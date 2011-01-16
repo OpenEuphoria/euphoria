@@ -33,7 +33,7 @@ enum task_mode {
 #endif
 
 struct interpreted_task{
-	int *pc;         // program counter for this task
+	intptr_t *pc;         // program counter for this task
 	object_ptr expr_stack; // call stack for this task
 	object_ptr expr_max;   // current top limit of stack
 	object_ptr expr_limit; // don't start a new routine above this

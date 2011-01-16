@@ -31,42 +31,6 @@ include std/filesys.e
 include std/regex.e
 
 -----------------------------------------------------------------------------
--- code from RDS's ED color coding routines
-
-sequence charClass
-
--- character classes
-constant    
-    DIGIT       = 1,
-    OTHER       = 2,
-    LETTER      = 3,
-    BRACKET     = 4,
-    QUOTE       = 5,
-    DASH        = 6,
-    WHITE_SPACE = 7,
-    NEW_LINE    = 8
-
-    charClass = repeat( OTHER, 255 )
-
-    
-    charClass['a'..'z'] = LETTER
-    charClass['A'..'Z'] = LETTER
-    charClass['_']      = LETTER
-    charClass['0'..'9'] = DIGIT
-    charClass['[']      = BRACKET
-    charClass[']']      = BRACKET
-    charClass['(']      = BRACKET
-    charClass[')']      = BRACKET
-    charClass['{']      = BRACKET
-    charClass['}']      = BRACKET
-    charClass['\'']     = QUOTE
-    charClass['"']      = QUOTE
-    charClass[' ']      = WHITE_SPACE
-    charClass['\t']     = WHITE_SPACE
-    charClass['\n']     = NEW_LINE
-    charClass['-']      = DASH
-
------------------------------------------------------------------------------
 sequence
     included,
     excludedIncludes
@@ -102,11 +66,6 @@ function findFile( sequence fName, integer showWarning = verbose )
     -- returns where a file is
     -- looks in the usual places
     
-    -- look in the usual places
-    if find(fName[length(fName)], {10, 13}) then
-		fName = fName[1..length(fName)-1]
-    end if
-    
     for i = 1 to length( Place ) do
 		if sequence( dir( Place[i] & fName ) ) then
 			ifdef WINDOWS then
@@ -135,18 +94,8 @@ function getIncludeName( sequence data )
 		return {"","",""}
 	end if
 
-	-- trim white space
-	while charClass[ data[1] ] = WHITE_SPACE do
-		data = remove( data, 1 )
-	end while      
-
-	-- line feed?
-	if find( '\n', data ) then
-		data = remove( data, length( data ) )
-	end if
-	if find( '\r', data ) then
-		data = remove( data, length( data ) )
-	end if
+	-- trim white space from ends
+	data = trim( data )
 
 	sequence includeType
 	-- not first statement?
@@ -176,18 +125,6 @@ end function
 
 
 -----------------------------------------------------------------------------
-function trimer(sequence s)
-    sequence t
-    integer u
-	if s[$] = '\n' then
-		s = remove( s, length(s) )
-	end if
-	if s[$] = '\r' then
-		s = remove( s, length(s) )
-	end if
-    return s
-end function
-
 function includable(sequence name)
     --return not find(name, excludedIncludes)
     name = findFile(name,0)
@@ -209,10 +146,16 @@ end function
 -----------------------------------------------------------------------------
 function parseFile( sequence fName, sequence fromPath = "" )
 
-	integer inFile, outFile
+	integer inFile, outFile, comment_start
 	sequence newIncludeName, newfName, nameSpace, includeType, includeName
 	object data
 
+	comment_start = match("--",fName)
+	if comment_start > 0 then
+		fName = fName[1..comment_start-1]
+	end if
+	fName = trim( fName )
+	
 	included = append( included, fName )
 	
 	inFile = -1
@@ -240,8 +183,8 @@ function parseFile( sequence fName, sequence fromPath = "" )
 	inFile = open( fName, "r" )
 	
     if inFile = -1 then
+		printf(1, "Error finding file: '%s'\n", { fName } )
 		included = remove( included, length( included ) )
-		printf(1, "Error finding file: %s\n", { fName } )
 		return includeFile
     end if
 
@@ -275,7 +218,7 @@ function parseFile( sequence fName, sequence fromPath = "" )
 		includeType = includeName[3]
 		nameSpace = includeName[2]
 		includeName = includeName[1]
-		if length( includeName ) and includable(trimer(includeName)) then
+		if length( includeName ) and includable(includeName) then
 
 			-- already part of the file?
 			newIncludeName = includeName

@@ -13,10 +13,9 @@
 
 #include "alldefs.h"
 #include "be_alloc.h"
+#include "be_machine.h"
 #include "be_runtime.h"
 #include "be_socket.h"
-
-extern long get_pos_int(char *, object); /* from be_machine.c */
 
 // Accessors for the socket sequence given to many functions
 #define SOCK_SOCKET   1
@@ -1174,8 +1173,8 @@ object eusock_socket(object x)
 	result_p = NewS1(2);
 	result_p->base[1] = sock;
 
-	if ((unsigned) addr > (unsigned)MAXINT)
-		result_p->base[2] = NewDouble((double)(unsigned long) addr);
+	if ((uintptr_t) addr > (uintptr_t)MAXINT)
+		result_p->base[2] = NewDouble((double)(uintptr_t) addr);
 	else
 		result_p->base[2] = (object)addr;
 

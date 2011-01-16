@@ -20,13 +20,27 @@ include std/types.e
 
 integer FREE_ARRAY_RID
 
+ifdef not WINDOWS then
+include std/dll.e
+export constant
+	STDLIB   = dll:open_dll({ "libc.so", "libc.dylib", "" }),
+	MMAP     = dll:define_c_func( STDLIB, "mmap", 
+				{dll:C_POINTER, dll:C_LONG, dll:C_INT, dll:C_INT, dll:C_INT, dll:C_LONG}, 
+				dll:C_POINTER ),
+	MUNMAP   = dll:define_c_func( STDLIB, "munmap", {dll:C_POINTER, dll:C_LONG}, dll:C_INT ),
+	MPROTECT = dll:define_c_func( STDLIB, "mprotect", {dll:C_POINTER, dll:C_LONG, dll:C_INT}, dll:C_INT),
+	MAP_ANONYMOUS = 32,
+	MAP_PRIVATE   = 2,
+	$
+end ifdef
+
 --****
 -- === Memory allocation
 --
 
 --**
 -- The number of bytes required to hold a pointer.
-public constant ADDRESS_LENGTH = 4
+public constant ADDRESS_LENGTH = sizeof( dll:C_POINTER )
 
 --**
 -- Allocate a contiguous block of data memory.
@@ -132,8 +146,8 @@ public function allocate_pointer_array(sequence pointers, types:boolean cleanup 
 	integer len = length(pointers) * ADDRESS_LENGTH
 	
     pList = allocate( (len + ADDRESS_LENGTH ) )
-    poke4(pList, pointers)
-    poke4(pList + len, 0)
+    poke_pointer(pList, pointers)
+    poke_pointer(pList + len, 0)
 	if cleanup then
 		return delete_routine( pList, FREE_ARRAY_RID )
 	end if
@@ -163,7 +177,7 @@ public procedure free_pointer_array(atom pointers_array)
 		pointers_array += ADDRESS_LENGTH
 		
 	entry
-		ptr = peek4u(pointers_array)
+		ptr = peek_pointer(pointers_array)
 	end while
 
 	free(saved)
@@ -513,14 +527,6 @@ ifdef WINDOWS then
 	end function
 end ifdef
 
---****
--- == Types supporting Memory
-
---**
--- protection constants type
-public type valid_memory_protection_constant( object x )
-	return find( x, memconst:MEMORY_PROTECTION )
-end type
 
 --**
 -- page aligned address type
@@ -626,8 +632,9 @@ function local_allocate_protected_memory( integer s, integer first_protection )
 			return machine_func(M_ALLOC, PAGE_SIZE)
 		end if
 	elsifdef UNIX then
-		return machine_func( memconst:M_ALLOC, PAGE_SIZE)
---		return mmap( 0, PAGE_SIZE, protection, or_bits(MAP_PRIVATE,MAP_ANONYMOUS), -1, 0 )
+		atom ptr = c_func( MMAP, { 0, s, first_protection, or_bits( MAP_ANONYMOUS, MAP_PRIVATE ), -1, 0 })
+		integer fail = local_change_protection_on_protected_memory( ptr, s, first_protection )
+		return ptr
 	end ifdef
 end function
 
@@ -642,8 +649,11 @@ function local_change_protection_on_protected_memory( atom p, integer s, integer
 		end if
 		return 0
 	elsifdef UNIX then
-		return 0
---		return mprotect(p, s, new_protection)
+		integer fail = c_func( MPROTECT, { p, s, new_protection } )
+		if fail then
+			error:crash( "Could not change memory protection at 0x%x (%d bytes) to %d", { p, s, new_protection } )
+		end if
+		return fail
 	end ifdef
 end function
 
@@ -655,8 +665,8 @@ procedure local_free_protected_memory( atom p, integer s)
 			machine_func(M_FREE, {p})
 		end if
 	elsifdef UNIX then
-			machine_func( memconst:M_FREE, {p})
---		munmap(p, s)
+		c_func( MPROTECT, { p, s, PAGE_READWRITE } )
+		machine_func( memconst:M_FREE, {p})
 	end ifdef
 end procedure
 
@@ -672,7 +682,7 @@ end procedure
 -- Parameters:
 -- # ##data## : is the machine code to be put into memory. 
 -- # ##wordsize## : is the size each element of data will take in 
--- memory.  Are they 1-byte, 2-bytes or 4-bytes long?  Specify here.  The default is 1.
+-- memory.  Are they 1-byte, 2-bytes, 4-bytes or 8-bytes long?  Specify here.  The default is 1.
 -- # ##protection## : is the particular Windows protection.
 --
 -- Returns:
@@ -731,25 +741,29 @@ public function allocate_protect( object data, memconst:valid_wordsize wordsize 
 	-- eaddr is set here
 	eaddr = memory:prepare_block( iaddr, size, protection )
 
-	if eaddr = 0 or atom( data ) then
+	if eaddr = 0 then
 		return eaddr
 	end if
-
-	switch wordsize do
-		case 1 then
-			eu:poke( eaddr, data )
-			
-		case 2 then
-			eu:poke2( eaddr, data )
-			
-		case 4 then
-			eu:poke4( eaddr, data )
-			
-		case else
-			error:crash("Parameter error: Wrong word size %d in allocate_protect().", wordsize)
-			
-	end switch
 	
+	if sequence( data ) then
+		switch wordsize do
+			case 1 then
+				eu:poke( eaddr, data )
+				
+			case 2 then
+				eu:poke2( eaddr, data )
+				
+			case 4 then
+				eu:poke4( eaddr, data )
+			
+			case 8 then
+				eu:poke8( eaddr, data )
+			
+			case else
+				error:crash("Parameter error: Wrong word size %d in allocate_protect().", wordsize)
+				
+		end switch
+	end if
 	ifdef SAFE then
 		-- here we can take away write access
 		-- from true_protection if protection doesn't have it.

@@ -18,6 +18,7 @@
 #include "be_runtime.h"
 #include "global.h"
 #include "be_pcre.h"
+#include "be_machine.h"
 
 void pcre_deref(object re) {
 	pcre_cleanup_ptr rcp;
@@ -41,7 +42,6 @@ void pcre_deref(object re) {
 	}
 }
 
-long get_int();
 
 object compile(object pattern, object eflags) {
 	pcre *re;
@@ -69,10 +69,10 @@ object compile(object pattern, object eflags) {
 	}
 	
 	
-	if ((unsigned) re > (unsigned)MAXINT)
-		ret = NewDouble((double)(unsigned long)re);
+	if ((uintptr_t) re > (uintptr_t)MAXINT)
+		ret = NewDouble((double)(uintptr_t)re);
 	else
-		ret = (unsigned long)re;
+		ret = (uintptr_t)re;
 	
 	return ret;
 }
@@ -134,7 +134,7 @@ object compile_pcre(object x, object flags) {
 			rcp->re = (struct real_pcre *) compiled_regex;
 		}
 		else {
-			rcp->re = (struct real_pcre *) (unsigned long) DBL_PTR( compiled_regex )->dbl;
+			rcp->re = (struct real_pcre *) (uintptr_t) DBL_PTR( compiled_regex )->dbl;
 		}
 		x = MAKE_SEQ( regex );
 	}

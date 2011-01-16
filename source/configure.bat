@@ -267,6 +267,14 @@ rem ============================================================
 echo TRUNKDIR=%TRUNKDIR% >> config.wat
 echo BUILDDIR=%FULL_BUILDDIR% >> config.wat
 
+echo [all] > eu.cfg
+echo -eudir %TRUNKDIR% >> eu.cfg
+echo -i %TRUNKDIR%\include >> eu.cfg
+
+echo [translate] >> eu.cfg
+echo -com %TRUNKDIR% >> eu.cfg
+
+
 rem ============================================================
 rem Copy temporary .wat includes
 rem ============================================================

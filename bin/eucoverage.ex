@@ -1,11 +1,12 @@
 -- process coverage database
 
-include std/eds.e
 include std/cmdline.e
-include std/map.e
+include std/eds.e
 include std/filesys.e
+include std/map.e
 include std/net/url.e
 include std/regex.e
+include std/sequence.e
 include std/sort.e
 
 ------------------------------------------------------------------------------
@@ -262,6 +263,8 @@ end function
 regex match_routine = regex:new( `^\s*(?:global\s+|public\s+|export\s+|override\s+|\s*)(?:function|procedure|type)\s+([a-zA-Z_0-9]+)\s*\(` )
 regex match_end_routine = regex:new( `^\s*end\s+(?:function|procedure|type)` )
 
+sequence all_routine_coverage = {}
+
 procedure write_file_html( sequence output_dir, integer fx )
 	atom in  = open( files[fx], "r", 1 )
 	if in = -1 then
@@ -377,6 +380,7 @@ procedure write_file_html( sequence output_dir, integer fx )
 		percent = calc_percent( total_executed, total_lines )
 		routine_coverage[i] = { total_executed - total_lines, keys[i], keys[i],
 			total_executed, total_lines, percent,total_lines -  total_executed }
+		all_routine_coverage = append( all_routine_coverage, routine_coverage[i] & fx )
 	end for
 	routine_coverage = sort( routine_coverage )
 
@@ -401,6 +405,44 @@ procedure write_file_html( sequence output_dir, integer fx )
 
 	puts( out, FOOTER )
 end procedure
+
+function routine_detail_sort( sequence r1, sequence r2 )
+	-- total exec - total, name, name, executed, total, pct, total - executed, fx
+	return compare( -r1[5] & r1[1], -r2[5] & r2[1] )
+end function
+
+function add_filename( sequence routine_info, object ignored )
+	sequence file_name = short_names[routine_info[$]]
+	sequence name = routine_info[3]
+	return { file_name, encode( encode( file_name ) ), name, name } 
+		& routine_info[5]
+		& routine_info[4]
+		& routine_info[6..$]
+end function
+
+-- class, file name, encoded file name, routine name, ...stats...
+constant BIG_ROUTINE_ROW = `
+	<tr class="%s"><td>%s</td><td><a href="files/%s.html#%s">%s()</a></td><td class="num">%d</td><td class="num">%d</td><td class="num">%0.2f%%</td><td class="num">%d</td></tr>
+`
+
+procedure write_routines_details( sequence output_directory )
+	atom out = open( output_directory & SLASH & "big_routines.html", "w", 1 )
+	
+	printf( out, HEADER, { "Routines", stylesheet } )
+	all_routine_coverage = custom_sort( routine_id("routine_detail_sort"), all_routine_coverage )
+	puts( out, "<div class='summary_header'>ROUTINES BY SIZE</div>\n" )
+	puts( out, "<table class='overview'><tr><th>File</th><th>Routine</th><th>Lines</th><th>Executed</th><th></th><th>Unexecuted</th></tr>\n" )
+	all_routine_coverage = stdseq:apply( all_routine_coverage, routine_id("add_filename") )
+	for i = 1 to length( all_routine_coverage ) do
+		sequence row_class = ""
+		if and_bits( i, 1 ) then
+			row_class = "shade-row"
+		end if
+		printf( out, BIG_ROUTINE_ROW, { row_class } & all_routine_coverage[i] )
+	end for
+	puts( out, "</table>\n" )
+end procedure
+
 
 procedure write_summary( sequence output_directory )
 	atom out = open( output_directory & SLASH & "index.html", "w", 1 )
@@ -525,6 +567,7 @@ procedure write_html()
 	end for
 
 	write_summary( output_directory )
+	write_routines_details( output_directory )
 end procedure
 
 procedure main()

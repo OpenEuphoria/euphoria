@@ -2,9 +2,13 @@
 #define BE_MACHINE_H_
 
 #include "global.h"
+#include "execute.h"
+#include "symtab.h"
+#include <stdint.h>
 
 #ifndef ERUNTIME
 object start_backend(object x);
+extern int in_backend;
 #endif
 
 #ifdef EWINDOWS
@@ -33,7 +37,7 @@ extern int *crash_list;       // list of routines to call when there's a crash
 extern int crash_routines;    // number of routines
 extern int crash_size;        // space allocated for crash_list
 
-extern int *profile_sample;
+extern intptr_t *profile_sample;
 extern volatile int sample_next;
 
 extern int first_mouse;
@@ -59,7 +63,8 @@ char *name_ext(char *s);
 void echo_wait();
 object memory_copy(object d, object s, object n);
 object memory_set(object d, object v, object n);
-unsigned long get_pos_int(char *where, object x);
+uintptr_t get_pos_int(char *where, object x);
+object get_int(object x);
 
 void NewConfig(int raise_console);
 double current_time();
@@ -72,4 +77,9 @@ object Wrap(object x);
 
 IFILE long_iopen(char *name, char *mode);
 
+uintptr_t internal_general_call_back(
+		  intptr_t cb_routine,
+						   uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+						   uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
+						   uintptr_t arg7, uintptr_t arg8, uintptr_t arg9);
 #endif

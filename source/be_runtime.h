@@ -41,7 +41,7 @@ extern char *TempErrName; // "ex.err" - but must be on the heap
 extern char *TempWarningName;
 extern int display_warnings;
 
-extern long seed1, seed2;  /* current value of first and second random generators */
+extern int32_t seed1, seed2;  /* current value of first and second random generators */
 extern int rand_was_set;
 extern int con_was_opened; /* TRUE if CON device was ever opened */
 extern int current_screen;
@@ -95,10 +95,11 @@ void Replace( replace_ptr rb );
 void Concat(object_ptr target, object a_obj, object b_obj);
 s1_ptr Add_internal_space(object a,int at,int len);
 void Concat_Ni(object_ptr target, object_ptr *source, int n);
+void Concat_N(object_ptr target, object_ptr  source, int n);
 
 object EGetEnv(object name);
 
-object EPrintf(int file_no, object format_obj, object values);
+object EPrintf(object file_no, object format_obj, object values);
 void StdPrint(int fn, object a, int new_lines);
 void EPuts(object file_no, object obj);
 void Print(IFILE f, object a, int lines, int width, int init_chars, int pretty);
@@ -117,7 +118,7 @@ void MakeCString(char *s, object pobj, int slen);
 void setran();
 void call_crash_routines();
 
-int compare(object a, object b);
+object compare(object a, object b);
 object calc_hash(object a, object b);
 void ctrace(char *line);
 void Position(object line, object col);
@@ -125,20 +126,20 @@ extern int charcopy(char *, int, char *, int);
 s1_ptr Copy_elements(int start,s1_ptr source, int replace );
 cleanup_ptr ChainDeleteRoutine( cleanup_ptr old, cleanup_ptr prev );
 cleanup_ptr DeleteRoutine( int e_index );
-void AssignSlice(object start, object end, s1_ptr val);
+void AssignSlice(object start, object end, object val);
 void cleanup_double( d_ptr dbl );
 void cleanup_sequence( s1_ptr seq );
 void Tail(s1_ptr s1, int start, object_ptr target);
 void Head(s1_ptr s1, int reqlen, object_ptr target);
 object Remove_elements(int start, int stop, int in_place );
-long find_from(object a, object bobj, object c);
-long e_match_from(object aobj, object bobj, object c);
-long e_match(s1_ptr a, s1_ptr b);
-long find(object a, s1_ptr b);
+object find_from(object a, object bobj, object c);
+object e_match_from(object aobj, object bobj, object c);
+object e_match(s1_ptr a, s1_ptr b);
+object find(object a, s1_ptr b);
 void RHS_Slice( object a, object start, object end);
 object Repeat(object item, object repcount);
 object Insert(object a,object b,int pos);
-unsigned long good_rand();
+int32_t good_rand();
 object Date();
 object EOpen(object filename, object mode_obj, object cleanup);
 object Command_Line();
@@ -152,62 +153,94 @@ object unary_op(int fn, object a);
 object binary_op_a(int fn, object a, object b);
 object binary_op(int fn, object a, object b);
 object x();
-object minus(long a, long b);
-object multiply(long a, long b);
-object divide(long a, long b);
+object minus(object a, object b);
+object multiply(object a, object b);
+object divide(object a, object b);
 object Ddivide(d_ptr a, d_ptr b);
-object eremainder(long a, long b);
+object eremainder(object a, object b);
 object Dremainder(d_ptr a, d_ptr b);
-object and_bits(unsigned long a, unsigned long b);
+object and_bits(uint32_t a, uint32_t b);
 object Dand_bits(d_ptr a, d_ptr b);
-object or_bits(unsigned long a, unsigned long b);
+object or_bits(uint32_t a, uint32_t b);
 object Dor_bits(d_ptr a, d_ptr b);
-object xor_bits(unsigned long a, unsigned long b);
+object xor_bits(uint32_t a, uint32_t b);
 object Dxor_bits(d_ptr a, d_ptr b);
-object not_bits(unsigned long a);
+object not_bits(uint32_t a);
 object Dnot_bits(d_ptr a);
-object power(long a, long b);
+object power(object a, object b);
 object Dpower(d_ptr a, d_ptr b);
-object equals(long a, long b);
+object equals(object a, object b);
 object Dequals(d_ptr a, d_ptr b);
-object less(long a, long b);
+object less(object a, object b);
 object Dless(d_ptr a, d_ptr b);
-object greater(long a, long b);
+object greater(object a, object b);
 object Dgreater(d_ptr a, d_ptr b);
-object noteq(long a, long b);
+object noteq(object a, object b);
 object Dnoteq(d_ptr a, d_ptr b);
-object lesseq(long a, long b);
+object lesseq(object a, object b);
 object Dlesseq(d_ptr a, d_ptr b);
-object greatereq(long a, long b);
+object greatereq(object a, object b);
 object Dgreatereq(d_ptr a, d_ptr b);
-object and(long a, long b);
+object and(object a, object b);
 object Dand(d_ptr a, d_ptr b);
-object or(long a, long b);
+object or(object a, object b);
 object Dor(d_ptr a, d_ptr b);
-object xor(long a, long b);
+object xor(object a, object b);
 object Dxor(d_ptr a, d_ptr b);
-object uminus(long a);
+object uminus(object a);
 object Duminus(d_ptr a);
-object not(long a);
+object not(object a);
 object Dnot(d_ptr a);
-object e_sqrt(long a);
+object e_sqrt(object a);
 object De_sqrt(d_ptr a);
-object e_sin(long a);
+object e_sin(object a);
 object De_sin(d_ptr a);
-object e_cos(long a);
+object e_cos(object a);
 object De_cos(d_ptr a);
-object e_tan(long a);
+object e_tan(object a);
 object De_tan(d_ptr a);
-object e_arctan(long a);
+object e_arctan(object a);
 object De_arctan(d_ptr a);
-object e_log(long a);
+object e_log(object a);
 object De_log(d_ptr a);
 object De_floor(d_ptr a);
-object Random(long a);
+object Random(object a);
 object DRandom(d_ptr a);
 
-object e_floor(long a);  // not used anymore
+object e_floor(object a);  // not used anymore
 
 int memcopy( void *dest, size_t avail, void *src, size_t len);
+
+object eu_sizeof( object data_type );
+
+#if INTPTR_MAX == INT32_MAX
+#define CALLBACK_POINTER 0x12345678
+
+#elif INTPTR_MAX == INT64_MAX
+#ifdef ERUNTIME
+#define CALLBACK_POINTER ((uintptr_t)0x1234567812345678LL)
+#else
+#define CALLBACK_POINTER ((symtab_ptr)0x1234567812345678LL)
+#endif
+#endif
+
+
+#ifdef EOSX
+uintptr_t __cdecl osx_cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+						uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
+						uintptr_t arg7, uintptr_t arg8, uintptr_t arg9)
+#endif // EOSX
+uintptr_t (*general_ptr)();
+
+
+uintptr_t general_call_back(
+#ifdef ERUNTIME
+		  intptr_t cb_routine,
+#else
+		  symtab_ptr cb_routine,
+#endif
+						   uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+						   uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
+						   uintptr_t arg7, uintptr_t arg8, uintptr_t arg9);
 
 #endif /* BE_RUNTIME_H */

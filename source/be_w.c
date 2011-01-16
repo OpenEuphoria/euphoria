@@ -127,7 +127,7 @@ void check_has_console() {
 	else {
 		DWORD count, processList[3];
 
-		count = gCPLA(&processList, 3);
+		count = gCPLA( (LPDWORD) &processList, 3);
 		FreeLibrary(kernel32);
 		_has_console = (count != 0);
 	}
@@ -647,7 +647,7 @@ void screen_output(IFILE f, char *out_string)
 {
     int len, collect_len;
 
-    if ((int)f == DOING_SPRINTF) {
+    if ((intptr_t)f == DOING_SPRINTF) {
         /* save characters as a C string in memory */
         len = strlen(out_string);
         if (collect == NULL) {

@@ -45,6 +45,12 @@ elsifdef UNIX then
 end ifdef
 
 ifdef LINUX then
+	integer STAT_VER
+	if sizeof( C_POINTER ) = 8 then
+		STAT_VER = 0
+	else
+		STAT_VER = 3
+	end if
 	constant xStatFile = dll:define_c_func(lib, "__xstat", {dll:C_INT, dll:C_POINTER, dll:C_POINTER}, dll:C_INT)
 elsifdef UNIX then
 	constant xStatFile = dll:define_c_func(lib, "stat", {dll:C_POINTER, dll:C_POINTER}, dll:C_INT)
@@ -193,7 +199,6 @@ public enum
 -- Bad path error code. See [[:walk_dir]]
 
 public constant W_BAD_PATH = -1 -- error code
-
 
 --**
 -- Return directory information for the specified file or directory.
@@ -573,7 +578,6 @@ public function walk_dir(sequence path_name, object your_function, integer scan_
 	end for
 	return 0
 end function
-
 
 --**
 -- Create a new directory.
@@ -1136,7 +1140,7 @@ public function pathinfo(sequence path, integer std_slash = 0)
 		end if
 	end if
 
-	return {dir_name, file_full, file_name, file_ext, drive_id}
+	return {dir_name, file_full, file_name, file_ext, lower( drive_id ) }
 end function
 
 --**
@@ -1446,7 +1450,6 @@ end function
 --     A **sequence**, the full path and file name.
 --
 -- Comment:
--- * In non-Unix systems, the result is always in lowercase.
 -- * The supplied file/directory does not have to actually exist.
 -- * ##path_in## can be enclosed in quotes, which will be stripped off.
 -- * If ##path_in## begins with a tilde '~~' then that is replaced by the
@@ -1603,8 +1606,8 @@ end function
 -- * Next it checks if it can form a relative path from the current directory
 --   to the supplied file which is shorter than the parameter string.
 -- * Failing all of that, it returns the original parameter.
--- * In Windows, the shorter result is always in lowercase and has all '/' 
---   characters are replaced by '\' characters.
+-- * In Windows, the shorter result has all '/' characters are replaced by '\'
+--	 characters.
 -- * The supplied path does not have to actually exist.
 -- * ##orig_path## can be enclosed in quotes, which will be stripped off.
 -- * If ##orig_path## begins with a tilde '~~' then that is replaced by the
@@ -1626,7 +1629,7 @@ public function abbreviate_path(sequence orig_path, sequence base_paths = {})
 	sequence expanded_path
 
 	-- Get full path of the parameter
-	expanded_path = canonical_path(orig_path,,1)
+	expanded_path = canonical_path(orig_path)
 	
 	-- Add the current directory onto the list of base search paths.
 	base_paths = append(base_paths, curdir())
@@ -1680,6 +1683,81 @@ public function abbreviate_path(sequence orig_path, sequence base_paths = {})
 	
 	-- If all else fails, just return the original data.
 	return orig_path
+end function
+
+--**
+-- Split a filename into path segments
+--
+-- Parameters:
+--   * ##fname## - Filename to split
+--
+-- Returns:
+--   A sequence of strings representing each path element found in ##fname##.
+--
+-- Example 1:
+-- <eucode>
+-- sequence path_elements = split_path("/usr/home/john/hello.txt")
+-- -- path_elements would be { "usr", "home", "john", "hello.txt" }
+-- </eucode>
+--
+-- Versioning:
+--   * Added in 4.0.1
+--
+-- See Also:
+--   [[:join_path]]
+--
+
+public function split_path(sequence fname)
+	return stdseq:split(fname, SLASH, 1)
+end function
+
+--**
+-- Join multiple path segments into a single path/filename
+--
+-- Parameters:
+--   * ##path_elements## - Sequence of path elements
+--
+-- Returns:
+--   A string representing the path elements on the given platform
+--
+-- Example 1:
+-- <eucode>
+-- sequence fname = join_path({ "usr", "home", "john", "hello.txt" })
+-- -- fname would be "/usr/home/john/hello.txt" on Unix
+-- -- fname would be "\\usr\\home\\john\\hello.txt" on Windows
+-- </eucode>
+--
+-- Versioning:
+--   * Added in 4.0.1
+--
+-- See Also:
+--   [[:split_path]]
+--
+
+public function join_path(sequence path_elements)
+	sequence fname = ""
+
+	for i = 1 to length(path_elements) do
+		sequence elem = path_elements[i]
+
+		if elem[$] = SLASH then
+			elem = elem[1..$ - 1]
+		end if
+
+		if length(elem) and elem[1] != SLASH then
+			ifdef WINDOWS then
+				if elem[$] != ':' then
+					elem = SLASH & elem
+				end if
+			elsedef
+				elem = SLASH & elem
+			end ifdef
+		end if
+
+		fname &= elem
+	end for
+
+	return fname
 end function
 
 --****
@@ -1945,7 +2023,7 @@ end function
 
 ifdef LINUX then
 	function xstat(atom psrc, atom psrcbuf)
-		return c_func(xStatFile, {3, psrc, psrcbuf})
+		return c_func(xStatFile, {STAT_VER, psrc, psrcbuf})
 	end function
 elsifdef UNIX then
 	function xstat(atom psrc, atom psrcbuf)
@@ -1991,7 +2069,7 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 	end ifdef
 	ifdef LINUX then
 		stat_t_offset = 0
-		stat_buf_size = 88
+		stat_buf_size = 88 * 2
 	elsifdef FREEBSD or OSX then
 		stat_t_offset = 0
 		stat_buf_size = 96
@@ -2005,12 +2083,11 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 	
 
 	ifdef UNIX then
-		psrcbuf = machine:allocate(stat_buf_size)
-		psrc = machine:allocate_string(src)
+		psrcbuf = machine:allocate(stat_buf_size, 1)
+		psrc = machine:allocate_string(src, 1)
 		ret = xstat(psrc, psrcbuf)
 		if ret then
- 			machine:free({psrcbuf, psrc})
- 			return 0
+			return 0
 		end if
 		
 		pdestbuf = machine:allocate(stat_buf_size)
@@ -2020,12 +2097,11 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 			-- Assume destination doesn't exist
 			atom pdir
 			if length(dirname(dest)) = 0 then
-				pdir = machine:allocate_string(current_dir())
+				pdir = machine:allocate_string(current_dir(), 1)
 			else
-				pdir = machine:allocate_string(dirname(dest))
+				pdir = machine:allocate_string(dirname(dest), 1)
 			end if
 			ret = xstat(pdir, pdestbuf)
-			machine:free(pdir)
 		end if
 		
 		if not ret and not equal(peek(pdestbuf+stat_t_offset), peek(psrcbuf+stat_t_offset)) then
@@ -2035,13 +2111,12 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 			if ret then
 				ret = delete_file(src)
 			end if
- 			machine:free({psrcbuf, psrc, pdestbuf, pdest})
  			return (not ret)
 		end if
 		
 	elsedef		
-		psrc  = machine:allocate_string(src)
-		pdest = machine:allocate_string(dest)
+		psrc  = machine:allocate_string(src, 1)
+		pdest = machine:allocate_string(dest, 1)
 	end ifdef
 
 	if overwrite then
@@ -2053,10 +2128,8 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 	ret = c_func(xMoveFile, {psrc, pdest})
 	
 	ifdef UNIX then
-		ret = not ret 
-		machine:free({psrcbuf, pdestbuf})
+		ret = not ret
 	end ifdef
-	machine:free({pdest, psrc})
 	
 	if overwrite then
 		if not ret then
@@ -2065,7 +2138,6 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 		end if
 		delete_file(tempfile)
 	end if
-	
 	return ret
 end function
 
@@ -2289,7 +2361,7 @@ public function disk_metrics(object disk_path)
 
 		ifdef LINUX then
 			stat_t_offset = 48
-			stat_buf_size = 88
+			stat_buf_size = 88 * 2
 		elsifdef FREEBSD or OSX then
 			stat_t_offset = 64
 			stat_buf_size = 96
@@ -2301,11 +2373,11 @@ public function disk_metrics(object disk_path)
 			stat_buf_size = 100
 		end ifdef
 
-		psrc    = machine:allocate_string(disk_path)
-		psrcbuf = machine:allocate(stat_buf_size)
+		psrc    = machine:allocate_string(disk_path, 1)
+		psrcbuf = machine:allocate(stat_buf_size, 1)
 		ret = xstat(psrc,psrcbuf)
 		bytes_per_cluster = peek4s(psrcbuf+stat_t_offset)
-		machine:free({psrcbuf, psrc})
+		
 		if ret then
 			-- failure
 			return result 

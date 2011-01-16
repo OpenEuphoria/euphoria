@@ -152,12 +152,16 @@ procedure init_op_info()
 	op_info[PASSIGN_SLICE       ] = { FIXED_SIZE, 5, {}, {1}, {} }
 	op_info[PASSIGN_SUBS        ] = { FIXED_SIZE, 4, {}, {1}, {} }
 	op_info[PEEK_STRING         ] = { FIXED_SIZE, 3, {}, {2}, {} }
+	op_info[PEEK8U              ] = { FIXED_SIZE, 3, {}, {2}, {} }
+	op_info[PEEK8S              ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[PEEK2U              ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[PEEK2S              ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[PEEK4U              ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[PEEK4S              ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[PEEKS               ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[PEEK                ] = { FIXED_SIZE, 3, {}, {2}, {} }
+	op_info[SIZEOF              ] = { FIXED_SIZE, 3, {}, {2}, {} }
+	op_info[PEEK_POINTER        ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[PLENGTH             ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[PLUS                ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[PLUS_I              ] = { FIXED_SIZE, 4, {}, {3}, {} }
@@ -166,6 +170,8 @@ procedure init_op_info()
 	op_info[POKE                ] = { FIXED_SIZE, 3, {}, {}, {} }
 	op_info[POKE2               ] = { FIXED_SIZE, 3, {}, {}, {} }
 	op_info[POKE4               ] = { FIXED_SIZE, 3, {}, {}, {} }
+	op_info[POKE8               ] = { FIXED_SIZE, 3, {}, {}, {} }
+	op_info[POKE_POINTER        ] = { FIXED_SIZE, 3, {}, {}, {} }
 	op_info[POSITION            ] = { FIXED_SIZE, 3, {}, {}, {} }
 	op_info[POWER               ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[PREPEND             ] = { FIXED_SIZE, 4, {}, {3}, {} }

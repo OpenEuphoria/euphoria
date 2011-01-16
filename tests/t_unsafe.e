@@ -1,7 +1,6 @@
 include std/unittest.e
 include std/machine.e
 
-
 atom addr
 addr = allocate_protect( {1,2,3,4}, 1, PAGE_NOACCESS )
 

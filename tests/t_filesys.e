@@ -31,8 +31,10 @@ end ifdef
 fname = "readme"
 fext = "txt"
 
-test_equal("pathinfo() fully qualified path", {pname, fname & '.' & fext, fname, fext, driveid},
+test_equal("pathinfo() fully qualified path", 
+	{ pname, fname & '.' & fext, fname, fext, driveid },
     pathinfo(fullname))
+
 test_equal("pathinfo() no extension", {pname, fname, fname, "", ""},
     pathinfo(pname & SLASH & fname))
 test_equal("pathinfo() no dir", {"", fname & '.' & fext, fname, fext, ""}, pathinfo(fname & "." & fext))
@@ -54,7 +56,6 @@ test_equal("defaultext #1", "abc.def", defaultext("abc", "def"))
 test_equal("defaultext #2", "abc.xyz", defaultext("abc.xyz", "def"))
 test_equal("defaultext #3", "abc.xyz" & SLASH & "abc.xyz", defaultext("abc.xyz" & SLASH & "abc.xyz", "def"))
 test_equal("defaultext #4", "abc.xyz" & SLASH & "abc.def", defaultext("abc.xyz" & SLASH & "abc", "def"))
-
 
 test_equal("SLASH", sep, SLASH)
 test_equal("EOLSEP", eolsep, EOLSEP)
@@ -87,9 +88,10 @@ end ifdef
 delete_file("fstesta.txt")
 delete_file("fstestb.txt")
 write_file("fstesta.txt", "move data", TEXT_MODE)
+test_true("file to move exists", file_exists( "fstesta.txt") )
 test_true("move_file #1", move_file("fstesta.txt", "fstestb.txt", 1))
-test_true("move_file #2", sequence( dir("fstestb.txt"))) -- 'b' should now exist
-test_false("move_file #3", sequence( dir("fstesta.txt"))) -- 'a' should now be gone
+test_true("move_file #2", file_exists("fstestb.txt")) -- 'b' should now exist
+test_false("move_file #3", file_exists("fstesta.txt")) -- 'a' should now be gone
 write_file("fstesta.txt", "some data", TEXT_MODE)
 test_false("move_file #4", move_file("fstesta.txt", "fstestb.txt")) -- should not overwrite existing file
 test_false("move_file #5", move_file("fstesta.txt", "fstestb.txt", 0)) -- should not overwrite existing file
@@ -164,8 +166,8 @@ ifdef UNIX then
 end ifdef
 
 ifdef WINDOWS then
-	test_equal( "canonical_path() #6", lower(current_dir() & SLASH & "UPPERNAME"), canonical_path( "UPPERNAME",,1 ))
-	test_equal( "canonical_path() #7",       current_dir() & SLASH & "UPPERNAME",  canonical_path( "UPPERNAME",,0 ))
+	test_equal( "canonical_path() #6", lower(current_dir() & SLASH & "UPPERNAME"), lower( canonical_path( "UPPERNAME" ) ) )
+	test_equal( "canonical_path() #7",       current_dir() & SLASH & "UPPERNAME",  canonical_path( "UPPERNAME" ))
 	test_equal( "canonical_path() #8", entire_driveid & SLASH & "john" & SLASH & "doe.txt",
 		canonical_path("/john/doe.txt"))
 end ifdef
@@ -278,6 +280,24 @@ test_true("temp file .TMP extension", ends(".TMP", tmp_name))
 
 tmp_name = filename(temp_file( , , ""))
 test_false("temp_file no extension", find('.', tmp_name))
+
+--
+-- Split/Join path
+--
+
+sequence spath_eles
+
+ifdef WINDOWS then
+	test_equal("split_path #1", { "Users", "john", "hello.txt" }, split_path("\\Users\\john\\hello.txt"))
+	test_equal("join_path #1", "\\Users\\john\\hello.txt", join_path({ "Users", "\\john\\", "hello.txt" }))
+	test_equal("split_path #2", { "C:", "Users", "john", "hello.txt" }, split_path("C:\\Users\\john\\hello.txt"))
+	test_equal("join_path #2", "C:\\Users\\john\\hello.txt", join_path({ "C:", "Users", "\\john\\", "hello.txt" }))
+elsedef
+	test_equal("split_path #1", { "usr", "home", "john", "hello.txt"},
+		split_path("/usr/home/john/hello.txt"))
+	test_equal("join path #1", "/usr/home/john/hello.txt",
+		join_path({ "/usr/", "/home", "john", "hello.txt" }))
+end ifdef
 
 test_report()
 

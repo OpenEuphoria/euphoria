@@ -286,8 +286,8 @@ export function NewStringSym(sequence s)
 		else
 			SymTab[p][S_SEQ_ELEM] = TYPE_NULL
 		end if
-		c_printf("int _%d;\n", SymTab[p][S_TEMP_NAME])
-		c_hprintf("extern int _%d;\n", SymTab[p][S_TEMP_NAME])
+		c_printf("object _%d;\n", SymTab[p][S_TEMP_NAME])
+		c_hprintf("extern object _%d;\n", SymTab[p][S_TEMP_NAME])
 
 	else
 		SymTab[p][S_MODE] = M_CONSTANT
@@ -370,8 +370,8 @@ export function NewDoubleSym(atom d)
 	if TRANSLATE then
 		SymTab[p][S_MODE] = M_TEMP  -- override CONSTANT for compile
 		SymTab[p][S_GTYPE] = TYPE_DOUBLE
-		c_printf("int _%d;\n", SymTab[p][S_TEMP_NAME])
-		c_hprintf("extern int _%d;\n", SymTab[p][S_TEMP_NAME])
+		c_printf("object _%d;\n", SymTab[p][S_TEMP_NAME])
+		c_hprintf("extern object _%d;\n", SymTab[p][S_TEMP_NAME])
 	end if
 
 	SymTab[p][S_NEXT] = literal_init
@@ -466,7 +466,7 @@ export procedure InitSymTab()
 			end if
 		end if
 		if keylist[k][K_TOKEN] = PROC then
-			if equal(kname, "_toplevel_") then
+			if equal(kname, "<TopLevel>") then
 				TopLevelSub = st_index
 			end if
 		elsif keylist[k][K_TOKEN] = TYPE then
@@ -502,7 +502,7 @@ export procedure InitSymTab()
 				for ij=1 to length(sj) do
 	                switch sj[ij][T_ID] with fallthru do
 	                    case ATOM then -- must create a lasting temp
-	                    	if integer(sj[ij][T_SYM]) then
+	                    	if is_integer(sj[ij][T_SYM]) then
 								st_index = NewIntSym(sj[ij][T_SYM])
 							else
 								st_index = NewDoubleSym(sj[ij][T_SYM])

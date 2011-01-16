@@ -599,6 +599,9 @@ export procedure CName(symtab_index s)
 
 		if LeftSym = FALSE and GType(s) = TYPE_INTEGER and v != NOVALUE then
 			c_printf("%d", v)
+			if SIZEOF_POINTER = 8 then
+				c_puts( "LL" )
+			end if
 		else
 			if SymTab[s][S_SCOPE] > SC_PRIVATE then
 				c_printf("_%d", SymTab[s][S_FILE_NO])
@@ -616,10 +619,13 @@ export procedure CName(symtab_index s)
  	elsif mode = M_CONSTANT then
 		-- literal integers, or declared constants
 
-		if integer( sym_obj( s ) ) or (LeftSym = FALSE and TypeIs(s, TYPE_INTEGER) and v != NOVALUE) then
+		if is_integer( sym_obj( s ) ) or (LeftSym = FALSE and TypeIs(s, TYPE_INTEGER) and v != NOVALUE) then
 			-- integer: either literal, or
 			-- declared constant rvalue with integer value
 			c_printf("%d", v)
+			if SIZEOF_POINTER = 8 then
+				c_puts( "LL" )
+			end if
 		else
 			-- Declared constant
 			c_printf("_%d", SymTab[s][S_FILE_NO])
@@ -633,6 +639,9 @@ export procedure CName(symtab_index s)
 		-- literal doubles, strings, temporary vars that we create
 		if LeftSym = FALSE and GType(s) = TYPE_INTEGER and v != NOVALUE then
 			c_printf("%d", v)
+			if SIZEOF_POINTER = 8 then
+				c_puts( "LL" )
+			end if
 		else
 			c_printf("_%d", SymTab[s][S_TEMP_NAME])
 		end if
@@ -741,17 +750,17 @@ export procedure DeclareFileVars()
 			if eentry[S_TOKEN] = PROC then
 				c_puts( "void ")
 			else
-				c_puts("int ")
+				c_puts("object ")
 			end if
 			c_printf("_%d", eentry[S_FILE_NO])
 			c_puts(eentry[S_NAME])
-			if integer( eentry[S_OBJ] ) then
-					c_printf(" = %d;\n", eentry[S_OBJ] )
+			if is_integer( eentry[S_OBJ] ) then
+					c_printf(" = %d%s;\n", { eentry[S_OBJ], LL_suffix} )
 			else
-				c_puts(" = 0;\n")
+				c_puts(" = NOVALUE;\n")
 			end if
 
-			c_hputs("extern int ")
+			c_hputs("extern object ")
 			c_hprintf("_%d", eentry[S_FILE_NO])
 			c_hputs(eentry[S_NAME])
 
@@ -897,7 +906,7 @@ procedure declare_prototype( symtab_index s )
 	if sym_token( s ) = PROC then
 		ret_type = "void "
 	else
-		ret_type ="int "
+		ret_type ="object "
 	end if
 
 	c_hputs(ret_type)
@@ -920,9 +929,9 @@ procedure declare_prototype( symtab_index s )
 	
 	for i = 1 to SymTab[s][S_NUM_ARGS] do
 		if i = 1 then
-			c_hputs("int")
+			c_hputs("object")
 		else
-			c_hputs(", int")
+			c_hputs(", object")
 		end if
 	end for
 	c_hputs(");\n")
@@ -937,7 +946,7 @@ procedure add_to_routine_list( symtab_index s, integer seq_num, integer first )
 
 	c_puts(SymTab[s][S_NAME])
 	c_puts("\", ")
-	c_puts("(int (*)())")
+	c_puts("(object (*)())")
 	c_printf("_%d", SymTab[s][S_FILE_NO])
 	c_puts(SymTab[s][S_NAME])
 	c_printf(", %d", seq_num)
@@ -1014,8 +1023,8 @@ export procedure DeclareRoutineList()
 	end if
 	c_puts("  {\"\", 0, 999999999, 0, 0, 0, 0}\n};\n\n")  -- end marker
 
-	c_hputs("extern unsigned char ** _02;\n")
-	c_puts("unsigned char ** _02;\n")
+	c_hputs("extern char ** _02;\n")
+	c_puts("char ** _02;\n")
 
 	c_hputs("extern object _0switches;\n")
 	c_puts("object _0switches;\n")
@@ -1483,7 +1492,7 @@ export procedure GenerateUserRoutines()
 					if SymTab[s][S_TOKEN] = PROC then
 						ret_type = "void "
 					else
-						ret_type = "int "
+						ret_type = "object "
 					end if
 					if find( SymTab[s][S_SCOPE], {SC_GLOBAL, SC_EXPORT, SC_PUBLIC} ) and dll_option then
 						-- mark it as a routine_id target, so it won't be deleted
@@ -1505,7 +1514,7 @@ export procedure GenerateUserRoutines()
 					-- declare the parameters
 					sp = SymTab[s][S_NEXT]
 					for p = 1 to SymTab[s][S_NUM_ARGS] do
-						c_puts("int _")
+						c_puts("object _")
 						c_puts(SymTab[sp][S_NAME])
 						if p != SymTab[s][S_NUM_ARGS] then
 							c_puts(", ")
@@ -1529,17 +1538,15 @@ export procedure GenerateUserRoutines()
 								break
 
 							case SC_PRIVATE then
-								c_stmt0("int ")
+								c_stmt0("object ")
 								c_puts("_")
 								c_puts(SymTab[sp][S_NAME])
-								if SymTab[sp][S_GTYPE] != TYPE_INTEGER then
-									-- avoid DeRef in 1st BB
-									c_puts(" = 0")
-									target[MIN] = 0
-									target[MAX] = 0
-									SetBBType(sp, TYPE_INTEGER, target, TYPE_OBJECT, 0)
-								end if
-								c_puts(";\n")
+								-- avoid DeRef in 1st BB
+								c_puts(" = NOVALUE;\n")
+								target[MIN] = NOVALUE
+								target[MAX] = NOVALUE
+								SetBBType(sp, TYPE_INTEGER, target, TYPE_OBJECT, 0)
+								
 								break
 
 							case else
@@ -1557,17 +1564,13 @@ export procedure GenerateUserRoutines()
 							if temp_name_type[SymTab[temps][S_TEMP_NAME]][T_GTYPE]
 																!= TYPE_NULL
 								and not find( name, names ) then
-								c_stmt0("int ")
+								c_stmt0("object ")
 								c_puts( name )
-								if temp_name_type[SymTab[temps][S_TEMP_NAME]][T_GTYPE]
-									!= TYPE_INTEGER
-								then
-									c_puts(" = 0")
-									-- avoids DeRef in 1st BB, but may hurt global type:
-									target = {0, 0}
-									-- PROBLEM: sp could be temp or symtab entry?
-									SetBBType(temps, TYPE_INTEGER, target, TYPE_OBJECT, 0)
-								end if
+								c_puts(" = NOVALUE")
+								-- avoids DeRef in 1st BB, but may hurt global type:
+								target = {NOVALUE, NOVALUE}
+								-- PROBLEM: sp could be temp or symtab entry?
+								SetBBType(temps, TYPE_INTEGER, target, TYPE_OBJECT, 0)
 								ifdef DEBUG then
 									c_puts(sprintf("; // %d %d\n", {temps, SymTab[temps][S_TEMP_NAME]} ) )
 								elsedef
@@ -1587,9 +1590,15 @@ export procedure GenerateUserRoutines()
 					Initializing = FALSE
 
 					if SymTab[s][S_LHS_SUBS2] then
-						c_stmt0("int _0, _1, _2, _3;\n\n")
+						c_stmt0("object _0, _1, _2, _3;\n\n")
+						ifdef DEBUG then
+							c_stmt0("_0 = 0; _1 = 1; if( _1 ) _2 = 0; else _3 = 1;\n")
+						end ifdef
 					else
-						c_stmt0("int _0, _1, _2;\n\n")
+						c_stmt0("object _0, _1, _2;\n\n")
+						ifdef DEBUG then
+							c_stmt0("_0 = 0; _1 = 1; if( _1 ) _2 = 0;\n")
+						end ifdef
 					end if
 
 					-- set the local parameter types in BB

@@ -75,12 +75,6 @@
 #define LOCK_UN  8 /* unlock */
 #endif
 
-#ifdef EOSX
-extern unsigned __cdecl osx_cdecl_call_back(unsigned arg1, unsigned arg2, unsigned arg3,
-						unsigned arg4, unsigned arg5, unsigned arg6,
-						unsigned arg7, unsigned arg8, unsigned arg9);
-#endif // EOSX
-
 #else // EUNIX
 
 #include <io.h>
@@ -134,7 +128,7 @@ struct arg_info *c_routine = NULL; /* array of c_routine structs */
 int allow_break = TRUE;       /* allow control-c/control-break to kill prog */
 int control_c_count = 0;      /* number of control-c/control-break since
 								 last call */
-int *profile_sample = NULL;
+intptr_t *profile_sample = NULL;
 volatile int sample_next = 0;
 
 int line_max; /* current number of text lines on screen */
@@ -207,7 +201,7 @@ static int MySetEnv(const char *name, const char *value, const int overwrite) {
 }
 #endif
 
-unsigned long get_pos_int(char *where, object x)
+uintptr_t get_pos_int(char *where, object x)
 /* return a positive integer value if possible */
 {
 	if (IS_ATOM_INT(x))
@@ -247,8 +241,8 @@ char *name_ext(char *s)
 		return s;
 }
 
-long get_int(object x)
-/* return an integer value if possible, truncated to 32 bits. */
+object get_int(object x)
+/* return an integer value if possible, truncated to the size of an object. */
 {
 	if (IS_ATOM_INT(x)){
 		return x;
@@ -256,10 +250,10 @@ long get_int(object x)
 
 	if (IS_ATOM(x)){
 		if (DBL_PTR(x)->dbl <= 0.0){
-			return (long)(DBL_PTR(x)->dbl);
+			return (object)(DBL_PTR(x)->dbl);
 		}
 		else{
-			return (unsigned long)(DBL_PTR(x)->dbl);
+			return (object)(uintptr_t)(DBL_PTR(x)->dbl);
 		}
 	}
 	RTFatal("an integer was expected, not a sequence");
@@ -451,7 +445,7 @@ static object Video_config()
 #if defined(EWINDOWS)
 	NewConfig(TRUE); // Windows size might have changed since last call.
 #endif
-	result = NewS1((long)10);
+	result = NewS1((int)10);
 	obj_ptr = result->base;
 
 	obj_ptr[1] = (config.monitor != _MONO) &&
@@ -814,7 +808,7 @@ static object user_allocate(object x)
 	int nbytes;
 	char *addr;
 #ifdef EBSD
-	unsigned first, last, gp1;
+	uintptr_t first, last, gp1;
 #endif
 
 	nbytes = get_int(x);
@@ -822,8 +816,8 @@ static object user_allocate(object x)
 	addr = EMalloc(nbytes);
 	// make it executable
 	gp1 = pagesize-1;
-	first = (unsigned)addr & (~gp1); // start of page
-	last = (unsigned)addr+nbytes-1; // last address
+	first = (uintptr_t)addr & (~gp1); // start of page
+	last = (uintptr_t)addr+nbytes-1; // last address
 	last = last | gp1; // end of page
 	mprotect((void *)first, last - first + 1,
 			 PROT_READ+PROT_WRITE+PROT_EXEC);
@@ -859,9 +853,9 @@ static object Where(object x)
 		RTFatal("where() failed on this file");
 	}
 	if (result > (IOFF)MAXINT || result < (IOFF)MININT)
-		pos = (object)NewDouble((double)result);  // maximum 2 billion
+		pos = NewDouble((double)result);  // maximum 2 billion
 	else
-		pos = (object)((long)result);
+		pos = (object) result;
 	
 	return pos;
 }
@@ -895,11 +889,11 @@ static object Seek(object x)
 			return ((result == ((IOFF)-1)) ? ATOM_1 : ATOM_0);
 		}
 		
-		if ((long) x2 < 0) {
+		if ( x2 < 0) {
 			return ATOM_1; // -ve positions are not permitted.
 		}
 		
-		pos = (IOFF)((long)(x2));
+		pos = (IOFF)x2;
 	}
 	else if (IS_ATOM(x2)) {
 		pos = (IOFF)(DBL_PTR(x2)->dbl);
@@ -1067,7 +1061,7 @@ typedef struct _SYSTEMTIME {
 	while (findres != 0) {
 
 		/* create a length-11 sequence */
-		row = NewS1((long)11);
+		row = NewS1(11);
 		obj_ptr = row->base;
 		obj_ptr[1] = NewString(file_info.cFileName);
 
@@ -1116,7 +1110,7 @@ typedef struct _SYSTEMTIME {
 			if (file_info.nFileSizeLow > MAXINT) {
 				obj_ptr[3] = NewDouble((double)file_info.nFileSizeLow);
 			} else {
-				obj_ptr[3] = MAKE_INT((int)file_info.nFileSizeLow);
+				obj_ptr[3] = MAKE_INT((object)file_info.nFileSizeLow);
 			}
 		}
 		else
@@ -1213,7 +1207,7 @@ static object Dir(object x)
 		}
 
 		/* create a length-11 sequence */
-		row = NewS1((long)11);
+		row = NewS1(11);
 		obj_ptr = row->base;
 		if (dirp == NULL)
 			obj_ptr[1] = NewString(name_ext(path)); // just the name
@@ -1287,6 +1281,11 @@ static object CurrentDir()
 	if (cwd == NULL)
 		RTFatal("current directory not available");
 	else {
+#ifdef EWINDOWS
+		/* Fix potential problem with lowercase drive letter */
+		if (cwd[0] >= 97 && cwd[0] <= 122)
+			cwd[0] -= 32;
+#endif
 		result = NewString(cwd);
 		EFree(buff);
 	}
@@ -1298,10 +1297,10 @@ static object PutScreenChar(object x)
 {
 	unsigned attr, len;
 	unsigned line, column;
-	unsigned fg, bg;
 	s1_ptr args;
 	object_ptr p;
 #ifdef EUNIX
+	unsigned fg, bg;
 	unsigned c;
 	char s1[2];
 	int save_line, save_col;
@@ -1392,7 +1391,7 @@ static object GetScreenChar(object x)
 	x1 = SEQ_PTR(x);
 	line =   get_int(*(x1->base+1));
 	column = get_int(*(x1->base+2));
-	result = NewS1((long)2);
+	result = NewS1(2);
 	obj_ptr = result->base;
 
 #ifdef EWINDOWS
@@ -1440,7 +1439,7 @@ static object GetPosition()
 	CONSOLE_SCREEN_BUFFER_INFO console_info;
 #endif
 
-	result = NewS1((long)2);
+	result = NewS1(2);
 	obj_ptr = result->base;
 #ifdef EWINDOWS
 	show_console();
@@ -1478,7 +1477,7 @@ static object lock_file(object x)
 #ifdef EUNIX
 	int t;
 #else
-	unsigned long first, last;
+	uintptr_t first, last;
 	object s;
 #endif
 	object fn;
@@ -1531,7 +1530,7 @@ static object unlock_file(object x)
 	IFILE f;
 	int fd;
 #ifdef EWINDOWS
-	unsigned long first, last;
+	uintptr_t first, last;
 	object s;
 #endif
 	object fn;
@@ -1583,9 +1582,9 @@ static object get_rand()
 static object set_rand(object x)
 /* set random number generator */
 {
-	long r;
+	intptr_t r;
 	s1_ptr x_ptr;
-	long slen;
+	int slen;
 	object_ptr obp;
 
 	if (!ASEQ(x)) {
@@ -1611,7 +1610,7 @@ static object set_rand(object x)
 			else {
 				// Complex case - an arbitary sequence supplied.
 				seed1 = get_int(calc_hash(x, slen));
-				seed2 = get_int(calc_hash(slen, make_atom32(seed1)));
+				seed2 = get_int(calc_hash(slen, make_atom32( seed1 ) ));
 			}
 		}
 	}
@@ -1675,25 +1674,6 @@ static void do_crash(object x)
 	message = EMalloc(SEQ_PTR(x)->length + 1);
 	MakeCString(message, x, SEQ_PTR(x)->length + 1);
 	RTFatal(message);
-}
-
-static void set_coverage(object x)
-{
-	object line, routine, wwrite;
-
-	if IS_ATOM(x) {
-		RTFatal("set_coverage expected a sequence");
-	}
-
-	if (SEQ_PTR(x)->length != 3) {
-		RTFatal("set_coverage expected a sequence of length 3");
-	}
-
-	line = get_pos_int("set_coverage", SEQ_PTR(x)->base[1]);
-	routine = get_pos_int("set_coverage", SEQ_PTR(x)->base[2]);
-	wwrite = get_pos_int("set_coverage", SEQ_PTR(x)->base[3]);
-
-	SET_COVERAGE((int)line, (int)routine, (int)wwrite);
 }
 
 static object change_dir(object x)
@@ -1766,7 +1746,7 @@ DWORD WINAPI WinTimer(LPVOID lpParameter)
 			Sleep((((double)(lcount.QuadPart-ncount.QuadPart))/((double)freq.QuadPart))*1000.0);
 		}
 		if (Executing && ProfileOn) {
-			profile_sample[sample_next++] = (int)tpc;
+			profile_sample[sample_next++] = (intptr_t) tpc;
 		}
 	}
 	return 0;
@@ -1907,8 +1887,8 @@ object OpenDll(object x)
 	s1_ptr dll_ptr;
 	static char message[81];
 	char *dll_string;
-	HINSTANCE lib;
 	int message_len;
+	HINSTANCE lib;
 
 	/* x will be a sequence if called via open_dll() */
 
@@ -1947,7 +1927,7 @@ object OpenDll(object x)
 #else
 	// Linux
 
-	lib = (HINSTANCE)dlopen(dll_string, RTLD_LAZY | RTLD_GLOBAL);
+	lib = dlopen(dll_string, RTLD_LAZY | RTLD_GLOBAL);
 
 #endif
 	return MAKE_UINT(lib);
@@ -1956,13 +1936,15 @@ object OpenDll(object x)
 object DefineCVar(object x)
 /* Get the address of a C variable, or return -1 */
 {
+
 	HINSTANCE lib;
+
 	object variable_name;
 	s1_ptr variable_ptr;
 	char *variable_string;
 	char *variable_address;
 
-	unsigned addr;
+	uintptr_t addr;
 
 	// x will be a sequence if called from define_c_func/define_c_proc
 	x = (object)SEQ_PTR(x);
@@ -1981,16 +1963,16 @@ object DefineCVar(object x)
 	MakeCString(variable_string, variable_name, TEMP_SIZE);
 #ifdef EWINDOWS
 	//Ray Smith says this works.
-	variable_address = (char *)(int (*)())GetProcAddress((void *)lib, variable_string);
+	variable_address = (char *)(intptr_t (*)())GetProcAddress((void *)lib, variable_string);
 	if (variable_address == NULL)
 		return ATOM_M1;
 #else
 	// Linux
-	variable_address = (char *)dlsym((void *)lib, variable_string);
+	variable_address = (char *)dlsym( lib, variable_string);
 	if (dlerror() != NULL)
 		return ATOM_M1;
 #endif
-	addr = (unsigned)variable_address;
+	addr = (uintptr_t)variable_address;
 	return MAKE_UINT(addr);
 }
 
@@ -2004,7 +1986,7 @@ object DefineC(object x)
 	object routine_name;
 	s1_ptr routine_ptr;
 	char *routine_string;
-	int (*proc_address)();
+	intptr_t (*proc_address)();
 	object arg_size, return_size;
 	object_ptr arg;
 	int convention, t, raw_addr;
@@ -2034,17 +2016,17 @@ object DefineC(object x)
 		/* machine code routine */
 		if (IS_ATOM(routine_name)) {
 			/* addr */
-			proc_address = (int (*)())get_pos_int("define_c_proc/func",
+			proc_address = (intptr_t (*)())get_pos_int("define_c_proc/func",
 										(object)routine_name);
 		}
 		else {
 			/* {'+', addr} */
 			if (SEQ_PTR(routine_name)->length != 2)
 				RTFatal("expected {'+', address} as second argument of define_c_proc/func");
-			proc_address = (int (*)())*(SEQ_PTR(routine_name)->base+2);
-			proc_address = (int (*)())get_pos_int("define_c_proc/func", (object)proc_address);
+			proc_address = (intptr_t (*)())*(SEQ_PTR(routine_name)->base+2);
+			proc_address = (intptr_t (*)())get_pos_int("define_c_proc/func", (object)proc_address);
 #ifdef EWINDOWS
-			t = (int)*(SEQ_PTR(routine_name)->base+1);
+			t = (intptr_t)*(SEQ_PTR(routine_name)->base+1);
 			t = get_pos_int("define_c_proc/func", (object)t);
 			if (t == '+')
 				convention = C_CDECL;
@@ -2074,13 +2056,13 @@ object DefineC(object x)
 			routine_string++;
 			convention = C_CDECL;
 		}
-		proc_address = (int (*)())GetProcAddress((void *)lib, routine_string);
+		proc_address = (intptr_t (*)())GetProcAddress((void *)lib, routine_string);
 		if (proc_address == NULL)
 			return ATOM_M1;
 
 #else
 #ifdef EUNIX
-		proc_address = (int (*)())dlsym((void *)lib, routine_string);
+		proc_address = (intptr_t (*)())dlsym((void *)lib, routine_string);
 		if (dlerror() != NULL)
 			return ATOM_M1;
 #endif
@@ -2110,7 +2092,7 @@ object DefineC(object x)
 			t = *arg;
 		}
 		else if (IS_ATOM(*arg)) {
-			t = (unsigned long)DBL_PTR(*arg)->dbl;
+			t = (uintptr_t)DBL_PTR(*arg)->dbl;
 		}
 		else
 			RTFatal("argument type may not be a sequence");
@@ -2129,7 +2111,7 @@ object DefineC(object x)
 		t = return_size;
 	}
 	else if (IS_ATOM(return_size)) {
-		t = (unsigned long)DBL_PTR(return_size)->dbl;
+		t = (uintptr_t)DBL_PTR(return_size)->dbl;
 	}
 	else
 		RTFatal("return type must be an atom");
@@ -2148,14 +2130,21 @@ object DefineC(object x)
 }
 
 #ifdef EOSX
-#define CALLBACK_SIZE (108)
-extern unsigned (*general_ptr)();
+	#define CALLBACK_SIZE (108)
 #else
-#if __GNUC__ == 4
-#define CALLBACK_SIZE (96)
-#else
-#define CALLBACK_SIZE (80)
-#endif
+	#if __GNUC__ == 4
+		#if INTPTR_MAX == INT32_MAX
+
+		#define CALLBACK_SIZE (96)
+
+		#elif INTPTR_MAX == INT64_MAX
+
+		#define CALLBACK_SIZE 143
+
+		#endif
+	#else
+		#define CALLBACK_SIZE (80)
+	#endif
 #endif
 
 #define EXECUTABLE_ALIGNMENT (4)
@@ -2186,10 +2175,8 @@ typedef unsigned char * page_ptr;
 unsigned char * new_page() {
 #ifdef EWINDOWS
 	return VirtualAlloc( NULL, CALLBACK_SIZE, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE );
-#elif ELINUX
-	return memalign( pagesize, pagesize );
 #elif EUNIX
-	return mmap(NULL, pagesize, PROT_EXEC|PROT_WRITE|PROT_READ, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);			
+	return mmap(NULL, pagesize, PROT_EXEC|PROT_WRITE|PROT_READ, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
 #endif
 }
 
@@ -2233,7 +2220,7 @@ object CallBack(object x)
 	static unsigned int page_offset = 0;
 	static long call_increment = 0;
 	static long last_block_offset = 0;
-	unsigned addr;
+	uintptr_t addr;
 	int routine_id, i, num_args;
 	unsigned char *copy_addr;
 #ifndef ERUNTIME
@@ -2279,29 +2266,29 @@ object CallBack(object x)
 	/* Get the address of the template to be modified. */
 	if (convention == C_CDECL) {
 		// cdecl allows var args - only one template needed
-		addr = (unsigned)&cdecl_call_back;
+		addr = (uintptr_t)&cdecl_call_back;
 	}
 	else {
 		switch (num_args) {
-			case 0: addr = (unsigned)&call_back0;
+			case 0: addr = (uintptr_t)&call_back0;
 					break;
-			case 1: addr = (unsigned)&call_back1;
+			case 1: addr = (uintptr_t)&call_back1;
 					break;
-			case 2: addr = (unsigned)&call_back2;
+			case 2: addr = (uintptr_t)&call_back2;
 					break;
-			case 3: addr = (unsigned)&call_back3;
+			case 3: addr = (uintptr_t)&call_back3;
 					break;
-			case 4: addr = (unsigned)&call_back4;
+			case 4: addr = (uintptr_t)&call_back4;
 					break;
-			case 5: addr = (unsigned)&call_back5;
+			case 5: addr = (uintptr_t)&call_back5;
 					break;
-			case 6: addr = (unsigned)&call_back6;
+			case 6: addr = (uintptr_t)&call_back6;
 					break;
-			case 7: addr = (unsigned)&call_back7;
+			case 7: addr = (uintptr_t)&call_back7;
 					break;
-			case 8: addr = (unsigned)&call_back8;
+			case 8: addr = (uintptr_t)&call_back8;
 					break;
-			case 9: addr = (unsigned)&call_back9;
+			case 9: addr = (uintptr_t)&call_back9;
 					break;
 			default:
 					RTFatal("routine has too many parameters for call-back");
@@ -2309,7 +2296,7 @@ object CallBack(object x)
 	}
 #ifdef EOSX
 	// always use the custom call back handler for OSX
-	addr = (unsigned)&osx_cdecl_call_back;
+	addr = (uintptr_t)&osx_cdecl_call_back;
 #endif
 
 	/* Now allocate memory that is executable or at least can be made to be ... */
@@ -2366,20 +2353,24 @@ object CallBack(object x)
 	// Find 78 56 34 12
 	for (i = 4; i < CALLBACK_SIZE-4; i++) {
 #ifdef EOSX
-         	if( (*(int*)(addr + i)) == 0xF001F001 ){
-			*(int *)(copy_addr+i) = (int)general_ptr;
+		if( (*(uintptr_t*)(addr + i)) == 0xF001F001 ){
+			*(uintptr_t *)(copy_addr+i) = (uintptr_t)general_ptr;
 		}
 #endif
-		if (copy_addr[i]   == 0x078 &&
-			copy_addr[i+1] == 0x056) {
+		if ( *(intptr_t*)(copy_addr + i) == (intptr_t)CALLBACK_POINTER ) {
 #ifdef ERUNTIME
-			*(int *)(copy_addr+i) = routine_id;
+			*(intptr_t *)(copy_addr+i) = routine_id;
 #else
-			*(symtab_ptr *)(copy_addr+i) = e_routine[routine_id];
+			*(intptr_t *)(copy_addr+i) = (intptr_t)e_routine[routine_id];
 #endif
 			not_patched = 0;
 			break;
 		}
+#if INTPTR_MAX == INT64_MAX
+		else if( *((uintptr_t*)(copy_addr + i)) == 0xabcdefabcdefabcdLL ){
+			*((uintptr_t*)(copy_addr + i)) = (uintptr_t)general_ptr;
+		}
+#endif
 	}
 	/* We're done writing, so protect the memory again...*/
 	set_page_to_read_execute_only(page_addr);
@@ -2388,43 +2379,43 @@ object CallBack(object x)
 		RTFatal("Internal error: CallBack routine id patch failed: missing magic.");
 	}
 	
-	addr = (unsigned long)copy_addr;
+	addr = (uintptr_t)copy_addr;
 
 	/* Return new address. */
 	return MAKE_UINT(addr);
 }
 
-unsigned internal_general_call_back(
-		  int cb_routine,
-						   unsigned arg1, unsigned arg2, unsigned arg3,
-						   unsigned arg4, unsigned arg5, unsigned arg6,
-						   unsigned arg7, unsigned arg8, unsigned arg9)
+uintptr_t internal_general_call_back(
+		  intptr_t cb_routine,
+						   uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+						   uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
+						   uintptr_t arg7, uintptr_t arg8, uintptr_t arg9)
 /* general call-back routine: 0 to 9 args */
 {
 	int num_args;
-	int (*addr)();
+	intptr_t (*addr)();
 
 // translator call-back
 	num_args = rt00[cb_routine].num_args;
 	addr = rt00[cb_routine].addr;
 	if (num_args >= 1) {
-	  call_back_arg1->obj = ((unsigned)arg1);
+	  call_back_arg1->obj = ((uintptr_t)arg1);
 	  if (num_args >= 2) {
-		call_back_arg2->obj = ((unsigned)arg2);
+		call_back_arg2->obj = ((uintptr_t)arg2);
 		if (num_args >= 3) {
-		  call_back_arg3->obj = ((unsigned)arg3);
+		  call_back_arg3->obj = ((uintptr_t)arg3);
 		  if (num_args >= 4) {
-			call_back_arg4->obj = ((unsigned)arg4);
+			call_back_arg4->obj = ((uintptr_t)arg4);
 			if (num_args >= 5) {
-			  call_back_arg5->obj = ((unsigned)arg5);
+			  call_back_arg5->obj = ((uintptr_t)arg5);
 			  if (num_args >= 6) {
-				call_back_arg6->obj = ((unsigned)arg6);
+				call_back_arg6->obj = ((uintptr_t)arg6);
 				if (num_args >= 7) {
-				  call_back_arg7->obj = ((unsigned)arg7);
+				  call_back_arg7->obj = ((uintptr_t)arg7);
 				  if (num_args >= 8) {
-					call_back_arg8->obj = ((unsigned)arg8);
+					call_back_arg8->obj = ((uintptr_t)arg8);
 					if (num_args >= 9) {
-					  call_back_arg9->obj = ((unsigned)arg9);
+					  call_back_arg9->obj = ((uintptr_t)arg9);
 					}
 				  }
 				}
@@ -2504,7 +2495,7 @@ unsigned internal_general_call_back(
 	}
 
 	// Don't do get_pos_int() for crash handler
-	return (unsigned)get_pos_int("internal-call-back", call_back_result->obj);
+	return (uintptr_t)get_pos_int("internal-call-back", call_back_result->obj);
 }
 
 int *crash_list = NULL;    // list of routines to call when there's a crash
@@ -2613,41 +2604,49 @@ void Machine_Handler(int sig_no)
 	is_batch = console_application();
 #endif
 #ifdef ERUNTIME
-	RTFatal("A machine-level exception occurred during execution of your program");
+	RTFatal("A machine-level exception occurred during execution of your program (signal %d)", sig_no);
 #else
-	RTFatal("A machine-level exception occurred during execution of this statement");
+	RTFatal("A machine-level exception occurred during execution of this statement (signal %d)", sig_no);
 #endif
 }
 
 #ifndef ERUNTIME
 extern struct IL fe;
-
+int in_backend = 0;
 object start_backend(object x)
 /* called by Euphoria-written front-end to run the back-end
  *
  * x is {symtab, topcode, subcode, names, line_table, miscellaneous }
  */
 {
-	long switch_len, i;
+	int switch_len, i;
 	s1_ptr x_ptr;
 	char *w;
-
-
 
 	w = "backend";
 
 	x_ptr = SEQ_PTR(x);
 
-	if (IS_ATOM(x) || x_ptr->length != 7)
-		RTFatal("BACKEND requires a sequence of length 7");
+	if (IS_ATOM(x) || x_ptr->length != 11)
+		RTFatal("BACKEND requires a sequence of length 11");
 
 	fe.st = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
 	fe.sl = (struct sline *) get_pos_int(w, *(x_ptr->base+2));
-	fe.misc = (int *)        get_pos_int(w, *(x_ptr->base+3));
+	fe.misc = (intptr_t *)   get_pos_int(w, *(x_ptr->base+3));
 	fe.lit = (char *)        get_pos_int(w, *(x_ptr->base+4));
 	fe.includes = (unsigned char **) get_pos_int(w, *(x_ptr->base+5));
 	fe.switches = x_ptr->base[6];
 	fe.argv = x_ptr->base[7];
+	
+	// Front End CallBacks:
+	cover_line        = get_pos_int(w, *(x_ptr->base+8));
+	cover_routine     = get_pos_int(w, *(x_ptr->base+9));
+	write_coverage_db = get_pos_int(w, *(x_ptr->base+10));
+	syncolor          = get_pos_int(w, *(x_ptr->base+11));
+	
+	// This is checked when we try to write coverage to make sure
+	// we need to output an error message.
+	in_backend = 1;
 
 #if defined(EUNIX) || defined(EMINGW)
 	do_exec(NULL);  // init jumptable
@@ -2655,7 +2654,7 @@ object start_backend(object x)
 
 	fe_set_pointers(); /* change some fe indexes into pointers */
 
-	/* Look at the switches for any information pertient to the backend */
+	/* Look at the switches for any information pertinent to the backend */
 	switch_len = SEQ_PTR(fe.switches)->length;
 
 	for (i=1; i <= switch_len; i++) {
@@ -2685,12 +2684,10 @@ object machine(object opcode, object x)
    Euphoria object as a result. */
 {
 	char *addr;
-	int temp;
 	char *dest;
 	char *src;
-
-
 	double d;
+	int temp;
 
 	while (TRUE) {
 		switch(opcode) {  /* tricky - could be atom or sequence */
@@ -2902,15 +2899,15 @@ object machine(object opcode, object x)
 
 			case M_INSTANCE:
 			{
-				unsigned int inst = 0;
+				uintptr_t inst = 0;
 #ifdef EUNIX
-				inst = (unsigned)getpid();
+				inst = (uintptr_t)getpid();
 #endif
 #ifdef EWINDOWS
-				inst = (unsigned)winInstance;
+				inst = (uintptr_t)winInstance;
 #endif
 
-				if (inst <= (unsigned)MAXINT)
+				if (inst <= (uintptr_t)MAXINT)
 					return inst;
 				else
 					return NewDouble((double)inst);
@@ -2957,16 +2954,6 @@ object machine(object opcode, object x)
 			case M_CRASH:
 				do_crash(x);
 				return ATOM_M1;
-				break;
-
-			case M_SET_COVERAGE:
-				set_coverage(x);
-				return ATOM_1;
-				break;
-
-			case M_SET_SYNCOLOR:
-				set_syncolor(x);
-				return ATOM_1;
 				break;
 
 			case M_CHDIR:
@@ -3129,6 +3116,7 @@ object machine(object opcode, object x)
 	
 			case M_HAS_CONSOLE:
 				return has_console();
+			
 
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:
@@ -3140,7 +3128,7 @@ object machine(object opcode, object x)
 					d = DBL_PTR(opcode)->dbl;
 					if (d < 0.0 || d >= MAXINT_DBL)
 						RTFatal("the first argument of machine_proc/func must be a small positive integer");
-					opcode = (long)d;
+					opcode = (object)d;
 				}
 				else {
 					RTFatal("the first argument of machine_proc/func must be an integer");

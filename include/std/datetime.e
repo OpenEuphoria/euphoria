@@ -5,6 +5,8 @@
 
 namespace datetime
 
+integer yydiff = 80
+
 include std/dll.e
 include std/get.e
 include std/machine.e
@@ -12,7 +14,7 @@ include std/types.e
 
 ifdef LINUX then
 	constant gmtime_ = dll:define_c_func(dll:open_dll(""), "gmtime", {dll:C_POINTER}, dll:C_POINTER)
-	constant time_ = dll:define_c_func(dll:open_dll(""), "time", {dll:C_POINTER}, dll:C_INT)
+	constant time_ = dll:define_c_func(dll:open_dll(""), "time", {dll:C_POINTER}, dll:C_POINTER)
 elsifdef OSX then
 	constant gmtime_ = dll:define_c_func(dll:open_dll("libc.dylib"), "gmtime", {dll:C_POINTER}, dll:C_POINTER)
 	constant time_ = dll:define_c_func(dll:open_dll("libc.dylib"), "time", {dll:C_POINTER}, dll:C_INT)
@@ -53,22 +55,17 @@ function gmtime(atom time)
 	atom timep, tm_p
 	integer n
 
-	timep = machine:allocate(4)
-	poke4(timep, time)
+	timep = machine:allocate( sizeof( C_POINTER ) )
+	poke_pointer(timep, time)
 	
 	tm_p = c_func(gmtime_, {timep})
 	
 	machine:free(timep)
-	
-	ret = repeat(0, 9)
-	n = 0
-
-	for i = 1 to 9 do
-		ret[i] = peek4s(tm_p+n)
-		n = n + 4
-	end for
-	
-	return ret
+	if tm_p != 0 then
+		return peek4s(tm_p & 9 )
+	else
+		return repeat( 0, 9 )
+	end if
 end function
 
 constant
@@ -924,12 +921,20 @@ public function format(datetime d, sequence pattern = "%Y-%m-%d %H:%M:%S")
 	return res
 end function
 
+--
+-- Used to determine how to handle %y in parse()
+--
+
+constant date_now = now()
+
 --**
 -- Parse a datetime string according to the given format.
 --
 -- Parameters:
 --   # ##val## : string datetime value
 --   # ##fmt## : datetime format. Default is "%Y-%m-%d %H:%M:%S"
+--   # ##yysplit## : Set the maximum difference from the current year when parsing
+--     a two digit year. Defaults to -80/+20.
 --
 -- Returns:
 --	A **datetime**, value.
@@ -942,7 +947,8 @@ end function
 --   * ##%m## ~--  month (01..12)
 --   * ##%M## ~--  minute (00..59)
 --   * ##%S## ~--  second (00..60)
---   * ##%Y## ~--  year
+--   * ##%y## ~--  2-digit year (YY)
+--   * ##%Y## ~--  4-digit year (CCYY)
 --
 --   More format codes will be added in future versions.
 --  
@@ -951,16 +957,49 @@ end function
 --
 --   All non-digits in the input string are ignored.
 --
+-- Parsing Two Digit Years:
+--   When parsing a two digit year ##parse## has to make a decision if a given year
+--   is in the past or future. For example, 10/18/44. Is that Oct 18, 1944 or
+--   Oct 18, 2044. A common rule has come about for this purpose and that is the -80/+20 
+--   rule. Based on research it was found that more historical events are recorded than
+--   future events, thus it favors history rather than future. Some other applications may
+--   require a different rule, thus the ##yylower## parameter can be supplied.
+--
+--   Assuming today is 12/22/2010 here is an example of the -80/+20 rule
+--   || YY || Diff   || CCYY ||
+--   | 18   | -92/+8  |  2018 |
+--   | 95   | -15/+85 |  1995 |
+--   | 33   | -77/+23 |  1933 |
+--   | 29   | -81/+19 |  2029 |
+--
+--   Another rule in use is the -50/+50 rule. Therefore, if you supply -50 to the ##yylower## 
+--   to set the lower bounds, some examples may be (given that today is 12/22/2010)
+--   || YY || Diff   || CCYY ||
+--   | 18   | -92/+8  |  2018 |
+--   | 95   | -15/+85 |  1995 |
+--   | 33   | -77/+23 |  2033 |
+--   | 29   | -81/+19 |  2029 |
+--
 -- Example 1:
 -- <eucode>
 -- datetime d = parse("05/01/2009 10:20:30", "%m/%d/%Y %H:%M:%S")
+-- -- d is { 2009, 5, 1, 10, 20, 30 }
 -- </eucode>
+--
+-- Example 2:
+-- <eucode>
+-- datetime d = parse("05/01/44", "%m/%d/%y", -50) -- -50/+50 rule
+-- -- d is { 2044, 5, 14, 0, 0, 0 }
+-- </eucode>
+--
+-- Versioning:
+--   * Since 4.0.1 - 2-digit year parsing and ##yylower## parameter
 --
 -- See Also:
 --   [[:format]]
 --
 
-public function parse(sequence val, sequence fmt="%Y-%m-%d %H:%M:%S")
+public function parse(sequence val, sequence fmt="%Y-%m-%d %H:%M:%S", integer yylower = -80)
 	integer fpos = 1, spos = 1, maxlen, rpos 
 	sequence res = {0,0,0,0,0,0}
 
@@ -972,6 +1011,10 @@ public function parse(sequence val, sequence fmt="%Y-%m-%d %H:%M:%S")
 				case 'Y' then
 					rpos = 1
 					maxlen = 4
+
+				case 'y' then
+					rpos = 1
+					maxlen = 2
 
 				case 'm' then
 					rpos = 2
@@ -1023,6 +1066,18 @@ public function parse(sequence val, sequence fmt="%Y-%m-%d %H:%M:%S")
 				got = stdget:value(val[spos .. epos-1], , stdget:GET_LONG_ANSWER)
 				if got[1] != stdget:GET_SUCCESS then
 					return -1
+				end if
+
+				-- If this is a 2 digit year we have to do some special handling
+				if fmt[fpos] = 'y' then
+					-- Adjust the date to be not more than yysplit years ago
+					integer century = floor(date_now[YEAR] / 100) * 100
+					integer year = got[2] + (century - 100)
+					if year < (date_now[YEAR] + yylower) then
+						year = got[2] + century
+					end if
+
+					got[2] = year
 				end if
 
 				res[rpos] = got[2]

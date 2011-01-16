@@ -250,11 +250,56 @@ export enum
 	MIN,
 	MAX
 
+ifdef E32 then
+
+	constant max_int = #3FFFFFFF
+	export constant SIZEOF_POINTER = 4
+
+elsifdef E64 then
+	
+	export constant SIZEOF_POINTER = 8
+	atom ptr = machine_func( 16, 8 )
+		poke( ptr, { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x3f } )
+	constant max_int = peek8s( ptr )
+	machine_proc( 17, ptr )
+
+elsedef
+	-- default to native...
+	export constant SIZEOF_POINTER = sizeof( #03000001 ) -- C_POINTER
+	integer max_int, min_int
+	if SIZEOF_POINTER = 4 then
+		max_int = #3FFFFFFF
+	else
+		-- the parser, in some cases, loses precision, probably due to
+		-- the way MULTIPLY ops are optimized, as 0x3fffffff_ffffffff
+		-- turns into a double and is rounded up to 0x40000000_00000000.
+		-- Using peek8s(), we get the proper integer under 64-bit euphoria.
+		atom ptr = machine_func( 16, 8 )
+		poke( ptr, { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x3f } )
+		max_int = peek8s( ptr )
+		machine_proc( 17, ptr )
+	end if
+end ifdef
+
 export constant
-	MAXINT = #3FFFFFFF,
+	MAXINT = max_int,
 	MININT = -MAXINT-1,   -- should be -ve
 	MININT_DBL = MININT,
 	MAXINT_DBL = MAXINT
+
+
+export function is_integer( object o )
+	if not atom( o ) then
+		return 0
+	end if
+	
+	if o = floor( o ) then
+		if o <= MAXINT and o >= MININT then
+			return 1
+		end if
+	end if
+	return 0
+end function
 
 export constant NOVALUE = -1.295837195871e307
 -- An unlikely number. If it occurs naturally,  there will be a slight loss of optimization

@@ -18,34 +18,11 @@
 #include "be_machine.h"
 #include "be_syncolor.h"
 
-unsigned internal_general_call_back(
-		  int cb_routine,
-						   unsigned arg1, unsigned arg2, unsigned arg3,
-						   unsigned arg4, unsigned arg5, unsigned arg6,
-						   unsigned arg7, unsigned arg8, unsigned arg9);
-
 int syncolor = -1;
 
 /*********************/
 /* Defined functions */
 /*********************/
-
-void set_syncolor(object x)
-{
-	object syn;
-
-	if IS_ATOM(x) {
-		RTFatal("set_syncolor expected a sequence");
-	}
-
-	if (SEQ_PTR(x)->length != 1) {
-		RTFatal("set_syncolor expected a sequence of length 1");
-	}
-
-	syn = get_pos_int("set_syncolor", SEQ_PTR(x)->base[1]);
-
-	syncolor = (int)syn;
-}
 
 void init_class()
 /* set up character classes for easier line scanning */

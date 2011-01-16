@@ -292,7 +292,7 @@ EXE=$(EX)
 # Change to using the EXEs to keep your CPU cool using
 # --use-binary-translator
 !ifndef EC
-EC=$(EXE) $(INCDIR) $(EUDEBUG) $(I_FLAGS) $(TRUNKDIR)\source\ec.ex
+EC=$(EXE) -d E32 $(INCDIR) $(EUDEBUG) $(I_FLAGS) $(TRUNKDIR)\source\ec.ex
 !endif
 
 EUTEST=$(EXE) -i $(TRUNKDIR)\include $(TRUNKDIR)\source\eutest.ex
@@ -378,7 +378,7 @@ OSFLAG=EWINDOWS
 LIBTARGET=$(BUILDDIR)\$(LIBRARY_NAME).lib
 CC = wcc386
 .ERASE
-FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s $(MEMFLAG) $(DEBUGFLAG) $(SETALIGN4) $(NOASSERT) $(HEAPCHECKFLAG) /I..\ $(EREL_TYPE)
+FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s $(MEMFLAG) $(DEBUGFLAG) $(SETALIGN4) $(NOASSERT) $(HEAPCHECKFLAG) /I$(TRUNKDIR) $(EREL_TYPE)
 BE_FLAGS = /ol /zp4 /d$(OSFLAG) /5r /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG) $(SETALIGN4) $(NOASSERT) $(HEAPCHECKFLAG) $(EXTRACHECKFLAG) $(EXTRASTATSFLAG) $(EREL_TYPE)
 	
 library : .SYMBOLIC runtime
@@ -486,12 +486,12 @@ tester: .SYMBOLIC
 binder : .SYMBOLIC $(BUILDDIR)\eubind.exe
 
 $(BUILDDIR)\eubind.exe : translator library
-	$(BUILDDIR)\euc -con -i $(TRUNKDIR)\include -o $(BUILDDIR)\eubind.exe $(TRUNKDIR)\source\bind.ex
+	$(BUILDDIR)\euc -lib $(BUILDDIR)\eu.lib -eudir $(TRUNKDIR) -con -i $(TRUNKDIR)\include -o $(BUILDDIR)\eubind.exe $(TRUNKDIR)\source\bind.ex
 	
 shrouder : .SYMBOLIC $(BUILDDIR)\eushroud.exe
 
 $(BUILDDIR)\eushroud.exe : translator library
-	$(BUILDDIR)\euc -con -i $(TRUNKDIR)\include -o $(BUILDDIR)\eushroud.exe $(TRUNKDIR)\source\shroud.ex
+	$(BUILDDIR)\euc -lib $(BUILDDIR)\eu.lib -eudir $(TRUNKDIR) -con -i $(TRUNKDIR)\include -o $(BUILDDIR)\eushroud.exe $(TRUNKDIR)\source\shroud.ex
 	
 tools: .SYMBOLIC
     @echo ------- TOOLS -----------

@@ -28,8 +28,11 @@
 #include <string.h>
 #include <time.h>
 #include <assert.h>
+#include <inttypes.h>
 #ifdef EWINDOWS
 #include <windows.h>
+#else
+#include <unistd.h>
 #endif
 #include "alldefs.h"
 #include "be_runtime.h"
@@ -329,7 +332,7 @@ static void Free_All()
 		list->first = NULL;
 	}
 	/* now do the doubles list */
-	assert(((unsigned long)d_list & 7) == 0);		
+	assert(((uintptr_t)d_list & 7) == 0);		
 	s = (s1_ptr)d_list;
 	while (s != NULL) {
 		p = (unsigned char *)s;
@@ -413,7 +416,7 @@ static char *Out_Of_Space(long nbytes)
 }
 #endif
 #ifndef ESIMPLE_MALLOC
-char *EMalloc(unsigned long nbytes)
+char *EMalloc(uintptr_t nbytes)
 /* storage allocator */
 /* Always returns a pointer that has 8-byte alignment (essential for our
    internal representation of an object). */
@@ -429,7 +432,6 @@ char *EMalloc(unsigned long nbytes)
 #ifdef HEAP_CHECK
 	long size;
 #endif
-
 #ifdef HEAP_CHECK
 	check_pool();
 #endif
@@ -500,10 +502,10 @@ char *EMalloc(unsigned long nbytes)
 // 	}
 
 	do {
-		p = malloc(nbytes+8);
+		p = malloc((long)nbytes+8);
 // 		assert(p);
 		if (p == NULL) {
-			printf("couldn't alloc %d bytes\n", nbytes );
+			printf("couldn't alloc %" PRIdPTR " bytes\n", nbytes );
 			// Only triggered if asserts are turned off.
 			p = Out_Of_Space(nbytes + 8);
 		}
@@ -539,7 +541,7 @@ char *EMalloc(unsigned long nbytes)
 		align4 = 4;  // start handling 4-aligned blocks
 		nbytes += align4;
 #else
-		assert(((unsigned int)p & 7) == 0);
+		assert(((uintptr_t)p & 7) == 0);
 		return p;
 #endif
 	} while (TRUE);
@@ -712,7 +714,7 @@ int heap_dump(char *ptr)
 #endif // EUNIX
 
 #ifndef ESIMPLE_MALLOC
-char *ERealloc(char *orig, unsigned long newsize)
+char *ERealloc(char *orig, uintptr_t newsize)
 /* Enlarge or shrink a malloc'd block.
    orig must not be NULL - not supported.
    Return a pointer to a storage area of the desired size
@@ -756,7 +758,7 @@ char *ERealloc(char *orig, unsigned long newsize)
 #endif
 		return orig;
 	}
-	else if (((long)q & 0x07) == ((long)p & 0x07)) {
+	else if (((uintptr_t)q & 0x07) == ((uintptr_t)p & 0x07)) {
 		/* q is aligned the same way as p modulo 8 (almost always I think) */
 		orig = orig + (q - p);
 		return orig;
@@ -809,7 +811,7 @@ void freeD(unsigned char *p)
 }
 #endif
 
-s1_ptr NewS1(long size)
+s1_ptr NewS1(intptr_t size)
 /* make a new s1 sequence block with a single reference count */
 /* size is number of elements, NOVALUE is added as an end marker */
 {
@@ -857,7 +859,7 @@ s1_ptr SequenceCopy(register s1_ptr a)
 {
 	s1_ptr c;
 	register object_ptr cp, ap;
-	register long length;
+	register int length;
 	register object temp_ap;
 
 	/* a is a SEQ_PTR */
@@ -957,7 +959,7 @@ static void new_dbl_block(unsigned int cnt)
 
 	blksize = cnt * dsize;
 	dbl_block = (free_block_ptr)EMalloc( blksize );
-	assert(((unsigned long)dbl_block & 7) == 0);
+	assert(((uintptr_t)dbl_block & 7) == 0);
 
 #ifdef HEAP_CHECK
 	Trash((char *)dbl_block, blksize);
@@ -992,7 +994,7 @@ object NewDouble(double d)
 	}
 
 	new_dbl = d_list;
-	assert(((unsigned long)new_dbl & 7) == 0);
+	assert(((uintptr_t)new_dbl & 7) == 0);
 	d_list = (d_ptr)((free_block_ptr)new_dbl)->next;
 
 	new_dbl->ref = 1;

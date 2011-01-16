@@ -92,6 +92,8 @@ for i = 1 to length( cases ) do
 		case NEGATIVE_3 then
 			negative_case = append( negative_case, NEGATIVE_3 )
 			break
+		case else
+			negative_case = append( negative_case, { "error!", cases[i] } )
 	end switch
 end for
 

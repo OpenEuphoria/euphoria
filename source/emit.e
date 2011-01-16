@@ -517,6 +517,9 @@ op_temp_ref[PEEK2U]           = NEW_REFERENCE
 op_temp_ref[PEEK2S]           = NEW_REFERENCE
 op_temp_ref[PEEK4U]           = NEW_REFERENCE
 op_temp_ref[PEEK4S]           = NEW_REFERENCE
+op_temp_ref[PEEK8U]           = NEW_REFERENCE
+op_temp_ref[PEEK8S]           = NEW_REFERENCE
+op_temp_ref[PEEK_POINTER]     = NEW_REFERENCE
 op_temp_ref[OPEN]             = NEW_REFERENCE
 op_temp_ref[GETS]             = NEW_REFERENCE
 op_temp_ref[SPRINTF]          = NEW_REFERENCE
@@ -1182,8 +1185,8 @@ export procedure emit_op(integer op)
 		assignable = FALSE  -- need to update current_sequence like in RHS_SUBS
 
 	-- 1 input, 1 output
-	case RAND, PEEK, PEEK4S, PEEK4U, NOT_BITS, NOT,
-					TASK_STATUS, PEEK2U, PEEK2S, PEEKS, PEEK_STRING then
+	case RAND, PEEK, PEEK4S, PEEK4U, NOT_BITS, NOT, PEEK8U, PEEK8S, SIZEOF,
+		TASK_STATUS, PEEK2U, PEEK2S, PEEKS, PEEK_STRING, PEEK_POINTER then
 		cont11ii(op, TRUE)
 
 	case UMINUS then
@@ -1193,7 +1196,7 @@ export procedure emit_op(integer op)
 		if a > 0 then
 			obj = SymTab[a][S_OBJ]
 			if SymTab[a][S_MODE] = M_CONSTANT then
-				if integer(obj) then
+				if is_integer(obj) then
 					if obj = MININT then
 						Push(NewDoubleSym(-MININT))
 					else
@@ -1278,7 +1281,7 @@ export procedure emit_op(integer op)
 
 	-- 2 inputs, 0 outputs
 	case SYSTEM, PUTS, PRINT, QPRINT, POSITION, MACHINE_PROC,
-					C_PROC, POKE, POKE4, TASK_SCHEDULE, POKE2 then
+		C_PROC, POKE, POKE4, TASK_SCHEDULE, POKE2, POKE8, POKE_POINTER then
 		emit_opcode(op)
 
 		b = Pop()

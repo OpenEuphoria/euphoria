@@ -1,0 +1,13 @@
+== Version 4.1.0 Date TBD
+
+== Bug Fixes
+
+
+== Enhancements
+
+* Euphoria can be built natively as a 64-bit programming language.
+* Added 8-byte memory access: [[:poke8], [[:peek8s]], [[:peek8u]]
+* eucoverage also outputs a file "big_routines.html" that shows covered routines
+  from all files sorted by descending routine size
+* Added [[:poke_pointer]] and [[:peek_pointer]]
+* New [[:sizeof]] built-in for determining size of certain data types.

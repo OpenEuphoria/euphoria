@@ -1053,7 +1053,7 @@ static void sf_output(char *string)
 	}
 }
 
-static void TracePrint(symtab_ptr proc, int *pc)
+static void TracePrint(symtab_ptr proc, intptr_t *pc)
 // print a line of traceback
 {
 	long gline;
@@ -1093,7 +1093,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 // msg is error message or NULL
 // s_ptr is symbol involved in error
 {
-	int *new_pc;
+	intptr_t *new_pc;
 	symtab_ptr current_proc;
 	
 	int levels, skipping, dash_count, i, task, show_message;
@@ -1179,7 +1179,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 			// unwind the stack for this task
 			
 			expr_top -= 2;
-			new_pc = (int *)*expr_top;
+			new_pc = (intptr_t *)*expr_top;
 			
 			if (current_proc->u.subp.saved_privates != NULL) {
 				// called recursively or multiple tasks - restore privates
@@ -1187,7 +1187,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 				restore_privates(current_proc);
 			}
 			
-			if (*new_pc == (int)opcode(CALL_BACK_RETURN)) {
+			if (*new_pc == (intptr_t)opcode(CALL_BACK_RETURN)) {
 				// we're in a callback routine
 				if (crash_count > 0) {
 					copy_string(TempBuff, "\n^^^ called to handle run-time crash\n", TEMP_SIZE);
@@ -1203,7 +1203,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 				if (expr_top <= expr_stack+3)
 					break;
 				expr_top -= 2;
-				new_pc = (int *)*expr_top;
+				new_pc = (intptr_t *)*expr_top;
 			}
 
 			current_proc = Locate(new_pc - 1);
@@ -1370,7 +1370,7 @@ void CleanUpError(char *msg, symtab_ptr s_ptr, ...)
 	va_end(ap);
 }
 
-void RTFatalType(int *pc)
+void RTFatalType(intptr_t *pc)
 /* handle type-check failures */
 /* pc points to variable in instruction stream */ 
 {
@@ -1393,7 +1393,7 @@ object_ptr BiggerStack()
 	return expr_stack + stack_size - 5; /* new expr_max */
 }
 
-void BadSubscript(object subs, long length)
+void BadSubscript(object subs, int length)
 /* report a subscript violation */
 {
 #define BadSubscript_bufflen (40)

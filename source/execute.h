@@ -5,6 +5,7 @@
 /*****************************************************************************/
 #ifndef EXECUTE_H_
 #define EXECUTE_H_
+#include <stdint.h>
 
 		  /* Euphoria object format v1.2 and later */
 
@@ -33,45 +34,68 @@
 /* NO VALUE objects can occur only in a few well-defined places,
    so we can simplify some tests. For speed we first check for ATOM-INT
    since that's what most objects are. */
+#undef MININT
 
-#define NOVALUE      ((long)0xbfffffffL)
-#define TOO_BIG_INT  ((long)0x40000000L)
-#define HIGH_BITS    ((long)0xC0000000L)
-#define IS_ATOM_INT(ob)       (((long)(ob)) > NOVALUE)
-#define IS_ATOM_INT_NV(ob)    ((long)(ob) >= NOVALUE)
+#define MININT32     (intptr_t) 0xC0000000L
+#define MAXINT32     (intptr_t) 0x3FFFFFFFL
 
-#define MAKE_UINT(x) ((object)((unsigned long)x <= (unsigned long)0x3FFFFFFFL \
-                          ? (unsigned long)x : \
-                            NewDouble((double)(unsigned long)x)))
+
+#if INTPTR_MAX == INT32_MAX
+
+#define DBL_MASK     (uintptr_t)0xA0000000L
+#define SEQ_MASK     (uintptr_t)0x80000000L
+#define DS_MASK      (uintptr_t)0xE0000000L
+#define MININT       MININT32
+#define MAXINT       MAXINT32
+#define NOVALUE      (intptr_t) 0xbfffffffL
+#define TOO_BIG_INT  (intptr_t) 0x40000000L
+#define HIGH_BITS    (intptr_t) 0xC0000000L
+
+#else
+
+#define DBL_MASK     (uintptr_t)INT64_C( 0xA000000000000000 )
+#define SEQ_MASK     (uintptr_t)INT64_C( 0x8000000000000000 )
+#define DS_MASK      (uintptr_t)INT64_C( 0xE000000000000000 )
+#define MININT       (intptr_t) INT64_C( 0xC000000000000000 )
+#define MAXINT       (intptr_t) INT64_C( 0x3FFFFFFFFFFFFFFF )
+#define NOVALUE      (intptr_t) INT64_C( 0xbfffffffffffffff )
+#define TOO_BIG_INT  (intptr_t) INT64_C( 0x4000000000000000 )
+#define HIGH_BITS    (intptr_t )INT64_C( 0xC000000000000000 )
+
+#endif
+
+#define IS_ATOM_INT(ob)       (((intptr_t)(ob)) > NOVALUE)
+#define IS_ATOM_INT_NV(ob)    ((intptr_t)(ob) >= NOVALUE)
+
+#define MAKE_UINT(x) ((object)((uintptr_t)x < (uintptr_t)TOO_BIG_INT \
+                          ? (uintptr_t)x : \
+                            NewDouble((double)(uintptr_t)x)))
 
 /* these are obsolete */
-#define INT_VAL(x)        ((int)(x))
+#define INT_VAL(x)        ((intptr_t)(x))
 #define MAKE_INT(x)       ((object)(x))
 
 /* N.B. the following distinguishes DBL's from SEQUENCES -
    must eliminate the INT case first */
-#define IS_ATOM_DBL(ob)         (((object)(ob)) >= (long)0xA0000000)
+#define IS_ATOM_DBL(ob)         (((object)(ob)) >= (object)DBL_MASK)
 
-#define IS_ATOM(ob)             (((long)(ob)) >= (long)0xA0000000)
-#define IS_SEQUENCE(ob)         (((long)(ob))  < (long)0xA0000000)
+#define IS_ATOM(ob)             (((object)(ob)) >= (object)DBL_MASK)
+#define IS_SEQUENCE(ob)         (((object)(ob))  < (object)DBL_MASK)
 
-#define ASEQ(s) (((unsigned long)s & (unsigned long)0xE0000000) == (unsigned long)0x80000000)
+#define ASEQ(s) (((uintptr_t)s & (uintptr_t)DS_MASK) == (uintptr_t)SEQ_MASK)
 
-#define IS_DBL_OR_SEQUENCE(ob)  (((long)(ob)) < NOVALUE)
+#define IS_DBL_OR_SEQUENCE(ob)  (((object)(ob)) < NOVALUE)
 
-#undef MININT
-#define MININT     (long)0xC0000000
-#define MAXINT     (long)0x3FFFFFFF
+
 #define MININT_DBL ((double)MININT)
 #define MAXINT_DBL ((double)MAXINT)
-#define INT23      (long)0x003FFFFFL
-#define INT16      (long)0x00007FFFL
-#define INT15      (long)0x00003FFFL
+#define INT23      (object)0x003FFFFFL
+#define INT16      (object)0x00007FFFL
+#define INT15      (object)0x00003FFFL
 #define ATOM_M1    -1
 #define ATOM_0     0
 #define ATOM_1     1
 #define ATOM_2     2
-
 
 #include "object.h"
 
@@ -88,7 +112,7 @@ struct symtab_entry;
 */
 struct routine_list {
 	char *name;
-	int (*addr)();
+	object (*addr)();
 	int seq_num;
 	int file_num;
 	short int num_args;
@@ -135,10 +159,10 @@ struct replace_block {
 
 
 /* MACROS */
-#define MAKE_DBL(x) ( (object) (((unsigned long)(x) >> 3) + (long)0xA0000000) )
-#define DBL_PTR(ob) ( (d_ptr)  (((unsigned long)(ob)) << 3) )
-#define MAKE_SEQ(x) ( (object) (((unsigned long)(x) >> 3) + (long)0x80000000) )
-#define SEQ_PTR(ob) ( (s1_ptr) (((unsigned long)(ob)) << 3) )
+#define MAKE_DBL(x) ( (object) (((uintptr_t)(x) >> 3) | DBL_MASK) )
+#define DBL_PTR(ob) ( (d_ptr)  (((uintptr_t)(ob)) << 3) )
+#define MAKE_SEQ(x) ( (object) (((uintptr_t)(x) >> 3) | SEQ_MASK) )
+#define SEQ_PTR(ob) ( (s1_ptr) (((uintptr_t)(ob)) << 3) )
 
 /* ref a double or a sequence (both need same 3 bit shift) */
 #define RefDS(a) ++(DBL_PTR(a)->ref)
@@ -177,7 +201,7 @@ struct file_info {
 };
 
 struct arg_info {
-	int (*address)();     // pointer to C function
+	intptr_t (*address)();// pointer to C function
 	s1_ptr name;          // name of routine (for diagnostics)
 	s1_ptr arg_size;      // s1_ptr of sequence of argument sizes
 	object return_size;   // atom or sequence for return value size
@@ -194,7 +218,7 @@ struct arg_info {
 struct IL {
 	struct symtab_entry *st;
 	struct sline *sl;
-	int *misc;
+	intptr_t *misc;
 	char *lit;
 	unsigned char **includes;
 	object switches;
@@ -251,6 +275,9 @@ struct char_cell {
 #define MAX_BITWISE_DBL ((double)(unsigned long)0xFFFFFFFF)
 #define MIN_BITWISE_DBL ((double)(signed long)  0x80000000)
 
+#define MAX_LONGLONG_DBL ((double)(unsigned long long) 0xFFFFFFFFFFFFFFFFLL)
+#define MIN_LONGLONG_DBL ((double)(signed long long)   0x8000000000000000LL)
+
 /* .dll argument & return value types */
 #define C_TYPE     0x0F000000
 #define C_DOUBLE   0x03000008
@@ -263,7 +290,13 @@ struct char_cell {
 #define E_ATOM     0x07000004
 #define E_SEQUENCE 0x08000004
 #define E_OBJECT   0x09000004
-
+#define C_INT      0x01000004
+#define C_UINT     0x02000004
+#define C_LONG     0x01000008
+#define C_ULONG    0x02000008
+#define C_POINTER  0x03000001
+#define C_LONGLONG 0x03000002
+	
 #define C_STDCALL 0
 #define C_CDECL 1
 
@@ -380,8 +413,7 @@ struct char_cell {
 #define M_PCRE_GET_OVECTOR_SIZE 97
 #define M_GET_RAND           98
 #define M_HAS_CONSOLE        99
-#define M_SET_COVERAGE       100
-#define M_SET_SYNCOLOR       101
+
 enum CLEANUP_TYPES {
 	CLEAN_UDT,
 	CLEAN_UDT_RT,

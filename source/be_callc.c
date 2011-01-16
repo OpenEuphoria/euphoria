@@ -34,6 +34,9 @@
  */           
 
 #include <stdio.h>
+#include <stdint.h>
+#include <inttypes.h>
+
 #ifdef EWINDOWS
 #include <windows.h>
 #endif
@@ -66,7 +69,7 @@
 #endif
 
 #ifdef EWATCOM
-void wcpush(long X);
+void wcpush(intptr_t X);
 #define push() wcpush(last_offset);
 #define pop()
 #pragma aux wcpush = \
@@ -77,15 +80,17 @@ void wcpush(long X);
 
 typedef union {
 	double dbl;
-	int ints[2];
+	int32_t ints[2];
+	int64_t int64;
 } double_arg;
 
 typedef union {
 	float flt;
-	int intval;
+	int32_t int32;
 } float_arg;
 
-#if !defined(EMINGW) && !defined(EOSX) && !defined(EMSVC)
+#if !defined(EMINGW) && !defined(EOSX) && !defined(EMSVC) && (INTPTR_MAX == INT32_MAX)
+// 32-bit only
 object call_c(int func, object proc_ad, object arg_list)
 /* Call a WIN32 or Linux C function in a DLL or shared library. 
    Alternatively, call a machine-code routine at a given address. */
@@ -175,7 +180,7 @@ object call_c(int func, object proc_ad, object arg_list)
 		if (IS_ATOM_INT(next_size))
 			size = INT_VAL(next_size);
 		else if (IS_ATOM(next_size))
-			size = (unsigned long)DBL_PTR(next_size)->dbl;
+			size = (uintptr_t)DBL_PTR(next_size)->dbl;
 		else 
 			RTFatal("This C routine was defined using an invalid argument type");
 
@@ -201,7 +206,7 @@ object call_c(int func, object proc_ad, object arg_list)
 			else {
 				/* C_FLOAT */
 				flt_arg.flt = (float)dbl_arg.dbl;
-				arg = (unsigned long)flt_arg.intval;
+				arg = (unsigned long)flt_arg.int32;
 				push();
 			}
 		}
@@ -233,7 +238,7 @@ object call_c(int func, object proc_ad, object arg_list)
 			else if (IS_ATOM(next_arg)) {
 				// atoms are rounded to integers
 				
-				arg = (unsigned long)DBL_PTR(next_arg)->dbl; //correct
+				arg = (uintptr_t)DBL_PTR(next_arg)->dbl; //correct
 				// if it's a -ve f.p. number, Watcom converts it to int and
 				// then to unsigned int. This is exactly what we want.
 				// Works with the others too. 
@@ -297,7 +302,15 @@ object call_c(int func, object proc_ad, object arg_list)
 #ifdef EUNIX       
 		pop();
 #endif      
-		if ((return_type & 0x000000FF) == 04) {
+		if (return_type == C_POINTER ){
+			if ((unsigned)iresult <= (unsigned)MAXINT) {
+				return iresult;
+			}
+			else{
+				return NewDouble((double)(unsigned)iresult);
+			}
+		}
+		else if ((return_type & 0x000000FF) == 04) {
 			/* 4-byte integer - usual case */
 			// check if unsigned result is required 
 			if ((return_type & C_TYPE) == 0x02000000) {
@@ -338,156 +351,157 @@ object call_c(int func, object proc_ad, object arg_list)
 			return 0; // unknown function return type
 	}
 }
-#else //EMINGW
+#else //EMINGW, 64-bit
 /*******************/
 /* Local variables */
 /*******************/
 
+#if INTPTR_MAX == INT32_MAX
 /* for c_proc */
 typedef void (__stdcall *proc0)();
-typedef void (__stdcall *proc1)(long);
-typedef void (__stdcall *proc2)(long,long);
-typedef void (__stdcall *proc3)(long,long,long);
-typedef void (__stdcall *proc4)(long,long,long,long);
-typedef void (__stdcall *proc5)(long,long,long,long,long);
-typedef void (__stdcall *proc6)(long,long,long,long,long,long);
-typedef void (__stdcall *proc7)(long,long,long,long,long,long,long);
-typedef void (__stdcall *proc8)(long,long,long,long,long,long,long,long);
-typedef void (__stdcall *proc9)(long,long,long,long,long,long,long,long,long);
-typedef void (__stdcall *procA)(long,long,long,long,long,long,long,long,long,long);
-typedef void (__stdcall *procB)(long,long,long,long,long,long,long,long,long,long,long);
-typedef void (__stdcall *procC)(long,long,long,long,long,long,long,long,long,long,long,long);
-typedef void (__stdcall *procD)(long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef void (__stdcall *procE)(long,long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef void (__stdcall *procF)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef void (__stdcall *proc1)(intptr_t);
+typedef void (__stdcall *proc2)(intptr_t,intptr_t);
+typedef void (__stdcall *proc3)(intptr_t,intptr_t,intptr_t);
+typedef void (__stdcall *proc4)(intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__stdcall *proc5)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__stdcall *proc6)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__stdcall *proc7)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__stdcall *proc8)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__stdcall *proc9)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__stdcall *procA)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__stdcall *procB)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__stdcall *procC)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__stdcall *procD)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__stdcall *procE)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__stdcall *procF)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
 
 /* for c_func */
-typedef long (__stdcall *func0)();
-typedef long (__stdcall *func1)(long);
-typedef long (__stdcall *func2)(long,long);
-typedef long (__stdcall *func3)(long,long,long);
-typedef long (__stdcall *func4)(long,long,long,long);
-typedef long (__stdcall *func5)(long,long,long,long,long);
-typedef long (__stdcall *func6)(long,long,long,long,long,long);
-typedef long (__stdcall *func7)(long,long,long,long,long,long,long);
-typedef long (__stdcall *func8)(long,long,long,long,long,long,long,long);
-typedef long (__stdcall *func9)(long,long,long,long,long,long,long,long,long);
-typedef long (__stdcall *funcA)(long,long,long,long,long,long,long,long,long,long);
-typedef long (__stdcall *funcB)(long,long,long,long,long,long,long,long,long,long,long);
-typedef long (__stdcall *funcC)(long,long,long,long,long,long,long,long,long,long,long,long);
-typedef long (__stdcall *funcD)(long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef long (__stdcall *funcE)(long,long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef long (__stdcall *funcF)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef intptr_t (__stdcall *func0)();
+typedef intptr_t (__stdcall *func1)(intptr_t);
+typedef intptr_t (__stdcall *func2)(intptr_t,intptr_t);
+typedef intptr_t (__stdcall *func3)(intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__stdcall *func4)(intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__stdcall *func5)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__stdcall *func6)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__stdcall *func7)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__stdcall *func8)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__stdcall *func9)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__stdcall *funcA)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__stdcall *funcB)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__stdcall *funcC)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__stdcall *funcD)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__stdcall *funcE)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__stdcall *funcF)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
 
 /* for c_proc */
 typedef void (__cdecl *cdproc0)();
-typedef void (__cdecl *cdproc1)(long);
-typedef void (__cdecl *cdproc2)(long,long);
-typedef void (__cdecl *cdproc3)(long,long,long);
-typedef void (__cdecl *cdproc4)(long,long,long,long);
-typedef void (__cdecl *cdproc5)(long,long,long,long,long);
-typedef void (__cdecl *cdproc6)(long,long,long,long,long,long);
-typedef void (__cdecl *cdproc7)(long,long,long,long,long,long,long);
-typedef void (__cdecl *cdproc8)(long,long,long,long,long,long,long,long);
-typedef void (__cdecl *cdproc9)(long,long,long,long,long,long,long,long,long);
-typedef void (__cdecl *cdprocA)(long,long,long,long,long,long,long,long,long,long);
-typedef void (__cdecl *cdprocB)(long,long,long,long,long,long,long,long,long,long,long);
-typedef void (__cdecl *cdprocC)(long,long,long,long,long,long,long,long,long,long,long,long);
-typedef void (__cdecl *cdprocD)(long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef void (__cdecl *cdprocE)(long,long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef void (__cdecl *cdprocF)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef void (__cdecl *cdproc1)(intptr_t);
+typedef void (__cdecl *cdproc2)(intptr_t,intptr_t);
+typedef void (__cdecl *cdproc3)(intptr_t,intptr_t,intptr_t);
+typedef void (__cdecl *cdproc4)(intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__cdecl *cdproc5)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__cdecl *cdproc6)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__cdecl *cdproc7)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__cdecl *cdproc8)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__cdecl *cdproc9)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__cdecl *cdprocA)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__cdecl *cdprocB)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__cdecl *cdprocC)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__cdecl *cdprocD)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__cdecl *cdprocE)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__cdecl *cdprocF)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
 
 /* for c_func */
-typedef long (__cdecl *cdfunc0)();
-typedef long (__cdecl *cdfunc1)(long);
-typedef long (__cdecl *cdfunc2)(long,long);
-typedef long (__cdecl *cdfunc3)(long,long,long);
-typedef long (__cdecl *cdfunc4)(long,long,long,long);
-typedef long (__cdecl *cdfunc5)(long,long,long,long,long);
-typedef long (__cdecl *cdfunc6)(long,long,long,long,long,long);
-typedef long (__cdecl *cdfunc7)(long,long,long,long,long,long,long);
-typedef long (__cdecl *cdfunc8)(long,long,long,long,long,long,long,long);
-typedef long (__cdecl *cdfunc9)(long,long,long,long,long,long,long,long,long);
-typedef long (__cdecl *cdfuncA)(long,long,long,long,long,long,long,long,long,long);
-typedef long (__cdecl *cdfuncB)(long,long,long,long,long,long,long,long,long,long,long);
-typedef long (__cdecl *cdfuncC)(long,long,long,long,long,long,long,long,long,long,long,long);
-typedef long (__cdecl *cdfuncD)(long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef long (__cdecl *cdfuncE)(long,long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef long (__cdecl *cdfuncF)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef intptr_t (__cdecl *cdfunc0)();
+typedef intptr_t (__cdecl *cdfunc1)(intptr_t);
+typedef intptr_t (__cdecl *cdfunc2)(intptr_t,intptr_t);
+typedef intptr_t (__cdecl *cdfunc3)(intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__cdecl *cdfunc4)(intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__cdecl *cdfunc5)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__cdecl *cdfunc6)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__cdecl *cdfunc7)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__cdecl *cdfunc8)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__cdecl *cdfunc9)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__cdecl *cdfuncA)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__cdecl *cdfuncB)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__cdecl *cdfuncC)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__cdecl *cdfuncD)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__cdecl *cdfuncE)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__cdecl *cdfuncF)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
 
 /* for c_func */
 typedef float (__stdcall *ffunc0)();
-typedef float (__stdcall *ffunc1)(long);
-typedef float (__stdcall *ffunc2)(long,long);
-typedef float (__stdcall *ffunc3)(long,long,long);
-typedef float (__stdcall *ffunc4)(long,long,long,long);
-typedef float (__stdcall *ffunc5)(long,long,long,long,long);
-typedef float (__stdcall *ffunc6)(long,long,long,long,long,long);
-typedef float (__stdcall *ffunc7)(long,long,long,long,long,long,long);
-typedef float (__stdcall *ffunc8)(long,long,long,long,long,long,long,long);
-typedef float (__stdcall *ffunc9)(long,long,long,long,long,long,long,long,long);
-typedef float (__stdcall *ffuncA)(long,long,long,long,long,long,long,long,long,long);
-typedef float (__stdcall *ffuncB)(long,long,long,long,long,long,long,long,long,long,long);
-typedef float (__stdcall *ffuncC)(long,long,long,long,long,long,long,long,long,long,long,long);
-typedef float (__stdcall *ffuncD)(long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef float (__stdcall *ffuncE)(long,long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef float (__stdcall *ffuncF)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef float (__stdcall *ffunc1)(intptr_t);
+typedef float (__stdcall *ffunc2)(intptr_t,intptr_t);
+typedef float (__stdcall *ffunc3)(intptr_t,intptr_t,intptr_t);
+typedef float (__stdcall *ffunc4)(intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__stdcall *ffunc5)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__stdcall *ffunc6)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__stdcall *ffunc7)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__stdcall *ffunc8)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__stdcall *ffunc9)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__stdcall *ffuncA)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__stdcall *ffuncB)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__stdcall *ffuncC)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__stdcall *ffuncD)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__stdcall *ffuncE)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__stdcall *ffuncF)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
 
 /* for c_func */
 typedef float (__cdecl *cdffunc0)();
-typedef float (__cdecl *cdffunc1)(long);
-typedef float (__cdecl *cdffunc2)(long,long);
-typedef float (__cdecl *cdffunc3)(long,long,long);
-typedef float (__cdecl *cdffunc4)(long,long,long,long);
-typedef float (__cdecl *cdffunc5)(long,long,long,long,long);
-typedef float (__cdecl *cdffunc6)(long,long,long,long,long,long);
-typedef float (__cdecl *cdffunc7)(long,long,long,long,long,long,long);
-typedef float (__cdecl *cdffunc8)(long,long,long,long,long,long,long,long);
-typedef float (__cdecl *cdffunc9)(long,long,long,long,long,long,long,long,long);
-typedef float (__cdecl *cdffuncA)(long,long,long,long,long,long,long,long,long,long);
-typedef float (__cdecl *cdffuncB)(long,long,long,long,long,long,long,long,long,long,long);
-typedef float (__cdecl *cdffuncC)(long,long,long,long,long,long,long,long,long,long,long,long);
-typedef float (__cdecl *cdffuncD)(long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef float (__cdecl *cdffuncE)(long,long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef float (__cdecl *cdffuncF)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef float (__cdecl *cdffunc1)(intptr_t);
+typedef float (__cdecl *cdffunc2)(intptr_t,intptr_t);
+typedef float (__cdecl *cdffunc3)(intptr_t,intptr_t,intptr_t);
+typedef float (__cdecl *cdffunc4)(intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__cdecl *cdffunc5)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__cdecl *cdffunc6)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__cdecl *cdffunc7)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__cdecl *cdffunc8)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__cdecl *cdffunc9)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__cdecl *cdffuncA)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__cdecl *cdffuncB)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__cdecl *cdffuncC)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__cdecl *cdffuncD)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__cdecl *cdffuncE)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__cdecl *cdffuncF)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
 
 /* for c_func */
 typedef double (__stdcall *dfunc0)();
-typedef double (__stdcall *dfunc1)(long);
-typedef double (__stdcall *dfunc2)(long,long);
-typedef double (__stdcall *dfunc3)(long,long,long);
-typedef double (__stdcall *dfunc4)(long,long,long,long);
-typedef double (__stdcall *dfunc5)(long,long,long,long,long);
-typedef double (__stdcall *dfunc6)(long,long,long,long,long,long);
-typedef double (__stdcall *dfunc7)(long,long,long,long,long,long,long);
-typedef double (__stdcall *dfunc8)(long,long,long,long,long,long,long,long);
-typedef double (__stdcall *dfunc9)(long,long,long,long,long,long,long,long,long);
-typedef double (__stdcall *dfuncA)(long,long,long,long,long,long,long,long,long,long);
-typedef double (__stdcall *dfuncB)(long,long,long,long,long,long,long,long,long,long,long);
-typedef double (__stdcall *dfuncC)(long,long,long,long,long,long,long,long,long,long,long,long);
-typedef double (__stdcall *dfuncD)(long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef double (__stdcall *dfuncE)(long,long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef double (__stdcall *dfuncF)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef double (__stdcall *dfunc1)(intptr_t);
+typedef double (__stdcall *dfunc2)(intptr_t,intptr_t);
+typedef double (__stdcall *dfunc3)(intptr_t,intptr_t,intptr_t);
+typedef double (__stdcall *dfunc4)(intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__stdcall *dfunc5)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__stdcall *dfunc6)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__stdcall *dfunc7)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__stdcall *dfunc8)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__stdcall *dfunc9)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__stdcall *dfuncA)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__stdcall *dfuncB)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__stdcall *dfuncC)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__stdcall *dfuncD)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__stdcall *dfuncE)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__stdcall *dfuncF)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
 
 /* for c_func */
 typedef double (__cdecl *cddfunc0)();
-typedef double (__cdecl *cddfunc1)(long);
-typedef double (__cdecl *cddfunc2)(long,long);
-typedef double (__cdecl *cddfunc3)(long,long,long);
-typedef double (__cdecl *cddfunc4)(long,long,long,long);
-typedef double (__cdecl *cddfunc5)(long,long,long,long,long);
-typedef double (__cdecl *cddfunc6)(long,long,long,long,long,long);
-typedef double (__cdecl *cddfunc7)(long,long,long,long,long,long,long);
-typedef double (__cdecl *cddfunc8)(long,long,long,long,long,long,long,long);
-typedef double (__cdecl *cddfunc9)(long,long,long,long,long,long,long,long,long);
-typedef double (__cdecl *cddfuncA)(long,long,long,long,long,long,long,long,long,long);
-typedef double (__cdecl *cddfuncB)(long,long,long,long,long,long,long,long,long,long,long);
-typedef double (__cdecl *cddfuncC)(long,long,long,long,long,long,long,long,long,long,long,long);
-typedef double (__cdecl *cddfuncD)(long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef double (__cdecl *cddfuncE)(long,long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef double (__cdecl *cddfuncF)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef double (__cdecl *cddfunc1)(intptr_t);
+typedef double (__cdecl *cddfunc2)(intptr_t,intptr_t);
+typedef double (__cdecl *cddfunc3)(intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfunc4)(intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfunc5)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfunc6)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfunc7)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfunc8)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfunc9)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfuncA)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfuncB)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfuncC)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfuncD)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfuncE)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfuncF)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
 
-float float_std_func(long i, long * op, long len) {
+float float_std_func(intptr_t i, intptr_t * op, long len) {
     
 	switch(len) {
 	    case 0: return ((ffunc0)i)();
@@ -510,7 +524,7 @@ float float_std_func(long i, long * op, long len) {
     return 0.0;
 }
 
-float float_cdecl_func(long i, long * op, long len) {
+float float_cdecl_func(intptr_t i, intptr_t * op, long len) {
     
 	switch(len) {
 	    case 0: return ((cdffunc0)i)();
@@ -533,7 +547,7 @@ float float_cdecl_func(long i, long * op, long len) {
     return 0.0;
 }
 
-double double_std_func(long i, long * op, long len) {
+double double_std_func(intptr_t i, intptr_t * op, long len) {
     
 	switch(len) {
 	    case 0: return ((dfunc0)i)();
@@ -556,7 +570,7 @@ double double_std_func(long i, long * op, long len) {
     return 0.0;
 }
 
-double double_cdecl_func(long i, long * op, long len) {
+double double_cdecl_func(intptr_t i, intptr_t * op, long len) {
     
 	switch(len) {
 	    case 0: return ((cddfunc0)i)();
@@ -579,7 +593,7 @@ double double_cdecl_func(long i, long * op, long len) {
     return 0.0;
 }
 
-void call_std_proc(long i, long * op, long len) {
+void call_std_proc(intptr_t i, intptr_t * op, long len) {
     
 	switch(len) {
 	    case 0: ((proc0)i)(); return;
@@ -601,7 +615,7 @@ void call_std_proc(long i, long * op, long len) {
 	}
 }
 
-long call_std_func(long i, long * op, long len) {
+intptr_t call_std_func(intptr_t i, intptr_t * op, long len) {
     
 	switch(len) {
 	    case 0: return ((func0)i)();
@@ -624,7 +638,7 @@ long call_std_func(long i, long * op, long len) {
     return 0;
 }
 
-void call_cdecl_proc(long i, long * op, long len) {
+void call_cdecl_proc(intptr_t i, intptr_t * op, long len) {
     
 	switch(len) {
 	    case 0: ((cdproc0)i)(); return;
@@ -646,7 +660,7 @@ void call_cdecl_proc(long i, long * op, long len) {
 	}
 }
 
-long call_cdecl_func(long i, long * op, long len) {
+intptr_t call_cdecl_func(intptr_t i, intptr_t * op, long len) {
 	switch(len) {
 	    case 0: return ((cdfunc0)i)();
 	    case 1: return ((cdfunc1)i)(op[0]);
@@ -668,6 +682,60 @@ long call_cdecl_func(long i, long * op, long len) {
     return 0;
 }
 
+#else
+// 64-bit Call-C
+
+int64_t icall_x86_64( intptr_t func, double* xmm, int64_t *r ){
+	return ((int64_t (*)())func)(
+			r[0], r[1], r[2], r[3], r[4], 
+			r[5], r[6], r[7], r[8], r[9],
+			r[10], r[11], r[12], r[13], 
+			r[14], r[15], r[16],
+			xmm[0], xmm[1], xmm[2], xmm[3], xmm[4] );
+}
+
+double dcall_x86_64( intptr_t func, double* xmm, int64_t *r ){
+	return ((double (*)())func)( xmm[0], xmm[1], xmm[2], xmm[3], xmm[4],
+			r[0], r[1], r[2], r[3], r[4], 
+			r[5], r[6], r[7], r[8], r[9],
+			r[10], r[11], r[12], r[13], 
+			r[14], r[15], r[16]);
+}
+
+float fcall_x86_64( intptr_t func, double* xmm, int64_t *r ){
+	return ((float (*)())func)( xmm[0], xmm[1], xmm[2], xmm[3], xmm[4],
+			r[0], r[1], r[2], r[3], r[4], 
+			r[5], r[6], r[7], r[8], r[9],
+			r[10], r[11], r[12], r[13], 
+			r[14], r[15], r[16]);
+}
+
+union xmm_param {
+	double d;
+	float f;
+};
+#endif
+
+#if INTPTR_MAX == INT64_MAX
+/* The x86-64 calling convention uses 6 registers for the first 6 integer
+ * parameters.  After that, parameters are pushed on the stack.  Also,
+ * the first 5 floating point parameters are put into floating point
+ * registers.  Either type of argument can start overflowing onto the
+ * stack, so we have to track the number of args we're putting onto the
+ * stack separately from what goes into the registers.
+ */
+#define PUSH_INT_ARG \
+if( arg_i < 6 ){ \
+	arg_op[arg_i++] = arg; \
+} \
+else{ \
+	arg_op[arg_stack++] = arg; \
+}
+
+#else
+#define PUSH_INT_ARG arg_op[arg_i++] = arg;
+#endif
+
 object call_c(int func, object proc_ad, object arg_list)
 /* Call a WIN32 or Linux C function in a DLL or shared library. 
    Alternatively, call a machine-code routine at a given address. */
@@ -675,32 +743,42 @@ object call_c(int func, object proc_ad, object arg_list)
 	s1_ptr arg_list_ptr, arg_size_ptr;
 	object_ptr next_arg_ptr, next_size_ptr;
 	object next_arg, next_size;
-	long iresult, i;
+	int64_t iresult, i;
 	double_arg dbl_arg;
-	double dresult;
+	double dresult = 0;
 	float_arg flt_arg;
-	float fresult;
-	unsigned long size;
-	long proc_index;
-	long cdecl_call;
-	long long_proc_address;
-	unsigned return_type;
+	float fresult = 0;
+	uintptr_t size;
+	intptr_t proc_index;
+	int cdecl_call;
+	intptr_t long_proc_address;
+	uintptr_t return_type;
 	char NameBuff[100];
-	unsigned long arg;
+	uint64_t arg;
 
-	long arg_op[16];
-	long arg_len;
-	long arg_i = 0;
-	long is_double, is_float;
-
+	intptr_t arg_op[16];
+	intptr_t arg_len;
+	intptr_t arg_i = 0;
+#if INTPTR_MAX == INT64_MAX
+	/* The x86-64 calling convention requires us to keep the first
+	 * few floating point values separate from the ints.  And the
+	 * floating point params could start overflowing onto the stack
+	 * before we have enough ints to go there.
+	 */
+	union xmm_param dbl_op[5];
+	intptr_t xmm_i = 0;
+	intptr_t arg_stack = 6;
+#endif
+	int is_double, is_float;
+	
 	// Setup and Check for Errors
 	proc_index = get_pos_int("c_proc/c_func", proc_ad); 
-	if (proc_index >= (unsigned)c_routine_next) {
-		snprintf(TempBuff, TEMP_SIZE, "c_proc/c_func: bad routine number (%ld)", proc_index);
+	if (proc_index >= (uintptr_t)c_routine_next) {
+		snprintf(TempBuff, TEMP_SIZE, "c_proc/c_func: bad routine number (%" PRIdPTR ")", proc_index);
 		RTFatal(TempBuff);
 	}
 	
-	long_proc_address = (long)(c_routine[proc_index].address);
+	long_proc_address = (intptr_t)(c_routine[proc_index].address);
 #if defined(EWINDOWS) && !defined(EWATCOM)
 	cdecl_call = c_routine[proc_index].convention;
 #else
@@ -737,7 +815,7 @@ object call_c(int func, object proc_ad, object arg_list)
 			MakeCString(NameBuff, MAKE_SEQ(c_routine[proc_index].name), c_routine[proc_index].name->length );
 		else
 			NameBuff[0] = '\0';
-		snprintf(TempBuff, TEMP_SIZE, "C routine %s() needs %ld argument%s, not %ld",
+		snprintf(TempBuff, TEMP_SIZE, "C routine %s() needs %d argument%s, not %d",
 						  NameBuff,
 						  arg_size_ptr->length,
 						  (arg_size_ptr->length == 1) ? "" : "s",
@@ -755,7 +833,7 @@ object call_c(int func, object proc_ad, object arg_list)
 		if (IS_ATOM_INT(next_size))
 			size = INT_VAL(next_size);
 		else if (IS_ATOM(next_size))
-			size = (unsigned long)DBL_PTR(next_size)->dbl;
+			size = (uintptr_t)DBL_PTR(next_size)->dbl;
 		else 
 			RTFatal("This C routine was defined using an invalid argument type");
 
@@ -770,26 +848,70 @@ object call_c(int func, object proc_ad, object arg_list)
 			}
 
 			if (size == C_DOUBLE) {
-				#if EBITS == 32
+				#if INTPTR_MAX == INT32_MAX
 					arg_op[arg_i++] = dbl_arg.ints[1];
 					arg_op[arg_i++] = dbl_arg.ints[0];
-				#elif EBITS == 64
-					arg_op[arg_i++] = dbl_arg.longint;
+				#elif INTPTR_MAX == INT64_MAX
+					if( xmm_i < 5 ){
+						dbl_op[xmm_i++].d = dbl_arg.dbl;
+					}
+					else{
+						arg_op[arg_stack++] = dbl_arg.int64;
+					}
 				#endif
 				
 			}
 			else {
 				/* C_FLOAT */
 				flt_arg.flt = (float)dbl_arg.dbl;
-				arg_op[arg_i++] = (unsigned long)flt_arg.intval;
+				#if INTPTR_MAX == INT32_MAX
+					arg_op[arg_i++] = (uintptr_t)flt_arg.intval;
+				#elif INTPTR_MAX == INT64_MAX
+					if( xmm_i < 5 ){
+						dbl_op[xmm_i++].f = flt_arg.flt;
+					}
+					else{
+						arg_op[arg_stack++] = flt_arg.int32;
+					}
+				#endif
+			}
+		}
+		else if( size == C_POINTER ){
+			if (IS_ATOM_INT(next_arg)) {
+				arg = next_arg;
+				PUSH_INT_ARG
+			}
+			else if (IS_ATOM(next_arg)) {
+				// atoms are rounded to integers
+				
+				arg = (uint64_t)(uintptr_t)DBL_PTR(next_arg)->dbl; //correct
+				// if it's a -ve f.p. number, Watcom converts it to long and
+				// then to unsigned long. This is exactly what we want.
+				// Works with the others too. 
+				PUSH_INT_ARG
+			}
+		}
+		else if( size == C_LONGLONG ){
+			if (IS_ATOM_INT(next_arg)) {
+				arg = next_arg;
+				PUSH_INT_ARG
+			}
+			else if (IS_ATOM(next_arg)) {
+				// atoms are rounded to integers
+				
+				arg = (uint64_t)DBL_PTR(next_arg)->dbl; //correct
+				// if it's a -ve f.p. number, Watcom converts it to long and
+				// then to unsigned long. This is exactly what we want.
+				// Works with the others too. 
+				PUSH_INT_ARG
 			}
 		}
 		else {
-			/* push 4-byte longeger */
+			/* push ptr size integer */
 			if (size >= E_INTEGER) {
 				if (IS_ATOM_INT(next_arg)) {
 					if (size == E_SEQUENCE)
-						RTFatal("passing an longeger where a sequence is required");
+						RTFatal("passing an integer where a sequence is required");
 				}
 				else {
 					if (IS_SEQUENCE(next_arg)) {
@@ -802,21 +924,21 @@ object call_c(int func, object proc_ad, object arg_list)
 					}
 					RefDS(next_arg);
 				}
-				arg = next_arg;
-				arg_op[arg_i++] = arg;
+				arg = (uintptr_t) next_arg;
+				PUSH_INT_ARG
 			} 
 			else if (IS_ATOM_INT(next_arg)) {
-				arg = next_arg;
-				arg_op[arg_i++] = arg;
+				arg = (uintptr_t) next_arg;
+				PUSH_INT_ARG
 			}
 			else if (IS_ATOM(next_arg)) {
-				// atoms are rounded to longegers
+				// atoms are rounded to integers
 				
-				arg = (unsigned long)DBL_PTR(next_arg)->dbl; //correct
+				arg = (uintptr_t)DBL_PTR(next_arg)->dbl; //correct
 				// if it's a -ve f.p. number, Watcom converts it to long and
 				// then to unsigned long. This is exactly what we want.
 				// Works with the others too. 
-				arg_op[arg_i++] = arg;
+				PUSH_INT_ARG
 			}
 			else {
 				RTFatal("arguments to C routines must be atoms");
@@ -831,6 +953,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	is_double = (return_type == C_DOUBLE);
 	is_float = (return_type == C_FLOAT);
 
+#if INTPTR_MAX == INT32_MAX
 	if (func) {
 		if (cdecl_call && is_double) {
 			dresult = double_cdecl_func(long_proc_address, arg_op, arg_len);
@@ -854,56 +977,78 @@ object call_c(int func, object proc_ad, object arg_list)
 			iresult = 0;
 		}
 	}
-
-	if (return_type == C_DOUBLE) {
-		return NewDouble(dresult);
-	}
-	
-	else if (return_type == C_FLOAT) {
-		return NewDouble((double)fresult);
-	}
-	
-	else {
-		// expect longeger to be returned
-		if ((return_type & 0x000000FF) == 04) {
-			/* 4-byte longeger - usual case */
-			// check if unsigned result is required 
-			if ((return_type & C_TYPE) == 0x02000000) {
-				// unsigned longeger result
-				if ((unsigned)iresult <= (unsigned)MAXINT) {
-					return iresult;
-				}
-				else
-					return NewDouble((double)(unsigned)iresult);
+#else
+	if( is_double ) dresult = dcall_x86_64( long_proc_address, (double*)dbl_op, arg_op );
+	if( is_float  ) fresult = fcall_x86_64( long_proc_address, (double*)dbl_op, arg_op );
+	else            iresult = icall_x86_64( long_proc_address, (double*)dbl_op, arg_op );
+#endif
+	switch( return_type ){
+		case C_DOUBLE:
+			return NewDouble(dresult);
+		case C_FLOAT:
+			return NewDouble((double)fresult);
+		case C_POINTER:
+			if ((uintptr_t)iresult <= (uintptr_t)MAXINT) {
+				return iresult;
 			}
-			else {
-				// signed longeger result
-				if (return_type >= E_INTEGER ||
-					(iresult >= MININT && iresult <= MAXINT)) {
-					return iresult;
-				}
-				else
-					return NewDouble((double)iresult);
+			else{
+				return NewDouble((double)(uintptr_t)iresult);
 			}
-		}
-		else if (return_type == 0) {
-			return 0; /* void - procedure */
-		}
-		/* less common cases */
-		else if (return_type == C_UCHAR) {
-			return (unsigned char)iresult;
-		}
-		else if (return_type == C_CHAR) {
-			return (signed char)iresult;
-		}
-		else if (return_type == C_USHORT) {
-			return (unsigned short)iresult;
-		}
-		else if (return_type == C_SHORT) {
-			return (short)iresult;
-		}
-		else
+		case C_LONGLONG:
+			if ((long long int)iresult <= (long long int)MAXINT) {
+				return iresult;
+			}
+			else{
+				return NewDouble((double)(intptr_t)iresult);
+			}
+		case C_INT:
+			if ((intptr_t)(int)iresult <= MAXINT) {
+				return (int)iresult;
+			}
+			else{
+				return NewDouble((double)(int)iresult);
+			}
+		case C_UINT:
+			if ((uintptr_t)(unsigned int)iresult <= (unsigned int)MAXINT) {
+				return (unsigned int)iresult;
+			}
+			else{
+				return NewDouble((double)(unsigned int)iresult);
+			}
+		case C_LONG:
+			if ((intptr_t)(long)iresult <= MAXINT) {
+				return (long)iresult;
+			}
+			else{
+				return NewDouble((double)(long)iresult);
+			}
+		case C_ULONG:
+			if ((uintptr_t)(unsigned long int)iresult <= (unsigned long int)MAXINT) {
+				return iresult;
+			}
+			else{
+				return NewDouble((double)(unsigned long int)iresult);
+			}
+		case C_UCHAR:
+			return (unsigned char) iresult;
+		case C_CHAR:
+			return (char) iresult;
+		case C_SHORT:
+			return (short) iresult;
+		case C_USHORT:
+			return (unsigned short) iresult;
+		case E_INTEGER:
+		case E_ATOM:
+		case E_SEQUENCE:
+		case E_OBJECT:
+			return iresult;
+		case 0:
+			// void procedure
+			return 0;
+			
+		default:
 			return 0; // unknown function return type
 	}
 }
+
 #endif // EMINGW

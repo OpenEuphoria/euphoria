@@ -64,7 +64,7 @@ static double next_task_id = 1.0;
 /*********************/
 
 #include "alldefs.h"
-static void init_task( int tx );
+static void init_task( intptr_t tx );
 static void run_current_task( int task );
 
 /*********************/
@@ -110,7 +110,7 @@ void InitTask()
 
 	tcb[0].mode = INTERPRETED_TASK;
 	// these things will be set when task 0 yields for the first time
-	tcb[0].impl.interpreted.pc = (int *)1; 
+	tcb[0].impl.interpreted.pc = (intptr_t *)1; 
 	tcb[0].impl.interpreted.expr_max = NULL;
 	tcb[0].impl.interpreted.expr_limit = NULL;
 	tcb[0].impl.interpreted.expr_top = NULL;
@@ -243,25 +243,25 @@ static void call_task(int rid, object args)
 	
 	switch(num_args) {
 		case 0:
-			(*(int (*)())proc_addr)(
+			(*(object (*)())proc_addr)(
 							);
 			break;
 		
 		case 1:
-			(*(int (*)())proc_addr)(
+			(*(object (*)())proc_addr)(
 							*(base_ptr+1)
 							);
 			break;
 		
 		case 2:
-			(*(int (*)())proc_addr)(
+			(*(object (*)())proc_addr)(
 							*(base_ptr+1), 
 							*(base_ptr+2)
 							);
 			break;
 		
 		case 3:
-			(*(int (*)())proc_addr)(
+			(*(object (*)())proc_addr)(
 							*(base_ptr+1), 
 							*(base_ptr+2), 
 							*(base_ptr+3)
@@ -269,7 +269,7 @@ static void call_task(int rid, object args)
 			break;
 	
 		case 4:
-			(*(int (*)())proc_addr)(
+			(*(object (*)())proc_addr)(
 							*(base_ptr+1), 
 							*(base_ptr+2), 
 							*(base_ptr+3), 
@@ -278,7 +278,7 @@ static void call_task(int rid, object args)
 			break;
 	
 		case 5:
-			(*(int (*)())proc_addr)(
+			(*(object (*)())proc_addr)(
 							*(base_ptr+1), 
 							*(base_ptr+2), 
 							*(base_ptr+3), 
@@ -288,7 +288,7 @@ static void call_task(int rid, object args)
 			break;
 	
 		case 6:
-			(*(int (*)())proc_addr)(
+			(*(object (*)())proc_addr)(
 							*(base_ptr+1), 
 							*(base_ptr+2), 
 							*(base_ptr+3), 
@@ -299,7 +299,7 @@ static void call_task(int rid, object args)
 			break;
 	
 		case 7:
-			(*(int (*)())proc_addr)(
+			(*(object (*)())proc_addr)(
 							*(base_ptr+1), 
 							*(base_ptr+2), 
 							*(base_ptr+3), 
@@ -311,7 +311,7 @@ static void call_task(int rid, object args)
 			break;
 	
 		case 8:
-			(*(int (*)())proc_addr)(
+			(*(object (*)())proc_addr)(
 							*(base_ptr+1), 
 							*(base_ptr+2), 
 							*(base_ptr+3), 
@@ -324,7 +324,7 @@ static void call_task(int rid, object args)
 			break;
 	
 		case 9:
-			(*(int (*)())proc_addr)(
+			(*(object (*)())proc_addr)(
 							*(base_ptr+1), 
 							*(base_ptr+2), 
 							*(base_ptr+3), 
@@ -338,7 +338,7 @@ static void call_task(int rid, object args)
 			break;
 		
 		case 10:
-			(*(int (*)())proc_addr)(
+			(*(object (*)())proc_addr)(
 							*(base_ptr+1), 
 							*(base_ptr+2), 
 							*(base_ptr+3), 
@@ -353,7 +353,7 @@ static void call_task(int rid, object args)
 			break;
 	
 		case 11:
-			(*(int (*)())proc_addr)(
+			(*(object (*)())proc_addr)(
 							*(base_ptr+1), 
 							*(base_ptr+2), 
 							*(base_ptr+3), 
@@ -369,7 +369,7 @@ static void call_task(int rid, object args)
 			break;
 	
 		case 12:
-			(*(int (*)())proc_addr)(
+			(*(object (*)())proc_addr)(
 							*(base_ptr+1), 
 							*(base_ptr+2), 
 							*(base_ptr+3), 
@@ -934,7 +934,7 @@ static int earliest_task;
 
 void run_task( int tx ){
 #ifndef ERUNTIME
-	static int **code[3];
+	static intptr_t **code[3];
 	if( tcb[tx].mode == INTERPRETED_TASK ){
 		struct tcb *tp;
 		
@@ -959,10 +959,10 @@ void run_task( int tx ){
 			
 			// re-entrant? - ok, we use code right away
 			// infinite calls to scheduler?
-			code[0] = (int **)opcode(CALL_PROC);
-			code[1] = (int **)&tcb[current_task].rid;
-			code[2] = (int **)&tcb[current_task].args;
-			tpc = (int *)&code;
+			code[0] = (intptr_t **)opcode(CALL_PROC);
+			code[1] = (intptr_t **)&tcb[current_task].rid;
+			code[2] = (intptr_t **)&tcb[current_task].args;
+			tpc = (intptr_t *)&code;
 		}
 		else {
 			// Resuming an already-started task after a task_yield().
@@ -1003,12 +1003,12 @@ static void run_current_task( int task ){
 }
 
 void WINAPI exec_task( void *task ){
-	struct tcb *t = &tcb[(int)task];
+	struct tcb *t = &tcb[(intptr_t)task];
 
 	call_task( t->rid, t->args );
 }
 
-static void init_task( int tx ){
+static void init_task( intptr_t tx ){
 	// fibers...
 	tcb[tx].impl.translated.task = (TASK_HANDLE) CreateFiber( 0, exec_task, (void *)tx );
 }
@@ -1030,8 +1030,8 @@ void wait_for_task( int task ){
  * calling the task's procedure.
  */
 void *start_task( void *task ){
-	wait_for_task( (int) task );
-	call_task( tcb[(int)task].rid, tcb[(int)task].args );
+	wait_for_task( (intptr_t) task );
+	call_task( tcb[(intptr_t)task].rid, tcb[(intptr_t)task].args );
 	return task;
 }
 
@@ -1039,7 +1039,7 @@ void *start_task( void *task ){
  * Creates the thread where the new task will run.
  */
 
-static void init_task( int tx ){
+static void init_task( intptr_t tx ){
 	int ret;
 	ret = pthread_create( &tcb[tx].impl.translated.task, NULL, &start_task, (void*)tx );
 	// TODO error handling

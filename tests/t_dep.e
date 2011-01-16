@@ -24,6 +24,7 @@ include std/error.e as error
 
 include std/unittest.e
 
+
 object line
 
 sequence test_message = ""
@@ -44,15 +45,15 @@ calling_dmemfunction = 0
 -- This is what DEP is susposed to do, so we get an ugly message from the
 -- interpreter.  We want an exception to be raised.
 function dep_is_enabled(object x)
-    if calling_dmemfunction then
-	if fs:delete_file( "ex.err" ) then
-		puts(1, "The file ex.err has been deleted.\n\n" )
+	if calling_dmemfunction then
+		if fs:delete_file( "ex.err" ) then
+			puts(1, "The file ex.err has been deleted.\n\n" )
+		end if
+		puts(1, "DEP is enabled for this process\n")
+		test_report()
+		abort(0)
 	end if
-	puts(1, "DEP is enabled for this process\n")
-	test_report()
-	abort(0)
-    end if
-    return 0
+	return 0
 end function
 
 
@@ -69,14 +70,28 @@ elsedef
 	use_stdcall = 1
 end ifdef
 
--- machine code taken from callmach.ex
-multiply_code = {
-   -- int argument is at stack offset +4, double is at +8 
-   #DB, #44, #24, #04,        -- fild  dword ptr +4[esp]
-   #DC, #4C, #24, #08,        -- fmul  qword ptr +8[esp]
-   #C2, #0C * use_stdcall, #00  -- ret C -- pop 12 (or 0) bytes 
-					   -- off the stack
-    }
+if sizeof( C_POINTER ) = 4 then
+	-- machine code taken from callmach.ex
+	multiply_code = {
+	-- int argument is at stack offset +4, double is at +8 
+	#DB, #44, #24, #04,        -- fild  dword ptr +4[esp]
+	#DC, #4C, #24, #08,        -- fmul  qword ptr +8[esp]
+	#C2, #0C * use_stdcall, #00  -- ret C -- pop 12 (or 0) bytes 
+						-- off the stack
+	}
+else
+	multiply_code = { 
+			#55,                     --  push   %rbp
+			#48, #89, #e5,           --  mov    %rsp,%rbp
+			#89, #7d, #fc,           --  mov    %edi,-0x4(%rbp)
+			#f2, #0f, #11, #45, #f0, --  movsd  %xmm0,-0x10(%rbp)
+			#f2, #0f, #2a, #45, #fc, --  cvtsi2sdl -0x4(%rbp),%xmm0
+			#f2, #0f, #59, #45, #f0, --  mulsd  -0x10(%rbp),%xmm0
+			#c9,                     --  leaveq 
+			#c3,                     --  retq   
+			$
+		}
+end if
 
 crash_routine(routine_id("bad_failure"))
 crash_routine(routine_id("dep_is_enabled"))
@@ -165,12 +180,13 @@ poke( rw_space+1, {6,7,8} )
 test_message = "read from readonly memory"
 test_equal( test_message, {5,6,7,8}, peek( { rw_space, 4 } ) )	
 test_pass( test_message )
+free_code( rw_space, 4 )
 
 test_message = "allocate read write and execute memory"
 rwx_space = allocate_protect( multiply_code, 1, PAGE_EXECUTE_READWRITE )
 test_not_equal( test_message, 0, rwx_space )
 test_message = ""
-rexec = define_c_func("", code_space, {C_INT, C_DOUBLE}, C_DOUBLE)
+rexec = define_c_func("", rwx_space, {C_INT, C_DOUBLE}, C_DOUBLE)
 test_message = "execute using read write and execute memory"
 void = c_func(rexec, {x, y})
 test_pass( test_message )
@@ -178,11 +194,13 @@ test_message = "write to read write and execute memory"
 poke( rwx_space, 5 )
 test_pass( test_message )
 test_message = "read from read write and execute memory"
-test_equal( test_message, {5, #44, #24, #04}, peek( { rwx_space, 4 } ) )	
+test_equal( test_message, 5 & multiply_code[2..4], peek( { rwx_space, 4 } ) )
+free_code( rwx_space, 4 )
 
 test_message = "allocate no access memory"
 n_space = allocate_protect( multiply_code, 1, PAGE_NOACCESS )
 test_not_equal( test_message, 0, n_space )
+free_code( n_space, length( multiply_code ) )
 -- do nothing
 test_message = ""
 

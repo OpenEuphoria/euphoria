@@ -18,6 +18,7 @@
 #include <math.h>
 #include <time.h>
 #include <ctype.h>
+#include <inttypes.h>
 
 #ifdef EUNIX
 #  include <unistd.h>
@@ -113,17 +114,7 @@ double eustart_time;
 /* Declared Functions */
 /**********************/
 
-object add(long a, long b);
-
-unsigned general_call_back(
-#ifdef ERUNTIME
-		  int cb_routine,
-#else
-		  symtab_ptr cb_routine,
-#endif
-						   unsigned arg1, unsigned arg2, unsigned arg3,
-						   unsigned arg4, unsigned arg5, unsigned arg6,
-						   unsigned arg7, unsigned arg8, unsigned arg9);
+object add(object a, object b);
 
 struct op_info optable[MAX_OPCODE+1] = {
 {x, x}, /* no 0th element */
@@ -349,7 +340,7 @@ IFILE last_w_file_ptr;
 object last_r_file_no = NOVALUE;
 IFILE last_r_file_ptr;
 struct file_info user_file[MAX_USER_FILE];
-long seed1, seed2;  /* current value of first and second random generators */
+int32_t seed1, seed2;  /* current value of first and second random generators */
 int rand_was_set = FALSE;   /* TRUE if user has called set_rand() */
 int con_was_opened = FALSE; /* TRUE if CON device was ever opened */
 int current_screen = MAIN_SCREEN;
@@ -361,7 +352,7 @@ int EuConsole = 0; /* TRUE if EnvVar EUCONS=1. Forces use of alternate console s
 char *last_traced_line = NULL;
 struct routine_list *rt00;
 struct ns_list *rt01;
-unsigned char ** rt02;
+char ** rt02;
 
 /*******************/
 /* Local variables */
@@ -663,7 +654,7 @@ void Prepend(object_ptr target, object s1, object a)
 	object_ptr p, q;
 	s1_ptr t;
 	s1_ptr s1p, new_seq;
-	long len, new_len;
+	int len, new_len;
 	object temp;
 
 	t = (s1_ptr)*target;
@@ -1245,7 +1236,7 @@ void Concat_Ni(object_ptr target, object_ptr *source, int n)
 }
 
 // used by translator
-void RepeatElem(int *addr, object item, int repcount)
+void RepeatElem(object *addr, object item, int repcount)
 /* replicate an object in memory - used by RIGHT_BRACE op */
 /* repcount will be at least 10 */
 {
@@ -1315,7 +1306,7 @@ object Repeat(object item, object repcount)
  * Calls the specified translated routine id for cleaning up the
  * UDT object.
  */
-void udt_clean_rt( object o, long rid ){
+void udt_clean_rt( object o, int rid ){
 	int pre_ref;
 
 	pre_ref = SEQ_PTR( o )->ref;
@@ -1345,22 +1336,22 @@ void udt_clean_rt( object o, long rid ){
 /**
  * Calls the specified routine id for cleaning up the UDT object.
  */
-void udt_clean( object o, long rid ){
+void udt_clean( object o, uintptr_t rid ){
 
-	int *code;
+	intptr_t *code;
 	char seq[8+2*sizeof(object)+sizeof(struct s1)]; // seq struct on the stack
 	s1_ptr s;
 	object args;
 	int pre_ref;
-	int *save_tpc;
+	intptr_t *save_tpc;
 
 	// Need to make sure that s is 8-byte aligned
 	s = (s1_ptr)( ((object)&seq[7])  & ~7 );
 	s->base = (((object_ptr)(s+1))-1);
 	s->ref = 2;
 	s->length = 1;
+	s->postfill = 0;
 	s->cleanup = 0;
-	s->base[0] = 0;
 	s->base[1] = o;
 	s->base[2] = NOVALUE;
 
@@ -1374,11 +1365,11 @@ void udt_clean( object o, long rid ){
 	}
 
 	args = MAKE_SEQ( s );
-	code = (int *)EMalloc( 4*sizeof(int*) );
-	code[0] = (int)opcode(CALL_PROC);
-	code[1] = (int)&rid;
-	code[2] = (int)&args;
-	code[3] = (int)opcode(CALL_BACK_RETURN);
+	code = (object *)EMalloc( 4 * sizeof(object*) );
+	code[0] = (object)opcode(CALL_PROC);
+	code[1] = (object)&rid;
+	code[2] = (object)&args;
+	code[3] = (object)opcode(CALL_BACK_RETURN);
 	if (expr_top >= expr_limit) {
 		expr_max = BiggerStack();
 		expr_limit = expr_max - 3;
@@ -1469,11 +1460,12 @@ void de_reference(s1_ptr a)
 {
 	object_ptr p;
 	object t;
+	intptr_t temp;
 
 #ifdef EXTRA_CHECK
 	s1_ptr a1;
 
-	if ((long)a == NOVALUE || IS_ATOM_INT(a))
+	if ((object)a == NOVALUE || IS_ATOM_INT(a))
 		RTInternal("bad object passed to de_reference");
 	if (DBL_PTR(a)->ref > 1000)
 		RTInternal("more than 1000 refs");
@@ -1526,11 +1518,12 @@ void de_reference(s1_ptr a)
 
 				if (t == NOVALUE) {
 					// end of sequence: back up a level
-					p = (object_ptr)a->length;
-					t = (object)a->ref;
+					
+					p = (object_ptr)a->cleanup;
+					t = (object) *(object_ptr)&(a->ref);
 					EFree((char *)a);
 					a = (s1_ptr)t;
-					if (a == NULL)
+					if ((((intptr_t) a) & ((intptr_t) 0xffffffff)) == 0)
 						break;  // it's the top-level sequence - quit
 				}
 				else if (--(DBL_PTR(t)->ref) == 0) {
@@ -1551,8 +1544,11 @@ void de_reference(s1_ptr a)
 						if( ((s1_ptr)t)->cleanup != 0 ){
 							cleanup_sequence( (s1_ptr)t );
 						}
-						((s1_ptr)t)->ref = (long)a;
-						((s1_ptr)t)->length = (long)p;
+						temp  = (intptr_t) &((s1_ptr)t)->ref;
+						*(intptr_t*)temp =  (intptr_t) a;
+						
+						temp  = (intptr_t) &((s1_ptr)t)->cleanup;
+						*(intptr_t*) temp = (intptr_t) p;
 						a = (s1_ptr)t;
 						p = a->base;
 					}
@@ -1562,13 +1558,13 @@ void de_reference(s1_ptr a)
 	}
 }
 
-void DeRef1(int a)
+void DeRef1(object a)
 /* Saves space. Use in top-level code (outside of loops) */
 {
 	DeRef(a);
 }
 
-void DeRef5(int a, int b, int c, int d, int e)
+void DeRef5(object a, object b, object c, object d, object e)
 /* Saves space. Use instead of 5 in-line DeRef's */
 {
 	DeRef(a);
@@ -1590,7 +1586,7 @@ void de_reference_i(s1_ptr a)
 #ifdef EXTRA_CHECK
 	s1_ptr a1;
 
-	if ((long)a == NOVALUE || IS_ATOM_INT(a))
+	if ((object)a == NOVALUE || IS_ATOM_INT(a))
 		RTInternal("bad object passed to de_reference");
 	if (DBL_PTR(a)->ref > 1000)
 		RTInternal("more than 1000 refs");
@@ -1642,7 +1638,7 @@ object DoubleToInt(object d)
 		temp_dbl <= MAXINT_DBL &&
 		temp_dbl >= MININT_DBL) {
 			/* return it in integer repn */
-			return MAKE_INT((long)temp_dbl);
+			return MAKE_INT((object)temp_dbl);
 	}
 	else
 		return d; /* couldn't convert */
@@ -1661,10 +1657,10 @@ object x()
 }
 
 
-object add(long a, long b)
+object add(object a, object b)
 /* integer add */
 {
-	long c;
+	object c;
 
 	c = a + b;
 	if (c + HIGH_BITS < 0)
@@ -1673,10 +1669,10 @@ object add(long a, long b)
 		return (object)NewDouble((double)c);
 }
 
-object minus(long a, long b)
+object minus(object a, object b)
 /* integer subtract */
 {
-	long c;
+	object c;
 
 	c = a - b;
 	if (c + HIGH_BITS < 0)
@@ -1685,10 +1681,11 @@ object minus(long a, long b)
 		return (object)NewDouble((double)c);
 }
 
-object multiply(long a, long b)
+object multiply(object a, object b)
 /* integer multiply */
 /* n.b. char type is signed */
 {
+	// TODO: this condition changes for 64-bits...
 	if (a == (short)a) {
 		if ((b <= INT15 && b >= -INT15) ||
 		   (a == (char)a && b <= INT23 && b >= -INT23) ||
@@ -1701,7 +1698,7 @@ object multiply(long a, long b)
 	return (object)NewDouble(a * (double)b);
 }
 
-object divide(long a, long b)
+object divide(object a, object b)
 /* compute a / b */
 {
 	if (b == 0)
@@ -1720,7 +1717,7 @@ object Ddivide(d_ptr a, d_ptr b)
 	return (object)NewDouble(a->dbl / b->dbl);
 }
 
-object eremainder(long a, long b)  // avoid conflict with "remainder" math fn
+object eremainder(object a, object b)  // avoid conflict with "remainder" math fn
 /* integer remainder of a divided by b */
 {
 	if (b == 0)
@@ -1738,7 +1735,7 @@ object Dremainder(d_ptr a, d_ptr b)
 }
 
 
-object and_bits(unsigned long a, unsigned long b)
+object and_bits(uint32_t a, uint32_t b)
 /* integer a AND b */
 {
 	a = a & b;
@@ -1748,10 +1745,10 @@ object and_bits(unsigned long a, unsigned long b)
 object Dand_bits(d_ptr a, d_ptr b)
 /* double a AND b */
 {
-	return and_bits( (unsigned long)(a->dbl), (unsigned long)(b->dbl));
+	return and_bits( (uint32_t)(a->dbl), (uint32_t)(b->dbl));
 }
 
-object or_bits(unsigned long a, unsigned long b)
+object or_bits(uint32_t a, uint32_t b)
 /* integer a OR b */
 {
 	a = a | b;
@@ -1761,10 +1758,10 @@ object or_bits(unsigned long a, unsigned long b)
 object Dor_bits(d_ptr a, d_ptr b)
 /* double a OR b */
 {
-	return or_bits( (unsigned long)(a->dbl), (unsigned long)(b->dbl));
+	return or_bits( (uint32_t)(a->dbl), (uint32_t)(b->dbl));
 }
 
-object xor_bits(unsigned long a, unsigned long b)
+object xor_bits(uint32_t a, uint32_t b)
 /* integer a XOR b */
 {
 	a = a ^ b;
@@ -1775,10 +1772,10 @@ object Dxor_bits(d_ptr a, d_ptr b)
 /* double a XOR b */
 {
 
-	return xor_bits((unsigned long)(a->dbl), (unsigned long)(b->dbl));
+	return xor_bits((uint32_t)(a->dbl), (uint32_t)(b->dbl));
 }
 
-object not_bits(unsigned long a)
+object not_bits(uint32_t a)
 /* integer bitwise NOT of a */
 {
 	a = ~a;
@@ -1788,10 +1785,10 @@ object not_bits(unsigned long a)
 object Dnot_bits(d_ptr a)
 /* double bitwise NOT of a */
 {
-	return not_bits((unsigned long)(a->dbl));
+	return not_bits((uint32_t)(a->dbl));
 }
 
-object power(long a, long b)
+object power(object a, object b)
 /* integer a to the power b */
 {
 	long i, p;
@@ -1826,7 +1823,7 @@ object Dpower(d_ptr a, d_ptr b)
 	return (object)NewDouble(pow(a->dbl, b->dbl));
 }
 
-object equals(long a, long b)
+object equals(object a, object b)
 /* integer a = b */
 {
 	if (a == b)
@@ -1845,7 +1842,7 @@ object Dequals(d_ptr a, d_ptr b)
 }
 
 
-object less(long a, long b)
+object less(object a, object b)
 /* integer a < b */
 {
 	if (a < b)
@@ -1864,7 +1861,7 @@ object Dless(d_ptr a, d_ptr b)
 }
 
 
-object greater(long a, long b)
+object greater(object a, object b)
 /* integer a > b */
 {
 	if (a > b)
@@ -1885,7 +1882,7 @@ object Dgreater(d_ptr a, d_ptr b)
 }
 
 
-object noteq(long a, long b)
+object noteq(object a, object b)
 /* integer a != b */
 {
 	if (a != b)
@@ -1904,7 +1901,7 @@ object Dnoteq(d_ptr a, d_ptr b)
 }
 
 
-object lesseq(long a, long b)
+object lesseq(object a, object b)
 /* integer a <= b */
 {
 	if (a <= b)
@@ -1923,7 +1920,7 @@ object Dlesseq(d_ptr a, d_ptr b)
 }
 
 
-object greatereq(long a, long b)
+object greatereq(object a, object b)
 /* integer a >= b */
 {
 	if (a >= b)
@@ -1942,7 +1939,7 @@ object Dgreatereq(d_ptr a, d_ptr b)
 }
 
 
-object and(long a, long b)
+object and(object a, object b)
 /* integer a and b */
 {
 	if (a != 0 && b != 0)
@@ -1961,7 +1958,7 @@ object Dand(d_ptr a, d_ptr b)
 }
 
 
-object or(long a, long b)
+object or(object a, object b)
 /* integer a or b */
 {
 	if (a != 0 || b != 0)
@@ -1979,7 +1976,7 @@ object Dor(d_ptr a, d_ptr b)
 		 return ATOM_0;
 }
 
-object xor(long a, long b)
+object xor(object a, object b)
 /* integer a xor b */
 {
 	if ((a != 0) != (b != 0))
@@ -1999,7 +1996,7 @@ object Dxor(d_ptr a, d_ptr b)
 
 /* --- Unary Ops --- */
 
-object uminus(long a)
+object uminus(object a)
 /* integer -a */
 {
 	if (a == MININT)
@@ -2015,7 +2012,7 @@ object Duminus(d_ptr a)
 }
 
 
-object not(long a)
+object not(object a)
 /* compute c := not a */
 {
 	if (a == 0)
@@ -2034,7 +2031,7 @@ object Dnot(d_ptr a)
 }
 
 
-object e_sqrt(long a)
+object e_sqrt(object a)
 /* integer square_root(a) */
 {
 	if (a < 0)
@@ -2051,7 +2048,7 @@ object De_sqrt(d_ptr a)
 }
 
 
-object e_sin(long a)
+object e_sin(object a)
 /* sin of an angle a (radians) */
 {
 	return (object)NewDouble( sin((double)a) );
@@ -2063,7 +2060,7 @@ object De_sin(d_ptr a)
 	return (object)NewDouble( sin(a->dbl) );
 }
 
-object e_cos(long a)
+object e_cos(object a)
 /* cos of an angle a (radians) */
 {
 	return (object)NewDouble( cos((double)a) );
@@ -2075,7 +2072,7 @@ object De_cos(d_ptr a)
 	return (object)NewDouble( cos(a->dbl) );
 }
 
-object e_tan(long a)
+object e_tan(object a)
 /* tan of an angle a (radians) */
 {
 	return (object)NewDouble( tan((double)a) );
@@ -2087,7 +2084,7 @@ object De_tan(d_ptr a)
 	return (object)NewDouble( tan(a->dbl) );
 }
 
-object e_arctan(long a)
+object e_arctan(object a)
 /* arctan of an angle a (radians) */
 {
 	return (object)NewDouble( atan((double)a) );
@@ -2099,7 +2096,7 @@ object De_arctan(d_ptr a)
 	return (object)NewDouble( atan(a->dbl) );
 }
 
-object e_log(long a)
+object e_log(object a)
 /* natural log of a (integer) */
 {
 	if (a <= 0)
@@ -2115,7 +2112,7 @@ object De_log(d_ptr a)
 	return (object)NewDouble( log(a->dbl) );
 }
 
-object e_floor(long a)  // not used anymore
+object e_floor(object a)  // not used anymore
 /* floor of a number - no op since a is already known to be an int */
 {
 	return a;
@@ -2129,7 +2126,7 @@ object De_floor(d_ptr a)
 	temp = floor(a->dbl);
 #ifndef ERUNTIME
 	if (fabs(temp) < MAXINT_DBL)
-		return MAKE_INT((long)temp);
+		return MAKE_INT((object)temp);
 	else
 #endif
 		return (object)NewDouble(temp);
@@ -2137,17 +2134,17 @@ object De_floor(d_ptr a)
 
 #define V(a,b) ((((a) << 1) | (a & 0x1)) ^ ((((b) >> 14) & 0x0000FFFF) | ((b) << 18)))
 
-#define prim1 ((long)2147483563L)
-#define prim2 ((long)2147483399L)
+#define prim1 ((int32_t)2147483563)
+#define prim2 ((int32_t)2147483399)
 
-#define root1 ((long)40014L)
-#define root2 ((long)40692L)
+#define root1 ((int32_t)40014)
+#define root2 ((int32_t)40692)
 
-#define quo1 ((long)53668L)  /* prim1 / root1 */
-#define quo2 ((long)52774L)  /* prim2 / root2 */
+#define quo1 ((int32_t)53668)  /* prim1 / root1 */
+#define quo2 ((int32_t)52774)  /* prim2 / root2 */
 
-#define rem1 ((long)12211L)  /* prim1 % root1 */
-#define rem2 ((long)3791L)   /* prim2 % root2 */
+#define rem1 ((int32_t)12211)  /* prim1 % root1 */
+#define rem2 ((int32_t)3791)   /* prim2 % root2 */
 
 /* set random seed1 and seed2 - neither can be 0 */
 void setran()
@@ -2155,9 +2152,9 @@ void setran()
 	time_t time_of_day;
 	struct tm *local;
 #if !defined( EWINDOWS )
-	long garbage;
+	object garbage;
 #endif
-	static long src = prim1 ^ prim2;
+	static int32_t src = prim1 ^ prim2;
 
 	time_of_day = time(NULL);
 	local = localtime(&time_of_day);
@@ -2166,18 +2163,18 @@ void setran()
 #ifdef EWINDOWS
 	seed1 = GetTickCount() + src;  // milliseconds since Windows started
 #else
-	seed1 = (unsigned long)(&garbage) + random() + src;
+	seed1 = (int32_t)(0xffffffff & (uintptr_t)&garbage) + random() + src;
 #endif
 	src += 1;
 	good_rand();  // skip first one, second will be more random-looking
 }
 
-static ldiv_t my_ldiv (long int numer, long int denom)
+static ldiv_t my_ldiv (int32_t numer, int32_t denom)
 {
 	ldiv_t result;
 
-	result.quot = numer / denom;
-	result.rem = numer % denom;
+	result.quot = (int32_t) numer / denom;
+	result.rem =  (int32_t) numer % denom;
 
 	if (numer >= 0 && result.rem < 0)   {
 		++result.quot;
@@ -2187,11 +2184,11 @@ static ldiv_t my_ldiv (long int numer, long int denom)
 	return result;
 }
 
-unsigned long good_rand()
+int32_t good_rand()
 /* Public Domain random number generator from USENET posting */
 {
 	ldiv_t temp;
-	long remval, quotval;
+	int32_t remval, quotval;
 
 	if (!rand_was_set && seed1 == 0 && seed2 == 0) {
 		// First time thru.
@@ -2200,8 +2197,8 @@ unsigned long good_rand()
 
 	/* seed = seed * ROOT % PRIME */
 	temp = my_ldiv(seed1, quo1);
-	remval = root1 * temp.rem;
-	quotval = rem1 * temp.quot;
+	remval = root1 * (int32_t) temp.rem;
+	quotval = rem1 * (int32_t) temp.quot;
 
 	/* normalize */
 	seed1 = remval - quotval;
@@ -2225,13 +2222,13 @@ unsigned long good_rand()
 	return V(seed1, seed2);
 }
 
-object Random(long a)
+object Random(object a)
 /* random number from 1 to a */
 /* a is a legal integer value */
 {
 	if (a <= 0)
 		RTFatal("argument to rand must be >= 1");
-	return MAKE_INT((good_rand() % (unsigned)a) + 1);
+	return MAKE_INT((good_rand() % (uint32_t)a) + 1);
 }
 
 
@@ -2242,7 +2239,7 @@ object DRandom(d_ptr a)
 
 	if (a->dbl < 1.0)
 		RTFatal("argument to rand must be >= 1");
-	res = (1 + good_rand() % (unsigned)(a->dbl));
+	res = (1 + good_rand() % (uint32_t)(a->dbl));
 	return MAKE_UINT(res);
 }
 
@@ -2251,7 +2248,7 @@ object unary_op(int fn, object a)
 /* recursive evaluation of a unary op
    c may be the same as a. ATOM_INT case handled in-line by caller */
 {
-	long length;
+	int length;
 	object_ptr ap, cp;
 	object x;
 	s1_ptr c;
@@ -2313,7 +2310,7 @@ object binary_op(int fn, object a, object b)
 /* Recursively calculates fn of a and b. */
 /* Caller must handle INT:INT case */
 {
-	long length;
+	int length;
 	object_ptr ap, bp, cp;
 	struct d temp_d;
 	s1_ptr c;
@@ -2422,6 +2419,16 @@ object binary_op(int fn, object a, object b)
 	return MAKE_SEQ(c);
 }
 
+/* When hashing, we treat doubles differently from integers.  But if a 
+ * double can be represented as an integer, we want to use that.
+ */
+#define IS_DOUBLE_AN_INTEGER( X ) \
+if( !IS_ATOM_INT( X ) && IS_ATOM( X ) ){ \
+	double TMP_dbl = DBL_PTR( X )->dbl; \
+	if( TMP_dbl == (double)(object)TMP_dbl ){\
+		X = (object)TMP_dbl;\
+	}\
+}\
 
 object calc_MD5(object a)
 {
@@ -2438,6 +2445,7 @@ object calc_MD5(object a)
 	object av;
 
 
+	IS_DOUBLE_AN_INTEGER(a)
 	if (IS_ATOM_INT(a)) {
 	}
 	else if (IS_ATOM_DBL(a)) {
@@ -2488,6 +2496,7 @@ object calc_SHA256(object a)
 	object av;
 
 
+	IS_DOUBLE_AN_INTEGER(a)
 	if (IS_ATOM_INT(a)) {
 	}
 	else if (IS_ATOM_DBL(a)) {
@@ -2505,6 +2514,7 @@ object calc_SHA256(object a)
 				break;  // we hit the end marker
 			}
 
+			IS_DOUBLE_AN_INTEGER(av)
 			if (IS_ATOM_INT(av)) {
 			}
 			else if (IS_ATOM_DBL(av)) {
@@ -2522,6 +2532,7 @@ object calc_SHA256(object a)
 
 	return 0;
 }
+
 
 
 unsigned int calc_adler32(object a)
@@ -2544,6 +2555,7 @@ unsigned int calc_adler32(object a)
 	lA = 1;
 	lB = 0;
 
+	IS_DOUBLE_AN_INTEGER(a)
 	if (IS_ATOM_INT(a)) {
 		lA +=  a; if (lA >= 65521) lA %= 65521;
 		lB +=  lA; if (lB >= 65521) lB %= 65521;
@@ -2566,6 +2578,7 @@ unsigned int calc_adler32(object a)
 				break;  // we hit the end marker
 			}
 
+			IS_DOUBLE_AN_INTEGER(av)
 			if (IS_ATOM_INT(av)) {
 				lA += av; if (lA >= 65521) lA %= 65521;
 				lB += lA; if (lB >= 65521) lB %= 65521;
@@ -2653,14 +2666,14 @@ static unsigned int hsieh32(char *data, int len, unsigned int starthash)
 
 char *hsieh_tempstr  = 0;
 int   hsieh_tempsize = 0;
-static unsigned int calc_hsieh32(object a)
+static uint32_t calc_hsieh32(object a)
 {
 
 
 	union TF
 	{
 		double ieee_double;
-		int    integer;
+		int32_t    integer;
 		char tfc[8];
 	} tf;
 
@@ -2668,12 +2681,11 @@ static unsigned int calc_hsieh32(object a)
 	object av;
 	char *sp;
 	int slen;
- 	unsigned int lHashVal;
+ 	uint32_t lHashVal;
 	int has_string;
 
-
-
- 	if (IS_ATOM_INT(a)) {
+	IS_DOUBLE_AN_INTEGER(a)
+	if (IS_ATOM_INT(a)) {
 	 	tf.integer = a;
 	 	lHashVal = hsieh32(tf.tfc, 4, a*2 - 1);
  	}
@@ -2697,6 +2709,7 @@ static unsigned int calc_hsieh32(object a)
 				break;  // we hit the end marker
 			}
 
+			IS_DOUBLE_AN_INTEGER(av)
 			if (IS_ATOM_INT(av)) {
 				if (av >= 0 && av <= 255) {
 					if ( !has_string ){
@@ -2739,6 +2752,7 @@ static unsigned int calc_hsieh32(object a)
 					break;  // we hit the end marker
 				}
 
+				IS_DOUBLE_AN_INTEGER(av)
 				if (IS_ATOM_INT(av)) {
 				 	tf.integer = av;
 				 	lHashVal = hsieh32(tf.tfc, 4, lHashVal);
@@ -2759,10 +2773,10 @@ static unsigned int calc_hsieh32(object a)
 }
 
 
-static unsigned int calc_hsieh30(object a)
+static uint32_t calc_hsieh30(object a)
 {
 
-	unsigned i32;
+	uint32_t i32;
 	
 	i32 = calc_hsieh32(a);
 	return (0x3FFFFFFF & (i32 + ((0xC0000000 & i32) >> 30)));
@@ -2788,16 +2802,25 @@ unsigned int calc_fletcher32(object a)
 	lA = 1;
 	lB = 0;
 
+	IS_DOUBLE_AN_INTEGER(a)
 	if (IS_ATOM_INT(a)) {
 		lA +=  a;
 		lB +=  lA;
 	}
 	else if (IS_ATOM_DBL(a)) {
-		tf.ieee_double = (DBL_PTR(a)->dbl);
-		for(tfi = 0; tfi < 4; tfi++)
-		{
-			lA += tf.tfc[tfi];
-			lB += lA;
+		double a_dbl = (DBL_PTR(a)->dbl);
+		if( a_dbl == (double)(object)a_dbl ){
+			a = (object) a_dbl;
+			lA +=  a;
+			lB +=  lA;
+		}
+		else{
+			tf.ieee_double = a_dbl;
+			for(tfi = 0; tfi < 4; tfi++)
+			{
+				lA += tf.tfc[tfi];
+				lB += lA;
+			}
 		}
 	}
 	else { /* input is a sequence */
@@ -2813,6 +2836,8 @@ unsigned int calc_fletcher32(object a)
 				break;  // we hit the end marker
 			}
 
+			IS_DOUBLE_AN_INTEGER(av)
+			
 			if (IS_ATOM_INT(av)) {
 				if (av < 256)
 				{
@@ -2870,11 +2895,11 @@ object calc_hash(object a, object b)
 
 */
 {
-	unsigned long lHashValue;
-	long lSLen;
+	uint32_t lHashValue;
+	int32_t lSLen;
 
 
-	int tfi;
+	int32_t tfi;
 	object lTemp;
 
 	union TF
@@ -2882,15 +2907,16 @@ object calc_hash(object a, object b)
 		double ieee_double;
 		struct dbllong
 		{
-			unsigned int a;
-			unsigned int b;
+			uint32_t a;
+			uint32_t b;
 		} ieee_uint;
-		unsigned char ieee_char[8];
+		uint8_t ieee_char[8];
 	} tf, seeder, prev;
 
 	object_ptr ap, lp;
 	object av, lv;
 
+	IS_DOUBLE_AN_INTEGER(a)
 	if (IS_ATOM_INT(b)) {
 		if (b == -6)
 			return calc_hsieh30(a);	// Will always return a Euphoria integer.
@@ -2912,6 +2938,7 @@ object calc_hash(object a, object b)
 
 		if (b < 0)
 			RTFatal("second argument of hash() must not be a negative integer.");
+		
 		if (b == 0)
 		{
 			if (IS_ATOM_INT(a)) {
@@ -2923,12 +2950,12 @@ object calc_hash(object a, object b)
 			else {
 				tf.ieee_double = 196069.10 + (double)(SEQ_PTR(a)->length);
 			}
-			tf.ieee_uint.a &= MAXINT;
+			tf.ieee_uint.a &= MAXINT32;
 			if (tf.ieee_uint.a == 0) {
-				tf.ieee_uint.a = MAXINT;
+				tf.ieee_uint.a = MAXINT32;
 			}
-
-			lTemp = calc_hash(a, (object)tf.ieee_uint.a);
+			
+			lTemp = calc_hash(a, (uint32_t)tf.ieee_uint.a);
 
 			if (IS_ATOM_INT(lTemp)) {
 				seeder.ieee_uint.a = lTemp;
@@ -2948,7 +2975,7 @@ object calc_hash(object a, object b)
 		seeder.ieee_double = (DBL_PTR(b)->dbl);
 	}
 	else {
-		lTemp = calc_hash(b, 16063 + (unsigned int)(SEQ_PTR(b)->length));
+		lTemp = calc_hash(b, 16063 + (uint32_t)(SEQ_PTR(b)->length));
 		if (IS_ATOM_INT(lTemp)) {
 			seeder.ieee_uint.a = lTemp;
 			seeder.ieee_uint.b = rol(lTemp, 15);
@@ -2964,18 +2991,18 @@ object calc_hash(object a, object b)
 	for(tfi = 0; tfi < 8; tfi++)
 	{
 		if (seeder.ieee_char[tfi] == 0)
-			seeder.ieee_char[tfi] = (unsigned char)(tfi * 171 + 1);
+			seeder.ieee_char[tfi] = (uint8_t)(tfi * 171 + 1);
 		seeder.ieee_char[tfi] += (tfi + 1) << 8;
+		
 		lHashValue = rol(lHashValue, 3) ^ seeder.ieee_char[tfi];
 	}
-
 	if (IS_ATOM_INT(a)) {
 		tf.ieee_uint.a = a;
 		tf.ieee_uint.b = rol(a, 15);
 		for(tfi = 0; tfi < 8; tfi++)
 		{
 			if (tf.ieee_char[tfi] == 0)
-				tf.ieee_char[tfi] = (unsigned char)(tfi * 171 + 1);
+				tf.ieee_char[tfi] = (uint8_t)(tfi * 171 + 1);
 			lHashValue = rol(lHashValue, 3) ^ ((tf.ieee_char[tfi] + (tfi + 1)) << 8);
 		}
 	}
@@ -2984,7 +3011,7 @@ object calc_hash(object a, object b)
 		for(tfi = 0; tfi < 8; tfi++)
 		{
 			if (tf.ieee_char[tfi] == 0)
-				tf.ieee_char[tfi] = (unsigned char)(tfi * 171 + 1);
+				tf.ieee_char[tfi] = (uint8_t)(tfi * 171 + 1);
 			lHashValue = rol(lHashValue, 3) ^ ((tf.ieee_char[tfi] + (tfi + 1)) << 8);
 		}
 	}
@@ -3005,6 +3032,7 @@ object calc_hash(object a, object b)
 				lHashValue = rol(lHashValue, 3) ^ seeder.ieee_char[tfi];
 			}
 
+			IS_DOUBLE_AN_INTEGER( lv )
 			if (IS_ATOM_INT(lv)) {
 				prev.ieee_uint.a = lv;
 				prev.ieee_uint.b = rol(lv, 15);
@@ -3013,17 +3041,18 @@ object calc_hash(object a, object b)
 				prev.ieee_double = (DBL_PTR(lv)->dbl);
 			}
 			else {
-				lv = (unsigned int)(SEQ_PTR(lv)->length);
+				lv = (uint32_t)(SEQ_PTR(lv)->length);
 				prev.ieee_uint.a = lv;
 				prev.ieee_uint.b = rol(lv, 15);
 			}
 
+			IS_DOUBLE_AN_INTEGER( av )
 			if (IS_ATOM_INT(av)) {
 				tf.ieee_uint.a = av;
 				tf.ieee_uint.b = rol(av, 15);
 			}
 			else if (IS_ATOM_DBL(av)) {
-				tf.ieee_double = (DBL_PTR(av)->dbl);
+				tf.ieee_double = DBL_PTR(av)->dbl;
 			}
 			else if (IS_SEQUENCE(av))
 			{
@@ -3045,31 +3074,31 @@ object calc_hash(object a, object b)
 			for(tfi = 0; tfi < 8; tfi++)
 			{
 				if (tf.ieee_char[tfi] == 0)
-					tf.ieee_char[tfi] = (unsigned char)(tfi * 171 + 1);
+					tf.ieee_char[tfi] = (uint8_t)(tfi * 171 + 1);
 				lHashValue = rol(lHashValue, 3) ^ ((tf.ieee_char[tfi] + (tfi + 1)) << 8);
 			}
 			lHashValue = rol(lHashValue,1);
 			lSLen--;
 		}
 	}
-
-	if (lHashValue  & HIGH_BITS) {
+	
+	if (lHashValue  > MAXINT32 ) {
 		return NewDouble((double)lHashValue);
 	}
 	else {
-		return MAKE_INT(lHashValue);
+		return (int32_t)MAKE_INT(lHashValue);
 	}
 
 }
 
-int compare(object a, object b)
+object compare(object a, object b)
 /* Compare general objects a and b. Return 0 if they are identical,
    1 if a > b, -1 if a < b. All atoms are less than all sequences.
    The INT-INT case *must* be taken care of by the caller */
 {
 	object_ptr ap, bp;
 	object av, bv;
-	long length, lengtha, lengthb;
+	int length, lengtha, lengthb;
 	double da, db;
 	int c;
 
@@ -3129,10 +3158,10 @@ int compare(object a, object b)
 }
 
 
-long find(object a, s1_ptr b)
+object find(object a, s1_ptr b)
 /* find object a as an element of sequence b */
 {
-	long length;
+	int length;
 	object_ptr bp;
 	object bv;
 
@@ -3191,7 +3220,7 @@ long find(object a, s1_ptr b)
 	}
 	else { // IS_SEQUENCE(a)
 
-		long a_len;
+		int a_len;
 
 		length = b->length;
 		a_len = SEQ_PTR(a)->length;
@@ -3215,15 +3244,15 @@ long find(object a, s1_ptr b)
 }
 
 
-long e_match(s1_ptr a, s1_ptr b)
+object e_match(s1_ptr a, s1_ptr b)
 /* find sequence a as a slice within sequence b
    sequence a may not be empty */
 {
-	long ntries, len_remaining;
+	int ntries, len_remaining;
 	object_ptr a1, b1, bp;
 	object_ptr ai, bi;
 	object av, bv;
-	long lengtha, lengthb;
+	int lengtha, lengthb;
 
 	if (!IS_SEQUENCE(a))
 		RTFatal("first argument of match() must be a sequence");
@@ -3266,7 +3295,7 @@ long e_match(s1_ptr a, s1_ptr b)
 }
 
 #ifndef ERUNTIME
-static void CheckSlice(object a, long startval, long endval, long length)
+static void CheckSlice(object a, int startval, int endval, int length)
 /* check legality of a slice, return integer values of start, length */
 /* startval and endval are deref'd */
 {
@@ -3277,14 +3306,14 @@ static void CheckSlice(object a, long startval, long endval, long length)
 		RTFatal("attempt to slice an atom");
 
 	if (startval < 1) {
-		RTFatal("slice lower index is less than 1 (%ld)", startval);
+		RTFatal("slice lower index is less than 1 (%d)", (int32_t) startval);
 	}
 	if (endval < 0) {
-		RTFatal("slice upper index is less than 0 (%ld)", endval);
+		RTFatal("slice upper index is less than 0 (%d)", (int32_t) endval);
 	}
 
 	if (length < 0 ) {
-		RTFatal("slice length is less than 0 (%ld)", length);
+		RTFatal("slice length is less than 0 (%d)", (int32_t) length);
 	}
 
 	s = SEQ_PTR(a);
@@ -3302,9 +3331,9 @@ static void CheckSlice(object a, long startval, long endval, long length)
 void RHS_Slice( object a, object start, object end)
 /* Construct slice a[start..end] */
 {
-	long startval;
-	long length;
-	long endval;
+	int startval;
+	int length;
+	int endval;
 	s1_ptr newa, olda;
 	object temp;
 	object_ptr p, q, sentinel;
@@ -3313,7 +3342,7 @@ void RHS_Slice( object a, object start, object end)
 	if (IS_ATOM_INT(start))
 		startval = INT_VAL(start);
 	else if (IS_ATOM_DBL(start)) {
-		startval = (long)(DBL_PTR(start)->dbl);
+		startval = (int)(DBL_PTR(start)->dbl);
 	}
 	else
 		RTFatal("slice lower index is not an atom");
@@ -3321,7 +3350,7 @@ void RHS_Slice( object a, object start, object end)
 	if (IS_ATOM_INT(end))
 		endval = INT_VAL(end);
 	else if (IS_ATOM_DBL(end)) {
-		endval = (long)(DBL_PTR(end)->dbl);
+		endval = (int)(DBL_PTR(end)->dbl);
 		 /* f.p.: if the double is too big for
 			a long WATCOM produces the most negative number. This
 			will be caught as a bad subscript, although the value in the
@@ -3393,11 +3422,11 @@ void RHS_Slice( object a, object start, object end)
 }
 
 
-void AssignSlice(object start, object end, s1_ptr val)
+void AssignSlice(object start, object end, object val)
 /* assign to a sliced variable */
 {
-	s1_ptr *seq_ptr, sp;
-	long startval, endval, length;
+	s1_ptr *seq_ptr, sp, val_seq;
+	int startval, endval, length;
 	object_ptr s_elem;
 	object_ptr v_elem;
 
@@ -3406,7 +3435,7 @@ void AssignSlice(object start, object end, s1_ptr val)
 	if (IS_ATOM_INT(start))
 		startval = INT_VAL(start);
 	else if (IS_ATOM_DBL(start)) {
-		startval = (long)(DBL_PTR(start)->dbl);
+		startval = (int)(DBL_PTR(start)->dbl);
 	}
 	else
 		RTFatal("slice lower index is not an atom");
@@ -3414,7 +3443,7 @@ void AssignSlice(object start, object end, s1_ptr val)
 	if (IS_ATOM_INT(end))
 		endval = INT_VAL(end);
 	else if (IS_ATOM_DBL(end)) {
-		endval = (long)(DBL_PTR(end)->dbl); /* see above comments on f.p. */
+		endval = (int)(DBL_PTR(end)->dbl); /* see above comments on f.p. */
 	}
 	else
 		RTFatal("slice upper index is not an atom");
@@ -3441,11 +3470,11 @@ void AssignSlice(object start, object end, s1_ptr val)
 		}
 	}
 	else {
-		val = SEQ_PTR(val);
-		v_elem = val->base+1;
-		if (val->length != length) {
-			RTFatal("lengths do not match on assignment to slice (%ld != %ld)",
-					length, val->length);
+		val_seq = SEQ_PTR(val);
+		v_elem = val_seq->base+1;
+		if (val_seq->length != length) {
+			RTFatal("lengths do not match on assignment to slice (%d != %d)",
+					length, val_seq->length);
 		}
 		while (TRUE) {
 			if (!IS_ATOM_INT(*v_elem)) {
@@ -3608,7 +3637,7 @@ object EOpen(object filename, object mode_obj, object cleanup)
 	IFILE fp;
 	long length;
 	int i;
-	long mode, text_mode;
+	int mode, text_mode;
 	cleanup_ptr cup;
 
 	if (IS_ATOM(mode_obj))
@@ -3977,7 +4006,7 @@ static void indent()
 static void rPrint(object a)
 /* print any object in default numeric format */
 {
-	long length;
+	int length;
 	int multi_line;
 	object_ptr elem;
 	char sbuff[NUM_SIZE];
@@ -3987,7 +4016,7 @@ static void rPrint(object a)
 
 	if (IS_ATOM(a)) {
 		if (IS_ATOM_INT(a)) {
-			snprintf(sbuff, NUM_SIZE, "%ld", a);
+			snprintf(sbuff, NUM_SIZE, "%" PRIdPTR, a);
 			sbuff[NUM_SIZE-1] = 0; // ensure NULL
 			screen_output(print_file, sbuff);
 			print_chars += strlen(sbuff);
@@ -4194,12 +4223,12 @@ object_ptr v_elem;
 {
 	int flen, sbuff_len=0;
 	char c;
-	long dval;
-	unsigned long uval;
+	intptr_t dval;
+	uintptr_t uval;
 	double gval;
 	char *sval;
 	char *sbuff;
-	long slength;
+	int slength;
 	char quick_alloc1[LOCAL_SPACE];
 	int free_sv;
 	int free_sb;
@@ -4263,7 +4292,7 @@ object_ptr v_elem;
 			dval = INT_VAL(*v_elem);
 		else {
 			gval = DBL_PTR(*v_elem)->dbl;
-			if (gval > (long)0x7FFFFFFF || gval < (long)0x80000000) {
+			if (gval > INTPTR_MAX || gval < INTPTR_MIN) {
 				/* can't convert to long integer */
 				if (c == 'd') {
 					/* use .0f instead */
@@ -4272,13 +4301,14 @@ object_ptr v_elem;
 					c = 'f';
 				}
 				else if (gval >= 0.0 &&
-						 gval <= (unsigned long)0xFFFFFFFF) {
+						 gval <= UINTPTR_MAX ) {
 					/* need conversion to unsigned */
 					uval = gval;
-					dval = (long)uval;
+					dval = (object)uval;
 				}
-				else
+				else{
 					RTFatal("number is too big for %%x or %%o format");
+				}
 			}
 			else {
 				/* convert to positive or negative long integer */
@@ -4336,7 +4366,7 @@ object_ptr v_elem;
 }
 
 
-object EPrintf(int file_no, object format_obj, object values)
+object EPrintf(object file_no, object format_obj, object values)
 /* formatted print */
 /* file_no could be DOING_SPRINTF (for sprintf) */
 {
@@ -4347,7 +4377,7 @@ object EPrintf(int file_no, object format_obj, object values)
 	char quick_alloc[LOCAL_SPACE]; // don't use TempBuff - FormatItem uses it
 	int free_cs;
 	char out_string[LOCAL_SPACE];
-	long flen;
+	int flen;
 	int s;
 	IFILE f;
 	object result;
@@ -4477,6 +4507,10 @@ int nodelaych(int wait)
 
 	return (error == 1 ? (int) ch : -1 );
 }
+#endif
+
+#if defined(EWINDOWS) && defined(EMINGW)
+int winkbhit();
 #endif
 
 int get_key(int wait)
@@ -4742,7 +4776,7 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 	}
 }
 
-void eu_startup(struct routine_list *rl, struct ns_list *nl, unsigned char **ip,
+void eu_startup(struct routine_list *rl, struct ns_list *nl, char **ip,
 				int cps, int clk)
 /* Initialize run-time data structures for the compiled user program. */
 {
@@ -4753,8 +4787,8 @@ void eu_startup(struct routine_list *rl, struct ns_list *nl, unsigned char **ip,
 	clocks_per_sec = cps;
 	clk_tck = clk;
 	xstdin = (void *)stdin;
-        eustart_time = current_time();
-        InitInOut();
+	eustart_time = current_time();
+	InitInOut();
 	InitGraphics();
 	InitEMalloc();
 	InitFiles();
@@ -4837,7 +4871,6 @@ char **make_arg_cv(char *cmdline, int *argc)
 		w = 0;
 	   }
 	i = 0;
-
 	while (TRUE) {
 		/* skip white space */
 		while (cmdline[i] == ' '  ||
@@ -4971,7 +5004,7 @@ object system_exec_call(object command, object wait)
 	exit_code = system(string_ptr);
 #else
 	argv = make_arg_cv(string_ptr, &exit_code);
-	exit_code = spawnvp(P_WAIT, argv[0], (char const * const *)argv);
+	exit_code = spawnvp(P_WAIT, argv[0], (char * const *)argv);
 
 	EFree(argv[0]);		// free the 'process' name
 	EFree((char *)argv); // free the list of arg addresses, but not the args themself.
@@ -5039,12 +5072,12 @@ void match_samples()
 		sample_overflow = TRUE;
 	total_samples += sample_next;  // volatile
 	for (i = 0; i < sample_next; i++) {
-		proc = Locate((int *)profile_sample[i]);
+		proc = Locate((intptr_t *)profile_sample[i]);
 		if (proc == NULL) {
 			bad_samples++;
 		}
 		else {
-			gline = FindLine((int *)profile_sample[i], proc);
+			gline = FindLine((intptr_t *)profile_sample[i], proc);
 
 			if (gline == 0) {
 				bad_samples++;
@@ -5059,7 +5092,7 @@ void match_samples()
 	total_samples -= bad_samples;
 }
 
-static void show_prof_line(IFILE f, long i)
+static void show_prof_line(IFILE f, int i)
 /* display one line of profile output */
 {
 	if (*(slist[i].src+4) == END_OF_FILE_CHAR) {
@@ -5131,56 +5164,65 @@ void ProfileCommand()
 object make_atom32(unsigned c32)
 /* make a Euphoria atom from an unsigned C value */
 {
-	if (c32 <= (unsigned)MAXINT)
+	if (c32 <= (uintptr_t)MAXINT32)
 		return c32;
 	else
 		return NewDouble((double)c32);
 }
 
-unsigned general_call_back(
+object make_atom(uintptr_t c)
+/* make a Euphoria atom from an unsigned C value */
+{
+	if (c <= (uintptr_t)MAXINT)
+		return c;
+	else
+		return NewDouble((double)c);
+}
+
+uintptr_t general_call_back(
 #ifdef ERUNTIME
-		  int cb_routine,
+		  intptr_t cb_routine,
 #else
 		  symtab_ptr cb_routine,
 #endif
-						   unsigned arg1, unsigned arg2, unsigned arg3,
-						   unsigned arg4, unsigned arg5, unsigned arg6,
-						   unsigned arg7, unsigned arg8, unsigned arg9)
+						   uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+						   uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
+						   uintptr_t arg7, uintptr_t arg8, uintptr_t arg9)
 /* general call-back routine: 0 to 9 args */
 {
 	int num_args;
 #ifdef ERUNTIME
-	int (*addr)();
+	intptr_t (*addr)();
 #else
-	int *code[4+9]; // place to put IL: max 9 args
-	int *save_tpc;
+	object *code[4+9]; // place to put IL: max 9 args
+	object *save_tpc;
 #endif
 
 	if (gameover)
-		return (unsigned)0; // ignore messages after we decide to shutdown
+		return (uintptr_t)0; // ignore messages after we decide to shutdown
 
 #ifdef ERUNTIME
 // translator call-back
 	num_args = rt00[cb_routine].num_args;
 	addr = rt00[cb_routine].addr;
 	if (num_args >= 1) {
-	  call_back_arg1->obj = make_atom32((unsigned)arg1);
+	  call_back_arg1->obj = make_atom((uintptr_t)arg1);
 	  if (num_args >= 2) {
-		call_back_arg2->obj = make_atom32((unsigned)arg2);
+		call_back_arg2->obj = make_atom((uintptr_t)arg2);
 		if (num_args >= 3) {
-		  call_back_arg3->obj = make_atom32((unsigned)arg3);
+		  call_back_arg3->obj = make_atom((uintptr_t)arg3);
 		  if (num_args >= 4) {
-			call_back_arg4->obj = make_atom32((unsigned)arg4);
+			call_back_arg4->obj = make_atom((uintptr_t)arg4);
 			if (num_args >= 5) {
-			  call_back_arg5->obj = make_atom32((unsigned)arg5);
+			  call_back_arg5->obj = make_atom((uintptr_t)arg5);
 			  if (num_args >= 6) {
-				call_back_arg6->obj = make_atom32((unsigned)arg6);
+				call_back_arg6->obj = make_atom((uintptr_t)arg6);
 				if (num_args >= 7) {
-				  call_back_arg7->obj = make_atom32((unsigned)arg7);
+				  call_back_arg7->obj = make_atom((uintptr_t)arg7);
 				  if (num_args >= 8) {
-					call_back_arg8->obj = make_atom32((unsigned)arg8);
+					call_back_arg8->obj = make_atom((uintptr_t)arg8);
 					if (num_args >= 9) {
-					  call_back_arg9->obj = make_atom32((unsigned)arg9);
+					  call_back_arg9->obj = make_atom((uintptr_t)arg9);
 					}
 				  }
 				}
@@ -5261,46 +5303,46 @@ unsigned general_call_back(
 
 #else
 	/* Interpreter: set up a PROC opcode call */
-	code[0] = (int *)opcode(PROC);
-	code[1] = (int *)cb_routine;  // symtab_ptr of Euphoria routine
+	code[0] = (intptr_t *)opcode(PROC);
+	code[1] = (intptr_t *)cb_routine;  // symtab_ptr of Euphoria routine
 
 	num_args = cb_routine->u.subp.num_args;
 	if (num_args >= 1) {
 	  DeRef(call_back_arg1->obj);
-	  call_back_arg1->obj = make_atom32((unsigned)arg1);
-	  code[2] = (int *)call_back_arg1;
+	  call_back_arg1->obj = make_atom32((uintptr_t)arg1);
+	  code[2] = (object *)call_back_arg1;
 	  if (num_args >= 2) {
 		DeRef(call_back_arg2->obj);
-		call_back_arg2->obj = make_atom32((unsigned)arg2);
-		code[3] = (int *)call_back_arg2;
+		call_back_arg2->obj = make_atom32((uintptr_t)arg2);
+		code[3] = (object *)call_back_arg2;
 		if (num_args >= 3) {
 		  DeRef(call_back_arg3->obj);
-		  call_back_arg3->obj = make_atom32((unsigned)arg3);
-		  code[4] = (int *)call_back_arg3;
+		  call_back_arg3->obj = make_atom32((uintptr_t)arg3);
+		  code[4] = (object *)call_back_arg3;
 		  if (num_args >= 4) {
 			DeRef(call_back_arg4->obj);
-			call_back_arg4->obj = make_atom32((unsigned)arg4);
-			code[5] = (int *)call_back_arg4;
+			call_back_arg4->obj = make_atom32((uintptr_t)arg4);
+			code[5] = (object *)call_back_arg4;
 			if (num_args >= 5) {
 			  DeRef(call_back_arg5->obj);
-			  call_back_arg5->obj = make_atom32((unsigned)arg5);
-			  code[6] = (int *)call_back_arg5;
+			  call_back_arg5->obj = make_atom32((uintptr_t)arg5);
+			  code[6] = (object *)call_back_arg5;
 			  if (num_args >= 6) {
 				DeRef(call_back_arg6->obj);
-				call_back_arg6->obj = make_atom32((unsigned)arg6);
-				code[7] = (int *)call_back_arg6;
+				call_back_arg6->obj = make_atom32((uintptr_t)arg6);
+				code[7] = (object *)call_back_arg6;
 				if (num_args >= 7) {
 				  DeRef(call_back_arg7->obj);
-				  call_back_arg7->obj = make_atom32((unsigned)arg7);
-				  code[8] = (int *)call_back_arg7;
+				  call_back_arg7->obj = make_atom32((uintptr_t)arg7);
+				  code[8] = (object *)call_back_arg7;
 				  if (num_args >= 8) {
 					DeRef(call_back_arg8->obj);
-					call_back_arg8->obj = make_atom32((unsigned)arg8);
-					code[9] = (int *)call_back_arg8;
+					call_back_arg8->obj = make_atom32((uintptr_t)arg8);
+					code[9] = (object *)call_back_arg8;
 					if (num_args >= 9) {
 					  DeRef(call_back_arg9->obj);
-					  call_back_arg9->obj = make_atom32((unsigned)arg9);
-					  code[10] = (int *)call_back_arg9;
+					  call_back_arg9->obj = make_atom32((uintptr_t)arg9);
+					  code[10] = (object *)call_back_arg9;
 					}
 				  }
 				}
@@ -5311,8 +5353,8 @@ unsigned general_call_back(
 	  }
 	}
 
-	code[num_args+2] = (int *)call_back_result;
-	code[num_args+3] = (int *)opcode(CALL_BACK_RETURN);
+	code[num_args+2] = (object *)call_back_result;
+	code[num_args+3] = (object *)opcode(CALL_BACK_RETURN);
 
 	*expr_top++ = (object)tpc;    // needed for traceback
 	*expr_top++ = (object)NULL;   // prevents restore_privates()
@@ -5322,7 +5364,7 @@ unsigned general_call_back(
 	// at all to the main Euphoria code.
 	save_tpc = tpc;
 
-	do_exec((int *)code);  // execute routine without setting up new stack
+	do_exec((intptr_t *)code);  // execute routine without setting up new stack
 
 	tpc = save_tpc;
 	expr_top -= 2;
@@ -5330,47 +5372,56 @@ unsigned general_call_back(
 	// Don't do get_pos_int() for crash handler
 	if (crash_call_back) {
 		crash_call_back = FALSE;
-		return (unsigned)(call_back_result->obj);
+		return (object)(call_back_result->obj);
 	}
 	else {
-		return (unsigned)get_pos_int("call-back", call_back_result->obj);
+		return (object)get_pos_int("call-back", call_back_result->obj);
 	}
 }
 
-unsigned (*general_ptr)() = (void *)&general_call_back;
+uintptr_t (*general_ptr)() = (void *)&general_call_back;
 
 #ifdef EWATCOM
 #pragma off (check_stack);
 #endif
 
 #ifdef EOSX
-unsigned __cdecl osx_cdecl_call_back(unsigned arg1, unsigned arg2, unsigned arg3,
-						unsigned arg4, unsigned arg5, unsigned arg6,
-						unsigned arg7, unsigned arg8, unsigned arg9)
+uintptr_t __cdecl osx_cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+						uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
+						uintptr_t arg7, uintptr_t arg8, uintptr_t arg9)
 {
 	// a dummy where CallBack will later assign the value of general_ptr
 	// this saves us the trouble of trying to calculate the offset of
 	// the callback copy from general_ptr and stuffing that into a LEA
 	// calculation
-	unsigned (*f)(unsigned, unsigned, unsigned, unsigned, unsigned,
-	unsigned, unsigned, unsigned, unsigned, unsigned)
-	= (unsigned (*)(unsigned, unsigned, unsigned, unsigned, unsigned,
-	unsigned, unsigned, unsigned, unsigned, unsigned)) 0xF001F001;
-	return (f)((symtab_ptr)0x12345678,
+	uintptr_t (*f)(uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
+	uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)
+	= (uintptr_t (*)(uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
+	uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)) 0xF001F001;
+	return (f)((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, arg8, arg9);
 }
+#endif
+
+#if INTPTR_MAX == INT32_MAX
+#define CALL_GENERAL_CALLBACK (*general_ptr)
+#else
+
+// Need to force the compiler to use an absolute address
+typedef intptr_t (*cbfunc)();
+#define CALL_GENERAL_CALLBACK ((cbfunc)0xabcdefabcdefabcdLL)
 #endif
 
 /* Windows cdecl - Need only one template.
    It can handle a variable number of args.
    Not all args below will actually be provided on a given call. */
 
-LRESULT __cdecl cdecl_call_back(unsigned arg1, unsigned arg2, unsigned arg3,
-						unsigned arg4, unsigned arg5, unsigned arg6,
-						unsigned arg7, unsigned arg8, unsigned arg9)
+intptr_t __cdecl cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+						uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
+						uintptr_t arg7, uintptr_t arg8, uintptr_t arg9)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
+	return (intptr_t) CALL_GENERAL_CALLBACK((symtab_ptr) ((uintptr_t) CALLBACK_POINTER ),
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, arg8, arg9);
 }
@@ -5380,81 +5431,81 @@ LRESULT __cdecl cdecl_call_back(unsigned arg1, unsigned arg2, unsigned arg3,
  * Euphoria routine.
  */
 
-LRESULT CALLBACK call_back0()
+intptr_t CALLBACK call_back0()
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678, // will be replaced
+	return (intptr_t) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER, // will be replaced
 									 0, 0, 0, 0, 0,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back1(unsigned arg1)
+intptr_t CALLBACK call_back1(uintptr_t arg1)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
+	return (intptr_t) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
 									 arg1, 0, 0, 0, 0,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back2(unsigned arg1, unsigned arg2)
+intptr_t CALLBACK call_back2(uintptr_t arg1, uintptr_t arg2)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
+	return (intptr_t) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, 0, 0, 0,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back3(unsigned arg1, unsigned arg2, unsigned arg3)
+intptr_t CALLBACK call_back3(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
+	return (intptr_t) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, 0, 0,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back4(unsigned arg1, unsigned arg2, unsigned arg3,
-							unsigned arg4)
+intptr_t CALLBACK call_back4(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+							uintptr_t arg4)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
+	return (intptr_t) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, 0,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back5(unsigned arg1, unsigned arg2, unsigned arg3,
-							unsigned arg4, unsigned arg5)
+intptr_t CALLBACK call_back5(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+							uintptr_t arg4, uintptr_t arg5)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
+	return (intptr_t) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back6(unsigned arg1, unsigned arg2, unsigned arg3,
-							unsigned arg4, unsigned arg5, unsigned arg6)
+intptr_t CALLBACK call_back6(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+							uintptr_t arg4, uintptr_t arg5, uintptr_t arg6)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
+	return (intptr_t) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back7(unsigned arg1, unsigned arg2, unsigned arg3,
-							unsigned arg4, unsigned arg5, unsigned arg6,
-							unsigned arg7)
+intptr_t CALLBACK call_back7(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+							uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
+							uintptr_t arg7)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
+	return (intptr_t) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, 0, 0);
 }
 
-LRESULT CALLBACK call_back8(unsigned arg1, unsigned arg2, unsigned arg3,
-							unsigned arg4, unsigned arg5, unsigned arg6,
-							unsigned arg7, unsigned arg8)
+intptr_t CALLBACK call_back8(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+							uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
+							uintptr_t arg7, uintptr_t arg8)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
+	return (intptr_t) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, arg8, 0);
 }
 
-LRESULT CALLBACK call_back9(unsigned arg1, unsigned arg2, unsigned arg3,
-							unsigned arg4, unsigned arg5, unsigned arg6,
-							unsigned arg7, unsigned arg8, unsigned arg9)
+intptr_t CALLBACK call_back9(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+							uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
+							uintptr_t arg7, uintptr_t arg8, uintptr_t arg9)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
+	return (intptr_t) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, arg8, arg9);
 }
@@ -5539,7 +5590,9 @@ void Cleanup(int status)
 
 	gameover = TRUE;
 #ifndef ERUNTIME
-	if( !WRITE_COVERAGE_DB() ){
+	if( !WRITE_COVERAGE_DB() && in_backend ){
+		// check to make sure we're in the backend, and not exiting
+		// from the front end (e.g., when user passes -v flag
 		screen_output(stderr, "\nUnable to open coverage database!\n");
 	}
 #endif
@@ -5662,8 +5715,6 @@ void UserCleanup(int status)
 }
 
 #ifdef EWINDOWS
-static char one_line[84];
-static char *next_char_ptr = NULL;
 
 #if defined(EMINGW)
 int winkbhit()
@@ -5684,6 +5735,12 @@ int winkbhit()
 		ReadConsoleInput(console_input, &pbuffer, 1, &junk);
 	}
 }
+
+#else
+
+static char one_line[84];
+static char *next_char_ptr = NULL;
+
 #endif
 
 int wingetch()
@@ -5775,7 +5832,7 @@ void key_gets(char *input_string)
 	}
 }
 
-long find_from(object a, object bobj, object c)
+object find_from(object a, object bobj, object c)
 /* find object a as an element of sequence b starting from c*/
 {
 	long length;
@@ -5855,7 +5912,7 @@ long find_from(object a, object bobj, object c)
 		}
 	}
 	else { // IS_SEQUENCE(a)
-		long a_len;
+		int a_len;
 
 		length -= c - 1;
 		a_len = SEQ_PTR(a)->length;
@@ -5878,15 +5935,15 @@ long find_from(object a, object bobj, object c)
 	return 0;
 }
 
-long e_match_from(object aobj, object bobj, object c)
+object e_match_from(object aobj, object bobj, object c)
 /* find sequence a as a slice within sequence b
    sequence a may not be empty */
 {
-	long ntries, len_remaining;
+	int ntries, len_remaining;
 	object_ptr a1, b1, bp;
 	object_ptr ai, bi;
 	object av, bv;
-	long lengtha, lengthb;
+	int lengtha, lengthb;
 	s1_ptr a, b;
 
 	if (!IS_SEQUENCE(aobj))
@@ -5907,7 +5964,7 @@ long e_match_from(object aobj, object bobj, object c)
 		;
 	}
 	else if (IS_ATOM_DBL(c)) {
-		c = (long)(DBL_PTR(c)->dbl);
+		c = (object)(DBL_PTR(c)->dbl);
 	}
 	else
 		RTFatal("third argument of match_from() must be an atom");
@@ -5954,12 +6011,12 @@ long e_match_from(object aobj, object bobj, object c)
 void Replace( replace_ptr rb )
 {
 //  normalise arguments, dispatch special cases
-	long start_pos, end_pos, seqlen, replace_len;
+	int start_pos, end_pos, seqlen, replace_len;
 	object copy_from, copy_to, target;
 	s1_ptr s1, s2;
 
-	start_pos = (IS_ATOM_INT(*rb->start)) ? *rb->start : (long)(DBL_PTR(*rb->start)->dbl);
-	end_pos = (IS_ATOM_INT(*rb->stop)) ? *rb->stop : (long)(DBL_PTR(*rb->stop)->dbl);
+	start_pos = (IS_ATOM_INT(*rb->start)) ? *rb->start : (int)(DBL_PTR(*rb->start)->dbl);
+	end_pos = (IS_ATOM_INT(*rb->stop)) ? *rb->stop : (int)(DBL_PTR(*rb->stop)->dbl);
 
 	copy_to   = *rb->copy_to;
 	copy_from = *rb->copy_from;
@@ -6187,4 +6244,45 @@ cleanup_ptr ChainDeleteRoutine( cleanup_ptr old, cleanup_ptr prev ){
 	new_cup->next = prev;
 
 	return new_cup;
+}
+
+object eu_sizeof( object data_type ){
+	long dt;
+	if( IS_ATOM_INT( data_type ) ){
+		dt = data_type;
+	}
+	else if( IS_ATOM( data_type ) ){
+		dt = (long) DBL_PTR( data_type )->dbl;
+	}
+	else{
+		RTFatal("Argument to sizeof must be an atom");
+	}
+	switch( dt ){
+		case C_DOUBLE:
+			return sizeof( double );
+		case C_FLOAT:
+			return sizeof( float );
+		case C_CHAR:
+		case C_UCHAR:
+			return sizeof( char );
+		case C_SHORT:
+		case C_USHORT:
+			return sizeof( short );
+		case E_INTEGER:
+		case E_ATOM:
+		case E_SEQUENCE:
+		case E_OBJECT:
+		case C_POINTER:
+			return sizeof( void* );
+		case C_INT:
+		case C_UINT:
+			return sizeof( int );
+		case C_LONG:
+		case C_ULONG:
+			return sizeof( long );
+		case C_LONGLONG:
+			return sizeof( long long );
+		default:
+			return 0;
+	}
 }

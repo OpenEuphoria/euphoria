@@ -1,0 +1,28 @@
+== Version 4.0.1 Date TBD
+
+== Bug Fixes
+
+* Renamed implicit Top Level SubProgram to an illegal name.  Previously used "_toplevel_",
+  which became a legal name for euphoria 4.0
+* [[ticket:577]] ##object()## works same on translator as the interpreter.
+* euc now uses quotes around filenames when processing resource files
+* [[ticket:575]] OW installer file setenv-ow.bat functionality restored from 4.0.0RC2.
+* case issues were removed from pathinfo(), canonical_path(), and abbreviate_path()
+  these functions now return raw OS output; it is up to the user to change case when necessary
+* [[ticket:593]] Atoms represented as doubles, but that hold the double representation of a
+  euphoria integer, now hash as though they were actually represented as an integer.  This
+  ensures that two objects that evaluate as ##equal()## will have the same hash value.
+
+== Enhancements
+
+* Added parsing of two digit years to ##std/datetime.e## ##[[:parse]]##.
+* [[ticket:516]] added ##[[:join_path]]## and ##[[:split_path]]## routines.
+* ##[[:current_dir]]()## now always returns an upper case letter for the drive
+  id.
+
+== Deprecated
+
+* ##[[:canonical_path]]()##'s third parameter, ##no_case##, has been deprecated. If you are doing
+  path comparisons on windows, use lower() or upper() instead of using the ##no_case##
+  parameter.
+

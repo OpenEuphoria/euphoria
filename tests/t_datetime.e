@@ -281,7 +281,33 @@ test_equal( "parse fail #2", -1, d:parse("2.3/10/2001 00:52:09", "%d%m%Y%H%M%S")
 
 dt1 = d:now_gmt()
 test_true("now_gmt() returns valid datetime type", datetime( d:now_gmt() ) )
+dt1 = d:now()
+integer min_year = dt1[YEAR] - 80
+integer max_year = dt1[YEAR] + 20
 
+dt2 = d:parse("01/02/10", "%m/%d/%y")
+test_true("parse 2-digit year #1", max_year >= dt2[YEAR] and min_year <= dt2[YEAR])
+
+dt2 = d:parse("01/01/38", "%m/%d/%y")
+test_true("parse 2-digit year #2", max_year >= dt2[YEAR] and min_year <= dt2[YEAR])
+
+dt2 = d:parse("01/01/99", "%m/%d/%y")
+test_true("parse 2-digit year #3", max_year >= dt2[YEAR] and min_year <= dt2[YEAR])
+
+min_year = dt1[YEAR] - 50
+max_year = dt1[YEAR] + 50
+
+dt1 = d:parse("01/01/70", "%m/%d/%y", -50)
+test_true("parse 2-digit year yylower set #1", max_year >= dt2[YEAR] and min_year <= dt2[YEAR])
+
+dt1 = d:parse("01/01/80", "%m/%d/%y", -50)
+test_true("parse 2-digit year yylower set #2", max_year >= dt2[YEAR] and min_year <= dt2[YEAR])
+
+dt1 = d:parse("01/01/50", "%m/%d/%y", -50)
+test_true("parse 2-digit year yylower set #3", max_year >= dt2[YEAR] and min_year <= dt2[YEAR])
+
+dt1 = d:parse("01/01/09", "%m/%d/%y", -50)
+test_true("parse 2-digit year yylower set #4", max_year >= dt2[YEAR] and min_year <= dt2[YEAR])
 
 test_report()
 

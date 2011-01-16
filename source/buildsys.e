@@ -5,6 +5,7 @@ elsedef
 end ifdef
 
 include std/datetime.e
+include std/dll.e
 include std/filesys.e
 include std/io.e
 include std/regex.e
@@ -273,8 +274,8 @@ function setup_build()
 				c_flags &= " -fPIC"
 			end if
 
-			c_flags &= sprintf(" -c -w -fsigned-char -O2 -m32 -I%s -ffast-math",
-				{ get_eucompiledir() })
+			c_flags &= sprintf(" -c -w -fsigned-char -O2 -m%d -I%s -ffast-math",
+				{ sizeof( C_POINTER ) * 8, get_eucompiledir() })
 
 			if TWINDOWS then
 				c_flags &= " -mno-cygwin"
@@ -284,7 +285,7 @@ function setup_build()
 				end if
 			end if
 
-			l_flags = user_library & " -m32 "
+			l_flags = sprintf( "%s -m%d", { user_library, sizeof( C_POINTER ) * 8 })
 
 			if dll_option then
 				l_flags &= " -shared "
@@ -301,7 +302,7 @@ function setup_build()
 			end if
 			
 			-- input/output
-			rc_comp = "windres -DSRCDIR=\"" & current_dir() & "\" [1] -O coff -o [2]"
+			rc_comp = "windres -DSRCDIR=\"" & current_dir() & "\" \"[1]\" -O coff -o \"[2]\""
 			
 		case COMPILER_WATCOM then
 			c_exe = "wcc386"
@@ -333,7 +334,7 @@ function setup_build()
 			l_flags &= sprintf(" FILE %s LIBRARY ws2_32", { user_library })
 			
 			-- resource file, executable file
-			rc_comp = "wrc -DSRCDIR=\"" & current_dir() & "\" -q -fo=[2] -ad [1] [3]"
+			rc_comp = "wrc -DSRCDIR=\"" & current_dir() & "\" -q -fo=\"[2]\" -ad \"[1]\" \"[3]\""
 		case else
 			CompileErr(43)
 	end switch

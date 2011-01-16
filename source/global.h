@@ -24,6 +24,7 @@ typedef signed   char   schar;
 #define _LARGEFILE64_SOURCE
 
 #include <stdio.h>
+#include <stdint.h>
 
 #include "object.h"
 #include "symtab.h"
@@ -35,7 +36,9 @@ typedef signed   char   schar;
 #	define _LARGEFILE64_SOURCE
 	/* note that LARGEFILE* macros do not work on MinGW */
 #	include <sys/types.h>
+#ifndef EMINGW
 #	include <unistd.h>
+#endif
 #	include <errno.h>
 #	define IFILE FILE*
 #	define IOFF long long
@@ -127,10 +130,10 @@ struct replace_block;
 typedef struct replace_block *replace_ptr;
 
 #ifdef INT_CODES
-	typedef int opcode_type;
+	typedef intptr_t opcode_type;
 	#define opcode(x) (x)
 #else
-	typedef int *opcode_type;
+	typedef intptr_t *opcode_type;
 	#define opcode(x) jumptab[x-1]
 #endif
 
@@ -157,10 +160,10 @@ typedef int (*FARPROC)();
 #    define WINAPI
 #  endif // EMINGW
 #  define __interrupt
-#  define LRESULT long
+#  define LRESULT intptr_t
 #  if !defined(EMINGW)
 #    define O_TEXT 0
-#    define HINSTANCE int
+#    define HINSTANCE void*
 #  endif
 struct videoconfig {
 	int monitor;
@@ -204,7 +207,7 @@ struct videoconfigEx {
 #define WORD unsigned short
 #define __stdcall
 #define __cdecl
-#else
+#elif !defined(EMINGW)
 /* So WATCOM debugger will work better: */
  #ifndef EXTRA_CHECK
   #pragma aux RTFatal aborts;
@@ -219,7 +222,7 @@ struct videoconfigEx {
 
 #ifdef EWINDOWS 
 // Use Heap functions for everything.
-extern unsigned default_heap;
+extern HANDLE default_heap;
 #define malloc(n) HeapAlloc((void *)default_heap, 0, n)
 #define free(p) HeapFree((void *)default_heap, 0, p)
 #define realloc(p, n) HeapReAlloc((void *)default_heap, 0, p, n)
@@ -233,7 +236,7 @@ extern int is_batch;
 extern int is_test;
 
 #ifndef LRESULT
-#define LRESULT long
+#define LRESULT intptr_t
 #endif
 #ifndef CALLBACK
 #define CALLBACK
