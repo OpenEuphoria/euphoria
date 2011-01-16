@@ -2688,7 +2688,7 @@ object start_backend(object x)
 	// call of BackEnd() in a new thread
 	backendify          = get_pos_int(w, *(x_ptr->base+12));
 	// pointer to internal_general_call_back
-	// later copies of start_backend() in euback.so won't
+	// later copies of start_backend() in libeuback.so won't
 	// have a frontend to call into, since it's not linked with
 	// any translated frontend source
 	backendify_ptr          = get_pos_int(w, *(x_ptr->base+13));
@@ -2785,16 +2785,16 @@ void * thread_start_backend(void * arg)
 
 	// get original backend name
 #ifdef EDEBUG
-	char origname[255] = "/tmp/eubackdbg.so";
+	char origname[255] = "/tmp/libeubackdbg.so";
 #else
-	char origname[255] = "/tmp/euback.so";
+	char origname[255] = "/tmp/libeuback.so";
 #endif
 
 	// create temporary name
 #ifdef EDEBUG
-	char tempname[255] = "/tmp/eubackdbgtmp.so.XXXXXX";
+	char tempname[255] = "/tmp/libeubackdbgtmp.so.XXXXXX";
 #else
-	char tempname[255] = "/tmp/eubacktmp.so.XXXXXX";
+	char tempname[255] = "/tmp/libeubacktmp.so.XXXXXX";
 #endif
 	int wfd = mkstemp(tempname);
 	if (wfd == -1) return NULL;
