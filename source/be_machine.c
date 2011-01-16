@@ -56,7 +56,9 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/file.h>
+#define __USE_GNU
 #include <dlfcn.h>
+#undef __USE_GNU
 #include <sys/times.h>
 #include <unistd.h>
 #include <termios.h>
@@ -2688,7 +2690,7 @@ object start_backend(object x)
 	// call of BackEnd() in a new thread
 	backendify          = get_pos_int(w, *(x_ptr->base+12));
 	// pointer to internal_general_call_back
-	// later copies of start_backend() in euback.so won't
+	// later copies of start_backend() in libeuback.so won't
 	// have a frontend to call into, since it's not linked with
 	// any translated frontend source
 	backendify_ptr          = get_pos_int(w, *(x_ptr->base+13));
@@ -2780,46 +2782,17 @@ void * thread_start_backend(void * arg)
 	object (*new_start_backend)(object);
 	void * newbackend;
 	object x;
-	ssize_t count = 1024;
-	char buf[1024];
 
 	// get original backend name
 #ifdef EDEBUG
-	char origname[255] = "/tmp/eubackdbg.so";
+	char origname[255] = "/tmp/libeubackdbg.so";
 #else
-	char origname[255] = "/tmp/euback.so";
+	char origname[255] = "/tmp/libeuback.so";
 #endif
 
-	// create temporary name
-#ifdef EDEBUG
-	char tempname[255] = "/tmp/eubackdbgtmp.so.XXXXXX";
-#else
-	char tempname[255] = "/tmp/eubacktmp.so.XXXXXX";
-#endif
-	int wfd = mkstemp(tempname);
-	if (wfd == -1) return NULL;
-	int rfd = open(origname, O_RDONLY);
-	if (rfd == -1)
-	{
-		close(wfd);
-		return NULL;
-	}
-
-	// copy the file
-	do {
-		count = read(rfd, buf, 1024);
-		// TODO XXX FIXME handle case when (count == -1)
-		ssize_t wcount = write(wfd, buf, count);
-		if (wcount != count)
-		{
-			// TODO XXX FIXME handle error
-		}
-	} while (count > 0);
-	close(wfd);
-	close(rfd);
-
-	// open the newly copied backend library
-	newbackend = dlopen(tempname, RTLD_LOCAL|RTLD_LAZY);
+	// open the backend library in a new dlmopen namespace
+	//newbackend = dlmopen(LM_ID_NEWLM, origname, RTLD_LAZY);
+	newbackend = dlmopen(LM_ID_NEWLM, origname, RTLD_LOCAL|RTLD_LAZY);
 	if (newbackend == NULL) return NULL;
 	new_start_backend = (object (*)(object))
 		dlsym(newbackend, "start_backend");
