@@ -101,7 +101,7 @@ function get_next( symtab_index sym )
 	return sym
 end function
 
-procedure BackEnd(integer il_file)
+function BackEndify(integer il_file)
 -- Store the required front-end data structures in memory.
 -- Offsets are used in some places rather than pointers.
 -- They will be replaced in the back-end.
@@ -209,13 +209,13 @@ procedure BackEnd(integer il_file)
 	poke(lit, lit_string) -- shouldn't need 0
 	
 	-- free lit_string
-	lit_string = {}
+	--lit_string = {}
 	
 	-- convert symbol names to C strings in memory
 	nm = alloc_symbol_names( st, lit, string_size )
 	
 	if not has_coverage() then
-		SymTab = {}  -- free up some space
+		--SymTab = {}  -- free up some space
 	end if
 	
 	-- slist is in run-length compressed form
@@ -270,7 +270,7 @@ procedure BackEnd(integer il_file)
 	end for
 	
 	if not has_coverage() then
-		slist = {}  -- free up some space
+		--slist = {}  -- free up some space
 	end if
 	
 	-- store file names and other variables
@@ -311,8 +311,7 @@ procedure BackEnd(integer il_file)
 		Argv = {Argv[1]} & Argv[3 .. Argc]
 	end if
 
-	-- M_BACKEND:
-	machine_proc(65, 
+	return
 		{
 			st, 
 			sl, 
@@ -325,8 +324,30 @@ procedure BackEnd(integer il_file)
 			routine_id( "cover_routine" ),
 			routine_id( "write_coverage_db" ),
 			routine_id( "DisplayColorLine" ),
+			routine_id( "BackEndify" ),
+			-- The folowing are null when M_BACKEND is called
+			-- from the front end. They are only used when
+			-- one back end calls another (used in the multithread
+			-- interface)
+			0, -- internal_general_call_back ptr
+			0, -- source copy of symtab
+			0, -- source copy of e_routine
+			0, -- source copy of e_routine_size
+			0, -- source copy of e_routine_next
+			0, -- source copy of pc/tpc
+			0, -- source copy of expr_stack
+			0, -- source copy of expr_top
+			0, -- source copy of expr_max
+			0, -- source copy of expr_limit
+			0, -- pthread mutex for internal_general_call_back ptr
+			0, -- temp pthread mutex used in thread creation
+			0, -- temp pthread cond_t used in thread creation
 			$
-		})
+		}
+end function
+procedure BackEnd(integer il_file)
+	-- M_BACKEND:
+	machine_proc(65, BackEndify(il_file))
 end procedure
 mode:set_backend( routine_id("BackEnd") )
 

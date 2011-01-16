@@ -16,5 +16,8 @@ int FindLine(intptr_t *pc, symtab_ptr proc);
 int RoutineId(symtab_ptr current_sub, object name, int file_no);
 int PrivateName(char *name, symtab_ptr proc);
 int ValidPrivate(symtab_ptr sym, symtab_ptr proc);
+extern void e_routine_copy(intptr_t old, int old_e_routine_size,
+	int old_e_routine_next, intptr_t oldsymtab);
+extern int get_e_routine_size();
 
 #endif

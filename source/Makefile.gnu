@@ -99,12 +99,20 @@ ifeq "$(EMINGW)" "1"
 	EOSPCREFLAGS=-mno-cygwin
 	EECUA=eu.a
 	EECUDBGA=eudbg.a
+	EECUBACKA=euback.a
+	EECUBACKDBGA=eubackdbg.a
 	ifdef EDEBUG
 		EOSMING=
 		LIBRARY_NAME=eudbg.a
+		DLIBRARY_NAME=libeudbg.dll
+		BACKENDLIB_NAME=eubackdbg.a
+		DBACKENDLIB_NAME=libeubackdbg.dll
 	else
 		EOSMING=-ffast-math -O3 -Os
 		LIBRARY_NAME=eu.a
+		DLIBRARY_NAME=libeu.dll
+		BACKENDLIB_NAME=euback.a
+		DBACKENDLIB_NAME=libeuback.dll
 	endif
 	EUBW_RES=$(BUILDDIR)/eubw.res
 	EUB_RES=$(BUILDDIR)/eub.res
@@ -133,10 +141,18 @@ else
 	EOSPCREFLAGS=
 	EECUA=eu.a
 	EECUDBGA=eudbg.a
+	EECUBACKA=euback.a
+	EECUBACKDBGA=eubackdbg.a
 	ifdef EDEBUG
 		LIBRARY_NAME=eudbg.a
+		DLIBRARY_NAME=libeudbg.so
+		BACKENDLIB_NAME=eubackdbg.a
+		DBACKENDLIB_NAME=libeubackdbg.so
 	else
 		LIBRARY_NAME=eu.a
+		DLIBRARY_NAME=libeu.so
+		BACKENDLIB_NAME=euback.a
+		DBACKENDLIB_NAME=libeuback.so
 	endif
 	MEM_FLAGS=-DESIMPLE_MALLOC
 endif
@@ -346,17 +362,22 @@ EU_TRANSLATOR_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/transobj/*.c))
 EU_BACKEND_RUNNER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/backobj/*.c))
 EU_INTERPRETER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/intobj/*.c))
 
-all : interpreter translator library debug-library backend
+all : backend-library debug-backend-library interpreter translator library debug-library backend
 
 BUILD_DIRS=\
 	$(BUILDDIR)/intobj/back \
 	$(BUILDDIR)/transobj/back \
 	$(BUILDDIR)/libobj/back \
 	$(BUILDDIR)/libobjdbg/back \
+	$(BUILDDIR)/libbackobj/back \
+	$(BUILDDIR)/libbackobjdbg/back \
 	$(BUILDDIR)/backobj/back \
 	$(BUILDDIR)/intobj/ \
 	$(BUILDDIR)/transobj/ \
 	$(BUILDDIR)/libobj/ \
+	$(BUILDDIR)/libobjdbg/ \
+	$(BUILDDIR)/libbackobj/ \
+	$(BUILDDIR)/libbackobjdbg/ \
 	$(BUILDDIR)/backobj/
 
 
@@ -386,6 +407,18 @@ library : builddirs
 
 $(BUILDDIR)/$(LIBRARY_NAME) : $(EU_LIB_OBJECTS)
 	ar -rc $(BUILDDIR)/$(LIBRARY_NAME) $(EU_LIB_OBJECTS)
+	gcc -shared -fPIC -o $(BUILDDIR)/$(DLIBRARY_NAME) $(EU_LIB_OBJECTS)
+	$(ECHO) $(MAKEARGS)
+
+debug-backend-library : builddirs
+	$(MAKE) $(BUILDDIR)/$(EECUBACKDBGA) OBJDIR=libbackobjdbg EBACKEND=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE)
+
+backend-library : builddirs
+	$(MAKE) $(BUILDDIR)/$(BACKENDLIB_NAME) OBJDIR=libbackobj EBACKEND=1 CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+
+$(BUILDDIR)/$(BACKENDLIB_NAME) : $(EU_BACKEND_OBJECTS)
+	ar -rc $(BUILDDIR)/$(BACKENDLIB_NAME) $(EU_BACKEND_OBJECTS)
+	gcc -shared -fPIC -o $(BUILDDIR)/$(DBACKENDLIB_NAME) $(EU_BACKEND_OBJECTS)
 	$(ECHO) $(MAKEARGS)
 
 builddirs : $(BUILD_DIRS)
@@ -422,6 +455,7 @@ binder : translator library $(EU_BACKEND_RUNNER_FILES)
 	$(MAKE) $(BUILDDIR)/$(EUSHROUD)
 
 .PHONY : library debug-library
+.PHONY : backend-library debug-backend-library
 .PHONY : builddirs
 .PHONY : interpreter
 .PHONY : translator

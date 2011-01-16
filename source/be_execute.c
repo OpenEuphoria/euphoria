@@ -870,6 +870,35 @@ static int recover_lhs_subscript(object subscript, s1_ptr s)
 	return 0; // not reached
 }
 
+void CopyInitStack(int size, intptr_t oldestack, intptr_t oldetop,
+	intptr_t oldemax, intptr_t oldelimit, intptr_t oldsymtab)
+// called to create the initial call stack for a thread
+// a clone of the call stack of the calling thread's current task
+{
+	symtab_ptr * oldst = (symtab_ptr *) oldsymtab;
+	object_ptr old_expr_stack = (object_ptr)oldestack;
+	object_ptr old_expr_top = (object_ptr)oldetop;
+	object_ptr old_expr_max = (object_ptr)oldemax;
+	object_ptr old_expr_limit = (object_ptr)oldelimit;
+	int i;
+
+	stack_size = old_expr_max - old_expr_stack + 5;
+	expr_stack = (object_ptr) EMalloc(stack_size * sizeof(object));
+	expr_top = old_expr_top - old_expr_stack + expr_stack;
+
+	for (i = 0; i < expr_top - expr_stack; i++)
+	{
+		// translate symtab pointers on old stack
+		// so the new stack will have them point to the
+		// new symtab instead of the old symtab
+		expr_stack[i] = (object)
+		((symtab_ptr *)old_expr_stack[i] - oldst + (symtab_ptr *)fe.st);
+	}
+
+	/* must allow for a few extra words */
+	expr_max = expr_stack + (stack_size - 5);
+	expr_limit = expr_max - 3; // we only push two items per call
+}
 
 void InitStack(int size, int toplevel)
 // called to create the initial call stack for a task
@@ -885,7 +914,8 @@ void InitStack(int size, int toplevel)
 }
 
 
-void InitExecute()
+void InitExecute(intptr_t oldestack, intptr_t oldetop, intptr_t oldemax,
+	intptr_t oldelimit, intptr_t oldsymtab)
 {
 #ifndef EDEBUG
 	// signal(SIGFPE, FPE_Handler)  // generate inf and nan instead
@@ -912,6 +942,9 @@ void InitExecute()
 	TraceBeyond = HUGE_LINE;
 
 	// Create Call Stack
+	if (oldestack)
+	CopyInitStack(EXPR_SIZE, oldestack, oldetop, oldemax, oldelimit, oldsymtab);
+	else
 	InitStack(EXPR_SIZE, 1);
 
 	// create first task (task 0)
@@ -1323,6 +1356,64 @@ void code_set_pointers(intptr_t **code)
 	}
 }
 
+object deep_copy(object x)
+{
+	// TODO XXX FIXME: this is a shallow copy.
+	// this is not thread safe and also violates the axiom that variables be
+	// separate in threads unless explicitly declared to be shared.
+	return x;
+}
+
+void symtab_deep_copy(intptr_t old)
+/* copy all variable values from the old symtab into the new symtab that will *
+ * be used by the new copy of the backend library */
+{
+	struct symtab_entry * olds, *s;
+	intptr_t i, len;
+
+	olds = (struct symtab_entry *)old;
+	s = fe.st;
+	len = *(intptr_t *)s;  // number of entries
+
+	olds++;
+	s++;  // point to first real entry
+	for (i = 1; i <= len; i++) {
+		switch (s->mode)
+		{
+			case M_TEMP:
+				s->obj = deep_copy(olds->obj);
+				break;
+			case M_NORMAL:
+				switch (s->token)
+				{
+					case PROC:
+					case FUNC:
+					case TYPE:
+						break;
+					default:
+						// normal variables, etc
+						s->obj = deep_copy(olds->obj);
+						break;
+				}
+			case M_CONSTANT:
+				// if the constant is set to NOVALUE then
+				// need to update, the original
+				// thread might have performed the
+				// forward reference and set the value
+				// here already
+				if (s->obj == NOVALUE)
+					s->obj = deep_copy(olds->obj);
+				// else the constant/literal value was known
+				// at parse time and we don't need to bother
+				// copying it over as it can't have been changed
+				break;
+			default:
+				break;
+		}
+		s = s->next;
+		olds = olds->next;
+	}
+}
 
 void symtab_set_pointers()
 /* set some symbol table fields to absolute pointers, rather than indexes */
@@ -1510,9 +1601,11 @@ int sample_size;
 int gline_number;  /* last global line number in program */
 int il_file;       /* we are processing a separate .il file */
 
-void fe_set_pointers()
+void fe_set_pointers(intptr_t oldsymtab)
 {
 	symtab_set_pointers();
+	if (oldsymtab != (intptr_t)NULL)
+		symtab_deep_copy(oldsymtab);
 
 	slist = fe.sl;
 
