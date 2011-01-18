@@ -16,6 +16,7 @@
 #define _LARGEFILE64_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 #include <be_ver.h>
 
@@ -1769,12 +1770,12 @@ object tick_rate(object x)
 }
 
 static object float_to_atom(object x, int flen)
-/* convert a sequence of 4 or 8 bytes in IEEE format to an atom */
+/* convert a sequence of 4, 8 or 10 bytes in IEEE format to an atom */
 {
 	int len, i;
 	object_ptr obj_ptr;
-	char fbuff[8];
-	double d;
+	char fbuff[10];
+	eudouble d;
 	s1_ptr s;
 
 	s = SEQ_PTR(x);
@@ -1786,10 +1787,13 @@ static object float_to_atom(object x, int flen)
 		fbuff[i] = (char)obj_ptr[i];
 	}
 	if (flen == 4)
-		d = (double)*((float *)&fbuff);
+		d = (eudouble)*((float *)&fbuff);
+	else if (flen == 8 )
+		d = (eudouble)*((double *)&fbuff);
 	else
-		d = *((double *)&fbuff);
-	return NewDouble((eudouble)d);
+		d = *(eudouble*)&fbuff;
+	
+	return NewDouble(d);
 }
 
 static object fpsequence(unsigned char *fp, int len)
@@ -1809,6 +1813,25 @@ static object fpsequence(unsigned char *fp, int len)
 	}
 	return MAKE_SEQ(result);
 }
+
+static object atom_to_float80(object x)
+/* convert an atom to a sequence of 10 bytes IEEE format */
+{
+	long double d;
+	int len;
+
+	len = 10;
+	if (IS_ATOM_INT(x)) {
+		d = (long double)INT_VAL(x);
+	}
+	else if (IS_ATOM(x)) {
+		d = (long double) DBL_PTR(x)->dbl;
+	}
+	else
+		len = 0;
+	return fpsequence((uchar *)&d, len);
+}
+
 
 static object atom_to_float64(object x)
 /* convert an atom to a sequence of 8 bytes IEEE format */
@@ -3127,6 +3150,14 @@ object machine(object opcode, object x)
 			case M_HAS_CONSOLE:
 				return has_console();
 			
+			case M_A_TO_F80:
+				return atom_to_float80( x );
+				
+			case M_F80_TO_A:
+				return float_to_atom( x, 10 );
+				
+			case M_INFINITY:
+				return NewDouble( (eudouble) INFINITY );
 
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:

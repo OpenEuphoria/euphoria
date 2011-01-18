@@ -25,6 +25,7 @@ unsigned char *string_ptr;
 #define MIN2B (int32_t)(-0x00008000)
 #define MIN3B (int32_t)(-0x00800000)
 #define MIN4B (int32_t)(-0x80000000)
+#define MIN8B (int64_t)(-0x8000000000000000LL)
 
 object decompress(uintptr_t c)
 // read a compressed Euphoria object
@@ -32,7 +33,9 @@ object decompress(uintptr_t c)
 {
 	s1_ptr s;
 	object_ptr obj_ptr;
-	int32_t len, i;
+	int32_t len;
+	int32_t i;
+	int64_t i8;
 	double d;
 	long double ld;
 	
@@ -62,9 +65,10 @@ object decompress(uintptr_t c)
 		return i + MIN4B;
 	}
 	
-	else if ( c = I8B ) {
-		i = *(int64_t *)string_ptr;
+	else if ( c == I8B ) {
+		i8 = *(int64_t *)string_ptr;
 		string_ptr += sizeof( int64_t );
+		return i8;
 	}
 	else if (c == F4B) {
 		d = (double)*(float *)string_ptr; 
@@ -78,7 +82,7 @@ object decompress(uintptr_t c)
 		return NewDouble((eudouble)d);
 	}
 	else if ( c == F10B ) {
-		ld = *(long double)string_ptr;
+		ld = *(long double*)string_ptr;
 		string_ptr += sizeof( long double );
 		return NewDouble( ld );
 	}
