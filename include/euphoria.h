@@ -249,7 +249,7 @@ object NewDouble(eudouble);
 void DeRef5(object, object, object, object, object);
 void de_reference(s1_ptr);
 void de_reference_i(s1_ptr);
-eudouble current_time(void);
+double current_time(void);
 double floor(double);
 double fabs(double);
 object binary_op_a(int, object, object);

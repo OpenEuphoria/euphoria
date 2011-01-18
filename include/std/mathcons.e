@@ -6,6 +6,8 @@
 
 namespace mathcons
 
+constant M_INFINITY = 102
+
 --****
 -- === Constants
 --
@@ -73,6 +75,7 @@ public constant
 	--**
 	-- Positive Infinity
 	PINF     = 1E308 * 1000 * 1E200,
+-- 	PINF     = machine_func( M_INFINITY, {}),
 	--**
 	-- Negative Infinity
 	MINF     = - PINF,
