@@ -9,15 +9,17 @@ unsigned char *string_ptr;
 // Compressed format of Euphoria objects
 //
 // First byte:
-//          0..248  // immediate small integer, -9 to 239
+//          0..246  // immediate small integer, -9 to 237
 					// since small negative integers -9..-1 might be common
-#define I2B 249   // 2-byte signed integer follows
-#define I3B 250   // 3-byte signed integer follows
-#define I4B 251   // 4-byte signed integer follows
-#define F4B 252   // 4-byte f.p. number follows
-#define F8B 253   // 8-byte f.p. number follows
-#define S1B 254   // sequence, 1-byte length follows, then elements
-#define S4B 255   // sequence, 4-byte length follows, then elements
+#define I2B  247   // 2-byte signed integer follows
+#define I3B  248   // 3-byte signed integer follows
+#define I4B  249   // 4-byte signed integer follows
+#define I8B  250
+#define F4B  251   // 4-byte f.p. number follows
+#define F8B  252   // 8-byte f.p. number follows
+#define F10B 253
+#define S1B  254   // sequence, 1-byte length follows, then elements
+#define S4B  255   // sequence, 4-byte length follows, then elements
 
 #define MIN1B (int32_t)(-2)
 #define MIN2B (int32_t)(-0x00008000)
@@ -32,6 +34,7 @@ object decompress(uintptr_t c)
 	object_ptr obj_ptr;
 	int32_t len, i;
 	double d;
+	long double ld;
 	
 	if (c == 0) {
 		c = *string_ptr++;
@@ -59,16 +62,25 @@ object decompress(uintptr_t c)
 		return i + MIN4B;
 	}
 	
+	else if ( c = I8B ) {
+		i = *(int64_t *)string_ptr;
+		string_ptr += sizeof( int64_t );
+	}
 	else if (c == F4B) {
 		d = (double)*(float *)string_ptr; 
 		string_ptr += sizeof( float );
-		return NewDouble(d);
+		return NewDouble((eudouble)d);
 	}
 	
 	else if (c == F8B) {
 		d = *(double *)string_ptr; 
 		string_ptr += sizeof( double );
-		return NewDouble(d);
+		return NewDouble((eudouble)d);
+	}
+	else if ( c == F10B ) {
+		ld = *(long double)string_ptr;
+		string_ptr += sizeof( long double );
+		return NewDouble( ld );
 	}
 	
 	else {

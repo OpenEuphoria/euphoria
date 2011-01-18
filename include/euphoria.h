@@ -65,7 +65,7 @@
 
 #define MAKE_UINT(x) ((object)((uintptr_t)x < (uintptr_t)TOO_BIG_INT \
                           ? (uintptr_t)x : \
-                            NewDouble((double)(uintptr_t)x)))
+                            NewDouble((eudouble)(uintptr_t)x)))
 
 /* these are obsolete */
 #define INT_VAL(x)        ((intptr_t)(x))
@@ -83,20 +83,28 @@
 #define IS_DBL_OR_SEQUENCE(ob)  (((object)(ob)) < NOVALUE)
 
 
-#define MININT_DBL ((double)MININT)
-#define MAXINT_DBL ((double)MAXINT)
+#define MININT_DBL ((eudouble)MININT)
+#define MAXINT_DBL ((eudouble)MAXINT)
 #define INT23      (object)0x003FFFFFL
 #define INT16      (object)0x00007FFFL
 #define INT15      (object)0x00003FFFL
+#define INT31      (object)0x3FFFFFFFL
+#define INT55      (intptr_t) INT64_C( 0x003fffffffffffff )
+#define INT47      (intptr_t) INT64_C( 0x00003fffffffffff )
 #define ATOM_M1    -1
 #define ATOM_0     0
 #define ATOM_1     1
 #define ATOM_2     2
 
 #undef MAKE_UINT
-#define MAKE_UINT(x)	((object)((uintptr_t)x <= (uintptr_t)MAXINT  ? (uintptr_t)x : NewDouble((double)(uintptr_t)x)))
+#define MAKE_UINT(x)	((object)((uintptr_t)x <= (uintptr_t)MAXINT  ? (uintptr_t)x : NewDouble((eudouble)(uintptr_t)x)))
 
 #define LOW_MEMORY_MAX ((unsigned)0x0010FFEF)
+#if INTPTR_MAX == INT32_MAX
+typedef double eudouble;
+#else
+typedef long double eudouble;
+#endif
 
 typedef intptr_t object;
 typedef object *object_ptr;
@@ -126,19 +134,22 @@ struct s1 {                        /* a sequence header block */
 #if INTPTR_MAX == INT32_MAX
 	int length;                   /* number of elements */
 	int ref;                      /* reference count */
+	cleanup_ptr cleanup;           /* custom clean up when sequence is deallocated */
 #else
+	cleanup_ptr cleanup;           /* custom clean up when sequence is deallocated */
 	int ref;                      /* reference count */
 	int length;                   /* number of elements */
+	
 #endif
 	int postfill;                 /* number of post-fill objects */
-	cleanup_ptr cleanup;           /* custom clean up when sequence is deallocated */
+	
 }; /* total 20 bytes */
 
-struct d {
-	double dbl;
-	int ref;
-	cleanup_ptr cleanup; 
-};
+struct d {                         /* a double precision number */
+	eudouble dbl;                    /* double precision value */
+	int ref;                      /* reference count */
+	cleanup_ptr cleanup;           /* custom clean up when sequence is deallocated */
+}; /* total 16 bytes */
 
 struct routine_list {
 	char *name;
@@ -234,11 +245,11 @@ object Dremainder();
 void Cleanup();
 void init_literal();
 char **make_arg_cv();
-object NewDouble(double);
+object NewDouble(eudouble);
 void DeRef5(object, object, object, object, object);
 void de_reference(s1_ptr);
 void de_reference_i(s1_ptr);
-double current_time(void);
+eudouble current_time(void);
 double floor(double);
 double fabs(double);
 object binary_op_a(int, object, object);

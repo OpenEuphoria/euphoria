@@ -72,7 +72,7 @@ public constant
 	SQRTE        = 1.64872_12707_00128_14684,
 	--**
 	-- Positive Infinity
-	PINF     = 1E308 * 1000,
+	PINF     = 1E308 * 1000 * 1E200,
 	--**
 	-- Negative Infinity
 	MINF     = - PINF,

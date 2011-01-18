@@ -106,7 +106,7 @@ else
 	atom big_integer = #3FFFFFFF_FFFFFFFF
 	atom ptr = allocate( 8, 1 )
 	poke( ptr, repeat( 0xff, 7 ) & 0x3f )
-	big_integer += 513
+	big_integer += 1
 	test_equal( "to_integer #9", 0,  to_integer(big_integer ))
 	test_equal( "to_integer #10", peek8s( ptr ),  to_integer(#3FFFFFFF_FFFFFFFF ))
 end if

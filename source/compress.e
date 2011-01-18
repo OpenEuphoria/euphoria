@@ -26,13 +26,15 @@ export constant IL_START = "YTREWQ\n"
 
 -- tags for various values:
 export constant
-		 I2B = 249,   -- 2-byte signed integer follows
-		 I3B = 250,   -- 3-byte signed integer follows
-		 I4B = 251,   -- 4-byte signed integer follows
-		 F4B = 252,   -- 4-byte f.p. number follows
-		 F8B = 253,   -- 8-byte f.p. number follows
-		 S1B = 254,   -- sequence, 1-byte length follows, then elements
-		 S4B = 255    -- sequence, 4-byte length follows, then elements
+		 I2B  = 247,   -- 2-byte signed integer follows
+		 I3B  = 248,   -- 3-byte signed integer follows
+		 I4B  = 249,   -- 4-byte signed integer follows
+		 I8B  = 250,   -- 8-byte signed integer follows
+		 F4B  = 251,   -- 4-byte f.p. number follows
+		 F8B  = 252,   -- 8-byte f.p. number follows
+		 F10B = 253,   -- 10-byte fp number follows
+		 S1B  = 254,   -- sequence, 1-byte length follows, then elements
+		 S4B  = 255    -- sequence, 4-byte length follows, then elements
 
 -- ranges for various sizes:
 export constant
@@ -151,8 +153,11 @@ export procedure fcompress(integer f, object x)
 					x -= MIN3B
 					puts(f, {I3B, and_bits(x, #FF), and_bits(floor(x / #100), #FF), floor(x / #10000)})
 
-				else
+				elsif x >= MIN4B and x <= MAX4B then
 					puts(f, I4B & int_to_bytes(x-MIN4B))
+					
+				else
+				
 
 				end if
 			end if

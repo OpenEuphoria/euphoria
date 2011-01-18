@@ -102,7 +102,7 @@
 
 #include <signal.h>
 
-extern double eustart_time; /* from be_runtime.c */
+extern eudouble eustart_time; /* from be_runtime.c */
 
 /*****************/
 /* Local defines */
@@ -853,7 +853,7 @@ static object Where(object x)
 		RTFatal("where() failed on this file");
 	}
 	if (result > (IOFF)MAXINT || result < (IOFF)MININT)
-		pos = NewDouble((double)result);  // maximum 2 billion
+		pos = NewDouble((eudouble)result);  // maximum 2 billion
 	else
 		pos = (object) result;
 	
@@ -1108,15 +1108,15 @@ typedef struct _SYSTEMTIME {
 		if (file_info.nFileSizeHigh == 0)
 		{
 			if (file_info.nFileSizeLow > MAXINT) {
-				obj_ptr[3] = NewDouble((double)file_info.nFileSizeLow);
+				obj_ptr[3] = NewDouble((eudouble)file_info.nFileSizeLow);
 			} else {
 				obj_ptr[3] = MAKE_INT((object)file_info.nFileSizeLow);
 			}
 		}
 		else
 		{
-			obj_ptr[3] = NewDouble((double)file_info.nFileSizeHigh * ((double)(MAXDWORD) + 1.0) +
-			                       (double)file_info.nFileSizeLow);
+			obj_ptr[3] = NewDouble((eudouble)file_info.nFileSizeHigh * ((eudouble)(MAXDWORD) + 1.0) +
+			                       (eudouble)file_info.nFileSizeLow);
 		}
 
 		FileTimeToSystemTime( &file_info.ftLastWriteTime, &file_time);
@@ -1240,7 +1240,7 @@ static object Dir(object x)
 				Append(temp, *temp, MAKE_INT('d'));
 
 			if( stbuf.st_size > MAXINT ){
-				obj_ptr[3] = NewDouble( (double) stbuf.st_size );
+				obj_ptr[3] = NewDouble( (eudouble) stbuf.st_size );
 			}
 			else{
 				obj_ptr[3] = (object) stbuf.st_size;
@@ -1408,7 +1408,7 @@ static object GetScreenChar(object x)
 	if ((unsigned)att <= (unsigned)MAXINT)
 		obj_ptr[2] = att;
 	else
-		obj_ptr[2] = NewDouble((double)(unsigned)att);
+		obj_ptr[2] = NewDouble((eudouble)(unsigned)att);
 
 #endif
 
@@ -1696,16 +1696,16 @@ static object change_dir(object x)
 static object e_sleep(object x)
 /* sleep for x seconds */
 {
-	double t;
+	eudouble t;
 
 	if IS_ATOM(x) {
 		if (IS_ATOM_INT(x)) {
-			t = (double)INT_VAL(x);
+			t = (eudouble)INT_VAL(x);
 		} else {
 			t = DBL_PTR(x)->dbl;
 		}
 	}
-	Wait(t);
+	Wait((double)t);
 	return ATOM_1;
 }
 
@@ -1789,7 +1789,7 @@ static object float_to_atom(object x, int flen)
 		d = (double)*((float *)&fbuff);
 	else
 		d = *((double *)&fbuff);
-	return NewDouble(d);
+	return NewDouble((eudouble)d);
 }
 
 static object fpsequence(unsigned char *fp, int len)
@@ -2686,7 +2686,7 @@ object machine(object opcode, object x)
 	char *addr;
 	char *dest;
 	char *src;
-	double d;
+	eudouble d;
 	int temp;
 
 	while (TRUE) {
@@ -2910,7 +2910,7 @@ object machine(object opcode, object x)
 				if (inst <= (uintptr_t)MAXINT)
 					return inst;
 				else
-					return NewDouble((double)inst);
+					return NewDouble((eudouble)inst);
 				break;
 			}
 

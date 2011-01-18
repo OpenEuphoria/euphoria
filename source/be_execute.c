@@ -426,7 +426,7 @@ int i;
 				uval = *peek8_addr;
 				++peek8_addr;
 				if ( uval > (uint64_t)MAXINT){
-					top = NewDouble((double) uval);
+					top = NewDouble((eudouble) uval);
 				}
 				else{
 					top = (uintptr_t)uval;
@@ -440,7 +440,7 @@ int i;
 				sval = (int64_t) *peek8_addr;
 				++peek8_addr;
 				if (sval < (int64_t)MININT || sval > (int64_t)MAXINT){
-					top = NewDouble((double) sval);
+					top = NewDouble((eudouble) sval);
 				}
 				else{
 					top = (uintptr_t) sval;
@@ -454,7 +454,7 @@ int i;
 		// unsigned
 		uval = *peek8_addr;
 		if ( uval > (uint64_t)MAXINT){
-			top = NewDouble((double) uval);
+			top = NewDouble((eudouble) uval);
 		}
 		else{
 			top = (intptr_t) uval;
@@ -464,7 +464,7 @@ int i;
 		// signed
 		sval = (int64_t) *peek8_addr;
 		if (sval < (int64_t)MININT || sval > (int64_t)MAXINT){
-			top = NewDouble((double) sval);
+			top = NewDouble((eudouble) sval);
 		}
 		else{
 			top = (intptr_t) sval;
@@ -511,7 +511,7 @@ static object do_peek4(object a, int b )
 				top = *peek4_addr;
 				++peek4_addr;
 				if ((uintptr_t)top > (uintptr_t)MAXINT)
-					top = NewDouble((double)(uint32_t)top);
+					top = NewDouble((eudouble)(uint32_t)top);
 				*(++obj_ptr) = top;
 			}
 		}
@@ -521,7 +521,7 @@ static object do_peek4(object a, int b )
 				top = (int32_t)*peek4_addr;
 				++peek4_addr;
 				if (top < (int32_t)MININT || top > (int32_t)MAXINT)
-					top = NewDouble((double)(int32_t)top);
+					top = NewDouble((eudouble)(int32_t)top);
 				*(++obj_ptr) = top;
 			}
 		}
@@ -532,13 +532,13 @@ static object do_peek4(object a, int b )
 		// unsigned
 		top = *peek4_addr;
 		if ((uintptr_t)top > (uintptr_t)MAXINT)
-			top = NewDouble((double)(uintptr_t)top);
+			top = NewDouble((eudouble)(uintptr_t)top);
 	}
 	else {
 		// signed
 		top = (int32_t)*peek4_addr;
 		if (top < (intptr_t) MININT || top > (intptr_t) MAXINT)
-			top = NewDouble((double)(intptr_t)top);
+			top = NewDouble((eudouble)(intptr_t)top);
 	}
 
 	return top;
@@ -548,7 +548,7 @@ static void do_poke2(object a, object top)
 // moved it here because it was causing bad code generation for WIN32
 {
 	uint16_t *poke2_addr;
-	double temp_dbl;
+	eudouble temp_dbl;
 	s1_ptr s1;
 	object_ptr obj_ptr;
 
@@ -601,7 +601,7 @@ static void do_poke2(object a, object top)
 static void do_poke8(object a, object top)
 {
 	uint64_t *poke8_addr;
-	double temp_dbl;
+	eudouble temp_dbl;
 	s1_ptr s1;
 	object_ptr obj_ptr;
 
@@ -655,7 +655,7 @@ static void do_poke4(object a, object top)
 // moved it here because it was causing bad code generation for WIN32
 {
 	uint32_t *poke4_addr;
-	double temp_dbl;
+	eudouble temp_dbl;
 	s1_ptr s1;
 	object_ptr obj_ptr;
 
@@ -1451,7 +1451,7 @@ void analyze_switch()
 
 			if( IS_ATOM_INT( top ) ){
 				if (top == MININT) {
-					top = (object)NewDouble((double)-MININT);
+					top = (object)NewDouble((eudouble)-MININT);
 				}
 				else
 					top = -top;
@@ -1686,7 +1686,7 @@ void do_exec(intptr_t *start_pc)
 	register object top;          /* an object - hopefully kept in a register */
 	/*register*/ intptr_t i;           /* loop counter */
 
-	double temp_dbl;
+	eudouble temp_dbl;
 	struct d temp_d;
 	char *poke_addr;
 	void (*sub_addr)();
@@ -2109,7 +2109,7 @@ void do_exec(intptr_t *start_pc)
 					top++;
 					if (top > MAXINT) {
 						b = top;
-						top = NewDouble((double)(INT_VAL(b)));
+						top = NewDouble((eudouble)(INT_VAL(b)));
 					}
 					if (IS_ATOM_INT_NV(*(object_ptr)a)) {
 						*(object_ptr)a = top;
@@ -2140,7 +2140,7 @@ void do_exec(intptr_t *start_pc)
 					}
 					b = top;
 					tpc = pc - 4;
-					*(object_ptr)a = NewDouble((double)(INT_VAL(b)));
+					*(object_ptr)a = NewDouble((eudouble)(INT_VAL(b)));
 				}
 				else {
 					tpc = pc - 4;
@@ -2190,7 +2190,7 @@ void do_exec(intptr_t *start_pc)
 				if( !IS_ATOM_INT( a ) ){
 					// have to check for integer value
 					top = (intptr_t) DBL_PTR( a )->dbl;
-					if( (double)top == DBL_PTR( a )->dbl ){
+					if( (eudouble)top == DBL_PTR( a )->dbl ){
 						a = (intptr_t) DBL_PTR( a )->dbl;
 					}
 					else{
@@ -2225,7 +2225,7 @@ void do_exec(intptr_t *start_pc)
 				if( !IS_ATOM_INT( a ) ){
 					// have to check for integer value
 					top = (intptr_t) DBL_PTR( a )->dbl;
-					if( (double)top == DBL_PTR( a )->dbl ){
+					if( (eudouble)top == DBL_PTR( a )->dbl ){
 						a = (intptr_t) DBL_PTR( a )->dbl;
 					}
 					else{
@@ -2772,7 +2772,7 @@ void do_exec(intptr_t *start_pc)
 				START_UNARY_OP
 				if (top == MININT) {
 					tpc = pc;
-					top = (object)NewDouble((double)-MININT);
+					top = (object)NewDouble((eudouble)-MININT);
 				}
 				else
 					top = -top;
@@ -2811,14 +2811,14 @@ void do_exec(intptr_t *start_pc)
 					tpc = pc;
 					if (IS_ATOM_INT(a) && IS_ATOM_DBL(top)) {
 						v = a;
-						temp_d.dbl = (double)INT_VAL(v);
+						temp_d.dbl = (eudouble)INT_VAL(v);
 						top = Dadd(&temp_d, DBL_PTR(top));
 						goto aresult;
 					}
 					else if (IS_ATOM_DBL(a)) { // true if a is INT - careful!
 						if (IS_ATOM_INT(top)) {
 							v = top;
-							temp_d.dbl = (double)INT_VAL(v);
+							temp_d.dbl = (eudouble)INT_VAL(v);
 							top = Dadd(DBL_PTR(a), &temp_d);
 							goto aresult;
 						}
@@ -2864,7 +2864,7 @@ void do_exec(intptr_t *start_pc)
 					if ((intptr_t)((uintptr_t)top + (uintptr_t)HIGH_BITS) >= 0) {
 						tpc = pc;
 						v = top;
-						top = NewDouble((double)v);
+						top = NewDouble((eudouble)v);
 					}
 					STORE_TOP_I
 				}
@@ -2873,14 +2873,14 @@ void do_exec(intptr_t *start_pc)
 					tpc = pc;
 					if (IS_ATOM_INT(a) && IS_ATOM_DBL(top)) {
 						v = a;
-						temp_d.dbl = (double)INT_VAL(v);
+						temp_d.dbl = (eudouble)INT_VAL(v);
 						top = Dminus(&temp_d, DBL_PTR(top));
 						goto aresult;
 					}
 					else if (IS_ATOM_DBL(a)) {
 						if (IS_ATOM_INT(top)) {
 							v = top;
-							temp_d.dbl = (double)INT_VAL(v);
+							temp_d.dbl = (eudouble)INT_VAL(v);
 							top = Dminus(DBL_PTR(a), &temp_d);
 							goto aresult;
 						}
@@ -2903,7 +2903,7 @@ void do_exec(intptr_t *start_pc)
 				if ((intptr_t)((uintptr_t)top + (uintptr_t)HIGH_BITS) >= 0) {
 					tpc = pc;
 					b = top;
-					top = NewDouble((double)b);
+					top = NewDouble((eudouble)b);
 					*obj_ptr = top;
 					inc3pc();
 					RTFatalType(pc);
@@ -2918,26 +2918,41 @@ void do_exec(intptr_t *start_pc)
 					c = a;
 					b = top;
 
-					// TODO: the optimizations here need updating for 64-bits
+#if INT64_MAX == INTPTR_MAX
+					if ( c == (int32_t) c ){
+						/* c is 32-bit */
+						if( (b <= INT31 && b >= INT31) ||
+							( c == (int16_t)c && b <= INT47 && b >= -INT47 ) ||
+							( c == (int8_t) c && b <= INT55 && b >= -INT55 ) ||
+							( b == (int32_t)b && c <= INT31 && c >= -INT31 )
+						){
+#else
 					if (c == (short)c) {
 						/* c is 16-bit */
 						if ((b <= INT15 && b >= -INT15) ||
 							(c == (char)c && b <= INT23 && b >= -INT23) ||
 							(b == (short)b && c <= INT15 && c >= -INT15)) {
+#endif
 							top = MAKE_INT(c * b);
 						}
 						else {
 							tpc = pc;
-							top = (object)NewDouble(c * (double)b);
+							top = (object)NewDouble(c * (eudouble)b);
 						}
 					}
+#if INT64_MAX == INTPTR_MAX
+					else if ( (b == (int16_t)b && c <= INT47 && c >= -INT47 ) ||
+						(b == (int8_t)b && c <= INT55 && c >= INT55 )
+						 ){
+#else
 					else if (b == (char)b && c <= INT23 && c >= -INT23) {
 						/* b is 8-bit, c is 23-bit */
+#endif
 						top = MAKE_INT(c * b);
 					}
 					else {
 						tpc = pc;
-						top = (object)NewDouble(c * (double)b);
+						top = (object)NewDouble(c * (eudouble)b);
 					}
 					STORE_TOP_I
 				}
@@ -2947,14 +2962,14 @@ void do_exec(intptr_t *start_pc)
 					tpc = pc;
 					if (IS_ATOM_INT(a) && IS_ATOM_DBL(top)) {
 						v = a;
-						temp_d.dbl = (double)INT_VAL(v);
+						temp_d.dbl = (eudouble)INT_VAL(v);
 						top = Dmultiply(&temp_d, DBL_PTR(top));
 						goto aresult;
 					}
 					else if (IS_ATOM(a)) {   // was IS_ATOM_DBL
 						if (IS_ATOM_INT(top)) {
 							v = top;
-							temp_d.dbl = (double)INT_VAL(v);
+							temp_d.dbl = (eudouble)INT_VAL(v);
 							top = Dmultiply(DBL_PTR(a), &temp_d);
 							goto aresult;
 						}
@@ -2977,7 +2992,7 @@ void do_exec(intptr_t *start_pc)
 				if ((b = INT_VAL(top)) == 0)
 					RTFatal("attempt to divide by 0");
 				if (c % b != 0) /* could try in-line DIV call here for speed */
-					top = (object)NewDouble((double)c / b);
+					top = (object)NewDouble((eudouble)c / b);
 				else
 					top = MAKE_INT(c / b);
 				END_BIN_OP(DIVIDE)
@@ -3087,7 +3102,7 @@ void do_exec(intptr_t *start_pc)
 							RTFatal("attempt to divide by 0");
 						}
 						v = a;
-						temp_dbl = floor((double)v / (double)b);
+						temp_dbl = floor((eudouble)v / (eudouble)b);
 						if (fabs(temp_dbl) <= MAXINT_DBL)
 							b = (intptr_t)temp_dbl;
 						else
@@ -3949,7 +3964,7 @@ void do_exec(intptr_t *start_pc)
 				// isn't a temp.  If copied below, then don't ref, either.
 				b = (pc[1] != pc[3]) && (((symtab_ptr)pc[1])->mode != M_TEMP);
 				if( IS_ATOM_INT(a) ){
-					a = NewDouble( (double)a );
+					a = NewDouble( (eudouble)a );
 					DBL_PTR(a)->cleanup = (cleanup_ptr) obj_ptr;
 					b = 0;
 				}
@@ -5272,13 +5287,13 @@ asubsfail:
 dblplus:
 	tpc = pc;
 	v = top;
-	top = NewDouble((double)v);
+	top = NewDouble((eudouble)v);
 	goto contplus;
 
 dblplus_i:
 	tpc = pc;
 	b = top;
-	top = NewDouble((double)b);
+	top = NewDouble((eudouble)b);
 	*obj_ptr = top;
 	inc3pc();
 	RTFatalType(pc);

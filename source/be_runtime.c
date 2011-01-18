@@ -1631,14 +1631,13 @@ void de_reference_i(s1_ptr a)
 object DoubleToInt(object d)
 /* try to convert a double to an integer, if possible */
 {
-	double temp_dbl;
-
+	eudouble temp_dbl;
 	temp_dbl = DBL_PTR(d)->dbl;
 	if (floor(temp_dbl) == temp_dbl &&
 		temp_dbl <= MAXINT_DBL &&
 		temp_dbl >= MININT_DBL) {
 			/* return it in integer repn */
-			return MAKE_INT((object)temp_dbl);
+			return (object)temp_dbl;
 	}
 	else
 		return d; /* couldn't convert */
@@ -1666,7 +1665,7 @@ object add(object a, object b)
 	if (c + HIGH_BITS < 0)
 		return MAKE_INT(c);
 	else
-		return (object)NewDouble((double)c);
+		return (object)NewDouble((eudouble)c);
 }
 
 object minus(object a, object b)
@@ -1678,7 +1677,7 @@ object minus(object a, object b)
 	if (c + HIGH_BITS < 0)
 		return MAKE_INT(c);
 	else
-		return (object)NewDouble((double)c);
+		return (object)NewDouble((eudouble)c);
 }
 
 object multiply(object a, object b)
@@ -1695,7 +1694,7 @@ object multiply(object a, object b)
 	else if (b == (char)b && a <= INT23 && a >= -INT23)
 		return MAKE_INT(a * b);
 
-	return (object)NewDouble(a * (double)b);
+	return (object)NewDouble(a * (eudouble)b);
 }
 
 object divide(object a, object b)
@@ -1704,7 +1703,7 @@ object divide(object a, object b)
 	if (b == 0)
 		RTFatal("attempt to divide by 0");
 	if (a % b != 0)
-		return (object)NewDouble((double)a / b);
+		return (object)NewDouble((eudouble)a / b);
 	else
 		return MAKE_INT(a / b);
 }
@@ -2000,7 +1999,7 @@ object uminus(object a)
 /* integer -a */
 {
 	if (a == MININT)
-		return (object)NewDouble((double)-MININT);
+		return (object)NewDouble((eudouble)-MININT);
 	else
 		return MAKE_INT(-a);
 }
@@ -2121,7 +2120,7 @@ object e_floor(object a)  // not used anymore
 object De_floor(d_ptr a)
 /* floor of a number */
 {
-	double temp;
+	eudouble temp;
 
 	temp = floor(a->dbl);
 #ifndef ERUNTIME
@@ -2291,13 +2290,13 @@ object binary_op_a(int fn, object a, object b)
 			return (*optable[fn].intfn)(INT_VAL(a), INT_VAL(b));
 		}
 		else {
-			temp_d.dbl = (double)INT_VAL(a);
+			temp_d.dbl = (eudouble)INT_VAL(a);
 			return (*optable[fn].dblfn)(&temp_d, DBL_PTR(b));
 		}
 	}
 	else {
 		if (IS_ATOM_INT(b)) {
-			temp_d.dbl = (double)INT_VAL(b);
+			temp_d.dbl = (eudouble)INT_VAL(b);
 			return (*optable[fn].dblfn)(DBL_PTR(a), &temp_d);
 		}
 		else
@@ -2321,13 +2320,13 @@ object binary_op(int fn, object a, object b)
 	   n.b. IS_ATOM_DBL actually only distinguishes ATOMS from SEQUENCES */
 	if (IS_ATOM_INT(a) && IS_ATOM_DBL(b)) {
 		/* in test above b can't be an int if a is */
-		temp_d.dbl = (double)INT_VAL(a);
+		temp_d.dbl = (eudouble)INT_VAL(a);
 		return (*optable[fn].dblfn)(&temp_d, DBL_PTR(b));
 	}
 	else if (IS_ATOM_DBL(a)) {
 		/* a could be an int, but then b must be a sequence */
 		if (IS_ATOM_INT(b)) {
-			temp_d.dbl = (double)INT_VAL(b);
+			temp_d.dbl = (eudouble)INT_VAL(b);
 			return (*optable[fn].dblfn)(DBL_PTR(a), &temp_d);
 		}
 		else if (IS_ATOM_DBL(b))  {
@@ -2425,7 +2424,7 @@ object binary_op(int fn, object a, object b)
 #define IS_DOUBLE_AN_INTEGER( X ) \
 if( !IS_ATOM_INT( X ) && IS_ATOM( X ) ){ \
 	double TMP_dbl = DBL_PTR( X )->dbl; \
-	if( TMP_dbl == (double)(object)TMP_dbl ){\
+	if( TMP_dbl == (eudouble)(object)TMP_dbl ){\
 		X = (object)TMP_dbl;\
 	}\
 }\
@@ -3083,7 +3082,7 @@ object calc_hash(object a, object b)
 	}
 	
 	if (lHashValue  > MAXINT32 ) {
-		return NewDouble((double)lHashValue);
+		return NewDouble((eudouble)lHashValue);
 	}
 	else {
 		return (int32_t)MAKE_INT(lHashValue);
@@ -3099,7 +3098,7 @@ object compare(object a, object b)
 	object_ptr ap, bp;
 	object av, bv;
 	int length, lengtha, lengthb;
-	double da, db;
+	eudouble da, db;
 	int c;
 
 	if (IS_ATOM(a)) {
@@ -3107,13 +3106,13 @@ object compare(object a, object b)
 			return -1;
 		if (IS_ATOM_INT(a)) {
 			/* b *must* be a double */
-			da = (double)a;
+			da = (eudouble)a;
 			db = DBL_PTR(b)->dbl;
 		}
 		else {
 			da = DBL_PTR(a)->dbl;
 			if (IS_ATOM_INT(b))
-				db = (double)b;
+				db = (eudouble)b;
 			else
 				db = DBL_PTR(b)->dbl;
 		}
@@ -3172,7 +3171,7 @@ object find(object a, s1_ptr b)
 	bp = b->base;
 
 	if (IS_ATOM_INT(a)) {
-		double da;
+		eudouble da;
 		int daok = 0;
 		while (TRUE) {
 			bv = *(++bp);
@@ -3188,7 +3187,7 @@ object find(object a, s1_ptr b)
 			}
 			else {  /* INT-DBL case */
 				if (! daok) {
-					da = (double)a;
+					da = (eudouble)a;
 					daok = 1;
 				}
 				if (da == DBL_PTR(bv)->dbl)
@@ -3198,11 +3197,11 @@ object find(object a, s1_ptr b)
 	}
 
 	else if (IS_ATOM_DBL(a)) {
-		double da = DBL_PTR(a)->dbl;
+		eudouble da = DBL_PTR(a)->dbl;
 		while (TRUE) {
 			bv = *(++bp);
 			if (IS_ATOM_INT(bv)) {
-				if (da == (double)bv) {  /* DBL-INT case */
+				if (da == (eudouble)bv) {  /* DBL-INT case */
 					return bp - (object_ptr)b->base;
 				}
 			}
@@ -3721,7 +3720,7 @@ object EOpen(object filename, object mode_obj, object cleanup)
 				cup->type = CLEAN_FILE;
 				cup->func.builtin = &EClose;
 				cup->next = 0;
-				cleanup = NewDouble( (double) i );
+				cleanup = NewDouble( (eudouble) i );
 				DBL_PTR(cleanup)->cleanup = cup;
 				return cleanup;
 			}
@@ -4033,7 +4032,11 @@ static void rPrint(object a)
                         print_chars += strlen("NOVALUE");
                 }
 		else {
+#if INTPTR_MAX == INT32_MAX
 			snprintf(sbuff, NUM_SIZE, "%.10g", DBL_PTR(a)->dbl);
+#else
+			snprintf(sbuff, NUM_SIZE, "%.10Lg", DBL_PTR(a)->dbl);
+#endif
 			sbuff[NUM_SIZE-1] = 0; // ensure NULL
 			screen_output(print_file, sbuff);
 			print_chars += strlen(sbuff);
@@ -4225,7 +4228,7 @@ object_ptr v_elem;
 	char c;
 	intptr_t dval;
 	uintptr_t uval;
-	double gval;
+	eudouble gval;
 	char *sval;
 	char *sbuff;
 	int slength;
@@ -4335,10 +4338,13 @@ object_ptr v_elem;
 		screen_output(f, sbuff);
 	}
 	else if (c == 'e' || c == 'f' || c == 'g') {
+#if INTPTR_MAX == INT64_MAX
+		cstring[flen++] = 'L';
+#endif
 		cstring[flen++] = c;
 		cstring[flen] = '\0';
 		if (IS_ATOM_INT(*v_elem))
-			gval = (double)INT_VAL(*v_elem);
+			gval = (eudouble)INT_VAL(*v_elem);
 		else
 			gval = DBL_PTR(*v_elem)->dbl;
 		if (NUM_SIZE + flen > TEMP_SIZE) {
@@ -5021,7 +5027,7 @@ object system_exec_call(object command, object wait)
 	if (exit_code >= MININT && exit_code <= MAXINT)
 		return (object)exit_code;
 	else
-		return NewDouble((double)exit_code);
+		return NewDouble((eudouble)exit_code);
 }
 
 object EGetEnv(object name)
@@ -5167,7 +5173,7 @@ object make_atom32(unsigned c32)
 	if (c32 <= (uintptr_t)MAXINT32)
 		return c32;
 	else
-		return NewDouble((double)c32);
+		return NewDouble((eudouble)c32);
 }
 
 object make_atom(uintptr_t c)
@@ -5176,7 +5182,7 @@ object make_atom(uintptr_t c)
 	if (c <= (uintptr_t)MAXINT)
 		return c;
 	else
-		return NewDouble((double)c);
+		return NewDouble((eudouble)c);
 }
 
 uintptr_t general_call_back(
@@ -5865,7 +5871,7 @@ object find_from(object a, object bobj, object c)
 	bp = b->base;
 	bp += c - 1;
 	if (IS_ATOM_INT(a)) {
-		double da;
+		eudouble da;
 		int daok = 0;
 		while (TRUE) {
 			bv = *(++bp);
@@ -5881,7 +5887,7 @@ object find_from(object a, object bobj, object c)
 			}
 			else {  /* INT-DBL case */
 				if (! daok) {
-					da = (double)a;
+					da = (eudouble)a;
 					daok = 1;
 				}
 				if (da == DBL_PTR(bv)->dbl)
@@ -5891,11 +5897,11 @@ object find_from(object a, object bobj, object c)
 	}
 
 	else if (IS_ATOM_DBL(a)) {
-		double da = DBL_PTR(a)->dbl;
+		eudouble da = DBL_PTR(a)->dbl;
 		while (TRUE) {
 			bv = *(++bp);
 			if (IS_ATOM_INT(bv)) {
-				if (da == (double)bv) {  /* DBL-INT case */
+				if (da == (eudouble)bv) {  /* DBL-INT case */
 					return bp - (object_ptr)b->base;
 				}
 			}
