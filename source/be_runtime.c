@@ -5841,7 +5841,7 @@ void key_gets(char *input_string)
 object find_from(object a, object bobj, object c)
 /* find object a as an element of sequence b starting from c*/
 {
-	long length;
+	int length;
 	object_ptr bp;
 	object bv;
 	s1_ptr b;
@@ -5857,7 +5857,7 @@ object find_from(object a, object bobj, object c)
 		;
 	}
 	else if (IS_ATOM_DBL(c)) {
-		c = (long)(DBL_PTR(c)->dbl);
+		c = (object)(DBL_PTR(c)->dbl);
 	}
 	else
 		RTFatal("third argument of find_from() must be an atom");
