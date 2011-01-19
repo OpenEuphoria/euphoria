@@ -39,7 +39,7 @@ export constant
 -- ranges for various sizes:
 export constant
 		 MIN1B = -2,  -- minimum integer value stored in one byte
-		 MAX1B = 246, -- maximum integer value (if no cache)
+		 MAX1B = 244, -- maximum integer value (if no cache)
 		 MIN2B = -power(2, 15),
 		 MAX2B =  power(2, 15)-1,
 		 MIN3B = -power(2, 23),
@@ -68,7 +68,7 @@ export function compress(object x)
 			return {I3B, and_bits(x, #FF), and_bits(floor(x / #100), #FF), floor(x / #10000)}
 
 		elsif x >= MIN4B and x <= MAX4B then
-			return I4B & int_to_bytes(x-MIN4B)
+			return I4B & int_to_bytes(x)
 		
 		else
 			return I8B & int_to_bytes(x, 8)
@@ -118,7 +118,7 @@ end function
 
 constant COMP_CACHE_SIZE = 64  -- power of 2: number of large integers to cache
 
-constant CACHE0 = 255-7-COMP_CACHE_SIZE -- just before cache
+constant CACHE0 = 255-9-COMP_CACHE_SIZE -- just before cache
 
 export integer max1b  -- maximum integer value to store in one byte
 max1b = CACHE0 + MIN1B
@@ -163,11 +163,11 @@ export procedure fcompress(integer f, object x)
 					puts(f, {I3B, and_bits(x, #FF), and_bits(floor(x / #100), #FF), floor(x / #10000)})
 
 				elsif x >= MIN4B and x <= MAX4B then
-					puts(f, I4B & int_to_bytes(x-MIN4B))
+					puts(f, I4B & int_to_bytes(x))
 					
 				else
 					puts(f, I8B & int_to_bytes(x, 8))
-
+					
 				end if
 			end if
 		end if
@@ -221,7 +221,7 @@ function get4()
 	poke(mem1, getc(current_db))
 	poke(mem2, getc(current_db))
 	poke(mem3, getc(current_db))
-	return peek4u(mem0)
+	return peek4s(mem0)
 end function
 
 function get8()
@@ -276,7 +276,7 @@ export function fdecompress(integer c)
 		return ival
 
 	elsif c = I4B  then
-		ival = get4() + MIN4B
+		ival = get4()
 		-- update the appropriate compression cache slot
 		comp_cache[1 + and_bits(ival, COMP_CACHE_SIZE-1)] = ival
 		return ival

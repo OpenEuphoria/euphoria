@@ -62,7 +62,7 @@ object decompress(uintptr_t c)
 	else if (c == I4B) {
 		i = *(int32_t *)string_ptr;
 		string_ptr += sizeof( int32_t );
-		return i + MIN4B;
+		return i;
 	}
 	
 	else if ( c == I8B ) {
