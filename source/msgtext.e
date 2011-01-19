@@ -15,7 +15,7 @@ include common.e
 -- don't change this please, but please look for -deleted- items before adding new options
 -- to the bottom of this list. Re-use -deleted- items.
 constant StdErrMsgs = {
-	{  0, "Unknown message code"},
+	{  0, "Unknown message code: [1]"},
 	{  1, "[1] is missing defined word before 'or'"},
 	{  2, "[1] is missing defined word before 'and'"},
 	{  3, "[1] word must be an identifier"},
@@ -385,6 +385,9 @@ public function GetMsgText( integer MsgNum, integer WithNum = 1, object Args = {
 			end if
 		end for
 		msgtext = StdErrMsgs[idx][2]
+		if idx = 1 then
+			Args = MsgNum
+		end if
 	end if
 
 	if atom(Args) or length(Args) != 0 then
