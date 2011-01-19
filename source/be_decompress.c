@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include "alldefs.h"
 #include "be_alloc.h"
+#include "be_runtime.h"
 
 unsigned char *string_ptr;
 
@@ -83,7 +84,7 @@ object decompress(uintptr_t c)
 	}
 	else if ( c == F10B ) {
 		ld = *(long double*)string_ptr;
-		string_ptr += sizeof( long double );
+		string_ptr += 10; // don't use sizeof, because that may include padding
 		return NewDouble( ld );
 	}
 	
