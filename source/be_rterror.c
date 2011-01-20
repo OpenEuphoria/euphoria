@@ -534,8 +534,13 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 			if (iv >= ' ' && iv <= 127)
 				add_char = TRUE;
 		}
-		else 
+		else{ 
+#if INTPTR_MAX == INT64_MAX
+			snprintf(val_string,  DV_len, "%.10Lg", DBL_PTR(val)->dbl);
+#else
 			snprintf(val_string,  DV_len, "%.10g", DBL_PTR(val)->dbl);
+#endif
+		}
 		val_string[ DV_len - 1] = 0; // ensure NULL
 		len_required = strlen(s_ptr->name) + 1 + strlen(val_string) + add_char;
 		if (len_required < VAR_WIDTH)
@@ -1402,7 +1407,11 @@ void BadSubscript(object subs, int length)
 	if (IS_ATOM_INT(subs))
 		snprintf(subs_buff, BadSubscript_bufflen, "%d", (int)subs);
 	else
+#if INTPTR_MAX == INT64_MAX
+		snprintf(subs_buff, BadSubscript_bufflen, "%.10Lg", DBL_PTR(subs)->dbl);
+#else
 		snprintf(subs_buff, BadSubscript_bufflen, "%.10g", DBL_PTR(subs)->dbl);
+#endif
 	subs_buff[BadSubscript_bufflen - 1] = 0; // ensure NULL
 
 	RTFatal("subscript value %s is out of bounds, assigning to a sequence of length %ld",
@@ -1427,7 +1436,11 @@ void RangeReading(object subs, int len)
 	if (IS_ATOM_INT(subs))
 		snprintf(subs_buff, RangeReading_buflen, "%d", (int)subs);
 	else
+#if INTPTR_MAX == INT64_MAX
+		snprintf(subs_buff, RangeReading_buflen, "%.10Lg", DBL_PTR(subs)->dbl);
+#else
 		snprintf(subs_buff, RangeReading_buflen, "%.10g", DBL_PTR(subs)->dbl);
+#endif
 	subs_buff[RangeReading_buflen - 1] = 0; // ensure NULL
 	
 	RTFatal("subscript value %s is out of bounds, reading from a sequence of length %ld",
