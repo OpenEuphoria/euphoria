@@ -4007,7 +4007,7 @@ end procedure
 
 procedure opAND_BITS()
 	gencode = "@ = binary_op(AND_BITS, @, @);\n"
-	intcode = "{uint32_t tu;\n tu = (uint32_t)@2 & (uint32_t)@3;\n @1 = MAKE_UINT(tu);\n}\n"
+	intcode = "{uintptr_t tu;\n tu = (uintptr_t)@2 & (uintptr_t)@3;\n @1 = MAKE_UINT(tu);\n}\n"
 	dblfn="Dand_bits"
 	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
@@ -4015,7 +4015,7 @@ end procedure
 
 procedure opOR_BITS()
 	gencode = "@ = binary_op(OR_BITS, @, @);\n"
-	intcode = "{uint32_t tu;\n tu = (uint32_t)@2 | (uint32_t)@3;\n @1 = MAKE_UINT(tu);\n}\n"
+	intcode = "{uintptr_t tu;\n tu = (uintptr_t)@2 | (uintptr_t)@3;\n @1 = MAKE_UINT(tu);\n}\n"
 	dblfn="Dor_bits"
 	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
@@ -4023,7 +4023,7 @@ end procedure
 
 procedure opXOR_BITS()
 	gencode = "@ = binary_op(XOR_BITS, @, @);\n"
-	intcode = "{uint32_t tu;\n tu = (uint32_t)@2 ^ (uint32_t)@3;\n @1 = MAKE_UINT(tu);\n}\n"
+	intcode = "{uintptr_t tu;\n tu = (uintptr_t)@2 ^ (uintptr_t)@3;\n @1 = MAKE_UINT(tu);\n}\n"
 	dblfn="Dxor_bits"
 	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
