@@ -274,6 +274,11 @@ echo -i %TRUNKDIR%\include >> eu.cfg
 echo [translate] >> eu.cfg
 echo -com %TRUNKDIR% >> eu.cfg
 
+rem ============================================================
+rem Copy 32-bit manifest file
+rem ============================================================
+
+copy eu.manifest32 eu.manifest
 
 rem ============================================================
 rem Copy temporary .wat includes
