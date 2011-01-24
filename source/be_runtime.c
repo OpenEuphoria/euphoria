@@ -4836,6 +4836,33 @@ void Position(object line, object col)
 	SetPosition(line_val, col_val);
 }
 
+#ifdef EWINDOWS
+char* buildCmdLine(){
+	char *szCmdLine;
+	int size;
+	int c, argc;
+	int len;
+	char **argv;
+	size = 1;
+	argv = __argv;
+	argc = __argc;
+	for( c = 1; c < argc; ++c ){
+		size += strlen( argv[c] );
+		++size;
+	}
+	szCmdLine = EMalloc( size );
+	size = 0;
+	for( c = 1; c < argc; ++c ){
+		len = strlen( argv[c] );
+		strncpy( szCmdLine + size, argv[c], len );
+		size += len;
+		szCmdLine[size++] = ' ';
+	}
+	szCmdLine[size] = '\0';
+	return szCmdLine;
+}
+#endif
+
 char **make_arg_cv(char *cmdline, int *argc)
 /* Convert command line string to argc, argv.
    If *argc is 1, then get program name from GetModuleFileName().
@@ -4849,6 +4876,11 @@ char **make_arg_cv(char *cmdline, int *argc)
 	int bs;
 #endif
 	InitEMalloc();
+#ifdef EWINDOWS
+	if( cmdline == NULL ){
+		cmdline = buildCmdLine();
+	}
+#endif
 	argv = (char **)EMalloc((strlen(cmdline)/2+3) * sizeof(char *));
 #ifdef EWINDOWS
 	if (*argc == 1) {

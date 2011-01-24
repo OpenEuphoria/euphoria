@@ -430,3 +430,9 @@ echo -i $TRUNKDIR/include >> eu.cfg
 echo -eudir $TRUNKDIR >> eu.cfg
 echo [translate] >> eu.cfg
 echo -com $TRUNKDIR >> eu.cfg
+
+if [ "$EFLAG" = "E32" ]; then
+	cp eu.manifest32 eu.manifest
+else
+	cp eu.manifest64 eu.manifest
+fi
