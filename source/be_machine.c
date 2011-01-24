@@ -1773,7 +1773,12 @@ static object float_to_atom(object x, int flen)
 {
 	int len, i;
 	object_ptr obj_ptr;
-	char fbuff[8];
+	union{
+		char   fbuff[8];
+		double fdouble;
+		float  ffloat;
+	} convert;
+	
 	double d;
 	s1_ptr s;
 
@@ -1783,12 +1788,12 @@ static object float_to_atom(object x, int flen)
 		RTFatal("sequence has wrong length");
 	obj_ptr = s->base+1;
 	for (i = 0; i < len; i++) {
-		fbuff[i] = (char)obj_ptr[i];
+		convert.fbuff[i] = (char)obj_ptr[i];
 	}
 	if (flen == 4)
-		d = (double)*((float *)&fbuff);
+		d = (double)convert.ffloat;
 	else
-		d = *((double *)&fbuff);
+		d = convert.ffloat;
 	return NewDouble(d);
 }
 
