@@ -478,8 +478,8 @@ endif
 .PHONY : source
 
 ifeq "$(EMINGW)" "1"
-$(EUI_RES) : eui.rc version_info.rc
-$(EUIW_RES) : euiw.rc version_info.rc
+$(EUI_RES) : eui.rc version_info.rc eu.manifest
+$(EUIW_RES) : euiw.rc version_info.rc eu.manifest
 endif
 
 $(BUILDDIR)/$(EEXU) :  EU_TARGET = int.ex
@@ -498,7 +498,7 @@ endif
 $(BUILDDIR)/$(OBJDIR)/back/be_machine.o : $(BUILDDIR)/$(OBJDIR)/back/be_ver.h
 
 ifeq "$(EMINGW)" "1"
-$(EUC_RES) : euc.rc version_info.rc
+$(EUC_RES) : euc.rc version_info.rc eu.manifest
 endif
 
 $(BUILDDIR)/$(EECU) :  OBJDIR = transobj
@@ -516,8 +516,8 @@ endif
 	$(MAKE) $(BUILDDIR)/$(EBACKENDU) EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 
 ifeq "$(EMINGW)" "1"
-$(EUB_RES) : eub.rc version_info.rc
-$(EUBW_RES) : eubw.rc version_info.rc
+$(EUB_RES) : eub.rc version_info.rc eu.manifest
+$(EUBW_RES) : eubw.rc version_info.rc eu.manifest
 endif
 
 $(BUILDDIR)/$(EBACKENDU) : OBJDIR = backobj
