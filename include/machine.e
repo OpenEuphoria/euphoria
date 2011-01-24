@@ -49,7 +49,14 @@ constant M_ALLOC = 16,
 	 M_CRASH_ROUTINE = 66
 	 
 -- biggest address on a 32-bit machine
-constant MAX_ADDR = power(2, 32)-1
+function max_addr()
+	if integer( power(2, 32 ) ) then
+		return power(2, 64 ) - 1
+	else
+		return power(2, 32)-1
+	end if
+end function
+constant MAX_ADDR = max_addr()
 
 -- biggest address accessible to 16-bit real mode
 constant LOW_ADDR = power(2, 20)-1
