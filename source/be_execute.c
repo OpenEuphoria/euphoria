@@ -3467,7 +3467,7 @@ void do_exec(int *start_pc)
 
 				// get the routine symtab_ptr:
 				a = get_pos_int("call_proc/call_func", *(object_ptr)pc[1]);
-				if (a >= e_routine_next) {
+				if (a < 0 || a >= e_routine_next) {
 					RTFatal("invalid routine id");
 				}
 				sub = e_routine[a];
