@@ -12,6 +12,8 @@
 * [[ticket:593]] Atoms represented as doubles, but that hold the double representation of a
   euphoria integer, now hash as though they were actually represented as an integer.  This
   ensures that two objects that evaluate as ##equal()## will have the same hash value.
+* [[ticket:597]] Invalid negative routine ids were not detected properly by the interpreter,
+  leading to a machine crash.
 
 == Enhancements
 
