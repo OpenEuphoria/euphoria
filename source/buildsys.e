@@ -243,6 +243,7 @@ function setup_build()
 	end if -- user_library = 0
 
 	if TWINDOWS then
+		c_flags &= " /dEWINDOWS"
 		if dll_option then
 			exe_ext = ".dll"
 		else
