@@ -743,6 +743,8 @@ $(PCRE_OBJECTS) : pcre/*.c pcre/pcre.h.windows pcre/config.h.windows
 # HTML Manual
 #
 
+htmldoc: .SYMBOLIC $(BUILDDIR)\html\style.css $(BUILDDIR)\html\images\prev.png $(BUILDDIR)\html\images\next.png $(BUILDDIR)\html\index.html
+
 $(BUILDDIR)\docs\js : .EXISTSONLY $(BUILDDIR)\docs  
 	mkdir $^@
 

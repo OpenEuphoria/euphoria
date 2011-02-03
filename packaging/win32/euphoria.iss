@@ -17,6 +17,7 @@ OutputBaseFilename=euphoria-4.0.0
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
+ChangesEnvironment=yes
 InfoBeforeFile=before.txt
 InfoAfterFile=after.txt
 
@@ -146,7 +147,7 @@ Filename: {app}\EuphoriaManual.url; Section: InternetShortcut; Key: URL; String:
 [Icons]
 ; Icons (shortcuts) to display in the Start menu
 ;Name: {group}\Euphoria Manual in HTML; Filename: {app}\docs\html\index.html; Components: comp_docs
-Name: {group}\Euphoria Manual in PDF; Filename: {app}\docs\euphoria-4.0.pdf; Components: comp_docs
+Name: {group}\Euphoria Manual in PDF; Filename: {app}\docs\euphoria.pdf; Components: comp_docs
 Name: {group}\Euphoria Manual on the Web; Filename: {app}\EuphoriaManual.url
 Name: {group}\Euphoria Website;  Filename: {app}\RapidEuphoria.url
 Name: {group}\Euphoria User Community (Forums and Wiki);  Filename: {app}\OpenEuphoria.url
