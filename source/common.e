@@ -118,7 +118,7 @@ public function get_eudir()
 	for i = 1 to length(possible_paths) do
 		sequence possible_path = possible_paths[i]
 
-		if file_exists(possible_path) then
+		if file_exists(possible_path & SLASH & "include" & SLASH & "euphoria.h") then
 			eudir = possible_path
 			return eudir
 		end if
