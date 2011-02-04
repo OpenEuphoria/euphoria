@@ -329,17 +329,31 @@ $(BUILDDIR)\ecp.dat : $(TRUNKDIR)\bin\buildcpdb.ex $(TRUNKDIR)\source\codepage
 BUILD_DIRS=$(BUILDDIR)\intobj $(BUILDDIR)\transobj $(BUILDDIR)\WINlibobj $(BUILDDIR)\WINlibobj1 $(BUILDDIR)\backobj $(BUILDDIR)\eutestdr
 
 distclean : .SYMBOLIC clean
+	-$(RM) $(BUILDDIR)\build\*.wat
 	-$(RM) $(CONFIG)
 	-$(RM) Makefile
+	
 
 clean : .SYMBOLIC mostlyclean
 	-@for %i in ($(BUILD_DIRS)) do -$(RMDIR) %i
+	-$(RM) $(BUILDDIR)\eu.lib
+	-$(RM) $(BUILDDIR)\eudbg.lib
+	-$(RM) $(BUILDDIR)\euiw.exe
+	-$(RM) $(BUILDDIR)\eui.exe
+	-$(RM) $(BUILDDIR)\euc.exe
+	-$(RM) $(BUILDDIR)\eub.exe
+	-$(RM) $(BUILDDIR)\eubw.exe
+	-@for %i in ($(BUILD_DIR)\html\*.*) do -$(RM) %i
+	-$(RM) $(BUILDDIR)\html\js\*.js
+	-$(RM) $(BUILDDIR)\html\png\*.*
+	-$(RMDIR) $(BUILDDIR)\html\js	
+	-$(RMDIR) $(BUILDDIR)\html\png
+	-$(RMDIR) $(BUILDDIR)\html
+	
 	
 nearlyclean mostlyclean : .SYMBOLIC	
 	-@for %i in ($(BUILD_DIRS)) do -$(RM) %i\*.obj
 	-$(RM) $(BUILDDIR)\pcre\*.obj
-	-$(RM) $(BUILDDIR)\eu*.exe
-	-$(RM) $(BUILDDIR)\eu*.lib
 	-$(RM) $(TRUNKDIR)\tests\ecp.dat
 	-$(RM) $(TRUNKDIR)\tests\*.c	
 	-$(RM) $(TRUNKDIR)\tests\*.obj
@@ -483,12 +497,12 @@ tester: .SYMBOLIC
 binder : .SYMBOLIC $(BUILDDIR)\eubind.exe
 
 $(BUILDDIR)\eubind.exe : translator library
-	$(BUILDDIR)\euc -con -i $(TRUNKDIR)\include -o $(BUILDDIR)\eubind.exe $(TRUNKDIR)\source\bind.ex
+	$(BUILDDIR)\euc -con -lib $(BUILDDIR)\eu.lib -i $(TRUNKDIR)\include -o $(BUILDDIR)\eubind.exe $(TRUNKDIR)\source\bind.ex
 	
 shrouder : .SYMBOLIC $(BUILDDIR)\eushroud.exe
 
 $(BUILDDIR)\eushroud.exe : translator library
-	$(BUILDDIR)\euc -con -i $(TRUNKDIR)\include -o $(BUILDDIR)\eushroud.exe $(TRUNKDIR)\source\shroud.ex
+	$(BUILDDIR)\euc -con -lib $(BUILDDIR)\eu.lib -i $(TRUNKDIR)\include -o $(BUILDDIR)\eushroud.exe $(TRUNKDIR)\source\shroud.ex
 	
 tools: .SYMBOLIC
     @echo ------- TOOLS -----------
