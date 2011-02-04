@@ -128,7 +128,9 @@ Source: "..\..\build\*.pdf"; DestDir: {app}\docs\; Flags: ignoreversion; Compone
 Source: "..\..\include\*.*"; DestDir: {app}\include\; Flags: ignoreversion recursesubdirs; Components: comp_main
 
 ; Sources
-Source: "..\..\source\*.*"; DestDir: {app}\source\; Flags: ignoreversion recursesubdirs; Components: comp_source
+Source: "..\..\source\*.*"; DestDir: {app}\source\; Flags: ignoreversion; Components: comp_source
+Source: "..\..\source\codepage\*.*"; DestDir: {app}\source\; Flags: ignoreversion; Components: comp_source
+Source: "..\..\source\pcre\*.*"; DestDir: {app}\source\; Flags: ignoreversion; Components: comp_source
 
 ; Test
 Source: "..\..\tests\*.*"; DestDir: {app}\tests\; Flags: ignoreversion recursesubdirs; Components: comp_tests
