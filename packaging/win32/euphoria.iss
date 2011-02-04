@@ -1,7 +1,7 @@
 [Setup]
 AppName=Euphoria
 AppVersion=4.0.0
-AppVerName=Euphoria v4.0.0
+AppVerName=Euphoria v4.0.1
 AppPublisher=OpenEuphoria Group
 AppPublisherURL=http://openeuphoria.org
 AppSupportURL=http://openeuphoria.org
@@ -13,7 +13,7 @@ LicenseFile=..\..\license.txt
 DisableStartupPrompt=yes
 DisableReadyPage=yes
 OutputDir=.\
-OutputBaseFilename=euphoria-4.0.0
+OutputBaseFilename=euphoria-4.0.1
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
@@ -180,6 +180,7 @@ Root: HKCR; Subkey: "EUConsoleApp\shell\translate\command"; ValueType: string; V
 Root: HKCR; Subkey: ".e"; ValueType: string; ValueName: ""; ValueData: "EUInc"; Flags: deletekey uninsdeletevalue createvalueifdoesntexist; Tasks: associate
 Root: HKCR; Subkey: "EUInc"; ValueType: string; ValueName: ""; ValueData: "Euphoria Include File"; Flags: deletekey uninsdeletekey createvalueifdoesntexist; Tasks: associate
 Root: HKCR; Subkey: "EUInc\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\eufile.ico"; Flags: deletekey uninsdeletekey createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: ".ew"; ValueType: string; ValueName: ""; ValueData: "EUInc"; Flags: deletekey uninsdeletevalue createvalueifdoesntexist; Tasks: associate
 
 [Messages]
 FinishedLabel=Setup has finished installing [name] on your computer.%n%nYou can now run Euphoria .ex and .exw programs by double-clicking them, or (after reboot) by typing:%n     eui filename.ex%nor%n     euiw filename.ex/euw%non a command-line.
