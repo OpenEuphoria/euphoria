@@ -40,6 +40,7 @@ procedure display(sequence message, sequence caption)
 	end ifdef
 end procedure
 
+without warning
 function display_DEP_successful_message(integer i)
 	display( "DEP is working on your system.", "Good News" )
 	abort(0)
