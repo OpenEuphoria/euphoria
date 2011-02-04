@@ -1,7 +1,7 @@
 [Setup]
 AppName=Euphoria
 AppVersion=4.0.0
-AppVerName=Euphoria v4.0.0
+AppVerName=Euphoria v4.0.1
 AppPublisher=OpenEuphoria Group
 AppPublisherURL=http://openeuphoria.org
 AppSupportURL=http://openeuphoria.org
@@ -13,7 +13,7 @@ LicenseFile=..\..\license.txt
 DisableStartupPrompt=yes
 DisableReadyPage=yes
 OutputDir=.\
-OutputBaseFilename=euphoria-4.0.0-ow
+OutputBaseFilename=euphoria-4.0.1-ow
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
@@ -70,74 +70,74 @@ Source: "{app}\file_id.diz"; DestDir: "{code:GetBackupPath}"; Flags: external sk
 
 ; Temporary Programs used to update AUTOEXEC.BAT in Windows 95, 98 and ME,
 ; create the docs, and euiw.exe (see [Run] section below)
-Source: "..\..\bin\euiw.exe"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: "..\..\source\build\euiw.exe"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
 
 ; We temporarily need these includes as well, but EUDIR will not have been set.
-Source: "cleanbranch\include\wildcard.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: "cleanbranch\include\get.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: "cleanbranch\include\misc.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: "cleanbranch\include\msgbox.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: "cleanbranch\include\machine.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: "cleanbranch\include\dll.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: "cleanbranch\include\euphoria\keywords.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: "cleanbranch\include\euphoria\syncolor.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: "cleanbranch\source\autoexec_update.exw"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: "..\..\include\wildcard.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: "..\..\include\get.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: "..\..\include\misc.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: "..\..\include\msgbox.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: "..\..\include\machine.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: "..\..\include\dll.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: "..\..\include\euphoria\keywords.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: "..\..\include\euphoria\syncolor.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: "..\..\source\autoexec_update.exw"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
 
 ; Files to Install
 ; Root
-Source: "cleanbranch\file_id.diz"; DestDir: {app}; Flags: ignoreversion;
-Source: "cleanbranch\license.txt"; DestDir: {app}; Flags: ignoreversion;
+Source: "..\..\file_id.diz"; DestDir: {app}; Flags: ignoreversion;
+Source: "..\..\license.txt"; DestDir: {app}; Flags: ignoreversion;
 
 ; Windows Binaries
-Source: "..\..\bin\eu.a"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eu.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eub.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eubind.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eubw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\euc.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eudbg.a"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eudbg.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eui.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main; AfterInstall: InstallEuCfg
-Source: "..\..\bin\euiw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eushroud.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "cleanbranch\source\eufile.ico"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "cleanbranch\source\euphoria.ico"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\eu.a"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\eu.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\eub.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\eubind.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\eubw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\euc.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\eudbg.a"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\eudbg.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\eui.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main; AfterInstall: InstallEuCfg
+Source: "..\..\source\build\euiw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\eushroud.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\eufile.ico"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\euphoria.ico"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 
 ; Windows Tools
-Source: "..\..\bin\creole.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "..\..\bin\eucoverage.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "..\..\bin\eudis.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "..\..\bin\eudist.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "..\..\bin\eudoc.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "..\..\bin\euloc.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "..\..\bin\eutest.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "..\..\source\build\creole.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "..\..\source\build\eucoverage.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "..\..\source\build\eudis.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "..\..\source\build\eudist.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "..\..\source\build\eudoc.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "..\..\source\build\euloc.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "..\..\source\build\eutest.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 
 ; Generic Tools
-Source: "cleanbranch\bin\*.bat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "cleanbranch\bin\*.ex"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "cleanbranch\bin\*.exw"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "..\..\bin\*.bat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "..\..\bin\*.ex"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "..\..\bin\*.exw"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 
 ; Demos
-Source: "cleanbranch\demo\*.*"; DestDir: {app}\demo\; Flags: ignoreversion recursesubdirs; Components: comp_demos
+Source: "..\..\demo\*.*"; DestDir: {app}\demo\; Flags: ignoreversion recursesubdirs; Components: comp_demos
 
 ; Docs
 Source: "..\..\build\*.pdf"; DestDir: {app}\docs\; Flags: ignoreversion; Components: comp_docs
 ;Source: "..\..\build\html\*.*"; DestDir: {app}\docs\html\; Flags: ignoreversion; Components: comp_docs
 
 ; Includes
-Source: "cleanbranch\include\*.*"; DestDir: {app}\include\; Flags: ignoreversion recursesubdirs; Components: comp_main
+Source: "..\..\include\*.*"; DestDir: {app}\include\; Flags: ignoreversion recursesubdirs; Components: comp_main
 
 ; Sources
-Source: "cleanbranch\source\*.*"; DestDir: {app}\source\; Flags: ignoreversion recursesubdirs; Components: comp_source
+Source: "..\..\source\*.*"; DestDir: {app}\source\; Flags: ignoreversion recursesubdirs; Components: comp_source
 
 ; Test
-Source: "cleanbranch\tests\*.*"; DestDir: {app}\tests\; Flags: ignoreversion recursesubdirs; Components: comp_tests
+Source: "..\..\tests\*.*"; DestDir: {app}\tests\; Flags: ignoreversion recursesubdirs; Components: comp_tests
 
 ; Tutorial
-Source: "cleanbranch\tutorial\*.*"; DestDir: {app}\tutorial\; Flags: ignoreversion recursesubdirs; Components: comp_tuts
+Source: "..\..\tutorial\*.*"; DestDir: {app}\tutorial\; Flags: ignoreversion recursesubdirs; Components: comp_tuts
 
 ; Others
-Source: "cleanbranch\packaging\win32\setenv-ow.bat"; DestDir: {app}; Flags: ignoreversion; Tasks: not update_env; AfterInstall: CreateEnvBatchFile()
+Source: "..\..\packaging\win32\setenv-ow.bat"; DestDir: {app}; Flags: ignoreversion; Tasks: not update_env; AfterInstall: CreateEnvBatchFile()
 
 ; OpenWatcom
 Source: "\Development\WATCOM-OEBUNDLE\*.*"; DestDir: {app}\watcom; Flags: ignoreversion recursesubdirs; Components: comp_ow;
@@ -186,6 +186,7 @@ Root: HKCR; Subkey: "EUConsoleApp\shell\translate\command"; ValueType: string; V
 Root: HKCR; Subkey: ".e"; ValueType: string; ValueName: ""; ValueData: "EUInc"; Flags: deletekey uninsdeletevalue createvalueifdoesntexist; Tasks: associate
 Root: HKCR; Subkey: "EUInc"; ValueType: string; ValueName: ""; ValueData: "Euphoria Include File"; Flags: deletekey uninsdeletekey createvalueifdoesntexist; Tasks: associate
 Root: HKCR; Subkey: "EUInc\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\eufile.ico"; Flags: deletekey uninsdeletekey createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: ".ew"; ValueType: string; ValueName: ""; ValueData: "EUInc"; Flags: deletekey uninsdeletevalue createvalueifdoesntexist; Tasks: associate
 
 [Messages]
 FinishedLabel=Setup has finished installing [name] on your computer.%n%nYou can now run Euphoria .ex and .exw programs by double-clicking them, or (after reboot) by typing:%n     eui filename.ex%nor%n     euiw filename.ex/euw%non a command-line.
@@ -200,8 +201,7 @@ var
 
 procedure CreateEnvBatchFile();
 begin
-	SaveStringToFile(ExpandConstant('{app}\setenv-ow.bat'), 
-		#13#10 + 
+	SaveStringToFile(ExpandConstant('{app}\setenv-ow.bat'), #13#10 + 
 		ExpandConstant('SET EUDIR={app}') + #13#10 + 
 		ExpandConstant('SET WATCOM={app}\watcom') + #13#10 + 
 		'SET PATH=%EUDIR%\bin;%WATCOM\binw;%WATCOM%\binnt;%PATH%' + #13#10 + 
