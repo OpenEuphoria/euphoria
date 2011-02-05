@@ -15,19 +15,22 @@
 #   Create Documentation in PDF      : wmake pdfdoc
 #   Create online Documentation HTML : wmake manual
 #                                    
-#   Clean binaries, object files,    
-#   C files and configuration        : wmake clobber
+#   Clean and remove entire build directory    
+#   and configuration                : wmake clobber
 #                                    
-#   Clean binaries, object files,    
-#   C files                          : wmake clean
+#   Clean binaries, libraries, including 
+#   files that take a long time, object files,    
+#   C files and configuration        : wmake distclean
 #                                    
-#   Clean binaries, object files,    
-#   C files and configuration and    
-#   build directory                  : wmake distclean
-#                                    
-#   Clean binaries and object files  
-#   but keep configuration and C     
-#   files                            : wmake nearlyclean
+#   Clean binaries, libraries, C files,
+#   documentation, and object files  : wmake clean
+#
+#   Clean documentation only         : wmake docsclean
+#
+#   Clean intermediate files (object files)  
+#   but keep documentation, 
+#   configuration, C,      
+#   library, and binary files        : wmake nearlyclean
 #                                    
 #   Make all targets                 : wmake
 #                                      wmake all
@@ -329,30 +332,37 @@ $(BUILDDIR)\ecp.dat : $(TRUNKDIR)\bin\buildcpdb.ex $(TRUNKDIR)\source\codepage
 BUILD_DIRS=$(BUILDDIR)\intobj $(BUILDDIR)\transobj $(BUILDDIR)\WINlibobj $(BUILDDIR)\WINlibobj1 $(BUILDDIR)\backobj $(BUILDDIR)\eutestdr
 
 distclean : .SYMBOLIC clean
-	-$(RM) $(BUILDDIR)\build\*.wat
+	-$(RM) $(BUILDDIR)\*.wat
 	-$(RM) $(CONFIG)
 	-$(RM) Makefile
 	
 
-clean : .SYMBOLIC mostlyclean
+clean : .SYMBOLIC mostlyclean docsclean
 	-@for %i in ($(BUILD_DIRS)) do -$(RMDIR) %i
-	-$(RM) $(BUILDDIR)\eu.lib
-	-$(RM) $(BUILDDIR)\eudbg.lib
-	-$(RM) $(BUILDDIR)\euiw.exe
-	-$(RM) $(BUILDDIR)\eui.exe
-	-$(RM) $(BUILDDIR)\euc.exe
-	-$(RM) $(BUILDDIR)\eub.exe
-	-$(RM) $(BUILDDIR)\eubw.exe
+	-$(RM) $(BUILDDIR)\*.lib
+	-$(RM) $(BUILDDIR)\*.exe
+	
+docsclean : .SYMBOLIC
 	-@for %i in ($(BUILD_DIR)\html\*.*) do -$(RM) %i
 	-$(RM) $(BUILDDIR)\html\js\*.js
-	-$(RM) $(BUILDDIR)\html\png\*.*
-	-$(RMDIR) $(BUILDDIR)\html\js	
+	-$(RM) $(BUILDDIR)\html\images\*.*
+	-$(RMDIR) $(BUILDDIR)\html\js
 	-$(RMDIR) $(BUILDDIR)\html\png
 	-$(RMDIR) $(BUILDDIR)\html
+	-@for %i in ($(BUILD_DIR)\docs\*.*) do -$(RM) %i
+	-$(RM) $(BUILDDIR)\docs\js\*.js
+	-$(RM) $(BUILDDIR)\docs\images\*.*
+	-$(RMDIR) $(BUILDDIR)\docs\js
+	-$(RMDIR) $(BUILDDIR)\docs\images
+	-$(RMDIR) $(BUILDDIR)\docs
+	-$(RM) $(BUILDDIR)\euphoria.txt
+	-$(RM) $(BUILDDIR)\euphoria.pdf
+	
 	
 	
 nearlyclean mostlyclean : .SYMBOLIC	
 	-@for %i in ($(BUILD_DIRS)) do -$(RM) %i\*.obj
+	-@for %i in ($(BUILD_DIRS)) do -$(RM) %i\back\*.obj	
 	-$(RM) $(BUILDDIR)\pcre\*.obj
 	-$(RM) $(TRUNKDIR)\tests\ecp.dat
 	-$(RM) $(TRUNKDIR)\tests\*.c	
@@ -360,6 +370,8 @@ nearlyclean mostlyclean : .SYMBOLIC
 	-$(RM) $(TRUNKDIR)\tests\*.h
 	
 clobber : .SYMBOLIC distclean
+	-$(RM) $(BUILDDIR)\ecp.dat
+	-$(RM) $(BUILDDIR)\*.a
 	-$(RMDIR) $(BUILDDIR)
 
 $(BUILD_DIRS) : .existsonly
