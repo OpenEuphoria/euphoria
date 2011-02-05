@@ -13,8 +13,6 @@ include std/os.e
 include std/filesys.e
 include std/search.e
 public include std/types.e
-include std/text.e
-include std/sequence.e
 
 public constant
 	NOT_INCLUDED     = 0,
@@ -62,7 +60,6 @@ export function open_locked(sequence file_path)
 
 	return fh
 end function
-
 
 --**
 -- Get the EUDIR
@@ -114,15 +111,11 @@ public function get_eudir()
 				homepath &= SLASH
 			end if
 
-			possible_paths = append(possible_paths, 
-			    homedrive & SLASH & homepath & "euphoria")
+			possible_paths = append(possible_paths, homedrive & SLASH & homepath & "euphoria")
 		end if
 	end ifdef
 
 	for i = 1 to length(possible_paths) do
-		if atom(possible_paths[i]) then
-			continue
-		end if
 		sequence possible_path = possible_paths[i]
 
 		if file_exists(possible_path & SLASH & "include" & SLASH & "euphoria.h") then
