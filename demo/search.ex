@@ -77,20 +77,17 @@ sequence log_name, log_path, home
 log_name = "search.out"
 ifdef UNIX then
     SLASH='/'
-    home = getenv("HOME")
-    if sequence(home) then
-		log_path = home & '/' & log_name -- put in home dir if possible
-    else
-		log_path = log_name  
-    end if
+    home = getenv("HOME") & ""
 elsedef
     SLASH='\\'
-    log_path = getenv("EUDIR")
-    if equal(log_path, -1) then
-		log_path = "C:" 
-    end if
-    log_path &= "\\" & log_name  -- put at top of C drive
+    home = getenv("HOMEDRIVE") & getenv("HOMEPATH")
 end ifdef
+
+if find(-1, home) then
+	log_path = log_name
+else
+	log_path = home & SLASH & log_name
+end if
 
 sequence pos, cmd, string, orig_string, file_spec
 
