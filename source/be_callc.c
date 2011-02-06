@@ -865,7 +865,7 @@ object call_c(int func, object proc_ad, object arg_list)
 				/* C_FLOAT */
 				flt_arg.flt = (float)dbl_arg.dbl;
 				#if INTPTR_MAX == INT32_MAX
-					arg_op[arg_i++] = (uintptr_t)flt_arg.intval;
+					arg_op[arg_i++] = (uintptr_t)flt_arg.int32;
 				#elif INTPTR_MAX == INT64_MAX
 					if( xmm_i < 5 ){
 						dbl_op[xmm_i++].f = flt_arg.flt;
