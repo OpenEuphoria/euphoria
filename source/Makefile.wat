@@ -780,7 +780,7 @@ $(BUILDDIR)\docs\images : .EXISTSONLY $(BUILDDIR)\docs
 $(BUILDDIR)\docs: .EXISTSONLY
 	mkdir $^@
 	
-$(BUILDDIR)\docs\style.css : $(DOCDIR)\style.css
+$(BUILDDIR)\docs\style.css : $(DOCDIR)\style.css $(BUILDDIR)\docs
 	copy $(DOCDIR)\style.css $(BUILDDIR)\docs
 
 $(BUILDDIR)\html\js : .EXISTSONLY $(BUILDDIR)\html  
@@ -792,7 +792,7 @@ $(BUILDDIR)\html\images : .EXISTSONLY $(BUILDDIR)\html
 $(BUILDDIR)\html: .EXISTSONLY
 	mkdir $^@
 	
-$(BUILDDIR)\html\style.css : $(DOCDIR)\style.css
+$(BUILDDIR)\html\style.css : $(DOCDIR)\style.css $(BUILDDIR)\html
 	copy $(DOCDIR)\style.css $(BUILDDIR)\html
 
 $(BUILDDIR)\html\images\prev.png : $(DOCDIR)\html\images\prev.png $(BUILDDIR)\html\images
@@ -810,12 +810,12 @@ $(BUILDDIR)\docs\images\next.png : $(DOCDIR)\html\images\next.png $(BUILDDIR)\do
 $(BUILDDIR)\euphoria.txt : $(EU_DOC_SOURCE) $(BUILDDIR)\html
 	$(EUDOC) -d HTML --strip=2 -a $(TRUNKDIR)\docs\manual.af -o $(BUILDDIR)\euphoria.txt
 
-$(BUILDDIR)\docs\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\template.html
+$(BUILDDIR)\docs\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\template.html $(BUILDDIR)\docs
 	cd $(TRUNKDIR)\docs
 	$(CREOLE) -A -t=$(TRUNKDIR)\docs\template.html -o=$(BUILDDIR)\docs $(BUILDDIR)\euphoria.txt
 	cd $(TRUNKDIR)\source
 
-$(BUILDDIR)\html\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html
+$(BUILDDIR)\html\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html $(BUILDDIR)\html
 	cd $(TRUNKDIR)\docs
 	$(CREOLE) -A -t=$(TRUNKDIR)\docs\offline-template.html -o=$(BUILDDIR)\html $(BUILDDIR)\euphoria.txt
 	cd $(TRUNKDIR)\source
@@ -832,15 +832,15 @@ $(BUILDDIR)\pdf : .EXISTSONLY
 $(BUILDDIR)\pdf\euphoria.txt : $(EU_DOC_SOURCE) $(BUILDDIR)\pdf
 	$(EUDOC) -d PDF --single --strip=2 -a $(TRUNKDIR)\docs\manual.af -o $(BUILDDIR)\pdf\euphoria.txt
 
-$(BUILDDIR)\pdf\euphoria.tex : $(BUILDDIR)\pdf\euphoria.txt $(TRUNKDIR)\docs\template.tex
+$(BUILDDIR)\pdf\euphoria.tex : $(BUILDDIR)\pdf\euphoria.txt $(TRUNKDIR)\docs\template.tex $(BUILDDIR)\pdf
 	$(CREOLE) -f latex -A -t=$(TRUNKDIR)\docs\template.tex -o=$(BUILDDIR)\pdf $<
 
-$(BUILDDIR)\euphoria.pdf : $(BUILDDIR)\pdf\euphoria.tex
+$(BUILDDIR)\euphoria.pdf : $(BUILDDIR)\pdf\euphoria.tex $(BUILDDIR)\pdf
 	cd $(TRUNKDIR)\docs
 	pdflatex -aux-directory=$(BUILDDIR)\pdf -output-directory=$(BUILDDIR) $(BUILDDIR)\pdf\euphoria.tex
 	cd $(TRUNKDIR)\source
 
-pdfdoc-again: .SYMBOLIC $(BUILDDIR)\euphoria.pdf
+pdfdoc-again: .SYMBOLIC $(BUILDDIR)\euphoria.pdf $(BUILDDIR)\pdf
 	cd $(TRUNKDIR)\docs
 	pdflatex -aux-directory=$(BUILDDIR)\pdf -output-directory=$(BUILDDIR) $(BUILDDIR)\pdf\euphoria.tex
 	cd $(TRUNKDIR)\source
