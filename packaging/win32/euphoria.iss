@@ -254,6 +254,7 @@ var euCfgFname : String;
 var euCfgContents_theoretical : String;
 var euCfgContents_tested : String;
 var path : String;
+var eu_auto_exec_bat : String;
 // Delete what the installer created at runtime.
 begin
   euCfgFName := ExpandConstant('{app}\bin\eu.cfg');
@@ -270,5 +271,12 @@ begin
            StringChangeEx(path, ExpandConstant('{app}\bin'), '', True);
             RegWriteStringValue(HKEY_CURRENT_USER, 'Environment', 'PATH', path);
       end;
-     Result := True;
+  if LoadStringFromFile('C:\AUTOEXEC.BAT', eu_auto_exec_bat) then
+      begin
+      	if StringChangeEx(eu_auto_exec_bat, ExpandConstant('SET PATH=%PATH%;{app}\bin'),
+      		'', True) <> 0 then
+          SaveStringToFile('C:\AUTOEXEC.BAT', eu_auto_exec_bat, False);
+      end;
+  end if
+  Result := True;
 end;
