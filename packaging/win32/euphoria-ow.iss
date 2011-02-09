@@ -1,3 +1,6 @@
+; Remember to update euphoria.iss and ../../version_info.rc when changing
+; the version.
+
 [Setup]
 AppName=Euphoria
 AppVersion=4.0.1
