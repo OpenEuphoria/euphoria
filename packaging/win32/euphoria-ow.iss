@@ -284,7 +284,13 @@ begin
       end;
   if RegQueryStringValue(HKEY_CURRENT_USER, 'Environment', 'INCLUDE', include) then
       begin
-        StringChangeEx(include, ExpandConstant('{app}\watcom\h;{app}\watcom\h\nt'),   		'', True);
+        StringChangeEx(if LoadStringFromFile('C:\AUTOEXEC.BAT', eu_auto_exec_bat) then
+      begin
+      	if StringChangeEx(eu_auto_exec_bat, ExpandConstant('SET PATH=%PATH%;{app}\bin'),
+      		'', True) <> 0 then
+          SaveStringToFile('C:\AUTOEXEC.BAT', eu_auto_exec_bat, False);
+      end;
+  end ifinclude, ExpandConstant('{app}\watcom\h;{app}\watcom\h\nt'),   		'', True);
     	RegWriteStringValue(HKEY_CURRENT_USER, 'Environment', 'INCLUDE', include);
       end;
   if RegQueryStringValue(HKEY_CURRENT_USER, 'Environment', 'WATCOM', watcom) then
@@ -292,6 +298,13 @@ begin
         RegDeleteValue(HKEY_CURRENT_USER, 'Environment', 'WATCOM');
       end;
   Result := True;
+  if LoadStringFromFile('C:\AUTOEXEC.BAT', eu_auto_exec_bat) then
+      begin
+      	if StringChangeEx(eu_auto_exec_bat, ExpandConstant('SET PATH=%PATH%;{app}\bin'),
+      		'', True) <> 0 then
+          SaveStringToFile('C:\AUTOEXEC.BAT', eu_auto_exec_bat, False);
+      end;
+  end if
 end;
 
 function NextButtonClick(CurPageID: Integer) : Boolean;
@@ -302,5 +315,5 @@ begin
     Result := False;
     end
   else
-    Result := True;
+  Result := True;
 end;
