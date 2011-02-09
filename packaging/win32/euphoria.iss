@@ -1,12 +1,12 @@
 [Setup]
 AppName=Euphoria
-AppVersion=4.0.0
+AppVersion=4.0.1
 AppVerName=Euphoria v4.0.1
 AppPublisher=OpenEuphoria Group
 AppPublisherURL=http://openeuphoria.org
 AppSupportURL=http://openeuphoria.org
 AppUpdatesURL=http://openeuphoria.org
-DefaultDirName=C:\euphoria
+DefaultDirName=c:\Euphoria
 DefaultGroupName=Euphoria
 AllowNoIcons=yes
 LicenseFile=..\..\license.txt
@@ -80,7 +80,7 @@ Source: "cleanbranch\include\machine.e"; DestDir: {tmp}; Flags: ignoreversion de
 Source: "cleanbranch\include\dll.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
 Source: "cleanbranch\include\euphoria\keywords.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
 Source: "cleanbranch\include\euphoria\syncolor.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-;Source: "cleanbranch\source\autoexec_update.exw"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: "cleanbranch\source\autoexec_update.exw"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
 
 ; Files to Install
 ; Root
@@ -121,13 +121,15 @@ Source: "cleanbranch\demo\*.*"; DestDir: {app}\demo\; Flags: ignoreversion recur
 
 ; Docs
 Source: "..\..\build\*.pdf"; DestDir: {app}\docs\; Flags: ignoreversion; Components: comp_docs
-;Source: "..\..\build\html\*.*"; DestDir: {app}\docs\html\; Flags: ignoreversion; Components: comp_docs
+Source: "..\..\build\html\*.*"; DestDir: {app}\docs\html\; Flags: ignoreversion recursesubdirs; Components: comp_docs
 
 ; Includes
 Source: "cleanbranch\include\*.*"; DestDir: {app}\include\; Flags: ignoreversion recursesubdirs; Components: comp_main
 
 ; Sources
-Source: "cleanbranch\source\*.*"; DestDir: {app}\source\; Flags: ignoreversion recursesubdirs; Components: comp_source
+Source: "..\..\source\*.*"; DestDir: {app}\source\; Flags: ignoreversion; Components: comp_source
+Source: "..\..\source\codepage\*.*"; DestDir: {app}\source\; Flags: ignoreversion; Components: comp_source
+Source: "..\..\source\pcre\*.*"; DestDir: {app}\source\; Flags: ignoreversion; Components: comp_source
 
 ; Test
 Source: "cleanbranch\tests\*.*"; DestDir: {app}\tests\; Flags: ignoreversion recursesubdirs; Components: comp_tests
@@ -146,7 +148,7 @@ Filename: {app}\EuphoriaManual.url; Section: InternetShortcut; Key: URL; String:
 
 [Icons]
 ; Icons (shortcuts) to display in the Start menu
-;Name: {group}\Euphoria Manual in HTML; Filename: {app}\docs\html\index.html; Components: comp_docs
+Name: {group}\Euphoria Manual in HTML; Filename: {app}\docs\html\index.html; Components: comp_docs
 Name: {group}\Euphoria Manual in PDF; Filename: {app}\docs\euphoria.pdf; Components: comp_docs
 Name: {group}\Euphoria Manual on the Web; Filename: {app}\EuphoriaManual.url
 Name: {group}\Euphoria Website;  Filename: {app}\RapidEuphoria.url
@@ -180,6 +182,8 @@ Root: HKCR; Subkey: "EUConsoleApp\shell\translate\command"; ValueType: string; V
 Root: HKCR; Subkey: ".e"; ValueType: string; ValueName: ""; ValueData: "EUInc"; Flags: deletekey uninsdeletevalue createvalueifdoesntexist; Tasks: associate
 Root: HKCR; Subkey: "EUInc"; ValueType: string; ValueName: ""; ValueData: "Euphoria Include File"; Flags: deletekey uninsdeletekey createvalueifdoesntexist; Tasks: associate
 Root: HKCR; Subkey: "EUInc\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\eufile.ico"; Flags: deletekey uninsdeletekey createvalueifdoesntexist; Tasks: associate
+
+;create an icon link for .ew files
 Root: HKCR; Subkey: ".ew"; ValueType: string; ValueName: ""; ValueData: "EUInc"; Flags: deletekey uninsdeletevalue createvalueifdoesntexist; Tasks: associate
 
 [Messages]
@@ -206,6 +210,16 @@ begin
   Result := backupDir;
 end;
 
+function generateEuCfgString() : String;
+var
+  euCfgFname : String;
+  incLine : String;
+begin
+  euCfgFName := ExpandConstant('{app}\bin\eu.cfg');
+   incLine := ExpandConstant('-i {app}\include');
+  Result := #13#10 + '[all]' + #13#10 + incLine + #13#10;
+end;
+
 procedure InstallEuCfg();
 var
   euCfgFname : String;
@@ -217,7 +231,7 @@ begin
 
   if FileExists(euCfgFname) = False then
     begin
-      SaveStringToFile(euCfgFname, incLine + #13#10, False);
+      SaveStringToFile(euCfgFname, generateEuCfgString(), False);
     end
   else
     begin
@@ -227,10 +241,34 @@ begin
                  mbConfirmation, MB_YESNO or MB_DEFBUTTON1) = IDYES
       then
         begin
-          SaveStringToFile(euCfgFname, #13#10 + '[all]' + #13#10 + incLine + #13#10, True);
+          SaveStringToFile(euCfgFname, generateEuCfgString(), True);
         end
       else
         MsgBox('Please ensure ' + euCfgFname + ' contains:' + #13#10 +
                incLine, mbInformation, MB_OK);
     end;
+end;
+
+function InitializeUninstall(): Boolean;
+var euCfgFname : String;
+var euCfgContents_theoretical : String;
+var euCfgContents_tested : String;
+var path : String;
+// Delete what the installer created at runtime.
+begin
+  euCfgFName := ExpandConstant('{app}\bin\eu.cfg');
+  euCfgContents_theoretical := generateEuCfgString();
+  euCfgContents_tested := '';
+  if not LoadStringFromFile( euCfgFName, euCfgContents_tested )
+    or (euCfgContents_tested = euCfgContents_theoretical) then
+          begin
+            DelayDeleteFile( euCfgFName, 1 );
+          end;
+  if RegQueryStringValue(HKEY_CURRENT_USER, 'Environment', 'PATH', path) then
+      begin
+           StringChangeEx(path, ExpandConstant('{app}\bin;'), '', True);
+           StringChangeEx(path, ExpandConstant('{app}\bin'), '', True);
+            RegWriteStringValue(HKEY_CURRENT_USER, 'Environment', 'PATH', path);
+      end;
+     Result := True;
 end;

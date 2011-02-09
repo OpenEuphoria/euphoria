@@ -1,12 +1,12 @@
 [Setup]
 AppName=Euphoria
-AppVersion=4.0.0
+AppVersion=4.0.1
 AppVerName=Euphoria v4.0.1
 AppPublisher=OpenEuphoria Group
 AppPublisherURL=http://openeuphoria.org
 AppSupportURL=http://openeuphoria.org
 AppUpdatesURL=http://openeuphoria.org
-DefaultDirName=C:\euphoria
+DefaultDirName=c:\euphoria
 DefaultGroupName=Euphoria
 AllowNoIcons=yes
 LicenseFile=..\..\license.txt
@@ -122,7 +122,7 @@ Source: "cleanbranch\demo\*.*"; DestDir: {app}\demo\; Flags: ignoreversion recur
 
 ; Docs
 Source: "..\..\build\*.pdf"; DestDir: {app}\docs\; Flags: ignoreversion; Components: comp_docs
-;Source: "..\..\build\html\*.*"; DestDir: {app}\docs\html\; Flags: ignoreversion; Components: comp_docs
+Source: "..\..\build\html\*.*"; DestDir: {app}\docs\html\; Flags: ignoreversion recursesubdirs; Components: comp_docs
 
 ; Includes
 Source: "cleanbranch\include\*.*"; DestDir: {app}\include\; Flags: ignoreversion recursesubdirs; Components: comp_main
@@ -142,7 +142,7 @@ Source: "cleanbranch\tutorial\*.*"; DestDir: {app}\tutorial\; Flags: ignoreversi
 Source: "cleanbranch\packaging\win32\setenv-ow.bat"; DestDir: {app}; Flags: ignoreversion; Tasks: not update_env; AfterInstall: CreateEnvBatchFile()
 
 ; OpenWatcom
-Source: "\Development\WATCOM-OEBUNDLE\*.*"; DestDir: {app}\watcom; Flags: ignoreversion recursesubdirs; Components: comp_ow;
+Source: "\Development\WATCOM-OEBUNDLE\*.*"; DestDir: {app}\watcom; Flags: ignoreversion recursesubdirs; Components: comp_ow; 
 
 [INI]
 ; shortcut file to launch Rapid Euphoria website
@@ -152,7 +152,7 @@ Filename: {app}\EuphoriaManual.url; Section: InternetShortcut; Key: URL; String:
 
 [Icons]
 ; Icons (shortcuts) to display in the Start menu
-;Name: {group}\Euphoria Manual in HTML; Filename: {app}\docs\html\index.html; Components: comp_docs
+Name: {group}\Euphoria Manual in HTML; Filename: {app}\docs\html\index.html; Components: comp_docs
 Name: {group}\Euphoria Manual in PDF; Filename: {app}\docs\euphoria.pdf; Components: comp_docs
 Name: {group}\Euphoria Manual on the Web; Filename: {app}\EuphoriaManual.url
 Name: {group}\Euphoria Website;  Filename: {app}\RapidEuphoria.url
@@ -188,6 +188,8 @@ Root: HKCR; Subkey: "EUConsoleApp\shell\translate\command"; ValueType: string; V
 Root: HKCR; Subkey: ".e"; ValueType: string; ValueName: ""; ValueData: "EUInc"; Flags: deletekey uninsdeletevalue createvalueifdoesntexist; Tasks: associate
 Root: HKCR; Subkey: "EUInc"; ValueType: string; ValueName: ""; ValueData: "Euphoria Include File"; Flags: deletekey uninsdeletekey createvalueifdoesntexist; Tasks: associate
 Root: HKCR; Subkey: "EUInc\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\eufile.ico"; Flags: deletekey uninsdeletekey createvalueifdoesntexist; Tasks: associate
+
+;create an icon link for .ew files
 Root: HKCR; Subkey: ".ew"; ValueType: string; ValueName: ""; ValueData: "EUInc"; Flags: deletekey uninsdeletevalue createvalueifdoesntexist; Tasks: associate
 
 [Messages]
@@ -218,6 +220,15 @@ begin
 		backupDir := ExpandConstant('{app}\backup.' + GetDateTimeString('yyyymmddhhnn', #0, #0));
 	 Result := backupDir;
 end;
+function generateEuCfgString() : String;
+var
+  euCfgFname : String;
+  incLine : String;
+begin
+  euCfgFName := ExpandConstant('{app}\bin\eu.cfg');
+   incLine := ExpandConstant('-i {app}\include');
+  Result := #13#10 + '[all]' + #13#10 + incLine + #13#10;
+end;
 
 procedure InstallEuCfg();
 var
@@ -230,7 +241,7 @@ begin
 
   if FileExists(euCfgFname) = False then
     begin
-      SaveStringToFile(euCfgFname, incLine + #13#10, False);
+      SaveStringToFile(euCfgFname, generateEuCfgString(), False);
     end
   else
     begin
@@ -240,10 +251,56 @@ begin
                  mbConfirmation, MB_YESNO or MB_DEFBUTTON1) = IDYES
       then
         begin
-          SaveStringToFile(euCfgFname, #13#10 + '[all]' + #13#10 + incLine + #13#10, True);
+          SaveStringToFile(euCfgFname, generateEuCfgString(), True);
         end
       else
         MsgBox('Please ensure ' + euCfgFname + ' contains:' + #13#10 +
                incLine, mbInformation, MB_OK);
     end;
+end;
+
+function InitializeUninstall(): Boolean;
+var euCfgFname : String;
+var euCfgContents_theoretical : String;
+var euCfgContents_tested : String;
+var path : String;
+var include : String;
+var watcom : String;
+// Delete what the installer created at runtime.
+begin
+  euCfgFName := ExpandConstant('{app}\bin\eu.cfg');
+  euCfgContents_theoretical := generateEuCfgString();
+  euCfgContents_tested := '';
+  if not LoadStringFromFile( euCfgFName, euCfgContents_tested )
+    or (euCfgContents_tested = euCfgContents_theoretical) then
+          begin
+            DelayDeleteFile( euCfgFName, 1 );
+          end;
+  if RegQueryStringValue(HKEY_CURRENT_USER, 'Environment', 'PATH', path) then
+      begin
+           StringChangeEx(path, ExpandConstant('{app}\bin;'), '', True);
+           StringChangeEx(path, ExpandConstant('{app}\bin'), '', True);
+           RegWriteStringValue(HKEY_CURRENT_USER, 'Environment', 'PATH', path);
+      end;
+  if RegQueryStringValue(HKEY_CURRENT_USER, 'Environment', 'INCLUDE', include) then
+      begin
+        StringChangeEx(include, ExpandConstant('{app}\watcom\h;{app}\watcom\h\nt'),   		'', True);
+    	RegWriteStringValue(HKEY_CURRENT_USER, 'Environment', 'INCLUDE', include);
+      end;
+  if RegQueryStringValue(HKEY_CURRENT_USER, 'Environment', 'WATCOM', watcom) then
+      begin
+        RegDeleteValue(HKEY_CURRENT_USER, 'Environment', 'WATCOM');
+      end;
+  Result := True;
+end;
+
+function NextButtonClick(CurPageID: Integer) : Boolean;
+begin
+  if (CurPageID = wpSelectDir) and ( Pos(' ', ExpandConstant('{app}')) <> 0) then
+    begin
+    MsgBox('The install directory cannot contain spaces.  Change the program name to some other value.  This is a Watcom issue.', mbError, MB_OK);
+    Result := False;
+    end
+  else
+    Result := True;
 end;
