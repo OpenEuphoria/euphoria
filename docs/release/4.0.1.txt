@@ -13,8 +13,18 @@
   ensures that two objects that evaluate as ##equal()## will have the same hash value.
 * [[ticket:597]] Invalid negative routine ids were not detected properly by the interpreter,
   leading to a machine crash.
+* Now EUPHORIA can be installed under the Windows' 'Program Files' (with spaces) and the
+  translated code will be compiled.
 * Fixed Demos to not rely on EUDIR being set and to not issue warnings
-* Improved confirmation in the algorithm that determines where EUPHORIA is
+* Improved confirmation in the algorithm that determines where EUPHORIA is.
+* [[ticket:601]] Missing htmldoc added to Makefile
+* [[ticket:604]] Uninstaller now completely cleans up after the installer. 
+  Note %EUBIN%\bin\eu.cfg is left  in place if modified.
+* Fixed link to PDF documentation
+* Added HTML documentation
+* [[ticket:610]] Euphoria Installer that includes Watcom will now prevent the user from
+  installing Euphoria under a directory with spaces.  Watcom itself has a lot of problems
+  when spaces are in its path
 
 == Enhancements
 

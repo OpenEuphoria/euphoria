@@ -1,5 +1,5 @@
-; Remember to update euphoria-ow.iss and ../../version_info.rc when changing
-; the version.
+; Remember to update euphoria.iss, ../../version_info.rc, and
+; ..\..\source\version.h when changing the version.
 
 [Setup]
 AppName=Euphoria
