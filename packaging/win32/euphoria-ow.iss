@@ -1,6 +1,15 @@
-; Remember to update euphoria.iss, ../../version_info.rc, and
-; ..\..\source\version.h when changing the version.
+; When making changes to this file, remember to make a similar change to
+; euphoria.iss
 
+; The following files all must be
+; changed when changing the patch version,
+; minor version or major version:
+; 1. /source/version_info.rc
+; 2. /packaging/win32/euphoria.iss
+; 3. /packaging/win32/euphoria-ow.iss
+; 4. /tests/t_condcmp.e
+; 5. /source/version.h
+;
 [Setup]
 AppName=Euphoria
 AppVersion=4.0.1

@@ -27,6 +27,8 @@
   when spaces are in its path
 * [[ticket:614]] maybe_any_key() was not pausing when a Console Program was run from 
   Windows Explorer.
+* [[ticket:591]] updated copyright and version and added documentation reminding us
+  all of the places we need to change that information.
 
 == Enhancements
 

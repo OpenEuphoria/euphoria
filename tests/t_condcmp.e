@@ -1,6 +1,17 @@
 include std/unittest.e
 include std/os.e
 
+-- The following files all must be
+-- changed when changing the patch version,
+-- minor version or major version:
+-- 1. /source/version_info.rc
+-- 2. /packaging/win32/euphoria.iss
+-- 3. /packaging/win32/euphoria-ow.iss
+-- 4. /tests/t_condcmp.e
+-- 5. /source/version.h
+--
+
+
 ifdef hello then
     test_fail("not defined #1")
 end ifdef
@@ -42,9 +53,9 @@ ifdef WINDOWS then
 end ifdef
 
 ifdef EU4_0_0 then
-    test_pass("EU4_0_0")
+    test_pass("EU4_0_1")
 elsedef
-    test_fail("EU4_0_0")
+    test_fail("EU4_0_1")
 end ifdef
 
 ifdef EU4_0 then
