@@ -25,6 +25,8 @@
 * [[ticket:610]] Euphoria Installer that includes Watcom will now prevent the user from
   installing Euphoria under a directory with spaces.  Watcom itself has a lot of problems
   when spaces are in its path
+* [[ticket:614]] maybe_any_key() was not pausing when a Console Program was run from 
+  Windows Explorer.
 
 == Enhancements
 

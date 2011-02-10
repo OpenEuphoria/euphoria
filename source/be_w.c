@@ -129,7 +129,7 @@ void check_has_console() {
 
 		count = gCPLA(&processList, 3);
 		FreeLibrary(kernel32);
-		_has_console = (count != 0);
+		_has_console = (count > 1);
 	}
 }
 
