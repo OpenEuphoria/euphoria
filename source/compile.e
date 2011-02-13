@@ -7441,7 +7441,8 @@ procedure BackEnd(atom ignore)
 
 	for csym = TopLevelSub to length(SymTab) do
 		if eu:compare( SymTab[csym][S_OBJ], NOVALUE ) then
-		if not integer( SymTab[csym][S_OBJ] ) then
+		if not integer( SymTab[csym][S_OBJ] )
+		or TYPE_DOUBLE = SymTab[csym][S_GTYPE] then
 		if SymTab[csym][S_MODE] != M_TEMP then
 			if tp_count > INIT_CHUNK then
 				-- close current .c and start a new one

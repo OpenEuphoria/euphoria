@@ -29,6 +29,8 @@
   Windows Explorer.
 * [[ticket:591]] updated copyright and version and added documentation reminding us
   all of the places we need to change that information.
+* [[ticket:607]] Fixed translation of integers with decimals (e.g., 2.0) when
+  assigned to constants
 
 == Enhancements
 
