@@ -13,6 +13,8 @@
   ensures that two objects that evaluate as ##equal()## will have the same hash value.
 * [[ticket:597]] Invalid negative routine ids were not detected properly by the interpreter,
   leading to a machine crash.
+* [[ticket:607]] Fixed translation of integers with decimals (e.g., 2.0) when
+  assigned to constants
 
 == Enhancements
 
