@@ -6,14 +6,13 @@ end ifdef
 
 include std/datetime.e
 include std/dll.e
-include std/filesys.e
+include std/filesys.e as filesys
 include std/io.e
-include std/regex.e
+include std/regex.e as regex
 include std/text.e
 include std/hash.e
 include std/search.e
 include std/utils.e
-
 include c_decl.e
 include c_out.e
 include error.e
@@ -192,6 +191,85 @@ export procedure write_checksum( integer file )
 	cfile_check = 0
 end procedure
 
+with trace
+-- searches for the file name needle in a list of files
+-- returned by dir().  First a case-sensitive search and
+-- then a case-insensitive search.  To handle the case when
+-- we use case-sensitive file systems under WINDOWS
+function find_file_element(sequence needle, sequence files)
+	for j = 1 to length(files) do
+		if equal(files[j][D_NAME],needle) then
+			return j
+		end if
+	end for
+	for j = 1 to length(files) do
+		if equal(lower(files[j][D_NAME]),lower(needle)) then
+			return j
+		end if
+	end for
+	-- check to see if it is already a short name
+	for j = 1 to length(files) do
+		if equal(lower(files[j][D_ALTNAME]),lower(needle)) then
+			return j
+		end if
+	end for
+	return 0
+end function
+
+-- A pattern for valid file seperators
+ifdef WINDOWS then
+    constant slash_pattern = regex:new(`[\\/]`) 
+elsedef
+    constant slash_pattern = regex:new("/")
+end ifdef
+constant quote_pattern = regex:new("[\"\'`]")
+constant space_pattern = regex:new(" ")
+-- cannot use SLASHES here because
+-- we need the colon to be left in the list.
+
+-- Change paths and filenmames into values that do not have
+-- any spaces.  In Windows this means to use the short-name.   
+-- In UNIX, this should return the same path, but with spaces
+-- preceeded with backslashes.
+-- This is a necessary work-around for WATCOM C but any command line
+-- but it could also be needed for any compiler and environment
+-- that is using spaces and build_commandline() will not work 
+-- in place of this.
+--
+-- If the path passed in doesn't exist, it returns 0.  
+-- If it does exist it is adjusted such that the file path contains
+-- no spaces on WINDOWS.
+-- spaces will not break a file system entity into two peices.
+function adjust_for_command_line_passing(sequence long_path)
+-- UNIX hands things to programs as an array of strings
+-- so all we need to do is protect it from the shell.  This should
+-- just return what is passed in the UNIX case.
+--
+-- WINDOWS sends all parameters as one string so we need this
+-- for programs that do not use escape characters for spaces.
+	long_path = regex:find_replace(quote_pattern, long_path, "")
+	sequence longs = split( slash_pattern, long_path )
+	sequence short_path = longs[1] & SLASH
+	for i = 2 to length(longs) do
+		object files = dir(short_path)
+		if atom(files) then
+			return 0
+		end if
+		integer file_location = find_file_element(longs[i], files)
+		if file_location then
+			if sequence(files[file_location][D_ALTNAME]) then
+				short_path &= files[file_location][D_ALTNAME]
+			else
+				short_path &= files[file_location][D_NAME]
+			end if
+			short_path &= SLASH
+		else
+			return 0
+		end if
+	end for -- i
+	return short_path
+end function
+
 --**
 -- Setup the build environment. This includes things such as the
 -- compiler/linker executable, c flags, linker flags, debug settings,
@@ -218,7 +296,11 @@ function setup_build()
 			t_slash = "\\"
 		end if
 
-		sequence eudir = get_eucompiledir()
+		object eudir = adjust_for_command_line_passing(get_eucompiledir())
+		if atom(eudir) then
+			printf(2,"Supplied directory \'%s\' is not a valid EUDIR\n",{get_eucompiledir()})
+			abort(1)
+		end if
 		for tk = 1 to length(l_names) do -- translation kind
 			user_library = eudir & sprintf("%sbin%s%s.%s",{t_slash, t_slash, l_names[tk],l_ext})
 			if TUNIX or compiler_type = COMPILER_GCC then
@@ -259,6 +341,12 @@ function setup_build()
 		end if
 	end if
 
+	object compile_dir = adjust_for_command_line_passing(get_eucompiledir())
+	if atom(compile_dir) then
+		printf(2,"Couldn't get include directory '%s'",{get_eucompiledir()})
+		abort(1)
+	end if
+	
 	switch compiler_type do
 		case COMPILER_GCC then
 			c_exe = "gcc"
@@ -303,7 +391,7 @@ function setup_build()
 			end if
 			
 			-- input/output
-			rc_comp = "windres -DSRCDIR=\"" & current_dir() & "\" \"[1]\" -O coff -o \"[2]\""
+			rc_comp = "windres -DSRCDIR=\"" & adjust_for_command_line_passing(current_dir()) & "\" [1] -O coff -o [2]"
 			
 		case COMPILER_WATCOM then
 			c_exe = "wcc386"
@@ -320,10 +408,10 @@ function setup_build()
 			l_flags &= " OPTION QUIET OPTION ELIMINATE OPTION CASEEXACT"
 
 			if dll_option then
-				c_flags &= " /bd /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /I" & get_eucompiledir()
+				c_flags &= " /bd /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /I" & compile_dir 
 				l_flags &= " SYSTEM NT_DLL initinstance terminstance"
 			else
-				c_flags &= " /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /I" & get_eucompiledir()
+				c_flags &= " /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /I" & compile_dir
 				if con_option then
 					-- SYSTEM NT *MUST* come first, otherwise memory dump
 					l_flags = " SYSTEM NT" & l_flags
@@ -335,7 +423,7 @@ function setup_build()
 			l_flags &= sprintf(" FILE %s LIBRARY ws2_32", { user_library })
 			
 			-- resource file, executable file
-			rc_comp = "wrc -DSRCDIR=\"" & current_dir() & "\" -q -fo=\"[2]\" -ad \"[1]\" \"[3]\""
+			rc_comp = "wrc -DSRCDIR=\"" & adjust_for_command_line_passing(current_dir()) & "\" -q -fo=[2] -ad [1] [3]"
 		case else
 			CompileErr(43)
 	end switch

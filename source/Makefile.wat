@@ -15,19 +15,22 @@
 #   Create Documentation in PDF      : wmake pdfdoc
 #   Create online Documentation HTML : wmake manual
 #                                    
-#   Clean binaries, object files,    
-#   C files and configuration        : wmake clobber
+#   Clean and remove entire build directory    
+#   and configuration                : wmake clobber
 #                                    
-#   Clean binaries, object files,    
-#   C files                          : wmake clean
+#   Clean binaries, libraries, including 
+#   files that take a long time, object files,    
+#   C files and configuration        : wmake distclean
 #                                    
-#   Clean binaries, object files,    
-#   C files and configuration and    
-#   build directory                  : wmake distclean
-#                                    
-#   Clean binaries and object files  
-#   but keep configuration and C     
-#   files                            : wmake nearlyclean
+#   Clean binaries, libraries, C files,
+#   documentation, and object files  : wmake clean
+#
+#   Clean documentation only         : wmake docsclean
+#
+#   Clean intermediate files (object files)  
+#   but keep documentation, 
+#   configuration, C,      
+#   library, and binary files        : wmake nearlyclean
 #                                    
 #   Make all targets                 : wmake
 #                                      wmake all
@@ -332,23 +335,46 @@ $(BUILDDIR)\ecp.dat : $(TRUNKDIR)\bin\buildcpdb.ex $(TRUNKDIR)\source\codepage
 BUILD_DIRS=$(BUILDDIR)\intobj $(BUILDDIR)\transobj $(BUILDDIR)\WINlibobj $(BUILDDIR)\WINlibobj1 $(BUILDDIR)\backobj $(BUILDDIR)\eutestdr
 
 distclean : .SYMBOLIC clean
+	-$(RM) $(BUILDDIR)\*.wat
 	-$(RM) $(CONFIG)
 	-$(RM) Makefile
+	
 
-clean : .SYMBOLIC mostlyclean
+clean : .SYMBOLIC mostlyclean docsclean
 	-@for %i in ($(BUILD_DIRS)) do -$(RMDIR) %i
+	-$(RM) $(BUILDDIR)\*.lib
+	-$(RM) $(BUILDDIR)\*.exe
+	
+docsclean : .SYMBOLIC
+	-@for %i in ($(BUILD_DIR)\html\*.*) do -$(RM) %i
+	-$(RM) $(BUILDDIR)\html\js\*.js
+	-$(RM) $(BUILDDIR)\html\images\*.*
+	-$(RMDIR) $(BUILDDIR)\html\js
+	-$(RMDIR) $(BUILDDIR)\html\png
+	-$(RMDIR) $(BUILDDIR)\html
+	-@for %i in ($(BUILD_DIR)\docs\*.*) do -$(RM) %i
+	-$(RM) $(BUILDDIR)\docs\js\*.js
+	-$(RM) $(BUILDDIR)\docs\images\*.*
+	-$(RMDIR) $(BUILDDIR)\docs\js
+	-$(RMDIR) $(BUILDDIR)\docs\images
+	-$(RMDIR) $(BUILDDIR)\docs
+	-$(RM) $(BUILDDIR)\euphoria.txt
+	-$(RM) $(BUILDDIR)\euphoria.pdf
+	
+	
 	
 nearlyclean mostlyclean : .SYMBOLIC	
 	-@for %i in ($(BUILD_DIRS)) do -$(RM) %i\*.obj
+	-@for %i in ($(BUILD_DIRS)) do -$(RM) %i\back\*.obj	
 	-$(RM) $(BUILDDIR)\pcre\*.obj
-	-$(RM) $(BUILDDIR)\eu*.exe
-	-$(RM) $(BUILDDIR)\eu*.lib
 	-$(RM) $(TRUNKDIR)\tests\ecp.dat
 	-$(RM) $(TRUNKDIR)\tests\*.c	
 	-$(RM) $(TRUNKDIR)\tests\*.obj
 	-$(RM) $(TRUNKDIR)\tests\*.h
 	
 clobber : .SYMBOLIC distclean
+	-$(RM) $(BUILDDIR)\ecp.dat
+	-$(RM) $(BUILDDIR)\*.a
 	-$(RMDIR) $(BUILDDIR)
 
 $(BUILD_DIRS) : .existsonly
@@ -734,6 +760,8 @@ $(PCRE_OBJECTS) : pcre/*.c pcre/pcre.h.windows pcre/config.h.windows
 # HTML Manual
 #
 
+htmldoc: .SYMBOLIC $(BUILDDIR)\html\style.css $(BUILDDIR)\html\images\prev.png $(BUILDDIR)\html\images\next.png $(BUILDDIR)\html\index.html
+
 $(BUILDDIR)\docs\js : .EXISTSONLY $(BUILDDIR)\docs  
 	mkdir $^@
 
@@ -743,7 +771,7 @@ $(BUILDDIR)\docs\images : .EXISTSONLY $(BUILDDIR)\docs
 $(BUILDDIR)\docs: .EXISTSONLY
 	mkdir $^@
 	
-$(BUILDDIR)\docs\style.css : $(DOCDIR)\style.css
+$(BUILDDIR)\docs\style.css : $(DOCDIR)\style.css $(BUILDDIR)\docs
 	copy $(DOCDIR)\style.css $(BUILDDIR)\docs
 
 $(BUILDDIR)\html\js : .EXISTSONLY $(BUILDDIR)\html  
@@ -755,7 +783,7 @@ $(BUILDDIR)\html\images : .EXISTSONLY $(BUILDDIR)\html
 $(BUILDDIR)\html: .EXISTSONLY
 	mkdir $^@
 	
-$(BUILDDIR)\html\style.css : $(DOCDIR)\style.css
+$(BUILDDIR)\html\style.css : $(DOCDIR)\style.css $(BUILDDIR)\html
 	copy $(DOCDIR)\style.css $(BUILDDIR)\html
 
 $(BUILDDIR)\html\images\prev.png : $(DOCDIR)\html\images\prev.png $(BUILDDIR)\html\images
@@ -773,12 +801,12 @@ $(BUILDDIR)\docs\images\next.png : $(DOCDIR)\html\images\next.png $(BUILDDIR)\do
 $(BUILDDIR)\euphoria.txt : $(EU_DOC_SOURCE) $(BUILDDIR)\html
 	$(EUDOC) -d HTML --strip=2 -a $(TRUNKDIR)\docs\manual.af -o $(BUILDDIR)\euphoria.txt
 
-$(BUILDDIR)\docs\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\template.html
+$(BUILDDIR)\docs\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\template.html $(BUILDDIR)\docs
 	cd $(TRUNKDIR)\docs
 	$(CREOLE) -A -t=$(TRUNKDIR)\docs\template.html -o=$(BUILDDIR)\docs $(BUILDDIR)\euphoria.txt
 	cd $(TRUNKDIR)\source
 
-$(BUILDDIR)\html\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html
+$(BUILDDIR)\html\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html $(BUILDDIR)\html
 	cd $(TRUNKDIR)\docs
 	$(CREOLE) -A -t=$(TRUNKDIR)\docs\offline-template.html -o=$(BUILDDIR)\html $(BUILDDIR)\euphoria.txt
 	cd $(TRUNKDIR)\source
@@ -795,15 +823,15 @@ $(BUILDDIR)\pdf : .EXISTSONLY
 $(BUILDDIR)\pdf\euphoria.txt : $(EU_DOC_SOURCE) $(BUILDDIR)\pdf
 	$(EUDOC) -d PDF --single --strip=2 -a $(TRUNKDIR)\docs\manual.af -o $(BUILDDIR)\pdf\euphoria.txt
 
-$(BUILDDIR)\pdf\euphoria.tex : $(BUILDDIR)\pdf\euphoria.txt $(TRUNKDIR)\docs\template.tex
+$(BUILDDIR)\pdf\euphoria.tex : $(BUILDDIR)\pdf\euphoria.txt $(TRUNKDIR)\docs\template.tex $(BUILDDIR)\pdf
 	$(CREOLE) -f latex -A -t=$(TRUNKDIR)\docs\template.tex -o=$(BUILDDIR)\pdf $<
 
-$(BUILDDIR)\euphoria.pdf : $(BUILDDIR)\pdf\euphoria.tex
+$(BUILDDIR)\euphoria.pdf : $(BUILDDIR)\pdf\euphoria.tex $(BUILDDIR)\pdf
 	cd $(TRUNKDIR)\docs
 	pdflatex -aux-directory=$(BUILDDIR)\pdf -output-directory=$(BUILDDIR) $(BUILDDIR)\pdf\euphoria.tex
 	cd $(TRUNKDIR)\source
 
-pdfdoc-again: .SYMBOLIC $(BUILDDIR)\euphoria.pdf
+pdfdoc-again: .SYMBOLIC $(BUILDDIR)\euphoria.pdf $(BUILDDIR)\pdf
 	cd $(TRUNKDIR)\docs
 	pdflatex -aux-directory=$(BUILDDIR)\pdf -output-directory=$(BUILDDIR) $(BUILDDIR)\pdf\euphoria.tex
 	cd $(TRUNKDIR)\source
