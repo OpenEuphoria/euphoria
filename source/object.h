@@ -24,16 +24,25 @@ struct s1 {                        /* a sequence header block */
 #if INTPTR_MAX == INT32_MAX
 	int length;                   /* number of elements */
 	int ref;                      /* reference count */
+	cleanup_ptr cleanup;           /* custom clean up when sequence is deallocated */
 #else
+	cleanup_ptr cleanup;           /* custom clean up when sequence is deallocated */
 	int ref;                      /* reference count */
 	int length;                   /* number of elements */
+	
 #endif
 	int postfill;                 /* number of post-fill objects */
-	cleanup_ptr cleanup;           /* custom clean up when sequence is deallocated */
+	
 }; /* total 20 bytes */
 
+#if INTPTR_MAX == INT32_MAX
+typedef double eudouble;
+#else
+typedef long double eudouble;
+#endif
+
 struct d {                         /* a double precision number */
-	double dbl;                    /* double precision value */
+	eudouble dbl;                    /* double precision value */
 	int ref;                      /* reference count */
 	cleanup_ptr cleanup;           /* custom clean up when sequence is deallocated */
 }; /* total 16 bytes */

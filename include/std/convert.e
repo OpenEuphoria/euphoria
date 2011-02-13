@@ -14,10 +14,12 @@ constant
 	M_A_TO_F64 = 46,
 	M_F64_TO_A = 47,
 	M_A_TO_F32 = 48,
-	M_F32_TO_A = 49
+	M_F32_TO_A = 49,
+	M_A_TO_F80 = 100,
+	M_F80_TO_A = 101
 
 constant M_ALLOC = 16
-atom mem  = machine_func(M_ALLOC,4)
+atom mem  = machine_func(M_ALLOC,8)
 
 --****
 -- === Routines
@@ -59,17 +61,20 @@ atom mem  = machine_func(M_ALLOC,4)
 -- See Also:
 --		[[:bytes_to_int]], [[:int_to_bits]], [[:atom_to_float64]], [[:poke4]]
 
-public function int_to_bytes(atom x)
-	integer a,b,c,d
-
-	a = remainder(x, #100)
-	x = floor(x / #100)
-	b = remainder(x, #100)
-	x = floor(x / #100)
-	c = remainder(x, #100)
-	x = floor(x / #100)
-	d = remainder(x, #100)
-	return {a,b,c,d}
+public function int_to_bytes(atom x, integer size = 4 )
+	switch size do
+		case 1 then
+			poke( mem, x )
+		case 2 then
+			poke2( mem, x )
+		case 4 then
+			poke4( mem, x )
+		case 8 then
+			poke8( mem, x )
+		case else
+			return {}
+	end switch
+	return peek( mem & size )
 end function
 
 type sequence_8(sequence s)
@@ -251,6 +256,18 @@ end function
 
 public function atom_to_float64(atom a)
 	return machine_func(M_A_TO_F64, a)
+end function
+
+--**
+-- 
+public function atom_to_float80(atom a)
+	return machine_func(M_A_TO_F80, a)
+end function
+
+--**
+--
+public function float80_to_atom( sequence bytes )
+	return machine_func(M_F80_TO_A, bytes )
 end function
 
 --**

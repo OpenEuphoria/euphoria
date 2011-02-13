@@ -3,26 +3,30 @@
 #include <stdint.h>
 #include "alldefs.h"
 #include "be_alloc.h"
+#include "be_runtime.h"
 
 unsigned char *string_ptr;
 
 // Compressed format of Euphoria objects
 //
 // First byte:
-//          0..248  // immediate small integer, -9 to 239
+//          0..246  // immediate small integer, -9 to 237
 					// since small negative integers -9..-1 might be common
-#define I2B 249   // 2-byte signed integer follows
-#define I3B 250   // 3-byte signed integer follows
-#define I4B 251   // 4-byte signed integer follows
-#define F4B 252   // 4-byte f.p. number follows
-#define F8B 253   // 8-byte f.p. number follows
-#define S1B 254   // sequence, 1-byte length follows, then elements
-#define S4B 255   // sequence, 4-byte length follows, then elements
+#define I2B  247   // 2-byte signed integer follows
+#define I3B  248   // 3-byte signed integer follows
+#define I4B  249   // 4-byte signed integer follows
+#define I8B  250
+#define F4B  251   // 4-byte f.p. number follows
+#define F8B  252   // 8-byte f.p. number follows
+#define F10B 253
+#define S1B  254   // sequence, 1-byte length follows, then elements
+#define S4B  255   // sequence, 4-byte length follows, then elements
 
 #define MIN1B (int32_t)(-2)
 #define MIN2B (int32_t)(-0x00008000)
 #define MIN3B (int32_t)(-0x00800000)
 #define MIN4B (int32_t)(-0x80000000)
+#define MIN8B (int64_t)(-0x8000000000000000LL)
 
 object decompress(uintptr_t c)
 // read a compressed Euphoria object
@@ -30,8 +34,11 @@ object decompress(uintptr_t c)
 {
 	s1_ptr s;
 	object_ptr obj_ptr;
-	int32_t len, i;
+	int32_t len;
+	int32_t i;
+	int64_t i8;
 	double d;
+	long double ld;
 	
 	if (c == 0) {
 		c = *string_ptr++;
@@ -56,19 +63,29 @@ object decompress(uintptr_t c)
 	else if (c == I4B) {
 		i = *(int32_t *)string_ptr;
 		string_ptr += sizeof( int32_t );
-		return i + MIN4B;
+		return i;
 	}
 	
+	else if ( c == I8B ) {
+		i8 = *(int64_t *)string_ptr;
+		string_ptr += sizeof( int64_t );
+		return i8;
+	}
 	else if (c == F4B) {
 		d = (double)*(float *)string_ptr; 
 		string_ptr += sizeof( float );
-		return NewDouble(d);
+		return NewDouble((eudouble)d);
 	}
 	
 	else if (c == F8B) {
 		d = *(double *)string_ptr; 
 		string_ptr += sizeof( double );
-		return NewDouble(d);
+		return NewDouble((eudouble)d);
+	}
+	else if ( c == F10B ) {
+		ld = *(long double*)string_ptr;
+		string_ptr += 10; // don't use sizeof, because that may include padding
+		return NewDouble( ld );
 	}
 	
 	else {
