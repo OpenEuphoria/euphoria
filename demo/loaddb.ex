@@ -122,7 +122,7 @@ end procedure
 
 procedure main(sequence pArgs)
 
-	ifdef WIN32_GUI then
+	ifdef WINDOWS and GUI then
 	    writefln("This program must be run from the command-line.")
 	    abort(0)
 	end ifdef

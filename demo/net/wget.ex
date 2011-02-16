@@ -21,7 +21,7 @@ end procedure
 
 procedure main(sequence args = command_line())
 	if length(args) = 2 then
-		ifdef WIN32_GUI then
+		ifdef WINDOWS and GUI then
 		    puts(1, "This program must be run from the command-line:\n\n")
 		end ifdef
 		puts(1, "Usage: eui wget.ex URL\n")

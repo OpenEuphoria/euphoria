@@ -1060,7 +1060,7 @@ global procedure sanity()
 
 	check_install(TRUE)
 
-	ifdef WIN32_GUI then
+	ifdef WINDOWS and GUI then
 		if (IDCANCEL = message_box("Run the test?", "Euphoria WIN32 Sanity Test", 
 			{MB_OKCANCEL, MB_SYSTEMMODAL})) then
 			return
@@ -1096,7 +1096,7 @@ global procedure sanity()
 		position(13,1)
 		writef("[:4]%", floor(100*(j+1)/21))
 		
-		ifdef WIN32 then
+		ifdef WINDOWS then
 			win32_tests()
 		end ifdef
 		
@@ -1173,7 +1173,7 @@ global procedure sanity()
 	
 	delete_file("sanityio.tst")
 	
-	ifdef WIN32_GUI then
+	ifdef WINDOWS and GUI then
 		message_box("PASSED (100%)", "Euphoria WIN32 Sanity Test", MB_OK)
 	elsedef
 		puts(msg, "\nPASSED (100%)\n")
