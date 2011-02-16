@@ -32,6 +32,8 @@
   all of the places we need to change that information.
 * [[ticket:607]] Fixed translation of integers with decimals (e.g., 2.0) when
   assigned to constants
+* [[ticket:598]] Link windows binaries to comdlg32.dll to make sure GUI calls work
+  with the new manifest.
 
 == Enhancements
 
