@@ -42,6 +42,7 @@
 #include <string.h>
 #ifdef EWINDOWS
 	#include <windows.h>
+	#include <commctrl.h>
 #endif
 
 #include "alldefs.h"
@@ -4803,7 +4804,18 @@ void eu_startup(struct routine_list *rl, struct ns_list *nl, char **ip,
 	copy_string(TempErrName, "ex.err", TempErrName_len);
 	TempWarningName = NULL;
 	display_warnings = 1;
-
+#ifdef EWINDOWS
+	{
+		/* Make sure the common controls stuff is initialized.
+		 * Since we use a manifest, we have to make sure that
+		 * comdlg32.dll is loaded, or GUI stuff won't work.
+		 */
+		INITCOMMONCONTROLSEX initcc;
+		initcc.dwSize = sizeof( INITCOMMONCONTROLSEX );
+		initcc.dwICC  = 0;
+		InitCommonControlsEx( &initcc );
+	}
+#endif
 	if (Argc)
 		InitTask();  // i.e. don't do this in a Euphoria .dll/.so
 }
