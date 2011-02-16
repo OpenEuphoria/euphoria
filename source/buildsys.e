@@ -19,6 +19,7 @@ include global.e
 include platform.e
 include reswords.e
 include msgtext.e
+include std/math.e as math
 
 constant
 	re_include = regex:new(`^[ ]*(public)*[ \t]*include[ \t]+([A-Za-z0-9_/.]+)`),
@@ -130,19 +131,29 @@ export integer compiler_type = COMPILER_UNKNOWN
 export sequence compiler_dir = ""
 
 --**
--- Resulting executable name
-
-export sequence exe_name = ""
+-- Resulting executable names
+-- exe_name[D_NAME] is what we show to the user in error and warning messages
+-- exe_name[D_ALTNAME] is what we show to the compiler in command scripts
+-- both of these names open to the same data.
+-- 
+export sequence exe_name = repeat("", math:max(D_NAME&D_ALTNAME))
 
 --**
 -- Resource file to link into executable
-
-export sequence rc_file = ""
+-- rc_file[D_NAME] is the passed name
+-- rc_file[D_ALTNAME] is what is passed to the command line tools
+-- which is possibily a different form but will always point to the
+-- same data as rc_file[D_NAME]
+export sequence rc_file = repeat("", math:max(D_NAME&D_ALTNAME))
 
 --**
--- Compile resource file
+-- Compiled resource file
+-- res_file[D_NAME] is the passed name
+-- res_file[D_ALTNAME] is what is passed to the command line tool
+-- which is possibily a different form but will always point to the
+-- same data as res_file[D_NAME]
 
-export sequence res_file = ""
+export sequence res_file = rc_file
 
 --**
 -- Maximum C file size before splitting the file into multiple chunks
@@ -235,38 +246,74 @@ constant space_pattern = regex:new(" ")
 -- that is using spaces and build_commandline() will not work 
 -- in place of this.
 --
--- If the path passed in doesn't exist, it returns 0.  
--- If it does exist it is adjusted such that the file path contains
+-- If the path passed in doesn't exist, its parent foldernames that do exist
+-- are adjusted so that the path is composed of 'short filenames'
+-- when possible.  For the parts of the path that doesn't exist,
+-- a zero is returned if they contain spaces and if they don't contain
+-- spaces they are returned as is in the path.
+--
+-- If the path does exist it is adjusted such that the file path contains
 -- no spaces on WINDOWS.
--- spaces will not break a file system entity into two peices.
-function adjust_for_command_line_passing(sequence long_path)
+--
+-- Examples:
+--
+-- Consider: 
+-- <eucode>
+--  x = adjust_for_command_line_passing(`C:\Program Files\Euphoria\winlib-70.1`)
+-- </eucode>
+--
+-- Suppose 'C:\Program Files\Euphoria' exists but not
+-- 'C:\Program Files\Euphoria\winlib-70.1'.  Now, winlib-70.1 contains no
+-- no spaces.  x probably will be "C:\Progra~1\EUPHORIA\winlib-70.1".  This
+-- string will allow access to the same as the passed path.
+--
+-- Suppose this is run on a Spanish distribution of Windows where 
+-- 'C:\Program Files' does not exist.  x will be 0.
+--
+-- 
+export function adjust_for_command_line_passing(sequence long_path)
 -- UNIX hands things to programs as an array of strings
 -- so all we need to do is protect it from the shell.  This should
 -- just return what is passed in the UNIX case.
 --
--- WINDOWS sends all parameters as one string so we need this
+-- WINDOWS sends all parameters as one string so and programs have to 
+-- split the command line string up itself.  So, we need this
 -- for programs that do not use escape characters for spaces.
-	long_path = regex:find_replace(quote_pattern, long_path, "")
-	sequence longs = split( slash_pattern, long_path )
-	sequence short_path = longs[1] & SLASH
-	for i = 2 to length(longs) do
-		object files = dir(short_path)
-		if atom(files) then
-			return 0
+	ifdef UNIX then
+		return long_path
+	elsifdef WINDOWS then
+		long_path = regex:find_replace(quote_pattern, long_path, "")
+		sequence longs = split( slash_pattern, long_path )
+		if length(longs)=0 then
+			return long_path
 		end if
-		integer file_location = find_file_element(longs[i], files)
-		if file_location then
-			if sequence(files[file_location][D_ALTNAME]) then
-				short_path &= files[file_location][D_ALTNAME]
-			else
-				short_path &= files[file_location][D_NAME]
+		sequence short_path = longs[1] & SLASH
+		for i = 2 to length(longs) do
+			object files = dir(short_path)
+			integer file_location = 0
+			if sequence(files) then
+				file_location = find_file_element(longs[i], files)
 			end if
-			short_path &= SLASH
-		else
-			return 0
+			if file_location then
+				if sequence(files[file_location][D_ALTNAME]) then
+					short_path &= files[file_location][D_ALTNAME]
+				else
+					short_path &= files[file_location][D_NAME]
+				end if
+				short_path &= SLASH
+			else
+				if not find(' ',longs[i]) then
+					short_path &= longs[i] & SLASH
+					continue
+				end if
+				return 0
+			end if
+		end for -- i
+		if short_path[$] = SLASH then
+			short_path = short_path[1..$-1]
 		end if
-	end for -- i
-	return short_path
+		return short_path
+	end ifdef
 end function
 
 --**
@@ -441,11 +488,12 @@ function setup_build()
 end function
 
 --**
--- Ensure exe_name contains data, if not copy file0
+-- Ensure exe_name[D_ALTNAME] contains data, if not copy file0
 
 procedure ensure_exename(sequence ext)
-	if length(exe_name) = 0 then
-		exe_name = current_dir() & SLASH & file0 & ext
+	if length(exe_name[D_ALTNAME]) = 0 then
+		exe_name[D_NAME] = current_dir() & SLASH & file0 & ext
+		exe_name[D_ALTNAME] = adjust_for_command_line_passing(exe_name[D_NAME])
 	end if
 end procedure
 
@@ -473,7 +521,7 @@ procedure write_objlink_file()
 	end for
 
 	if compiler_type = COMPILER_WATCOM then
-		printf(fh, "NAME '%s'" & HOSTNL, { exe_name })
+		printf(fh, "NAME '%s'" & HOSTNL, { exe_name[D_ALTNAME] })
 	end if
 
 	puts(fh, trim(settings[SETUP_LFLAGS] & HOSTNL))
@@ -545,19 +593,19 @@ procedure write_makefile_full()
 
 	write_makefile_srcobj_list(fh)
 	puts(fh, HOSTNL)
-
+	
 	if compiler_type = COMPILER_WATCOM then
 		printf(fh, "\"%s\" : $(%s_OBJECTS) %s" & HOSTNL, { 
-			exe_name, upper(file0), user_library
+			exe_name[D_ALTNAME], upper(file0), user_library
 		})
 		printf(fh, "\t$(LINKER) @%s.lnk" & HOSTNL, { file0 })
-		if length(rc_file) and length(settings[SETUP_RC_COMPILER]) then
-			writef(fh, "\t" & settings[SETUP_RC_COMPILER], { rc_file, res_file, exe_name })
+		if length(rc_file[D_ALTNAME]) and length(settings[SETUP_RC_COMPILER]) then
+			writef(fh, "\t" & settings[SETUP_RC_COMPILER], { rc_file[D_ALTNAME], res_file[D_ALTNAME], exe_name[D_ALTNAME] })
 		end if
 		puts(fh, HOSTNL)
 		printf(fh, "%s-clean : .SYMBOLIC" & HOSTNL, { file0 })
-		if length(res_file) then
-			printf(fh, "\tdel \"%s\"" & HOSTNL, { res_file })
+		if length(res_file[D_ALTNAME]) then
+			printf(fh, "\tdel \"%s\"" & HOSTNL, { res_file[D_ALTNAME] })
 		end if
 		for i = 1 to length(generated_files) do
 			if match(".o", generated_files[i]) then
@@ -566,9 +614,9 @@ procedure write_makefile_full()
 		end for
 		puts(fh, HOSTNL)
 		printf(fh, "%s-clean-all : .SYMBOLIC" & HOSTNL, { file0 })
-		printf(fh, "\tdel \"%s\"" & HOSTNL, { exe_name })
-		if length(res_file) then
-			printf(fh, "\tdel \"%s\"" & HOSTNL, { res_file })
+		printf(fh, "\tdel \"%s\"" & HOSTNL, { exe_name[D_ALTNAME] })
+		if length(res_file[D_ALTNAME]) then
+			printf(fh, "\tdel \"%s\"" & HOSTNL, { res_file[D_ALTNAME] })
 		end if
 		for i = 1 to length(generated_files) do
 			printf(fh, "\tdel \"%s\"" & HOSTNL, { generated_files[i] })
@@ -579,20 +627,20 @@ procedure write_makefile_full()
 		puts(fh, HOSTNL)
 
 	else
-		printf(fh, "%s: $(%s_OBJECTS) %s %s" & HOSTNL, { exe_name, upper(file0), user_library, rc_file })
-		if length(rc_file) then
-			writef(fh, "\t" & settings[SETUP_RC_COMPILER] & HOSTNL, { rc_file, res_file })
+		printf(fh, "%s: $(%s_OBJECTS) %s %s" & HOSTNL, { exe_name[D_ALTNAME], upper(file0), user_library, rc_file[D_ALTNAME] })
+		if length(rc_file[D_ALTNAME]) then
+			writef(fh, "\t" & settings[SETUP_RC_COMPILER] & HOSTNL, { rc_file[D_ALTNAME], res_file[D_ALTNAME] })
 		end if
 		printf(fh, "\t$(LINKER) -o %s $(%s_OBJECTS) %s $(LFLAGS)" & HOSTNL, {
-			exe_name, upper(file0), iif(length(res_file), res_file, "") })
+			exe_name[D_ALTNAME], upper(file0), iif(length(res_file[D_ALTNAME]), res_file[D_ALTNAME], "") })
 		puts(fh, HOSTNL)
 		printf(fh, ".PHONY: %s-clean %s-clean-all" & HOSTNL, { file0, file0 })
 		puts(fh, HOSTNL)
 		printf(fh, "%s-clean:" & HOSTNL, { file0 })
-		printf(fh, "\trm -rf $(%s_OBJECTS) %s" & HOSTNL, { upper(file0), res_file })
+		printf(fh, "\trm -rf $(%s_OBJECTS) %s" & HOSTNL, { upper(file0), res_file[D_ALTNAME] })
 		puts(fh, HOSTNL)
 		printf(fh, "%s-clean-all: %s-clean" & HOSTNL, { file0, file0 })
-		printf(fh, "\trm -rf $(%s_SOURCES) %s %s" & HOSTNL, { upper(file0), res_file, exe_name })
+		printf(fh, "\trm -rf $(%s_SOURCES) %s %s" & HOSTNL, { upper(file0), res_file[D_ALTNAME], exe_name[D_ALTNAME] })
 		puts(fh, HOSTNL)
 		puts(fh, "%.o: %.c" & HOSTNL)
 		puts(fh, "\t$(CC) $(CFLAGS) $*.c -o $*.o" & HOSTNL)
@@ -698,11 +746,11 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 	end if
 
 	-- For MinGW the RC file gets compiled to a .res file and then put in the normal link line
-	if length(rc_file) and length(settings[SETUP_RC_COMPILER]) and compiler_type = COMPILER_GCC then
-		cmd = text:format(settings[SETUP_RC_COMPILER], { rc_file, res_file })
+	if length(rc_file[D_ALTNAME]) and length(settings[SETUP_RC_COMPILER]) and compiler_type = COMPILER_GCC then
+		cmd = text:format(settings[SETUP_RC_COMPILER], { rc_file[D_ALTNAME], res_file[D_ALTNAME] })
 		status = system_exec(cmd, 0)
 		if status != 0 then
-			ShowMsg(2, 350, { rc_file })
+			ShowMsg(2, 350, { rc_file[D_NAME] })
 			ShowMsg(2, 169, { status, cmd })
 			
 			goto "build_direct_cleanup"
@@ -715,8 +763,8 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 
 		case COMPILER_GCC then
 			cmd = sprintf("%s -o %s %s %s %s", { 
-				settings[SETUP_LEXE], exe_name, objs, 
-				iif(length(res_file), res_file, ""),
+				settings[SETUP_LEXE], exe_name[D_ALTNAME], objs, 
+				iif(length(res_file[D_ALTNAME]), res_file[D_ALTNAME], ""),
 				settings[SETUP_LFLAGS]
 			})
 
@@ -728,7 +776,7 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 
 	if not silent then
 		if not verbose then
-			ShowMsg(1, 166, { abbreviate_path(exe_name) })
+			ShowMsg(1, 166, { abbreviate_path(exe_name[D_NAME]) })
 		else
 			ShowMsg(1, 166, { cmd })
 		end if
@@ -736,18 +784,18 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 
 	status = system_exec(cmd, 0)
 	if status != 0 then
-		ShowMsg(2, 168, { exe_name })
+		ShowMsg(2, 168, { exe_name[D_NAME] })
 		ShowMsg(2, 169, { status, cmd })
 		
 		goto "build_direct_cleanup"
 	end if
 	
 	-- For Watcom the rc file links in after the fact	
-	if length(rc_file) and length(settings[SETUP_RC_COMPILER]) and compiler_type = COMPILER_WATCOM then
-		cmd = text:format(settings[SETUP_RC_COMPILER], { rc_file, res_file, exe_name })
+	if length(rc_file[D_ALTNAME]) and length(settings[SETUP_RC_COMPILER]) and compiler_type = COMPILER_WATCOM then
+		cmd = text:format(settings[SETUP_RC_COMPILER], { rc_file[D_ALTNAME], res_file[D_ALTNAME], exe_name[D_ALTNAME] })
 		status = system_exec(cmd, 0)
 		if status != 0 then
-			ShowMsg(2, 187, { rc_file, exe_name })
+			ShowMsg(2, 187, { rc_file[D_NAME], exe_name[D_NAME] })
 			ShowMsg(2, 169, { status, cmd })
 			
 			goto "build_direct_cleanup"
@@ -763,8 +811,8 @@ label "build_direct_cleanup"
 			delete_file(generated_files[i])
 		end for
 		
-		if length(res_file) then
-			delete_file(res_file)
+		if length(res_file[D_ALTNAME]) then
+			delete_file(res_file[D_ALTNAME])
 		end if
 
 		if remove_output_dir then
@@ -817,7 +865,7 @@ export procedure write_buildfile()
 
 			if not silent then
 				sequence settings = setup_build()
-				--ShowMsg(1, 175, { exe_name })
+				--ShowMsg(1, 175, { exe_name[D_NAME] })
 			end if
 
 		case BUILD_NONE then

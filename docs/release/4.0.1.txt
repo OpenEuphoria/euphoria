@@ -31,7 +31,10 @@
   all of the places we need to change that information.
 * [[ticket:607]] Fixed translation of integers with decimals (e.g., 2.0) when
   assigned to constants
-
+* [[ticket:590]] Fixed outdated or incorrect documentation on loop statements
+* [[ticket:594]] Fixed problem with not being able to link to resource file in a 
+  location with spaces.
+  
 == Enhancements
 
 * Added parsing of two digit years to ##std/datetime.e## ##[[:parse]]##.
