@@ -3025,7 +3025,6 @@ loop is executed at least once, since testing takes place **after** the body
 completes.  However in a ##while## statement, the test is taken **before** 
 the body is executed.
 
-Also note that a ##loop## can not have a ##with entry## clause.
 
 @[to|] @[by|]
 === for statement
