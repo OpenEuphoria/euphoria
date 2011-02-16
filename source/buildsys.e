@@ -385,7 +385,7 @@ function setup_build()
 			elsif TOSX then
 				l_flags &= " -lresolv"
 			elsif TWINDOWS then
-				l_flags &= " -mno-cygwin -lws2_32"				
+				l_flags &= " -mno-cygwin -lws2_32 -lcomdlg32"				
 			end if
 			
 			-- input/output
@@ -419,6 +419,7 @@ function setup_build()
 			end if
 
 			l_flags &= sprintf(" FILE %s LIBRARY ws2_32", { user_library })
+			l_flags &= sprintf(" FILE %s LIBRARY comdlg32", { user_library })
 			
 			-- resource file, executable file
 			rc_comp = "wrc -DSRCDIR=\"" & adjust_for_command_line_passing(current_dir()) & "\" -q -fo=[2] -ad [1] [3]"
