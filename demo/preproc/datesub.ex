@@ -6,7 +6,7 @@ include std/map.e      -- map accessor functions (get())
 include std/search.e   -- find_replace()
 include std/console.e
 
-ifdef WIN32_GUI then
+ifdef WINDOWS and GUI then
     puts(2,"This program must be run from the command-line:\n\n"&
 	"usage: eui datesub.ex [options]\n\n")
     procedure my_help()

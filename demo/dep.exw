@@ -12,7 +12,7 @@ include std/error.e
 ifdef WINDOWS then
 	include std/win32/msgbox.e
 end ifdef
-ifdef WIN32_CONSOLE or UNIX then
+ifdef CONSOLE then
 with define CONSOLE
 end ifdef
 type valid_rid(integer x)

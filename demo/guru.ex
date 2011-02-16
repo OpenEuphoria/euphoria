@@ -56,7 +56,7 @@ ifdef UNIX then
 elsedef
 	home = getenv("HOMEDRIVE") & getenv("HOMEPATH")
 end ifdef
-if find(-1, log_path) then
+if find(-1, home) then
 	log_path = home & SLASH & log_name -- put in home dir if possible
 else
 	log_path = log_name
