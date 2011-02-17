@@ -33,11 +33,10 @@
   assigned to constants
 * [[ticket:598]] Link windows binaries to comdlg32.dll to make sure GUI calls work
   with the new manifest.
-
 * [[ticket:590]] Fixed outdated or incorrect documentation on loop statements
 * [[ticket:594]] Fixed problem with not being able to link to resource file in a 
   location with spaces.
-  
+* [[ticket:615]] Fixed abbreviate_path for Windows 
 == Enhancements
 
 * Added parsing of two digit years to ##std/datetime.e## ##[[:parse]]##.
