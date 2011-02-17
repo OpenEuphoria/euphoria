@@ -32,7 +32,15 @@ include std/sort.e
 include std/text.e
 include std/wildcard.e
 include std/win32/msgbox.e
+include std/text.e
+include std/search.e
+include std/sequence.e
 
+ifdef WINDOWS then
+    constant dexe = ".exe"
+elsedef
+    constant dexe = ""
+end ifdef
 constant msg = 1 -- place to send messages
 constant generic_msg = "sanity tests failed at line number shown in ex.err"
 constant t = time()
@@ -1003,10 +1011,9 @@ end procedure
 procedure check_install(integer doit)
 -- see if Euphoria was installed correctly
 	object path
-	sequence temp_eudir
 	object ex_sum
 	integer slash, key
-
+	
 	if not doit then
 		any_key("skipping checksum - press Enter")
 		return
@@ -1018,34 +1025,31 @@ procedure check_install(integer doit)
 		path = ""
 	end if
 	
-	eubin = upper(pathname( cmd_line[1] ))
+	eubin = pathname( cmd_line[1] )
 	
-
-	if length(eubin) and eubin[$] = SLASH then
-		eubin = eubin[1..$-1]
-	end if
-
-	temp_eudir = eubin
-	ifdef WINDOWS then	
-		slash = find(':', temp_eudir)
-		if slash then
-			-- safer to ignore DRIVE on Windows
-			temp_eudir = temp_eudir[slash+1..$]
-		end if
-		temp_eudir = lower(temp_eudir)
-		path = lower(path)
+	ifdef WINDOWS then
+		eubin = upper( eubin )
+		path = upper( path )
 	end ifdef
 	
-	--
-	-- This was trying to see if eui.ex was in your path or not and if not it figured
-	-- that some serious issue occured while installing Euphoria. This is not true and
-	-- does not work if you run sanity from a non-standard eui, such as 
-	-- source/build/eui sanity.ex
-	--
-	--if not match(temp_eudir, path) then
-	--	puts(msg, "Note: " & eubin & " is not on your PATH.\n")
-	--	reboot_msg()
-	--end if
+	slash = length(eubin) + 1 - find(SLASH,reverse(eubin))
+	sequence temp_eudir
+	
+	if slash <= length(eubin) then
+		temp_eudir = eubin[slash+1..$]
+		if match(temp_eudir,path) then
+			return
+		end if
+	end if
+	
+	-- running with a non standard eui, see if there is
+	-- an interpreter in the path.
+	if equal( 
+		locate_file( "eui" & dexe, split( {PATHSEP}, path ) ), 
+		"eui" & dexe ) then
+	      puts(msg, "Note: the interpreter is not on your PATH.\n")
+	      reboot_msg()
+	end if
 end procedure
 
 without profile
@@ -1056,7 +1060,7 @@ global procedure sanity()
 
 	check_install(TRUE)
 
-	ifdef WIN32_GUI then
+	ifdef WINDOWS and GUI then
 		if (IDCANCEL = message_box("Run the test?", "Euphoria WIN32 Sanity Test", 
 			{MB_OKCANCEL, MB_SYSTEMMODAL})) then
 			return
@@ -1092,7 +1096,7 @@ global procedure sanity()
 		position(13,1)
 		writef("[:4]%", floor(100*(j+1)/21))
 		
-		ifdef WIN32 then
+		ifdef WINDOWS then
 			win32_tests()
 		end ifdef
 		
@@ -1169,7 +1173,7 @@ global procedure sanity()
 	
 	delete_file("sanityio.tst")
 	
-	ifdef WIN32_GUI then
+	ifdef WINDOWS and GUI then
 		message_box("PASSED (100%)", "Euphoria WIN32 Sanity Test", MB_OK)
 	elsedef
 		puts(msg, "\nPASSED (100%)\n")

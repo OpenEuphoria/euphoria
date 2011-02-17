@@ -699,9 +699,6 @@ public type std_library_address( object addr )
 	end ifdef
 end type
 
-ifdef WINDOWS then
-std_library_address oldprotptr = allocate_data(ADDRESS_LENGTH)
-end ifdef
 
 function local_allocate_protected_memory( integer s, integer first_protection )
 	ifdef WINDOWS then
@@ -718,15 +715,22 @@ function local_allocate_protected_memory( integer s, integer first_protection )
 	end ifdef
 end function
 
+ifdef WINDOWS then
+	atom oldprotptr = 0
+end ifdef
 -- return -1 for failure. 0 success  
 function local_change_protection_on_protected_memory( atom p, integer s, integer new_protection )
 	ifdef WINDOWS then
+		if (not object(oldprotptr)) or (oldprotptr = 0) then
+			oldprotptr = eu:machine_func(memconst:M_ALLOC, ADDRESS_LENGTH)
+		end if
 		if dep_works() then
 			if eu:c_func( VirtualProtect_rid, { p, s, new_protection , oldprotptr } ) = 0 then
 				-- 0 indicates failure here
 				return -1
 			end if
 		end if
+		--free(oldprotptr)
 		return 0
 	elsifdef UNIX then
 		integer fail = c_func( MPROTECT, { p, s, new_protection } )

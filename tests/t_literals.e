@@ -162,4 +162,25 @@ constant colors_name = {"blue", "black", "white", "red", "green"}
 test_equal("enum values", {1, 2.3, 13, 29.9, 68.77, 94.3}, {BLUE, BLACK, WHITE, RED, GREEN, CYAN})
 test_equal("enum type func", "green", colors_name[colors(GREEN)])
 
+constant MINVAL_1 = 2.0  
+atom     MINVAL_2 = 2.0  
+  
+function doit()  
+  
+   atom amt1 = 0  
+   atom amt2 = 0  
+   atom amt3 = 0  
+   atom amt4 = 0  
+  
+   amt1 += MINVAL_1  
+   amt2 -= MINVAL_1  
+  
+   amt3 += MINVAL_2  
+   amt4 -= MINVAL_2  
+  
+   return 0  
+  
+end function  
+test_equal( "Constant floating point with zero fraction", 0, doit() )
+
 test_report()

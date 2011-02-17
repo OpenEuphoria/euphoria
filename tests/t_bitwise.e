@@ -1,4 +1,5 @@
 include std/unittest.e
+include std/dll.e
 
 test_equal( "and_bits 1", 1, and_bits( 1, 3 ) )
 
@@ -31,9 +32,17 @@ test_equal( "inlined return and_bits", 1, inline_binop( i1, i2 ) )
 
 i1 = 0x00103070
 i1 = not_bits( i1 )
-test_equal( "not bits assign operand", 0xFFEFCF8F, i1 )
+if sizeof( C_POINTER ) = 4 then
+	test_equal( "not bits assign operand", 0xFFEFCF8F, i1 )
+else
+	test_equal( "not bits assign operand", 0xFFFFFFFF_FFEFCF8F, i1 )
+end if
 
 i1 = not_bits( 0xFFEFCF8F )
-test_equal( "not bits assign operand", 0x00103070, i1 )
+if sizeof( C_POINTER ) = 4 then
+	test_equal( "not bits assign operand", 0x00103070, i1 )
+else
+	test_equal( "not bits assign operand", 0xFFFFFFFF_00103070, i1 )
+end if
 
 test_report()

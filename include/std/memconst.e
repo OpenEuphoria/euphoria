@@ -43,9 +43,8 @@ ifdef WINDOWS then
 	-- You have no access to this page
 	public constant PAGE_NOACCESS = #01
 
-
 elsedef
-
+                                                                                 
 	constant
 		PROT_EXEC = 4,
 		PROT_READ = 1,

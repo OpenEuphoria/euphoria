@@ -4,7 +4,7 @@ include std/console.e as con
 
 sequence cmds = command_line()
 if length(cmds) != 3 then
-	ifdef WIN32_GUI then
+	ifdef WINDOWS and GUI then
 	    puts(1, "This program must be run from the command-line:\n\n")
 	end ifdef
 

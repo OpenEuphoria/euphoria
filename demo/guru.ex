@@ -52,19 +52,15 @@ sequence log_name, log_path, home
 log_name = "guru.out"
 -- place to store results
 ifdef UNIX then
-	home = getenv("HOME")
-	if sequence(home) then
-		log_path = home & '/' & log_name -- put in home dir if possible
-	else
-		log_path = log_name
-	end if
+	home = getenv("HOME") & ""
 elsedef
-	log_path = getenv("EUDIR")
-	if equal(log_path, -1) then
-		log_path = "C:"
-	end if
-	log_path &= "\\" & log_name -- put at top of C drive
+	home = getenv("HOMEDRIVE") & getenv("HOMEPATH")
 end ifdef
+if find(-1, home) then
+	log_path = home & SLASH & log_name -- put in home dir if possible
+else
+	log_path = log_name
+end if
 
 -- some files to skip:
 sequence skip_list
@@ -680,12 +676,10 @@ object d
 if euphoria then
 	d = getenv("EUDIR")
 	if atom(d) then
-		ifdef UNIX then
-			puts(ERR, "EUDIR not set\n")
-			abort(1)
-		elsedef
-			d = "C:\\EUPHORIA"
-		end ifdef
+		puts(ERR, "EUDIR not set\n")
+		puts(ERR, "Please set EUDIR to the location of EUPHORIA and try again")
+		maybe_any_key()
+		abort(1)
 	end if
 	if sequence(dir(d)) then
 		-- reduce noise in Euphoria Help

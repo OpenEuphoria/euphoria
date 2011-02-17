@@ -159,13 +159,13 @@ object divide(object a, object b);
 object Ddivide(d_ptr a, d_ptr b);
 object eremainder(object a, object b);
 object Dremainder(d_ptr a, d_ptr b);
-object and_bits(uint32_t a, uint32_t b);
+object and_bits(uintptr_t a, uintptr_t b);
 object Dand_bits(d_ptr a, d_ptr b);
-object or_bits(uint32_t a, uint32_t b);
+object or_bits(uintptr_t a, uintptr_t b);
 object Dor_bits(d_ptr a, d_ptr b);
-object xor_bits(uint32_t a, uint32_t b);
+object xor_bits(uintptr_t a, uintptr_t b);
 object Dxor_bits(d_ptr a, d_ptr b);
-object not_bits(uint32_t a);
+object not_bits(uintptr_t a);
 object Dnot_bits(d_ptr a);
 object power(object a, object b);
 object Dpower(d_ptr a, d_ptr b);
@@ -230,7 +230,7 @@ uintptr_t __cdecl osx_cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t 
 						uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
 						uintptr_t arg7, uintptr_t arg8, uintptr_t arg9)
 #endif // EOSX
-uintptr_t (*general_ptr)();
+extern uintptr_t (*general_ptr)();
 
 
 uintptr_t general_call_back(

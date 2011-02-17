@@ -33,7 +33,9 @@ constant
 -- Determing if the process has a console window or not
 --
 -- Returns:
---   1 if a console exists, 0 if a console does not exist.
+--   1 if there is more than one process attached to the current console, 
+--   0 if a console does not exist or only one process (EUPHORIA) is attached to
+--     the current console.
 --
 -- Notes:
 --   Method always returns 1 on *nix systems.

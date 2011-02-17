@@ -5,7 +5,7 @@ include std/dll.e
 include std/machine.e
 
 test_equal("int_to_bytes +ve", {231, 3, 0, 0}, int_to_bytes(999))
-test_equal("int_to_bytes -ve", {-231, -4, -1, -1}, int_to_bytes(-999))
+test_equal("int_to_bytes -ve",  {25,252,255,255}, int_to_bytes(-999))
 test_equal("int_to_bytes hex", {#CE, #FA, 0, 0}, int_to_bytes(#FACE))
 
 test_equal("bytes_to_int +ve", 999, bytes_to_int({231, 3, 0, 0}))
@@ -106,7 +106,7 @@ else
 	atom big_integer = #3FFFFFFF_FFFFFFFF
 	atom ptr = allocate( 8, 1 )
 	poke( ptr, repeat( 0xff, 7 ) & 0x3f )
-	big_integer += 513
+	big_integer += 1
 	test_equal( "to_integer #9", 0,  to_integer(big_integer ))
 	test_equal( "to_integer #10", peek8s( ptr ),  to_integer(#3FFFFFFF_FFFFFFFF ))
 end if

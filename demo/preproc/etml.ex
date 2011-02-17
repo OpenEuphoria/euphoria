@@ -15,7 +15,7 @@ object input_filename=map:get(params, "i"),
 	output_filename=map:get(params, "o")
 
 if atom(input_filename) or atom(output_filename) then
-	ifdef WIN32_GUI then
+	ifdef WINDOWS and GUI then
 		puts(1, "This program must be run from the command-line:\n\n")
 	end ifdef
 	puts(1, "Usage: eui etml.ex -i input_file -o output_file\n")

@@ -16,6 +16,7 @@
 #define _LARGEFILE64_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 #include <be_ver.h>
 
@@ -102,7 +103,7 @@
 
 #include <signal.h>
 
-extern double eustart_time; /* from be_runtime.c */
+extern eudouble eustart_time; /* from be_runtime.c */
 
 /*****************/
 /* Local defines */
@@ -853,7 +854,7 @@ static object Where(object x)
 		RTFatal("where() failed on this file");
 	}
 	if (result > (IOFF)MAXINT || result < (IOFF)MININT)
-		pos = NewDouble((double)result);  // maximum 2 billion
+		pos = NewDouble((eudouble)result);  // maximum 2 billion
 	else
 		pos = (object) result;
 	
@@ -1108,15 +1109,15 @@ typedef struct _SYSTEMTIME {
 		if (file_info.nFileSizeHigh == 0)
 		{
 			if (file_info.nFileSizeLow > MAXINT) {
-				obj_ptr[3] = NewDouble((double)file_info.nFileSizeLow);
+				obj_ptr[3] = NewDouble((eudouble)file_info.nFileSizeLow);
 			} else {
 				obj_ptr[3] = MAKE_INT((object)file_info.nFileSizeLow);
 			}
 		}
 		else
 		{
-			obj_ptr[3] = NewDouble((double)file_info.nFileSizeHigh * ((double)(MAXDWORD) + 1.0) +
-			                       (double)file_info.nFileSizeLow);
+			obj_ptr[3] = NewDouble((eudouble)file_info.nFileSizeHigh * ((eudouble)(MAXDWORD) + 1.0) +
+			                       (eudouble)file_info.nFileSizeLow);
 		}
 
 		FileTimeToSystemTime( &file_info.ftLastWriteTime, &file_time);
@@ -1240,7 +1241,7 @@ static object Dir(object x)
 				Append(temp, *temp, MAKE_INT('d'));
 
 			if( stbuf.st_size > MAXINT ){
-				obj_ptr[3] = NewDouble( (double) stbuf.st_size );
+				obj_ptr[3] = NewDouble( (eudouble) stbuf.st_size );
 			}
 			else{
 				obj_ptr[3] = (object) stbuf.st_size;
@@ -1408,7 +1409,7 @@ static object GetScreenChar(object x)
 	if ((unsigned)att <= (unsigned)MAXINT)
 		obj_ptr[2] = att;
 	else
-		obj_ptr[2] = NewDouble((double)(unsigned)att);
+		obj_ptr[2] = NewDouble((eudouble)(unsigned)att);
 
 #endif
 
@@ -1696,16 +1697,16 @@ static object change_dir(object x)
 static object e_sleep(object x)
 /* sleep for x seconds */
 {
-	double t;
+	eudouble t;
 
 	if IS_ATOM(x) {
 		if (IS_ATOM_INT(x)) {
-			t = (double)INT_VAL(x);
+			t = (eudouble)INT_VAL(x);
 		} else {
 			t = DBL_PTR(x)->dbl;
 		}
 	}
-	Wait(t);
+	Wait((double)t);
 	return ATOM_1;
 }
 
@@ -1769,17 +1770,18 @@ object tick_rate(object x)
 }
 
 static object float_to_atom(object x, int flen)
-/* convert a sequence of 4 or 8 bytes in IEEE format to an atom */
+/* convert a sequence of 4, 8 or 10 bytes in IEEE format to an atom */
 {
 	int len, i;
 	object_ptr obj_ptr;
 	union{
-		char   fbuff[8];
+		char   fbuff[10];
+		long double ldouble;
 		double fdouble;
 		float  ffloat;
 	} convert;
 	
-	double d;
+	eudouble d;
 	s1_ptr s;
 
 	s = SEQ_PTR(x);
@@ -1791,9 +1793,13 @@ static object float_to_atom(object x, int flen)
 		convert.fbuff[i] = (char)obj_ptr[i];
 	}
 	if (flen == 4)
-		d = (double)convert.ffloat;
-	else
-		d = convert.ffloat;
+		d = (eudouble)convert.ffloat;
+	else if (flen == 8 ){
+		d = (eudouble)convert.fdouble;
+	}
+	else{
+		d = (eudouble)convert.ldouble;
+	}
 	return NewDouble(d);
 }
 
@@ -1814,6 +1820,25 @@ static object fpsequence(unsigned char *fp, int len)
 	}
 	return MAKE_SEQ(result);
 }
+
+static object atom_to_float80(object x)
+/* convert an atom to a sequence of 10 bytes IEEE format */
+{
+	long double d;
+	int len;
+
+	len = 10;
+	if (IS_ATOM_INT(x)) {
+		d = (long double)INT_VAL(x);
+	}
+	else if (IS_ATOM(x)) {
+		d = (long double) DBL_PTR(x)->dbl;
+	}
+	else
+		len = 0;
+	return fpsequence((uchar *)&d, len);
+}
+
 
 static object atom_to_float64(object x)
 /* convert an atom to a sequence of 8 bytes IEEE format */
@@ -2691,7 +2716,7 @@ object machine(object opcode, object x)
 	char *addr;
 	char *dest;
 	char *src;
-	double d;
+	eudouble d;
 	int temp;
 
 	while (TRUE) {
@@ -2915,7 +2940,7 @@ object machine(object opcode, object x)
 				if (inst <= (uintptr_t)MAXINT)
 					return inst;
 				else
-					return NewDouble((double)inst);
+					return NewDouble((eudouble)inst);
 				break;
 			}
 
@@ -3132,6 +3157,14 @@ object machine(object opcode, object x)
 			case M_HAS_CONSOLE:
 				return has_console();
 			
+			case M_A_TO_F80:
+				return atom_to_float80( x );
+				
+			case M_F80_TO_A:
+				return float_to_atom( x, 10 );
+				
+			case M_INFINITY:
+				return NewDouble( (eudouble) INFINITY );
 
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:

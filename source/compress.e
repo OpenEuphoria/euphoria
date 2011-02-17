@@ -8,6 +8,7 @@ elsedef
 	without type_check
 end ifdef
 include std/convert.e
+include std/machine.e
 
 export constant IL_MAGIC = 79 -- indicates an IL file
 
@@ -26,24 +27,28 @@ export constant IL_START = "YTREWQ\n"
 
 -- tags for various values:
 export constant
-		 I2B = 249,   -- 2-byte signed integer follows
-		 I3B = 250,   -- 3-byte signed integer follows
-		 I4B = 251,   -- 4-byte signed integer follows
-		 F4B = 252,   -- 4-byte f.p. number follows
-		 F8B = 253,   -- 8-byte f.p. number follows
-		 S1B = 254,   -- sequence, 1-byte length follows, then elements
-		 S4B = 255    -- sequence, 4-byte length follows, then elements
+		 I2B  = 247,   -- 2-byte signed integer follows
+		 I3B  = 248,   -- 3-byte signed integer follows
+		 I4B  = 249,   -- 4-byte signed integer follows
+		 I8B  = 250,   -- 8-byte signed integer follows
+		 F4B  = 251,   -- 4-byte f.p. number follows
+		 F8B  = 252,   -- 8-byte f.p. number follows
+		 F10B = 253,   -- 10-byte fp number follows
+		 S1B  = 254,   -- sequence, 1-byte length follows, then elements
+		 S4B  = 255    -- sequence, 4-byte length follows, then elements
 
 -- ranges for various sizes:
 export constant
 		 MIN1B = -2,  -- minimum integer value stored in one byte
-		 MAX1B = 246, -- maximum integer value (if no cache)
+		 MAX1B = 244, -- maximum integer value (if no cache)
 		 MIN2B = -power(2, 15),
 		 MAX2B =  power(2, 15)-1,
 		 MIN3B = -power(2, 23),
 		 MAX3B =  power(2, 23)-1,
 		 MIN4B = -power(2, 31),
-		 MAX4B =  power(2, 31 )-1
+		 MAX4B =  power(2, 31)-1,
+		 MIN8B = -power(2, 63),
+		 MAX8B =  power(2, 63)-1
 
 export function compress(object x)
 -- Return the compressed representation of a Euphoria object
@@ -51,7 +56,7 @@ export function compress(object x)
 -- The compression cache is not used. Decompression occurs in be_execute.c
 	sequence x4, s
 
-	if integer(x) and x >= MIN4B and x <= MAX4B then
+	if integer(x) then
 		if x >= MIN1B and x <= MAX1B then
 			return {x - MIN1B}
 
@@ -63,9 +68,11 @@ export function compress(object x)
 			x -= MIN3B
 			return {I3B, and_bits(x, #FF), and_bits(floor(x / #100), #FF), floor(x / #10000)}
 
+		elsif x >= MIN4B and x <= MAX4B then
+			return I4B & int_to_bytes(x)
+		
 		else
-			return I4B & int_to_bytes(x-MIN4B)
-
+			return I8B & int_to_bytes(x, 8)
 		end if
 
 	elsif atom(x) then
@@ -75,7 +82,12 @@ export function compress(object x)
 			-- can represent as 4-byte float
 			return F4B & x4
 		else
-			return F8B & atom_to_float64(x)
+			x4 = atom_to_float64( x )
+			if x = float64_to_atom( x4 ) then
+				return F8B & x4
+			else
+				return F10B & atom_to_float80( x )
+			end if
 		end if
 
 	else
@@ -107,7 +119,7 @@ end function
 
 constant COMP_CACHE_SIZE = 64  -- power of 2: number of large integers to cache
 
-constant CACHE0 = 255-7-COMP_CACHE_SIZE -- just before cache
+constant CACHE0 = 255-9-COMP_CACHE_SIZE -- just before cache
 
 export integer max1b  -- maximum integer value to store in one byte
 max1b = CACHE0 + MIN1B
@@ -125,7 +137,7 @@ export procedure fcompress(integer f, object x)
 	sequence x4, s
 	integer p
 
-	if integer(x) and x >= MIN4B and x <= MAX4B then
+	if integer(x) then
 		if x >= MIN1B and x <= max1b then
 			puts(f, x - MIN1B) -- normal, quite small integer
 
@@ -151,9 +163,12 @@ export procedure fcompress(integer f, object x)
 					x -= MIN3B
 					puts(f, {I3B, and_bits(x, #FF), and_bits(floor(x / #100), #FF), floor(x / #10000)})
 
+				elsif x >= MIN4B and x <= MAX4B then
+					puts(f, I4B & int_to_bytes(x))
+					
 				else
-					puts(f, I4B & int_to_bytes(x-MIN4B))
-
+					puts(f, I8B & int_to_bytes(x, 8))
+					
 				end if
 			end if
 		end if
@@ -165,7 +180,12 @@ export procedure fcompress(integer f, object x)
 			-- can represent as 4-byte float
 			puts(f, F4B & x4)
 		else
-			puts(f, F8B & atom_to_float64(x))
+			x4 = atom_to_float64(x)
+			if x = float64_to_atom( x4 ) then
+				puts(f, F8B & x4)
+			else
+				puts(f, F10B & atom_to_float80( x ) )
+			end if
 		end if
 
 	else
@@ -183,11 +203,16 @@ export procedure fcompress(integer f, object x)
 end procedure
 
 constant M_ALLOC = 16
-atom mem0, mem1, mem2, mem3
-mem0 = machine_func(M_ALLOC,4)
-mem1 = mem0 + 1
-mem2 = mem0 + 2
-mem3 = mem0 + 3
+atom
+	mem0 = machine_func(M_ALLOC,8),
+	mem1 = mem0 + 1,
+	mem2 = mem0 + 2,
+	mem3 = mem0 + 3,
+	mem4 = mem0 + 4,
+	mem5 = mem0 + 5,
+	mem6 = mem0 + 6,
+	mem7 = mem0 + 7,
+	$
 
 export integer current_db
 
@@ -197,7 +222,20 @@ function get4()
 	poke(mem1, getc(current_db))
 	poke(mem2, getc(current_db))
 	poke(mem3, getc(current_db))
-	return peek4u(mem0)
+	return peek4s(mem0)
+end function
+
+function get8()
+-- read 8-byte value at current position in database file
+	poke(mem0, getc(current_db))
+	poke(mem1, getc(current_db))
+	poke(mem2, getc(current_db))
+	poke(mem3, getc(current_db))
+	poke(mem4, getc(current_db))
+	poke(mem5, getc(current_db))
+	poke(mem6, getc(current_db))
+	poke(mem7, getc(current_db))
+	return peek8s(mem0)
 end function
 
 export function fdecompress(integer c)
@@ -239,16 +277,28 @@ export function fdecompress(integer c)
 		return ival
 
 	elsif c = I4B  then
-		ival = get4() + MIN4B
+		ival = get4()
 		-- update the appropriate compression cache slot
 		comp_cache[1 + and_bits(ival, COMP_CACHE_SIZE-1)] = ival
 		return ival
-
+		
+	elsif c = I8B then
+		ival = get8()
+		-- update the appropriate compression cache slot
+		comp_cache[1 + and_bits(ival, COMP_CACHE_SIZE-1)] = ival
+		return ival
+		
 	elsif c = F4B then
 		return float32_to_atom({getc(current_db), getc(current_db),
 								getc(current_db), getc(current_db)})
 	elsif c = F8B then
 		return float64_to_atom({getc(current_db), getc(current_db),
+								getc(current_db), getc(current_db),
+								getc(current_db), getc(current_db),
+								getc(current_db), getc(current_db)})
+	elsif c = F10B then
+		return float80_to_atom({getc(current_db), getc(current_db),
+								getc(current_db), getc(current_db),
 								getc(current_db), getc(current_db),
 								getc(current_db), getc(current_db),
 								getc(current_db), getc(current_db)})

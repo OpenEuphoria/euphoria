@@ -986,48 +986,48 @@ object call_c(int func, object proc_ad, object arg_list)
 		case C_DOUBLE:
 			return NewDouble(dresult);
 		case C_FLOAT:
-			return NewDouble((double)fresult);
+			return NewDouble((eudouble)fresult);
 		case C_POINTER:
 			if ((uintptr_t)iresult <= (uintptr_t)MAXINT) {
 				return iresult;
 			}
 			else{
-				return NewDouble((double)(uintptr_t)iresult);
+				return NewDouble((eudouble)(uintptr_t)iresult);
 			}
 		case C_LONGLONG:
 			if ((long long int)iresult <= (long long int)MAXINT) {
 				return iresult;
 			}
 			else{
-				return NewDouble((double)(intptr_t)iresult);
+				return NewDouble((eudouble)(intptr_t)iresult);
 			}
 		case C_INT:
 			if ((intptr_t)(int)iresult <= MAXINT) {
 				return (int)iresult;
 			}
 			else{
-				return NewDouble((double)(int)iresult);
+				return NewDouble((eudouble)(int)iresult);
 			}
 		case C_UINT:
 			if ((uintptr_t)(unsigned int)iresult <= (unsigned int)MAXINT) {
 				return (unsigned int)iresult;
 			}
 			else{
-				return NewDouble((double)(unsigned int)iresult);
+				return NewDouble((eudouble)(unsigned int)iresult);
 			}
 		case C_LONG:
 			if ((intptr_t)(long)iresult <= MAXINT) {
 				return (long)iresult;
 			}
 			else{
-				return NewDouble((double)(long)iresult);
+				return NewDouble((eudouble)(long)iresult);
 			}
 		case C_ULONG:
 			if ((uintptr_t)(unsigned long int)iresult <= (unsigned long int)MAXINT) {
 				return iresult;
 			}
 			else{
-				return NewDouble((double)(unsigned long int)iresult);
+				return NewDouble((eudouble)(unsigned long int)iresult);
 			}
 		case C_UCHAR:
 			return (unsigned char) iresult;

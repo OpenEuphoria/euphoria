@@ -984,7 +984,7 @@ static void new_dbl_block(unsigned int cnt)
 	chkcnt++;
 }
 
-object NewDouble(double d)
+object NewDouble(eudouble d)
 /* allocate space for a new double value */
 {
 	register d_ptr new_dbl;

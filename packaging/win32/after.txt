@@ -2,7 +2,7 @@ After completing the installation:
 
    1. Reboot your system (if you changed your environment).
 
-   2. View docs\euphoria-4.0.pdf
+   2. View docs\euphoria.pdf or docs\html\index.html
       (if you chose to install the documentation).
 
    3. Experiment with simple command-line programs first.

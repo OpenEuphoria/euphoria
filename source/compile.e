@@ -45,7 +45,9 @@ integer np, pc
 constant MAXLEN = MAXINT - 1000000  -- assumed maximum length of a sequence
 
 constant INT16 = #00007FFF,
-		 INT15 = #00003FFF
+		 INT15 = #00003FFF,
+		 INT32 = #7FFFFFFF,
+		 INT31 = #3FFFFFFF
 
 -- Machine Operations - avoid renumbering existing constants
 -- update C copy in execute.h
@@ -954,7 +956,7 @@ procedure seg_peek_pointer(integer target, integer source, integer mode)
 	
 	c_stmt("if ((uintptr_t)@ > (uintptr_t)MAXINT){\n",
 				target)
-	c_stmt("@ = NewDouble((double)(uintptr_t)@);\n",
+	c_stmt("@ = NewDouble((eudouble)(uintptr_t)@);\n",
 				{target, target})
 	c_stmt0("}\n")
 	-- FIX: in first BB we might assume TYPE_INTEGER, value 0
@@ -1014,12 +1016,12 @@ procedure seg_peek4(integer target, integer source, boolean dbl)
 	if Code[pc] = PEEK4S then
 		c_stmt("if (@ < MININT || @ > MAXINT){\n",
 					{target, target})
-		c_stmt("@ = NewDouble((double)(object)@);\n",
+		c_stmt("@ = NewDouble((eudouble)(object)@);\n",
 				{target, target})
 		c_stmt0("}\n")
 	else  -- PEEK4U */
 		c_stmt("if ((uintptr_t)@ > (uintptr_t)MAXINT){\n", target)
-		c_stmt("@ = NewDouble((double)(uintptr_t)@);\n", {target, target})
+		c_stmt("@ = NewDouble((eudouble)(uintptr_t)@);\n", {target, target})
 		c_stmt0("}\n")
 	end if
 	-- FIX: in first BB we might assume TYPE_INTEGER, value 0
@@ -1050,7 +1052,7 @@ procedure seg_peek8(integer target_sym, integer source, boolean dbl, integer op)
 
 	if op = PEEK8S then
 		c_stmt0("if (peek8_longlong < (int64_t)MININT || peek8_longlong > (int64_t) MAXINT){\n")
-		c_stmt("@ = NewDouble((double) peek8_longlong);\n", target_sym)
+		c_stmt("@ = NewDouble((eudouble) peek8_longlong);\n", target_sym)
 		c_stmt0("}\n")
 		c_stmt0("else{\n")
 			c_stmt("@ = (object) peek8_longlong;\n", target_sym, target_sym )
@@ -1059,7 +1061,7 @@ procedure seg_peek8(integer target_sym, integer source, boolean dbl, integer op)
 
 	elsif op = PEEK8U then
 		c_stmt0("if (peek8_longlong > (uint64_t)MAXINT){\n")
-		c_stmt("@ = NewDouble((double)(uint64_t)peek8_longlong);\n", target_sym)
+		c_stmt("@ = NewDouble((eudouble)(uint64_t)peek8_longlong);\n", target_sym)
 		c_stmt0("}\n")
 		c_stmt0("else{\n")
 			c_stmt("@ = (object) peek8_longlong;\n", target_sym, target_sym )
@@ -1523,13 +1525,87 @@ function NotInRange(integer x, integer badval)
 	return FALSE
 end function
 
+function int32_mult_testa( sequence range_a )
+	sequence test_a
+	if range_a[MIN] >= -INT16 and range_a[MAX] <= INT16 then
+		test_a = ""     -- will pass for sure
+	elsif range_a[MAX] < -INT16 or range_a[MIN] > INT16 then
+		return 0  -- will fail for sure
+	else
+		test_a = "@2 == (short)@2"  -- not sure
+	end if
+	return test_a
+end function
+
+function int64_mult_testa( sequence range_a )
+	sequence test_a
+	if range_a[MIN] >= -INT32 and range_a[MAX] <= INT32 then
+		test_a = ""     -- will pass for sure
+	elsif range_a[MAX] < -INT32 or range_a[MIN] > INT32 then
+		return 0  -- will fail for sure
+	else
+		test_a = "@2 == (int32_t)@2"  -- not sure
+	end if
+	return test_a
+end function
+
+function int32_mult_testb1( sequence range_b )
+	sequence test_b1
+	if range_b[MAX] <= INT15 then
+		test_b1 = ""    -- will pass for sure
+	elsif range_b[MIN] > INT15 then
+		return 0  -- will fail for sure
+	else
+		test_b1 = "@3 <= INT15"  -- not sure
+	end if
+	return test_b1
+end function
+
+function int64_mult_testb1( sequence range_b )
+	sequence test_b1
+	if range_b[MAX] <= INT31 then
+		test_b1 = ""    -- will pass for sure
+	elsif range_b[MIN] > INT31 then
+		return 0  -- will fail for sure
+	else
+		test_b1 = "@3 <= INT31"  -- not sure
+	end if
+	return test_b1
+end function
+
+function int32_mult_testb2( sequence range_b )
+	sequence test_b2
+	if range_b[MIN] >= -INT15 then
+		test_b2 = ""    -- will pass for sure
+	elsif range_b[MAX] < -INT15 then
+		return 0  -- will fail for sure
+	else
+		test_b2 = "@3 >= -INT15"  -- not sure
+	end if
+	return test_b2
+end function
+
+function int64_mult_testb2( sequence range_b )
+	sequence test_b2
+	if range_b[MIN] >= -INT31 then
+		test_b2 = ""    -- will pass for sure
+	elsif range_b[MAX] < -INT31 then
+		return 0  -- will fail for sure
+	else
+		test_b2 = "@3 >= -INT31"  -- not sure
+	end if
+	return test_b2
+end function
+
+
 function IntegerMultiply(integer a, integer b)
 -- create the optimal code for multiplying two integers,
 -- based on their min and max values.
 -- a must be from -INT16 to +INT16
 -- b must be from -INT15 to +INT15
 	sequence multiply_code
-	sequence dblcode, test_a, test_b1, test_b2
+	sequence dblcode
+	object test_a, test_b1, test_b2
 	sequence range_a, range_b
 
 	if TypeIs(a, TYPE_INTEGER) then
@@ -1544,43 +1620,41 @@ function IntegerMultiply(integer a, integer b)
 		range_b = {MININT, MAXINT}
 	end if
 
-	dblcode = "@1 = NewDouble(@2 * (double)@3);\n"
+	dblcode = "@1 = NewDouble(@2 * (eudouble)@3);\n"
 
 	-- test_a
-	if range_a[MIN] >= -INT16 and range_a[MAX] <= INT16 then
-		test_a = ""     -- will pass for sure
-
-	elsif range_a[MAX] < -INT16 or range_a[MIN] > INT16 then
-		return dblcode  -- will fail for sure
-
+	if SIZEOF_POINTER = 4 then
+		test_a = int32_mult_testa( range_a )
+		
 	else
-		test_a = "@2 == (short)@2"  -- not sure
-
+		test_a = int64_mult_testa( range_a )
 	end if
-
+	
+	if atom( test_a ) then
+		return dblcode
+	end if
+	
 	-- test_b1
-	if range_b[MAX] <= INT15 then
-		test_b1 = ""    -- will pass for sure
-
-	elsif range_b[MIN] > INT15 then
-		return dblcode  -- will fail for sure
-
+	if SIZEOF_POINTER = 4 then
+		test_b1 = int32_mult_testb1( range_b )
 	else
-		test_b1 = "@3 <= INT15"  -- not sure
-
+		test_b1 = int64_mult_testb1( range_b )
 	end if
-
+	if atom( test_b1 ) then
+		return dblcode
+	end if
+	
+	
 	-- test_b2
-	if range_b[MIN] >= -INT15 then
-		test_b2 = ""    -- will pass for sure
-
-	elsif range_b[MAX] < -INT15 then
-		return dblcode  -- will fail for sure
-
+	if SIZEOF_POINTER = 4 then
+		test_b2 = int32_mult_testb2( range_b )
 	else
-		test_b2 = "@3 >= -INT15"  -- not sure
+		test_b2 = int64_mult_testb2( range_b )
 	end if
-
+	if atom( test_b2 ) then
+		return dblcode
+	end if
+	
 	-- put it all together
 	multiply_code = "if ("
 
@@ -1599,10 +1673,19 @@ function IntegerMultiply(integer a, integer b)
 	multiply_code &= test_b2
 
 	if length(test_a) or length(test_b1) or length(test_b2) then
-		multiply_code &= ")\n" &
-						 "@1 = @2 * @3;\n" &
-						 "else\n" &
-						 "@1 = NewDouble(@2 * (double)@3);\n"
+		multiply_code &= "){\n" &
+						 "@1 = @2 * @3;\n}\n" &
+						 "else{\n"
+		if SIZEOF_POINTER = 4 then
+			multiply_code &= "@1 = NewDouble(@2 * (eudouble)@3);\n}\n"
+		else
+			multiply_code &= "long double ld = ((long double)@2) * ((long double)@3);\n"
+			multiply_code &= "if( ld <= (long double)MAXINT && ld >= (long double)MININT ){\n"
+			multiply_code &= "@1 = (object)ld;\n"
+			multiply_code &= "}\nelse{\n"
+			multiply_code &= "@1 = NewDouble( (eudouble)ld );\n"
+			multiply_code &= "}\n}\n"
+		end if
 	else
 		multiply_code = "@1 = @2 * @3;\n"  -- no tests, must be integer
 	end if
@@ -1988,7 +2071,7 @@ function binary_op(integer pc, integer ResAlwaysInt, sequence target_val,
 			if check != 1 and
 			   TypeIsIn(rhs1, TYPES_IAO) then
 				if length(dblfn) > 2 then
-					c_stmt("temp_d.dbl = (double)@;\n", rhs1)
+					c_stmt("temp_d.dbl = (eudouble)@;\n", rhs1)
 					c_stmt("@ = ", lhs, lhs)
 					c_puts(dblfn)
 					temp_indent = -indent
@@ -1997,9 +2080,9 @@ function binary_op(integer pc, integer ResAlwaysInt, sequence target_val,
 					c_stmt("@ = ", lhs, lhs)
 					temp_indent = -indent
 					if atom_type = TYPE_INTEGER then
-						c_stmt("((double)@ ", rhs1)
+						c_stmt("((eudouble)@ ", rhs1)
 					else
-						c_stmt("NewDouble((double)@ ", rhs1)
+						c_stmt("NewDouble((eudouble)@ ", rhs1)
 					end if
 					c_puts(dblfn)
 					temp_indent = -indent
@@ -2022,7 +2105,7 @@ function binary_op(integer pc, integer ResAlwaysInt, sequence target_val,
 				if check != 2 and
 				   TypeIsIn(rhs2, TYPES_IAO) then
 					if length(dblfn) > 2 then
-						c_stmt("temp_d.dbl = (double)@;\n", rhs2)
+						c_stmt("temp_d.dbl = (eudouble)@;\n", rhs2)
 						c_stmt("@ = ", lhs, lhs)
 						c_puts(dblfn)
 						temp_indent = -indent
@@ -2037,7 +2120,7 @@ function binary_op(integer pc, integer ResAlwaysInt, sequence target_val,
 						end if
 						c_puts(dblfn)
 						temp_indent = -indent
-						c_stmt(" (double)@);\n", rhs2)
+						c_stmt(" (eudouble)@);\n", rhs2)
 					end if
 				end if
 
@@ -2536,7 +2619,7 @@ procedure opSWITCH_I()
 		Goto( Code[pc+4] )
 		c_stmt0("}\n")
 		c_stmt( "if(!IS_ATOM_INT(@)){\n", Code[pc+1] )
-		c_stmt( "if( (DBL_PTR(@)->dbl != (double) ((object) DBL_PTR(@)->dbl) ) ){\n",
+		c_stmt( "if( (DBL_PTR(@)->dbl != (eudouble) ((object) DBL_PTR(@)->dbl) ) ){\n",
 						repeat( Code[pc+1], 2) )
 		Goto( Code[pc+4] )
 		c_stmt0( "}\n" )
@@ -3186,7 +3269,7 @@ procedure opPLUS1()
 				SetBBType(Code[pc+3], GType(Code[pc+3]), target_val,
 								  target_elem, HasDelete( Code[pc+3] ) )
 				c_stmt("if (@ > MAXINT){\n", Code[pc+3])
-				c_stmt("@ = NewDouble((double)@);\n", {Code[pc+3], Code[pc+3]})
+				c_stmt("@ = NewDouble((eudouble)@);\n", {Code[pc+3], Code[pc+3]})
 				c_stmt0("}\n")
 			end if
 		end if
@@ -3643,7 +3726,7 @@ procedure opUMINUS()
 	gencode = "@ = unary_op(UMINUS, @);\n"
 	intcode2= "@1 = - @2;\n"    -- careful about -- occurring
 	intcode = "if ((uintptr_t)@2 == (uintptr_t)HIGH_BITS){\n" &
-			  "@1 = (object)NewDouble((double) -HIGH_BITS);\n" &
+			  "@1 = (object)NewDouble((eudouble) -HIGH_BITS);\n" &
 			  "}\nelse{\n" &
 			  "@1 = - @2;\n}\n"    -- careful about -- occurring
 	if GType(Code[pc+1]) = TYPE_INTEGER then
@@ -3788,7 +3871,7 @@ procedure opPLUS()
 	intcode2= "@1 = @2 + @3;\n"
 	intcode = "@1 = @2 + @3;\n"
 	intcode_extra = "if ((object)((uintptr_t)@1 + (uintptr_t)HIGH_BITS) >= 0){\n" &
-					"@1 = NewDouble((double)@1);\n}\n"
+					"@1 = NewDouble((eudouble)@1);\n}\n"
 	if TypeIs(Code[pc+1], TYPE_DOUBLE) or
 	   TypeIs(Code[pc+2], TYPE_DOUBLE) then
 		atom_type = TYPE_DOUBLE
@@ -3805,7 +3888,7 @@ procedure opMINUS()
 	intcode2 ="@1 = @2 - @3;\n"
 	intcode = "@1 = @2 - @3;\n"
 	intcode_extra = "if ((object)((uintptr_t)@1 +(uintptr_t) HIGH_BITS) >= 0){\n" &
-					"@1 = NewDouble((double)@1);\n}\n"
+					"@1 = NewDouble((eudouble)@1);\n}\n"
 	if TypeIs(Code[pc+1], TYPE_DOUBLE) or
 	   TypeIs(Code[pc+2], TYPE_DOUBLE) then
 		atom_type = TYPE_DOUBLE
@@ -3849,7 +3932,7 @@ procedure opDIVIDE()
 		gencode = intcode
 	else
 		gencode = "@ = binary_op(DIVIDE, @, @);\n"
-		intcode = "@1 = (@2 % @3) ? NewDouble((double)@2 / @3) : (@2 / @3);\n"
+		intcode = "@1 = (@2 % @3) ? NewDouble((eudouble)@2 / @3) : (@2 / @3);\n"
 	end if
 	if TypeIs(Code[pc+1], TYPE_DOUBLE) or
 	   TypeIs(Code[pc+2], TYPE_DOUBLE) then
@@ -3895,7 +3978,7 @@ procedure opFLOOR_DIV()
 			   "@1 = @2 / @3;\n" &
 			   "}\n" &
 			   "else {\n" &
-			   "temp_dbl = floor((double)@2 / (double)@3);\n" &
+			   "temp_dbl = floor((eudouble)@2 / (eudouble)@3);\n" &
 			   "@1 = (object)temp_dbl;\n" &
 			   "}\n"
 
@@ -3910,7 +3993,7 @@ procedure opFLOOR_DIV()
 				  "@1 = @2 / @3;\n" &
 				  "}\n" &
 				  "else {\n" &
-				  "temp_dbl = floor((double)@2 / (double)@3);\n" &
+				  "temp_dbl = floor((eudouble)@2 / (eudouble)@3);\n" &
 				  "if (@2 != MININT)\n" &
 				  "@1 = (object)temp_dbl;\n" &
 				  "else\n" &
@@ -3924,7 +4007,7 @@ end procedure
 
 procedure opAND_BITS()
 	gencode = "@ = binary_op(AND_BITS, @, @);\n"
-	intcode = "{uint32_t tu;\n tu = (uint32_t)@2 & (uint32_t)@3;\n @1 = MAKE_UINT(tu);\n}\n"
+	intcode = "{uintptr_t tu;\n tu = (uintptr_t)@2 & (uintptr_t)@3;\n @1 = MAKE_UINT(tu);\n}\n"
 	dblfn="Dand_bits"
 	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
@@ -3932,7 +4015,7 @@ end procedure
 
 procedure opOR_BITS()
 	gencode = "@ = binary_op(OR_BITS, @, @);\n"
-	intcode = "{uint32_t tu;\n tu = (uint32_t)@2 | (uint32_t)@3;\n @1 = MAKE_UINT(tu);\n}\n"
+	intcode = "{uintptr_t tu;\n tu = (uintptr_t)@2 | (uintptr_t)@3;\n @1 = MAKE_UINT(tu);\n}\n"
 	dblfn="Dor_bits"
 	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
@@ -3940,7 +4023,7 @@ end procedure
 
 procedure opXOR_BITS()
 	gencode = "@ = binary_op(XOR_BITS, @, @);\n"
-	intcode = "{uint32_t tu;\n tu = (uint32_t)@2 ^ (uint32_t)@3;\n @1 = MAKE_UINT(tu);\n}\n"
+	intcode = "{uintptr_t tu;\n tu = (uintptr_t)@2 ^ (uintptr_t)@3;\n @1 = MAKE_UINT(tu);\n}\n"
 	dblfn="Dxor_bits"
 	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
@@ -4314,7 +4397,7 @@ procedure opENDFOR_GENERAL()
 	-- rvalue for CName should be ok - we've initialized loop var
 	intcode = "@1 = @2 + @3;\n" &
 			  "if ((object)((uintptr_t)@1 +(uintptr_t) HIGH_BITS) >= 0){\n" &
-			  "@1 = NewDouble((double)@1);\n}\n"
+			  "@1 = NewDouble((eudouble)@1);\n}\n"
 
 	if TypeIs(Code[pc+3], TYPE_INTEGER) and
 	   TypeIs(Code[pc+4], TYPE_INTEGER) then
@@ -5306,13 +5389,13 @@ procedure opPEEK_STRING()
 			if Code[pc] = PEEK4S then
 				c_stmt("if (@ < MININT || @ > MAXINT)\n",
 							  {Code[pc+2], Code[pc+2]})
-				c_stmt("@ = NewDouble((double)(object)@);\n",
+				c_stmt("@ = NewDouble((eudouble)(object)@);\n",
 							  {Code[pc+2], Code[pc+2]})
 
 			elsif Code[pc] = PEEK4U then
 				c_stmt("if ((uintptr_t)@ > (uintptr_t)MAXINT)\n",
 							  Code[pc+2])
-				c_stmt("@ = NewDouble((double)(uintptr_t)@);\n",
+				c_stmt("@ = NewDouble((eudouble)(uintptr_t)@);\n",
 							  {Code[pc+2], Code[pc+2]})
 
 			end if
@@ -5435,7 +5518,7 @@ procedure opPEEK()
 			case PEEK8S then
 				c_stmt0("peek8_longlong = *peek8_addr++;\n")
 				c_stmt0("if (peek8_longlong < (int64_t) MININT || peek8_longlong > (int64_t) MAXINT){\n")
-					c_stmt0("_1 = NewDouble((double)peek8_longlong);\n")
+					c_stmt0("_1 = NewDouble((eudouble)peek8_longlong);\n")
 				c_stmt0("}\n")
 				c_stmt0("else{\n")
 					c_stmt0("_1 = (object)(int64_t) peek8_longlong;\n" )
@@ -5445,7 +5528,7 @@ procedure opPEEK()
 			case PEEK8U then
 				c_stmt0("peek8_longlong = *peek8_addr++;\n")
 				c_stmt0("if ((uint64_t)peek8_longlong > (uint64_t)MAXINT){\n")
-					c_stmt0("_1 = NewDouble((double) (uint64_t) peek8_longlong);\n")
+					c_stmt0("_1 = NewDouble((eudouble) (uint64_t) peek8_longlong);\n")
 				c_stmt0("}\n")
 				c_stmt0("else{\n")
 					c_stmt0("_1 = (object)peek8_longlong;\n" )
@@ -5455,20 +5538,20 @@ procedure opPEEK()
 			case PEEK_POINTER then
 				c_stmt0("_1 = (object)*peekptr_addr++;\n")
 				c_stmt0("if ((uintptr_t)_1 > (uintptr_t)MAXINT){\n")
-				c_stmt0("_1 = NewDouble((double)(uintptr_t)_1);\n")
+				c_stmt0("_1 = NewDouble((eudouble)(uintptr_t)_1);\n")
 				c_stmt0("}\n")
 				c_stmt0("*pokeptr_addr = _1;\n")
 			case PEEK4U then
 				c_stmt0("_1 = (object)*peek4_addr++;\n")
 				c_stmt0("if ((uintptr_t)_1 > (uintptr_t)MAXINT){\n")
-				c_stmt0("_1 = NewDouble((double)(uintptr_t)_1);\n")
+				c_stmt0("_1 = NewDouble((eudouble)(uintptr_t)_1);\n")
 				c_stmt0("}\n")
 				c_stmt0("*pokeptr_addr = _1;\n")
 			case PEEK4S then
 				c_stmt0("_1 = (object)(int32_t)*peek4_addr++;\n")
 				
 				c_stmt0("if (_1 < MININT || _1 > MAXINT){\n")
-				c_stmt0("_1 = NewDouble((double)_1);\n")
+				c_stmt0("_1 = NewDouble((eudouble)_1);\n")
 				c_stmt0("}\n")
 				c_stmt0("*pokeptr_addr = _1;\n")
 		end switch
@@ -5977,7 +6060,7 @@ procedure delete_sequence( symtab_index obj )
 end procedure
 
 procedure promote_integer_delete( symtab_index obj, symtab_index target )
-	c_stmt("@ = NewDouble( (double) @ );\n", {target, obj})
+	c_stmt("@ = NewDouble( (eudouble) @ );\n", {target, obj})
 	SetBBType( target, TYPE_DOUBLE, ObjMinMax( obj ), TYPE_OBJECT, 1)
 end procedure
 
@@ -6052,7 +6135,7 @@ procedure opDELETE_ROUTINE()
 		object val = SymTab[obj][S_OBJ]
 		if atom(val) then
 			if integer(val) then
-				c_stmt( "_2 = NewDouble( (double) @ );\n", obj )
+				c_stmt( "_2 = NewDouble( (eudouble) @ );\n", obj )
 			elsif atom(val) then
 				c_stmt( "_2 = NewDouble( DBL_PTR(@)->dbl );\n", obj )
 			end if
@@ -7349,7 +7432,7 @@ procedure BackEnd(atom ignore)
 		if atom(SymTab[tp][S_OBJ]) then -- can't be NOVALUE
 			-- double
 			c_stmt0("_")
-			c_printf("%d = NewDouble((double)", SymTab[tp][S_TEMP_NAME])
+			c_printf("%d = NewDouble((eudouble)", SymTab[tp][S_TEMP_NAME])
 			c_printf8(SymTab[tp][S_OBJ])
 			c_puts(");\n")
 		else
@@ -7361,7 +7444,8 @@ procedure BackEnd(atom ignore)
 
 	for csym = TopLevelSub to length(SymTab) do
 		if eu:compare( SymTab[csym][S_OBJ], NOVALUE ) then
-		if not is_integer( SymTab[csym][S_OBJ] ) then
+		if not is_integer( SymTab[csym][S_OBJ] )
+		or TYPE_DOUBLE = SymTab[csym][S_GTYPE] then
 		if SymTab[csym][S_MODE] != M_TEMP then
 			if tp_count > INIT_CHUNK then
 				-- close current .c and start a new one
@@ -7405,6 +7489,11 @@ procedure BackEnd(atom ignore)
 				end if
 			else
 				c_printf( "\t_%d", SymTab[csym][S_FILE_NO] )
+if atom( SymTab[csym][S_NAME] ) then
+	? csym & SymTab[csym]
+	printf(1, "  1234567812345678\n0x%x\n", sym_obj( csym ) )
+	? integer( sym_obj( csym ) ) & is_integer( sym_obj( csym ) )
+end if
 				c_puts( SymTab[csym][S_NAME] )
 				c_printf( " = NewDouble( %0.16f );\n", SymTab[csym][S_OBJ] )
 			end if
