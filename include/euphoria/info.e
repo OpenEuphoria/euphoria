@@ -10,6 +10,7 @@ constant M_EU_INFO=75
 enum MAJ_VER, MIN_VER, PAT_VER, VER_TYPE, NODE, REVISION, REVISION_DATE, START_TIME
 
 include std/dll.e
+include std/machine.e
 
 constant version_info = machine_func(M_EU_INFO, {})
 

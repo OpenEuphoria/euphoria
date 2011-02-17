@@ -5,6 +5,7 @@ elsedef
 end ifdef
 
 include std/datetime.e
+include std/machine.e
 include std/dll.e
 include std/filesys.e
 include std/io.e
@@ -13,7 +14,6 @@ include std/text.e
 include std/hash.e
 include std/search.e
 include std/utils.e
-
 include c_decl.e
 include c_out.e
 include error.e

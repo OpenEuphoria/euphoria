@@ -20,6 +20,86 @@ include std/types.e
 
 integer FREE_ARRAY_RID
 
+ifdef EU4_0 then
+	include std/math.e
+	public function sizeof(integer x)
+		switch x do
+			case C_CHAR,C_UCHAR then
+				return 1
+			case C_SHORT, C_USHORT then
+				return 2
+			case C_DOUBLE, C_DWORDLONG then
+				return 8
+			case else
+				return 4
+		end switch
+		return 0
+	end function
+	
+	public procedure poke8(atom address, object x)
+		if atom(x) then
+			x = {x}
+		end if
+		address -= 8
+		for i = 1 to length(x) do
+			-- put less significant bits.
+			poke4(address+i*8,and_bits(#FFFF_FFFF,x[i]))
+			
+			if x[i] > 0 then
+				poke4(address+i*8+4,floor(x[i]/#1_0000_0000))
+			else
+				poke4(address+i*8+4,floor(x[i]/#1_0000_0000))
+			end if
+		end for
+	end procedure
+
+	public procedure poke_pointer(atom address, object x)
+		poke4(address,x)
+	end procedure
+
+	public function peek8s(object address)
+		integer count = 1
+		integer atom_flag = atom(address)
+		if sequence(address) then
+			count = address[2]
+			address = address[1]
+		end if
+		sequence sout = peek4s({address,2*count})
+		sequence uout = peek4u({address,2*count})
+		sequence out = repeat(0,count)
+		for i = 1 to count do
+			out[i] = sout[2*i] * #1_0000_0000 + uout[2*i-1]
+		end for
+		if atom_flag then
+			return out[1]
+		end if
+		return out
+	end function
+
+	public function peek8u(object address)
+		integer count = 1
+		integer atom_flag = atom(address)
+		if sequence(address) then
+			count = address[2]
+			address = address[1]
+		end if
+		sequence out = peek4u({address,count*2})
+		for i = 1 to length(out) by 2 do
+			out[floor((i+1)/2)] = out[i+1] * #1_0000_0000 + out[i]
+		end for
+		out = out[1..count]
+		if atom_flag then
+			return out[1]
+		end if
+		return out
+	end function
+
+	public function peek_pointer(object x)
+		return peek4u(x)
+	end function
+
+end ifdef
+	
 ifdef not WINDOWS then
 include std/dll.e
 export constant
@@ -757,7 +837,7 @@ public function allocate_protect( object data, memconst:valid_wordsize wordsize 
 				eu:poke4( eaddr, data )
 			
 			case 8 then
-				eu:poke8( eaddr, data )
+				poke8( eaddr, data )
 			
 			case else
 				error:crash("Parameter error: Wrong word size %d in allocate_protect().", wordsize)

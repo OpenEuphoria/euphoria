@@ -40,7 +40,7 @@ namespace memory
 public include std/memconst.e
 
 -- biggest address on a 32-bit machine
-constant MAX_ADDR = power(2, 32)-1
+constant MAX_ADDR32 = power(2, 32)-1
 
 ifdef DATA_EXECUTE or not WINDOWS then
 	include std/machine.e
@@ -75,7 +75,7 @@ public type machine_addr(object a)
 		end if
 	end if
 	
-	return a > 0 and a <= MAX_ADDR
+	return a > 0 and a <= MAX_ADDR32
 end type
 
 -- Internal use of the library only.  free() calls this.  It works with
@@ -365,7 +365,8 @@ memconst:FREE_RID = routine_id("deallocate")
 -- See Also:
 --     [[:peek2s]], [[:peek2u]], [[:poke]], [[:poke4]], [[:poke_pointer]] [[:allocate]], [[:free]], [[:call]]
 --
-
+ifdef EU_4_0 then
+end ifdef
 --****
 -- Signature:
 -- <built-in> procedure poke_pointer(atom addr, object x)
@@ -465,6 +466,7 @@ memconst:FREE_RID = routine_id("deallocate")
 --  [[:poke2]], [[:peeks]], [[:peek4s]], [[:allocate]], [[:free]]
 --  [[:peek2u]], [[:peek_pointer]]
 --
+
 
 --****
 -- Signature:
