@@ -850,7 +850,12 @@ export procedure write_buildfile()
 				end if
 
 				ShowMsg(1, 170, { cfile_count + 2 })
-				ShowMsg(1, 172, { make_command, file0 })
+				
+				if sequence(output_dir) and length(output_dir) > 0 then
+					ShowMsg(1, 174, { output_dir, make_command, file0 })
+				else
+					ShowMsg(1, 172, { make_command, file0 })
+				end if
 			end if
 
 		case BUILD_MAKEFILE_PARTIAL then

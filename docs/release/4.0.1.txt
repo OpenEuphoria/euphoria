@@ -37,6 +37,8 @@
 * [[ticket:594]] Fixed problem with not being able to link to resource file in a 
   location with spaces.
 * [[ticket:615]] Fixed abbreviate_path for Windows 
+* [[ticket:595]] When it is necessary, tell user to change directory before using the make program.
+
 == Enhancements
 
 * Added parsing of two digit years to ##std/datetime.e## ##[[:parse]]##.
