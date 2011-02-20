@@ -434,7 +434,7 @@ char *EMalloc(unsigned long nbytes)
 	check_pool();
 #endif
 #if defined(EALIGN4)
-	nbytes += align4; // allow for possible 4-aligned addresses
+	nbytes += align4; // allow for 4-aligned addresses that are not always 8-aligned.
 #endif
 
 	if (nbytes <= MAX_CACHED_SIZE) {
@@ -605,7 +605,7 @@ void EFree(char *p)
 #else
 #if !defined(EWINDOWS) && !defined(EUNIX)
 // Version of allocation routines for systems that might not return allocations
-// that are 8-byte aligned.
+// that are 4-byte aligned.
 char *EMalloc(unsigned long nbytes)
 /* storage allocator */
 /* Always returns a pointer that has 8-byte alignment (essential for our
@@ -629,7 +629,7 @@ char *EMalloc(unsigned long nbytes)
 		p = a;
 	assert( ((unsigned long)p & 7) == 0);
 	*(p-1) = (char)adj;
-	*((unsigned long*)(p-5)) = nbytes;
+	*((unsigned long*)(p - 1 - sizeof(nbytes))) = nbytes;
 	return p;
 }
 
