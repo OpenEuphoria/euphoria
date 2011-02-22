@@ -391,3 +391,7 @@ echo XLTTARGETCC=$XLTTARGETCC >> "$PREFIX"${CONFIG_FILE}
 # Make a generic Makefile that simply includes Makefile.gnu
 echo include Makefile.gnu > Makefile
 
+
+echo Writing eu.cfg to $BUILDDIR/eu.cfg
+echo "[all]" > $BUILDDIR/eu.cfg
+echo -i $TRUNKDIR/include >> $BUILDDIR/eu.cfg
