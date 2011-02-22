@@ -375,6 +375,13 @@ export function GetDefaultArgs()
 	-- this command loads C:\euphoria\bin\eu.cfg not C:\euphoria\demo\eu.cfg
 	-- as it would under unix variants.
 	
+	-- From current working directory
+	default_args &= load_euphoria_config("./" & conf_file)
+	
+	-- From where ever the executable is
+	env = strip_file_from_path( exe_path() )
+	default_args &= load_euphoria_config( env & conf_file )
+	
 	-- platform specific
 	ifdef UNIX then
 		default_args &= load_euphoria_config( "/etc/euphoria/" & conf_file )
@@ -404,12 +411,6 @@ export function GetDefaultArgs()
 		-- none for DOS
 	end ifdef
 	
-	-- From current working directory
-	default_args &= load_euphoria_config("./" & conf_file)
-	
-	-- From where ever the executable is
-	env = strip_file_from_path( exe_path() )
-	default_args &= load_euphoria_config( env & conf_file )
 
 	env = get_eudir()
 	if sequence(env) then
