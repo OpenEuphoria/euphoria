@@ -34,6 +34,13 @@
   assigned to constants
 * [[ticket:598]] Link windows binaries to comdlg32.dll to make sure GUI calls work
   with the new manifest.
+* [[ticket:590]] Fixed outdated or incorrect documentation on loop statements
+* [[ticket:594]] Fixed problem with not being able to link to resource file in a 
+  location with spaces.
+* [[ticket:615]] Fixed abbreviate_path for Windows 
+* [[ticket:595]] When it is necessary, tell user to change directory before using the make program.
+* [[ticket:592]] eu.cfg files in the program's directory and the euphoria executable directories
+  are searched before platform specific directories
 
 == Enhancements
 

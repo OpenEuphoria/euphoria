@@ -11,7 +11,7 @@ include std/locale.e
 include std/text.e
 
 include common.e
-
+                                                       
 -- don't change this please, but please look for -deleted- items before adding new options
 -- to the bottom of this list. Re-use -deleted- items.
 constant StdErrMsgs = {
@@ -189,7 +189,7 @@ constant StdErrMsgs = {
 	{171, "Link resource file into resulting executable"},
 	{172, "To build your project, type [1][2].mak"},
 	{173, "To build your project, include [1].mak into a larger Makefile project"},
-	{174, "-deleted-"},
+	{174, "To build your project, change directory to [1] and type [2][3].mak"},
 	{175, "\nTo run your project, type [1]"},
 	{176, "Compiling with [1]"},
 	{177, "Do not display status messages" },

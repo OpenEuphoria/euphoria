@@ -425,14 +425,16 @@ echo XLTTARGETCC=$XLTTARGETCC >> "$PREFIX"${CONFIG_FILE}
 # Make a generic Makefile that simply includes Makefile.gnu
 echo include Makefile.gnu > Makefile
 
-echo [all] > eu.cfg
-echo -i $TRUNKDIR/include >> eu.cfg
-echo -eudir $TRUNKDIR >> eu.cfg
-echo [translate] >> eu.cfg
-echo -com $TRUNKDIR >> eu.cfg
-
 if [ "$EFLAG" = "E32" ]; then
 	cp eu.manifest32 eu.manifest
 else
 	cp eu.manifest64 eu.manifest
 fi
+=======
+echo Writing eu.cfg to $BUILDDIR/eu.cfg
+echo "[all]" > $BUILDDIR/eu.cfg
+echo -i $TRUNKDIR/include >> $BUILDDIR/eu.cfg
+echo -eudir $TRUNKDIR >> $BUILDDIR/eu.cfg
+echo [translate] >> $BUILDDIR/eu.cfg
+echo -com $TRUNKDIR >> $BUILDDIR/eu.cfg
+

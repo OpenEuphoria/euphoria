@@ -56,7 +56,6 @@ ifdef EU4_1_0 then
     test_pass("EU4_1_0")
 elsedef
     test_fail("EU4_1_0")
-    test_fail("EU4_0_1")
 end ifdef
 
 ifdef EU4_1 then

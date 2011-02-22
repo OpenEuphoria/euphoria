@@ -1581,6 +1581,25 @@ public function canonical_path(sequence path_in, integer directory_given = 0, in
 end function
 
 
+-- Change the parts of s to lower case that exist on a case insensitive file 
+-- system.
+--
+--        
+function fs_case(sequence s)
+	-- Bugs:
+	-- Normally Windows is insensitive and others are sensitive.  
+	-- On the other hand:
+	--        EXT2 filesystem mounted on Windows is case sensitive.
+	--        OS X's filesystems may be insensitive so in this case we want
+	--        SMB filesystems mounted on UNIX are insensitive.
+	ifdef WINDOWS then
+		return lower(s)
+	elsedef
+		return s
+	end ifdef
+end function
+
+
 --**
 -- Returns a path string to the supplied file which is shorter than the 
 -- given path string.
@@ -1627,26 +1646,30 @@ end function
 
 public function abbreviate_path(sequence orig_path, sequence base_paths = {})
 	sequence expanded_path
-
+	
 	-- Get full path of the parameter
 	expanded_path = canonical_path(orig_path)
 	
 	-- Add the current directory onto the list of base search paths.
 	base_paths = append(base_paths, curdir())
 	
+	-- normalize for OSes with case insensitive filesystems
+	-- by setting all to lowercase
+	base_paths = fs_case(base_paths)
+	
 	ifdef WINDOWS then
-		-- normalize for windows by setting all to lowercase and replacing any
-		-- unix style slashes with windows style ones.
-		base_paths = lower(base_paths)
+		-- replace any unix style slashes with Windows style ones.
 		for i = 1 to length(base_paths) do
-			base_paths[i] = match_replace('/', base_paths[i], `\`)
+			base_paths[i] = match_replace('/', base_paths[i], `/`)
 		end for
-		expanded_path = match_replace('/', expanded_path, `\`)
+		expanded_path = match_replace('/', expanded_path, `/`)
 	end ifdef
+	
+	sequence lowered_expanded_path = fs_case(expanded_path)
 	
 	-- The first pass is to see if the parameter begins with any of the base paths.
 	for i = 1 to length(base_paths) do
-		if search:begins(base_paths[i], expanded_path) then
+		if search:begins(base_paths[i], lowered_expanded_path) then
 			-- Found one, so strip it off and return the remainder.
 			return expanded_path[length(base_paths[i]) + 1 .. $]
 		end if
@@ -1655,7 +1678,7 @@ public function abbreviate_path(sequence orig_path, sequence base_paths = {})
 	-- Second pass is to try and find the given path, relative to the current directory.
 	ifdef WINDOWS then
 		-- If not on same drive just return what was supplied.
-		if not equal(base_paths[$][1], expanded_path[1]) then
+		if not equal(base_paths[$][1], lowered_expanded_path[1]) then
 			return orig_path
 		end if
 	end ifdef
@@ -1664,10 +1687,11 @@ public function abbreviate_path(sequence orig_path, sequence base_paths = {})
 	base_paths = stdseq:split(base_paths[$], SLASH)
 	-- Separate full given path into its components.
 	expanded_path = stdseq:split(expanded_path, SLASH)
+	lowered_expanded_path = ""
 	
 	-- locate where the two paths begin to get different.
 	for i = 1 to math:min({length(expanded_path), length(base_paths) - 1}) do
-		if not equal(expanded_path[i], base_paths[i]) then
+		if not equal(fs_case(expanded_path[i]), base_paths[i]) then
 			-- Create a new path by backing up from the current dir to
 			-- the point of difference and tacking on the remainder of the
 			-- parameter's path.

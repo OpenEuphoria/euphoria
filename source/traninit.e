@@ -134,8 +134,9 @@ export procedure transoptions()
 				verbose = TRUE
 				
 			case "rc-file" then
-				rc_file = canonical_path(val)
-				if not file_exists(rc_file) then
+				rc_file[D_NAME] = canonical_path(val)
+				rc_file[D_ALTNAME] = adjust_for_command_line_passing((rc_file[D_NAME]))
+				if not file_exists(rc_file[D_NAME]) then
 					ShowMsg(2, 349, { val })
 					abort(1)
 				end if
@@ -241,14 +242,15 @@ export procedure transoptions()
 				force_build = 1
 
 			case "o" then
-				exe_name = val
+				exe_name[D_NAME] = val
 		end switch
 	end for
 
-	if length(exe_name) and not absolute_path(exe_name) then
-		exe_name = current_dir() & SLASH & exe_name
+	if length(exe_name[D_NAME]) and not absolute_path(exe_name[D_NAME]) then
+		exe_name[D_NAME] = current_dir() & SLASH & exe_name[D_NAME]
 	end if
-
+	exe_name[D_ALTNAME] = adjust_for_command_line_passing(exe_name[D_NAME])
+	
 	if length(map:get(opts, OPT_EXTRAS)) = 0 then
 		-- No source supplied on command line
 		show_banner()
@@ -282,8 +284,9 @@ export procedure transoptions()
 		end if
 	end ifdef
 	
-	if length(rc_file) then
-		res_file = canonical_path(output_dir & filebase(rc_file) & ".res")
+	if length(rc_file[D_NAME]) then
+		res_file[D_NAME] = canonical_path(output_dir & filebase(rc_file[D_NAME]) & ".res")
+		res_file[D_ALTNAME] = adjust_for_command_line_passing(res_file[D_NAME])
 	end if
 	
 	finalize_command_line(opts)
