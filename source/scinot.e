@@ -224,8 +224,12 @@ function decimals_to_bits( sequence decimals )
 		bits = repeat( 0, 53 )
 		bit = 1
 		assigned = 0
-		while (not assigned) or (bit < find( 1, bits ) + 54)  do
-				
+
+		-- Check for the simple case of zero. It must be guaranteed that no element of decimals
+		-- is itself negative when this function is called and that its length is less than 54.
+		if compare(decimals, bits) > 0 then 
+
+			while (not assigned) or (bit < find( 1, bits ) + 54)  do
 				if compare( sub, decimals ) <= 0 then
 						assigned = 1
 						if length( bits ) < bit then
@@ -238,8 +242,9 @@ function decimals_to_bits( sequence decimals )
 				sub = half( sub )
 				
 				bit += 1
-		end while
-		
+			end while
+
+		end if	
 		return reverse(bits)
 end function
 
@@ -267,6 +272,7 @@ end function
 --returns a sequence of bytes in the raw format of an IEEE 754 double 
 --precision floating point number.  This value can be passed to the euphoria
 --library function, float64_to_atom().
+--Note: does not check if the string exceeds IEEE 754 double precision limits.
 export function scientific_to_float64( sequence s )
 		integer dp, e, exp
 		sequence int_bits, frac_bits, mbits, ebits, sbits
