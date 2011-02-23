@@ -1099,10 +1099,11 @@ function my_sscanf(sequence yytext)
 	integer c, i
 	atom dec
 
-	if length(yytext) < 2 then
+	if length(yytext) < 2 or length(yytext) > 24 then
 		CompileErr(121)
 	end if
 
+	-- TODO need to find a way to error check this.
 	if find( 'e', yytext ) or find( 'E', yytext ) then
 		return scientific_to_atom( yytext )
 	end if
@@ -1138,10 +1139,12 @@ function my_sscanf(sequence yytext)
 	end if
 
 	if ndigits = 0 then
-		return {}  -- no digits
+		CompileErr(121)  -- no digits
 	end if
 
-	if c = 'e' or c = 'E' then
+	--The following code is already handled by the call to
+	--scientific_to_atom() above. It can probably be removed.
+	/* if c = 'e' or c = 'E' then
 		-- get exponent sign
 		e_sign = +1
 		e_mag = 0
@@ -1181,7 +1184,7 @@ function my_sscanf(sequence yytext)
 		else
 			mantissa = mantissa * power(10.0, e_mag)
 		end if
-	end if
+	end if */
 	return mantissa
 end function
 
