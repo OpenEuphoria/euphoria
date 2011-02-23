@@ -430,7 +430,7 @@ if [ "$EFLAG" = "E32" ]; then
 else
 	cp eu.manifest64 eu.manifest
 fi
-=======
+
 echo Writing eu.cfg to $BUILDDIR/eu.cfg
 echo "[all]" > $BUILDDIR/eu.cfg
 echo -i $TRUNKDIR/include >> $BUILDDIR/eu.cfg
