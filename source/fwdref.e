@@ -471,7 +471,7 @@ procedure patch_forward_case( token tok, integer ref )
 		case_sym = SymTab[fr[FR_SUBPROG]][S_CODE][switch_pc + 2]
 	end if
 	
-	if current_file_no = fr[FR_FILE] and fr[FR_SUBPROG] = TopLevelSub then
+	if SymTab[tok[T_SYM]][S_FILE_NO] = fr[FR_FILE] and fr[FR_SUBPROG] = TopLevelSub then
 		return
 	end if
 	
