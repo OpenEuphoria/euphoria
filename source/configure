@@ -438,3 +438,4 @@ echo -eudir $TRUNKDIR >> $BUILDDIR/eu.cfg
 echo [translate] >> $BUILDDIR/eu.cfg
 echo -com $TRUNKDIR >> $BUILDDIR/eu.cfg
 
+cp $BUILDDIR/eu.cfg $TRUNKDIR/source/eu.cfg

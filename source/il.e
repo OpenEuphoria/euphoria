@@ -45,6 +45,7 @@ ifdef SHROUDER then
 		{ "batch",       0, GetMsgText(279,0), { } },
 		{ "quiet",       0, GetMsgText(304, 0), { } },
 		{ "copyright",   0, GetMsgText(312, 0), { } },
+		{ "eudir",     0, GetMsgText(328,0), { HAS_PARAMETER, "dir" } },
 		$
 	}
 elsedef
@@ -61,6 +62,7 @@ elsedef
 		{ "batch",       0, GetMsgText(279,0), { } },
 		{ "quiet",       0, GetMsgText(304, 0), { } },
 		{ "copyright",   0, GetMsgText(312, 0), { } },
+		{ "eudir",     0, GetMsgText(328,0), { HAS_PARAMETER, "dir" } },
 		$
 	}	
 end ifdef
@@ -353,6 +355,9 @@ export procedure handle_options_for_bind( m:map opts )
 			case "eub" then
 				eub_path = val
 
+			case "eudir" then
+				set_eudir( val )
+			
 			case else
 				fatal(GetMsgText(314, , {option}))
 		end switch
