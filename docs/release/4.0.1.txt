@@ -41,6 +41,7 @@
 * [[ticket:592]] eu.cfg files in the program's directory and the euphoria executable directories
   are searched before platform specific directories
 * [[ticket:609]] Scientific notation not handling a decimal of all zeroes correctly.
+* [[ticket:621]] Add ##-eudir <dir>## handler to binder and shrouder
 
 == Enhancements
 

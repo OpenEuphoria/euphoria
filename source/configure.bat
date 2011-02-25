@@ -282,10 +282,15 @@ rem ============================================================
 echo !include Makefile.wat > Makefile
 
 rem ============================================================
-rem Add a default eu.cfg to the build dir
+rem Add a default eu.cfg to the build dir and source dir
 rem ============================================================
 echo "[All]" > %BUILDDIR%\eu.cfg
 echo -i %TRUNKDIR%\include >> %BUILDDIR%\eu.cfg
+echo -eudir $TRUNKDIR >> %BUILDDIR%\eu.cfg
+echo "[translate]" >> %BUILDDIR%\eu.cfg
+echo "-com" $TRUNKDIR >> %BUILDDIR%\eu.cfg
+
+copy %BUILDDIR%\eu.cfg %TRUNKDIR%\source\eu.cfg
 
 echo Build directory is %BUILDDIR%
 
