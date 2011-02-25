@@ -685,13 +685,23 @@ intptr_t call_cdecl_func(intptr_t i, intptr_t * op, long len) {
 #else
 // 64-bit Call-C
 
-int64_t icall_x86_64( intptr_t func, double* xmm, int64_t *r ){
-	return ((int64_t (*)())func)(
-			r[0], r[1], r[2], r[3], r[4], 
-			r[5], r[6], r[7], r[8], r[9],
-			r[10], r[11], r[12], r[13], 
-			r[14], r[15], r[16],
-			xmm[0], xmm[1], xmm[2], xmm[3], xmm[4] );
+int64_t icall_x86_64( intptr_t func, double* xmm, int64_t *r, int args ){
+	
+	switch( args ){
+		case 0: return ((int64_t (*)())func)();
+		case 1: return ((int64_t (*)())func)( r[0] );
+		case 2: return ((int64_t (*)())func)( r[0], r[1] );
+		case 3: return ((int64_t (*)())func)( r[0], r[1], r[2] );
+		case 4: return ((int64_t (*)())func)( r[0], r[1], r[2], r[3] );
+		case 5: return ((int64_t (*)())func)( r[0], r[1], r[2], r[3], r[4] );
+		default:
+			return ((int64_t (*)())func)(
+				r[0], r[1], r[2], r[3], r[4], 
+				r[5], r[6], r[7], r[8], r[9],
+				r[10], r[11], r[12], r[13], 
+				r[14], r[15], r[16],
+				xmm[0], xmm[1], xmm[2], xmm[3], xmm[4] );
+	}
 }
 
 double dcall_x86_64( intptr_t func, double* xmm, int64_t *r ){
@@ -727,6 +737,7 @@ union xmm_param {
 #define PUSH_INT_ARG \
 if( arg_i < 6 ){ \
 	arg_op[arg_i++] = arg; \
+	++int_args; \
 } \
 else{ \
 	arg_op[arg_stack++] = arg; \
@@ -768,6 +779,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	union xmm_param dbl_op[5];
 	intptr_t xmm_i = 0;
 	intptr_t arg_stack = 6;
+	int int_args = 0;
 #endif
 	int is_double, is_float;
 	
@@ -858,6 +870,7 @@ object call_c(int func, object proc_ad, object arg_list)
 					else{
 						arg_op[arg_stack++] = dbl_arg.int64;
 					}
+					int_args += 6;
 				#endif
 				
 			}
@@ -873,6 +886,7 @@ object call_c(int func, object proc_ad, object arg_list)
 					else{
 						arg_op[arg_stack++] = flt_arg.int32;
 					}
+					int_args += 6;
 				#endif
 			}
 		}
@@ -980,7 +994,7 @@ object call_c(int func, object proc_ad, object arg_list)
 #else
 	if( is_double ) dresult = dcall_x86_64( long_proc_address, (double*)dbl_op, arg_op );
 	if( is_float  ) fresult = fcall_x86_64( long_proc_address, (double*)dbl_op, arg_op );
-	else            iresult = icall_x86_64( long_proc_address, (double*)dbl_op, arg_op );
+	else            iresult = icall_x86_64( long_proc_address, (double*)dbl_op, arg_op, int_args );
 #endif
 	switch( return_type ){
 		case C_DOUBLE:
