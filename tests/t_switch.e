@@ -363,5 +363,25 @@ for i = 1 to length( routine_name ) do
 	test_equal( "replace callback using switch with " & routine_name[i], "one two unknown ", result )
 end for
 
+include switch_constants.e
+constant LOCAL_CASE = 4
+sequence ticket_617 = {}
+for i = 1 to 5 do
+	switch i do
+		case PUBLIC_CASE then
+			ticket_617 = append( ticket_617, "public" )
+		case GLOBAL_CASE then
+			ticket_617 = append( ticket_617, "global")
+		case EXPORT_CASE then
+			ticket_617 = append( ticket_617, "export")
+		case LOCAL_CASE then
+			ticket_617 = append( ticket_617, "local")
+		case else
+			ticket_617 = append( ticket_617,"??")
+	end switch
+end for
+test_equal( "unqualified case labels from other files at top level (ticket:617)",
+	{"public", "export", "global", "local", "??"}, ticket_617 )
+
 test_report()
       
