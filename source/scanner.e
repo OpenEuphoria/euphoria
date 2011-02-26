@@ -1074,13 +1074,14 @@ end function
 function my_sscanf(sequence yytext)
 -- Converts string to floating-point number
 -- based on code in get.e
--- returns {} if number is badly formed
+-- Throws CompileErr 121 if number is badly formed
 	integer e_sign, ndigits, e_mag
 	atom mantissa
 	integer c, i
 	atom dec
 
-	if length(yytext) < 2 or length(yytext) > 24 then
+	-- No upper bound or other error checking yet.
+	if length(yytext) < 2 then
 		CompileErr(121)
 	end if
 
