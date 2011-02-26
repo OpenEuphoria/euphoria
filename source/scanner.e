@@ -1579,13 +1579,16 @@ export function Scanner()
 
 				elsif equal(yytext, "0") then
 					basetype = find(ch, nbasecode)
-					if basetype > 4 then
-						basetype -= 4
+					if basetype > length(nbase) then
+						basetype -= length(nbase)
 					end if
 
 					if basetype = 0 then
 						if char_class[ch] = LETTER then
-							CompileErr(105, ch)
+							if ch != 'e' and ch != 'E' then
+								CompileErr(105, ch)
+							-- else a rare form of scientific notation "0E..."
+							end if
 						end if
 						basetype = -1 -- decimal
 						exit
