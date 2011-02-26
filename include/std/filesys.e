@@ -1640,25 +1640,20 @@ end function
 
 public function abbreviate_path(sequence orig_path, sequence base_paths = {})
 	sequence expanded_path
-	
+
 	-- Get full path of the parameter
 	expanded_path = canonical_path(orig_path)
 	
 	-- Add the current directory onto the list of base search paths.
 	base_paths = append(base_paths, curdir())
 	
+	for i = 1 to length(base_paths) do
+		base_paths[i] = canonical_path(base_paths[i], 1) -- assume each base path is meant to be a directory.
+	end for
+	
 	-- normalize for OSes with case insensitive filesystems
 	-- by setting all to lowercase
 	base_paths = fs_case(base_paths)
-	
-	ifdef WINDOWS then
-		-- replace any unix style slashes with Windows style ones.
-		for i = 1 to length(base_paths) do
-			base_paths[i] = match_replace('/', base_paths[i], `/`)
-		end for
-		expanded_path = match_replace('/', expanded_path, `/`)
-	end ifdef
-	
 	sequence lowered_expanded_path = fs_case(expanded_path)
 	
 	-- The first pass is to see if the parameter begins with any of the base paths.
