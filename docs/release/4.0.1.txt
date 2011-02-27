@@ -45,6 +45,7 @@
 * [[ticket:621]] Add ##-eudir <dir>## handler to binder and shrouder
 * [[ticket:617]] Fix top level ##case## values when referencing an unqualified constant
   in another file
+* [[ticket:620]] Added comdlg32.dll to mingw linking flags
 
 == Enhancements
 

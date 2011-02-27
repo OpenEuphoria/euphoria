@@ -92,7 +92,7 @@ ifeq "$(EMINGW)" "1"
 	EPTHREAD=
 	EOSTYPE=-DEWINDOWS
 	EBSDFLAG=-DEMINGW
-	LDLFLAG=-lws2_32
+	LDLFLAG=-lws2_32 -lcomdlg32
 	SEDFLAG=-ri
 	EOSFLAGS=-mno-cygwin -mwindows
 	EOSFLAGSCONSOLE=-mno-cygwin
