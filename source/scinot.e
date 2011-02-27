@@ -320,6 +320,12 @@ export function scientific_to_float64( sequence s )
 		-- We split the integral and fractional parts, because they have to be
 		-- calculated differently.
 		s = s[1..e-1] - '0'
+		
+		-- If LHS only consists of zeros, then return zero.
+		if not find(0, s = 0) then
+			return atom_to_float64(0)
+		end if
+		
 		if exp >= 0 then
 				-- We have a large exponent, so it's all integral.  Pad it to account for 
 				-- the positive exponent.

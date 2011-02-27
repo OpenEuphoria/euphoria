@@ -310,7 +310,7 @@ public function euphoria_copyright()
 		"Euphoria v" & version_string_long(),
 		`
 ________
-		Copyright (c) 2007-2010 by OpenEuphoria Group.
+		Copyright (c) 2007-2011 by OpenEuphoria Group.
 		Copyright (c) 1993-2006 by Rapid Deployment Software.
 		All Rights Reserved.
 		`
