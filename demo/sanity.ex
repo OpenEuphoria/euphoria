@@ -1004,7 +1004,7 @@ procedure reboot_msg()
 		puts(msg, "Did you forget to reboot (restart) your machine?\n")
 	end ifdef
 	
-	puts(msg, "See INSTALL.DOC\n")
+	puts(msg, "See the 'Installing Euphoria' section of the manual\n")
 	abort(1)
 end procedure
 
