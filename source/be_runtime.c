@@ -3360,9 +3360,6 @@ void RHS_Slice( object a, object start, object end)
 	else
 		RTFatal("slice upper index is not an atom");
 	olda = SEQ_PTR(a);
-	if( startval < 0 ) startval += olda->length;
-	if( endval < 0 )   endval   += olda->length;
-
 	length = endval - startval + 1;
 
 #ifndef ERUNTIME
