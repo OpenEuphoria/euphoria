@@ -46,6 +46,7 @@
 * [[ticket:617]] Fix top level ##case## values when referencing an unqualified constant
   in another file
 * [[ticket:620]] Added comdlg32.dll to mingw linking flags
+* [[ticket:625]] Negative subscripts result in runtime errors.
 
 == Enhancements
 
