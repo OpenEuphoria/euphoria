@@ -224,7 +224,7 @@ export function load_euphoria_config( sequence file )
 	end if
 	
 	conf_path = canonical_path( file,,1 )
-	printf(1, "load_euphoria_config: %s\n", { conf_path } )
+	
 	-- Prevent recursive configuration loads.
 	if find(conf_path, seen_conf) != 0 then
 		return {}
