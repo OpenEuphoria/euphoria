@@ -15,6 +15,7 @@ include std/text.e
 include global.e
 include common.e
 include platform.e
+include cominit.e
 
 atom oem2char, convert_buffer
 integer convert_length
@@ -223,6 +224,7 @@ export function load_euphoria_config( sequence file )
 	end if
 	
 	conf_path = canonical_path( file,,1 )
+	printf(1, "load_euphoria_config: %s\n", { conf_path } )
 	-- Prevent recursive configuration loads.
 	if find(conf_path, seen_conf) != 0 then
 		return {}
@@ -375,36 +377,38 @@ export function GetDefaultArgs()
 	-- this command loads C:\euphoria\bin\eu.cfg not C:\euphoria\demo\eu.cfg
 	-- as it would under unix variants.
 	
+	sequence cmd_options = get_options()
+	
 	-- From current working directory
-	default_args &= load_euphoria_config("./" & conf_file)
+	default_args = load_euphoria_config("./" & conf_file)
 	
 	-- From where ever the executable is
 	env = strip_file_from_path( exe_path() )
-	default_args &= load_euphoria_config( env & conf_file )
+	default_args = merge_parameters( load_euphoria_config( env & conf_file ), default_args, cmd_options, 1 )
 	
 	-- platform specific
 	ifdef UNIX then
-		default_args &= load_euphoria_config( "/etc/euphoria/" & conf_file )
+		default_args = merge_parameters( load_euphoria_config( "/etc/euphoria/" & conf_file ), default_args, cmd_options, 1 )
 		
 		env = getenv( "HOME" )
 		if sequence(env) then
-			default_args &= load_euphoria_config( env & "/." & conf_file )
+			default_args = merge_parameters( load_euphoria_config( env & "/." & conf_file ), default_args, cmd_options, 1 )
 		end if
 		
 	elsifdef WINDOWS then
 		env = getenv( "ALLUSERSPROFILE" )
 		if sequence(env) then
-			default_args &= load_euphoria_config( expand_path( "euphoria", env ) & conf_file )
+			default_args = merge_parameters( load_euphoria_config( expand_path( "euphoria", env ) & conf_file ), default_args, cmd_options, 1 )
 		end if
 		
 		env = getenv( "APPDATA" )
 		if sequence(env) then
-			default_args &= load_euphoria_config( expand_path( "euphoria", env ) & conf_file )
+			default_args = merge_parameters( load_euphoria_config( expand_path( "euphoria", env ) & conf_file ), default_args, cmd_options, 1 )
 		end if
 
 		env = getenv( "HOMEPATH" )
 		if sequence(env) then
-			default_args &= load_euphoria_config( getenv( "HOMEDRIVE" ) & env & "\\" & conf_file )
+			default_args = merge_parameters( load_euphoria_config( getenv( "HOMEDRIVE" ) & env & "\\" & conf_file ), default_args, cmd_options, 1 )
 		end if
 		
 	elsedef
@@ -414,7 +418,7 @@ export function GetDefaultArgs()
 
 	env = get_eudir()
 	if sequence(env) then
-		default_args &= load_euphoria_config(env & "/" & conf_file)
+		default_args = merge_parameters( load_euphoria_config(env & "/" & conf_file), default_args, cmd_options, 1 )
 	end if
 
 	return default_args
