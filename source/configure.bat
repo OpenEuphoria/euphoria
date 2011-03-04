@@ -286,9 +286,12 @@ rem Add a default eu.cfg to the build dir and source dir
 rem ============================================================
 echo "[All]" > %BUILDDIR%\eu.cfg
 echo -i %TRUNKDIR%\include >> %BUILDDIR%\eu.cfg
-echo -eudir $TRUNKDIR >> %BUILDDIR%\eu.cfg
+echo -eudir %TRUNKDIR% >> %BUILDDIR%\eu.cfg
 echo "[translate]" >> %BUILDDIR%\eu.cfg
-echo "-com" $TRUNKDIR >> %BUILDDIR%\eu.cfg
+echo "-com" %TRUNKDIR% >> %BUILDDIR%\eu.cfg
+echo "-lib" %BUILDDIR%\eu.lib >> %BUILDDIR%\eu.cfg
+echo "[bind]"  >> %BUILDDIR%\eu.cfg
+echo "-eub" %BUILDDIR%\eub >> %BUILDDIR%\eu.cfg
 
 copy %BUILDDIR%\eu.cfg %TRUNKDIR%\source\eu.cfg
 
