@@ -74,8 +74,7 @@ public constant
 	SQRTE        = 1.64872_12707_00128_14684,
 	--**
 	-- Positive Infinity
-	PINF     = 1E308 * 1000 * 1E200,
--- 	PINF     = machine_func( M_INFINITY, {}),
+	PINF     = machine_func( M_INFINITY, {}),
 	--**
 	-- Negative Infinity
 	MINF     = - PINF,
