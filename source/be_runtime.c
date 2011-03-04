@@ -1634,14 +1634,15 @@ object DoubleToInt(object d)
 {
 	eudouble temp_dbl;
 	temp_dbl = DBL_PTR(d)->dbl;
-	if (floor(temp_dbl) == temp_dbl &&
+	if (EUFLOOR(temp_dbl) == temp_dbl &&
 		temp_dbl <= MAXINT_DBL &&
 		temp_dbl >= MININT_DBL) {
 			/* return it in integer repn */
 			return (object)temp_dbl;
 	}
-	else
+	else{
 		return d; /* couldn't convert */
+	}
 }
 
 
@@ -1818,7 +1819,7 @@ object Dpower(d_ptr a, d_ptr b)
 {
 	if (a->dbl == 0.0 && b->dbl <= 0.0)
 		RTFatal("can't raise 0 to power <= 0");
-	if (a->dbl < 0.0 && floor(b->dbl) != b->dbl)
+	if (a->dbl < 0.0 && EUFLOOR(b->dbl) != b->dbl)
 		RTFatal("can't raise negative number to non-integer power");
 	return (object)NewDouble(pow(a->dbl, b->dbl));
 }
@@ -2123,7 +2124,7 @@ object De_floor(d_ptr a)
 {
 	eudouble temp;
 
-	temp = floor(a->dbl);
+	temp = EUFLOOR(a->dbl);
 #ifndef ERUNTIME
 	if (fabs(temp) < MAXINT_DBL)
 		return MAKE_INT((object)temp);

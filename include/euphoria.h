@@ -47,6 +47,8 @@
 #define TOO_BIG_INT  (intptr_t)0x40000000L
 #define HIGH_BITS    (intptr_t)0xC0000000L
 
+#define EUFLOOR floor
+
 #else
 
 #define DBL_MASK     (uintptr_t)INT64_C( 0xA000000000000000 )
@@ -57,6 +59,8 @@
 #define NOVALUE      (intptr_t) INT64_C( 0xbfffffffffffffff )
 #define TOO_BIG_INT  (intptr_t) INT64_C( 0x4000000000000000 )
 #define HIGH_BITS    (intptr_t) INT64_C( 0xC000000000000000 )
+
+#define EUFLOOR floorl
 
 #endif
 

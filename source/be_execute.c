@@ -3108,7 +3108,7 @@ void do_exec(intptr_t *start_pc)
 							RTFatal("attempt to divide by 0");
 						}
 						v = a;
-						temp_dbl = floor((eudouble)v / (eudouble)b);
+						temp_dbl = EUFLOOR((eudouble)v / (eudouble)b);
 						if (fabs(temp_dbl) <= MAXINT_DBL)
 							b = (intptr_t)temp_dbl;
 						else

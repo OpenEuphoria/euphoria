@@ -286,10 +286,14 @@ struct char_cell {
 #define MAX_BITWISE_DBL MAX_DOUBLE_DBL
 #define MIN_BITWISE_DBL MIN_DOUBLE_DBL
 
+#define EUFLOOR floor
+
 #else
 
 #define MAX_BITWISE_DBL MAX_LONGLONG_DBL
 #define MIN_BITWISE_DBL MIN_LONGLONG_DBL
+
+#define EUFLOOR floorl
 
 #endif
 

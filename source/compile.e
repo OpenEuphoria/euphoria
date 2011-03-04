@@ -3978,7 +3978,7 @@ procedure opFLOOR_DIV()
 			   "@1 = @2 / @3;\n" &
 			   "}\n" &
 			   "else {\n" &
-			   "temp_dbl = floor((eudouble)@2 / (eudouble)@3);\n" &
+			   "temp_dbl = EUFLOOR((eudouble)@2 / (eudouble)@3);\n" &
 			   "@1 = (object)temp_dbl;\n" &
 			   "}\n"
 
@@ -3993,7 +3993,7 @@ procedure opFLOOR_DIV()
 				  "@1 = @2 / @3;\n" &
 				  "}\n" &
 				  "else {\n" &
-				  "temp_dbl = floor((eudouble)@2 / (eudouble)@3);\n" &
+				  "temp_dbl = EUFLOOR((eudouble)@2 / (eudouble)@3);\n" &
 				  "if (@2 != MININT)\n" &
 				  "@1 = (object)temp_dbl;\n" &
 				  "else\n" &

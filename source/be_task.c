@@ -182,14 +182,14 @@ double Wait(double t)
 #endif // EUNIX
 	
 #ifdef EWINDOWS
-	t1 = floor(1000.0 * t);
+	t1 = EUFLOOR(1000.0 * t);
 	t2 = t1 / 1000.0;
 #else // EWINDOWS
-	t1 = floor(t);
+	t1 = EUFLOOR(t);
 #endif // EWINDOWS
 #ifdef EUNIX
 	t2 = t - t1;
-	t3 = floor(1000000000.0 * t2);
+	t3 = EUFLOOR(1000000000.0 * t2);
 #endif // EUNIX
 	if (t1 >= 1.0) {
 		it = t1; // overflow?
@@ -541,7 +541,7 @@ void task_schedule(object task, object sparams)
 		if (min_dbl < clock_period / 2.0) {
 			// allow multiple runs per clock period
 			if (min_dbl > 1.0e-9) {
-				tcb[task].runs_max =  floor(clock_period / min_dbl);
+				tcb[task].runs_max =  EUFLOOR(clock_period / min_dbl);
 			}
 			else {
 				// avoid divide by zero or almost zero
