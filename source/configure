@@ -434,6 +434,7 @@ fi
 echo Writing eu.cfg to $BUILDDIR/eu.cfg
 echo "[all]" > $BUILDDIR/eu.cfg
 echo -i $TRUNKDIR/include >> $BUILDDIR/eu.cfg
+echo -d $EFLAG >> $BUILDDIR/eu.cfg
 echo -eudir $TRUNKDIR >> $BUILDDIR/eu.cfg
 echo "[translate]" >> $BUILDDIR/eu.cfg
 echo "-com" $TRUNKDIR >> $BUILDDIR/eu.cfg

@@ -267,13 +267,6 @@ rem ============================================================
 echo TRUNKDIR=%TRUNKDIR% >> config.wat
 echo BUILDDIR=%FULL_BUILDDIR% >> config.wat
 
-echo [all] > eu.cfg
-echo -eudir %TRUNKDIR% >> eu.cfg
-echo -i %TRUNKDIR%\include >> eu.cfg
-
-echo [translate] >> eu.cfg
-echo -com %TRUNKDIR% >> eu.cfg
-
 rem ============================================================
 rem Copy 32-bit manifest file
 rem ============================================================
@@ -300,6 +293,7 @@ rem ============================================================
 echo "[All]" > %BUILDDIR%\eu.cfg
 echo -i %TRUNKDIR%\include >> %BUILDDIR%\eu.cfg
 echo -eudir %TRUNKDIR% >> %BUILDDIR%\eu.cfg
+echo -d E32 >> %BUILDDIR%\eu.cfg
 echo "[translate]" >> %BUILDDIR%\eu.cfg
 echo "-com" %TRUNKDIR% >> %BUILDDIR%\eu.cfg
 echo "-lib" %BUILDDIR%\eu.lib >> %BUILDDIR%\eu.cfg
