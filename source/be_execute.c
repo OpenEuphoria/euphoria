@@ -544,6 +544,12 @@ static object do_peek4(object a, int b )
 	return top;
 }
 
+#if INTPTR_MAX == INT32_MAX
+#define POKE_LIMIT(x) "poke" #x " is limited to 32-bit numbers"
+#else
+#define POKE_LIMIT(x) "poke" #x " is limited to 64-bit numbers"
+#endif
+
 static void do_poke2(object a, object top)
 // moved it here because it was causing bad code generation for WIN32
 {
@@ -569,7 +575,7 @@ static void do_poke2(object a, object top)
 	else if (IS_ATOM(top)) {
 		temp_dbl = DBL_PTR(top)->dbl;
 		if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
-			RTFatal("poke2 is limited to 32-bit numbers");
+			RTFatal(POKE_LIMIT(2));
 		*poke2_addr = (uint16_t) temp_dbl;
 	}
 	else {
@@ -587,7 +593,7 @@ static void do_poke2(object a, object top)
 					break;
 				temp_dbl = DBL_PTR(top)->dbl;
 				if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
-					RTFatal("poke2 is limited to 32-bit numbers");
+					RTFatal( POKE_LIMIT(2) );
 				*poke2_addr = (uint16_t) temp_dbl;
 				++poke2_addr;
 			}
@@ -676,7 +682,7 @@ static void do_poke4(object a, object top)
 	else if (IS_ATOM(top)) {
 		temp_dbl = DBL_PTR(top)->dbl;
 		if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
-			RTFatal("poke4 is limited to 32-bit numbers");
+			RTFatal(POKE_LIMIT(4));
 		*poke4_addr = (uint32_t) temp_dbl;
 	}
 	else {
@@ -694,7 +700,7 @@ static void do_poke4(object a, object top)
 					break;
 				temp_dbl = DBL_PTR(top)->dbl;
 				if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
-					RTFatal("poke4 is limited to 32-bit numbers");
+					RTFatal(POKE_LIMIT(4));
 				*poke4_addr = (uint32_t) temp_dbl;
 				++poke4_addr;
 			}
