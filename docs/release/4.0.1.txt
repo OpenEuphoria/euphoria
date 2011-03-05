@@ -49,6 +49,7 @@
 * Fixed eu.cfg handling precedence and parameter merge / de-dupe algorithm to
   keep correct order of switches.
 * Load eu.cfg arguments when running programs with no arguments, e.g., "eui app.ex"
+* [[ticket:619]] GNU makefile "all" target builds all binaries now
 
 == Enhancements
 

@@ -339,7 +339,10 @@ EU_TRANSLATOR_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/transobj/*.c))
 EU_BACKEND_RUNNER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/backobj/*.c))
 EU_INTERPRETER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/intobj/*.c))
 
-all : interpreter translator library debug-library backend
+all : 
+	$(MAKE) interpreter translator library debug-library backend
+	$(MAKE) tools
+
 
 BUILD_DIRS=\
 	$(BUILDDIR)/intobj/back \
