@@ -7489,13 +7489,8 @@ procedure BackEnd(atom ignore)
 				end if
 			else
 				c_printf( "\t_%d", SymTab[csym][S_FILE_NO] )
-if atom( SymTab[csym][S_NAME] ) then
-	? csym & SymTab[csym]
-	printf(1, "  1234567812345678\n0x%x\n", sym_obj( csym ) )
-	? integer( sym_obj( csym ) ) & is_integer( sym_obj( csym ) )
-end if
 				c_puts( SymTab[csym][S_NAME] )
-				c_printf( " = NewDouble( %0.16f );\n", SymTab[csym][S_OBJ] )
+				c_printf( " = NewDouble( %0.20fL );\n", SymTab[csym][S_OBJ] )
 			end if
 
 			tp_count += 1

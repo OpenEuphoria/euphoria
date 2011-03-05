@@ -114,7 +114,7 @@ export procedure c_printf8(atom value)
 	
 	if emit_c_output then
 		neg = 0
-		buff = sprintf("%.16e", value)
+		buff = sprintf("%.20eL", value)
 		if length(buff) < 10 then
 			-- funny f.p. value
 			p = 1

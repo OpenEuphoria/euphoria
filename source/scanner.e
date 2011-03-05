@@ -932,6 +932,24 @@ export function IncludePop()
 	return TRUE
 end function
 
+ifdef E32 then
+	constant
+		MAXCHK2  = 0x1FFFFFFF,
+		MAXCHK8  = 0x07FFFFFF,
+		MAXCHK10 = 0x06666665,
+		MAXCHK16 = 0x03FFFFFF,
+		$
+elsifdef E64 then
+	constant
+		MAXCHK2  = 0x1FFFFFFF_FFFFFFFD,
+		MAXCHK8  = 0x07FFFFFF_FFFFFFF7,
+		MAXCHK10 = 0X06666666_6666665E,
+		MAXCHK16 = 0x03FFFFFF_FFFFFFF0,
+		$
+elsedef
+	InternalErr( 351, "Configuring integer scanning" )
+end ifdef
+
 constant common_int_text = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "20", "50", "100", "1000"}
 constant common_ints     = { 0,   1,   2,   3,   4,   5,   6,   7,   8,   9,   10,   11,   12,   13,   20,   50,   100,   1000 }
 function MakeInt(sequence text, integer nBase = 10)
@@ -940,14 +958,14 @@ function MakeInt(sequence text, integer nBase = 10)
 	atom fnum
 	integer digit
 	integer maxchk
-
+	
 	-- Quick scan for common integers
 	switch nBase do
 		case 2 then
-			maxchk = 536870911
+			maxchk = MAXCHK2
 
 		case 8 then
-			maxchk = 134217727
+			maxchk = MAXCHK8
 
 		case 10 then
 			-- Quick scan for common integers
@@ -956,10 +974,10 @@ function MakeInt(sequence text, integer nBase = 10)
 				return common_ints[num]
 			end if
 
-			maxchk = 107374181
+			maxchk = MAXCHK10
 
 		case 16 then
-			maxchk = 67108863
+			maxchk = MAXCHK16
 
 	end switch
 
@@ -1106,7 +1124,13 @@ function my_sscanf(sequence yytext)
 
 	-- TODO need to find a way to error check this.
 	if find( 'e', yytext ) or find( 'E', yytext ) then
-		return scientific_to_atom( yytext )
+		ifdef E32 then
+			return scientific_to_atom( yytext, DOUBLE )
+		elsifdef E64 then
+			return scientific_to_atom( yytext, EXTENDED )
+		elsedef
+			InternalErr( 351, "Scanning scientific notation in my_sscanf" )
+		end ifdef
 	end if
 	mantissa = 0.0
 	ndigits = 0
@@ -1678,7 +1702,7 @@ export function Scanner()
 			ungetch()
 
 			while i != 0 with entry do
-			    yytext = yytext[1 .. i-1] & yytext[i+1 .. $]
+				yytext = remove( yytext, i )
 			  entry
 			    i = find('_', yytext)
 			end while

@@ -30,19 +30,20 @@ function inline_binop( integer a, integer b )
 end function
 test_equal( "inlined return and_bits", 1, inline_binop( i1, i2 ) )
 
-i1 = 0x00103070
-i1 = not_bits( i1 )
+atom a1
+a1 = 0x00103070
+a1 = not_bits( a1 )
 if sizeof( C_POINTER ) = 4 then
-	test_equal( "not bits assign operand", 0xFFEFCF8F, i1 )
+	test_equal( "not bits assign operand 1", 0xFFEFCF8F, a1 )
 else
-	test_equal( "not bits assign operand", 0xFFFFFFFF_FFEFCF8F, i1 )
+	test_equal( "not bits assign operand 1", 0xFFFFFFFF_FFEFCF8F, a1 )
 end if
 
-i1 = not_bits( 0xFFEFCF8F )
+a1 = not_bits( 0xFFEFCF8F )
 if sizeof( C_POINTER ) = 4 then
-	test_equal( "not bits assign operand", 0x00103070, i1 )
+	test_equal( "not bits assign operand 2", 0x00103070, a1 )
 else
-	test_equal( "not bits assign operand", 0xFFFFFFFF_00103070, i1 )
+	test_equal( "not bits assign operand 2", 0xFFFFFFFF_00103070, a1 )
 end if
 
 test_report()
