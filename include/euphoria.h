@@ -14,6 +14,7 @@
 #undef _dos_ds
 #include <stdint.h>
 #include <stdio.h>
+#include <math.h>
 
 /***************************************************************************
 *

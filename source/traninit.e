@@ -102,6 +102,7 @@ add_options( trans_opt_def )
 --**
 -- Process the translator command-line options
 
+include std/console.e
 export procedure transoptions()
 	sequence tranopts = get_options()
 	

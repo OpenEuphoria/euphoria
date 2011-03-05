@@ -263,7 +263,7 @@ export function merge_parameters(sequence a, sequence b, sequence opts, integer 
 				integer beginLen = length(a)
 				
 				if dedupe = 0 and i < beginLen then
-					a = merge_parameters(a[1..i], a[i + 1..$], opts, 1)
+					a = merge_parameters( a[i + 1..$], a[1..i], opts, 1)
 					
 					if beginLen = length(a) then
 						-- nothing removed, increment the parameter index
@@ -282,7 +282,7 @@ export function merge_parameters(sequence a, sequence b, sequence opts, integer 
 	end while
 	
 	if dedupe then
-		return a & b
+		return b & a
 	end if
 	
 	integer first_extra = 0
@@ -300,7 +300,7 @@ export function merge_parameters(sequence a, sequence b, sequence opts, integer 
 		end if
 		
 		sequence this_opt = {}
-		if opt[2] = '-' then
+		if opt[2] = '-' and opt[1] = '-' then
 			this_opt = find_opt(LONGNAME, opt[3..$], opts)
 		elsif opt[1] = '-' or opt[1] = '/' then
 			this_opt = find_opt(SHORTNAME, opt[2..$], opts)
@@ -318,13 +318,12 @@ export function merge_parameters(sequence a, sequence b, sequence opts, integer 
 		i += 1
 	end while
 	
-	if first_extra > 1 then
-		
+	if first_extra then
 		return splice(b, a, first_extra)
 	end if
 	
 	-- No extras, system will prob fail w/a help message later
-	return a & b
+	return b & a
 end function
 
 --**
