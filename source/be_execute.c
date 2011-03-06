@@ -284,6 +284,7 @@ static void trace_command(object x)
 		RTFatal("argument to trace() must be an atom");
 
 #ifndef BACKEND
+		is_debugging = i;
 		if (i == 0) {
 			TraceOn = FALSE;
 			file_trace = FALSE;
