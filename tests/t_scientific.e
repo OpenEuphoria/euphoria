@@ -9,7 +9,7 @@ atom mnspd, mxspd, mnnpd, mxdb
 mnspd = 4.9406564584124654e-324
 mxspd = 2.2250738585072009e-308
 mnnpd = 2.2250738585072014e-308
-mxdb  = 1.7976931348623157e308
+mxdb  = 1.7976931348623157082e308
 
 test_equal("1. Minimum subnormal positive double:", 
     float64_to_atom({0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}), mnspd)
@@ -26,7 +26,7 @@ atom mnsnd, mxsnd, mnnnd, mxndb
 mnsnd = -4.9406564584124654e-324
 mxsnd = -2.2250738585072009e-308
 mnnnd = -2.2250738585072014e-308
-mxndb  = -1.7976931348623157e308
+mxndb  = -1.7976931348623157082e308
 
 test_equal("5. Minimum subnormal negative double:",
     float64_to_atom({0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80}), mnsnd)
