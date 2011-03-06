@@ -50,6 +50,7 @@
   keep correct order of switches.
 * Load eu.cfg arguments when running programs with no arguments, e.g., "eui app.ex"
 * [[ticket:619]] GNU makefile "all" target builds all binaries now
+* [[ticket:632]] fix trace screen prompts to prompt to continue
 
 == Enhancements
 
