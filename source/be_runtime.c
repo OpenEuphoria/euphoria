@@ -1811,7 +1811,7 @@ object power(object a, object b)
 		return MAKE_INT(p);
 	}
 	else
-		return (object)NewDouble(pow((double)a, (double)b));
+		return (object)NewDouble(EUPOW((eudouble)a, (eudouble)b));
 }
 
 object Dpower(d_ptr a, d_ptr b)
@@ -1821,7 +1821,7 @@ object Dpower(d_ptr a, d_ptr b)
 		RTFatal("can't raise 0 to power <= 0");
 	if (a->dbl < 0.0 && EUFLOOR(b->dbl) != b->dbl)
 		RTFatal("can't raise negative number to non-integer power");
-	return (object)NewDouble(pow(a->dbl, b->dbl));
+	return (object)NewDouble(EUPOW(a->dbl, b->dbl));
 }
 
 object equals(object a, object b)
