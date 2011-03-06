@@ -7,21 +7,21 @@ include std/os.e
 ifdef not NOINET_TESTS then
 	object content
 
-	content = http_get("http://example.com")
+	content = http_get("http://www.iana.org/domains/example/")
 	if atom(content) then
 		test_fail("get_url 1")
 	else
 		test_true("get_url 1", length(content) = 2)
-		test_true("get_url 2", match("<TITLE>Example Web Page</TITLE>", "" & content[2]))
+		test_true("get_url 2", match("<title>", "" & content[2]))
 	end if
 
-	content = http_get("http://example.com:80/")
+	content = http_get("http://www.iana.org:80/domains/example/")
 	if atom(content) then
 		test_fail("get_url 2")
 		test_fail("get_url 3")
 	else
 		test_true("get_url 3", length(content) = 2)
-		test_true("get_url 4", match("<TITLE>Example Web Page</TITLE>", "" & content[2]))
+		test_true("get_url 4", match("<title>", "" & content[2]))
 	end if
 
 	-- Test nested sequence post data
