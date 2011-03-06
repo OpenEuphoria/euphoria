@@ -181,7 +181,7 @@ LRESULT CALLBACK call_back9(unsigned, unsigned, unsigned, unsigned, unsigned,
 
 int is_debugging = 0;
 int use_prompt() {
-	return (is_batch == 0 && is_test == 0 && has_console() == 0) || is_debugging == 1;
+	return (is_batch == 0 && is_test == 0 && has_console() == 0) || TraceOn != 0;
 }
 
 #ifdef EMINGW
