@@ -292,51 +292,55 @@ public constant W_BAD_PATH = -1 -- error code
 --
 
 public function dir(sequence name)
-	object dir_data, data, the_name, the_dir
-	integer idx
-
-	-- Did the user give a wildcard? If not, just return the standard dir.
-	if eu:find('*', name) > 0 or eu:find('?', name) > 0 then
-		-- Empty if so that we can short circuit if * is found, otherwise
-		-- we would have to run a search for * and ? even if * is found.
-	else
+	ifdef WINDOWS then
 		return machine_func(M_DIR, name)
-	end if
+	elsedef
+		object dir_data, data, the_name, the_dir
+		integer idx
 
-	-- Is there a path involved?
-	if eu:find(SLASH, name) = 0 then
-		the_dir = "."
-		the_name = name
-	else
-		-- Find a SLASH character and break the name there resulting in
-		-- a directory and file name.
-		idx = search:rfind(SLASH, name)
-		the_dir = name[1 .. idx]
-		the_name = name[idx+1 .. $]
-	end if
+		-- Did the user give a wildcard? If not, just return the standard dir.
+		if eu:find('*', name) > 0 or eu:find('?', name) > 0 then
+			-- Empty if so that we can short circuit if * is found, otherwise
+			-- we would have to run a search for * and ? even if * is found.
+		else
+			return machine_func(M_DIR, name)
+		end if
 
-	-- Get directory contents
-	dir_data = machine_func(M_DIR, the_dir)
+		-- Is there a path involved?
+		if eu:find(SLASH, name) = 0 then
+			the_dir = "."
+			the_name = name
+		else
+			-- Find a SLASH character and break the name there resulting in
+			-- a directory and file name.
+			idx = search:rfind(SLASH, name)
+			the_dir = name[1 .. idx]
+			the_name = name[idx+1 .. $]
+		end if
 
-	-- Did an error occur?
-	if atom(dir_data) then
-		return dir_data
-	end if
+		-- Get directory contents
+		dir_data = machine_func(M_DIR, the_dir)
 
-	data = {}
-	-- Filter the directory contents returning only those items
-	-- matching name.
-	for i = 1 to length(dir_data) do
- 		if wildcard:is_match(the_name, dir_data[i][1]) then
- 				data = append(data, dir_data[i])
- 		end if
-	end for
+		-- Did an error occur?
+		if atom(dir_data) then
+			return dir_data
+		end if
 
-	if not length(data) then
-		-- no matches found, act like it doesn't exist
-		return -1
-	end if
-	return data
+		data = {}
+		-- Filter the directory contents returning only those items
+		-- matching name.
+		for i = 1 to length(dir_data) do
+			if wildcard:is_match(the_name, dir_data[i][1]) then
+					data = append(data, dir_data[i])
+			end if
+		end for
+
+		if not length(data) then
+			-- no matches found, act like it doesn't exist
+			return -1
+		end if
+		return data
+	end ifdef
 end function
 
 --**

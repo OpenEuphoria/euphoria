@@ -44,6 +44,7 @@
 * [[ticket:621]] Add ##-eudir <dir>## handler to binder and shrouder
 * [[ticket:617]] Fix top level ##case## values when referencing an unqualified constant
   in another file
+* [[ticket:633]] On Windows, ##[[:dir]]## was incorrectly case sensitive if wildcards were used.
 
 == Enhancements
 
