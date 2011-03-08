@@ -41,9 +41,13 @@
 
 #include <string.h>
 #ifdef EWINDOWS
+	#ifdef EMINGW
+		#define _WIN32_IE 0x0400
+	#endif
 	#include <windows.h>
 	#include <commctrl.h>
 #endif
+
 
 #include "alldefs.h"
 #include "be_alloc.h"
@@ -74,7 +78,9 @@
 /* convert atom to char. *must avoid side effects in elem* */
 #define Char(elem) ((IS_ATOM_INT(elem)) ? ((char)INT_VAL(elem)) : doChar(elem))
 
-
+#if defined(EMINGW)
+int winkbhit();
+#endif
 
 #define CONTROL_Z 26
 
