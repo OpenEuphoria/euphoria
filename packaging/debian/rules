@@ -41,7 +41,6 @@ build-arch-stamp: configure-stamp
 	# Add here commands to compile the arch part of the package.
 	echo TARGET build-arch-stamp
 	$(MAKE) -C source all
-	$(MAKE) -C source tools
 	touch $@
 
 build-indep: build-indep-stamp
