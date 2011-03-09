@@ -7338,7 +7338,9 @@ procedure BackEnd(atom ignore)
 				slash_ix += 1
 			end while
 		end if
-		c_stmt0(sprintf("_0switch_ptr->base[%d] = NewString(\"%s\");\n", {i, escape_string( cmd_switch )}))
+		c_stmt0(sprintf("_0switch_ptr->base[%d] = NewString(\"", i ) )
+		escape_string( cmd_switch )
+		c_stmt0("\");\n")
 	end for
 	c_stmt0( "_0switches = MAKE_SEQ( _0switch_ptr );\n")
 	c_puts("\n")
