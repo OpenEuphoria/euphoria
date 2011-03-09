@@ -41,7 +41,8 @@
 
 #include <string.h>
 #ifdef EWINDOWS
-	#ifdef EMINGW
+	#if defined(EMINGW) && INTPTR_MAX == INT32_MAX
+		// some versions of MinGW don't define this
 		#define _WIN32_IE 0x0400
 	#endif
 	#include <windows.h>
