@@ -307,9 +307,7 @@ begin
       end;
   if LoadStringFromFile('C:\AUTOEXEC.BAT', eu_auto_exec_bat) then
       begin
-      	if (StringChangeEx(eu_auto_exec_bat, ExpandConstant('SET PATH=%EUDIR%\bin;%WATCOM\binw;%WATCOM%\binnt;%PATH%'),
-      		'', True) <> 0) or  (
-      		StringChangeEx(eu_auto_exec_bat, ExpandConstant('SET INCLUDE=%WATCOM%\h;%WATCOM%\h\nt'),
+      	if (StringChangeEx(eu_auto_exec_bat, ExpandConstant('{app}\bin'),
       		'', True) <> 0) then
           SaveStringToFile('C:\AUTOEXEC.BAT', eu_auto_exec_bat, False);
       end;
