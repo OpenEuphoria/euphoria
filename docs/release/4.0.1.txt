@@ -53,6 +53,7 @@
 * [[ticket:619]] GNU makefile "all" target builds all binaries now
 * [[ticket:632]] fix trace screen prompts to prompt to continue
 * [[ticket:633]] On Windows, ##[[:dir]]## was incorrectly case sensitive if wildcards were used.
+* [[ticket:624]] Fixed regex function ##[[:is_match]]## to use the ##from## parameter
 
 == Enhancements
 

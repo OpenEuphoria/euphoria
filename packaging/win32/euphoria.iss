@@ -174,6 +174,7 @@ Type: files; Name: {app}\EuphoriaManual.url
 
 [Registry]
 ;set EUDIR environment variable and add to PATH on NT/2000/XP machines
+;Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "EUDIR"; ValueData: "{app}"; MinVersion: 0, 3.51; Tasks: update_env
 Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "PATH"; ValueData: "{app}\bin;{reg:HKCU\Environment,PATH}"; MinVersion: 0, 3.51; Tasks: update_env
 
 ;associate .exw files to be called by euiw.exe
@@ -267,7 +268,7 @@ var euCfgContents_theoretical : String;
 var euCfgContents_tested : String;
 var path : String;
 var eu_auto_exec_bat : String;
-// Delete what the installer created at runtime.
+// Undo what the installer changed at runtime.
 begin
   euCfgFName := ExpandConstant('{app}\bin\eu.cfg');
   euCfgContents_theoretical := generateEuCfgString();
@@ -279,9 +280,16 @@ begin
           end;
   if RegQueryStringValue(HKEY_CURRENT_USER, 'Environment', 'PATH', path) then
       begin
+      	   // get rid of the {app}/bin paths whether they have a semicolon or not. 
            StringChangeEx(path, ExpandConstant('{app}\bin;'), '', True);
            StringChangeEx(path, ExpandConstant('{app}\bin'), '', True);
             RegWriteStringValue(HKEY_CURRENT_USER, 'Environment', 'PATH', path);
       end;
-  Result := True;
+  if LoadStringFromFile('C:\AUTOEXEC.BAT', eu_auto_exec_bat) then
+      begin
+      	if StringChangeEx(eu_auto_exec_bat, ExpandConstant('{app}\bin'),
+      		'', True) <> 0 then
+          SaveStringToFile('C:\AUTOEXEC.BAT', eu_auto_exec_bat, False);
+      end;
+ Result := True;
 end;

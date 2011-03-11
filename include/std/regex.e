@@ -887,7 +887,7 @@ end function
 public function is_match(regex re, string haystack, integer from=1, option_spec options=DEFAULT)
 	object m = find(re, haystack, from, options)
 	
-	if sequence(m) and length(m) > 0 and m[1][1] = 1 and m[1][2] = length(haystack) then
+	if sequence(m) and length(m) > 0 and m[1][1] = from and m[1][2] = length(haystack) then
 		return 1
 	end if
 	
