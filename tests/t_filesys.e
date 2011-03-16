@@ -28,6 +28,33 @@ elsedef
 	entire_driveid = driveid & ":"
 end ifdef
 
+object home
+ifdef WINDOWS then
+	-- Not defined so use alternative.
+	home = getenv("HOMEDRIVE")
+	if sequence(home) then
+		home &= getenv("HOMEPATH")
+	end if
+elsedef
+	home = getenv("HOME")
+end ifdef
+if sequence(home) then
+	if home[$] != SLASH then
+		home &= SLASH
+	end if
+end if
+
+test_not_equal("dir() #1", dir(home & '*'),-1)
+if file_exists(lower(home)) then
+	test_not_equal("dir() #2", dir(lower(home) & '*'),-1)
+	test_not_equal("dir() #3", dir(lower(home[1..$-1]) & '*'),-1)
+end if
+if file_exists(upper(home)) then
+	test_not_equal("dir() #4", dir(upper(home) & '*'),-1)
+	test_not_equal("dir() #5", dir(upper(home[1..$-1]) & '*'),-1)
+end if
+test_not_equal("dir() #6", dir(home[1..$-1] & '*'),-1)
+
 fname = "readme"
 fext = "txt"
 
@@ -135,40 +162,32 @@ test_equal( "canonical_path() #1", current_dir() & SLASH & "t_filesys.e", canoni
 test_equal( "canonical_path() #2", current_dir() & SLASH & "t_filesys.e", canonical_path( `"t_filesys.e"` ) )
 test_equal( "canonical_path() #3", current_dir() & SLASH, canonical_path( current_dir() & SLASH & '.' & SLASH ) )
 
-
-object home
-
-home = getenv("HOME")	-- Usually defined in unix and might be defined in Windows.
-ifdef WINDOWS then
-if atom(home) then
-	-- Not defined so use alternative.
-	home = getenv("HOMEDRIVE")
-	if sequence(home) then
-		home &= getenv("HOMEPATH")
-	end if
-end if
-end ifdef
-if sequence(home) then
-	if home[$] != SLASH then
-		home &= SLASH
-	end if
-end if
 test_equal( "canonical_path() tilde = HOME #1", home, canonical_path("~"))
 test_equal( "canonical_path() tilde = HOME #2", home & 'a', canonical_path("~/a"))
 test_equal( "canonical_path() tilde = HOME #3", home & 'a', canonical_path("~a"))
 
 test_equal( "canonical_path() #5", current_dir() & SLASH, canonical_path( current_dir() & SLASH & "foo" & SLASH & ".." & SLASH ) )
-
-ifdef UNIX then
-	test_equal( "canonical_path() #6", current_dir() & SLASH & "UPPERNAME", canonical_path( "UPPERNAME",,1 ))
-	test_equal( "canonical_path() #7", current_dir() & SLASH & "UPPERNAME", canonical_path( "UPPERNAME",,0 ))
-end ifdef
+test_equal( "canonical_path() #6", current_dir() & SLASH & "UPPERNAME", canonical_path( "UPPERNAME",,CORRECT ))
+test_equal( "canonical_path() #7", current_dir() & SLASH & "UPPERNAME", canonical_path( "UPPERNAME",,AS_IS ))
 
 ifdef WINDOWS then
-	test_equal( "canonical_path() #6", lower(current_dir() & SLASH & "UPPERNAME"), lower( canonical_path( "UPPERNAME" ) ) )
-	test_equal( "canonical_path() #7",       current_dir() & SLASH & "UPPERNAME",  canonical_path( "UPPERNAME" ))
 	test_equal( "canonical_path() #8", entire_driveid & SLASH & "john" & SLASH & "doe.txt",
 		canonical_path("/john/doe.txt"))
+end ifdef
+
+test_equal( "canonical_path() #9", lower(current_dir() & SLASH & "UPPERNAME"), canonical_path( "UPPERNAME",, TO_LOWER ) )
+test_equal( "canonical_path() #10",current_dir() & SLASH & lower("UPPERNAME"),  canonical_path( "UPPERNAME",,or_bits(TO_LOWER,CORRECT)))
+test_equal( "canonical_path() #11",current_dir() & SLASH, canonical_path(lower(current_dir()), 1, CORRECT)) 
+
+
+ifdef WINDOWS then
+	object program_files = getenv("ProgramFiles")
+	
+	if sequence(program_files) then
+		sequence fbpf = filebase(program_files)
+		sequence shortened = upper(fbpf[1..6]) & "~1"
+		test_equal( "canonical_path() #12", shortened, filebase(canonical_path(program_files,,TO_SHORT)))
+	end if
 end ifdef
 
 sequence walk_data = {}
