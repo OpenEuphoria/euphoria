@@ -79,22 +79,25 @@ public constant EOF = (-1)
 -- 		# ##x## : the object to print
 --
 -- Errors:
--- The target file or device must be open.
+-- The target file or device must be open and able to be written to.
 --
 -- Comments:
 -- This is not used to write to "binary" files as it only outputs text.
 --
 -- Example 1:
 -- <eucode>
+-- include std/io.e
 -- print(STDOUT, "ABC")   -- output is:  "{65,66,67}"
--- puts(STDOUT, "ABC")    -- output is:  "65"
--- puts(STDOUT, 65)       -- output is:  "A"  (ASCII-65 ==> 'A')
+-- puts (STDOUT, "ABC")    -- output is:  "ABC"
+-- print(STDOUT, "65")    -- output is:  "65"
+-- puts (STDOUT, 65)       -- output is:  "A"  (ASCII-65 ==> 'A')
 -- print(STDOUT, 65.1234) -- output is:  "65.1234"
--- puts(STDOUT, 65.1234)  -- output is:  "A" (Converts to integer first)
+-- puts (STDOUT, 65.1234)  -- output is:  "A" (Converts to integer first)
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
+-- include std/io.e
 -- print(STDOUT, repeat({10,20}, 3)) -- output is: {{10,20},{10,20},{10,20}}
 -- </eucode>
 --
@@ -119,17 +122,24 @@ public constant EOF = (-1)
 -- The target file or device must be open.
 --
 -- Comments:
--- A format specifier is a string of characters starting with a percent sign ( ~%~ ) and ending
--- in a letter. Some extra information may come in the middle.
+-- A //format specifier// is a string of characters starting with a percent sign ( ~%~ ) and ending
+-- in a letter. Some extra information may come in between those.
 --
--- ##format## will be scanned for format specifiers. Whenever one is found, the current value
+-- This procedure writes out the ##format## text to the output file ##fn##, 
+-- replacing format specifiers with the corresponding data from the ##values##
+-- parameter. Whenever a format specifiers is found in ##formatt##, the //N-th// item
 -- in ##values## will be turned into a string according to the format specifier. The resulting
--- string will be plugged in the result, as if replacing the modifier with the printed value.
--- Then moving on to next value and carrying the process on.
+-- string will the format specifier. This means that the first format specifier uses the
+-- first item in ##values##, the second format specifier the second item, etc ...
 --
--- This way, ##printf##() always takes
--- exactly 3 arguments, no matter how many values are to be printed. Only the length of the last
--- argument, containing the values to be printed, will vary.
+-- You must have at least as many items in ##values## as there are format specifiers
+-- in ##format##. This means that if there is only one format specifier then ##values##
+-- can be either an atom, integer or a non-empty sequence. And when there are more
+-- than one format specifier in ##format## then ##values## must be a sequence with 
+-- a length that is greater than or equal to the number of format specifiers present.
+--
+-- This way, ##printf##() always takes exactly 3 arguments, no matter how many
+-- values are to be printed.
 --
 -- The basic format specifiers are...
 --
@@ -147,64 +157,94 @@ public constant EOF = (-1)
 --
 -- Field widths can be added to the basic formats, e.g. %5d, %8.2f, %10.4s. The number
 -- before the decimal point is the minimum field width to be used. The number after
--- the decimal point is the precision to be used.
+-- the decimal point is the precision to be used for numeric values.
 --
 -- If the field width is negative, e.g. %-5d then the value will be left-justified
--- within the field. Normally it will be right-justified. If the field width
+-- within the field. Normally it will be right-justified, even strings. If the field width
 -- starts with a leading 0, e.g. %08d then leading zeros will be supplied to fill up
 -- the field. If the field width starts with a '+' e.g. %+7d then a plus sign will
 -- be printed for positive values.
 --
 -- Comments:
--- Watch out for the following common mistake:
+-- Watch out for the following common mistake, in which the intention is to
+-- output all the characters in the third parameter but which ends up by 
+-- only outputing the first character ...
 --
 -- <eucode>
--- name="John Smith"
--- printf(STDOUT, "%s", name)     -- error!
+-- include std/io.e
+-- sequence name="John Smith"
+-- printf(STDOUT, "My name is %s", name)
 -- </eucode>
 --
--- This will print only the first character, J, of name, as each element of
--- name is taken to be a separate value to be formatted. You must say this instead:
+-- The output of this will be //##My name is J##// because each format specifier
+-- uses exactly **one** item from the ##values## parameter. In this case we have
+-- only one specifier so it uses the first item in the ##values## parameter, which
+-- is the character 'J'. To fix this situation, you must ensure that the first
+-- item in the ##values## parameter is the entire text string and not just a
+--  character, so you need code this instead:
 --
 -- <eucode>
+-- include std/io.e
 -- name="John Smith"
--- printf(STDOUT, "%s", {name})   -- correct
+-- printf(STDOUT, "My name is %s", {name})
 -- </eucode>
 --
--- Now, the third argument of ##printf##() is a one-element sequence containing the
--- item to be formatted.
+-- Now, the third argument of ##printf##() is a one-element sequence containing all
+-- the text to be formatted.
 --
--- If there is only one ##%## format specifier, and if the value it stands for is an atom, then ##values## may be simply that atom.
+-- Also note that if there is only one format specifier then ##values## can 
+-- simply be an atom or integer.
 --
 -- Example 1:
 -- <eucode>
--- rate = 7.875
--- printf(my_file, "The interest rate is: %8.2f\n", rate)
+-- include std/io.e
+-- atom rate = 7.875
+-- printf(STDOUT, "The interest rate is: %8.2f\n", rate)
 --
 -- --      The interest rate is:     7.88
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
--- name="John Smith"
--- score=97
+-- include std/io.e
+-- sequence name="John Smith"
+-- integer score=97
 -- printf(STDOUT, "%15s, %5d\n", {name, score})
 --
--- --      John Smith,    97
+-- -- "     John Smith,    97"
 -- </eucode>
 --
 -- Example 3:
 -- <eucode>
+-- include std/io.e
 -- printf(STDOUT, "%-10.4s $ %s", {"ABCDEFGHIJKLMNOP", "XXX"})
 -- --      ABCD       $ XXX
 -- </eucode>
 --
 -- Example 4:
 -- <eucode>
+-- include std/io.e
 -- printf(STDOUT, "%d  %e  %f  %g", repeat(7.75, 4)) 
 --                   -- same value in different formats
 --
 -- --      7  7.750000e+000  7.750000  7.75
+-- </eucode>
+--
+-- **//NOTE//** that ##printf## cannot use an item in ##values## that contains
+-- nested sequences. Thus this is an error ...
+-- <eucode>
+-- include std/io.e
+-- sequence name = {"John", "Smith"}
+-- printf(STDOUT, "%s", {name} )
+-- </eucode>
+-- because the item that is used from the ##values## parameter contains two
+-- subsequences (strings in this case). To get the correct output you would
+-- need to do this instead ...
+--
+-- <eucode>
+-- include std/io.e
+-- sequence name = {"John", "Smith"}
+-- printf(STDOUT, "%s %s", {name[1], name[2]} )
 -- </eucode>
 --
 -- See Also:
@@ -237,6 +277,7 @@ public constant EOF = (-1)
 --
 -- Example 1:
 -- <eucode>
+-- include std/io.e
 -- puts(SCREEN, "Enter your first name: ")
 -- </eucode>
 --
