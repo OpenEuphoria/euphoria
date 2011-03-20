@@ -2,9 +2,6 @@
    C include file for Euphoria programs 
    that have been translated to C */
 
-#undef _segment
-#undef _self
-#undef _dos_ds
 
 /***************************************************************************
 *
@@ -29,6 +26,12 @@ However, the macros mean these:
 
 
 ****************************************************************************/
+#ifndef EUPHORIA_H_
+#define EUPHORIA_H_
+
+#undef _segment
+#undef _self
+#undef _dos_ds
 
 #define NOVALUE      ((long)0xbfffffffL)
 #define IS_ATOM_INT(ob)       (((long)(ob)) > NOVALUE)
@@ -51,8 +54,6 @@ However, the macros mean these:
 typedef int object;
 typedef int *object_ptr;
 
-struct cleanup;
-typedef struct cleanup *cleanup_ptr;
 typedef void(*cleanup_func)(object);
 
 struct cleanup {
@@ -61,8 +62,10 @@ struct cleanup {
 		long rid;
 		cleanup_func builtin;
 	} func;
-	cleanup_ptr next;
+	struct cleanup *next;
 };
+
+typedef struct cleanup *cleanup_ptr;
 
 enum CLEANUP_TYPES {
 	CLEAN_UDT,
@@ -246,3 +249,4 @@ int e_match_from(int,int,int);
 int find_from(int,int,int);
 void Replace(int);
 char *TransAlloc(unsigned long);
+#endif
