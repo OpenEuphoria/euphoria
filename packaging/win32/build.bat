@@ -37,8 +37,10 @@ echo Ensuring binaries are compressed
 upx ..\..\bin\creole.exe
 upx ..\..\bin\eub.exe
 upx ..\..\bin\eubind.exe
+upx ..\..\bin\eushroud.exe
 upx ..\..\bin\eubw.exe
 upx ..\..\bin\euc.exe
+upx ..\..\bin\eudis.exe
 upx ..\..\bin\eucoverage.exe
 upx ..\..\bin\eudoc.exe
 upx ..\..\bin\eui.exe
