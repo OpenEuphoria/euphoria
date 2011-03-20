@@ -1625,7 +1625,38 @@ export procedure GenerateUserRoutines()
 					if TUNIX and dll_option and is_exported( s ) then
 						-- create an alias for exporting routines
 						LeftSym = TRUE
-						c_stmt( ret_type & SymTab[s][S_NAME] & "() __attribute__ ((alias (\"@\")));\n", s )
+						if TOSX then
+							-- for ticket 596: Apple's site:http://developer.apple.com/library/mac/#documentation/-
+							-- DeveloperTools/gcc-4.0.1/gcc/Function-Attributes.html states that "alias" is not 
+							-- supported on all machines.    
+							c_stmt0( ret_type & SymTab[s][S_NAME] & " (" )
+							
+							sp = SymTab[s][S_NEXT]
+							for p = 1 to SymTab[s][S_NUM_ARGS] do
+								c_puts("int _")
+								c_puts(SymTab[sp][S_NAME])
+								if p != SymTab[s][S_NUM_ARGS] then
+									c_puts(", ")
+								end if
+								sp = SymTab[sp][S_NEXT]
+							end for
+							
+							c_puts( ") {\n")
+							c_stmt("    return @(", s)
+							sp = SymTab[s][S_NEXT]
+							for p = 1 to SymTab[s][S_NUM_ARGS] do
+								c_puts("_")
+								c_puts(SymTab[sp][S_NAME])
+								if p != SymTab[s][S_NUM_ARGS] then
+									c_puts(", ")
+								end if
+								sp = SymTab[sp][S_NEXT]
+							end for
+
+							c_puts( ");\n}\n" )	
+						else
+							c_stmt( ret_type & SymTab[s][S_NAME] & "() __attribute__ ((alias (\"@\")));\n", s )
+						end if
 						LeftSym = FALSE
 					end if
 					c_puts("\n\n" )
