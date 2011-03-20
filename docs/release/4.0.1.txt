@@ -54,6 +54,8 @@
 * [[ticket:633]] On Windows, ##[[:dir]]## was incorrectly case sensitive if wildcards were used.
 * [[ticket:624]] Fixed regex function ##[[:is_match]]## to use the ##from## parameter
 * [[ticket:596]] Worked around GNU C problem of a lack of alias attribute support on some Mac OS X machines.
+* [[ticket:636]] Source files checked out from Mercurial (and thus distributed packages) 
+  will use the conventions of the OS for line breaks. 
 
 == Enhancements
 
@@ -61,10 +63,7 @@
 * [[ticket:516]] added ##[[:join_path]]## and ##[[:split_path]]## routines.
 * ##[[:current_dir]]()## now always returns an upper case letter for the drive
   id.
-
-== Deprecated
-
-* ##[[:canonical_path]]()##'s third parameter, ##no_case##, has been deprecated. If you are doing
-  path comparisons on windows, use lower() or upper() instead of using the ##no_case##
-  parameter.
-
+* ##[[:canonical_path]]()## can now leave the case alone, lower the case,
+  correct the case, and even get short file names for programs that still 
+  cannot handle quoted arguments at the command line.
+  
