@@ -1,6 +1,6 @@
 == Version 4.0.1 Date TBD
 
-== Bug Fixes
+=== Bug Fixes
 
 * Renamed implicit Top Level SubProgram to an illegal name.  Previously used "_toplevel_",
   which became a legal name for euphoria 4.0
@@ -57,7 +57,7 @@
 * [[ticket:636]] Source files checked out from Mercurial (and thus distributed packages) 
   will use the conventions of the OS for line breaks. 
 
-== Enhancements
+=== Enhancements
 
 * Added parsing of two digit years to ##std/datetime.e## ##[[:parse]]##.
 * [[ticket:516]] added ##[[:join_path]]## and ##[[:split_path]]## routines.
