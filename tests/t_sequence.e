@@ -645,5 +645,15 @@ procedure xor_test()
 end procedure
 xor_test()
 
+procedure ticket_639()
+	sequence a, b
+	a = "abc" & "d"
+	a = a[2..$]
+	b = "123"
+	a = splice( a, b, 2 )
+	test_equal("in place RHS_slice + in place splice()", "b123cd", a )
+end procedure
+ticket_639()
+
 test_report()
 
