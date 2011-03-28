@@ -9,3 +9,7 @@ global sequence forward_global_sequence = "abcdef"
 ifdef EC then
 global object fwd_object
 end ifdef
+
+global function return_a_sequence()
+	return "a_sequence"
+end function

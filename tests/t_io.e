@@ -1,6 +1,8 @@
 include std/io.e
 include std/filesys.e
 include std/unittest.e
+include std/text.e
+include std/sequence.e
 
 -- TODO: add more tests
 
@@ -54,12 +56,12 @@ close(tmp)
 tmp = open("file.txt", "r")
 test_equal("where() #1b", 0, where(tmp))
 data = read_file(tmp) -- BINARY_MODE even though file was opened in 'text' mode.
-ifdef DOSFAMILY or WINDOWS then
-test_equal("read_file() #1b", 253, length(data))
-test_equal("read_file() #2b", "alter this file", data[51..65])
+ifdef WINDOWS then
+	test_equal("read_file() #1b", 253, length(data))
+	test_equal("read_file() #2b", "alter this file", data[51..65])
 elsedef
-test_equal("read_file() #1b", 262, length(data))
-test_equal("read_file() #2b", "alter this file", data[52..66])
+	test_equal("read_file() #1b", 262, length(data))
+	test_equal("read_file() #2b", "alter this file", data[52..66])
 end ifdef
 
 test_equal("where() #2b", 262, where(tmp))
@@ -110,12 +112,12 @@ write_file("filea.txt", testdata_raw, TEXT_MODE) -- Write out as current o/s tex
 write_file("fileb.txt", testdata_unix, TEXT_MODE) -- Write out as current o/s text data.
 write_file("filec.txt", testdata_dos, TEXT_MODE) -- Write out as current o/s text data.
 
-ifdef DOSFAMILY or WINDOWS then
-sequence res_text = testdata_dos
+ifdef WINDOWS then
+	sequence res_text = testdata_dos
 elsifdef UNIX then
-sequence res_text = testdata_unix
+	sequence res_text = testdata_unix
 elsedef
-sequence res_text = "unsupported op sys"
+	sequence res_text = "unsupported op sys"
 end ifdef
 test_equal("read file binary #2a", res_text, read_file("filea.txt", BINARY_MODE))
 test_equal("read file binary #2b", res_text, read_file("fileb.txt", BINARY_MODE))
@@ -165,10 +167,47 @@ tmp = open( "file.txt", "r", 1 )
 test_not_equal( "open file with auto close after deref closing", -1, tmp )
 delete(tmp)
 
+tmp = {}
+
+sequence alt_tmp = {}
+
+function test_proc(sequence aLine, integer line_no, object data)
+	tmp &= aLine
+	tmp &= '\n'
+	
+	alt_tmp = append(alt_tmp, format(data[1], {line_no, aLine}))
+	
+	return 0
+end function
+
+test_equal( "process lines #1", 0, process_lines("file.txt", routine_id("test_proc"), {"[1z:4] : [2]", 0}))
+test_equal( "process lines #2", test_file_data, tmp)
+tmp = split(test_file_data, '\n')
+tmp = tmp[1..$-1] -- Strip off final empty sequence.
+for i = 1 to length(tmp) do
+	tmp[i] = sprintf("%04d : %s", {i, tmp[i]})
+end for
+test_equal( "process lines #3", tmp, alt_tmp)
+
+
+-- OpenBSD allows seeking on STDIN, STDOUT and STDERR
+ifdef not OPENBSD and not NETBSD then
+	test_equal( "Seek STDIN",  1, seek(0, 0))
+	test_equal( "Seek STDOUT", 1, seek(1, 0))
+	test_equal( "Seek STDERR", 1, seek(2, 0))
+end ifdef
+
+integer fh
+
+fh = open("file.txt", "r")
+test_equal( "Seek opened file", 0, seek(fh, -1))
+close(fh)
+test_equal( "Seek closed file", 1, seek(fh, -1))
+
+
 delete_file("file.txt")
 delete_file("filea.txt")
 delete_file("fileb.txt")
 delete_file("filec.txt")
-
 test_report()
 

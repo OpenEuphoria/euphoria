@@ -1,5 +1,10 @@
+--****
+-- === unix/mylib.ex
+--
 -- Call a C routine in a shared library that you created.
 -- Also read and write the value of a C variable.
+--
+
 include dll.e
 
 atom mylib, extra_addr
@@ -41,4 +46,3 @@ if a = 99 and b = 55 and c = 1055 then
 else
     puts(1, "\nWrong\n")
 end if
-

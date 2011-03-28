@@ -1,13 +1,11 @@
--- (c) Copyright - See License.txt
---
-namespace stack
-
 --****
 -- == Stack
 --
--- **Page Contents**
---
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
+
+-- (c) Copyright - See License.txt
+
+namespace stack
 
 include std/error.e
 include std/eumem.e
@@ -16,14 +14,14 @@ include std/eumem.e
 -- === Constants
 --
 
---**
--- Stack types
--- * FIFO: like people standing in line: first item in is first item out
--- * FILO: like for a stack of plates  : first item in is last item out
+--****
+-- === Stack types
 
 
 public constant
+	--**  FIFO: like people standing in line: first item in is first item out
 	FIFO = 1,
+	--**  FILO: like for a stack of plates  : first item in is last item out
 	FILO = 2
 
 --****
@@ -37,11 +35,11 @@ constant type_is_stack = "Eu:StdStack"
 -- A stack is a sequence of objects with some internal data.
 
 public type stack(object obj_p)
-	if not valid(obj_p, "") then return 0 end if
+	if not eumem:valid(obj_p, "") then return 0 end if
 
-	object o = ram_space[obj_p]
+	object o = eumem:ram_space[obj_p]
 	if not sequence(o) then return 0 end if
-	if not length(o) = data then return 0 end if
+	if length(o) != data then return 0 end if
 	if not equal(o[type_tag], type_is_stack) then return 0 end if
 	if not find(o[stack_type], { FIFO, FILO }) then return 0 end if
 	if not sequence(o[data]) then return 0 end if
@@ -77,9 +75,9 @@ end type
 -- [[:is_empty]]
 
 public function new(integer typ = FILO)
-	atom new_stack = malloc()
+	atom new_stack = eumem:malloc()
 
-	ram_space[new_stack] = { type_is_stack, typ, {} }
+	eumem:ram_space[new_stack] = { type_is_stack, typ, {} }
 
 	return new_stack
 end function
@@ -98,7 +96,7 @@ end function
 -- [[:size]]
 
 public function is_empty(stack sk)
-	return length(ram_space[sk][data]) = 0
+	return length(eumem:ram_space[sk][data]) = 0
 end function
 
 --**
@@ -111,7 +109,7 @@ end function
 --		An **integer**, the number of elements in ##sk##.
 
 public function size(stack sk)
-	return length(ram_space[sk][data])
+	return length(eumem:ram_space[sk][data])
 end function
 
 --**
@@ -138,32 +136,36 @@ end function
 -- Example 1:
 -- <eucode>
 -- stack sk = new(FILO)
--- push(sk,5)
--- push(sk,"abc")
--- push(sk,2.3)
--- ? at(sk,0) -- 5
--- ? at(sk,-1) -- "abc"
--- ? at(sk,1) -- 2.3
--- ? at(sk,2) -- "abc"
+--
+-- push(sk, 5)
+-- push(sk, "abc")
+-- push(sk, 2.3)
+--
+-- at(sk, 0)  --> 5
+-- at(sk, -1) --> "abc"
+-- at(sk, 1)  --> 2.3
+-- at(sk, 2)  --> "abc"
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
 -- stack sk = new(FIFO)
--- push(sk,5)
--- push(sk,"abc")
--- push(sk,2.3)
--- ? at(sk,0) -- 2.3
--- ? at(sk,-1) -- "abc"
--- ? at(sk,1) -- 5
--- ? at(sk,2) -- "abc"
+--
+-- push(sk, 5)
+-- push(sk, "abc")
+-- push(sk, 2.3)
+-- at(sk, 0)  --> 2.3
+-- at(sk, -1) --> "abc"
+-- at(sk, 1)  --> 5
+-- at(sk, 2)  --> "abc"
 -- </eucode>
 --
 -- See Also:
 -- [[:size]], [[:top]], [[:peek_top]], [[:peek_end]]
+--
 
 public function at(stack sk, integer idx = 1)
-	sequence o = ram_space[sk][data]
+	sequence o = eumem:ram_space[sk][data]
 	integer oidx = idx
 
 	if idx <= 0 then
@@ -174,7 +176,7 @@ public function at(stack sk, integer idx = 1)
 	end if
 	
 	if idx < 1 or idx > length(o) then
-		crash("stack index (%d) out of bounds for at()", oidx)
+		error:crash("stack index (%d) out of bounds for at()", oidx)
 	end if
 
 	return o[idx]
@@ -194,40 +196,43 @@ end function
 -- Example 1:
 -- <eucode>
 -- stack sk = new(FIFO)
+--
 -- push(sk,5)
 -- push(sk,"abc")
 -- push(sk, 2.3)
--- ? top(sk) -- 5
--- ? last(sk) -- 2.3
+-- top(sk)  --> 5
+-- last(sk) --> 2.3
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
 -- stack sk = new(FILO)
+--
 -- push(sk,5)
 -- push(sk,"abc")
 -- push(sk, 2.3)
--- ? top(sk) -- 2.3
--- ? last(sk) -- 5
+-- top(sk)  --> 2.3
+-- last(sk) --> 5
 -- </eucode>
 --
 -- See Also:
--- [[:pop]], [[:top]]
+--   [[:pop]], [[:top]]
+--
 
 public procedure push(stack sk, object value)
 	-- The last element in the data sequence is always the top item, 
 	-- regardless of the stack type.
 	
 	-- Type checking ensures type is either FIFO or FILO
-	switch ram_space[sk][stack_type] do
+	switch eumem:ram_space[sk][stack_type] do
 		case FIFO then
-			ram_space[sk][data] = prepend(ram_space[sk][data], value)
+			eumem:ram_space[sk][data] = prepend(eumem:ram_space[sk][data], value)
 
 		case FILO then
-			ram_space[sk][data] = append(ram_space[sk][data], value)
+			eumem:ram_space[sk][data] = append(eumem:ram_space[sk][data], value)
 			
 		case else
-			crash("Internal error in stack.e: Stack %d has invalid stack type %d", {sk,ram_space[sk][stack_type]})
+			error:crash("Internal error in stack.e: Stack %d has invalid stack type %d", {sk,eumem:ram_space[sk][stack_type]})
 			
 	end switch
 end procedure
@@ -247,30 +252,35 @@ end procedure
 -- Example 1:
 -- <eucode>
 -- stack sk = new(FILO)
--- push(sk,5)
--- push(sk,"abc")
+--
+-- push(sk, 5)
+-- push(sk, "abc")
 -- push(sk, 2.3)
--- ? top(sk) -- 2.3
+--
+-- top(sk) --> 2.3
 -- </eucode>
 --
 -- Example 1:
 -- <eucode>
 -- stack sk = new(FIFO)
--- push(sk,5)
--- push(sk,"abc")
+--
+-- push(sk, 5)
+-- push(sk, "abc")
 -- push(sk, 2.3)
--- ? top(sk) -- 5
+--
+-- top(sk) --> 5
 -- </eucode>
 --
 -- See Also:
--- [[:at]], [[:pop]], [[:peek_top]], [[:last]]
+--   [[:at]], [[:pop]], [[:peek_top]], [[:last]]
+--
 
 public function top(stack sk)
-	if length(ram_space[sk][data]) = 0 then
-		crash("stack is empty so there is no top()", {})
+	if length(eumem:ram_space[sk][data]) = 0 then
+		error:crash("stack is empty so there is no top()", {})
 	end if
 
-	return ram_space[sk][data][$]
+	return eumem:ram_space[sk][data][$]
 end function
 
 --**
@@ -288,30 +298,34 @@ end function
 -- Example 1:
 -- <eucode>
 -- stack sk = new(FILO)
+--
 -- push(sk,5)
 -- push(sk,"abc")
 -- push(sk, 2.3)
--- ? last(sk) -- 5
+--
+-- last(sk) --> 5
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
 -- stack sk = new(FIFO)
+--
 -- push(sk,5)
 -- push(sk,"abc")
 -- push(sk, 2.3)
--- ? last(sk) -- 2.3
+--
+-- last(sk) --> 2.3
 -- </eucode>
 --
 -- See Also:
 -- [[:at]], [[:pop]], [[:peek_end]], [[:top]]
 
 public function last(stack sk)
-	if length(ram_space[sk][data]) = 0 then
-		crash("stack is empty so there is no last()", {})
+	if length(eumem:ram_space[sk][data]) = 0 then
+		error:crash("stack is empty so there is no last()", {})
 	end if
 
-	return ram_space[sk][data][1]
+	return eumem:ram_space[sk][data][1]
 end function
 
 --**
@@ -403,18 +417,18 @@ end function
 public function pop(stack sk, integer idx = 1)
 	sequence t
 	
-	t = ram_space[sk][data]
+	t = eumem:ram_space[sk][data]
 	if idx < 0 or idx > length(t) then
 		if length(t) = 0 then
-			crash("stack is empty, cannot pop")
+			error:crash("stack is empty, cannot pop")
 		else
-			crash("stack idx (%d) out of bounds in pop()", {idx})
+			error:crash("stack idx (%d) out of bounds in pop()", {idx})
 		end if
 	end if
 	idx = length(t) - idx + 1
 
 	object top_obj = t[idx]
-	ram_space[sk][data] = t[1 .. idx - 1] & t[idx + 1 .. $]
+	eumem:ram_space[sk][data] = t[1 .. idx - 1] & t[idx + 1 .. $]
 	return top_obj
 end function
 
@@ -475,12 +489,12 @@ end function
 public function peek_top(stack sk, integer idx = 1)
 	sequence t
 	
-	t = ram_space[sk][data]
+	t = eumem:ram_space[sk][data]
 	if idx < 0 or idx > length(t) then
 		if length(t) = 0 then
-			crash("stack is empty, cannot peek_top")
+			error:crash("stack is empty, cannot peek_top")
 		else
-			crash("stack idx (%d) out of bounds in peek_top()", {idx})
+			error:crash("stack idx (%d) out of bounds in peek_top()", {idx})
 		end if
 	end if
 	idx = length(t) - idx + 1
@@ -544,12 +558,12 @@ end function
 public function peek_end(stack sk, integer idx = 1)
 	sequence t
 	
-	t = ram_space[sk][data]
+	t = eumem:ram_space[sk][data]
 	if idx < 0 or idx > length(t) then
 		if length(t) = 0 then
-			crash("stack is empty, cannot peek_end")
+			error:crash("stack is empty, cannot peek_end")
 		else
-			crash("stack idx (%d) out of bounds in peek_end()", {idx})
+			error:crash("stack idx (%d) out of bounds in peek_end()", {idx})
 		end if
 	end if
 	idx = length(t) - idx + 1
@@ -577,44 +591,52 @@ end function
 -- Example 1:
 -- <eucode>
 -- stack sk = new(FILO)
--- push(sk,5)
--- push(sk,"abc")
+--
+-- push(sk, 5)
+-- push(sk, "abc")
 -- push(sk, 2.3)
 -- push(sk, "")
--- ? peek_top(sk,1)  -- ""
--- ? peek_top(sk,2)  -- 2.3
+--
+-- ? peek_top(sk, 1) --> ""
+-- ? peek_top(sk, 2) --> 2.3
+--
 -- swap(sk)
--- ? peek_top(sk,1)  -- 2.3
--- ? peek_top(sk,2)  -- ""
+--
+-- ? peek_top(sk, 1) --> 2.3
+-- ? peek_top(sk, 2) --> ""
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
 -- stack sk = new(FIFO)
--- push(sk,5)
--- push(sk,"abc")
+--
+-- push(sk, 5)
+-- push(sk, "abc")
 -- push(sk, 2.3)
 -- push(sk, "")
--- ? peek_top(sk,1)  -- 5
--- ? peek_top(sk,2)  -- "abc"
+--
+-- peek_top(sk, 1) --> 5
+-- peek_top(sk, 2) --> "abc"
+--
 -- swap(sk)
--- ? peek_top(sk,1)  -- "abc"
--- ? peek_top(sk,2)  -- 5
+--
+-- peek_top(sk, 1) --> "abc"
+-- peek_top(sk, 2) --> 5
 -- </eucode>
 --
 
 public procedure swap(stack sk)
 	sequence t
 	
-	t = ram_space[sk][data]
+	t = eumem:ram_space[sk][data]
 	if length(t) < 2 then
-		crash("swap() needs at least 2 items in the stack", {})
+		error:crash("swap() needs at least 2 items in the stack", {})
 	end if
 
 	object tmp = t[$]
 	t[$] = t[$-1]
 	t[$-1] = tmp
-	ram_space[sk][data] = t
+	eumem:ram_space[sk][data] = t
 end procedure
 
 --**
@@ -637,47 +659,57 @@ end procedure
 -- Example 1:
 -- <eucode>
 -- stack sk = new(FILO)
+--
 -- push(sk,5)
 -- push(sk,"abc")
 -- push(sk, "")
+--
 -- dup(sk)
--- ? peek_top(sk,1)  -- ""
--- ? peek_top(sk,2)  -- "abc"
--- ? size(sk)  -- 3
+--
+-- peek_top(sk,1) --> ""
+-- peek_top(sk,2) --> "abc"
+-- size(sk)       --> 3
+--
 -- dup(sk)
--- ? peek_top(sk,1)  -- ""
--- ? peek_top(sk,2)  -- ""
--- ? peek_top(sk,3)  -- "abc"
--- ? size(sk)  -- 4
+--
+-- peek_top(sk,1) --> ""
+-- peek_top(sk,2) --> ""
+-- peek_top(sk,3) --> "abc"
+-- size(sk)       --> 4
 -- </eucode>
 --
 -- Example 1:
 -- <eucode>
 -- stack sk = new(FIFO)
--- push(sk,5)
--- push(sk,"abc")
+--
+-- push(sk, 5)
+-- push(sk, "abc")
 -- push(sk, "")
+--
 -- dup(sk)
--- ? peek_top(sk,1)  -- 5
--- ? peek_top(sk,2)  -- "abc"
--- ? size(sk)  -- 3
+--
+-- peek_top(sk, 1) --> 5
+-- peek_top(sk, 2) --> "abc"
+-- size(sk)        --> 3
+--
 -- dup(sk)
--- ? peek_top(sk,1)  -- 5
--- ? peek_top(sk,2)  -- 5
--- ? peek_top(sk,3)  -- "abc"
--- ? size(sk)  -- 4
+--
+-- peek_top(sk, 1) --> 5
+-- peek_top(sk, 2) --> 5
+-- peek_top(sk, 3) --> "abc"
+-- size(sk)        --> 4
 -- </eucode>
 --
 
 public procedure dup(stack sk)
 	sequence t
 	
-	t = ram_space[sk][data]
+	t = eumem:ram_space[sk][data]
 	if length(t) = 0 then
-		crash("dup() needs at least one item in the stack", {})
+		error:crash("dup() needs at least one item in the stack", {})
 	end if
 
-	ram_space[sk][data] = append(t, t[$])
+	eumem:ram_space[sk][data] = append(t, t[$])
 end procedure
 
 --**
@@ -700,9 +732,10 @@ end procedure
 --
 -- See Also:
 -- [[:size]], [[:top]]
+--
 
 public procedure set(stack sk, object val, integer idx = 1)
-	sequence o = ram_space[sk][data]
+	sequence o = eumem:ram_space[sk][data]
 	integer oidx = idx
 
 	if idx <= 0 then
@@ -713,10 +746,10 @@ public procedure set(stack sk, object val, integer idx = 1)
 	end if
 	
 	if idx < 1 or idx > length(o) then
-		crash("stack index (%d) out of bounds for set()", oidx)
+		error:crash("stack index (%d) out of bounds for set()", oidx)
 	end if
 	
-	ram_space[sk][data][idx] = val
+	eumem:ram_space[sk][data][idx] = val
 end procedure
 
 --**
@@ -729,8 +762,9 @@ end procedure
 --   The stack contents is emptied.
 --
 -- See Also:
--- [[:new]], [[:is_empty]]
+--   [[:new]], [[:is_empty]]
+--
 
 public procedure clear(stack sk)
-	ram_space[sk][data] = {}
+	eumem:ram_space[sk][data] = {}
 end procedure

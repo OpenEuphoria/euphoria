@@ -1,6 +1,9 @@
 -- (c) Copyright - See License.txt
 --
 -- the official C back-end interpreter
+
+with define INTERPRETER
+
 ifdef ETYPE_CHECK then
     with type_check
 elsedef
@@ -11,11 +14,11 @@ include mode.e
 set_mode( "interpret", 0 )
 
 -- standard Euphoria includes
+include std/error.e
 include std/wildcard.e
 
 include global.e
 include reswords.e
-include std/error.e
 include keylist.e
 include c_out.e    -- Translator output (leave in for now)
 include symtab.e

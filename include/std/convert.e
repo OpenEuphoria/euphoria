@@ -1,10 +1,14 @@
-	-- (c) Copyright - See License.txt
 --****
 -- == Data type conversion
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
+
 namespace convert
+
+include std/types.e
+include std/search.e
+include std/text.e
 
 constant
 	M_A_TO_F64 = 46,
@@ -121,7 +125,7 @@ end function
 --
 -- Parameters:
 --		# ##x## : the atom to convert
--- 		# ##nbits## : the number of bits requested.
+-- 		# ##nbits## : the number of bits requested. The default is 32.
 --
 -- Returns:
 --		A **sequence**, of length ##nbits##, made of 1's and 0's.
@@ -148,12 +152,15 @@ end function
 --	[[:bits_to_int]], [[:int_to_bytes]], [[:Relational operators]],
 --  [[:operations on sequences]]
 
-public function int_to_bits(atom x, integer nbits)
+public function int_to_bits(atom x, integer nbits = 32)
 	sequence bits
-	integer mask
+	atom mask
 
+	if nbits < 1 then
+		return {}
+	end if
 	bits = repeat(0, nbits)
-	if integer(x) and nbits < 30 then
+	if nbits <= 32 then
 		-- faster method
 		mask = 1
 		for i = 1 to nbits do
@@ -357,6 +364,7 @@ end function
 -- * The text can have any number of underscores, all of which are ignored.
 -- * The text can have one leading '-', indicating a negative number.
 -- * The text can have any number of underscores, all of which are ignored.
+-- * Any other characters in the text stops the parsing and returns the value thus far.
 --
 -- Example 1:
 -- <eucode>
@@ -485,27 +493,27 @@ end function
 -- Converts the text into a number.
 --
 -- Parameters:
--- # ##pText## : A string containing the text representation of a number.
--- # ##pReturnBadPos## : An integer. 
+-- # ##text_in## : A string containing the text representation of a number.
+-- # ##return_bad_pos## : An integer. 
 --     ** If 0 (the default) then this will return
 --     a number based on the supplied text and it will **not** return
---     any position in ##pText## that caused an incomplete conversion. 
---     ** If ##pReturnBadPos## is -1 then if the conversion of ##pText## was
+--     any position in ##text_in## that caused an incomplete conversion. 
+--     ** If ##return_bad_pos## is -1 then if the conversion of ##text_in## was
 --        complete the resulting number is returned otherwise a single-element
---        sequence containing the position within ##pText## where the conversion
+--        sequence containing the position within ##text_in## where the conversion
 --        stopped. 
 --     ** If not 0 then this returns both the converted value up to the point of failure (if any) and the
---     position in ##pText## that caused the failure. If that position is 0 then
+--     position in ##text_in## that caused the failure. If that position is 0 then
 --     there was no failure. 
 --
 -- Returns:
--- * an **atom**, If ##pReturnBadPos## is zero, the number represented by ##pText##.
---  If ##pText## contains invalid characters, zero is returned.\\
--- * a **sequence**, If ##pReturnBadPos## is non-zero. If ##pReturnBadPos## is -1
--- it returns a 1-element sequence containing the spot inside ##pText## where
+-- * an **atom**, If ##return_bad_pos## is zero, the number represented by ##text_in##.
+--  If ##text_in## contains invalid characters, zero is returned.\\
+-- * a **sequence**, If ##return_bad_pos## is non-zero. If ##return_bad_pos## is -1
+-- it returns a 1-element sequence containing the spot inside ##text_in## where
 -- conversion stopped. Otherwise it returns a 2-element sequence
--- containing the number represented by ##pText## and either 0 or the position in
--- ##pText## where conversion stopped.
+-- containing the number represented by ##text_in## and either 0 or the position in
+-- ##text_in## where conversion stopped.
 --
 -- Comments:
 -- # You can supply **Hexadecimal** values if the value is preceded by
@@ -528,7 +536,7 @@ end function
 -- after the last digit.
 -- # The currency, sign and base symbols can appear in any order. Thus "$ -21.10" is
 -- the same as " -$21.10 ", which is also the same as "21.10$-", etc.
--- # This function can optionally return information about invalid numbers. If ##pReturnBadPos##
+-- # This function can optionally return information about invalid numbers. If ##return_bad_pos##
 -- is not zero, a two-element sequence is returned. The first element is the converted
 -- number value , and the second is the position in the text where conversion stopped.
 -- If no errors were found then the second element is zero.
@@ -538,24 +546,26 @@ end function
 --
 -- Examples:
 -- <eucode>
---     object val
---     val = to_number("12.34", 1)  ---> {12.34, 0} -- No errors.
---     val = to_number("12.34", -1)  ---> 12.34 -- No errors.
---     val = to_number("12.34a", 1) ---> {12.34, 6} -- Error at position 6
---     val = to_number("12.34a", -1) ---> {6} -- Error at position 6
---     val = to_number("12.34a")  ---> 0 because its not a valid number
---     val = to_number("#f80c") --> 63500
---     val = to_number("#f80c.7aa") --> 63500.47900390625
---     val = to_number("@1703") --> 963
---     val = to_number("!101101") --> 45
---     val = to_number("12_583_891") --> 12583891
---     val = to_number("12_583_891%") --> 125838.91
---     val = to_number("12,583,891%%") --> 12583.891
+-- object val
+-- val = to_number("12.34")      ---> 12.34 -- No errors and no error return needed.
+-- val = to_number("12.34", 1)   ---> {12.34, 0} -- No errors.
+-- val = to_number("12.34", -1)  ---> 12.34 -- No errors.
+-- val = to_number("12.34a", 1)  ---> {12.34, 6} -- Error at position 6
+-- val = to_number("12.34a", -1) ---> {6} -- Error at position 6
+-- val = to_number("12.34a")     ---> 0 because its not a valid number
+--
+-- val = to_number("#f80c")        --> 63500
+-- val = to_number("#f80c.7aa")    --> 63500.47900390625
+-- val = to_number("@1703")        --> 963
+-- val = to_number("!101101")      --> 45
+-- val = to_number("12_583_891")   --> 12583891
+-- val = to_number("12_583_891%")  --> 125838.91
+-- val = to_number("12,583,891%%") --> 12583.891
 -- </eucode>
 
 
-public function to_number( sequence pText, integer pReturnBadPos = 0)
-	-- get the numeric result of pText
+public function to_number( sequence text_in, integer return_bad_pos = 0)
+	-- get the numeric result of text_in
 	integer lDotFound = 0
 	integer lSignFound = 2
 	integer lCharValue
@@ -572,12 +582,12 @@ public function to_number( sequence pText, integer pReturnBadPos = 0)
 	integer lLastDigit = 0
 	integer lChar
 
-	for i = 1 to length(pText) do
-		if not integer(pText[i]) then
+	for i = 1 to length(text_in) do
+		if not integer(text_in[i]) then
 			exit
 		end if
 
-		lChar = pText[i]
+		lChar = text_in[i]
 		switch lChar do
 			case '-' then
 				if lSignFound = 2 then
@@ -631,11 +641,11 @@ public function to_number( sequence pText, integer pReturnBadPos = 0)
 
 			case '.', ',' then
 				if lLastDigit = 0 then
-	            	if decimal_mark = lChar then
-		                if lDotFound = 0 then
-			                lDotFound = 1
-				        else
-					        lBadPos = i
+					if decimal_mark = lChar then
+						if lDotFound = 0 then
+							lDotFound = 1
+						else
+							lBadPos = i
 						end if
 					else
 						-- Ignore it
@@ -645,21 +655,17 @@ public function to_number( sequence pText, integer pReturnBadPos = 0)
 				end if
 
 			case '%' then
-				if lDigitCount >= 0 then
-					lLastDigit = lDigitCount
-					if lPercent = 1 then
-						lPercent = 100
-					else
-						if pText[i-1] = '%' then
-							lPercent *= 10 -- Yes ten not one hundred.
-						else
-							lBadPos = i
-						end if
-					end if
+				lLastDigit = lDigitCount
+				if lPercent = 1 then
+					lPercent = 100
 				else
-					lBadPos = i
+					if text_in[i-1] = '%' then
+						lPercent *= 10 -- Yes ten not one hundred.
+					else
+						lBadPos = i
+					end if
 				end if
-
+				
 			case '\t', ' ', #A0 then
 				if lDigitCount = 0 then
 					-- skip it
@@ -707,7 +713,7 @@ public function to_number( sequence pText, integer pReturnBadPos = 0)
 		lBadPos = 1
 	end if
 
-	if pReturnBadPos = 0 and lBadPos != 0 then
+	if return_bad_pos = 0 and lBadPos != 0 then
 		return 0
 	end if
 
@@ -730,11 +736,11 @@ public function to_number( sequence pText, integer pReturnBadPos = 0)
 		lResult = -lResult
 	end if
 
-	if pReturnBadPos = 0 then
+	if return_bad_pos = 0 then
 		return lResult
 	end if
 
-	if pReturnBadPos = -1 then
+	if return_bad_pos = -1 then
 		if lBadPos = 0 then
 			return lResult
 		else
@@ -750,12 +756,12 @@ end function
 -- Converts an object into a integer.
 --
 -- Parameters:
--- # ##pData## : Any Euphoria object.
--- # ##pError## : An integer. This is returned if ##pData## cannot be converted
+-- # ##data_in## : Any Euphoria object.
+-- # ##def_value## : An integer. This is returned if ##data_in## cannot be converted
 --                into an integer. If omitted, zero is returned.
 --
 -- Returns:
--- An **integer**, either the integer rendition of ##pData## or ##pError## if it has
+-- An **integer**, either the integer rendition of ##data_in## or ##def_value## if it has
 -- no integer value.
 --
 -- Comments:
@@ -763,36 +769,106 @@ end function
 --
 -- Examples:
 -- <eucode>
--- ? to_integer(12)       --> 12
--- ? to_integer(12.4)     --> 12
--- ? to_integer("12")     --> 12
--- ? to_integer("12.9")   --> 12
--- ? to_integer("a12")    --> 0 (not a valid number)
--- ? to_integer("a12",-1) --> -1 (not a valid number)
--- ? to_integer({"12"})   --> 0 (sub-sequence found)
--- ? to_integer(#3FFFFFFF)   --> 1073741823
--- ? to_integer(#3FFFFFFF + 1)   --> 0 (too big for a Euphoria integer)
+-- ? to_integer(12)            --> 12
+-- ? to_integer(12.4)          --> 12
+-- ? to_integer("12")          --> 12
+-- ? to_integer("12.9")        --> 12
+--
+-- ? to_integer("a12")         --> 0 (not a valid number)
+-- ? to_integer("a12",-1)      --> -1 (not a valid number)
+-- ? to_integer({"12"})        --> 0 (sub-sequence found)
+-- ? to_integer(#3FFFFFFF)     --> 1073741823
+-- ? to_integer(#3FFFFFFF + 1) --> 0 (too big for a Euphoria integer)
 -- </eucode>
 
-public function to_integer(object pData, integer pError = 0)
-	if integer(pData) then
-		return pData
+public function to_integer(object data_in, integer def_value = 0)
+	if integer(data_in) then
+		return data_in
 	end if
 
-	if atom(pData) then
-		pData = floor(pData)
-		if not integer(pData) then
-			return pError
+	if atom(data_in) then
+		data_in = floor(data_in)
+		if not integer(data_in) then
+			return def_value
 		end if
-		return pData
+		return data_in
 	end if
 
-	sequence lResult = to_number(pData, 1)
+	sequence lResult = to_number(data_in, 1)
 	if lResult[2] != 0 then
-		return pError
+		return def_value
 	else
 		return floor(lResult[1])
 	end if
 
+end function
+
+--**
+-- Converts an object into a text string.
+--
+-- Parameters:
+-- # ##data_in## : Any Euphoria object.
+-- # ##string_quote## : An integer. If not zero (the default) this will be used to
+--   enclose ##data_in##, if it is already a string. 
+-- # ##embed_string_quote## : An integer. This will be used to
+--   enclose any strings embedded inside ##data_in##. The default is '"'
+--
+-- Returns:
+-- A **sequence**. This is the string repesentation of data_in.
+--
+-- Comments:
+-- * The returned value is guaranteed to be a displayable text string.
+-- * ##string_quote## is only used if ##data_in## is already a string. In this case,
+--   all occurances of ##string_quote## already in ##data_in## are prefixed with
+--   the '\' escape character, as are any preexisting escape characters. Then 
+--   ##string_quote## is added to both ends of ##data_in##, resulting in a quoted
+--   string.
+-- * ##embed_string_quote## is only used if ##data_in## is a sequence that contains
+--   strings. In this case, it is used as the enclosing quote for embedded strings.
+--
+-- Examples:
+-- <eucode>
+-- include std/console.e
+-- display(to_string(12))           --> 12
+-- display(to_string("abc"))        --> abc
+-- display(to_string("abc",'"'))    --> "abc"
+-- display(to_string(`abc\"`,'"'))  --> "abc\\\""
+-- display(to_string({12,"abc",{4.5, -99}}))    --> {12, "abc", {4.5, -99}}
+-- display(to_string({12,"abc",{4.5, -99}},,0)) --> {12, abc, {4.5, -99}}
+-- </eucode>
+
+public function to_string(object data_in, integer string_quote = 0, integer embed_string_quote = '"')
+	sequence data_out
+	
+	if types:string(data_in) then
+		if string_quote = 0 then
+			return data_in
+		end if
+		data_in = search:match_replace(`\`, data_in, `\\`)
+		data_in = search:match_replace({string_quote}, data_in, `\` & string_quote)
+		return string_quote & data_in & string_quote
+	end if
+	
+	if atom(data_in) then
+		if integer(data_in) then
+			return sprintf("%d", data_in)
+		end if
+		data_in = text:trim_tail(sprintf("%.15f", data_in), '0')
+		if data_in[$] = '.' then
+			data_in = remove(data_in, length(data_in))
+		end if
+		return data_in
+	end if
+	
+	data_out = "{"
+	for i = 1 to length(data_in) do
+		data_out &= to_string(data_in[i], embed_string_quote)
+		if i != length(data_in) then
+			data_out &= ", "
+		end if
+	end for
+	data_out &= '}'
+	
+	return data_out
 end function
 

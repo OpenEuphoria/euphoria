@@ -1,0 +1,69 @@
+== Version 4.0.1 Date TBD
+
+== Bug Fixes
+
+* Renamed implicit Top Level SubProgram to an illegal name.  Previously used "_toplevel_",
+  which became a legal name for euphoria 4.0
+* [[ticket:577]] ##object()## works same on translator as the interpreter.
+* [[ticket:575]] OW installer file setenv-ow.bat functionality restored from 4.0.0RC2.
+* case issues were removed from pathinfo(), canonical_path(), and abbreviate_path()
+  these functions now return raw OS output; it is up to the user to change case when necessary
+* [[ticket:593]] Atoms represented as doubles, but that hold the double representation of a
+  euphoria integer, now hash as though they were actually represented as an integer.  This
+  ensures that two objects that evaluate as ##equal()## will have the same hash value.
+* [[ticket:597]] Invalid negative routine ids were not detected properly by the interpreter,
+  leading to a machine crash.
+* Now EUPHORIA can be installed under the Windows' 'Program Files' (with spaces) and the
+  translated code will be compiled.
+* Fixed Demos to not rely on EUDIR being set and to not issue warnings
+* Improved confirmation in the algorithm that determines where EUPHORIA is.
+* [[ticket:601]] Missing htmldoc added to Makefile
+* [[ticket:604]] Uninstaller now completely cleans up after the installer. 
+  Note %EUBIN%\bin\eu.cfg is left  in place if modified.
+* Fixed link to PDF documentation
+* Added HTML documentation
+* [[ticket:610]] Euphoria Installer that includes Watcom will now prevent the user from
+  installing Euphoria under a directory with spaces.  Watcom itself has a lot of problems
+  when spaces are in its path
+* [[ticket:614]] maybe_any_key() was not pausing when a Console Program was run from 
+  Windows Explorer.
+* [[ticket:591]] updated copyright and version and added documentation reminding us
+  all of the places we need to change that information.
+* [[ticket:607]] Fixed translation of integers with decimals (e.g., 2.0) when
+  assigned to constants
+* [[ticket:598]] Link windows binaries to comdlg32.dll to make sure GUI calls work
+  with the new manifest.
+* [[ticket:590]] Fixed outdated or incorrect documentation on loop statements
+* [[ticket:594]] Fixed problem with not being able to link to resource file in a 
+  location with spaces.
+* [[ticket:615]] Fixed abbreviate_path for Windows 
+* [[ticket:595]] When it is necessary, tell user to change directory before using the make program.
+* [[ticket:592]] eu.cfg files in the program's directory and the euphoria executable directories
+  are searched before platform specific directories
+* [[ticket:609]] Scientific notation not handling a decimal of all zeroes correctly.
+* [[ticket:621]] Add ##-eudir <dir>## handler to binder and shrouder
+* [[ticket:617]] Fix top level ##case## values when referencing an unqualified constant
+  in another file
+* [[ticket:620]] Added comdlg32.dll to mingw linking flags
+* [[ticket:625]] Negative subscripts result in runtime errors.
+* Fixed eu.cfg handling precedence and parameter merge / de-dupe algorithm to
+  keep correct order of switches.
+* Load eu.cfg arguments when running programs with no arguments, e.g., "eui app.ex"
+* [[ticket:619]] GNU makefile "all" target builds all binaries now
+* [[ticket:632]] fix trace screen prompts to prompt to continue
+* [[ticket:633]] On Windows, ##[[:dir]]## was incorrectly case sensitive if wildcards were used.
+* [[ticket:624]] Fixed regex function ##[[:is_match]]## to use the ##from## parameter
+* [[ticket:596]] Worked around GNU C problem of a lack of alias attribute support on some Mac OS X machines.
+* [[ticket:636]] Source files checked out from Mercurial (and thus distributed packages) 
+  will use the conventions of the OS for line breaks. 
+
+== Enhancements
+
+* Added parsing of two digit years to ##std/datetime.e## ##[[:parse]]##.
+* [[ticket:516]] added ##[[:join_path]]## and ##[[:split_path]]## routines.
+* ##[[:current_dir]]()## now always returns an upper case letter for the drive
+  id.
+* ##[[:canonical_path]]()## can now leave the case alone, lower the case,
+  correct the case, and even get short file names for programs that still 
+  cannot handle quoted arguments at the command line.
+  

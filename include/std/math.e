@@ -1,9 +1,7 @@
--- (c) Copyright - See License.txt
---
 --****
 -- == Math
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 namespace math
 
@@ -138,7 +136,7 @@ public function max(object a)
 	if atom(a) then
 		return a
 	end if
-	b = MINF
+	b = mathcons:MINF
 	for i = 1 to length(a) do
 		c = max(a[i])
 		if c > b then
@@ -171,7 +169,7 @@ public function min(object a)
 	if atom(a) then
 			return a
 	end if
-	b = PINF
+	b = mathcons:PINF
 	for i = 1 to length(a) do
 		c = min(a[i])
 			if c < b then
@@ -182,7 +180,7 @@ public function min(object a)
 end function
 
 --**
--- Ensures that the ##item## is in a range of values supplied by ##range_limits##
+-- Ensures that the ##item## is in a range of values supplied by inclusive ##range_limits##
 --
 -- Parameters:
 --   # ##item## : The object to test for.
@@ -198,14 +196,14 @@ end function
 --
 -- Example 1:
 --   <eucode>
---   object valid_data = set_in_range(user_data, {2, 75})
+--   object valid_data = ensure_in_range(user_data, {2, 75})
 --   if not equal(valid_data, user_data) then
 --       errmsg("Invalid input supplied. Using %d instead.", valid_data)
 --   end if
 --   procA(valid_data)
 --   </eucode>
 
-public function set_in_range(object item, sequence range_limits)
+public function ensure_in_range(object item, sequence range_limits)
 	if length(range_limits) < 2 then
 		return item
 	end if
@@ -215,6 +213,46 @@ public function set_in_range(object item, sequence range_limits)
 	end if
 	if eu:compare(item, range_limits[$]) > 0 then
 		return range_limits[$]
+	end if
+	return item
+end function
+
+--**
+-- Ensures that the ##item## is in a list of values supplied by ##list##
+--
+-- Parameters:
+--   # ##item## : The object to test for.
+--   # ##list## : A sequence of elements that ##item## should be a member of.
+--	# ##default## : an integer, the index of the list item to return if ##item## is not found. Defaults to 1.
+--
+-- Returns:
+--   An **object**, if ##item## is not in the list, it returns the list item of index ##default##,
+--                 otherwise it returns ##item##.
+--
+-- Comments:
+--
+-- If ##default## is set to an invalid index, the first item on the list is returned instead
+-- when ##item## is not on the list.
+--
+-- Example 1:
+--   <eucode>
+--   object valid_data = ensure_in_list(user_data, {100, 45, 2, 75, 121})
+--   if not equal(valid_data, user_data) then
+--       errmsg("Invalid input supplied. Using %d instead.", valid_data)
+--   end if
+--   procA(valid_data)
+--   </eucode>
+
+public function ensure_in_list(object item, sequence list, integer default=1)
+	if length(list) = 0 then
+		return item
+	end if
+	if find(item, list) = 0 then
+		if default>=1 and default<=length(list) then
+		    return list[default]
+		else
+			return list[1]
+		end if
 	end if
 	return item
 end function
@@ -434,16 +472,8 @@ end function
 -- </eucode>
 --
 
-public function intdiv(object a, object b)
-	object x
-	object y
-	
-	x = abs(a)/abs(b)
-	y = floor(x)
-	if not equal(x,y) then
-		y += 1
-	end if
-	return  sign(a) * y
+public function intdiv(object a, object b)	
+	return sign(a)*ceil(abs(a)/abs(b))
 end function
 
 --****
@@ -560,7 +590,7 @@ public function round(object a, object precision=1)
 	end if
 	len = length(a)
 	if len != length(precision) then
-		crash("The lengths of the two supplied sequences do not match.")
+		error:crash("The lengths of the two supplied sequences do not match.")
 	end if
 	s = repeat(0, len)
 	for i = 1 to len do
@@ -730,7 +760,7 @@ end function
 
 public function arccos(trig_range x)
 --  returns angle in radians
-	return HALFPI - 2 * arctan(x / (1.0 + sqrt(1.0 - x * x)))
+	return mathcons:HALFPI - 2 * arctan(x / (1.0 + sqrt(1.0 - x * x)))
 end function
 
 --**
@@ -790,14 +820,14 @@ public function atan2(atom y, atom x)
 		return arctan(y/x)
 	elsif x < 0 then
 		if y < 0 then
-			return arctan(y/x) - PI
+			return arctan(y/x) - mathcons:PI
 		else
-			return arctan(y/x) + PI
+			return arctan(y/x) + mathcons:PI
 		end if
 	elsif y > 0 then
-		return HALFPI
+		return mathcons:HALFPI
 	elsif y < 0 then
-		return -(HALFPI)
+		return -(mathcons:HALFPI)
 	else
 		return 0
 	end if
@@ -827,7 +857,7 @@ end function
 --		[[:deg2rad]]
 
 public function rad2deg (object x)
-   return x * RADIANS_TO_DEGREES
+   return x * mathcons:RADIANS_TO_DEGREES
 end function
 
 --**
@@ -852,7 +882,7 @@ end function
 -- [[:rad2deg]]
 
 public function deg2rad (object x)
-   return x * DEGREES_TO_RADIANS
+   return x * mathcons:DEGREES_TO_RADIANS
 end function
 
 --****
@@ -920,7 +950,7 @@ end function
 --		[[:log]]
 
 public function log10(object x1)
-	return log(x1) * INVLN10
+	return log(x1) * mathcons:INVLN10
 end function
 
 --**
@@ -946,7 +976,7 @@ end function
 --		[[:log]]
 
 public function exp(atom x)
-	return power(E, x)
+	return power( mathcons:E, x)
 end function
 
 --****
@@ -1034,6 +1064,33 @@ end function
 -- See Also:
 --		[[:power]], [[:Operations on sequences]]
 --
+
+--**
+-- Computes the Nth Fibonacci Number
+--
+-- Parameters:
+--		# ##value## : an integer. The starting value to compute a Fibonacci Number from.
+--
+-- Returns:
+-- An **atom**,
+-- * The Fibonacci Number specified by value.
+--
+-- Comments:
+-- * Note that due to the limitations of the floating point implementation,
+-- only 'i' values less than 76 are accurate on Windows platforms, and 
+-- 69 on other platforms (due to rounding differences in the native C
+-- runtime libraries).
+--
+-- Example 1:
+-- <eucode>
+--   ? fib(6)
+-- -- output ... 
+-- -- 8
+-- </eucode>
+--
+public function fib(integer i)
+	return floor((power( mathcons:PHI, i) / mathcons:SQRT5) + 0.5)
+end function
 
 --****
 -- === Hyperbolic trigonometry
@@ -1253,7 +1310,7 @@ end function
 --   </eucode>
 --
 -- See Also:
---		[[:can_add]], [[:product]], [[:or_all]]
+--		[[:product]], [[:or_all]]
 
 public function sum(object a)
 	atom b
@@ -1293,14 +1350,14 @@ end function
 --   </eucode>
 --
 -- See Also:
---		[[:can_add]], [[:sum]], [[:or_all]]
+--		[[:sum]], [[:or_all]]
 
 public function product(object a)
 	atom b
 	if atom(a) then
 		return a
 	end if
-	b = 0
+	b = 1
 	for i = 1 to length(a) do
 		if atom(a[i]) then
 			b *= a[i]
@@ -1332,7 +1389,7 @@ end function
 --   </eucode>
 --
 -- See Also:
---		[[:can_add]], [[:sum]], [[:product]], [[:or_bits]]
+--		[[:sum]], [[:product]], [[:or_bits]]
 
 public function or_all	(object a)
 	atom b
@@ -1512,45 +1569,146 @@ end function
 --   [[:and_bits]], [[:or_bits]], [[:xor_bits]], [[:int_to_bits]]
 
 --**
--- Left shift moves a left by b bits
+-- Moves the bits in the input value by the specified distance.
 --
--- Parameters
---   # ##a## : value to be moved
---   # ##b## : number of bits to be moved left by
+-- Parameters:
+--   # ##source_number## : object: The value(s) whose bits will be be moved.
+--   # ##shift_distance## : integer: number of bits to be moved by. 
+-- Comments:
+-- * If ##source_number## is a sequence, each element is shifted.
+-- * The value(s) in ##source_number## are first truncated to a 32-bit integer.
+-- * The output is truncated to a 32-bit integer.
+-- * Vacated bits are replaced with zero.
+-- * If ##shift_distance## is negative, the bits in ##source_number## are moved left.
+-- * If ##shift_distance## is positive, the bits in ##source_number## are moved right.
+-- * If ##shift_distance## is zero, the bits in ##source_number## are not moved.
+--
+-- Returns:
+-- Atom(s) containing a 32-bit integer. A single atom in ##source_number## is an atom, or
+-- a sequence in the same form as ##source_number## containing 32-bit integers.
 --
 -- Example 1:
 -- <eucode>
--- ? left_shift(2, 2) -- 8
--- ? left_shift(4, 2) -- 16
--- ? left_shift(4, 4) -- 64
+-- ? shift_bits((7, -3) --> 56
+-- ? shift_bits((0, -9) --> 0
+-- ? shift_bits((4, -7) --> 512
+-- ? shift_bits((8, -4) --> 128
+-- ? shift_bits((0xFE427AAC, -7) --> 0x213D5600
+-- ? shift_bits((-7, -3) --> -56  which is 0xFFFFFFC8 
+-- ? shift_bits((131, 0) --> 131
+-- ? shift_bits((184.464, 0) --> 184
+-- ? shift_bits((999_999_999_999_999, 0) --> -1530494977 which is 0xA4C67FFF
+-- ? shift_bits((184, 3) -- 23
+-- ? shift_bits((48, 2) --> 12
+-- ? shift_bits((121, 3) --> 15
+-- ? shift_bits((0xFE427AAC, 7) -->  0x01FC84F5
+-- ? shift_bits((-7, 3) --> 0x1FFFFFFF
+-- ? shift_bits({48, 121}, 2) --> {12, 30}
 -- </eucode>
 --
 -- See Also:
---   [[:right_shift]]
+--   [[:rotate_bits]]
 
-public function left_shift(integer a, integer b)
-	return round(a * power(2, b))
+public function shift_bits(object source_number, integer shift_distance)
+
+	if sequence(source_number) then
+		for i = 1 to length(source_number) do
+			source_number[i] = shift_bits(source_number[i], shift_distance)
+		end for
+		return source_number
+	end if
+	source_number = and_bits(source_number, 0xFFFFFFFF)
+	if shift_distance = 0 then
+		return source_number
+	end if
+	
+	if shift_distance < 0 then
+		source_number *= power(2, -shift_distance)
+	else
+		integer lSigned = 0
+		-- Check for the sign bit so we don't propagate it.
+		if and_bits(source_number, 0x80000000) then
+			lSigned = 1
+			source_number = and_bits(source_number, 0x7FFFFFFF)
+		end if
+		source_number /= power(2, shift_distance)
+		if lSigned and shift_distance < 32 then
+			-- Put back the sign bit now shifted
+			source_number = or_bits(source_number, power(2, 31-shift_distance))
+		end if
+	end if
+	
+	return and_bits(source_number, 0xFFFFFFFF)
 end function
 
 --**
--- Right shift moves a right by b bits
+-- Rotates the bits in the input value by the specified distance.
 --
 -- Parameters:
---   # ##a## : value to be moved
---   # ##b## : number of bits to be moved right by
+--   # ##source_number## : object: value(s) whose bits will be be rotated.
+--   # ##shift_distance## : integer: number of bits to be moved by. 
+-- Comments:
+-- * If ##source_number## is a sequence, each element is rotated.
+-- * The value(s) in ##source_number## are first truncated to a 32-bit integer.
+-- * The output is truncated to a 32-bit integer.
+-- * If ##shift_distance## is negative, the bits in ##source_number## are rotated left.
+-- * If ##shift_distance## is positive, the bits in ##source_number## are rotated right.
+-- * If ##shift_distance## is zero, the bits in ##source_number## are not rotated.
+--
+-- Returns:
+-- Atom(s) containing a 32-bit integer. A single atom in ##source_number## is an atom, or
+-- a sequence in the same form as ##source_number## containing 32-bit integers.
 --
 -- Example 1:
 -- <eucode>
--- ? right_shift(2, 2) -- 0
--- ? right_shift(4, 2) -- 1
--- ? right_shift(40, 2) -- 10
+-- ? rotate_bits(7, -3) --> 56
+-- ? rotate_bits(0, -9) --> 0
+-- ? rotate_bits(4, -7) --> 512
+-- ? rotate_bits(8, -4) --> 128
+-- ? rotate_bits(0xFE427AAC, -7) --> 0x213D567F
+-- ? rotate_bits(-7, -3) --> -49  which is 0xFFFFFFCF 
+-- ? rotate_bits(131, 0) --> 131
+-- ? rotate_bits(184.464, 0) --> 184
+-- ? rotate_bits(999_999_999_999_999, 0) --> -1530494977 which is 0xA4C67FFF
+-- ? rotate_bits(184, 3) -- 23
+-- ? rotate_bits(48, 2) --> 12
+-- ? rotate_bits(121, 3) --> 536870927
+-- ? rotate_bits(0xFE427AAC, 7) -->  0x59FC84F5
+-- ? rotate_bits(-7, 3) --> 0x3FFFFFFF
+-- ? rotate_bits({48, 121}, 2) --> {12, 1073741854}
 -- </eucode>
 --
 -- See Also:
---   [[:left_shift]]
+--   [[:shift_bits]]
 
-public function right_shift(integer a, integer b)
-	return round(a / power(2, b))
+public function rotate_bits(object source_number, integer shift_distance)
+	atom lTemp
+	atom lSave
+	integer lRest
+	
+	if sequence(source_number) then
+		for i = 1 to length(source_number) do
+			source_number[i] = rotate_bits(source_number[i], shift_distance)
+		end for
+		return source_number
+	end if
+	
+	source_number = and_bits(source_number, 0xFFFFFFFF)
+	if shift_distance = 0 then
+		return source_number
+	end if
+
+	if shift_distance < 0 then
+		lSave = not_bits(power(2, 32 + shift_distance) - 1) 	
+		lRest = 32 + shift_distance
+	else
+		lSave = power(2, shift_distance) - 1
+		lRest = shift_distance - 32
+	end if
+	
+	lTemp = shift_bits(and_bits(source_number, lSave), lRest)
+	source_number = shift_bits(source_number, shift_distance)
+	return or_bits(source_number, lTemp)
 end function
 
 --****
@@ -1652,12 +1810,18 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- ? approx(10, 33.33 * 30.01 / 100) --> 0 because 10 and 10.002333 are within 0.005 of each other
--- ? approx(10, 10.001) -> 0 because 10 and 10.001 are within 0.005 of each other
--- ? approx(10, {10.001,9.999, 9.98, 10.04}) --> {0,0,1,-1}
--- ? approx({10.001,9.999, 9.98, 10.04}, 10) --> {0,0,-1,1}
--- ? approx({10.001,{9.999, 10.01}, 9.98, 10.04}, {10.01,9.99, 9.8, 10.4}) --> {-1,{1,1},1,-1}
--- ? approx(23,32, 10) -> 0 because 23 and 32 are within 10 of each other.
+-- ? approx(10, 33.33 * 30.01 / 100) 
+--           --> 0 because 10 and 10.002333 are within 0.005 of each other
+-- ? approx(10, 10.001) 
+--           --> 0 because 10 and 10.001 are within 0.005 of each other
+-- ? approx(10, {10.001,9.999, 9.98, 10.04}) 
+--           --> {0,0,1,-1}
+-- ? approx({10.001,9.999, 9.98, 10.04}, 10) 
+--           --> {0,0,-1,1}
+-- ? approx({10.001,{9.999, 10.01}, 9.98, 10.04}, {10.01,9.99, 9.8, 10.4}) 
+--           --> {-1,{1,1},1,-1}
+-- ? approx(23,32, 10) 
+--           --> 0 because 23 and 32 are within 10 of each other.
 -- </eucode>
 --
 public function approx(object p, object q, atom epsilon = 0.005)
@@ -1665,7 +1829,7 @@ public function approx(object p, object q, atom epsilon = 0.005)
 	if sequence(p) then
 		if sequence(q) then
 			if length(p) != length(q) then
-				crash("approx(): Sequence arguments must be the same length")
+				error:crash("approx(): Sequence arguments must be the same length")
 			end if
 			for i = 1 to length(p) do
 				p[i] = approx(p[i], q[i])
@@ -1734,7 +1898,7 @@ end function
 -- Test if the supplied integer is a even or odd number.
 --
 -- Parameters:
---		# ##pData## : an integer. The item to test.
+--		# ##test_integer## : an integer. The item to test.
 --
 -- Returns:
 -- An **integer**,
@@ -1759,23 +1923,23 @@ end function
 -- -- {10,1}
 -- </eucode>
 --
-public function is_even(integer pData)
-	return (and_bits(pData, 1) = 0)
+public function is_even(integer test_integer)
+	return (and_bits(test_integer, 1) = 0)
 end function
 
 --**
 -- Test if the supplied Euphoria object is even or odd.
 --
 -- Parameters:
---		# ##pData## : any Euphoria object. The item to test.
+--		# ##test_object## : any Euphoria object. The item to test.
 --
 -- Returns:
 -- An **object**,
--- * If ##pData## is an integer...
+-- * If ##test_object## is an integer...
 -- ** 1 if its even.
 -- ** 0 if its odd.
--- * If ##pData## is an atom this always returns 0
--- * If ##pData## is an sequence it tests each element recursively, returning a
+-- * Otherwise if ##test_object## is an atom this always returns 0
+-- * otherwise if ##test_object## is an sequence it tests each element recursively, returning a
 -- sequence of the same structure containing ones and zeros for each element. A
 -- 1 means that the element at this position was even otherwise it was odd.
 --
@@ -1802,17 +1966,17 @@ end function
 -- ? is_even_obj({{1,2,3}, {{4,5},6,{7,8}},9}) --> {{0,1,0},{{1,0},1,{0,1}},0}
 -- </eucode>
 --
-public function is_even_obj(object pData)
-	if atom(pData) then
-		if integer(pData) then
-			return (and_bits(pData, 1) = 0)
+public function is_even_obj(object test_object)
+	if atom(test_object) then
+		if integer(test_object) then
+			return (and_bits(test_object, 1) = 0)
 		end if
 		return 0
 	end if
-	for i = 1 to length(pData) do
-		pData[i] = is_even_obj(pData[i])
+	for i = 1 to length(test_object) do
+		test_object[i] = is_even_obj(test_object[i])
 	end for
 	
-	return pData
+	return test_object
 end function
 

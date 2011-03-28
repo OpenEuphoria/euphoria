@@ -1,4 +1,4 @@
 echo Binding using Windows...
-..\source\exwc.exe ..\source\bind.ex bindme.ex
+..\source\eui.exe ..\source\bind.ex bindme.ex
 echo Binding using DOS...
-..\source\ex.exe ..\source\bind.ex bindme.ex
+..\source\euid.exe ..\source\bind.ex bindme.ex

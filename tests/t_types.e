@@ -388,6 +388,7 @@ test_false ("ascii_string(\"abc§¶\")", ascii_string("abc§¶"))
 test_false("ascii_string({1, 2, \"abc\"})", ascii_string({1, 2, "abc"}))
 test_false("ascii_string({1, 2, 9.7)", ascii_string({1, 2, 9.7}))
 test_true ("ascii_string({1, 2, 'a')", ascii_string({1, 2, 'a'}))
+test_false("ascii_string({1, -2, 'a')", ascii_string({1, -2, 'a'}))
 test_true ("ascii_string({})", ascii_string({}))
 
 test_false("string(-1)", string(-1))
@@ -396,8 +397,21 @@ test_true ("string(\"abc§¶\")", string("abc§¶"))
 test_false("string({1, 2, \"abc\"})", string({1, 2, "abc"}))
 test_false("string({1, 2, 9.7)", string({1, 2, 9.7}))
 test_true ("string({1, 2, 'a')", string({1, 2, 'a'}))
+test_true ("string({1, 2, 'a', 0)", string({1, 2, 'a', 0}))
 test_false("string({1, -2, 'a')", string({1, -2, 'a'}))
 test_true ("string({})", string({}))
+test_false("string({'a',256)", string({'a', 256}))
+
+test_false("cstring(-1)", cstring(-1))
+test_true ("cstring(\"abc\")", cstring("abc"))
+test_true ("cstring(\"abc§¶\")", cstring("abc§¶"))
+test_false("cstring({1, 2, \"abc\"})", cstring({1, 2, "abc"}))
+test_false("cstring({1, 2, 9.7)", cstring({1, 2, 9.7}))
+test_true ("cstring({1, 2, 'a')", cstring({1, 2, 'a'}))
+test_false("cstring({1, 2, 'a', 0)", cstring({1, 2, 'a', 0}))
+test_false("cstring({1, -2, 'a')", cstring({1, -2, 'a'}))
+test_true ("cstring({})", cstring({}))
+test_false("cstring({'a',256)", cstring({'a', 256}))
 
 test_false("sequence_array(-1)", sequence_array(-1))
 test_false("sequence_array(\"abc\")", sequence_array("abc"))
@@ -406,5 +420,23 @@ test_false("sequence_array(1, 2, 9.7)", sequence_array({1, 2, 9.7}))
 test_false("sequence_array(1, 2, 'a')", sequence_array({1, 2, 'a'}))
 test_true ("sequence_array({})", sequence_array({}))
 test_true ("sequence_array({})", sequence_array({"abc", {3.4, 5, 92837.12312, "abc"}}))
+
+-- test for ignored type calls:
+object foo = 1
+atom( foo )
+test_pass( "ignored return for built-in type call at top level" )
+
+string( "" )
+test_pass( "ignored return for UDT type call at top level" )
+
+
+
+if 1 then
+	string( "" )
+	test_pass( "ignored return for UDT type call in statement list" )
+	
+	atom( 3 )
+	test_pass( "ignored return for built-in type call in statement list" )
+end if
 
 test_report()

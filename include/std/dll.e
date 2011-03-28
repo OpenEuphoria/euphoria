@@ -1,15 +1,13 @@
--- (c) Copyright - See License.txt
 --****
 -- == Dynamic Linking to external code
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
+
 namespace dll
 
-include std/convert.e
-include std/machine.e
-include std/math.e
 include std/error.e
+include std/machine.e
 include std/types.e
 
 --****
@@ -149,7 +147,8 @@ constant M_OPEN_DLL  = 50,
 -- Example 2:
 -- <eucode>
 -- atom mysql_lib
--- mysql_lib = open_dll({"libmysqlclient.so", "libmysqlclient.so.15", "libmysqlclient.so.15.0"})
+-- mysql_lib = open_dll({"libmysqlclient.so", "libmysqlclient.so.15", 
+--                      "libmysqlclient.so.15.0"})
 -- if mysql_lib = 0 then
 --   puts(1, "Couldn't find the mysql client library\n")
 -- end if
@@ -159,7 +158,7 @@ constant M_OPEN_DLL  = 50,
 --     [[:define_c_func]], [[:define_c_proc]], [[:define_c_var]], [[:c_func]], [[:c_proc]]
 
 public function open_dll(sequence file_name)
-	if length(file_name) > 0 and string(file_name) then
+	if length(file_name) > 0 and types:string(file_name) then
 		return machine_func(M_OPEN_DLL, file_name)
 	end if
 
@@ -274,6 +273,9 @@ end function
 
 public function define_c_proc(object lib, object routine_name, 
 							  sequence arg_types)
+	if atom(routine_name) and not machine:safe_address(routine_name, 1, machine:A_EXECUTE) then
+        error:crash("A C function is being defined from Non-executable memory.")
+	end if			
 	return machine_func(M_DEFINE_C, {lib, routine_name, arg_types, 0})
 end function
 
@@ -355,7 +357,7 @@ end function
 --                          {C_POINTER, C_INT}, C_INT)
 -- -- We use "LoadIconA" here because we know that LoadIconA
 -- -- needs the stdcall convention, as do
--- -- all standard .dll routines in the WIN32 API. 
+-- -- all standard .dll routines in the WINDOWS API. 
 -- -- To specify the cdecl convention, we would have used "+LoadIconA".
 --
 -- if LoadIcon = -1 then
@@ -368,7 +370,10 @@ end function
 
 public function define_c_func(object lib, object routine_name,
 							  sequence arg_types, atom return_type)
-	return machine_func(M_DEFINE_C, {lib, routine_name, arg_types, return_type})
+	  if atom(routine_name) and not machine:safe_address(routine_name, 1, machine:A_EXECUTE) then
+	      error:crash("A C function is being defined from Non-executable memory.")
+	  end if			
+	  return machine_func(M_DEFINE_C, {lib, routine_name, arg_types, return_type})
 end function
 
 --****
@@ -471,12 +476,6 @@ end function
 -- 
 
 constant M_CALL_BACK = 52
-constant EXECUTABLE_ALIGNMENT = 4 -- can we execute on 2 mod 4 or even odd 
-                                -- addresses?
-constant call_back_size = 92 -- maximum value of C based Euphoria and the 
-                             -- Euphoria based Euphoria.
-atom page_addr = 0
-atom page_offset = 0
 
 --**
 -- Get a machine address for an Euphoria procedure.
@@ -525,30 +524,5 @@ atom page_offset = 0
 --     [[:routine_id]]
 
 public function call_back(object id)
-	ifdef not WIN32 then
-		-- save speed for OSes that do not have DEP.
 		return machine_func(M_CALL_BACK, id)
-	elsedef
-		sequence s, code, rep
-		atom addr, size, repi
-
-		s = machine_func(M_CALL_BACK, {id})
-		addr = s[1]
-		rep =  int_to_bytes( s[2] )
-		size = s[3]
-		code = peek( {addr, size} )
-		repi = match( {#78, #56, #34, #12 }, code[5..$-4] ) + 4
-		if repi = 4 then
-			crash("Cannot generate call_back address.")
-		end if
-		if page_addr = 0 or page_addr + page_offset + call_back_size >= PAGE_SIZE then
-			page_addr = allocate_protect( code[1..repi-1] & rep & code[repi+4..length(code)], 1, PAGE_EXECUTE_READWRITE )
-			page_offset = 0
-		else
-			-- align for execution (need 8-byte?) and put after the previous call back
-			page_offset += EXECUTABLE_ALIGNMENT* ceil( size / EXECUTABLE_ALIGNMENT )
-			poke( page_addr + page_offset, code[1..repi-1] & rep & code[repi+4..length(code)] )
-		end if
-		return page_offset + page_addr
-	end ifdef
 end function

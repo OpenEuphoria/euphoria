@@ -2,6 +2,7 @@
 --
 -- Modularizes the code, while allowing files to explicitly include the
 -- files they need.
+
 ifdef ETYPE_CHECK then
 	with type_check
 elsedef
@@ -12,8 +13,8 @@ integer interpret
 integer translate
 integer bind
 integer do_extra_check
-integer init_backend_rid
-integer backend_rid
+integer init_backend_rid = -1
+integer backend_rid = -1
 integer extract_options_rid
 integer output_il_rid
 integer backend

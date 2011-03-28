@@ -1,12 +1,10 @@
--- (c) Copyright - See License.txt
---
-namespace stdsort
-
 --****
 -- == Sorting
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
+
+namespace stdsort
 
 --****
 -- === Constants
@@ -31,7 +29,6 @@ public constant
 	--** Reverses the sense of the order returned by a custom comparison routine.
 	REVERSE_ORDER = DESCENDING
 
-include std/text.e -- upper()
 
 --****
 -- === Routines
@@ -140,7 +137,8 @@ end function
 -- when ##order = REVERSE_ORDER##.
 -- The default is ##order = NORMAL_ORDER##, which sorts in order returned by the
 -- custom comparison routine.
--- <
+-- < 
+--
 -- * When no user data is provided, the user defined routine must accept two
 --  objects (A, B) and return just the //comparison result//.
 --
@@ -319,7 +317,7 @@ function column_compare(object a, object b, object cols)
 		if column <= length(a) then
 			if column <= length(b) then
 				if not equal(a[column], b[column]) then
-					return sign * eu:compare(upper(a[column]), upper(b[column]))
+					return sign * eu:compare(a[column], b[column])
 				end if
 			else
 				return sign * -1
@@ -378,3 +376,168 @@ public function sort_columns(sequence x, sequence column_list)
 	return custom_sort(routine_id("column_compare"), x, {column_list})
 end function
 
+
+--**
+-- Merge two pre-sorted sequences into a single sequence.
+--
+-- Parameters:
+-- # ##a## : a sequence, holding pre-sorted data.
+-- # ##b## : a sequence, holding pre-sorted data.
+-- # ##compfunc## : an integer, either -1 or the routine id of a user-defined
+--                  comparision function.
+--
+-- Returns:
+--	 A **sequence**, consisting of ##a## and ##b## merged together.
+--
+-- Comments:
+-- * If ##a## or ##b## is not already sorted, the resulting sequence might not
+--  be sorted either.
+-- * The input sequences do not have to be the same size.
+-- * The user-defined comparision function must accept two objects and return an
+--   integer. It returns -1 if the first object must appear before the second one,
+--   and 1 if the first object must after before the second one, and 0 if the order
+--   doesn't matter.
+--
+-- Example 1:
+--   <eucode>
+--   sequence X,Y
+--   X = sort( {5,3,7,1,9,0} ) --> {0,1,3,5,7,9}
+--   Y = sort( {6,8,10,2} ) --> {2,6,8,10}
+--   ? merge(X,Y) --> {0,1,2,3,5,6,7,8,9,10}
+--   </eucode>
+--
+-- See Also:
+--	 [[:compare]], [[:sort]]
+
+public function merge(sequence a, sequence b, integer compfunc = -1, object userdata = "")
+	integer al,bl,n,r
+	sequence s
+	
+	al = 1
+	bl = 1
+	n = 1
+	s = repeat(0, length(a) + length(b))
+	if compfunc >= 0 then
+		while al <= length(a) and bl <= length(b) do
+			r = call_func(compfunc,{a[al], b[bl], userdata})
+			if r <= 0 then
+				s[n] = a[al]
+				al += 1
+			else
+				s[n] = b[bl]
+				bl += 1
+			end if
+			n += 1
+		end while
+		
+	else
+		while al <= length(a) and bl <= length(b) do
+			r = compare(a[al], b[bl])
+			if r <= 0 then
+				s[n] = a[al]
+				al += 1
+			else
+				s[n] = b[bl]
+				bl += 1
+			end if
+			n += 1
+		end while
+	end if
+	
+	if al > length(a) then
+		s[n .. $] = b[bl .. $]
+	elsif bl > length(b) then
+		s[n .. $] = a[al .. $]
+	end if
+	
+	return s
+end function
+
+--**
+-- Sort a sequence, and optionally another object together.
+--
+-- Parameters:
+-- # ##s## : a sequence, holding data to be sorted.
+-- # ##e## : an object. If this is an atom, it is sorted in with ##s##. If this
+-- is a non-empty sequence then ##s## and ##e## are both sorted independantly using
+-- this ##insertion_sort## function and then the results are merged and returned.
+-- # ##compfunc## : an integer, either -1 or the routine id of a user-defined
+--                  comparision function.
+--
+-- Returns:
+--	 A **sequence**, consisting of ##s## and ##e## sorted together.
+--
+-- Comments:
+-- * This routine is usually a lot faster than the standard sort when ##s## and ##e##
+--   are (mostly) sorted before calling the function. For example, you can use
+--   this routine to quickly add to a sorted list.
+-- * The input sequences do not have to be the same size.
+-- * The user-defined comparision function must accept two objects and return an
+--   integer. It returns -1 if the first object must appear before the second one,
+--   and 1 if the first object must after before the second one, and 0 if the order
+--   doesn't matter.
+--
+-- Example 1:
+--   <eucode>
+--   sequence X = {}
+--   while true do
+--      newdata = get_data()
+--      if compare(-1, newdata) then
+--         exit
+--      end if
+--      X = insertion_sort(X, newdata)
+--      process(new_data)
+--   end while
+--   </eucode>
+--
+-- See Also:
+--	 [[:compare]], [[:sort]], [[:merge]]
+
+public function insertion_sort(sequence s, object e = "",  integer compfunc = -1, object userdata = "")
+	object key
+	integer a
+	
+	if atom(e) then
+		s &= e
+	elsif length(e) > 1 then
+		return merge(insertion_sort(s,,compfunc, userdata), insertion_sort(e,,compfunc, userdata), compfunc, userdata)
+	end if
+
+	if compfunc = -1 then
+		
+		for j = 2 to length(s) label "outer" do
+			key = s[j]
+			for i = j - 1 to 1 by -1 do
+				if compare(s[i], key) <= 0 then
+					a = i+1
+					if a != j then
+						s[a+1 .. j] = s[a .. j-1]
+						s[a] = key
+					end if
+					continue "outer"
+				end if
+				a = i
+			end for
+			s[a+1 .. j] = s[a .. j-1]
+			s[a] = key
+		end for
+	else
+		for j = 2 to length(s) label "outer" do
+			key = s[j]
+			for i = j - 1 to 1 by -1 do
+				if call_func(compfunc,{s[i], key, userdata}) <= 0 then
+					a = i+1
+					if a != j then
+						s[a+1 .. j] = s[a .. j-1]
+						s[a] = key
+					end if
+					continue "outer"
+				end if
+				a = i
+			end for
+			s[a+1 .. j] = s[a .. j-1]
+			s[a] = key
+		end for
+	end if	
+	return s
+end function

@@ -1,0 +1,69 @@
+== Version 2.4 July 3, 2003
+
+* **define_c_proc()** and **define_c_func()** have been extended, so in
+  addition to defining C routines in external .dll's and shared
+  libraries, you can now define the parameters and return value for a
+  machine-code routine that your program pokes into its own
+  memory. You can call the machine-code routine using **c_proc()** or
+  **c_func()**. Thanks to Daniel Kluss.
+
+* Performance Improvement: **get4()** and **put4()** in **database.e**
+  have been sped up slightly. They are very important to the overall
+  speed of **EDS**. Thanks to Derek Parnell.
+
+* Performance Improvement: **get_bytes()** is now much faster when the
+  number of bytes requested far exceeds the number of bytes remaining in
+  the file. Thanks to Pier Feddema.
+
+* **Translator**: When translating a huge Euphoria routine (many
+  hundreds of Euphoria statements), the Translator will now output
+  calls to a dereference routine, rather than using in-lined C
+  statements. This reduces the chance of exceeding a size limit
+  imposed by the C compiler (especially Watcom C). It also reduces the
+  **.exe** size. Since the dereference routine is more likely than the
+  in-lined statements to be in cache, the speed difference is not that
+  great.
+
+* **Interpreter Source Code**: In **watexw.bat**, **runtime
+  windows=4.0** was added to the link command for building
+  **exw.exe**.
+
+* There are now some checks for invalid argument type and invalid
+  return type in calls to **define_c_func()** and **define_c_proc()**.
+
+* Some syntax error messages are now more descriptive when namespace
+  identifiers are involved.
+
+* The filesort.ex tutorial program was altered to make it more usable
+  under Linux and FreeBSD.
+
+* By default, **safe.e** now does a less-strict, "edges-only" check for
+  memory corruption, when the platform is **WIN32**. Windows programs
+  often access memory that was not allocated using Euphoria's
+  **allocate()**.
+
+* **bug fixed**: When a literal floating-point constant in the Euphoria
+  program was larger than about 1e308, the Translator would output
+  "inf" in **init_.c**. This caused the C compiler to issue an
+  undefined symbol error. Thanks to Juergen Luethje.
+
+* **bug fixed**: In a rare case, the Translator was failing to emit C
+  code to make a copy of a sequence with multiple references to it,
+  before overwriting an element of that sequence. Thanks to Juergen
+  Luethje.
+
+* **bug fixed**: In certain cases, when a Euphoria program exchanged
+  Euphoria data with a **.dll** written in Euphoria, the data might
+  not be freed (until the program terminated). Thanks to Wayne
+  Overman.
+
+* **bug fixed**: If you used "asm" in your program, as a private
+  variable or parameter name, the Translator would use "_asm" in the C
+  code. This was not acceptable for some C compilers. The Translator
+  will now avoid using "_asm", as well as "_try", "_Seg16", "_stdcall"
+  and several other single-underscore names that are reserved by
+  various C compilers. Thanks to George Papadopoulos and Matt Lewis.
+
+* **bug fixed**: If the HOT_KEYS parameter in **ed.ex** was set to
+  FALSE, then **Esc h Enter** would not bring up the help
+  prompt. Thanks to J. Brown.

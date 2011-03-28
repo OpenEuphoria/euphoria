@@ -1,9 +1,16 @@
 --****
 -- == Keyword Data
-
--- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 -- Keywords and routines built in to Euphoria.
+--
+-- <<LEVELTOC level=2 depth=4>>
+--
+
+namespace keywords
+
+--****
+-- === Constants
+--
 
 --**
 -- Sequence of Euphoria keywords
@@ -60,7 +67,7 @@ public constant keywords = {
 -- Sequence of Euphoria's built-in function names
 
 public constant builtins = {
-    "?",
+	"?",
 	"abort",
 	"and_bits",
 	"append",
@@ -81,10 +88,8 @@ public constant builtins = {
 	"delete_routine",
 	"equal",
 	"find",
-	"find_from",
 	"floor",
 	"get_key",
-	"get_pixel",
 	"getc",
 	"getenv",
 	"gets",
@@ -98,7 +103,6 @@ public constant builtins = {
 	"machine_func",
 	"machine_proc",
 	"match",
-	"match_from",
 	"mem_copy",
 	"mem_set",
 	"not_bits",
@@ -123,8 +127,6 @@ public constant builtins = {
 	"prepend",
 	"print",
 	"printf",
-	"profile",
-	"profile_time",
 	"puts",
 	"rand",
 	"remainder",
@@ -152,6 +154,5 @@ public constant builtins = {
 	"task_yield",
 	"time",
 	"trace",
-	"warning",
 	"xor_bits"
 }

@@ -1,10 +1,9 @@
--- (c) Copyright - See License.txt
---
 --****
 -- == Windows Message Box
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
+
 namespace msgbox
 
 include std/dll.e
@@ -93,16 +92,16 @@ public constant
 atom lib
 integer msgbox_id, get_active_id
 
-ifdef WIN32 then
-	lib = open_dll("user32.dll")
-	msgbox_id = define_c_func(lib, "MessageBoxA", {C_UINT, C_POINTER, 
+ifdef WINDOWS then
+	lib = dll:open_dll("user32.dll")
+	msgbox_id = dll:define_c_func(lib, "MessageBoxA", {C_UINT, C_POINTER, 
 												   C_POINTER, C_UINT}, C_INT)
 	if msgbox_id = -1 then
 		puts(2, "couldn't find MessageBoxA\n")
 		abort(1)
 	end if
 
-	get_active_id = define_c_func(lib, "GetActiveWindow", {}, C_UINT)
+	get_active_id = dll:define_c_func(lib, "GetActiveWindow", {}, C_UINT)
 	if get_active_id = -1 then
 		puts(2, "couldn't find GetActiveWindow\n")
 		abort(1)
@@ -133,13 +132,13 @@ public function message_box(sequence text, sequence title, object style)
 	integer or_style
 	atom text_ptr, title_ptr, ret
 	
-	text_ptr = allocate_string(text)
+	text_ptr = machine:allocate_string(text)
 	if not text_ptr then
 		return 0
 	end if
-	title_ptr = allocate_string(title)
+	title_ptr = machine:allocate_string(title)
 	if not title_ptr then
-		free(text_ptr)
+		machine:free(text_ptr)
 		return 0
 	end if
 	if atom(style) then
@@ -152,8 +151,8 @@ public function message_box(sequence text, sequence title, object style)
 	end if
 	ret = c_func(msgbox_id, {c_func(get_active_id, {}), 
 							 text_ptr, title_ptr, or_style})
-	free(text_ptr)
-	free(title_ptr)
+	machine:free(text_ptr)
+	machine:free(title_ptr)
 
 	return ret
 end function

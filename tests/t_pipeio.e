@@ -1,11 +1,11 @@
 include std/unittest.e
 include std/pipeio.e as pipe
 include std/filesys.e as fs
-include std/text.e as text
+include std/sequence.e
 
 sequence list, interpreter
 list = command_line()
-ifdef EC then
+ifdef not EUI then
 	-- The tests test are here to test interpreters and libraries as we do not know where the
 	-- interpreter is we just quit.
 	test_report()
@@ -23,7 +23,7 @@ end ifdef
 
 object z = pipe:create()
 
-object p = pipe:exec(interpreter & " "&text:join({"..","demo","pipe_sub.ex"},fs:SLASH), z)
+object p = pipe:exec(interpreter & " "& stdseq:join({"..","demo","pipe_sub.ex"},fs:SLASH), z)
 if atom(p) then
 	test_fail("pipe:exec #1")
 	abort(1)

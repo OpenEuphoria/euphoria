@@ -1,6 +1,40 @@
-euphoria (4.0-1ubuntu1) unstable; urgency=low
+euphoria (4.0.0-eu3-Final0) stable; urgency=low
+  
+  * 4.0.0 Final Release
+
+ -- Matt Lewis <mattlewis@openeuphoria.org>  Mon, 08 Dec 2010 04:53:05 -0500
+
+euphoria (4.0.0-eu2-RC.2) stable; urgency=low
+
+  * Release Candidate 2
+  * Many bug fixes.  See release notes.
+
+ -- Matt Lewis <mattlewis@openeuphoria.org>  Mon, 08 Dec 2010 04:53:05 -0500
+
+euphoria (4.0.0-eu2-RC.1) stable; urgency=low
+
+  * Release Candidate 1
+
+ -- Matt Lewis <mattlewis@openeuphoria.org>  Mon, 08 Nov 2010 04:53:05 -0500
+
+
+euphoria (4.0.0-eu1-beta.4.3883) stable; urgency=low
+
+  * New package with bug fixes for openeuphoria.org
+
+ -- Matt Lewis <mattlewis@openeuphoria.org>  Fri, 05 Jun 2010 21:28:05 -0500
+
+
+euphoria (4.0..0-eu1-beta.4.1) unstable; urgency=low
+
+  * Interim release - many bug fixes
+
+ -- Matt Lewis <mattlewis@openeuphoria.org>  Thu, 19 Jun 2008 21:28:05 -0500
+
+
+euphoria (4.0..0-eu1-beta.4) unstable; urgency=low
 
   * Initial release
 
- -- Matt Lewis <matthewwalkerlewis@gmail.com>  Thu, 19 Jun 2008 21:28:05 -0500
+ -- Matt Lewis <mattlewis@openeuphoria.org>  Thu, 19 Jun 2008 21:28:05 -0500
 

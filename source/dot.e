@@ -1,8 +1,9 @@
 -- (c) Copyright - See License.txt
+
 ifdef ETYPE_CHECK then
-with type_check
+	with type_check
 elsedef
-without type_check
+	without type_check
 end ifdef
 
 include global.e
@@ -12,7 +13,6 @@ include std/get.e
 include std/map.e as map
 include std/sequence.e
 include std/search.e
-include std/sets.e as set
 include std/math.e
 
 -- called_from:  file -> proc -> called_proc file : called proc
@@ -100,10 +100,10 @@ function clusters()
 			integer fn = files[f]
 			if call_type[ct] then
 				lines &= sprintf("\tsubgraph \"cluster_%d_%d\" {\n\t\tlabel = \"%s\"\n\t\tcolor = blue\n", 
-						{ call_type[ct], fn, file_name[fn] } )
+						{ call_type[ct], fn, known_files[fn] } )
 			else
 				lines &= sprintf("\tsubgraph \"cluster_target\" {\n\t\tlabel = \"%s\"\n\t\tcolor = blue\n", 
-						{ file_name[fn] } )
+						{ known_files[fn] } )
 			end if
 			map:map token_map = new_extra( map:get( file_map, fn) )
 			sequence tokens = map:keys( token_map )
@@ -176,13 +176,13 @@ export function diagram_routine( object proc, integer files = ALL_FILES, integer
 end function
 
 export procedure short_files()
-	short_names = file_name
+	short_names = known_files
 	
 	for f = 1 to length( short_names ) do
 		-- just the short name
 		sequence name = short_names[f]
-		name = find_replace( '\\', name, '/' )
-		file_name[f] = name
+		name = match_replace( '\\', name, '/' )
+		known_files[f] = name
 		for r = length( name ) to 1 by -1 do
 			if name[r] = '/' then
 				name = name[r+1..$]
@@ -192,8 +192,8 @@ export procedure short_files()
 		short_names[f] = name
 	end for
 	std_libs = repeat( 0, length( short_names ) )
-	for i = 1 to length( file_name ) do
-		if match( "std/", file_name[i]) then
+	for i = 1 to length( known_files ) do
+		if match( "std/", known_files[i]) then
 			short_names[i] = "std/" & short_names[i]
 			if not show_stdlib then
 				-- we only care if user doesn't want to show it
@@ -216,14 +216,14 @@ export function diagram_includes( integer show_all = 0, integer stdlib = 0)
 	end for
 	lines &= "\t}\n"
 	
-	set:set included = {}
+	sequence included = {}
 	for fi = 1 to length( file_include ) do
 		for i = 1 to length( file_include[fi] ) do
 			integer file = abs( file_include[fi][i])
-			if show_all or not set:belongs_to( file, included ) then
+			if show_all or not find( file, included ) then
 				if stdlib or match( "std/", short_names[file] ) != 1 then
 					lines &= sprintf("\t\"%s\" -> \"%s\"\n", {short_names[fi], short_names[file]})
-					included = set:add_to( file, included )
+					included = append( included, file )
 				end if
 			end if
 		end for

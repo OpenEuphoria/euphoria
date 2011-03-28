@@ -1,192 +1,233 @@
--- Hash Table Demo
--- written by Junko C. Miura, RDS
--- This reads standard input and builds a hash table containing all of 
+--****
+-- === hash.ex
+-- 
+-- Hash Table Demo written by Junko C. Miura, RDS
+-- 
+-- This reads a text file and builds a hash table containing all of 
 -- the unique words plus a count of how many times each word occurred.
--- It outputs the words to standard output and writes a bunch of hash table 
+-- It outputs the words to and a bunch of hash table 
 -- statistics to "hash.out".
-
--- example: 
---          ex hash < \euphoria\doc\library.doc
 --
--- You can direct standard output to a file with '>'
+-- ==== Example
+-- {{{
+-- eui hash \euphoria\doc\library.doc
+-- }}}
+--
 -- hash.ex (hash table) is faster than tree.ex (binary tree),
 -- but does not produce a sorted list of words.
+--
+-- ==== How it Works
+--
+-- hashing is generally much faster than searching a long linear list for a 
+-- word. Instead of searching one big list, we create hundreds of small
+-- lists, and then use a "hash function" to tell us which small list (or
+-- "bucket") to search. For each word, the hash function will return an 
+-- integer. For a given word, the hash function must always return the same 
+-- integer. That integer is used as the index into a sequence of small 
+-- word-lists. We can quickly search the selected small list for the word.
+--
 
--- How it Works:
--- * hashing is generally much faster than searching a long linear list for a 
---   word. Instead of searching one big list, we create hundreds of small
---   lists, and then use a "hash function" to tell us which small list (or
---   "bucket") to search. For each word, the hash function will return an 
---   integer. For a given word, the hash function must always return the same 
---   integer. That integer is used as the index into a sequence of small 
---   word-lists. We can quickly search the selected small list for the word.
+include std/console.e
+include std/io.e
+include std/hash.e
+include std/map.e
+include std/types.e
+include std/convert.e
+include std/cmdline.e
 
 without type_check
 
 constant EOF = -1
-constant STANDARD_IN = 0, STANDARD_OUT = 1, SCREEN = 2 
 constant TRUE = 1
 constant STRING = 1, COUNT = 2 -- fields for one hash table entry
 
-constant HASH_BUCKETS = 1009  -- prime
-    -- With the hash function below, it helps (a little bit) 
-    -- to have a prime number here. Don't use a power of 2.
-    -- You'll get better performance by using a
-    -- bigger size of table, but it wastes space.
+integer hashBuckets  -- prime
+	-- With the hash function below, it helps (a little bit) 
+	-- to have a prime number here. Don't use a power of 2.
+	-- You'll get better performance by using a
+	-- bigger size of table, but it uses up space.
+
+-- This hash table consists of a set of two sequences. One for the
+-- keys (words) and one for the corresponding word counter.
 
 -- Initialize the hash table to a sequence of empty "buckets"
-sequence hash_table
-hash_table = repeat({}, HASH_BUCKETS)
+sequence table_words
+sequence table_count
 
-integer compares
-compares = 0
+integer compares = 0
+integer  inputHandle
+sequence vOutPath
+integer outputHandle
+---------------- Statistics ------------------
+integer numZeroBucket, max, items, len, total_words
 
 function hash_function(sequence string)
--- This function works well for English words.
--- It's fast to calculate and it gives a pretty even distribution.
--- These are the two properties that you want in a hash function.
-    integer len
-    atom val
-    
-    len = length(string)
-    val = string[len] * 2 + len
-    if len > 4 then
-	len = 4
-    end if
-    for i = 1 to len - 1 do
-	val = val * 64 + string[i]  -- shift 6 bits and add
-    end for
-    return remainder(val, HASH_BUCKETS) + 1
+	return remainder(hash(string, stdhash:HSIEH32 ), hashBuckets) + 1
 end function
 
-procedure hash_add(sequence string)
+procedure update_table(sequence string)
 -- If string is not in the table already, add it, with a count of 1, 
 -- otherwise just increment its count.
-    integer hash_val, found
-    sequence bucket
-    
-    -- which bucket to search?
-    hash_val = hash_function(string) 
-    bucket = hash_table[hash_val]
-    found = 0
-    -- search this bucket for the string
-    for i = 1 to length(bucket) do
-	compares += 1
-	if equal(string, bucket[i][STRING]) then
-	    -- found it
-	    found = i
-	    exit
+	integer hash_val, found
+	sequence bucket
+	sequence counters
+	
+	-- which bucket to search?
+	hash_val = hash_function(string) 
+	bucket = table_words[hash_val]
+	found = find(string, bucket)
+	if found then
+		compares += found
+		table_count[hash_val][found] += 1
+	else
+		bucket = append(bucket, string)
+		table_words[hash_val] = bucket
+		table_count[hash_val] &= 1
 	end if
-    end for
-    if found then
-	-- increment count
-	bucket[found][COUNT] += 1
-    else
-	-- add new string with count 1:
-	bucket = append(bucket, {string, 1})
-    end if
-    hash_table[hash_val] = bucket
 end procedure
 
-integer last_word = 0
 function next_word()
--- Read standard input to get the next "word".
-    integer c
-    sequence word
+-- Read to get the next "word".
+	integer c
+	sequence word
 
-    word = ""
-    while TRUE do
-	c = getc(STANDARD_IN)
-	if (c >= 'a' and c <= 'z') then
-	    word &= c
-	elsif (c >= 'A' and c <= 'Z') then
-	    word &= c
-	else
-		last_word = (c = EOF)
-		if length(word) > 0 then
-		    return word
-		elsif c = EOF then
-		    return 0
+	word = ""
+	while TRUE do
+		c = getc(inputHandle)
+		if t_alpha(c) then
+		    word &= c
+		else
+			if length(word) > 0 or c = EOF then
+		    	exit
+			end if
 		end if
-	end if
-    end while
+	end while
+	
+	return word
 end function
 
 procedure build_table()
 -- build a hash table containing all unique words in standard input
-    object word
+	object word
 
-    while not last_word do
+	while length(word) > 0 with entry do
+	    update_table(word)
+	entry
 		word = next_word()
-		if atom(word) then
-		    exit
-		else
-		    hash_add(word)
-		end if
-    end while
+	end while
+	
 end procedure
 
-puts(SCREEN, "terminate typed input with: control-Z Enter\n")
+sequence vOpts = {
+	{"s", "hash", "Hash size", {ONCE, HAS_PARAMETER, NO_CASE}, -1},
+	{"o", "outfile", "File to receive word list and statistics", {ONCE, NO_CASE, HAS_PARAMETER}, -1},
+	$
+}
 
-atom t
-t = time()         -- Time the table-building process only
-build_table() 
-t = time() - t     -- stop timer
+object vOptMap
+
+without warning
+override procedure abort(integer errcode)
+	maybe_any_key("\nPress Any Key to Continue...")
+	eu:abort(errcode)
+end procedure
+
+procedure main()
+	sequence lDicts
+	object lFileList
+	integer lFileHandle
+	
+	vOptMap = cmd_parse(vOpts)
+	
+	vOutPath = map:get(vOptMap, "outfile", "hash.out")
+	hashBuckets = to_integer(map:get(vOptMap, "hash", "1009"))
+	table_words = repeat({}, hashBuckets)
+	table_count = repeat({}, hashBuckets)
+	
+	
+	outputHandle = open(vOutPath, "w")
+	if outputHandle = -1 then
+		writefln("Cannot open output file")
+		abort(1)
+	end if
+	
+	
+	lFileList = map:get(vOptMap, cmdline:EXTRAS, {})
+	
+	if length(lFileList) < 1 then
+		puts(2, "You must give the name of an input file")
+		abort(1)
+	end if
+	
+	if length(lFileList) > 1 then
+		puts(2, "You must only give the name of one input file")
+		abort(1)
+	end if
+	
+	inputHandle = open(lFileList[1], "r")
+	if inputHandle = -1 then
+		puts(2, "Cannot open input file.")
+		abort(1)
+	end if
 
 
----------------- Statistics ------------------
-integer numZeroBucket, max, items, len, stats, total_words
-
-stats = open("hash.out", "w")
-if stats = -1 then
-    puts(SCREEN, "Couldn't open output file\n")
-    abort(1)
-end if
-printf(stats, "time: %.2f\n", t)
-numZeroBucket = 0
-items = 0
-max = 0
-total_words = 0
-for i = 1 to length(hash_table) do
-    len = length(hash_table[i])
-    items += len
-    if len = 0 then
-	numZeroBucket += 1
-    else
-	-- calculate total compares required to lookup all words again
-	for j = 1 to length(hash_table[i]) do
-	    total_words +=  hash_table[i][j][COUNT]
+	atom t
+	t = time()         -- Time the table-building process only
+	build_table() 
+	t = time() - t     -- stop timer
+	
+	
+	writefln("\n[:.2] seconds", t)
+	
+	numZeroBucket = 0
+	items = 0
+	max = 0
+	total_words = 0
+	
+	for i = 1 to length(table_words) do
+		len = length(table_words[i])
+		items += len
+		for j = 1 to length(table_count[i]) do
+			total_words += table_count[i][j]
+		end for
+		if len = 0 then
+			numZeroBucket += 1
+		elsif len > max then
+		    max = len
+		end if
 	end for
-	if len > max then
-	    max = len
+	
+	if total_words = 0 then
+		abort(0)
 	end if
-    end if
-end for
+	
+	writefln(outputHandle, "build time ..................... : [:.2]", t)
+	writefln(outputHandle, "number of hash table buckets ... : []", hashBuckets)
+	writefln(outputHandle, "number of words in input stream  : []", total_words)
+	writefln(outputHandle, "number of items in hash table .. : []", items)
+	writefln(outputHandle, "number of empty buckets ........ : []", numZeroBucket)
+	writefln(outputHandle, "largest bucket size ............ : []", max)
+	writefln(outputHandle, "average bucket size ............ : [:.2]", items / (hashBuckets - numZeroBucket))
+	writefln(outputHandle, "compares per lookup ............ : [:.2]",  compares/total_words)
+	
+	for i = 1 to length(table_words) do
+		if length(table_words[i]) > 0 then
+		    writef(outputHandle, "bucket#[:6]: ", i)
+		    for j = 1 to length(table_words[i]) do
+				if j > 1 and remainder(j-1,5) = 0 then
+				    writefln(outputHandle, "")
+				    writef(outputHandle, "             ")
+				end if
+				
+				writef(outputHandle, "[]:[] ", {table_words[i][j], table_count[i][j]})
+	
+		    end for
+			writefln(outputHandle, "")
+	
+		end if
+	end for
+	close(outputHandle)
+	writefln("See '[1]' for statistics and table contents", {vOutPath})
+end procedure
 
-printf(stats, "number of hash table buckets     : %d\n", HASH_BUCKETS)
-printf(stats, "number of words in input stream  : %d\n", total_words)
-printf(stats, "number of items in hash table    : %d\n", items)
-printf(stats, "number of empty buckets          : %d\n", numZeroBucket)
-printf(stats, "largest bucket                   : %d\n", max)
-if total_words then
-    printf(stats, "compares per lookup              : %.2f\n", 
-	       compares/total_words)
-end if
-puts(STANDARD_OUT,"\n\n")
-for i = 1 to length(hash_table) do
-    printf(stats, "\nbucket#%d: ", i)
-    for j = 1 to length(hash_table[i]) do
-	printf(stats, "%s:%d ", hash_table[i][j])
-	printf(STANDARD_OUT, "%s:%d\n", hash_table[i][j])
-	if remainder(j,5) = 0 then
-	    puts(stats, '\n')
-	end if
-    end for
-    if remainder(length(hash_table[i]), 5) then
-	puts(stats, '\n')
-    end if
-end for
-
-printf(SCREEN, "\n%.2f seconds\n", t)
-
-
+main()

@@ -184,5 +184,53 @@ test_equal("sort_columns() single item sequence",
                     sort_columns({{1,2,3}, {1,2,4}, {1,2,1}, {1,3,3}, {5,3,4}}, {2,-3})
            )                      
 
+---- merge() ----
+test_equal("merge std", {0,1,2,3,4,5,6,7,8,9,10}, merge({1,3,5,7,9}, {0, 2,4,6,8,10}))
+test_equal("merge custom", {10,9,8,7,6,5,4,3,2,1,0}, merge({9,7,5,3,1}, {10,8,6,4,2,0}, rid_rsu, "rev"))
+           
+test_equal("merge null all", {}, merge({}, {}))
+test_equal("merge null one", {1,2,3}, merge({}, {1,2,3}))
+test_equal("merge null two", {1,2,3}, merge({1,2,3}, {}))
+
+test_equal("merge single one", {2}, merge({2}, {}))
+test_equal("merge single two", {2}, merge({}, {2}))
+test_equal("merge single both", {1,2}, merge({1}, {2}))
+
+
+---- insertion_sort() ----
+sequence isrt
+isrt = {}
+isrt = insertion_sort(isrt, 8)
+isrt = insertion_sort(isrt, 3)
+isrt = insertion_sort(isrt, 1)
+isrt = insertion_sort(isrt, 5)
+isrt = insertion_sort(isrt, 9)
+isrt = insertion_sort(isrt, 4)
+isrt = insertion_sort(isrt, 6)
+isrt = insertion_sort(isrt, 2)
+isrt = insertion_sort(isrt, 7)
+test_equal("insertion_sort std", {1,2,3,4,5,6,7,8,9}, isrt)
+
+isrt = {}
+isrt = insertion_sort(isrt, 8, rid_rsu, "rev")
+isrt = insertion_sort(isrt, 3, rid_rsu, "rev")
+isrt = insertion_sort(isrt, 1, rid_rsu, "rev")
+isrt = insertion_sort(isrt, 5, rid_rsu, "rev")
+isrt = insertion_sort(isrt, 9, rid_rsu, "rev")
+isrt = insertion_sort(isrt, 4, rid_rsu, "rev")
+isrt = insertion_sort(isrt, 6, rid_rsu, "rev")
+isrt = insertion_sort(isrt, 2, rid_rsu, "rev")
+isrt = insertion_sort(isrt, 7, rid_rsu, "rev")
+test_equal("insertion_sort custom", {9,8,7,6,5,4,3,2,1}, isrt)
+
+test_equal("insertion_sort two lists", {1,2,3,4,5,6,7,8,9}, insertion_sort({9,6,3,1,7}, {2,4,5,8}))
+
+test_equal("insertion_sort null all", {}, insertion_sort({}))
+test_equal("insertion_sort null one", {1,2,3}, insertion_sort({}, {3,2,1}))
+
+test_equal("insertion_sort single one", {2}, insertion_sort({2}))
+test_equal("insertion_sort single two", {2}, insertion_sort({}, 2))
+test_equal("insertion_sort single both", {1,2}, insertion_sort({1}, 2))
+
 test_report()
 

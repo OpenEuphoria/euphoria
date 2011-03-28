@@ -1,0 +1,89 @@
+== Version 4.0.0 December 22, 2010
+
+4.0.0 has not yet been released. These changes are available in the latest SVN trunk. 
+4.0.0 is scheduled to be released on December 22, 2010.
+
+For a concise list of what has changed from 3.1.1 to 4.0.0 final, please see 
+[[:What's new in 4.0?]] section of this manual.
+
+=== Deprecation
+
+* with/without warning lists have changed from ##( name1, name2 )## to
+##{ name1, name2 }## as to be more like Euphoria sequences. In the
+future the old ##( name1, name2 )## syntax will be removed.
+
+
+=== Possible Breaking Changes
+
+* ##std/sequence.e##/##[[:series]]## has changed the functionality of the last parameter.
+  Previously ##series(1,1,5)## would produce ##{1,2,3,4,5,6}##. i.e. 5 was the number of
+  items to add onto the starting 1. The last parameter has been changed to be the number
+  of items in the resulting list. Thus, ##series(1,1,5)## will now produce
+  ##{1,2,3,4,5}##, i.e. a sequence of 5 items. ##series(1,1,0)## before would produce
+  ##{1}##. Now it produces ##{}##, i.e. an empty series.
+* [[ticket:551]]: ##WIN32_GUI##, ##WIN32_CONSOLE##, ##EUB_CONSOLE##, ##EUC_CONSOLE## have been changed
+  to simply refer to ##GUI## or ##CONSOLE##.  On non-Windows platforms, ##CONSOLE## 
+  will be defined.
+
+=== Removed
+
+* ##creolehtml## is no longer shipped with Euphoria. It has been enhanced to support
+  multiple output formats and thus its name has been changed to simply ##creole##. HTML
+  remains the default output. Usage remains the same thus simply renaming build systems
+  to use ##creole## instead of ##creolehtml## will work.
+
+=== Bug Fixes
+
+* [[ticket:438]], removed path test in ##demos/santiy.ex## as it does not function
+                  correctly with bound, translated or even a non-standard eui location and
+                  actually cannot, thus it was removed.
+* [[ticket:514]], Fixed bug with internal ##dir## implementation that would prevent displaying
+                  the content of a directory if given without a trailing slash on Windows.
+* [[ticket:517]], Added a bounds check that could cause the translator or binder to crash.
+* [[ticket:518]], Prevented write_coverage from being called twice on CTRL+C/error condition.
+* [[ticket:519]], preproc and net demos are now in the debian package.
+* [[ticket:530]], ##t_command_line_quote## test fixed on Windows.
+* [[ticket:533]], Debian package copyright was updated in accordance to Debian policy.
+* [[ticket:540]], ##[[:get_key]]## was described in both ##io.e## and ##console.e##, removed
+                  from ##io.e##
+* [[ticket:545]], ##[[:canonical_path]]## did not properly insert the drive letter on Windows
+                  when the path began with a forward slash ##/##.
+* [[ticket:548]], Fixed error in emitted C in some translated ##for## loops.
+* [[ticket:550]], Examples for regex ##[[:matches]]## and ##[[:all_matches]]## now properly
+                  either supply or use the default ##from## parameter.
+* [[ticket:555]], Fixed parsing of constants when first statement is a constant assigned by a
+                  built-in function.
+* [[ticket:556]], Fixed type inference for return value from ##[[:rand]]## in translator.
+* [[ticket:557]], ##euphoria.h## had gotten out of sync when some OPs were removed.
+* [[ticket:558]], Fixed crash caused by undeclared variable assignment by properly subscripting
+		  [i] when looking up forward references in the toplevel subroutine
+* [[ticket:560]], Functions that started with an unqualified variable from another file
+                  being assigned by the return value of an unqualified function from another
+                  file could result in a crash.
+* [[ticket:564]], Documentation fix on parameter name for ##[[:calc_hash]]##.
+* Fix backend and interpreter to avoid "press any key" prompts when
+  running as a console from a shared console window.
+* Ensure forward type checks aren't resolved until after the variable being type checked has
+  been resolved.
+
+=== Enhancements/Changes
+
+* Made previously private method ##iscon## in ##std/console.e## a public method named
+  ##[[:has_console]]## which will return TRUE/FALSE if the current application has a
+  console window attached.
+* ##[[:cmd_parse]]## now splits onto two lines an option whose command is longer than
+  the maximum pad size and its description.
+* PDF documentation is now much better, generated from LaTeX sources.
+* Bundled ##creole## program supports multiple output formats now, the addition of LaTeX
+  for great printed or PDF documentation from your creole sources.
+* Bundled utility ##bench.ex## now outputs timing information to STDERR
+  by default. ##--stdout## can be supplied if output to STDOUT is desired. It now also
+  displays the min and max iteration times in addition to the already average and total.
+* ##demo/net/pastey.ex## demo has been updated to function with
+  OpenEuphoria's pastey service. It can also now accept file input via stdin.
+* ##-version## on main products now reports build date in addition to
+  previous information.
+* ##euphoria/info.e## version methods ##[[:version_string]]## and ##[[:version_string_long]]##
+  now have the ability to report the enhanced version information.
+* Optimized for loops to check for integer initial value and
+  limits.

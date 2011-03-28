@@ -1,6 +1,17 @@
 include std/unittest.e
 include std/os.e
 
+-- The following files all must be
+-- changed when changing the patch version,
+-- minor version or major version:
+-- 1. /source/version_info.rc
+-- 2. /packaging/win32/euphoria.iss
+-- 3. /packaging/win32/euphoria-ow.iss
+-- 4. /tests/t_condcmp.e
+-- 5. /source/version.h
+--
+
+
 ifdef hello then
     test_fail("not defined #1")
 end ifdef
@@ -25,10 +36,6 @@ ifdef UNIX then
 	end if
 end ifdef
 
-ifdef SUNOS then
-	test_equal("SunOS test", 5, platform())
-end ifdef
-
 ifdef OSX then
     test_equal("OSX test", 4, platform())
 end ifdef
@@ -41,24 +48,20 @@ ifdef LINUX then
 	test_equal("LINUX test", 3, platform())
 end ifdef
 
-ifdef WIN32 then
-	test_equal("WIN32 test", 2, platform())
+ifdef WINDOWS then
+	test_equal("WINDOWS test", 2, platform())
 end ifdef
 
-ifdef DOS32 then
-	test_equal("DOS32 test", 1, platform())
-end ifdef
-
-ifdef EU40000 then
-    test_pass("EU40000")
+ifdef EU4_0_1 then
+    test_pass("EU4_0_1")
 elsedef
-    test_fail("EU40000")
+    test_fail("EU4_0_1")
 end ifdef
 
-ifdef EU400 then
-	test_pass("EU400")
+ifdef EU4_0 then
+	test_pass("EU4_0")
 elsedef
-	test_fail("EU400")
+	test_fail("EU4_0")
 end ifdef
 
 ifdef EU4 then
@@ -67,6 +70,4 @@ elsedef
 	test_fail("EU4")
 end ifdef
 
-
 test_report()
-

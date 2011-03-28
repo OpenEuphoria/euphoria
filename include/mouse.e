@@ -40,18 +40,18 @@ global function get_mouse()
 -- report mouse events,
 -- returns -1 if no mouse event,
 -- otherwise returns {event#, x-coord, y-coord}
-    return machine_func(M_GET_MOUSE, 0)
+    return -1
 end function
 
 global procedure mouse_events(integer events)
 -- select the mouse events to be reported by get_mouse()
 -- e.g. mouse_events(LEFT_UP + LEFT_DOWN + RIGHT_DOWN)
-    machine_proc(M_MOUSE_EVENTS, events)
+events = events
 end procedure
 
 global procedure mouse_pointer(integer show_it)
 -- show (1) or hide (0) the mouse pointer
-    machine_proc(M_MOUSE_POINTER, show_it)
+show_it = show_it
 end procedure
 
 

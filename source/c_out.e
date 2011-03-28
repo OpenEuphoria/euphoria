@@ -1,14 +1,16 @@
 -- (c) Copyright - See License.txt
+--
 --****
 -- == c_out.e: Translator Routines for outputting C code
 
 ifdef ETYPE_CHECK then
-with type_check
+	with type_check
 elsedef
-without type_check
+	without type_check
 end ifdef
 
 include global.e
+include buildsys.e
 
 --****
 -- === gtype values, TRANSLATOR
@@ -59,6 +61,7 @@ export sequence novalue = {MININT, MAXINT} --, target= {0, 0}
 export procedure c_putc(integer c)
 	if emit_c_output then
 		puts(c_code, c)
+		update_checksum( c )
 	end if
 end procedure
 
@@ -75,6 +78,7 @@ end procedure
 export procedure c_puts(sequence c_source)
 	if emit_c_output then
 		puts(c_code, c_source)
+		update_checksum( c_source )
 	end if
 end procedure
 
@@ -90,7 +94,9 @@ end procedure
 -- output C source code with (one) 4-byte formatted value (should allow multiple values later)
 export procedure c_printf(sequence format, object value)
 	if emit_c_output then
-		printf(c_code, format, value)
+		sequence text = sprintf( format, value )
+		puts(c_code, text)
+		update_checksum( text )
 	end if
 end procedure
 
@@ -203,7 +209,7 @@ export procedure adjust_indent_before(sequence stmt)
 		i -= length(big_blanks)
 	end while
 
-	c_putc(big_blanks[1..i])
+	c_puts(big_blanks[1..i])
 
 	temp_indent = 0    
 end procedure

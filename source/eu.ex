@@ -1,7 +1,5 @@
 -- (c) Copyright - See License.txt
 --
--- Euphoria 3.1 
---
 -- A Euphoria Interpreter written 100% in Euphoria
 --
 -- usage:
@@ -12,6 +10,8 @@
 -- much faster, but not as fast as the official RDS interpreter
 -- which uses the same Euphoria-coded front-end, combined 
 -- with a high-performance back-end carefully hand-coded in C.
+
+with define EU_EX
 
 ifdef ETYPE_CHECK then
 	with type_check

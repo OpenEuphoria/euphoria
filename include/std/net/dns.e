@@ -1,16 +1,18 @@
 --****
 -- == DNS
 --
--- Based on EuNet project, version 1.3.2 at SourceForge.
---
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 
-include std/socket.e
+namespace dns
+
+/*
 include std/get.e
+include std/socket.e
+*/
 
-constant BLOCK_SIZE = 4096
-enum M_SOCK_GETHOSTBYNAME=79, M_SOCK_GETHOSTBYADDR
+--constant BLOCK_SIZE = 4096
+enum M_SOCK_GETHOSTBYNAME = 79, M_SOCK_GETHOSTBYADDR
 
 --****
 -- ===  Constants
@@ -53,7 +55,7 @@ public constant
 -- === General Routines
 
 /*
-ifdef WIN32 then
+ifdef WINDOWS then
 	constant dnsdll_ = open_dll("dnsapi.dll")
 
 	constant getaddrinfo_ = define_c_func(sockdll_,"getaddrinfo",{C_POINTER,C_POINTER,C_POINTER,C_POINTER},C_INT)
@@ -62,10 +64,10 @@ ifdef WIN32 then
 	constant dnsexpand_ = -1
 	constant freeaddrinfo_ = define_c_proc(sockdll_,"freeaddrinfo",{C_POINTER})
 
-elsifdef LINUX or SUNOS then
+elsifdef LINUX then
 	constant dnsdll_ = open_dll("libresolv.so")
 
-elsifdef FREEBSD then
+elsifdef BSD then
 	constant dnsdll_ = open_dll("libc.so")
 
 elsifdef OSX then
@@ -89,7 +91,7 @@ function _socket_trim(sequence s)
 	while c <= length(s) and rs[c] <= 32 do
 		c = c + 1
 	end while
-	rs = rs[c..length(rs)]
+	rs = rs[c .. $]
 	c = length(rs)
 	while c > 0 and rs[c] <= 32 do
 		c = c - 1
@@ -236,7 +238,6 @@ function unix_dnsquery(sequence dname, integer q_type)
 	
 end function
 
-
 function windows_dnsquery(sequence dname, integer q_type, atom options)
 	-- NOTE: This function does not work on Windows versions below Windows 2000.
 	
@@ -310,7 +311,6 @@ function windows_dnsquery(sequence dname, integer q_type, atom options)
 	
 end function
 
-
 --**
 -- Query DNS info.
 --
@@ -345,10 +345,10 @@ end function
 --     [[:getaddrinfo]], [[:gethostbyname]], [[:getmxrr]], [[:getnsrr]]
 
 public function dnsquery(sequence dname, integer q_type, atom options)
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		return windows_dnsquery(dname, q_type, options)
 	elsifdef UNIX then
-		return unix_dnsquery(dname,q_type)
+		return unix_dnsquery(dname, q_type)
 	end ifdef
 	
 	return -999 -- TODO: -999 or -1?
@@ -499,7 +499,7 @@ function unix_getaddrinfo(object node, object service, object hints)
 	elsif svcport > 0 then
 		cpos = find(':',rtn[1][5])
 		if cpos = 0 or cpos = length(rtn[1][5]) or
-				eu:compare(rtn[1][5][length(rtn[1][5])-1..length(rtn[1][5])],":0")=0 then
+				eu:compare(rtn[1][5][$ - 1 .. $],":0")=0 then
 			if cpos = 0 then
 				rtn[1][5] = rtn[1][5] & sprintf(":%d",svcport)
 			else
@@ -552,7 +552,7 @@ end function
 -- </eucode>
 
 public function getaddrinfo(object node, object service, object hints)
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		return windows_getaddrinfo(node,service,hints)
 	elsifdef UNIX then
 		return unix_getaddrinfo(node,service,hints)

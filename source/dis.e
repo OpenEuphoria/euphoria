@@ -1,10 +1,13 @@
 -- (c) Copyright - See License.txt
+
 ifdef ETYPE_CHECK then
-with type_check
+	with type_check
 elsedef
-without type_check
+	without type_check
 end ifdef
+
 without trace
+
 include std/text.e
 include std/pretty.e
 include std/error.e
@@ -12,6 +15,7 @@ include std/map.e
 include dot.e
 include std/sort.e
 include std/cmdline.e
+include std/math.e
 
 include mode.e as mode
 include cominit.e
@@ -22,6 +26,8 @@ include global.e
 include reswords.e
 include symtab.e
 include scanner.e
+include fwdref.e
+include c_out.e
 
 include dox.e as dox
 
@@ -43,6 +49,10 @@ ps_options[LINE_BREAKS]   = 0
 function name_or_literal( integer sym )
 	if not sym then
 		return "[0: ???]"
+	elsif sym < 0 then
+		return sprintf("[UNRESOLVED FORWARD REFERENCE: %d]", sym )
+	elsif sym > length(SymTab) then
+		return sprintf("[_invalid_:%d]", sym )
 	elsif length(SymTab[sym]) = 1 then
 		return sprintf("[_deleted_:%d]", sym)
 	elsif length(SymTab[sym]) >= SIZEOF_VAR_ENTRY then
@@ -59,11 +69,7 @@ function names( sequence n )
 	nl = {}
 	for i = 1 to length(n) do
 		if n[i] then
-			if n[i] < 0 then
-				nl = append( nl, '-' & name_or_literal(-n[i]))
-			else
-				nl = append( nl, name_or_literal(n[i]))
-			end if
+			nl = append( nl, name_or_literal(n[i]))
 		else
 			nl = append( nl, "[0]" )
 		end if
@@ -91,7 +97,7 @@ procedure il( sequence dsm, integer len )
 				else
 					printf( out, "%-40s # ", {code[1..c]})
 				end if
-				
+
 				line += 1
 				code = code[c+1..$]
 				exit
@@ -130,7 +136,7 @@ procedure il( sequence dsm, integer len )
 		end if
 		puts( out, dsm & "\n")
 	end if
-	
+
 end procedure
 
 procedure quadary()
@@ -140,7 +146,7 @@ end procedure
 
 procedure pquadary()
 	il( sprintf( "%s: %s, %s, %s %s", {opnames[Code[pc]]} & names(Code[pc+1..pc+4])), 4)
-	pc += 5	
+	pc += 5
 end procedure
 
 
@@ -151,17 +157,17 @@ end procedure
 
 procedure ptrinary()
 	il( sprintf( "%s: %s, %s, %s", {opnames[Code[pc]]} & names(Code[pc+1..pc+3])), 3)
-	pc += 4	
+	pc += 4
 end procedure
 
 procedure binary()
 	il( sprintf( "%s: %s, %s => %s", {opnames[Code[pc]]} & names(Code[pc+1..pc+3])), 3)
-	pc += 4	
+	pc += 4
 end procedure
 
 procedure pbinary()
 	il( sprintf( "%s: %s, %s", {opnames[Code[pc]]} & names(Code[pc+1..pc+2])), 2)
-	pc += 3	
+	pc += 3
 end procedure
 
 procedure unary( )
@@ -184,17 +190,19 @@ procedure pnonary()
 	pc += 1
 end procedure
 
-procedure opSTARTLINE()
--- Start of a line. Use for diagnostics.
+procedure opCOVERAGE_LINE()
+
 	object line
 	sequence entry_
 	integer lx
-	
+
+
 	lx = Code[pc+1]
+	symtab_index sub = Code[pc+2]
 	if atom(slist[$]) then
 		slist = s_expand( slist )
 	end if
-	
+
 	if atom(slist[lx][SRC]) then
 		slist[lx][SRC] = fetch_line(slist[lx][SRC])
 	end if
@@ -208,8 +216,45 @@ procedure opSTARTLINE()
 			line = line[2..$]
 		end while
 	end if
-	il( sprintf( "%s: %s(%d)<<%s>>", {opnames[Code[pc]], file_name[entry_[LOCAL_FILE_NO]],entry_[LINE] ,line}), 1)
-	
+
+	il( sprintf( "%s: %s:(%d)<<%s>>", {opnames[Code[pc]],  known_files[entry_[LOCAL_FILE_NO]], entry_[LINE] ,line}), 1)
+	pc += 2
+end procedure
+
+include std/filesys.e
+procedure opCOVERAGE_ROUTINE()
+	il( sprintf( "%s: %s:%s\n",
+		{ opnames[Code[pc]], canonical_path( known_files[ SymTab[Code[pc+1]][S_FILE_NO] ] ),
+			sym_name( Code[pc+1] ) }  ), 1 )
+	pc += 2
+end procedure
+
+procedure opSTARTLINE()
+-- Start of a line. Use for diagnostics.
+	object line
+	sequence entry_
+	integer lx
+
+	lx = Code[pc+1]
+	if atom(slist[$]) then
+		slist = s_expand( slist )
+	end if
+
+	if atom(slist[lx][SRC]) then
+		slist[lx][SRC] = fetch_line(slist[lx][SRC])
+	end if
+
+	entry_ = slist[Code[pc+1]]
+	line = entry_[SRC]
+	if atom(line) then
+		line = ""
+	else
+		while length(line) and find( line[1], "\t " ) do
+			line = line[2..$]
+		end while
+	end if
+	il( sprintf( "%s: %s(%d)<<%s>>", {opnames[Code[pc]], known_files[entry_[LOCAL_FILE_NO]],entry_[LINE] ,line}), 1)
+
 	pc += 2
 end procedure
 
@@ -232,17 +277,17 @@ procedure opTASK_YIELD()
 end procedure
 
 procedure opTASK_STATUS()
--- return task status   
+-- return task status
 	unary()
 end procedure
 
 procedure opTASK_LIST()
--- return list of active and suspended tasks    
+-- return list of active and suspended tasks
 	nonary()
 end procedure
 
 procedure opTASK_SELF()
--- return current task id   
+-- return current task id
 	nonary()
 end procedure
 
@@ -250,22 +295,22 @@ atom save_clock
 save_clock = -1
 
 procedure opTASK_CLOCK_STOP()
--- stop the scheduler clock 
+-- stop the scheduler clock
 	pnonary()
 end procedure
 
 procedure opTASK_CLOCK_START()
--- resume the scheduler clock   
+-- resume the scheduler clock
 	pnonary()
 end procedure
 
 procedure opTASK_SUSPEND()
--- suspend a task   
+-- suspend a task
 	punary()
 end procedure
-	    
+
 procedure opTASK_CREATE()
--- create a new task    
+-- create a new task
 	binary()
 end procedure
 
@@ -288,7 +333,7 @@ function find_line(symtab_index sub, integer pc, integer file_only = 1)
 -- return the file name and line that matches pc in sub
 	sequence linetab
 	integer line, gline
-	
+
 	linetab = SymTab[sub][S_LINETAB]
 	line = 1
 	for i = 1 to length(linetab) do
@@ -303,10 +348,14 @@ function find_line(symtab_index sub, integer pc, integer file_only = 1)
 	gline = SymTab[sub][S_FIRSTLINE] + line - 1
 	if file_only then
 		return slist[gline][LOCAL_FILE_NO]
-	else
-		return {file_name[slist[gline][LOCAL_FILE_NO]], slist[gline][LINE], slist[gline][SRC]}
-	end if
 	
+	elsif gline > length( slist ) or not gline then
+		-- probably a bug with the line table code in the parser
+		return { "??", -1, "???", gline }
+	else
+		return {known_files[slist[gline][LOCAL_FILE_NO]], slist[gline][LINE], slist[gline][SRC], gline}
+	end if
+
 end function
 
 procedure opPROC()  -- Normal subroutine call
@@ -316,20 +365,20 @@ procedure opPROC()  -- Normal subroutine call
     -- make a procedure or function/type call
     sub = Code[pc+1] -- subroutine
     n = SymTab[sub][S_NUM_ARGS]
-	
+
 	integer current_file
 	if CurrentSub = TopLevelSub then
 		current_file = find_line( sub, pc )
 	else
 		current_file = SymTab[CurrentSub][S_FILE_NO]
 	end if
-	
+
 	-- record the data for the call graph
 	-- called_from maps from the caller to the callee
 	-- called_by maps from the callee back to the caller
 	map:nested_put( called_from, { current_file, CurrentSub, SymTab[sub][S_FILE_NO], sub }, 1 , map:ADD )
 	map:nested_put( called_by,   { SymTab[sub][S_FILE_NO], sub, current_file, CurrentSub }, 1, map:ADD )
-	
+
     dsm = sprintf( "%s: %s",{opnames[Code[pc]],name_or_literal(sub)})
 
 	for i = 1 to n do
@@ -362,7 +411,7 @@ procedure opRETURNP()   -- return from procedure (or function)
 --	pc += 3
 end procedure
 
-procedure opRETURNF()  
+procedure opRETURNF()
 -- return from function
 	result_val = Code[pc+3]
 	il(	sprintf( "RETURNF: %s block[%d]", {name_or_literal(result_val), Code[pc+2]}), 3)
@@ -373,7 +422,7 @@ procedure opCALL_BACK_RETURN()
 --    keep_running = FALSE  -- force return from do_exec()
 	il( "CALL_BACK_RETURN", 0 )
 end procedure
-		
+
 procedure opBADRETURNF()  -- shouldn't reach here
 	pnonary()
 --    RTFatal("attempt to exit a function without returning a value")  -- end of a function
@@ -382,19 +431,19 @@ end procedure
 procedure opRETURNT()   -- return from top-level "procedure"
 	pnonary()
 end procedure
-	
-procedure opRHS_SUBS() -- find(opcode, {RHS_SUBS_CHECK, RHS_SUBS,         
+
+procedure opRHS_SUBS() -- find(opcode, {RHS_SUBS_CHECK, RHS_SUBS,
 		       -- RHS_SUBS_I}) then
     object sub, x
-    
+
     a = Code[pc+1]
     b = Code[pc+2]
     target = Code[pc+3]
     il( sprintf("%s: %s sub %s => %s",{opnames[Code[pc]]} & names({a,b,target})), 3 )
-    
+
     pc += 4
 end procedure
---	
+--
 procedure opIF()
     a = Code[pc+1]
     il(sprintf( "%s: %s = 0 goto %04d", {opnames[Code[pc]],name_or_literal(a), Code[pc+2]}),2)
@@ -409,11 +458,11 @@ end procedure
 procedure opINTEGER_CHECK()
 	check()
 end procedure
-	    
+
 procedure opATOM_CHECK()
 	check()
 end procedure
-	      
+
 procedure opSEQUENCE_CHECK()
 	check()
 end procedure
@@ -424,19 +473,19 @@ procedure opASSIGN()  -- or opASSIGN_I or SEQUENCE_COPY
     il( sprintf("%s => %s", names( {a,target} )), 2 )
     pc += 3
 end procedure
---		
+--
 procedure opELSE()  -- or EXIT, ENDWHILE}) then
 	il( sprintf("%s goto %04d", {opnames[Code[pc]], Code[pc+1]}),1 )
 --    pc = Code[pc+1]
 	pc += 2
 end procedure
 
-procedure opRIGHT_BRACE_N()  -- form a sequence of any length 
+procedure opRIGHT_BRACE_N()  -- form a sequence of any length
     sequence x
-    
+
     len = Code[pc+1]
-    x = sprintf("RIGHT_BRACE: len %d", len)
-    
+    x = sprintf("RIGHT_BRACE_N: len %d", len)
+
     for i = pc+len+1 to pc+2 by -1 do
 		-- last one comes first
 		x &= sprintf(", %s",{name_or_literal(Code[i])})
@@ -455,17 +504,17 @@ end procedure
 procedure opPLUS1() --or opPLUS1_I then
     a = Code[pc+1]
     -- [2] is not used
-    target = Code[pc+3] 
+    target = Code[pc+3]
     il( sprintf("PLUS1: %s + 1 => %s", names( a & target )), 3 )
     pc += 4
 end procedure
-	
+
 procedure opGLOBAL_INIT_CHECK()  --or PRIVATE_INIT_CHECK then
     a = Code[pc+1]
     il( sprintf("%s: %s", {opnames[Code[pc]],name_or_literal(a)}), 1 )
     pc += 2
 end procedure
-	    
+
 procedure opWHILE()     -- sometimes emit.c optimizes this away
     a = Code[pc+1]
     il( sprintf("WHILE: %s goto %04d else goto %04d", {name_or_literal(a), pc+3, Code[pc+2]}), 2 )
@@ -473,11 +522,11 @@ procedure opWHILE()     -- sometimes emit.c optimizes this away
 end procedure
 
 procedure opLENGTH()
--- operand should be a sequence 
+-- operand should be a sequence
     a = Code[pc+1]
     target = Code[pc+2]
     il( sprintf("LENGTH: %s => %s", names(a&target)), 2 )
-    
+
     pc += 3
 end procedure
 
@@ -487,30 +536,30 @@ end procedure
 
 procedure opPLENGTH()
 -- Needed for some LHS uses of $. Operand should be a val index of a sequence,
--- with subscripts. 
+-- with subscripts.
     a = Code[pc+1]
     target = Code[pc+2]
     il( sprintf("PLENGTH: %s => %s", names( a & target )), 2 )
     pc += 3
 end procedure
 
-procedure opLHS_SUBS() 
+procedure opLHS_SUBS()
 -- Handle one LHS subscript, when there are multiple LHS subscripts.
-    
+
     a = Code[pc+1] -- base var sequence, or a temp that contains
 		   -- {base index, subs1, subs2... so far}
     b = Code[pc+2] -- subscript
     target = Code[pc+3] -- temp for storing result
-    
+
     il( sprintf("LHS_SUBS: %s, %s => %s (UNUSED - %s)", names( Code[pc+1..pc+4] )), 4 )
     -- a is a "pointer" to the result of previous subscripting
 --    val[target] = append(val[a], val[b])
     pc += 5
 end procedure
 --
-procedure opLHS_SUBS1() 
+procedure opLHS_SUBS1()
 -- Handle first LHS subscript, when there are multiple LHS subscripts.
-    
+
     a = Code[pc+1] -- base var sequence, or a temp that contains
 		   -- {base index, subs1, subs2... so far}
     b = Code[pc+2] -- subscript
@@ -521,28 +570,28 @@ procedure opLHS_SUBS1()
     pc += 5
 end procedure
 
-procedure opLHS_SUBS1_COPY() 
+procedure opLHS_SUBS1_COPY()
 -- Handle first LHS subscript, when there are multiple LHS subscripts.
--- In tricky situations a copy of the sequence is made into a temp. 
+-- In tricky situations a copy of the sequence is made into a temp.
 -- (Protects against function call inside subscript expression.
 -- In the C backend, it also prevents circular pointer references.)
-    
+
     a = Code[pc+1] -- base var sequence
-		   
+
     b = Code[pc+2] -- subscript
-    
+
     target = Code[pc+3] -- temp for storing result
-    
+
     c = Code[pc+4] -- temp to hold base sequence while it's manipulated
     il( sprintf("LHS_SUBS1_COPY: %s, %s => (%s) %s", names( Code[pc+1..pc+4] )), 4 )
 --    val[c] = val[a]
-    
+
     -- a is the base var
 --    val[target] = {c, val[b]}
-    
+
     pc += 5
 end procedure
-      
+
 
 procedure opASSIGN_SUBS() -- also ASSIGN_SUBS_CHECK, ASSIGN_SUBS_I
 -- LHS single subscript and assignment
@@ -565,12 +614,12 @@ procedure opPASSIGN_SUBS()
     a = Code[pc+1]
     b = Code[pc+2]  -- subscript
     c = Code[pc+3]  -- RHS value
-    
+
     -- multiple LHS subscript case
 --    lhs_seq_index = val[a][1]
---    lhs_subs = val[a][2..$]    
---    val[lhs_seq_index] = assign_subs(val[lhs_seq_index], 
---					 lhs_subs & val[b], 
+--    lhs_subs = val[a][2..$]
+--    val[lhs_seq_index] = assign_subs(val[lhs_seq_index],
+--					 lhs_subs & val[b],
 --					 val[c])
 	il( sprintf("PASSIGN_SUBS: %s, %s <= %s", names( Code[pc+1..pc+3] )), 3 )
     pc += 4
@@ -581,7 +630,7 @@ end procedure
 
 procedure opASSIGN_OP_SUBS()  -- var[subs] op= expr
     object x
-    
+
     a = Code[pc+1]
     b = Code[pc+2]
     target = Code[pc+3]
@@ -600,7 +649,7 @@ procedure opPASSIGN_OP_SUBS()  -- var[subs] ... [subs] op= expr
     -- temp with multiple subscripts
 --    lhs_seq_index = val[a][1]
 --    lhs_subs = val[a][2..$]
-	il( sprintf("PASSIGN_OP_SUBS: %s, %s => %s (patch %04dd => %d)", 
+	il( sprintf("PASSIGN_OP_SUBS: %s, %s => %s (patch %04dd => %d)",
 		names( Code[pc+1..pc+3] ) & pc+9 & Code[pc+1]), 3 )
     Code[pc+9] = Code[pc+1] -- patch upcoming op
 --    val[target] = var_subs(val[lhs_seq_index], lhs_subs & val[b])
@@ -628,16 +677,16 @@ procedure opPASSIGN_OP_SLICE()  --then  -- var[subs] ... [i..j] op= expr
     b = Code[pc+2]
     c = Code[pc+3]
     target = Code[pc+4]
-    il( sprintf("PASSIGN_OP_SLICE: %s, %s, %s => %s (patch %04d => %d", 
+    il( sprintf("PASSIGN_OP_SLICE: %s, %s, %s => %s (patch %04d => %d",
     	names(a&b&c&target) & pc+10 & Code[pc+1]),4 )
     Code[pc+10] = Code[pc+1]
 
     pc += 5
 end procedure
-	    
+
 procedure opASSIGN_SLICE()   -- var[i..j] = expr
     object x
-    
+
     a = Code[pc+1]  -- sequence
     b = Code[pc+2]  -- 1st index
     c = Code[pc+3]  -- 2nd index
@@ -655,13 +704,13 @@ procedure opPASSIGN_SLICE()   -- var[x] ... [i..j] = expr
     pc += 5
 end procedure
 
-procedure opRHS_SLICE() -- rhs slice of a sequence a[i..j] 
+procedure opRHS_SLICE() -- rhs slice of a sequence a[i..j]
     object x
-    
+
     a = Code[pc+1]  -- sequence
     b = Code[pc+2]  -- 1st index
     c = Code[pc+3]  -- 2nd index
-    target = Code[pc+4]  
+    target = Code[pc+4]
     il(sprintf("RHS_SLICE: %s %s..%s => %s", names({a,b,c,target})),4)
     pc += 5
 end procedure
@@ -671,7 +720,7 @@ procedure opTYPE_CHECK_FORWARD()
 	pc += 3
 end procedure
 
-procedure opTYPE_CHECK() 
+procedure opTYPE_CHECK()
 
 	pnonary()
 
@@ -682,7 +731,7 @@ procedure is_an()
     target = Code[pc+2]
     il( sprintf("%s: %s %s",{ opnames[Code[pc]] } & names(a&target)), 2 )
     pc += 3
-end procedure    
+end procedure
 procedure opIS_AN_INTEGER()
     is_an()
 end procedure
@@ -690,18 +739,18 @@ end procedure
 procedure opIS_AN_ATOM()
     is_an()
 end procedure
-		
-procedure opIS_A_SEQUENCE() 
+
+procedure opIS_A_SEQUENCE()
     is_an()
 end procedure
-	    
+
 procedure opIS_AN_OBJECT()
     is_an()
 end procedure
-		
---	-- ---------- start of unary ops ----------------- 
+
+--	-- ---------- start of unary ops -----------------
 --
-procedure opSQRT() 
+procedure opSQRT()
 	unary()
 end procedure
 
@@ -735,119 +784,125 @@ end procedure
 
 procedure opNOT_IFW()
     a = Code[pc+1]
-    il( sprintf( "NOT_IFW %s goto %04d else goto %04d", 
+    il( sprintf( "NOT_IFW %s goto %04d else goto %04d",
     	{name_or_literal(a), pc + 3, Code[pc+2]}), 2 )
     pc += 3
 end procedure
-	    
+
 procedure opNOT()
 	unary()
 end procedure
-	    
+
 procedure opUMINUS()
 	unary()
 end procedure
-	    
+
 procedure opRAND()
 	unary()
 end procedure
-	    
+
 procedure opDIV2()  -- like unary, but pc+=4
-	
+
     a = Code[pc+1]
     -- Code[pc+2] not used
     target = Code[pc+3]
     il( sprintf("DIV2: %s => %s",names( a & target )), 3 )
-    pc += 4 
+    pc += 4
 end procedure
-	    
+
 procedure opFLOOR_DIV2()
     a = Code[pc+1]
     -- Code[pc+2] not used
     target = Code[pc+3]
-    il( sprintf("FLOOR_DIV2: %s => %s",names( a & target )), 3 )   
-    pc += 4 
+    il( sprintf("FLOOR_DIV2: %s => %s",names( a & target )), 3 )
+    pc += 4
 end procedure
-		
+
 --	----------- start of binary ops ----------
---	    
+--
 procedure opGREATER_IFW()
     a = Code[pc+1]
     b = Code[pc+2]
-    il( sprintf( "GREATER_IFW %s > %s goto %04d else goto %04d", 
+    il( sprintf( "GREATER_IFW %s > %s goto %04d else goto %04d",
     	{name_or_literal(a),name_or_literal(b), pc + 4, Code[pc+3]}), 3 )
 	pc += 4
 end procedure
---	
+--
 procedure opNOTEQ_IFW()
     a = Code[pc+1]
     b = Code[pc+2]
-    il( sprintf( "NOTEQ_IFW %s != %s goto %04d else goto %04d", 
+    il( sprintf( "NOTEQ_IFW %s != %s goto %04d else goto %04d",
     	{name_or_literal(a),name_or_literal(b), pc + 4, Code[pc+3]}), 3 )
 	pc += 4
 end procedure
-	
+
 procedure opLESSEQ_IFW()
     a = Code[pc+1]
     b = Code[pc+2]
-    il( sprintf( "LESSEQ_IFW %s <= %s goto %04d else goto %04d", 
+    il( sprintf( "LESSEQ_IFW %s <= %s goto %04d else goto %04d",
     	{name_or_literal(a),name_or_literal(b), pc + 4, Code[pc+3]}), 3 )
 	pc += 4
 
 end procedure
-	
+
 procedure opGREATEREQ_IFW()
     a = Code[pc+1]
     b = Code[pc+2]
-    il( sprintf( "GREATEREQ_IFW %s > %s goto %04d else goto %04d", 
+    il( sprintf( "GREATEREQ_IFW %s > %s goto %04d else goto %04d",
     	{name_or_literal(a),name_or_literal(b), pc + 4, Code[pc+3]}), 3 )
 	pc += 4
 
 end procedure
-	
+
 procedure opEQUALS_IFW()
     a = Code[pc+1]
     b = Code[pc+2]
-    il( sprintf( "IFW %s = %s goto %04d else goto %04d", 
-    	{name_or_literal(a),name_or_literal(b), pc + 4, Code[pc+3]}), 3 )
+	sequence i
+	if Code[pc] = EQUALS_IFW then
+		i = ""
+	else
+		i = "_I"
+	end if
+    il( sprintf( "EQUALS_IFW%s %s = %s goto %04d else goto %04d",
+    	{i, name_or_literal(a),name_or_literal(b), pc + 4, Code[pc+3]}), 3 )
     pc += 4
 end procedure
-	
+
 procedure opLESS_IFW()
     a = Code[pc+1]
     b = Code[pc+2]
-    il( sprintf( "IFW %s < %s goto %04d else goto %04d", 
+    il( sprintf( "IFW %s < %s goto %04d else goto %04d",
     	{name_or_literal(a),name_or_literal(b), pc + 4, Code[pc+3]}), 3 )
     pc += 4
 end procedure
 
 
 --	-- other binary ops
---	
+--
 procedure opMULTIPLY()
     binary()
 end procedure
-	    
+
 procedure opPLUS() -- or opPLUS_I then
     binary()
 end procedure
-	
+
 procedure opMINUS() -- or opMINUS_I then
     binary()
 end procedure
-	    
+
 procedure opOR()
     binary()
 end procedure
-	
+
 procedure opXOR()
     binary()
 end procedure
-	
+
 procedure opAND()
     binary()
 end procedure
-	    
+
 procedure opDIVIDE()
     binary()
 end procedure
@@ -855,52 +910,52 @@ end procedure
 procedure opREMAINDER()
     binary()
 end procedure
-	    
+
 procedure opFLOOR_DIV()
     binary()
 end procedure
-	    
+
 procedure opAND_BITS()
     binary()
 end procedure
-	
+
 procedure opOR_BITS()
     binary()
 end procedure
-	
+
 procedure opXOR_BITS()
     binary()
 end procedure
-	    
+
 procedure opPOWER()
     binary()
 end procedure
-	    
+
 procedure opLESS()
     binary()
 end procedure
-	
+
 procedure opGREATER()
     binary()
 end procedure
-	
+
 procedure opEQUALS()
     binary()
 end procedure
-	
+
 procedure opNOTEQ()
     binary()
 end procedure
-	
+
 procedure opLESSEQ()
     binary()
 end procedure
-	
+
 procedure opGREATEREQ()
     binary()
 end procedure
-	    
--- short-circuit ops 
+
+-- short-circuit ops
 
 procedure short_circuit()
     a = Code[pc+1]
@@ -912,29 +967,29 @@ procedure opSC1_AND()
 	short_circuit()
 end procedure
 
-procedure opSC1_AND_IF() 
+procedure opSC1_AND_IF()
 	short_circuit()
 end procedure
 
 procedure opSC1_OR()
 	short_circuit()
 end procedure
-		
+
 procedure opSC1_OR_IF()
 	short_circuit()
 end procedure
-		
-procedure opSC2_OR() -- or opSC2_AND 
+
+procedure opSC2_OR() -- or opSC2_AND
 -- short-circuit op
 	pbinary()
 end procedure
 
--- for loops 
-	    
-procedure opFOR()  -- or opFOR_I 
--- enter into a for loop    
+-- for loops
+
+procedure opFOR()  -- or opFOR_I
+-- enter into a for loop
     integer increment, limit, initial, loopvar, jump
-    
+
     increment = Code[pc+1]
     limit = Code[pc+2]
     initial = Code[pc+3]
@@ -942,7 +997,7 @@ procedure opFOR()  -- or opFOR_I
     -- so recursion is not a problem
     loopvar = Code[pc+5]
     jump = Code[pc+6]
-    
+
     il( sprintf("%s: inc %s, lim %s, initial %s, lv %s, jmp %04d",
     	{opnames[Code[pc]]} & names( Code[pc+1..pc+3] & Code[pc+5]) & Code[pc+6]), 6 )
     pc += 7
@@ -962,7 +1017,7 @@ procedure opENDFOR_INT_UP1() -- ENDFOR_INT_UP1
 -- faster: end of for loop with known +1 increment
 -- exit or go back to the top
 -- (loop var might not be integer, but that doesn't matter here)
-    
+
     il( sprintf("ENDFOR_INT_UP1: top %04d, lim: %s, lv %s, inc %s",
     	Code[pc+1] & names( Code[pc+2..pc+4] )), 4)
     pc += 5
@@ -973,10 +1028,10 @@ end procedure
 --sequence e_routine -- list of routines with a routine id assigned to them
 --e_routine = {}
 --
-procedure opCALL_PROC() -- or opCALL_FUNC 
+procedure opCALL_PROC() -- or opCALL_FUNC
 	sequence proc
 
-    
+
     a = Code[pc+1]  -- routine id
     b = Code[pc+2]  -- argument list
     if Code[pc] = CALL_FUNC and pc + 3 <= length(Code) then
@@ -984,12 +1039,12 @@ procedure opCALL_PROC() -- or opCALL_FUNC
     else
     	il( sprintf("%s: %s %s", {opnames[Code[pc]]} & names( a&b) ), 2 )
     end if
-    
-    
+
+
     pc += 3 + (Code[pc] = CALL_FUNC)
 
 end procedure
-	      
+
 procedure opROUTINE_ID()
 --    integer sub, fn, p
 --    object name
@@ -1007,12 +1062,12 @@ procedure opROUTINE_ID()
 		pc += 6
 	end if
 end procedure
-	    
+
 procedure opAPPEND()
 	binary()
 end procedure
 
-procedure opPREPEND() 
+procedure opPREPEND()
 	binary()
 
 end procedure
@@ -1021,12 +1076,12 @@ procedure opCONCAT()
 	binary()
 
 end procedure
-	    
+
 procedure opCONCAT_N()
     -- concatenate 3 or more items
     integer n
     object x
-    
+
     n = Code[pc+1] -- number of items
     -- operands are in reverse order
     x = sprintf("CONCAT_N: %d", Code[pc+1] )
@@ -1038,7 +1093,7 @@ procedure opCONCAT_N()
 
     pc += n+3
 end procedure
-	    
+
 procedure opREPEAT()
 	binary()
 
@@ -1069,11 +1124,11 @@ end procedure
 procedure opPOSITION()
 	pbinary()
 end procedure
-	    
+
 procedure opEQUAL()
 	binary()
 end procedure
-		
+
 procedure opHASH()
 	binary()
 end procedure
@@ -1109,19 +1164,11 @@ end procedure
 procedure opMEM_COPY()
 	ptrinary()
 end procedure
-	    
+
 procedure opMEM_SET()
 	ptrinary()
 end procedure
-	    
-procedure opPIXEL()
-	pbinary()
-end procedure
-	    
-procedure opGET_PIXEL()
-	unary()
-end procedure
-	  
+
 procedure opCALL()
 	punary()
 end procedure
@@ -1129,11 +1176,11 @@ end procedure
 procedure opSYSTEM()
 	pbinary()
 end procedure
-		
+
 procedure opSYSTEM_EXEC()
 	binary()
 end procedure
-		
+
 -- I/O routines
 
 procedure opOPEN()
@@ -1143,22 +1190,22 @@ end procedure
 procedure opCLOSE()
 	punary()
 end procedure
-	      
+
 procedure opABORT()
 	punary()
 end procedure
 
-procedure opGETC()  -- read a character from a file 
+procedure opGETC()  -- read a character from a file
 	unary()
 end procedure
- 
+
 procedure opGETS()  -- read a line from a file */
 	unary()
 end procedure
 
-procedure opGET_KEY() 
--- read an immediate key (if any) from the keyboard 
--- or return -1 
+procedure opGET_KEY()
+-- read an immediate key (if any) from the keyboard
+-- or return -1
 	nonary()
 end procedure
 
@@ -1172,19 +1219,19 @@ end procedure
 --
 procedure opQPRINT()
 -- Code[pc+1] not used
-	
+
     a = Code[pc+2]
     il( sprintf( "QPRINT: %s",{name_or_literal( a )} ), 2 )
     pc += 3
 end procedure
-	
+
 procedure opPRINT()
 	pbinary()
 end procedure
 
 procedure opPRINTF()
     -- printf
-    ptrinary() 
+    ptrinary()
 end procedure
 
 procedure opSPRINTF()
@@ -1204,16 +1251,16 @@ procedure opC_PROC()
 	il( sprintf( "%s: %s, %s", {opnames[Code[pc]]} & names(Code[pc+1..pc+2])), 3)
 	pc += 4
 end procedure
-	  
+
 procedure opC_FUNC()
 	il( sprintf( "%s: %s, %s (sub %s) => %s", {opnames[Code[pc]]} & names(Code[pc+1..pc+4])), 4)
 	pc += 5
 end procedure
-	    
+
 procedure opTRACE()
 	punary()
 end procedure
---	    
+--
 -- other tracing/profiling ops - ignored
 procedure opPROFILE() --or DISPLAY_VAR, ERASE_PRIVATE_NAMES, ERASE_SYMBOL
     -- NOT IMPLEMENTED, ignore
@@ -1235,8 +1282,13 @@ procedure opMACHINE_PROC()
 end procedure
 
 procedure opSWITCH()
-	il( sprintf( "%s: value %s cases %s jump %s else goto %d", 
-		{opnames[Code[pc]]} & names(Code[pc+1..pc+3]) & Code[pc+4] ), 5)
+	if Code[pc] = SWITCH_SPI then
+		il( sprintf( "%s: value %s case offset %d jump %s else goto %d",
+			{opnames[Code[pc]], name_or_literal( Code[pc+1] ), Code[pc+2], name_or_literal( Code[pc+3] ), Code[pc+4] } ), 5)
+	else
+		il( sprintf( "%s: value %s cases %s jump %s else goto %d",
+			{opnames[Code[pc]]} & names(Code[pc+1..pc+3]) & Code[pc+4] ), 5)
+	end if
 	pc += 5
 end procedure
 
@@ -1248,7 +1300,7 @@ procedure opCASE()
 		pnonary()
 		pc += 1
 	end if
-	
+
 end procedure
 
 procedure opENTRY()
@@ -1327,31 +1379,31 @@ end procedure
 procedure write_call_info( sequence name )
 	-- The output of this procedure is meant to be post processed to
 	-- create *.dot files to be used with something like graphviz to
-	-- produce call graphs.  The *.calls file contains the raw maps, which 
-	-- can be used to generate more focused graphs (i.e., for individual 
+	-- produce call graphs.  The *.calls file contains the raw maps, which
+	-- can be used to generate more focused graphs (i.e., for individual
 	-- routines).
-	
+
 	-- called_from:  file -> proc -> called_proc file : called proc
 	-- called_by  :  called_proc file -> called proc -> file : proc
 	sequence files = map:keys( called_from )
-	
+
 	integer fn = open( name & "calls", "w" )
 	sequence pp = PRETTY_DEFAULT
 	pp[DISPLAY_ASCII] = 2
 	pp[LINE_BREAKS]   = -1
-	
+
 	puts( fn, "\"called_from\"\n" )
 	pretty_print( fn, called_from, pp )
 	puts( fn, "\n\n\"called_by\"\n" )
 	pretty_print( fn, called_by, pp )
-	puts( fn, "\n\n\"file_name\"\n") 
-	pretty_print( fn, file_name, pp )
-	puts( fn, "\n\n\"file_include\"\n" )
+	puts( fn, "\n\n\"known_files\"\n")
+	pretty_print( fn, known_files, pp )
+	puts( fn, "\n\n\"file_include \"\n" )
 	pretty_print( fn, file_include, pp )
 	puts( fn, "\n" )
 	close( fn )
-	
-	
+
+
 	sequence routines = {"If_statement","main","SetBBType"}
 	for r = 1 to length( routines ) do
 		integer dn = open( sprintf( "%s.dot", {routines[r]}), "w" )
@@ -1359,17 +1411,17 @@ procedure write_call_info( sequence name )
 		close( dn )
 		make_pngs( routines[r] )
 	end for
-	
+
 	fn = open( name & "include.dot", "w" )
 	puts( fn, diagram_includes() )
 	close( fn )
 	make_pngs( name & "include" )
-	
+
 	fn = open( name & "include_all.dot", "w" )
 	puts( fn, diagram_includes( 1 ) )
 	close( fn )
 	make_pngs( name & "include_all" )
-	
+
 	files = short_names
 	for f = 1 to length( files ) do
 		integer dn = open( sprintf("%s.dep.dot", {files[f]}), "w" )
@@ -1399,14 +1451,14 @@ procedure line_print( integer fn, object p )
 		else
 			count += 1
 		end if
-		
+
 		puts(fn, p[1..line_break])
 		p = p[line_break+1..$]
 		if length(p) then
 			puts(fn,"\n")
 		end if
 	end while
-	
+
 	if count then
 		puts(fn, '\t')
 	end if
@@ -1452,35 +1504,72 @@ constant TEMP_USAGES = {
 	"T_UNKNOWN",
 	"T_USED"
 	}
+
+map:map gtypes = map:new()
+map:put( gtypes, TYPE_NULL, "TYPE_NULL" )
+map:put( gtypes, TYPE_INTEGER, "TYPE_INTEGER" )
+map:put( gtypes, TYPE_DOUBLE, "TYPE_DOUBLE" )
+map:put( gtypes, TYPE_ATOM, "TYPE_ATOM" )
+map:put( gtypes, TYPE_SEQUENCE, "TYPE_SEQUENCE" )
+map:put( gtypes, TYPE_OBJECT, "TYPE_OBJECT" )
+
 function format_symbol( sequence symbol )
 	if symbol[S_MODE] = M_TEMP then
 		symbol[S_USAGE] = TEMP_USAGES[symbol[S_USAGE]]
 	else
-		switch symbol[S_USAGE] with fallthru do
+		switch symbol[S_USAGE] do
 		case U_UNUSED then
 			symbol[S_USAGE] = "U_UNUSED"
-			break
 		case U_DELETED then
 			symbol[S_USAGE] = "U_DELETED"
-			break
-		case U_READ then
-		case U_WRITTEN then
+		case U_READ, U_WRITTEN then
 			symbol[S_USAGE] = USAGES[symbol[S_USAGE]]
-			break
 		case 3 then
 			symbol[S_USAGE] = "U_READ + U_WRITTEN"
-			break
 		case else
 			symbol[S_USAGE] = "Usage Unknown"
 		end switch
+		
+		if length( symbol ) >= S_TOKEN and symbol[S_TOKEN] = VARIABLE then
+			if length( symbol ) >= S_VTYPE then
+				integer vtype = symbol[S_VTYPE]
+				if vtype > 0 then
+					symbol[S_VTYPE] = sym_name( vtype )
+				else
+					symbol[S_VTYPE] = sprintf( "Unknown Type: %d", vtype )
+				end if
+			end if
+			if TRANSLATE then
+				symbol[S_GTYPE] = map:get( gtypes, symbol[S_GTYPE], sprintf( "Unknown GType: %d", symbol[S_GTYPE] ) )
+				symbol[S_ARG_TYPE] = map:get( gtypes, symbol[S_ARG_TYPE], sprintf( "Unknown GType: %d", symbol[S_ARG_TYPE] ) )
+				symbol[S_ARG_TYPE_NEW] = map:get( gtypes, symbol[S_ARG_TYPE_NEW], sprintf( "Unknown GType: %d", symbol[S_ARG_TYPE_NEW] ) )
+			end if
+		end if
 	end if
 	symbol[S_MODE] = MODES[symbol[S_MODE]]
 	if symbol[S_SCOPE] then
 		symbol[S_SCOPE] = SCOPES[symbol[S_SCOPE]]
 	end if
 	
+
 	return symbol
 end function
+
+sequence in_chain = {}
+procedure write_next_links( symtab_pointer s, integer fn )
+	puts( fn, "\nSYMBOL CHAIN:\n")
+	while s do
+		if sym_mode( s ) = M_TEMP then
+			printf(fn, "\t%6d TEMP\n", { s })
+		elsif length( SymTab[s] ) >= S_NAME then
+			printf(fn, "\t%6d %s\n", { s, SymTab[s][S_NAME] })
+		else
+			printf(fn, "\t%6d ?\n", s )
+		end if
+		in_chain[s] = 1
+		s = SymTab[s][S_NEXT]
+	end while
+end procedure
 
 procedure save_il( sequence name )
 	integer st, max_width
@@ -1488,75 +1577,105 @@ procedure save_il( sequence name )
 	integer used_buckets
 	integer symcnt
 	sequence bucket_usage
-	
+
 	st = open( sprintf("%ssym", { name }), "wb" )
 	pretty_options[DISPLAY_ASCII] = 2
 	pretty_options[LINE_BREAKS]   = 0
-	
+
 	for j = 1 to length( SymTab ) do
 		puts( st,  pretty_sprint( j & format_symbol( SymTab[j] ), pretty_options ) )
 -- 		pretty_print( st, j & SymTab[j], pretty_options )
 		puts( st, "\n" )
 	end for
+
+	-- now output the chains...
+	in_chain = repeat( 0, length( SymTab ) )
+	for j = 1 to length( SymTab ) do
+		if not in_chain[j] and sym_mode( j ) != M_TEMP then
+			write_next_links( j, st )
+		end if
+	end for
+	in_chain = {}
 	close( st )
-	
+
 	st = open( sprintf("%sline", {name}), "wb" )
 
 	if length(slist) and atom(slist[$]) then
 		slist = s_expand( slist )
 	end if
-	
+
 	max_width = 0
-	for i = 1 to length(file_name) do
-		if length(file_name[i]) > max_width then
-			max_width = length(file_name[i])
+	for i = 1 to length(known_files) do
+		if length(known_files[i]) > max_width then
+			max_width = length(known_files[i])
 		end if
 	end for
-	
+
 	line_format = sprintf("%%%ds %%%dd : %%s\n", {max_width, floor(log( length(slist) ) / log(10) ) + 1})
-	
-	
+
+
 	for j = 1 to length(slist) do
 		if atom(slist[j][SRC]) then
 			slist[j][SRC] = fetch_line(slist[j][SRC])
 		end if
-		if length(slist[j][SRC]) then
-			printf( st, line_format, {file_name[slist[j][LOCAL_FILE_NO]], j, slist[j][SRC] })
-		end if
 		
+		printf( st, line_format, {known_files[slist[j][LOCAL_FILE_NO]], j, slist[j][SRC] })
+
 	end for
-	
+
 	close(st)
-	
+
 	st = open( sprintf("%shash", { name }), "wb" )
 	sequence bucket = repeat( "", length( buckets ) )
+	sequence end_size = repeat( "", length( buckets ) )
+	sequence bucket_reps = repeat( "", length( buckets ) ) 
+	for i = 1 to length( buckets ) do
+		integer size = 0
+		integer s = buckets[i]
+		while s do
+			size += 1
+			s = SymTab[s][S_SAMEHASH]
+		end while
+		end_size[i] = size
+	end for
 	used_buckets = 0
 	symcnt = 0
 	bucket_usage = {}
+	
 	for i = 1 to length( SymTab ) do
 		if length( SymTab[i] ) >= S_HASHVAL and SymTab[i][S_HASHVAL] then
-			if not find( SymTab[i][S_NAME], bucket[SymTab[i][S_HASHVAL]] ) then
-				bucket[SymTab[i][S_HASHVAL]] = append( bucket[SymTab[i][S_HASHVAL]], SymTab[i][S_NAME] )
+			integer h = SymTab[i][S_HASHVAL]
+			integer bx = find( SymTab[i][S_NAME], bucket[h] )
+			if not bx then
+				bucket[h] = append( bucket[h], SymTab[i][S_NAME] )
+				bucket_reps[h] &= 1
+			else
+				bucket_reps[h][bx] += 1
 			end if
 		end if
 	end for
-	
+
 	for i = 1 to length( bucket ) do
-		bucket[i] = length(bucket[i]) & i & bucket[i]
+		for j = 1 to length( bucket[i] ) do
+			bucket[i][j] = sprintf( "[%d:%s]", {bucket_reps[i][j], bucket[i][j]})
+		end for
+		bucket[i] = sum(bucket_reps[i]) & i & bucket[i]
 	end for
+	
 	bucket = sort(bucket, DESCENDING)
 	bucket_usage = repeat(0, bucket[1][1])
+	puts(st, "Bucket size / hashval / Ending Size / hits : contents\n" )
 	for i = 1 to length( bucket ) do
 		if bucket[i][1] > 0 then
 			used_buckets += 1
 			symcnt += bucket[i][1]
 			bucket_usage[bucket[i][1]] += 1
-			printf( st, "%03d %05d: ", bucket[i][1..2] )
+			printf( st, "%5d %5d %5d %5d: ", bucket[i][1..2] & end_size[i] & bucket_hits[i] )
 			for j = 3 to length( bucket[i] ) do
 				if j > 3 then
 					puts( st, ", " )
 				end if
-				puts( st, bucket[i][j] )
+				printf( st, "%s", {bucket[i][j]} )
 			end for
 			puts( st, '\n' )
 		end if
@@ -1570,36 +1689,48 @@ procedure save_il( sequence name )
 		for i = 1 to length(bucket_usage) do
 			printf( st, "Len %2d : %d\n", {i, bucket_usage[i]})
 		end for
+		
+		sequence hit_counts = {}
+		for i = 1 to length( bucket_hits ) do
+			integer hits = bucket_hits[i] + 1 -- could be 0
+			if length( hit_counts ) < hits then
+				hit_counts &= repeat( 0, hits - length( hit_counts ) )
+			end if
+			hit_counts[hits] += 1
+		end for
+		
+		for i = 1 to length( hit_counts ) do
+			hit_counts[i] = { i-1, hit_counts[i] }
+		end for
+		
+		puts( st, "\nBucket search frequency counts (hits : # buckets):\n" )
+-- 		hit_counts = sort( hit_counts )
+		for i = length( hit_counts ) to 1 by -1 do
+			if hit_counts[i][2] then
+				printf( st, "%6d: %d\n", hit_counts[i]  )
+			end if
+			
+		end for
 	end if
-	
+
 	close( st )
-	
+
 end procedure
 
 include std/filesys.e
 procedure InitBackEnd( object ignore )
--- initialize Interpreter   
+-- initialize Interpreter
     sequence name
     sequence missing = {}
     -- set up operations
     operation = repeat(-1, length(opnames))
-	
-	while 2 <= length(Argv) do
-		if Argv[2][1] != '-' and 
-		(match("dis", Argv[2]) = 1
-		or match( SLASH & "dis", Argv[2] ) ) then
-			exit
-		end if
-		Argv = eu:remove( Argv, 2, 2 )
-	end while
-	Argc = length(Argv)
-	
+
 	if not TRANSLATE then
 		intoptions()
 	else
 		transoptions()
 	end if
-    
+
 	for i = 1 to length(opnames) do
 		name = opnames[i]
 		-- some similar ops are handled by a common routine
@@ -1612,7 +1743,7 @@ procedure InitBackEnd( object ignore )
 		elsif find(name, {"EXIT", "ENDWHILE", "RETRY", "GOTO"}) then
 			name = "ELSE"
 		elsif equal(name, "PLUS1_I") then
-			name = "PLUS1"      
+			name = "PLUS1"
 		elsif equal(name, "PRIVATE_INIT_CHECK") then
 			name = "GLOBAL_INIT_CHECK"
 		elsif equal(name, "PLUS_I") then
@@ -1621,21 +1752,21 @@ procedure InitBackEnd( object ignore )
 			name = "MINUS"
 		elsif equal(name, "FOR_I") then
 			name = "FOR"
-		elsif find(name, {"ENDFOR_UP", "ENDFOR_DOWN", 
+		elsif find(name, {"ENDFOR_UP", "ENDFOR_DOWN",
 				"ENDFOR_INT_UP", "ENDFOR_INT_DOWN",
 				"ENDFOR_INT_DOWN1"}) then
 			name = "ENDFOR_GENERAL"
 		elsif equal(name, "CALL_FUNC") then
 			name = "CALL_PROC"
-		elsif find(name, {"DISPLAY_VAR", "ERASE_PRIVATE_NAMES", 
+		elsif find(name, {"DISPLAY_VAR", "ERASE_PRIVATE_NAMES",
 				"ERASE_SYMBOL"}) then
 			name = "PROFILE"
 		elsif equal(name, "SC2_AND") then
 			name = "SC2_OR"
 		elsif find(name, {"SC2_NULL", "ASSIGN_SUBS2", "PLATFORM",
-				"END_PARAM_CHECK", "PROC_FORWARD", "FUNC_FORWARD"}) then 
+				"END_PARAM_CHECK", "PROC_FORWARD", "FUNC_FORWARD"}) then
 			-- never emitted
-			name = "NOP2" 
+			name = "NOP2"
 		elsif equal(name, "GREATER_IFW_I") then
 			name = "GREATER_IFW"
 		elsif equal(name, "LESS_IFW_I") then
@@ -1659,13 +1790,13 @@ procedure InitBackEnd( object ignore )
 		elsif equal( name, "PROC_TAIL" ) then
 			name = "PROC"
 		end if
-		
+
 		operation[i] = routine_id("op" & name)
 		if operation[i] = -1 then
 			missing = append( missing, name )
 		end if
     end for
-	
+
     if length( missing ) then
     	name = ""
 		for i = 1 to length( missing ) do
@@ -1683,20 +1814,30 @@ function max( integer a, integer b )
 	return b
 end function
 
+
 procedure dis( integer sub )
 	integer op, ix
 	sequence sym
 	CurrentSub = sub
-	
+
 	symtab_index param = SymTab[sub][S_NEXT]
 	sequence params = {}
 	for p = 1 to SymTab[sub][S_NUM_ARGS] do
 		params &= sprintf( " %s", names({param}) )
 		param = SymTab[param][S_NEXT]
 	end for
+
+	printf( out, "\nSubProgram [%s-%s:%05d] %s\n",
+		{known_files[SymTab[sub][S_FILE_NO]], SymTab[sub][S_NAME], sub, params })
 	
-	printf( out, "\nSubProgram [%s-%s:%05d] %s\n", 
-		{file_name[SymTab[sub][S_FILE_NO]], SymTab[sub][S_NAME], sub, params })
+	if sub != TopLevelSub then
+		integer stack_space_required = calc_stack_required( sub )
+		printf( out, "\tSTACK SPACE: %d\n\tRequired:    %d\n", { SymTab[sub][S_STACK_SPACE], stack_space_required } )
+		if stack_space_required > SymTab[sub][S_STACK_SPACE] then
+			printf(2, "Stack space mismatch! %s:%s Reserved[%d] Required[%d]\n", 
+				{ filename( known_files[SymTab[sub][S_FILE_NO]] ), sym_name( sub ), SymTab[sub][S_STACK_SPACE], stack_space_required } )
+		end if
+	end if
 	
 	map:put( proc_names, SymTab[sub][S_NAME], sub )
 	Code = SymTab[sub][S_CODE]
@@ -1705,11 +1846,11 @@ procedure dis( integer sub )
 	while pc <= length(Code) do
 		integer ln = find( pc-1, line_table )
 		if ln > 0 and ln <= length(line_table) then
-			printf(out, "\n        [%s:%d] %s\n", find_line( sub, pc, 0 ) )
+			printf(out, "\n        [%s:%d] %s (%d)\n", find_line( sub, pc, 0 ) )
 		end if
-		
+
 		op = Code[pc]
-		call_proc(operation[op], {}) 
+		call_proc(operation[op], {})
 	end while
 	printf( out, "End SubProgram [%s:%05d]\n", {SymTab[sub][S_NAME], sub})
 end procedure
@@ -1729,6 +1870,13 @@ function set_html( object o )
 	generate_html = 1
 	return 0
 end function
+
+integer generate_file_list = 0
+function enable_file_list( object o )
+	generate_file_list = 1
+	return 0
+end function
+
 include std/pretty.e
 
 sequence opts = {
@@ -1739,24 +1887,36 @@ sequence opts = {
 		{ "f", "file", "include this file", {HAS_PARAMETER}, routine_id("document_file") },
 		{ "g", "graphs", "suppress call graphs", {NO_PARAMETER}, routine_id("suppress_callgraphs") },
 		{ "t", 0, "translator mode", {NO_PARAMETER}, -1 },
-		{ "b", 0, "binder mode", {NO_PARAMETER}, -1 }
+		{ "b", 0, "binder mode", {NO_PARAMETER}, -1 },
+		{ 0, "file-list", "outputs the list of files in the disassembled code at the top of the .dis file",
+			{NO_PARAMETER}, routine_id("enable_file_list") }
 		}
 
 add_options( opts )
 
 export procedure BackEnd( object ignore )
-	
+
 -- 	map:map result = cmd_parse( opts, -1, Argv )
-	
-	save_il( file_name[1] & '.' )
-	out = open( file_name[1] & ".dis", "wb" )
-	printf(1,"saved to [%s.dis]\n", {file_name[1]})
+
+	save_il( known_files[1] & '.' )
+	out = open( known_files[1] & ".dis", "wb" )
+	printf(1,"saved to [%s.dis]\n", {known_files[1]})
+
+	if generate_file_list then
+		puts( out, "File List:\n" )
+		for i = 1 to length( known_files ) do
+			printf( out, "%s\n", {known_files[i]})
+		end for
+		puts( out, "\n" )
+	end if
+
 	if atom(slist[$]) then
 		slist = s_expand(slist)
 	end if
+
 	for i = TopLevelSub to length(SymTab) do
-		if length(SymTab[i]) = SIZEOF_ROUTINE_ENTRY 
-		and sequence(SymTab[i][S_CODE]) 
+		if length(SymTab[i]) = SIZEOF_ROUTINE_ENTRY
+		and sequence(SymTab[i][S_CODE])
 		and SymTab[i][S_SCOPE] != SC_PRIVATE then
 			dis( i )
 		else
@@ -1764,13 +1924,10 @@ export procedure BackEnd( object ignore )
 		end if
 	end for
 	close( out )
-	
-	
+
 	if generate_html then
 		dox:generate()
 	end if
-	--write_call_info( file_name[1] & '.' )
-	
+
 end procedure
 mode:set_backend( routine_id("BackEnd") )
-

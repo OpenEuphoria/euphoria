@@ -18,7 +18,7 @@ To run this example, at the command prompt type:
 eui etmltest.ex
 
 Now, how does Euphoria know how to process these files? Look in the 
-euinc.conf file in this directory. You will notice that there are lines
+eu.cfg file in this directory. You will notice that there are lines
 that look similar to:
 
 -p le,lex:literate.ex

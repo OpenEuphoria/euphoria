@@ -1,0 +1,9 @@
+== Version 1.0 July 1993
+
+Euphoria was first released after 3 years of research and development
+and 6 months of Beta testing. Many of the ideas behind Euphoria came
+from Robert Craig's Master's Thesis in Computer Science at the University
+of Toronto. That thesis was strongly influenced by the work of John Backus
+on functional programming (FP) languages.
+
+

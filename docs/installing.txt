@@ -1,0 +1,249 @@
+%%output=installing_euphoria
+== Installation
+:<<LEVELTOC level=2 depth=4>>
+
+To install Euphoria, consult the instructions below for your particular 
+operating system.
+
+=== Windows
+
+To install Euphoria on //Windows//, visit the following URL:
+
+:http://openeuphoria.org/wiki/view/DownloadEuphoria.wc
+
+The "Standard" version is a complete Euphoria installation, with
+Interpreter, Binder, Translator. Included are demo programs and
+documentation.
+
+The "Open Watcom" version has the contents of the "Standard" version, 
+plus a bundled compiler. This is a convenient way of producing compiled executables
+from Euphoria programs.
+
+Download the latest //Windows// installer found under the Binary Releases 
+heading of the Current version of Euphoria. Run the program and follow the 
+prompts to get Euphoria installed.
+   
+The installer copies the required files and adds ##euphoria\bin## to your path.
+It also sets the environment variable **EUDIR** to the Euphoria directory.
+
+=== Linux and FreeBSD
+
+Euphoria may be installed using either a //Unix// archive ( ##.tar.gz## or ##.tar.bz2## ) 
+or, a distribution specific package, if available.
+
+:http://openeuphoria.org/wiki/view/DownloadEuphoria.wc
+
+The //Unix// tarball "Archive" is laid out similarly to the //Windows// directory 
+structure. This may be convenient if working cross-platform between
+//Windows// and //Unix//. The files at ~SourceForge are also in this
+form, making it convenient if you wish to use updates directly from
+the SVN depository.
+
+To install this version you must manually unarchive the tarball. Then
+copy the files to a suitable directory.
+
+You'll need to manually edit:
+* ##/etc/profile## so the ##PATH## contains
+** ##euphoria/bin##, and either create 
+*** an ##eu.cfg## file or 
+*** set up ##EUDIR## and ##EUINC##.
+
+The "Packaged" version installs Euphoria in a more //Unix//-like way, putting the executables into 
+* ##/usr/bin##, 
+* ##/usr/share/euphoria## and
+* ##/usr/share/doc/euphoria##.  
+* Man pages for ##eui##, ##euc##, ##eub##, ##shroud## and ##bind## are also installed.  
+* It will also create ##/etc/euphoria/eu.cfg##, which will point to the standard euphoria include
+directory in ##/usr/share/euphoria/include##.
+
+Other //Unix// based installations can be compiled from "Source Releases".
+
+=== OS X
+
+Look for an installation package for Apple installations.
+
+:http://openeuphoria.org/wiki/view/DownloadEuphoria.wc
+
+=== DOS
+
+There is DOS support only up to Euphoria 3.1. DOS developers are 
+invited to contribute their skills.
+
+=== Nightly Builds
+
+
+You have access to the latest Euphoria source-code that the Developers are
+working on via the official OpenEuphoria Mercurial repository:
+http://scm.openeuphoria.org
+
+Binary files are called //Eubins//, and are automated "Nightly Builds" 
+produced from the latest code in the code repository:
+http://openeuphoria.org/eubins/
+
+A complete installation requires merging the original source files,
+and the contents of the eubins download. Then, the path to euphoria/bin
+must be set and a cfg file must be written.
+
+For the adventurous only.
+
+%%output=post_install
+== Post Install
+
+The directory maps will help you locate the Euphoria executables, documentation,
+and sample programs.
+
+The default for the //Windows// installation, and optional for a 
+//Unix// installation:
+
+{{{
+|
+|__ euphoria
+|     file_id.diz
+|     License.txt
+|
+|__ bin 
+|     Interpreter (eui.exe and euiw.exe,  if on Windows)
+|                 (eui, if on Unix)
+|     Binder      (eubind, with eub)
+|     Translator  (euc.exe, if on Windows)
+|                 (euc, if on Unix)
+|     Utilities   (bugreport.ex, bench.ex, ed.ex, ...)
+|
+|__ include 
+|   |             (original include files)
+|   |
+|   |__ std       (standard Euphoria library: io.e, sequence.e, ...)
+|   |
+|   |__ euphoria  (Euphoria specific)
+|
+|
+|__ docs          (html and pdf documentation files)
+|
+|__ tutorial      (small tutorial programs to help you learn Euphoria)
+|
+|__ demo          (generic demo programs that run on all platforms)
+|   |
+|   |__ win32     (Windows specific demo programs (optional) )
+|   |__ unix      (Linux/FreeBSD/OS X specific demo programs (optional))
+|   |__ langwar   (language war game for Linux/FreeBSD/OS X )
+|   |__ bench     (benchmark program )
+|
+|__ source        (the complete source code for: interpreter, translator)
+|
+|__ tests         (unit tests for Euphoria)
+|
+|__ packaging     (software for making installation packages)
+}}}
+
+
+The //Linux// subdirectory is not included in the //Windows// distribution,
+and the ##win32## subdirectories are not included in the
+ //Linux/FreeBSD// distribution. In this manual, directory names are shown
+ using backslash (**\**). //Linux/FreeBSD// users should substitute forward
+ slash (**/**).
+
+The "Debian Package" installs Euphoria into these directories:
+
+{{{
+|
+|__ /usr/bin                       (executables: eui, euc, ... )
+|       
+|__ /usr/share/euphoria     
+|                     |   
+|                     |__ bin      (utility programs)
+|                     |__ demo     (general demonstration programs)
+|                     |__ include  (standard library)
+|                     |__ source   (source-code for Euphoria)
+|                     |__ tutorial (tutorial programs for learning Euphoria)
+|
+|__ /usr/share/doc/euphoria        (html and pdf documentation)
+|
+|__ /etc/euphoria                  ( eu.cfg )
+}}}
+
+Additionally, installing from source on a Unix-like OS will install in 
+the same pattern, by default using ##/usr/local/## instead of ##/usr/##.
+You can change ##/usr/local## to something else by running:
+{{{
+$ ./configure --prefix /some/other/location
+}}}
+Before building.
+
+The "include", "demo" and "tutorial" directories are the same in
+//Windows// and //Unix//.
+
+
+%%output=configuration
+== Set Up the Euphoria Configuration File (eu.cfg)
+
+Euphoria supports reading command line switches from configuration files. The 
+default name for the configuration file is ##eu.cfg##. However you can specify
+different ones by using the ##-C## switch.
+
+=== Configuration file format
+
+The configuration file is a text file. Each line in the file is either a command
+line switch, a section header, an include path or a comment.
+* Comments are lines that begin with a double dash {{{"--"}}}. Everything on the
+line is ignored.
+* A section header is a //name// enclosed in square brackets. eg. 
+##[interpret]##.
+** There are a number of predefined sections.
+** The lines in a section are only added to the command line switches if they
+ apply to the mode that Euphoria is running in.
+*** [windows] Applies to Windows platform only.
+*** [unix] Applies to any Unix platform only.
+*** [interpret] Applies to the interpreter running in any platform.
+*** [translate] Applies to the translator running in any platform.
+*** [bind] Applies to the binder running in any platform.
+*** [interpret:windows] Applies to the interpreter when running under //Windows// 
+only.
+*** [interpret:unix] Applies to the interpreter when running under //Unix// 
+only.
+*** [translate:windows] Applies to the translator when running under //Windows// 
+only.
+*** [translate:unix] Applies to the translator when running under //Unix// only.
+*** [bind:windows] Applies to the binder when running under //Windows// only.
+*** [bind:unix] Applies to the binder when running under //Unix// only.
+*** [all] Applies to all running modes.
+** All configuration lines before the first section header are assumed to be the
+##[all]## section.
+** You can have any number of section headers, but only the predefined ones are
+used. All lines in other sections are treated as comments.
+* A command line switch is a line that begins with a single dash. The entire 
+line is added to the actual command line as if it was originally there.
+* An include path is any other line that is not one of the above. The string 
+##-I## is prepended to the line and then it is added to the command line.
+
+=== Config File Locations
+
+When Euphoria starts up, it looks for configuration files in the following 
+order:
+* For //Windows// systems
+## ~%ALLUSERSPROFILE~%\euphoria\eu.cfg
+## ~%APPDATA~%\euphoria\eu.cfg
+## ~%EUDIR~%\eu.cfg
+## ~%HOMEDRIVE~%\~%HOMEPATH~%\eu.cfg
+## From where ever the executable is run from "<exepath>/eu.cfg"
+## Current working directory - "./eu.cfg"
+## Command line -C switches
+* For //Unix// systems
+## /etc/euphoria/eu.cfg
+## ${EUDIR}/eu.cfg
+## ${HOME}/.eu.cfg
+## From where ever the executable is run from "<exepath>/eu.cfg"
+## Current working directory - "./eu.cfg"
+## Command line -C switches
+
+=== Config File Notes
+
+* Euphoria processes every configuration file found, and in the order described 
+above. This means that settings specified in earlier configuration files may be 
+overridden by subsequent configuration files. For example, a configuration file 
+in the current directory will override the same settings in a configuration file
+in the executable's directory.
+* If a configuration file contains a ##-C## switch, the new configuration file
+specified on that switch is processed before subsequent lines in the old file.
+* A configuration file is only ever processed once. Additional references to the
+same file are ignored.
+

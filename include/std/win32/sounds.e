@@ -1,12 +1,12 @@
--- (c) Copyright - See License.txt
---
 --****
 -- == Windows Sound
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
-include std/dll.e
+ 
+namespace sound
 
+include std/dll.e
 
 public constant   
 	SND_DEFAULT     = 0x00,
@@ -23,10 +23,10 @@ atom xUser32
 -- Makes a sound.
 --
 -- Parameters:
--- # pStyle: An atom. The type of sound to make. The default is SND_DEFAULT.
+-- # sound_type: An atom. The type of sound to make. The default is SND_DEFAULT.
 --
 -- Comments:
--- The ##pStyle## value can be one of ...
+-- The ##sound_type## value can be one of ...
 -- * ##SND_ASTERISK## 
 -- * ##SND_EXCLAMATION##
 -- * ##SND_STOP##
@@ -41,10 +41,10 @@ atom xUser32
 --  sound( SND_EXCLAMATION )
 -- </eucode>
 
-public procedure sound( atom pStyle = SND_DEFAULT )
+public procedure sound( atom sound_type = SND_DEFAULT )
 	if not object(xMessageBeep) then
-		xUser32 = open_dll("user32.dll")
-		xMessageBeep   = define_c_proc(xUser32, "MessageBeep", {C_UINT})
+		xUser32 = dll:open_dll("user32.dll")
+		xMessageBeep   = dll:define_c_proc(xUser32, "MessageBeep", {C_UINT})
 	end if
-    c_proc( xMessageBeep, { pStyle } )
+    c_proc( xMessageBeep, { sound_type } )
 end procedure

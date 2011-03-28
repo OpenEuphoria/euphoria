@@ -1,14 +1,18 @@
-= Syntax Reference
+== Formal Syntax
 
-<<LEVELTOC depth=3>>
+=== Basics
 
-== basics ==
-<eucode>
+The syntax of Euphoria is described using a form of BNF notation.
+
+{{{
 ALPHA ==: ('a' - 'z') | ('A' - 'Z')
 DIGIT ==: ('0' - '9')
 USCORE ==: '_'
+EOL ==: new line character
 
-INDENTIFIER ==: ( ALPHA | USCORE ) [(AlPHA | DIGIT | USCORE) ... ]
+IDENTIFIER ==: ( ALPHA | USCORE ) [(AlPHA | DIGIT | USCORE) ... ]
+
+EXPRESSION ==: NUMEXPR | STREXPR | SEQEXPR | BOOLEXPR
 
 NUMEXPR ==: (an expression that evaluates to an atom)
 
@@ -16,9 +20,16 @@ STREXPR ==: (an expression that evaluates to a string sequence)
 
 SEQEXPR ==: (an expression that evaluates to an sequence)
 
-BOOLEXPR ==: (an expression that evaluates to an atom in which zero represents falsehood and non-zero represents truth)
+BOOLEXPR ==: (an expression that evaluates to an atom in which zero represents 
+              falsehood and non-zero represents truth)
+              
+BINARYEXPR ==: [ EXPRESSION BINOP EXPRESSION ]
 
-EXPR ==:
+BINOP ==: 'and' | 'or' | 'xor' | '+' | '-' | '*' | '/' 
+
+UNARYEXPR ==: [ UNARYOP EXPRESSION ]
+
+UNARYOP ==: 'not' | '-'
 
 STATEMENT ==: 
 
@@ -41,10 +52,28 @@ RAWSTRINGLIT ==: DQRAWSTRING | BQRAWSTRING
 DQRAWSTRING ==: '"""' [ MARGINSTR ] [CHAR ...] '"""'
 BQRAWSTRING ==: '`' [ MARGINSTR ] [CHAR ...] '`'
 MARGINSTR  ==: '_' ...
-</eucode>
 
-== statements ==
-=== flow control ===
+SCOPETYPE ==: 'global' | 'public' | 'export' | 'override'
+
+DATATYPE ==: 'atom' | 'integer' | 'sequence' | 'object' | IDENTIFER
+}}}
+
+=== Statements
+
+==== Directives
+
+[[:INCLUDESTMT]]\\
+[[:WITHSTMT]]\\
+[[:NAMESPACE]]\\
+
+==== Variables, Constants, Enums
+[[:VARDECLARE]]\\
+[[:CONSTDECLARE]]\\
+[[:ENUMDECLARE]]\\
+[[:SLICING]]\\
+
+==== Flow Control
+
 [[:IFSTMT]]\\
 [[:SWITCHSTMT]]\\
 [[:BREAKSTMT]]\\
@@ -56,27 +85,71 @@ MARGINSTR  ==: '_' ...
 [[:WHILESTMT]]\\
 [[:LOOPSTMT]]\\
 [[:GOTOSTMT]]\\
+[[:CALL]]\\
+[[:IFDEFSTMT]]\\
 
+==== Routines
 
-== slice == @[SLICE]
-<eucode>
+[[:PROCDECLARE]]\\
+[[:FUNCDECLARE]]\\
+[[:TYPEDECLARE]]\\
+[[:RETURN]]\\
+
+==== include
+
+@[INCLUDESTMT]
+{{{
+ INCLUDESTMT  ==:  'include' FILEREF [ 'as' NAMESPACEID ] EOL
+ FILEREF  ==:  A file path that may be enclosed in double-quotes. 
+ NAMESPACEID ==: IDENTIFIER  
+}}}
+**NOTE** that after the file reference, the only text allowed is the keyword 
+'as' or the start of a comment. Nothing else is permitted on the same text line.
+
+    See Also: [[:include statement]]
+
+=== Sequence Slice
+@[SLICING]
+
+{{{
 SLICE      ==: SLICESTART INTEXPRESSION SLICEDELIM INTEXPRESSION SLICEEND
 SLICESTART ==: '['
 SLICEDELIM ==: '..'
 SLICEEND   ==: ']'
-</eucode>
+}}}
+    See Also: [[:Slicing of Sequences]]
 
-== if == @[IFSTMT]
-<eucode>
+=== if
+@[IFSTMT]
+
+{{{
  IFSTMT  ==:  IFTEST [ ELSIF ...] [ELSE] ENDIF 
  IFTEST  ==:  'if' ATOMEXPR [ LABEL ] 'then' [ STMTBLOCK ] 
  ELSIF   ==:  'elsif' ATOMEXPR 'then' [ STMTBLOCK ] 
  ELSE    ==:  'else' [ STMTBLOCK ] 
  ENDIF   ==:  'end' 'if' 
-</eucode>
+}}}
+    See Also: [[:if statement]]
 
-== switch == @[SWITCHSTMT]
-<eucode>
+=== ifdef
+@[IFDEFSTMT]
+
+{{{
+ IFDEFSTMT  ==:  IFDEFTEST [ ELSDEFIF ...] [ELSEDEF] ENDDEFIF 
+ IFDEFTEST  ==:  'ifdef' DEFEXPR 'then' [ STMTBLOCK ] 
+ ELSDEFIF   ==:  'elsifdef' DEFEXPR 'then' [ STMTBLOCK ] 
+ ELSEDEF    ==:  'elsedef' [ STMTBLOCK ] 
+ ENDDEFIF   ==:  'end' 'ifdef' 
+ DEFEXPR    ==:  DEFTERM [ DEFOP DEFTERM ]
+ DEFTERM    ==:  [ 'not' IDENTIFIER ]
+ DEFOP      ==:  'and' | 'or'
+}}}
+    See Also: [[:ifdef statement]]
+
+==== switch
+@[SWITCHSTMT]
+
+{{{
  SWITCHSTMT  ==:  SWITCHTEST CASE [ CASE ...] [ CASEELSE ] [ ENDSWITCH ]
  SWITCHTEST  ==:  'switch' EXPRESSION [ WITHFALL ] [ LABEL ] 'do'
  WITHFALL    ==:  ('with' | 'without') 'fallthru'
@@ -84,52 +157,185 @@ SLICEEND   ==: ']'
  CASELIST    ==:  EXPRESSION [(LISTDELIM EXPRESSION) ...]
  CASEELSE    ==:  'case' 'else'
  ENDSWITCH   ==:  'end' 'switch'
-</eucode>
+}}}
+    See Also: [[:switch statement]]
 
-== break == @[BREAKSTMT]
-<eucode>
+=== break
+@[BREAKSTMT]
+
+{{{
  BREAKSTMT       ==:  'break' [ STRINGLIT ]
-</eucode>
+}}}
+    See Also: [[:break statement]]
 
-== continue == @[CONTINUESTMT]
-<eucode>
+=== continue
+@[CONTINUESTMT]
+
+{{{
  CONTINUESTMT       ==:  'continue' [ STRINGLIT ]
-</eucode>
+}}}
+    See Also: [[:continue statement]]
 
-== retry == @[RETRYSTMT]
-<eucode>
+=== retry
+@[RETRYSTMT]
+
+{{{
  RETRYSTMT       ==:  'retry' [ STRINGLIT ]
-</eucode>
+}}}
+    See Also: [[:retry statement]]
 
-== exit == @[EXITSTMT]
-<eucode>
+=== exit
+@[EXITSTMT]
+
+{{{
  EXITSTMT       ==:  'exit' [ STRINGLIT ]
-</eucode>
+}}}
+    See Also: [[:exit statement]]
 
-== fallthru == @[FALLTHRUSTMT]
-<eucode>
+=== fallthru
+@[FALLTHRUSTMT]
+
+{{{
  FALLTHRUSTMT       ==:  'fallthru'
-</eucode>
+}}}
+    See Also: [[:switch statement]]
 
-== for == @[FORSTMT]
-<eucode>
+=== for
+@[FORSTMT]
+
+{{{
  FORSTMT ==: 'for' FORIDX [ LABEL ] 'do' [STMTBLK] 'end' 'for'
  FORIDX  ==: IDENTIFIER '=' NUMEXPR 'to' NUMEXPR ['by' NUMEXPR]
-</eucode>
- 
-== while == @[WHILESTMT]
-<eucode>
- WHILESTMT ==: 'while' BOOLEXPR [WITHENTRY] [LABEL] 'do' STMTBLK [ENTRY] 'end' 'while'
- WITHENTRY ==: 'with' 'entry'
- ENTRY ==: 'entry' [STMTBLK]
-</eucode>
- 
-== loop == @[LOOPSTMT]
-<eucode>
- LOOPSTMT ==: 'loop' [WITHENTRY] [LABEL] 'do' STMTBLK [ENTRY] 'until' BOOLEXPR
-</eucode>
- 
-== goto == @[GOTOSTMT]
-<eucode>
+}}}
+    See Also: [[:for statement]]
+
+=== while
+@[WHILESTMT]
+
+{{{
+WHILESTMT ==: 
+        'while' BOOLEXPR [WITHENTRY] [LABEL] 'do' STMTBLK [ENTRY] 'end' 'while'
+WITHENTRY ==: 'with' 'entry'
+ENTRY ==: 'entry' [STMTBLK]
+}}}
+   See Also: [[:while statement]]
+
+=== loop
+@[LOOPSTMT]
+
+{{{
+LOOPSTMT ==: 
+   'loop' [WITHENTRY] [LABEL] 'do' STMTBLK [ENTRY] 'until' BOOLEXPR 'end' 'loop'
+}}}
+   See Also: [[:loop until statement]]
+
+=== goto
+@[GOTOSTMT]
+
+{{{
  GOTOSMT ==: 'goto' LABEL
-</eucode>
+}}}
+  See Also: [[:goto statement]]
+
+=== declare a variable
+@[VARDECLARE]
+{{{
+VARDECLARE ==: [SCOPETYPE] DATATYPE IDENTLIST
+IDENTLIST ==: IDENT [',' IDENTLIST]
+IDENT ==: IDENTIFIER [ '=' EXPRESSION ]
+}}}
+Notes:
+* The type of the ##EXPRESSION## must be compatable with the ##DATATYPE##.
+
+=== declare a constant
+@[CONSTDECLARE]
+{{{
+CONSTDECLARE ==: [SCOPETYPE] 'constant' IDENTLIST
+}}}
+
+=== declare an enumerated value
+@[ENUMDECLARE]
+{{{
+ENUMDECLARE ==: [SCOPETYPE] [ ENUMVAL | ENUMTYPE ]
+ENUMVAL ==: 'enum' ['by' ENUMDELTA ] IDENTLIST
+ENUMDELTA ==: [ '+' | '-' | '*' | '/' ] NUMEXPR
+ENUMTYPE ==: 'enum' 'type' ['by' ENUMDELTA ] IDENTLIST 'end' 'type'
+}}}
+
+  
+=== call a procedure or function
+@[CALL]
+Used to call (invoke) either a procedure or a function.
+{{{
+CALL ==: IDENTIFIER '(' [ARGLIST] ')'
+ARGLIST ==: ARGUMENT [',' ARGLIST]
+}}}
+  See Also: [[:procedures]] [[:functions]]
+  
+=== declare a procedure
+@[PROCDECLARE]
+{{{
+PROCDECLARE ==: [SCOPETYPE] 'procedure' IDENTIFIER '(' [PARMLIST] ')' [STMTBLK] 'end' 'procedure'
+PARMLIST ==: PARAMETER [',' PARMLIST]
+PARAMETER ==: DATATYPE IDENTIFER
+}}}
+Notes:
+* The ##procedure## statement block **must not** contain a ##return## statememt.
+
+  See Also: [[:procedures]]
+  
+=== declare a function
+@[FUNCDECLARE]
+{{{
+FUNCDECLARE ==: [SCOPETYPE] 'function' IDENTIFIER '(' [PARMLIST] ')' [STMTBLK] 'end' 'function'
+PARMLIST ==: PARAMETER [',' PARMLIST]
+PARAMETER ==: DATATYPE IDENTIFER
+}}}
+Notes:
+* The ##function## statement block **must** contain a ##return## statememt.
+
+  See Also: [[:functions]]
+  
+=== declare a user defined type
+@[TYPEDECLARE]
+{{{
+TYPEDECLARE ==: [SCOPETYPE] 'type' IDENTIFIER '(' PARAMETER ')' [STMTBLK] 'end' 'type'
+PARAMETER ==: DATATYPE IDENTIFER
+}}}
+Notes:
+* The ##type## statement block **must** contain a ##return## statememt.
+* It must return an integer; 0 means that the supplied argument is not of the correct type.
+
+  See Also: [[:types]]
+  
+=== return the result of a function
+@[RETURN]
+{{{
+RETURN ==: 'return' EXPRESSION
+}}}
+
+  See Also: [[:types]]
+  
+=== default namespace
+{{{
+NAMESPACE ==: 'namespace' IDENTIFIER EOL
+}}}
+
+  See Also: [[:Using namespaces]]
+  
+=== with options
+@[WITHSTMT]
+{{{
+WITHSTMT ==: [ "with" | "without" ] WITHOPTION
+WITHOPTION ==: [ "profile" | "profile_time" | "trace" | "batch" |
+                 "type_check" | "indirect_includes" | "inline" | WITHWARNING ]
+WITHWARNING ==: "warning" [ WARNOPT]
+WARNOPT ==: SETWARN | ADDWARN | SAVEWARN | RESTOREWARN | STRICTWARN
+SETWARN ==: ['='] '{' WARNLIST '}'
+ADDWARN ==: ['+=' | '&='] '{' WARNLIST '}'
+SAVEWARN ==: 'save'
+RESTOREWARN ==: 'restore'
+STRICTWARN ==: 'strict'
+}}}
+
+  See Also: [[:with / without]]

@@ -130,8 +130,6 @@ static char *opnames[] = {
 	"PEEK",
 	"POKE",
 	"CALL",
-	"PIXEL",
-	"GET_PIXEL",
 	"MEM_COPY",
 	"MEM_SET",
 	"C_PROC",
@@ -211,5 +209,7 @@ static char *opnames[] = {
 	"EXIT_BLOCK",
 	"REF_TEMP",
 	"DEREF_TEMP",
-	"NOVALUE_TEMP"
+	"NOVALUE_TEMP",
+	"COVERAGE_LINE",
+	"COVERAGE_ROUTINE"
 };

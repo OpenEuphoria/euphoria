@@ -1,10 +1,15 @@
+--****
+-- === win32/dsearch.exw
+-- 
 -- search for a .DLL that contains a given routine
--- usage:  
---      exw dsearch [routine] 
+-- ==== Usage
+-- {{{
+-- eui dsearch [routine] 
+-- }}}
 --
 -- If you don't supply a string on the command line you will be prompted 
 -- for it. 
-
+--
 
 -- Some of the common WIN32 .DLLs. Feel free to add more.
 sequence dll_list
@@ -16,10 +21,16 @@ dll_list = {
     "comdlg32.dll",
     "comctl32.dll"
 }
-
 include std/filesys.e
 include std/dll.e
 include std/machine.e
+
+
+sequence file_list = dir(`c:\windows\system32\*.dll`)
+for i = 1 to length(file_list) do
+	dll_list = append( dll_list, file_list[i][D_NAME] )
+end for	
+
 
 constant KEYB = 0, SCREEN = 1
 
@@ -109,7 +120,7 @@ end function
 
 CSetup()
 
-cmd = command_line()   -- exw dsearch [string]
+cmd = command_line()   -- eui dsearch [string]
 
 if length(cmd) >= 3 then
     orig_string = cmd[3]

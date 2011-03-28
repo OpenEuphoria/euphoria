@@ -1,29 +1,134 @@
--- (c) Copyright - See License.txt
---
-namespace types
-
 --****
 -- == Types - Extended
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
+
+namespace types
+
+--**
+-- Object not assigned
+public constant OBJ_UNASSIGNED = 0
+
+--**
+-- Object is integer
+public constant OBJ_INTEGER = 1
+
+--**
+-- Object is atom
+public constant OBJ_ATOM = 2
+
+--**
+-- Object is sequence
+public constant OBJ_SEQUENCE = 3
+
+--****
+-- Signature:
+-- <built-in> type object(object x)
 --
--- === Constants
+-- Description:
+-- Returns information about the object type of the supplied argument ##x##.
 --
+-- Returns:
+-- # An integer. 
+-- ** OBJ_UNASSIGNED if ##x## has not been assigned anything yet.
+-- ** OBJ_INTEGER if ##x## holds an integer value.
+-- ** OBJ_ATOM if ##x## holds a number that is not an integer.
+-- ** OBJ_SEQUENCE if ##x## holds a sequence value.
+--
+-- Example 1:
+-- <eucode>
+-- ? object(1) --> OBJ_INTEGER
+-- ? object(1.1) --> OBJ_ATOM
+-- ? object("1") --> OBJ_SEQUENCE
+-- object x
+-- ? object(x) --> OBJ_UNASSIGNED
+-- </eucode>
+--
+-- See Also:
+-- [[:sequence]](), [[:integer]](), [[:atom]]()
+
+--****
+-- Signature:
+-- <built-in> type integer(object x)
+--
+-- Description:
+-- Tests the supplied argument ##x## to see if it is an integer or not.
+--
+-- Returns:
+-- # An integer. 
+-- ** 1 if ##x## is an integer.
+-- ** 0 if ##x## is not an integer.
+--
+-- Example 1:
+-- <eucode>
+-- ? integer(1) --> 1
+-- ? integer(1.1) --> 0
+-- ? integer("1") --> 0
+-- </eucode>
+--
+-- See Also:
+-- [[:sequence]](), [[:object]](), [[:atom]]()
+
+--****
+-- Signature:
+-- <built-in> type atom(object x)
+--
+-- Description:
+-- Tests the supplied argument ##x## to see if it is an atom or not.
+--
+-- Returns:
+-- # An integer. 
+-- ** 1 if ##x## is an atom.
+-- ** 0 if ##x## is not an atom.
+--
+-- Example 1:
+-- <eucode>
+-- ? atom(1) --> 1
+-- ? atom(1.1) --> 1
+-- ? atom("1") --> 0
+-- </eucode>
+--
+-- See Also:
+-- [[:sequence]](), [[:object]](), [[:integer]]()
+
+--****
+-- Signature:
+-- <built-in> type sequence( object x)
+--
+-- Description:
+-- Tests the supplied argument ##x## to see if it is a sequence or not.
+--
+-- Returns:
+-- # An integer. 
+-- ** 1 if ##x## is a sequence.
+-- ** 0 if ##x## is not an sequence.
+--
+-- Example 1:
+-- <eucode>
+-- ? sequence(1) --> 0
+-- ? sequence({1}) --> 1
+-- ? sequence("1") --> 1
+-- </eucode>
+--
+-- See Also:
+-- [[:integer]](), [[:object]](), [[:atom]]()
 
 --**
 -- Boolean FALSE value
 
-public constant FALSE = 0
+public constant FALSE = (1=0)
 
 --**
 -- Boolean TRUE value
 
-public constant TRUE = 1
+public constant TRUE = (1=1)
 
---**
--- Predefined character sets:
+--****
+-- === Predefined character sets
+--
+
 public enum
-	CS_FIRST = 0,
+	CS_FIRST = 0,	
 	CS_Consonant,
 	CS_Vowel,
 	CS_Hexadecimal,
@@ -53,8 +158,8 @@ public enum
 -- Determine whether one or more characters are in a given character set.
 --
 -- Parameters:
--- 		# ##pVal## : an object, either a character or a string
---		# ##pCharSet## : a sequence, either a list of allowable characters, or a list of pairs representing allowable ranges.
+-- 		# ##test_data## : an object to test, either a character or a string
+--		# ##char_set## : a sequence, either a list of allowable characters, or a list of pairs representing allowable ranges.
 --
 -- Returns:
 --		An **integer**, 1 if all characters are allowed, else 0.
@@ -76,36 +181,49 @@ public enum
 -- -- FALSE, not every char is in the range 'A' to 'C'
 --
 -- char_test("Harry", {{'a', 'z'}, {'D', 'J'}})
--- -- TRUE, every char is either in the range 'a' to 'z', or in the range 'D' to 'J'
+-- -- TRUE, every char is either in the range 'a' to 'z', 
+-- --       or in the range 'D' to 'J'
 --
 -- char_test("Potter", "novel")
 -- -- FALSE, not every character is in the set 'n', 'o', 'v', 'e', 'l'
 -- </eucode>
 
-public function char_test(object pVal, sequence pCharSet)
+public function char_test(object test_data, sequence char_set)
 	integer lChr
 
-	if integer(pVal) then
-		if sequence(pCharSet[1]) then
-			for j = 1 to length(pCharSet) do
-				if pVal >= pCharSet[j][1] and pVal <= pCharSet[j][2] then return TRUE end if
+	if integer(test_data) then
+		if sequence(char_set[1]) then
+			for j = 1 to length(char_set) do
+				if test_data >= char_set[j][1] and test_data <= char_set[j][2] then 
+					return TRUE 
+				end if
 			end for
 			return FALSE
 		else
-			return find(pVal, pCharSet) > 0
+			return find(test_data, char_set) > 0
 		end if
-	elsif sequence(pVal) then
-		if length(pVal) = 0 then return FALSE end if
-		for i = 1 to length(pVal) label "NXTCHR" do
-			if sequence(pVal[i]) then return FALSE end if
-			if not integer(pVal[i]) then return FALSE end if
-			lChr = pVal[i]
-			if sequence(pCharSet[1]) then
-				for j = 1 to length(pCharSet) do
-					if lChr >= pCharSet[j][1] and lChr <= pCharSet[j][2] then continue "NXTCHR" end if
+	elsif sequence(test_data) then
+		if length(test_data) = 0 then 
+			return FALSE 
+		end if
+		for i = 1 to length(test_data) label "NXTCHR" do
+			if sequence(test_data[i]) then 
+				return FALSE
+			end if
+			if not integer(test_data[i]) then 
+				return FALSE
+			end if
+			lChr = test_data[i]
+			if sequence(char_set[1]) then
+				for j = 1 to length(char_set) do
+					if lChr >= char_set[j][1] and lChr <= char_set[j][2] then
+						continue "NXTCHR" 
+					end if
 				end for
 			else
-				if find(lChr, pCharSet) > 0 then continue "NXTCHR" end if
+				if find(lChr, char_set) > 0 then
+					continue "NXTCHR"
+				end if
 			end if
 			return FALSE
 		end for
@@ -183,10 +301,10 @@ end function
 -- Sets the definition for one or more defined character sets.
 --
 -- Parameters:
---		# ##pSets## : a sequence of zero or more character set definitions.
+--		# ##charset_list## : a sequence of zero or more character set definitions.
 --
 -- Comments:
--- ##pSets## must be a sequence of pairs. The first element of each pair
+-- ##charset_list## must be a sequence of pairs. The first element of each pair
 -- is the character set id , eg. CS_Whitespace, and the second is the definition
 -- of that character set.
 --
@@ -207,11 +325,11 @@ end function
 -- See Also:
 -- [[:get_charsets]]
 
-public procedure set_charsets(sequence pSets)
-	for i = 1 to length(pSets) do
-		if sequence(pSets[i]) and length(pSets[i]) = 2 then
-			if integer(pSets[i][1]) and pSets[i][1] > CS_FIRST and pSets[i][1] < CS_LAST then
-				Defined_Sets[pSets[i][1]] = pSets[i][2]
+public procedure set_charsets(sequence charset_list)
+	for i = 1 to length(charset_list) do
+		if sequence(charset_list[i]) and length(charset_list[i]) = 2 then
+			if integer(charset_list[i][1]) and charset_list[i][1] > CS_FIRST and charset_list[i][1] < CS_LAST then
+				Defined_Sets[charset_list[i][1]] = charset_list[i][2]
 			end if
 		end if
 	end for
@@ -242,10 +360,10 @@ end procedure
 -- boolean({})            -- FALSE (empty sequence)
 -- </eucode>
 
-public type boolean(object pVal)
+public type boolean(object test_data)
 	-- A boolean is a value that is either zero or one.
 
-	return find(pVal,{1,0}) != 0
+	return find(test_data,{1,0}) != 0
 
 end type
 
@@ -265,8 +383,8 @@ end type
 -- t_boolean({1, 1, 9.7})    -- FALSE
 -- t_boolean({})            -- FALSE (empty sequence)
 -- </eucode>
-public type t_boolean(object pVal)
-	return char_test(pVal, Defined_Sets[CS_Boolean])
+public type t_boolean(object test_data)
+	return char_test(test_data, Defined_Sets[CS_Boolean])
 end type
 
 --**
@@ -292,8 +410,8 @@ end type
 -- t_alnum({})            -- FALSE (empty sequence)
 -- </eucode>
 
-public type t_alnum(object pVal)
-	return char_test(pVal, Defined_Sets[CS_Alphanumeric])
+public type t_alnum(object test_data)
+	return char_test(test_data, Defined_Sets[CS_Alphanumeric])
 end type
 
 --**
@@ -323,15 +441,15 @@ end type
 -- t_identifier({})            -- FALSE (empty sequence)
 -- </eucode>
 
-public type t_identifier(object pVal)
+public type t_identifier(object test_data)
 	-- Test to make sure the first character is not a number
-	if t_digit(pVal) then
+	if t_digit(test_data) then
 		return 0
-	elsif sequence(pVal) and length(pVal) > 0 and t_digit(pVal[1]) then
+	elsif sequence(test_data) and length(test_data) > 0 and t_digit(test_data[1]) then
 		return 0
 	end if
 
-	return char_test(pVal, Defined_Sets[CS_Identifier])
+	return char_test(test_data, Defined_Sets[CS_Identifier])
 end type
 
 --**
@@ -357,8 +475,8 @@ end type
 -- t_alpha({})            -- FALSE (empty sequence)
 -- </eucode>
 
-public type t_alpha(object pVal)
-	return char_test(pVal, Defined_Sets[CS_Alphabetic])
+public type t_alpha(object test_data)
+	return char_test(test_data, Defined_Sets[CS_Alphabetic])
 end type
 
 --**
@@ -384,8 +502,8 @@ end type
 -- t_ascii({})            -- FALSE (empty sequence)
 -- </eucode>
 
-public type t_ascii(object pVal)
-	return char_test(pVal, Defined_Sets[CS_ASCII])
+public type t_ascii(object test_data)
+	return char_test(test_data, Defined_Sets[CS_ASCII])
 end type
 
 --**
@@ -412,8 +530,8 @@ end type
 -- t_cntrl({})            -- FALSE (empty sequence)
 -- </eucode>
 
-public type t_cntrl(object pVal)
-	return char_test(pVal, Defined_Sets[CS_Control])
+public type t_cntrl(object test_data)
+	return char_test(test_data, Defined_Sets[CS_Control])
 end type
 
 --**
@@ -441,8 +559,8 @@ end type
 -- t_digit({})            -- FALSE (empty sequence)
 -- </eucode>
 
-public type t_digit(object pVal)
-	return char_test(pVal, Defined_Sets[CS_Digit])
+public type t_digit(object test_data)
+	return char_test(test_data, Defined_Sets[CS_Digit])
 end type
 
 --**
@@ -471,8 +589,8 @@ end type
 -- t_graph({})            -- FALSE (empty sequence)
 -- </eucode>
 
-public type t_graph(object pVal)
-	return char_test(pVal, Defined_Sets[CS_Graphic])
+public type t_graph(object test_data)
+	return char_test(test_data, Defined_Sets[CS_Graphic])
 end type
 
 --**
@@ -507,8 +625,8 @@ end type
 -- t_specword({})            -- FALSE (empty sequence)
 -- </eucode>
 
-public type t_specword(object pVal)
-	return char_test(pVal, Defined_Sets[CS_SpecWord])
+public type t_specword(object test_data)
+	return char_test(test_data, Defined_Sets[CS_SpecWord])
 end type
 
 --**
@@ -540,8 +658,8 @@ end type
 -- t_bytearray({})            -- FALSE (empty sequence)
 -- </eucode>
 
-public type t_bytearray(object pVal)
-	return char_test(pVal, Defined_Sets[CS_Bytes])
+public type t_bytearray(object test_data)
+	return char_test(test_data, Defined_Sets[CS_Bytes])
 end type
 
 --**
@@ -569,8 +687,8 @@ end type
 -- t_lower({})            -- FALSE (empty sequence)
 -- </eucode>
 
-public type t_lower(object pVal)
-	return char_test(pVal, Defined_Sets[CS_Lowercase])
+public type t_lower(object test_data)
+	return char_test(test_data, Defined_Sets[CS_Lowercase])
 end type
 
 --**
@@ -600,8 +718,8 @@ end type
 -- t_print({})            -- FALSE (empty sequence)
 -- </eucode>
 
-public type t_print(object pVal)
-	return char_test(pVal, Defined_Sets[CS_Printable])
+public type t_print(object test_data)
+	return char_test(test_data, Defined_Sets[CS_Printable])
 end type
 
 --**
@@ -631,8 +749,8 @@ end type
 -- t_display({})            -- FALSE (empty sequence)
 -- </eucode>
 
-public type t_display(object pVal)
-	return char_test(pVal, Defined_Sets[CS_Displayable])
+public type t_display(object test_data)
+	return char_test(test_data, Defined_Sets[CS_Displayable])
 end type
 
 --**
@@ -660,8 +778,8 @@ end type
 -- t_punct({})            -- FALSE (empty sequence)
 -- </eucode>
 
-public type t_punct(object pVal)
-	return char_test(pVal, Defined_Sets[CS_Punctuation])
+public type t_punct(object test_data)
+	return char_test(test_data, Defined_Sets[CS_Punctuation])
 end type
 
 --**
@@ -688,8 +806,8 @@ end type
 -- t_space({})            -- FALSE (empty sequence)
 -- </eucode>
 
-public type t_space(object pVal)
-	return char_test(pVal, Defined_Sets[CS_Whitespace])
+public type t_space(object test_data)
+	return char_test(test_data, Defined_Sets[CS_Whitespace])
 end type
 
 --**
@@ -717,8 +835,8 @@ end type
 -- t_upper({})            -- FALSE (empty sequence)
 -- </eucode>
 
-public type t_upper(object pVal)
-	return char_test(pVal, Defined_Sets[CS_Uppercase])
+public type t_upper(object test_data)
+	return char_test(test_data, Defined_Sets[CS_Uppercase])
 end type
 
 --**
@@ -746,8 +864,8 @@ end type
 -- t_xdigit({})            -- FALSE (empty sequence)
 -- </eucode>
 
-public type t_xdigit(object pVal)
-	return char_test(pVal, Defined_Sets[CS_Hexadecimal])
+public type t_xdigit(object test_data)
+	return char_test(test_data, Defined_Sets[CS_Hexadecimal])
 end type
 
 --**
@@ -775,8 +893,8 @@ end type
 -- t_vowel({})            -- FALSE (empty sequence)
 -- </eucode>
 
-public type t_vowel(object pVal)
-	return char_test(pVal, Defined_Sets[CS_Vowel])
+public type t_vowel(object test_data)
+	return char_test(test_data, Defined_Sets[CS_Vowel])
 end type
 
 --**
@@ -804,8 +922,8 @@ end type
 -- t_consonant({})            -- FALSE (empty sequence)
 -- </eucode>
 
-public type t_consonant(object pVal)
-	return char_test(pVal, Defined_Sets[CS_Consonant])
+public type t_consonant(object test_data)
+	return char_test(test_data, Defined_Sets[CS_Consonant])
 end type
 
 set_default_charsets()
@@ -973,6 +1091,7 @@ end type
 -- string({1, 2, "abc'6"}) -- FALSE (contains a sequence)
 -- string({1, 2, 9.7})    -- FALSE (contains a non-integer)
 -- string({1, 2, 'a'})    -- TRUE
+-- string({1, 2, 'a', 0}) -- TRUE (even though it contains a null byte)
 -- string({1, -2, 'a'})   -- FALSE (contains a negative integer)
 -- string({})            -- TRUE
 -- </eucode>
@@ -994,3 +1113,51 @@ public type string( object x )
 	end for
 	return 1
 end type
+
+--**
+-- Returns:
+--  TRUE if argument is a sequence that only contains zero or more non-null byte characters.
+--
+-- Comment:
+-- A non-null byte 'character' is defined as a integer in the range [1 to 255].
+--
+-- Example 1:
+-- <eucode>
+-- cstring(-1)            -- FALSE (not a sequence)
+-- cstring("abc'6")       -- TRUE (all single byte characters)
+-- cstring({1, 2, "abc'6"}) -- FALSE (contains a sequence)
+-- cstring({1, 2, 9.7})    -- FALSE (contains a non-integer)
+-- cstring({1, 2, 'a'})    -- TRUE
+-- cstring({1, 2, 'a', 0}) -- FALSE (contains a null byte)
+-- cstring({1, -2, 'a'})   -- FALSE (contains a negative integer)
+-- cstring({})            -- TRUE
+-- </eucode>
+public type cstring( object x )
+	if not sequence(x) then
+		return 0
+	end if
+
+	for i = 1 to length(x) do
+		if not integer(x[i]) then
+			return 0
+		end if
+		if x[i] <= 0 then
+			return 0
+		end if
+		if x[i] > 255 then
+			return 0
+		end if
+	end for
+	return 1
+end type
+
+--**
+-- value returned from [[:routine_id]]()
+-- when the routine doesn't exist or is out of scope.
+-- this is typically seen as -1 in legacy code.
+public constant INVALID_ROUTINE_ID = routine_id("#")
+
+--**
+-- to be used as a flag for no [[:routine_id]]() supplied.
+public constant NO_ROUTINE_ID = -99999
+

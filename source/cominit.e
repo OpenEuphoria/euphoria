@@ -1,24 +1,25 @@
 -- (c) Copyright - See License.txt
+--
 --****
 -- == cominit.e: Common command line initialization
 
 ifdef ETYPE_CHECK then
-with type_check
+	with type_check
 elsedef
-without type_check
+	without type_check
 end ifdef
 
 include euphoria/info.e
 
 include std/cmdline.e
+include std/console.e
 include std/error.e as error
 include std/filesys.e
 include std/io.e
-include std/search.e
-include std/text.e
 include std/map.e as m
+include std/search.e
 include std/sequence.e
-include std/console.e
+include std/text.e
 
 include common.e
 include error.e
@@ -32,23 +33,26 @@ export sequence src_name = ""
 export sequence switches = {}
 
 constant COMMON_OPTIONS = {
-	{ "batch",     0, GetMsgText(279,0), { NO_CASE } },
-	{ "c",         0, GetMsgText(280,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "filename" } },
-	{ "copyright", 0, GetMsgText(281,0), { NO_CASE } },
-	{ "d",         0, GetMsgText(282,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "word" } },
-	{ "i",         0, GetMsgText(283,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "dir" } },
-	{ "l",         0, GetMsgText(284,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "local" } },
-	{ "ldb",       0, GetMsgText(285,0), { NO_CASE, HAS_PARAMETER, "localdb" } },
-	{ "p",         0, GetMsgText(286,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "file_ext:command" } },
-	{ "pf",        0, GetMsgText(287,0), { NO_CASE } },
-	{ "strict",    0, GetMsgText(288,0), { NO_CASE } },
-	{ "test",      0, GetMsgText(289,0), { NO_CASE } },
-	{ "version",   0, GetMsgText(290,0), { NO_CASE } },
-	{ "w",         0, GetMsgText(291,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "name" } },
-	{ "wf",        0, GetMsgText(292,0), { NO_CASE, HAS_PARAMETER, "filename" } },
-	{ "x",         0, GetMsgText(293,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "name" } },
+	{ "eudir",     0, GetMsgText(328,0), { HAS_PARAMETER, "dir" } },
+	{ "c",         0, GetMsgText(280,0), { MULTIPLE, HAS_PARAMETER, "filename" } },
+	{ "i",         0, GetMsgText(283,0), { MULTIPLE, HAS_PARAMETER, "dir" } },
+	{ "d",         0, GetMsgText(282,0), { MULTIPLE, HAS_PARAMETER, "word" } },
+	{ "l",         0, GetMsgText(284,0), { MULTIPLE, HAS_PARAMETER, "local" } },
+	{ "ldb",       0, GetMsgText(285,0), { HAS_PARAMETER, "localdb" } },
+	{ "p",         0, GetMsgText(286,0), { MULTIPLE, HAS_PARAMETER, "file_ext:command" } },
+	{ "pf",        0, GetMsgText(287,0), { } },
+	{ "w",         0, GetMsgText(291,0), { MULTIPLE, HAS_PARAMETER, "name" } },
+	{ "wf",        0, GetMsgText(292,0), { HAS_PARAMETER, "filename" } },
+	{ "x",         0, GetMsgText(293,0), { MULTIPLE, HAS_PARAMETER, "name" } },
+	{ "batch",     0, GetMsgText(279,0), { } },
+	{ "strict",    0, GetMsgText(288,0), { } },
+	{ "test",      0, GetMsgText(289,0), { } },
+	{ "copyright", 0, GetMsgText(281,0), { } },
+	{ "v", "version", GetMsgText(290,0), { } },
  	$
 }
+
+constant COMMON_OPTIONS_SPLICE_IDX = length(COMMON_OPTIONS) - 1
 
 sequence options = {}
 add_options( COMMON_OPTIONS )
@@ -56,7 +60,8 @@ add_options( COMMON_OPTIONS )
 --**
 -- Add options to be parsed.
 export procedure add_options( sequence new_options )
-	options &= new_options
+	options = splice(options, new_options, COMMON_OPTIONS_SPLICE_IDX)
+	--options &= new_options
 end procedure
 
 --**
@@ -86,35 +91,239 @@ end function
 procedure show_copyrights()
 	sequence notices = all_copyrights()
 	for i = 1 to length(notices) do
-		printf(2, "%s\n  %s\n\n", { notices[i][1], find_replace("\n", notices[i][2], "\n  ") })
+		printf(2, "%s\n  %s\n\n", { notices[i][1], match_replace("\n", notices[i][2], "\n  ") })
 	end for
 end procedure
 
 --**
+-- Show the Euphoria banner message stating product name,
+-- platform, version and other miscellaneous information
+-- about the compilation
+--
+
 export procedure show_banner()
+	sequence prod_name, memory_type
+
 	if INTERPRET and not BIND then
-		screen_output(STDERR, GetMsgText(270,0))
+		prod_name = GetMsgText(270,0)
 
 	elsif TRANSLATE then
-		screen_output(STDERR, GetMsgText(271,0))
+		prod_name = GetMsgText(271,0)
 
 	elsif BIND then
-		screen_output(STDERR, GetMsgText(272,0))
+		prod_name = GetMsgText(272,0)
 	end if
-	screen_output(STDERR, version_string_long() & "\n")
 
 	ifdef EU_MANAGED_MEM then
-		screen_output(STDERR, GetMsgText(273,0))
+		memory_type = GetMsgText(273,0)
 	elsedef
-		screen_output(STDERR, GetMsgText(274,0))
+		memory_type = GetMsgText(274,0)
 	end ifdef
+
+	sequence misc_info = {
+		info:platform_name(), 
+		memory_type, 
+		"", 
+		info:version_date(),
+		info:version_node()
+	}
+
+	if info:is_developmental then
+		misc_info[$] = sprintf("%d:%s", { info:version_revision(), info:version_node() })
+	end if
 
 	object EuConsole = getenv("EUCONS")
 	if equal(EuConsole, "1") then
-		screen_output(STDERR, GetMsgText(275,0))
+		misc_info[3] = GetMsgText(275,0)
+	else
+		misc_info = remove(misc_info, 3)
 	end if
-	screen_output(STDERR, "\n")
+
+	screen_output(STDERR, sprintf("%s v%s %s\n   %s, %s\n   Revision Date: %s, Id: %s\n", {
+		prod_name, info:version_string_short(), info:version_type() } & misc_info ) )
 end procedure
+
+-- Taken from std/cmdline.e :-(
+-- Record fields in 'opts' argument.
+enum
+	SHORTNAME   = 1,
+	LONGNAME    = 2,
+	DESCRIPTION = 3,
+	OPTIONS     = 4,
+	CALLBACK    = 5,
+	MAPNAME     = 6
+
+--**
+-- Find a given option from the command line in the possible options sequence
+--
+-- Parameters:
+--   * ##name_type## - type of parameter, SHORTNAME or LONGNAME
+--   * ##opt## - actual option, text only no preceding - or / characters
+--   * ##opts## - possible options (as sent to cmd_parse())
+--
+-- Returns:
+--   Matching sequence in ##opts## or an empty sequence if the option was not found
+--
+
+function find_opt(integer name_type, sequence opt, sequence opts)
+	for i = 1 to length(opts) do
+		sequence o = opts[i]		
+		integer has_case = find(HAS_CASE, o[OPTIONS])
+		
+		if has_case and equal(o[name_type], opt) then
+			return o
+		elsif not has_case and equal(text:lower(o[name_type]), text:lower(opt)) then
+			return o
+		end if
+	end for
+	
+	return {}
+end function
+
+--**
+-- Merge ##a## into ##b## keeping ##b## when there are conflicts in accordance with
+-- ##opts##
+--
+-- Parameters:
+--   * ##a## - A set of command line parameters
+--   * ##b## - B set of command line parameters (steady)
+--   * ##opts## - options sequence as normally passed to cmd_parse
+--
+-- Returns:
+--   A new harmonized command line sequence in accordance with 
+
+export function merge_parameters(sequence a, sequence b, sequence opts, integer dedupe = 0)
+	integer i = 1
+	
+	while i <= length(a) do
+		sequence opt = a[i]
+		if length(opt) < 2 then
+			i += 1
+			continue
+		end if
+		
+		sequence this_opt = {}
+		integer bi = 0
+		
+		if opt[2] = '-' then
+			-- We have a long option
+			-- Look to see if b has this option
+			this_opt = find_opt(LONGNAME, opt[3..$], opts)
+			
+			for j = 1 to length(b) do
+				if equal(text:lower(b[j]), text:lower(opt)) then
+					bi = j
+					exit
+				end if
+			end for
+			
+		elsif opt[1] = '-' or opt[1] = '/' then
+			-- We have a short option
+			-- Look to see if b has this option
+			this_opt = find_opt(SHORTNAME, opt[2..$], opts)
+			
+			for j = 1 to length(b) do
+				if equal(text:lower(b[j]), '-' & text:lower(opt[2..$])) or 
+							equal(text:lower(b[j]), '/' & text:lower(opt[2..$]))
+				then
+					bi = j
+					exit
+				end if
+			end for
+			
+		end if
+		
+		--
+		-- If we have it in b also, is a valid option and contains the ONCE parameter
+		--
+	
+		if length(this_opt) and not find(MULTIPLE, this_opt[OPTIONS]) then
+			if bi then
+				if find(HAS_PARAMETER, this_opt[OPTIONS]) then
+					-- remove the option and it's parameter as well
+					a = remove(a, i, i + 1)
+				else
+					-- remove only the option
+					a = remove(a, i)
+				end if
+				
+				-- no need to increment the parameter index as we have removed options 
+				-- which has the same effect as incrementing the parameter index
+				
+			else
+				
+				--
+				-- Dedupe a w/in itself (eu.cfg args)
+				--
+				--   * i < length(a) makes sure we are not at the end of the list
+				--     nothing to do if so and slicing would err.
+				--
+
+				integer beginLen = length(a)
+				
+				if dedupe = 0 and i < beginLen then
+					a = merge_parameters( a[i + 1..$], a[1..i], opts, 1)
+					
+					if beginLen = length(a) then
+						-- nothing removed, increment the parameter index
+						i += 1
+					end if
+				else
+					-- nothing removed, increment the parameter index
+					i += 1
+				end if
+			end if			
+			
+		else
+			-- nothing processed, increment the parameter index
+			i += 1
+		end if
+	end while
+	
+	if dedupe then
+		return b & a
+	end if
+	
+	integer first_extra = 0
+	
+	i = 1
+	
+	-- We know the first extra is not in a (DefaultArgs)
+	while i <= length(b) do
+		sequence opt = b[i]
+		
+		-- can't be a parameter
+		if length(opt) <= 1 then
+			first_extra = i
+			exit
+		end if
+		
+		sequence this_opt = {}
+		if opt[2] = '-' and opt[1] = '-' then
+			this_opt = find_opt(LONGNAME, opt[3..$], opts)
+		elsif opt[1] = '-' or opt[1] = '/' then
+			this_opt = find_opt(SHORTNAME, opt[2..$], opts)
+		end if
+		
+		if length(this_opt) then
+			if find(HAS_PARAMETER, this_opt[OPTIONS]) then
+				i += 1
+			end if
+		else
+			first_extra = i
+			exit
+		end if
+		
+		i += 1
+	end while
+	
+	if first_extra then
+		return splice(b, a, first_extra)
+	end if
+	
+	-- No extras, system will prob fail w/a help message later
+	return b & a
+end function
 
 --**
 -- Expand any config file options on the command line adding
@@ -159,7 +368,6 @@ export procedure handle_common_options(m:map opts)
 
 			case "test" then
 				test_only = 1
-				batch_job = 1
 
 			case "strict" then
 				Strict_is_on = 1
@@ -181,53 +389,69 @@ export procedure handle_common_options(m:map opts)
 				LocalDB = val
 
 			case "w" then
-				integer n = find(val, warning_names)
-				if n != 0 then
-					if option_w = 1 then
-						OpWarning = or_bits(OpWarning, warning_flags[n])
-					else
-						option_w = 1
-						OpWarning = warning_flags[n]
+				for i = 1 to length(val) do
+					sequence this_warn = val[i]
+					integer auto_add_warn = 0
+					if this_warn[1] = '+' then
+						auto_add_warn = 1
+						this_warn = this_warn[2 .. $]
 					end if
-
-					prev_OpWarning = OpWarning
-				end if
-
+					integer n = find(this_warn, warning_names)
+					if n != 0 then
+						if auto_add_warn or option_w = 1 then
+							OpWarning = or_bits(OpWarning, warning_flags[n])
+						else
+							option_w = 1
+							OpWarning = warning_flags[n]
+						end if
+	
+						prev_OpWarning = OpWarning
+					end if
+				end for
+				
 			case "x" then
-				integer n = find(val, warning_names)
-				if n != 0 then
-					if option_w = -1 then
-						OpWarning = and_bits(OpWarning, not_bits(warning_flags[n]))
-					else
-						option_w = -1
-						OpWarning = all_warning_flag - warning_flags[n]
+				for i = 1 to length(val) do
+					sequence this_warn = val[i]
+					integer auto_add_warn = 0
+					if this_warn[1] = '+' then
+						auto_add_warn = 1
+						this_warn = this_warn[2 .. $]
 					end if
-
-					prev_OpWarning = OpWarning
-				end if
+					integer n = find(this_warn, warning_names)
+					if n != 0 then
+						if auto_add_warn or option_w = -1 then
+							OpWarning = and_bits(OpWarning, not_bits(warning_flags[n]))
+						else
+							option_w = -1
+							OpWarning = all_warning_flag - warning_flags[n]
+						end if
+	
+						prev_OpWarning = OpWarning
+					end if
+				end for
 
 			case "wf" then
 				TempWarningName = val
 			  	error:warning_file(TempWarningName)
 
-			case "version" then
+			case "v", "version" then
 				show_banner()
-				if find("WIN32_GUI", OpDefines) then
-					if not batch_job then
-						any_key(GetMsgText(278,0), 2)
-					end if
+				if not batch_job and not test_only then
+					console:maybe_any_key(GetMsgText(278,0), 2)
 				end if
 
 				abort(0)
 
 			case "copyright" then
 				show_copyrights()
-				if find("WIN32_GUI", OpDefines) then
-					if not batch_job then
-						any_key(GetMsgText(278,0), 2)
-					end if
+				if not batch_job and not test_only then
+					console:maybe_any_key(GetMsgText(278,0), 2)
 				end if
 				abort(0)
+			
+			case "eudir" then
+				set_eudir( val )
+				
 		end switch
 	end for
 
@@ -246,16 +470,16 @@ export procedure finalize_command_line(m:map opts)
 		OpWarning = all_warning_flag
 		prev_OpWarning = OpWarning
 	end if
-
+	
 	-- Initialize the option_switches and remove them
 	-- from the command line
-	sequence extras = m:get(opts, "extras")
+	sequence extras = m:get(opts, cmdline:EXTRAS)
 	if length(extras) > 0 then
-		integer eufile_pos = find(extras[1], Argv)
 		sequence pairs = m:pairs( opts )
+		
 		for i = 1 to length( pairs ) do
 			sequence pair = pairs[i]
-			if equal( pair[1], "extras" ) then
+			if equal( pair[1], cmdline:EXTRAS ) then
 				continue
 			end if
 			pair[1] = prepend( pair[1], '-' )
@@ -271,10 +495,9 @@ export procedure finalize_command_line(m:map opts)
 				switches = append( switches, pair[1] )
 			end if
 		end for
-		if eufile_pos > 3 then
-			Argv = Argv[1..2] & Argv[eufile_pos..$]
-			Argc = length(Argv)
-		end if
+
+		Argv = Argv[2..3] & extras
+		Argc = length(Argv)
 
 		src_name = extras[1]
 	end if

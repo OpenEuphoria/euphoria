@@ -3,7 +3,6 @@
 
 include std/error.e
 include dot.e
-include std/sets.e as set
 include std/filesys.e
 include std/sort.e
 include std/map.e as map
@@ -17,7 +16,7 @@ sequence out_dir           = "eudox" & SLASH
 integer  show_dependencies = 1
 integer  show_callgraphs   = 1
 
-set:set  files             = {}
+sequence  files             = {}
 
 export function set_out_dir( sequence out )
 	if length( out ) and out[$] != SLASH then
@@ -43,7 +42,9 @@ export function suppress_stdlib( object o)
 end function
 
 export function document_file( sequence name )
-	files = set:add_to( name, files )
+	if not find( name, files ) then
+		files = append( files, name )
+	end if
 	return 0
 end function
 
@@ -89,8 +90,8 @@ end procedure
 
 
 function underscore_name( sequence name )
-	name = find_replace( '\\', name, '_' )
-	name = find_replace( '/', name,  '_' )
+	name = match_replace( '\\', name, '_' )
+	name = match_replace( '/', name,  '_' )
 	return name
 end function
 

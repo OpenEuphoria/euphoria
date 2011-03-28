@@ -1,9 +1,10 @@
 namespace decl
+constant cmd = command_line()
 
 include std/unittest.e
 include std/error.e
 
-with warning (short_circuit)
+with warning {short_circuit}
 
 integer n=3,n0
 sequence s0="Useless code"
@@ -15,7 +16,7 @@ end function
 
 if n and f()=7 then end if
 
-with warning &= (not_used, custom)
+with warning &= {not_used, custom}
 
 function foo()
 	integer n = decl:n + f()
@@ -30,7 +31,9 @@ warning("Useless code")
 without warning &= (short_circuit)
 if n and f()=7 then end if
 
-warning_file("warning.lst")
+ifdef EUI then
+	warning_file("warning.lst")
+end ifdef
 integer n1
 procedure bar()
 	integer nha = 2

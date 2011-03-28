@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "alldefs.h"
+#include "be_alloc.h"
 
 unsigned char *string_ptr;
 
@@ -22,7 +23,6 @@ unsigned char *string_ptr;
 #define MIN3B (-0x00800000)
 #define MIN4B (-0x80000000)
 
-
 object decompress(unsigned int c)
 // read a compressed Euphoria object
 // if c is set, then c is not <= 248    
@@ -30,7 +30,6 @@ object decompress(unsigned int c)
 	s1_ptr s;
 	object_ptr obj_ptr;
 	unsigned int len, i;
-	int x;
 	double d;
 	
 	if (c == 0) {

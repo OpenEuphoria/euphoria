@@ -1,14 +1,11 @@
 
-ifdef not DOS32 then
 include std/localeconv.e as lcc
 include std/locale.e as l
 include std/datetime.e as d
-end ifdef
 
 include std/unittest.e
 include std/mathcons.e
 
-ifdef not DOS32 then
 sequence locale
 
 locale = "en_US"
@@ -17,6 +14,7 @@ locale = "en_US"
 integer ix = set( "" )
 sequence native_locale = l:get()
 ix = find( '.', native_locale )
+
 sequence encoding
 if ix then
 	encoding = native_locale[ix..$]
@@ -24,9 +22,17 @@ else
 	encoding = ""
 end if
 
+
 test_true("set()", l:set("C"))
 test_equal("set/get", lcc:decanonical("C"), lcc:decanonical(l:get()))
-if l:set(locale & encoding) then
+
+integer has_locale = l:set(locale & encoding)
+if not has_locale then
+	encoding = ".US-ASCII"
+	has_locale = l:set(locale & encoding)
+end if
+
+if has_locale then
 	test_equal("set/get en_US", lcc:decanonical(locale & encoding), lcc:decanonical(l:get()))
 	test_equal("money", "$1,020.50", l:money(1020.50))
 	test_equal("number", "1,020.50", l:number(1020.5))
@@ -35,12 +41,12 @@ if l:set(locale & encoding) then
 	test_equal("large integer", "9,999,999,999,999", l:number(9_999_999_999_999))
 else
 	-- can not test, maybe emit a warning?
-	puts(1, "warning can not test en_US locale, testing against C locale..")
+	puts(1, "warning can not test en_US locale, testing against C locale..\n")
 	test_equal("money", "1020.50", l:money(1020.50))
 	test_equal("number", "1020.50", l:number(1020.5))
 	test_equal("integer", "1020", l:number(1020))
-	test_equal("number", "1,020.10", l:number(1020.1))
-	test_equal("large integer", "9,999,999,999,999", l:number(9_999_999_999_999))
+	test_equal("number", "1020.10", l:number(1020.1))
+	test_equal("large integer", "9999999999999", l:number(9_999_999_999_999))
 end if
 
 d:datetime dt1
@@ -93,12 +99,13 @@ test_equal("translate() #8a", "g'day", l:translate("g'day",, PINF))
 
 test_equal("translate() #9", "This is an example of some \n  translation text that spans \n   multiple lines.", l:translate("help text"))
 
-
-
 test_equal("trsprintf #1", "Hola, Bob!",  trsprintf("greeting", {       "hello", "Bob"}))
 test_equal("trsprintf #2", "hello, Bob!", trsprintf("greeting", {"__" & "hello", "Bob"}))
 
+test_equal("get_text unknown number", 0, get_text(-2))
 
-end ifdef
+test_equal("get_text known number A", "Block comment from line [1] not terminated.", get_text(42,"two"))
+test_equal("get_text known number B", "Block comment from line [1] not terminated.", get_text(42,{"zero","two"}))
+test_equal("get_text known number C", "Block comment from line [1] not terminated.", get_text(42, {"zero"}))
 
 test_report()

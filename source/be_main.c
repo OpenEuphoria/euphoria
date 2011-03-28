@@ -40,39 +40,13 @@
 #endif
 #include <fcntl.h>
 #include <string.h>
+
 #include "alldefs.h"
-
-/**********************/
-/* Imported variables */
-/**********************/
-extern int EuConsole;
-extern int clocks_per_sec;
-extern int clk_tck;
-#ifdef EWINDOWS
-//extern HINSTANCE winInstance;
-extern unsigned default_heap;
-#endif
-extern int have_console;
-
-extern int gameover;
-#ifdef EXTRA_STATS
-extern int mouse_ints;
-extern unsigned recycles;
-extern long a_miss;
-extern long a_hit; 
-extern long a_too_big;
-extern long funny_expand;
-extern long funny_align;
-extern int bad_samples;
-#endif
-extern char show_cursor[];
-extern char hide_cursor[];
-extern char wrap[];
-extern long bytes_allocated;
-extern long max_bytes_allocated;
-extern char **file_name;
-extern unsigned char TempBuff[];
-extern char *TempErrName;
+#include "be_runtime.h"
+#include "be_execute.h"
+#include "be_alloc.h"
+#include "be_rterror.h"
+#include "be_w.h"
 
 /**********************/
 /* Exported variables */
@@ -82,107 +56,14 @@ void *Backlink = NULL; /* DLL back pointer */
 char *eudir;           /* path to Euphoria directory */
 char main_path[PATH_MAX+1]; /* path of main file being executed */
 
-/*******************/
-/* Local variables */
-/*******************/
-static int src_file;
-
-/**********************/
-/* Declared functions */
-/**********************/
-extern char *getenv();
-#ifndef ESIMPLE_MALLOC
-extern char *EMalloc();
-#else
-#include "alloc.h"
-#endif
-#ifndef EWINDOWS 
-extern void *malloc();
-#endif
-
 /*********************/
 /* Defined functions */
 /*********************/
-
-static int e_path_open(char *name, int mode)
-/* follow the search path, if necessary to open the main file */
-{
-	int src_file, fn;
-#ifdef EWINDOWS
-	int accents;
-#endif
-	char *path;
-	char *full_name;
-	char *p;
-	   
-	file_name[1] = name;
-	src_file = long_open(name, mode);        
-	if (src_file > -1) {
-		return src_file;        
-	}
-	/* first make sure that name is a simple name without '\' in it */
-	for (p = name; *p != 0; p++) {
-		if (*p == '\\' || *p == '/')   // should add ':' too - but doesn't matter
-			return -1;
-	}     
-	path = getenv("PATH");
-	if (path == NULL)
-		return -1;
-	full_name = EMalloc(PATH_MAX+1);
-	fn = 0;
-#ifdef EWINDOWS
-	accents = 0;
-#endif
-	for (p = path; ; p++) {
-		if (*p == ' ' || *p == '\t')
-			continue;
-		else if (*p == PATH_SEPARATOR || *p == '\0') {
-			/* end of a directory */
-			if (fn > 0) {
-				full_name[fn++] = SLASH;
-				strlcpy(full_name + fn, name, PATH_MAX);
-				src_file = long_open(full_name, mode);
-				if (src_file > -1) {
-					file_name[1] = full_name;           
-					return src_file;
-				}
-				else {
-#ifdef EWINDOWS                         
-					if (accents) {
-						accents = OemToCharBuffA(full_name,full_name,fn);
-				src_file = long_open(full_name, mode);
-				if (src_file > -1) {
-					file_name[1] = full_name;           
-					return src_file;
-				}
-					}
-#endif
-					fn = 0;
-				}
-			}
-			if (*p == '\0')
-				break;
-#ifdef EWINDOWS
-			accents = 0;
-#endif
-		}
-		else {
-			full_name[fn++] = *p;
-#ifdef EWINDOWS
-			if (*p >= 128) accents = 1;
-#endif
-		}
-	}
-	return -1;
-}
 
 void be_init()
 /* Main routine for Interpreter back end */
 {
 	char *p;
-	int i;
-	long c;
-	char *temp;
 
 	EuConsole = (getenv("EUCONS") != NULL && atoi(getenv("EUCONS")) == 1);
 	clocks_per_sec = CLOCKS_PER_SEC;
@@ -193,8 +74,8 @@ void be_init()
 #endif
 
 #define TempErrName_len (30)
-	TempErrName = (char *)malloc(TempErrName_len); // uses malloc, not EMalloc
-	strlcpy(TempErrName, "ex.err", TempErrName_len); // can change
+	TempErrName = (char *)EMalloc(TempErrName_len);
+	copy_string(TempErrName, "ex.err", TempErrName_len); // can change
 	
 	eudir = getenv("EUDIR");
 	if (eudir == NULL) {
@@ -206,7 +87,7 @@ void be_init()
 		}
 		else {
 			int p_size = strlen(eudir) + 12;
-			p = (char *)malloc(p_size + 1);
+			p = (char *)EMalloc(p_size + 1);
 			snprintf(p, p_size+1, "%s/euphoria", eudir);
 			p[p_size] = 0; // ensure NULL
 			eudir = p;
@@ -217,7 +98,7 @@ void be_init()
 	}
 	
 #if defined(EUNIX) || defined(EMINGW)
-	strlcpy(main_path, file_name[1], PATH_MAX); // FOR NOW!
+	copy_string(main_path, file_name[1], PATH_MAX); // FOR NOW!
 #else
 	(void)_fullpath(main_path, file_name[1], PATH_MAX+1); 
 #endif
@@ -234,7 +115,6 @@ void be_init()
 	InitDebug();
 	InitTraceWindow();
 }
-
 
 #ifdef EXTRA_STATS
 void Stats()
@@ -257,3 +137,4 @@ void Stats()
 	printf("bad time-profile samples: %d\n", bad_samples);
 }
 #endif
+

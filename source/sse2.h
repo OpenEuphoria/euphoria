@@ -8,15 +8,18 @@
   set this to another number, such as 16, you will have to change loads of code in be_alloc and
   be_runtime. */
 #define ALIGN_SIZE 8
+
 /* alignment memory must be at to call the SSE2 instructions */
 #define BASE_ALIGN_SIZE 16 
 /* a variable type of the same size and structure of a 
-vector register.  In this case the SSE2 XMM register */
+vector register.  In this case the SSE2 XMM register.  In 
+the case where the vectors are scalar 4. */
+
 /* Assumption: size of this is a power of 2 */
 typedef union {
 	object obj[4];
 	double dbl[2];
-} vreg; 
+} vreg;
 #if defined( ESIMPLE_MALLOC )
 #	define EMalloc(size) malloc_aligned(size,16)
 #	define ERealloc(orig,newsize) realloc_aligned(orig,newsize,16)

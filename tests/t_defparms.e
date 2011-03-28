@@ -91,5 +91,10 @@ test_equal("Indirect reference to parameter",5,f2("abcde"))
 include unknown_defparm.e
 test_equal("Default parameter relays knwn symbols #1", 3, unk_foo())
 
+function nested_functions_in_default_param( sequence a, sequence b = repeat(a,(length(a)))) 
+	return { a, b }
+end function
+test_equal( "nested functions in default parameters",{"ab" ,{"ab","ab" }} , nested_functions_in_default_param("ab"))
+
 test_report()
 

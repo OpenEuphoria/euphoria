@@ -1,28 +1,108 @@
--- (c) Copyright - See License.txt
+--****
+-- == Machine Level Access
 --
+-- <<LEVELTOC level=2 depth=4>>
+--
+
 namespace machine
 
-include std/dll.e
-
-include std/error.e
 public include std/memconst.e
 
 ifdef SAFE then
-
-	public include std/safe.e
-
+	public include std/safe.e as memory
 elsedef
-
-	public include std/memory.e
-
+	public include std/memory.e as memory
 end ifdef
+
+include std/dll.e
+include std/error.e
+include std/types.e
 
 integer FREE_ARRAY_RID
 
-type block_aligned( atom a )
-	return remainder(a,4096)=0
-end type
+--****
+-- === Memory allocation
+--
 
+--**
+-- The number of bytes required to hold a pointer.
+public constant ADDRESS_LENGTH = 4
+
+--**
+-- Allocate a contiguous block of data memory.
+--
+-- Parameters:
+--   # ##n## : a positive integer, the size of the requested block.
+--   # ##cleanup## : an integer, if non-zero, then the returned pointer will be
+--     automatically freed when its reference count drops to zero, or
+--     when passed as a parameter to [[:delete]].
+--
+-- Return:
+--   An **atom**, the address of the allocated memory or 0 if the memory
+--   can't be allocated. **NOTE** you must use either an atom or object to
+--   receive the returned value as sometimes the returned memory address is
+--   too larger for an integer to hold.
+--
+-- Comments:
+-- * Since ##allocate##() acquires memory from the system, it is your responsiblity to 
+-- return that memory when your application is done with it. There are two ways to
+-- do that - automatically or manually.
+-- ** //Automatically// - If the ##cleanup## parameter is non-zero, then the memory
+-- is returned when the variable that receives the address goes out of scope **and**
+-- is not referenced by anything else. Alternatively you can force it be released by
+-- calling the [[:delete]]() function.
+-- ** //Manually// - If the ##cleanup## parameter is zero, then you must call the
+-- [[:free]]() function at some point in your program to release the memory back to the system.
+-- * When your program terminates, the operating system will reclaim
+-- all memory that your applicaiton acquired anyway.
+-- * An address returned by this function shouldn't be passed to ##[[:call]]()##.
+-- For that purpose you should use ##[[:allocate_code]]()## instead. 
+-- * The address returned will be at least 8-byte aligned.
+--
+-- Example 1:
+-- <eucode>
+-- buffer = allocate(100)
+-- for i = 0 to 99 do
+--     poke(buffer+i, 0)
+-- end for
+-- </eucode>
+--                  
+-- See Also:
+--     [[:free]], [[:peek]], [[:poke]], [[:mem_set]], [[:allocate_code]] [[:allocate_string]]
+
+public function allocate( memory:positive_int n, types:boolean cleanup = 0)
+-- allocate memory block and add it to safe list
+	atom iaddr --machine_addr iaddr
+	atom eaddr	
+	ifdef DATA_EXECUTE then
+		-- high level call:  No need to add BORDER_SPACE*2 here.
+		eaddr = machine:allocate_protect( n, 1, PAGE_READ_WRITE_EXECUTE )
+	elsedef	
+		iaddr = eu:machine_func( memconst:M_ALLOC, n + memory:BORDER_SPACE * 2)
+		eaddr = memory:prepare_block( iaddr, n, PAGE_READ_WRITE )
+	end ifdef
+	if cleanup then
+		eaddr = delete_routine( eaddr, memconst:FREE_RID )
+	end if
+	return eaddr
+end function
+
+--**
+-- Allocate n bytes of memory and return the address.
+-- Free the memory using free() below.
+
+public function allocate_data( memory:positive_int n, types:boolean cleanup = 0)
+-- allocate memory block and add it to safe list
+	memory:machine_addr a
+	bordered_address sla
+	a = eu:machine_func( memconst:M_ALLOC, n+BORDER_SPACE*2)
+	sla = memory:prepare_block(a, n, PAGE_READ_WRITE )
+	if cleanup then
+		return delete_routine( sla, memconst:FREE_RID )
+	else
+		return sla
+	end if
+end function
 
 
 --**
@@ -39,22 +119,21 @@ end type
 --
 -- Example 1:
 -- <eucode>
--- atom pa = allocate_pointer_array({ allocate_string("1"), allocate_string("2") })
+-- atom pa
+-- pa = allocate_pointer_array({ allocate_string("1"), allocate_string("2") })
 -- </eucode>
 --
 -- See Also:
 --   [[:allocate_string_pointer_array]], [[:free_pointer_array]]
 
-public function allocate_pointer_array(sequence pointers, integer cleanup = 0)
+public function allocate_pointer_array(sequence pointers, types:boolean cleanup = 0)
+
     atom pList
-
-    if atom(pointers) then
-        return 0
-    end if
-
-    pointers &= 0
-    pList = allocate(length(pointers) * 4)
+	integer len = length(pointers) * ADDRESS_LENGTH
+	
+    pList = allocate( (len + ADDRESS_LENGTH ) )
     poke4(pList, pointers)
+    poke4(pList + len, 0)
 	if cleanup then
 		return delete_routine( pList, FREE_ARRAY_RID )
 	end if
@@ -76,13 +155,14 @@ end function
 --   [[:allocate_pointer_array]], [[:allocate_string_pointer_array]]
 
 public procedure free_pointer_array(atom pointers_array)
-	atom saved = pointers_array,
-		ptr = peek4u(pointers_array)
+	atom saved = pointers_array
+	atom ptr
 
-	while ptr do
-		free(ptr)
-
-		pointers_array+=4
+	while ptr with entry do
+		memory:deallocate( ptr )
+		pointers_array += ADDRESS_LENGTH
+		
+	entry
 		ptr = peek4u(pointers_array)
 	end while
 
@@ -112,7 +192,7 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- See Also:
 --   [[:free_pointer_array]]
 
-public function allocate_string_pointer_array(object string_list, integer cleanup = 0)
+public function allocate_string_pointer_array(object string_list, types:boolean cleanup = 0)
 	for i = 1 to length(string_list) do
 		string_list[i] = allocate_string(string_list[i])
 	end for
@@ -126,9 +206,9 @@ end function
 
 
 --****
--- == Dynamic Calling
+-- == Indirect Routine Calling
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 -- === SAFE mode
 --
@@ -245,7 +325,7 @@ end function
 --  
 -- See Also:
 -- [[:call_proc]], [[:call_func]], [[:call_back]], [[:define_c_func]], [[:define_c_proc]], 
--- [[:task_create]], [[:Platform-Specific Issues]], [[:Dynamic routine calling]]
+-- [[:task_create]], [[:Platform-Specific Issues]], [[:Indirect routine calling]]
 
 --****
 -- Signature:
@@ -271,7 +351,7 @@ end function
 --
 -- ##args## must be a sequence of argument values of length n, where n is the number of
 -- arguments required by the called function. Defaulted parameters currently cannot be
--- synthesized while making a dynamic call.
+-- synthesized while making a indirect call.
 --
 -- If the function with id ##id## does not take any arguments then ##args## should be ##{}##.
 --
@@ -303,7 +383,7 @@ end function
 --
 -- ##args## must be a sequence of argument values of length n, where n is the number of
 -- arguments required by the called procedure. Defaulted parameters currently cannot be
--- synthesized while making a dynamic call.
+-- synthesized while making a indirect call.
 --
 -- If the procedure with id ##id## does not take any arguments then ##args## should be ##{}##.
 --
@@ -328,7 +408,7 @@ end function
 --   [[:call_func]], [[:routine_id]], [[:c_proc]]
 
 --****
--- === Accessing Euphoria internals dynamically
+-- === Accessing Euphoria internals
 
 --****
 -- Signature:
@@ -369,23 +449,22 @@ end function
 -- See Also:
 -- [[:machine_func]]
 
-
-ifdef WIN32 then
+integer page_size = 0
+ifdef WINDOWS then
 
 	atom kernel_dll, memDLL_id, 
 		VirtualAlloc_rid, 
 		-- VirtualLock_rid, VirtualUnlock_rid,
 		VirtualProtect_rid, GetLastError_rid, GetSystemInfo_rid
 
-	memDLL_id = open_dll( "kernel32.dll" )
+	memDLL_id = dll:open_dll( "kernel32.dll" )
 	kernel_dll = memDLL_id
-	VirtualAlloc_rid = define_c_func( memDLL_id, "VirtualAlloc", { C_POINTER, C_SIZE_T, C_DWORD, C_DWORD }, C_POINTER )
-	VirtualProtect_rid = define_c_func( memDLL_id, "VirtualProtect", { C_POINTER, C_SIZE_T, C_DWORD, C_POINTER }, C_BOOL )
-	VirtualFree_rid = define_c_func( kernel_dll, "VirtualFree", { C_POINTER, C_SIZE_T, C_DWORD }, C_BOOL )
-	-- VirtualLock_rid = define_c_func( memDLL_id, "VirtualLock", { C_POINTER, C_SIZE_T }, C_BOOL )
-	-- VirtualUnlock_rid = define_c_func( memDLL_id, "VirtualUnlock", { C_POINTER, C_SIZE_T }, C_BOOL )
-	GetLastError_rid = define_c_func( kernel_dll, "GetLastError", {}, C_DWORD )
-	GetSystemInfo_rid = define_c_proc( kernel_dll, "GetSystemInfo", { C_POINTER } )
+	VirtualAlloc_rid = dll:define_c_func( memDLL_id, "VirtualAlloc", { dll:C_POINTER, dll:C_SIZE_T, dll:C_DWORD, dll:C_DWORD }, dll:C_POINTER )
+	VirtualProtect_rid = dll:define_c_func( memDLL_id, "VirtualProtect", { dll:C_POINTER, dll:C_SIZE_T, dll:C_DWORD, dll:C_POINTER }, dll:C_BOOL )
+	-- set exported
+	memory:VirtualFree_rid = dll:define_c_func( kernel_dll, "VirtualFree", { dll:C_POINTER, dll:C_SIZE_T, dll:C_DWORD }, dll:C_BOOL )
+	GetLastError_rid = dll:define_c_func( kernel_dll, "GetLastError", {}, dll:C_DWORD )
+	GetSystemInfo_rid = dll:define_c_proc( kernel_dll, "GetSystemInfo", { dll:C_POINTER } )
 	if VirtualAlloc_rid != -1 and VirtualProtect_rid != -1 
 		and GetLastError_rid != -1 and GetSystemInfo_rid != -1
 		then
@@ -397,23 +476,36 @@ ifdef WIN32 then
 		end if
 	end if
 
-	integer page_size = 0
+	
 	if GetSystemInfo_rid != -1 then
-		bordered_address system_info_ptr = allocate( 9 * 4 )
+		bordered_address system_info_ptr = allocate( 9 * ADDRESS_LENGTH )
 		if system_info_ptr != 0 then
 			c_proc( GetSystemInfo_rid, { system_info_ptr } )
-			page_size = peek4u( system_info_ptr + 4 )
---			free( system_info_ptr )
-			machine_proc(M_FREE, system_info_ptr)
+			page_size = peek4u( system_info_ptr + ADDRESS_LENGTH )
+			free( system_info_ptr )
 		end if
 	end if
-	public constant PAGE_SIZE = page_size
-elsedef
-	public constant PAGE_SIZE = -1
+
+elsifdef NETBSD then
+
+	constant libc_h = open_dll("libc.so")
+	constant getpagesize_rid = dll:define_c_func(libc_h, "sysconf", { dll:C_INT }, dll:C_LONG )
+	if getpagesize_rid > -1 then
+		page_size = c_func(getpagesize_rid, { 28 })
+	end if
+
+elsifdef UNIX then
+
+	constant getpagesize_rid = dll:define_c_func( -1, "getpagesize", { }, dll:C_UINT )	 
+	page_size = c_func( getpagesize_rid, {} )
 
 end ifdef
 
-ifdef WIN32 then
+--** 
+-- The operating system's memory page length in bytes.
+public constant PAGE_SIZE = page_size
+
+ifdef WINDOWS then
 	function VirtualAlloc( atom addr, atom size, atom allocation_type, atom protect_ )
 		atom r1
 		r1 = c_func( VirtualAlloc_rid, {addr, size, allocation_type, protect_ } )
@@ -426,15 +518,30 @@ end ifdef
 
 --**
 -- protection constants type
-public type valid_memory_protection_constant( integer x )
-	return 0 != find( x, MEMORY_PROTECTION )
+public type valid_memory_protection_constant( object x )
+	return find( x, memconst:MEMORY_PROTECTION )
 end type
 
 --**
 -- page aligned address type
-export type page_aligned_address( atom a )
-	return remainder( a, 4096 ) = 0
+public type page_aligned_address( object a )
+	if not atom(a) then
+		return 0
+	end if
+	return remainder( a, PAGE_SIZE ) = 0
 end type
+
+public function is_DEP_supported()
+	return memconst:DEP_really_works
+end function
+
+public function is_using_DEP()
+	return memconst:use_DEP
+end function
+
+public procedure DEP_on(integer value)
+	memconst:use_DEP = value
+end procedure
 
 --****
 -- === Allocating and Writing to memory:
@@ -471,7 +578,7 @@ end type
 -- See Also:
 -- [[:allocate]], [[:free_code]], [[:allocate_protect]]
 
-public function allocate_code( object data, valid_wordsize wordsize = 1 )
+public function allocate_code( object data, memconst:valid_wordsize wordsize = 1 )
 
 	return allocate_protect( data, wordsize, PAGE_EXECUTE )
 
@@ -495,17 +602,286 @@ end function
 -- Only values that satisfy this type may be passed into
 -- free or free_code.
 --
-public type std_library_address( atom addr ) 
+public type std_library_address( object addr ) 
 	ifdef not SAFE then
-		return 1
+		return atom(addr)
 	elsedef
+		if not atom(addr) then
+			return 0
+		end if
 		return (addr = 0) or bordered_address(addr)
 	end ifdef
 end type
 
-ifdef WIN32 then
-std_library_address oldprotptr = allocate_data(4)
+ifdef WINDOWS then
+std_library_address oldprotptr = allocate_data(ADDRESS_LENGTH)
 end ifdef
+
+function local_allocate_protected_memory( integer s, integer first_protection )
+	ifdef WINDOWS then
+		if dep_works() then
+			return eu:c_func(VirtualAlloc_rid, 
+				{ 0, s, or_bits( MEM_RESERVE, MEM_COMMIT ), first_protection })
+		else
+			return machine_func(M_ALLOC, PAGE_SIZE)
+		end if
+	elsifdef UNIX then
+		return machine_func( memconst:M_ALLOC, PAGE_SIZE)
+--		return mmap( 0, PAGE_SIZE, protection, or_bits(MAP_PRIVATE,MAP_ANONYMOUS), -1, 0 )
+	end ifdef
+end function
+
+-- return -1 for failure. 0 success  
+function local_change_protection_on_protected_memory( atom p, integer s, integer new_protection )
+	ifdef WINDOWS then
+		if dep_works() then
+			if eu:c_func( VirtualProtect_rid, { p, s, new_protection , oldprotptr } ) = 0 then
+				-- 0 indicates failure here
+				return -1
+			end if
+		end if
+		return 0
+	elsifdef UNIX then
+		return 0
+--		return mprotect(p, s, new_protection)
+	end ifdef
+end function
+
+procedure local_free_protected_memory( atom p, integer s)
+	ifdef WINDOWS then
+		if dep_works() then
+			c_func(VirtualFree_rid, { p, s, MEM_RELEASE })
+		else
+			machine_func(M_FREE, {p})
+		end if
+	elsifdef UNIX then
+			machine_func( memconst:M_FREE, {p})
+--		munmap(p, s)
+	end ifdef
+end procedure
+
+--**
+-- Allocates and copies data into memory and gives it protection using
+-- [[:Standard Library Memory Protection Constants]] or
+-- [[:Microsoft Windows Memory Protection Constants]].  The user may only pass in one of these 
+-- constants.  If you only wish to execute a sequence as machine code use ##allocate_code()##.  
+-- If you only want to read and write data into memory use ##allocate()##.
+--
+-- See [[http://msdn.microsoft.com/en-us/library/aa366786(VS.85).aspx "MSDN: Microsoft's Memory Protection Constants"]]
+--
+-- Parameters:
+-- # ##data## : is the machine code to be put into memory. 
+-- # ##wordsize## : is the size each element of data will take in 
+-- memory.  Are they 1-byte, 2-bytes or 4-bytes long?  Specify here.  The default is 1.
+-- # ##protection## : is the particular Windows protection.
+--
+-- Returns:
+-- An **address**,
+-- The function returns the address to the required memory
+-- or 0 if it fails.  This function is guaranteed to return memory on 
+-- the 8 byte boundary.  It also guarantees that the memory returned with 
+-- at least the protection given (but you may get more).
+--
+-- If you want to call ##allocate_protect( data, PAGE_READWRITE )##, you can use 
+-- [[:allocate]] instead.  It is more efficient and simpler.
+--
+-- If you want to call ##allocate_protect( data, PAGE_EXECUTE )##, you can use 
+-- [[:allocate_code()]] instead.  It is simpler.
+--
+-- You must not use [[:free()]] on memory returned from this function, instead use [[:free_code()]].
+
+public function allocate_protect( object data, memconst:valid_wordsize wordsize = 1, valid_memory_protection_constant protection )
+	-- set the actual protection for the OS to /true_protection/ in all cases
+	-- /protection/ is put into the checking system if it is there using SAFE
+	
+	atom iaddr = 0
+	std_library_address eaddr	
+	integer size
+	valid_memory_protection_constant first_protection
+	
+	valid_memory_protection_constant true_protection = protection
+		
+	-- when SAFE is defined /true_protection/ always allows READ so that block edges can be 
+	-- checked and WRITE so that we can add leader and trailer markers in this routine.
+	-- when SAFE is not defined /true_protection/ is set to what is passed in without
+	-- modification.
+	ifdef SAFE then	
+		if ( (not test_write(protection)) or (not test_read(protection) ) ) then
+			if test_exec(protection) then
+				true_protection = PAGE_READ_WRITE_EXECUTE
+			else
+				true_protection = PAGE_READ_WRITE
+			end if
+		end if
+	end ifdef
+
+	if atom(data) then
+		size = data * wordsize
+		first_protection = true_protection
+	else
+		size = length(data) * wordsize
+		first_protection = PAGE_READ_WRITE
+	end if
+
+	iaddr = local_allocate_protected_memory( size + memory:BORDER_SPACE * 2, first_protection )
+	if iaddr = 0 then
+		return 0
+	end if
+	
+	-- eaddr is set here
+	eaddr = memory:prepare_block( iaddr, size, protection )
+
+	if eaddr = 0 or atom( data ) then
+		return eaddr
+	end if
+
+	switch wordsize do
+		case 1 then
+			eu:poke( eaddr, data )
+			
+		case 2 then
+			eu:poke2( eaddr, data )
+			
+		case 4 then
+			eu:poke4( eaddr, data )
+			
+		case else
+			error:crash("Parameter error: Wrong word size %d in allocate_protect().", wordsize)
+			
+	end switch
+	
+	ifdef SAFE then
+		-- here we can take away write access
+		-- from true_protection if protection doesn't have it.
+		-- true_protection must have read access though.
+		switch protection do
+			case PAGE_EXECUTE then
+				true_protection = PAGE_EXECUTE_READ
+				
+			case PAGE_EXECUTE_WRITECOPY  then
+				true_protection = PAGE_EXECUTE_READWRITE
+				
+			case PAGE_WRITECOPY, PAGE_NOACCESS then				
+				true_protection = PAGE_READONLY
+				
+			case else
+				true_protection = protection					
+		end switch
+	end ifdef
+	
+	if local_change_protection_on_protected_memory( iaddr, size + memory:BORDER_SPACE * 2, true_protection ) = -1 then
+		local_free_protected_memory( iaddr, size + memory:BORDER_SPACE * 2 )
+		eaddr = 0
+	end if
+	
+	return eaddr
+end function
+
+
+
+--**
+-- Stores a C-style null-terminated ANSI string in memory
+--
+-- Parameters:
+-- # ##buffaddr##: an atom, the RAM address to to the string at.
+-- # ##buffsize##: an integer, the number of bytes available, starting from ##buffaddr##.
+-- # ##s## : a sequence, the string to store at address ##buffaddr##.
+--
+-- Comments:
+-- * This does not allocate an RAM. You must supply the preallocated area.
+-- * This can only be used on ANSI strings. It cannot be used for double-byte strings.
+-- * If ##s## is not a string, nothing is stored and a zero is returned.
+--
+-- Returns:
+-- An atom. If this is zero, then nothing was stored, otherwise it is the
+-- address of the first byte after the stored string.
+--
+-- Example 1:
+-- <eucode>
+--  atom title
+--
+-- title = allocate(1000)
+-- if poke_string(title, 1000, "The Wizard of Oz") then
+--     -- successful
+-- else
+--     -- failed
+-- end if
+-- </eucode>
+-- 
+-- See Also:
+-- [[:allocate]], [[:allocate_string]]
+
+public function poke_string(atom buffaddr, integer buffsize, sequence s)
+	
+	if buffaddr <= 0 then
+		return 0
+	end if
+	
+	if not types:string(s) then
+		return 0
+	end if
+	
+	if buffsize <= length(s) then
+		return 0
+	end if
+
+	poke(buffaddr, s)
+	buffaddr += length(s)
+	poke(buffaddr, 0)
+
+	return buffaddr
+end function
+
+--**
+-- Stores a C-style null-terminated Double-Byte string in memory
+--
+-- Parameters:
+-- # ##buffaddr##: an atom, the RAM address to to the string at.
+-- # ##buffsize##: an integer, the number of bytes available, starting from ##buffaddr##.
+-- # ##s## : a sequence, the string to store at address ##buffaddr##.
+--
+-- Comments:
+-- * This does not allocate an RAM. You must supply the preallocated area.
+-- * This uses two bytes per string character. **Note** that ##buffsize## 
+-- is the number of //bytes// available in the buffer and not the number
+-- of //characters// available.
+-- * If ##s## is not a double-byte string, nothing is stored and a zero is returned.
+--
+-- Returns:
+-- An atom. If this is zero, then nothing was stored, otherwise it is the
+-- address of the first byte after the stored string.
+--
+-- Example 1:
+-- <eucode>
+--  atom title
+--
+-- title = allocate(1000)
+-- if poke_wstring(title, 1000, "The Wizard of Oz") then
+--     -- successful
+-- else
+--     -- failed
+-- end if
+-- </eucode>
+-- 
+-- See Also:
+-- [[:allocate]], [[:allocate_wstring]]
+
+public function poke_wstring(atom buffaddr, integer buffsize, sequence s)
+	
+	if buffaddr <= 0 then
+		return 0
+	end if
+	
+	if buffsize <= 2 * length(s) then
+		return 0
+	end if
+
+	poke2(buffaddr, s)
+	buffaddr += 2 * length(s)
+	poke2(buffaddr, 0)
+
+	return buffaddr
+end function
 
 --**
 -- Allocate a C-style null-terminated string in memory
@@ -542,7 +918,7 @@ end ifdef
 -- See Also:
 --              [[:allocate]], [[:allocate_wstring]]
 
-public function allocate_string(sequence s, integer cleanup = 0 )
+public function allocate_string(sequence s, types:boolean cleanup = 0 )
 	atom mem
 	
 	mem = allocate( length(s) + 1) -- Thanks to Igor
@@ -551,146 +927,116 @@ public function allocate_string(sequence s, integer cleanup = 0 )
 		poke(mem, s)
 		poke(mem+length(s), 0)  -- Thanks to Aku
 		if cleanup then
-			mem = delete_routine( mem, FREE_RID )
+			mem = delete_routine( mem, memconst:FREE_RID )
 		end if
 	end if
 
 	return mem
 end function
 
-
 --**
--- Allocates and copies data into memory and gives it protection using [[:Microsoft's Memory Protection Constants]].  The user may only pass in one of these constants.  If you only wish to execute a sequence as machine code use ##allocate_code()##.  If you only want to read and write data into memory use ##allocate()##.
---
--- See [[http://msdn.microsoft.com/en-us/library/aa366786(VS.85).aspx "MSDN: Microsoft's Memory Protection Constants"]]
+-- Create a C-style null-terminated wchar_t string in memory
 --
 -- Parameters:
--- # ##data## : is the machine code to be put into memory. 
--- # ##wordsize## : is the size each element of data will take in 
--- memory.  Are they 1-byte, 2-bytes or 4-bytes long?  Specify here.  The default is 1.
--- # ##protection## : is the particular Windows protection.
+--   # ##s## : a unicode (utf16) string
 --
 -- Returns:
--- An **address**,
--- The function returns the address to the required memory
--- or 0 if it fails.  This function is guaranteed to return memory on 
--- the 4 byte boundary.  It also guarantees that the memory returned with 
--- at least the protection given (but you may get more).
+--   An **atom**, the address of the allocated string, or 0 on failure.
 --
--- If you want to call ##allocate_protect( data, PAGE_READWRITE )##, you can use 
--- [[:allocate]] instead.  It is more efficient and simpler.
+-- See Also:
+-- [[:allocate_string]]
 --
--- If you want to call ##allocate_protect( data, PAGE_EXECUTE )##, you can use 
--- [[:allocate_code()]] instead.  It is simpler.
---
--- You mustn't use [[:free()]] on memory returned from this function, instead use [[:free_code()]].
-
-public function allocate_protect( object data, valid_wordsize wordsize = 1, valid_memory_protection_constant protection )
-	-- set the actual protection for the OS to /true_protection/ in all cases
-	-- /protection/ is put into the checking system if it is there using SAFE
+public function allocate_wstring(sequence s, types:boolean cleanup = 0 )
+	atom mem
 	
-	atom iaddr = 0
-	std_library_address eaddr	
-	integer size
-	valid_memory_protection_constant first_protection
-	
-	valid_memory_protection_constant true_protection = protection
-		
-	-- when SAFE is defined /true_protection/ always allows READ so that block edges can be 
-	-- checked and WRITE so that we can add leader and trailer markers in this routine.
-	-- when SAFE is not defined /true_protection/ is set to what is passed in without
-	-- modification.
-	ifdef SAFE then	
-		if ( (not test_write(protection)) or (not test_read(protection) ) ) then
-			if test_exec(protection) then
-				true_protection = PAGE_READ_WRITE_EXECUTE
-			else
-				true_protection = PAGE_READ_WRITE
-			end if
+	mem = allocate( 2 * (length(s) + 1) )
+	if mem then
+		poke2(mem, s)
+		poke2(mem + length(s)*2, 0)
+		if cleanup then
+			mem = delete_routine( mem, memconst:FREE_RID )
 		end if
-	end ifdef
-
-	if atom(data) then
-		size = data * wordsize
-		first_protection = true_protection
-	else
-		size = length(data) * wordsize
-		first_protection = PAGE_READ_WRITE
-	end if
-
-	ifdef WIN32 then
-		if dep_works() then
-			iaddr = eu:c_func(VirtualAlloc_rid, 
-				{ 0, size+BORDER_SPACE*2, or_bits( MEM_RESERVE, MEM_COMMIT ), first_protection })
-		else
-			iaddr = machine_func(M_ALLOC, size+BORDER_SPACE*2)
-		end if
-	elsedef 
-		iaddr = machine_func(M_ALLOC, size+BORDER_SPACE*2)
-	end ifdef
-	if iaddr = 0 then
-		return 0
 	end if
 	
-	-- eaddr is set here
-	eaddr = prepare_block( iaddr, size, protection )
-
-	if eaddr = 0 or atom( data ) then
-		return eaddr
-	end if
-
-	switch wordsize do
-		case 1 then
-			eu:poke( eaddr, data )
-			
-		case 2 then
-			eu:poke2( eaddr, data )
-			
-		case 4 then
-			eu:poke4( eaddr, data )
-			
-		case else
-			crash("logic error: Wrong word size %d in allocate_protect", wordsize)
-			
-	end switch
-	
-
-	ifdef WIN32 then
-		ifdef SAFE then
-			-- here we can take away write access
-			-- from true_protection if protection doesn't have it.
-			-- true_protection must have read access though.
-			switch protection do
-				case PAGE_EXECUTE then
-					true_protection = PAGE_EXECUTE_READ
-					
-				case PAGE_EXECUTE_WRITECOPY  then
-					true_protection = PAGE_EXECUTE_READWRITE
-					
-				case PAGE_WRITECOPY, PAGE_NOACCESS then				
-					true_protection = PAGE_READONLY
-					
-				case else
-					true_protection = protection					
-			end switch
-		end ifdef
-		if dep_works() then
-			if eu:c_func( VirtualProtect_rid, { iaddr, size, true_protection , oldprotptr } ) = 0 then
-				-- 0 indicates failure here
-				c_proc(VirtualFree_rid, { iaddr, size, MEM_RELEASE })
-				return 0
-			end if
-		end if
-	end ifdef
-
-	return eaddr
+	return mem
 end function
 
+--**
+-- Return a unicode (utf16) string that are stored at machine address a.
+--
+-- Parameters:
+--   # ##addr## : an atom, the address of the string in memory
+--
+-- Returns:
+--   The **string**, at the memory position.  The terminator is the null word (two bytes equal to 0).
+--
+-- See Also:
+-- [[:peek_string]]
 
+public function peek_wstring(atom addr)
+	atom ptr = addr
+	
+	while peek2u(ptr) do
+		ptr += 2
+	end while
+	
+	return peek2u({addr, (ptr - addr) / 2})
+end function
 
 --****
 -- === Memory disposal
 --
+
+--**
+-- Free up a previously allocated block of memory.
+--
+-- Parameters:
+--  # ##addr##, either a single atom or a sequence of atoms; these are addresses of a blocks to free.
+--
+-- Comments:
+--  * Use ##free##() to return blocks of memory the during execution. This will reduce the chance of 
+--   running out of memory or getting into excessive virtual memory swapping to disk. 
+-- * Do not reference a block of memory that has been freed. 
+-- * When your program terminates, all allocated memory will be returned to the system.
+-- * ##addr## must have been allocated previously using [[:allocate]](). You
+--   cannot use it to relinquish part of a block. Instead, you have to allocate
+--   a block of the new size, copy useful contents from old block there and
+--   then ##free##() the old block.  
+-- * If the memory was allocated and automatic cleanup
+--   was specified, then do not call ##free()## directly.  Instead, use [[:delete]].
+-- * An ##addr## of zero is simply ignored.
+--
+-- Example 1:
+--   ##demo/callmach.ex##
+--
+-- See Also:
+--     [[:allocate]], [[:free_code]]
+--
+
+public procedure free(object addr)
+	if types:number_array (addr) then
+		if types:ascii_string(addr) then
+			error:crash("free(\"%s\") is not a valid address", {addr})
+		end if
+		
+		for i = 1 to length(addr) do
+			memory:deallocate( addr[i] )
+		end for
+		return
+	elsif sequence(addr) then
+		error:crash("free() called with nested sequence")
+	end if
+	
+	if addr = 0 then
+		-- Special case, a zero address is assumed to be an uninitialized pointer,
+		-- so it is ignored.
+		return
+	end if
+
+	memory:deallocate( addr )
+end procedure
+memconst:FREE_RID = routine_id("free")
+
 
 --****
 -- Signature:

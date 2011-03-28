@@ -1,0 +1,5 @@
+== Euphoria to C Translator Beta-1 February 15, 2001
+
+* Some bugs were fixed. Smaller, faster C code is produced.
+
+

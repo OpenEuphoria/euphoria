@@ -1,9 +1,11 @@
------------------------ Simple Customizable Database -----------------------
-
+--****
+-- === mydata.ex
+-- 
 -- This program uses the Euphoria Database System (EDS) to create and
 -- maintain a simple database. You can customize this program by modifying
 -- the FIELDS variable (below). You'll have to delete or rename the 
 -- "mydata.edb" database file if you change the number of fields.
+--
 
 constant FIELDS = {
    -- The first field is the "key" value used for lookups,

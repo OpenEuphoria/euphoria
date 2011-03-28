@@ -1,9 +1,11 @@
 -- (c) Copyright - See License.txt
+--
 -- Names of the IL opcodes
+
 ifdef ETYPE_CHECK then
-with type_check
+	with type_check
 elsedef
-without type_check
+	without type_check
 end ifdef
 
 export constant opnames = {
@@ -136,8 +138,6 @@ export constant opnames = {
 	"PEEK",
 	"POKE",
 	"CALL",
-	"PIXEL",
-	"GET_PIXEL",
 	"MEM_COPY",
 	"MEM_SET",
 	"C_PROC",
@@ -217,5 +217,7 @@ export constant opnames = {
 	"EXIT_BLOCK",
 	"REF_TEMP",
 	"DEREF_TEMP",
-	"NOVALUE_TEMP"
+	"NOVALUE_TEMP",
+	"COVERAGE_LINE",
+	"COVERAGE_ROUTINE"
 }

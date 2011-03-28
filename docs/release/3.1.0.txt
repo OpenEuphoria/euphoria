@@ -1,0 +1,59 @@
+== Version 3.1 June 2007
+
+This release adds some new features, fixes some bugs, and improves the documentation.
+
+=== New Features
+
+* New built-in routines, **find_from()** and **match_from()** have been added.
+  These work like find() and match() but they let you start searching from any
+  element in the sequence, not necessarily at element 1.  This makes some
+  algorithms simpler and much faster. Implemented by Matthew Lewis.
+* When searching for an include file specified with a relative (i.e. not
+  absolute) file path, Euphoria will check first for a file relative to the
+  location of the current source file.  If not found, then the usual rules will
+  apply, i.e. it will check relative to the main program file, then check the
+  EUINC directories (if any), and finally euphoria\include.  Suggested by C.K.
+  Lester and, in various forms, by several other people. Implemented by C.K.
+  Lester.  Checked in by Matt Lewis.
+* **ex int.ex** (in euphoria\source) will now work, since the interpreter now
+  supports machine_proc(65,...) which passes IL to the fast C-coded back-end. You
+  can also run int.ex with eui.  This lets you easily modify the front end and
+  get a modified Euphoria interpreter, for all platforms, that runs programs at
+  full speed (much faster than the Euphoria-coded execute.e). You might also bind
+  int.ex to get a single executable file for whatever platform you like.
+* If the user does not supply a filename with an extension, Euphoria will attempt
+  to open the file first with the standard extension for its respective platform,
+  but if it does not find it, it will also look for files with the standard
+  extensions for the other platforms. Implemented by Matthew Lewis.
+* **Translator: ** The limit on the number of additional .c files that can be
+  created per Euphoria file has been raised from 36 to well over 1000.
+
+=== New Documentation
+
+* The "storage cache" compression technique that's used for bound executables and
+  .il files, was documented in comments added to compress.e.  It reduces the size
+  of the IL by 30% or more, while allowing fast decompression.
+* A documentation file, tasks.doc, was added to euphoria\demo\langwar.
+  It describes the multiple tasks used in Language War.
+
+=== Bug Fixes
+
+* **bug fixed: ** **Translator: ** Translated code for routine_id() erroneously
+  returned -1 when a global symbol was looked up which matched a symbol in the
+  same file as the call to routine_id(), as well as a global symbol in another
+  earlier file. It was treated incorrectly as a multiply-defined symbol that was
+  lacking a namespace qualifier. Thanks to Daniel Kluss.
+* **bug fixed: ** **Translator: ** In rare situations, a naming conflict could
+  occur when more than one .c file is created for a Euphoria file.  Thanks to DB
+  James.
+* **bug fixed: ** **Translator:** get_key(), when translated/compiled with
+  Borland or LCC, required an extra keystroke after a carriage return.
+  Implemented by Jacques Deschenes.
+* **bug fixed: ** **Source Code Portability:** euphoria.h: CLK_TCK is now defined
+  as CLOCKS_PER_SEC if not defined previously in the source. Implemented by Matt
+  Lewis.
+* **bug fixed: ** **Installer:** Double-quotes were added around several
+  filenames used in the INNO installer script (though this did not seem to affect
+  many people).
+
+

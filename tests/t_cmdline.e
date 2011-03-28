@@ -21,13 +21,23 @@ end function
 -- Option definition
 sequence option_defs = {
     { "v", "verbose",  "Verbose output",   {MANDATORY,NO_PARAMETER} },
-    { 0  , "style",    "Style sheet file", {HAS_PARAMETER,"filename",NO_CASE} },
+    { ""  , "style",    "Style sheet file", {HAS_PARAMETER,"filename",NO_CASE} },
     { "c", "count",    "Count",            HAS_PARAMETER },
     { "i", 0,    "Include",            {HAS_PARAMETER,NO_CASE} },
     { "d", "dummy",    "Dummy Test",       {ONCE}, routine_id("got_dummy") },
     { 0,    0,         "At least one file name is also required.", {MANDATORY}}
     
 }
+
+show_help( option_defs, {"help line 1", "help line 2" } )
+
+-- use different extras help display method:
+sequence alternate_opts = option_defs
+alternate_opts[$][$] = {}
+show_help( alternate_opts )
+
+alternate_opts[$][$-1] = {}
+show_help( alternate_opts )
 
 -- Parse command line
 constant extra_data = `
@@ -50,8 +60,8 @@ constant optional_data = `
 write_file("extra.txt", extra_data, DOS_TEXT)
 write_file("optional.txt", optional_data, DOS_TEXT)
 delete_file("nofile.txt") -- Ensure that this does not exist.
-map:map opts = cmd_parse(option_defs, routine_id("opt_help"), 
-				{"exu", 
+map:map opts = cmd_parse(option_defs, , 
+				{"eui", 
 				 "app.ex", 
 				 "-d", 
 				 "@@nofile.txt",
@@ -68,7 +78,8 @@ delete_file("optional.txt")
 test_equal("cmd_parse() #1", 1, map:get(opts, "verbose"))
 test_equal("cmd_parse() #2", "50", map:get(opts, "count"))
 test_equal("cmd_parse() #3", "file.css", map:get(opts, "style"))
-test_equal("cmd_parse() #4", {"1  2 3", "4 5", "# not a comment", "\\usr\\input.txt", "output.txt"}, map:get(opts, "extras"))
+test_equal("cmd_parse() #4", {"1  2 3", "4 5", "# not a comment", "\\usr\\input.txt", "output.txt"}, map:get(opts, cmdline:EXTRAS))
+test_equal("cmd_parse() #4 (OPT_EXTRAS)", {"1  2 3", "4 5", "# not a comment", "\\usr\\input.txt", "output.txt"}, map:get(opts, cmdline:OPT_EXTRAS))
 test_equal("cmd_parse() #5", 0, map:get(opts, "not_set"))
 test_equal("cmd_parse() #6", 0, map:get(opts, "dummy"))
 test_equal("cmd_parse() #7", 21, dummy)
@@ -79,8 +90,11 @@ test_equal("build_commandline #2", "abc \"def ghi\"", build_commandline({"abc", 
 test_equal("parse_commandline #1", { "-v", "-f", "%Y-%m-%d %H:%M" }, parse_commandline("-v -f '%Y-%m-%d %H:%M'"))
 
 -- Reported bugs:
-cmd_parse({}, {}, { "eui", "prog.ex", "bug", "-h" })
+cmd_parse({}, NO_AT_EXPANSION, { "eui", "prog.ex", "bug", "/h" })
 test_pass("cmd_parse bug #2790825")
+
+cmd_parse({{ "z", "",   0, {OPTIONAL} }}, {AT_EXPANSION, NO_HELP, PAUSE_MSG, "here is a pause message"}, 
+	{ "eui", "prog.ex", "/z", "--", "bug", "-h"})
 
 -- Bug #2792895
 integer bug_help_called = 0
@@ -138,10 +152,10 @@ map = cmd_parse({{"v", "verbose", "Verbose output", {}}}, { NO_VALIDATION_AFTER_
 test_false("cmd_parse bug #2792895 ( NO_VAILDATION_AFTER_FIRST_EXTRA, { eui, bug, -? }) calls help",
 	bug_help_called)
 
-cmd_parse( {{ 0, "html", "html output", { NO_PARAMETER }}}, -1, { "eui", "bug", "--html" })
+cmd_parse( {{ 0, "html", "html output", { NO_PARAMETER }}}, , { "eui", "bug", "--html" })
 test_pass("cmd_parse bug #2792287")
 
-cmd_parse( {{ "i", 0, "include dir", { HAS_PARAMETER }}}, -1, { "eui", "eui", "-i",
+cmd_parse( {{ "i", 0, "include dir", { HAS_PARAMETER }}}, , { "eui", "eui", "-i",
 	"/usr/euphoria", "bug.ex" })
 test_pass("cmd_parse bug #2789982")
 

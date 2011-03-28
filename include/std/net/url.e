@@ -1,6 +1,8 @@
 --****
 -- == URL handling
 -- 
+-- <<LEVELTOC level=2 depth=4>>
+--
 
 namespace url
 
@@ -11,7 +13,13 @@ include std/map.e
 -- === Parsing
 -- 
 
-constant PAIR_SEP = {'&', ';'}, HEX_SIG = '%', WHITESPACE = '+', VALUE_SEP = '='
+constant 
+	PAIR_SEP_A = '&',
+	PAIR_SEP_B = ';',
+	HEX_SIG    = '%',
+	WHITESPACE = '+',
+	VALUE_SEP  = '=',
+	$
 
 --**
 -- Parse a query string into a map
@@ -30,38 +38,42 @@ constant PAIR_SEP = {'&', ';'}, HEX_SIG = '%', WHITESPACE = '+', VALUE_SEP = '='
 -- 
 
 public function parse_querystring(object query_string)
-	atom i, char
+	integer i, char
 	object tmp
-	sequence charbuf, fieldbuf, fname=""
+	sequence charbuf, fname=""
 	map:map the_map = map:new()
 
 	if atom(query_string) then
 		return the_map
 	end if
 
-	charbuf = {}  fieldbuf = {}  i = 1
+	charbuf = {}  
+	i = 1
 	while i <= length(query_string) do
 		char = query_string[i]  -- character we're working on
-		if equal(char, HEX_SIG) then
-			tmp = value("#" & query_string[i+1] & query_string[i+2])
-			charbuf &= tmp[2]
-			i += 3
-		elsif equal(char, WHITESPACE) then
-			charbuf &= " "
-			i += 1
-		elsif equal(char, VALUE_SEP) then
-			fname = charbuf
-			charbuf = {}
-			i += 1
-		elsif find(char, PAIR_SEP) then
-			map:put(the_map, fname, charbuf)
-			fname = {}
-			charbuf = {}
-			i += 1
-		else
-			charbuf &= char
-			i += 1
-		end if
+		switch char do
+			case HEX_SIG then
+				tmp = stdget:value("#" & query_string[i+1] & query_string[i+2])
+				charbuf &= tmp[2]
+				i += 2 -- skip over hex digits
+				
+			case WHITESPACE then
+				charbuf &= " "
+				
+			case VALUE_SEP then
+				fname = charbuf
+				charbuf = {}
+				
+			case PAIR_SEP_A, PAIR_SEP_B then
+				map:put(the_map, fname, charbuf)
+				fname = {}
+				charbuf = {}
+				
+			case else
+				charbuf &= char
+				
+		end switch
+		i += 1
 	end while
 
 	if length(fname) then
@@ -71,11 +83,47 @@ public function parse_querystring(object query_string)
 	return the_map
 end function
 
-public enum URL_PROTOCOL, URL_HOSTNAME, URL_PORT, URL_PATH, URL_USER, URL_PASSWORD, 
+--****
+-- === URL Parse Accessor Constants
+--
+-- Use with the result of [[:parse]].
+--
+-- Notes:
+--   If the host name, port, path, username, password or query string are not part of the 
+--   URL they will be returned as an integer value of zero.
+--
+
+public enum 
+	--**
+	-- The protocol of the URL
+	URL_PROTOCOL, 
+
+	--**
+	-- The hostname of the URL
+	URL_HOSTNAME, 
+
+	--**
+	-- The TCP port that the URL will connect to
+	URL_PORT, 
+
+	--**
+	-- The protocol-specific pathname of the URL
+	URL_PATH,
+
+	--**
+	-- The username of the URL
+	URL_USER,
+
+	--**
+	-- The password the URL
+	URL_PASSWORD, 
+
+	--**
+	-- The HTTP query string
 	URL_QUERY_STRING
 
 --**
--- Parse a URL returning it's various elements.
+-- Parse a URL returning its various elements.
 -- 
 -- Parameters:
 --   # ##url##: URL to parse
@@ -99,7 +147,8 @@ public enum URL_PROTOCOL, URL_HOSTNAME, URL_PORT, URL_PATH, URL_USER, URL_PASSWO
 --   
 -- Example 1:
 -- <eucode>
--- sequence parsed = parse("http://user:pass@www.debian.org:80/index.html?name=John&age=39")
+-- sequence parsed = 
+--       parse("http://user:pass@www.debian.org:80/index.html?name=John&age=39")
 -- -- parsed is
 -- -- { 
 -- --     "http",
@@ -202,7 +251,7 @@ label "parse_domain"
         	port_end = length(url)
         end if
 
-		port = defaulted_value(url[port_colon+1..port_end], 0)
+		port = stdget:defaulted_value(url[port_colon+1..port_end], 0)
     end if
     
     -- Increment the position to the next element to parse
@@ -343,9 +392,18 @@ public function decode(sequence what)
     if what[k] = '+' then
       what[k] = ' ' -- space is a special case, converts into +
     elsif what[k] = '%' then
-      what[k] = value("#" & what[k+1..k+2])
-      what[k] = what[k][2]
-      what = what[1..k] & what[k+3..length(what)]
+      if k = length(what) then
+        -- strip empty percent sign
+        what = what[1..k-1] & what[k+1 .. $]
+      elsif k+1 = length(what) then
+        what[k] = stdget:value("#0" & what[k+1])
+        what[k] = what[k][2]
+        what = what[1..k] & what[k+2 .. $]
+      else
+        what[k] = stdget:value("#" & what[k+1..k+2])
+        what[k] = what[k][2]
+        what = what[1..k] & what[k+3 .. $]
+      end if
     else
         -- do nothing if it is a regular char ('0' or 'A' or etc)
     end if

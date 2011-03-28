@@ -1,3 +1,5 @@
+atom my_start_time = time()
+
 include std/unittest.e
 include euphoria/info.e
 
@@ -15,6 +17,7 @@ test_true("version_string_long #1", sequence(version_string_long()))
 test_true("version_string_long #2", length(version_string_long()) > 0)
 test_true("platform_name #1", sequence(platform_name()))
 test_true("platform_name #2", length(platform_name()) > 0)
+test_true("start_time", my_start_time >= start_time())
 test_true("euphoria_copyright #1", sequence(euphoria_copyright()))
 test_true("euphoria_copyright #2", length(euphoria_copyright()) = 2)
 test_true("pcre_copyright #1", sequence(pcre_copyright()))

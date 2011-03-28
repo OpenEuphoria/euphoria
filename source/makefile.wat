@@ -1,58 +1,96 @@
-# OpenWatcom makefile for Euphoria (Win32/DOS32)
+# OpenWatcom makefile for Euphoria (Win32)
 #
 # You must first run configure.bat, supplying any options you might need:
 #
-#     --without-euphoria      Use this option if you are building Euphoria 
-#		     with only a C compiler.
-# 
-#     --prefix <dir>  Use this option to specify the location for euphoria to
-#		     be installed.  The default is EUDIR, or c:\euphoria,
-#		     if EUDIR is not set.
-#
-#     --eubin <dir>   Use this option to specify the location of the interpreter
-#		     binary to use to translate the front end.  The default
-#		     is ..\bin
-#
-#     --managed-mem   Use this option to turn EUPHORIA's memory cache on in
-#		     the targets
-#
-#     --debug	 Use this option to turn on debugging symbols
-#
-#
-#     --full	  Use this option to so EUPHORIA doesn't report itself
-#		     as a development version.
+#     Run "configure.bat --help" for a list of options.
 #
 # Syntax:
-#   Interpreter (euiw.exe, eui.exe):  wmake interpreter
-#   Translator  		  (euc.exe):  wmake translator
-#   Translator Library     (eu.lib):  wmake library
-#   Backend 	 eub.exe, eubw.exe):  wmake backend
-#	        	   Make all targets:  wmake
-#		             	    		  wmake all
+#   Interpreter (euiw.exe, eui.exe)  : wmake interpreter
+#   Translator            (euc.exe)  : wmake translator
+#   Translator Library     (eu.lib)  : wmake library
+#   Backend 	 eub.exe, eubw.exe)  : wmake backend
+#   Supporting Tools                 : wmake tools
+#   Code Page Database               : wmake code-page-db
+#   Create Documentation in HTML     : wmake htmldoc
+#   Create Documentation in PDF      : wmake pdfdoc
+#   Create online Documentation HTML : wmake manual
+#                                    
+#   Clean and remove entire build directory    
+#   and configuration                : wmake clobber
+#                                    
+#   Clean binaries, libraries, including 
+#   files that take a long time, object files,    
+#   C files and configuration        : wmake distclean
+#                                    
+#   Clean binaries, libraries, C files,
+#   documentation, and object files  : wmake clean
 #
-#   Make C sources so this tree      
-#   can be built with just a	 
-#   compiler.
-#   			                   :  wmake translate
+#   Clean documentation only         : wmake docsclean
 #
-# Install binaries, source and 
-#		    		 include files : wmake install
-#
-#					 Run unit tests: wmake test
-#						Using eu.ex: wmake testeu
-#
-# The source targets will create a subdirectory called euphoria-r$(SVN_REV). 
-# The default for SVN_REV is 'xxx'.
-#
+#   Clean intermediate files (object files)  
+#   but keep documentation, 
+#   configuration, C,      
+#   library, and binary files        : wmake nearlyclean
+#                                    
+#   Make all targets                 : wmake
+#                                      wmake all
+#                                    
+#   Make C sources so this tree        
+#   can be built without the         
+#   EUPHORIA binaries 	             : wmake translate
+#                                  
+#   Install binaries only            : wmake installbin
+#                                    
+#   Install binaries, source and     
+#   include files                    : wmake install
+#                                    
+#   Run unit tests using eui.exe     : wmake test
+#   Run unit tests using eu.ex       : wmake testeu
+#   
+#   The source targets will create a subdirectory called euphoria-r$(SVN_REV). 
+#   The default for SVN_REV is 'xxx'.
 #
 #   Options:
-#		    MANAGED_MEM:  Set this to 1 to use Euphoria's memory cache.
-#				  The default is to use straight HeapAlloc/HeapFree calls. ex:
-#				      wmake -h interpreter MANAGED_MEM=1
+#                   MANAGED_MEM:  Set this to 1 to use Euphoria's memory cache.
+#                                 The default is to use straight HeapAlloc/HeapFree calls. 
+#                                 ex:
+#                                     wmake -h interpreter MANAGED_MEM=1
 #
-#			  DEBUG:  Set this to 1 to build debug versions of the targets.  ex:
-#				      wmake -h interpreter DEBUG=1
+#                         DEBUG:  Set this to 1 to build debug versions of the targets.
+#                                 ex:
+#                                     wmake -h interpreter DEBUG=1
 #
+#			C_EXTRA:  Set this to add C flags to the command line.
+#				  
+#                                 You can limit sequences to 100,000 members:
+#				  wmake clean C_EXTRA="/DMAX_SEQ_LEN=100000" all
+#
+#
+#                       I_EXTRA:  Set this to arguments you want to append to the interpreter.
+#                                 arguments when running the testeu or test target.  This is passed
+#                                 to the instances that compile and translate the code.
+#
+#                    TEST_EXTRA:  Set this to arguments you want to append to the eutest program's 
+#                                 arguments.
+#
+#              TESTFILE or LIST:  Set either of these to set narrow the list of unit test files for
+#                                 either the test target or the testeu target.
+#
+# ex:
+# 	wmake testeu I_EXTRA="-D ETYPE_CHECK" TEST_EXTRA="-log"
+#
+#       This tests using the interpreter with type checking on and writes the results to a log
+#       file.
+#
+# ex:   wmake library DEBUG=1
+#
+#       Create a copy of eu.lib with debugging on.
+#
+# ex:   wmake test LIST="t_switch.e t_math.e"
+#
+#       Run eutest on only two unit test files.
+#
+
 !ifndef CONFIG
 CONFIG=config.wat
 !endif
@@ -68,13 +106,13 @@ LIBEXT=lib
 
 BASEPATH=$(BUILDDIR)\pcre
 !include pcre\objects.wat
-!include $(TRUNKDIR)\source\version.mak
 
 FULLBUILDDIR=$(BUILDDIR)
 
 EU_CORE_FILES = &
 	block.e &
 	common.e &
+	coverage.e &
 	emit.e &
 	error.e &
 	fwdref.e &
@@ -122,9 +160,9 @@ EU_BACKEND_OBJECTS = &
 !ifneq INT_CODES 1
 	$(BUILDDIR)\$(OBJDIR)\back\be_magic.obj &
 !endif	
-!ifeq	SSE2 -DSSE2=1
-	$(BUILDDIR)\$(OBJDIR)\back\be_sse2.obj &
-!endif	
+!ifeq  SSE2 -DSSE2=1
+       $(BUILDDIR)\$(OBJDIR)\back\be_sse2.obj &
+!endif
 	$(BUILDDIR)\$(OBJDIR)\back\be_execute.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_decompress.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_task.obj &
@@ -140,15 +178,12 @@ EU_BACKEND_OBJECTS = &
 	$(BUILDDIR)\$(OBJDIR)\back\be_w.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_socket.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_rev.obj &
 	$(PCRE_OBJECTS)
-#       &
-#       $(BUILDDIR)\$(OBJDIR)\memory.obj
 
 EU_LIB_OBJECTS = &
-!ifeq	SSE2 -DSSE2=1
-	$(BUILDDIR)\$(OBJDIR)\back\be_sse2.obj &
-!endif	
+!ifeq  SSE2 -DSSE2=1
+       $(BUILDDIR)\$(OBJDIR)\back\be_sse2.obj &
+!endif
 	$(BUILDDIR)\$(OBJDIR)\back\be_decompress.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_machine.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_w.obj &
@@ -159,7 +194,6 @@ EU_LIB_OBJECTS = &
 	$(BUILDDIR)\$(OBJDIR)\back\be_callc.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_socket.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_rev.obj &
 	$(PCRE_OBJECTS)
 
 EU_BACKEND_RUNNER_FILES = &
@@ -181,26 +215,47 @@ EU_INCLUDES = $(TRUNKDIR)\include\std\*.e $(TRUNKDIR)\include\*.e &
 EU_ALL_FILES = *.e $(EU_INCLUDES) &
 		 int.ex ec.ex backend.ex
 
+DOCDIR = $(TRUNKDIR)\docs
+EU_DOC_SOURCE = &
+	$(EU_INCLUDES) &
+	$(DOCDIR)\manual.af &
+	$(DOCDIR)\*.txt
+
+!ifeq ALIGN4 1
+SETALIGN4 = /dEALIGN4
+MANAGED_MEM=1
+!endif
+
 !ifneq MANAGED_MEM 1
 MEMFLAG = /dESIMPLE_MALLOC
 !else
 MANAGED_FLAG = -D EU_MANAGED_MEM
+# heap check only valid if using managed memory.
+!ifeq HEAP_CHECK 1
+HEAPCHECKFLAG=/dHEAP_CHECK
+!endif
+
 !endif
 
 !ifeq RELEASE 1
 RELEASE_FLAG = -D EU_FULL_RELEASE
+NOASSERT = /dNDEBUG
 !endif
 
-!ifndef EUBIN
-EUBIN=$(TRUNKDIR)\bin
+!ifneq ASSERT 1
+NOASSERT = /dNDEBUG
 !endif
 
 !ifndef PREFIX
-!ifneq PREFIX ""
+!ifdef %EUDIR
 PREFIX=$(%EUDIR)
 !else
 PREFIX=C:\euphoria
 !endif
+!endif
+
+!ifndef EUBIN
+EUBIN=$(PREFIX)\bin
 !endif
 
 !ifndef BUILDDIR
@@ -218,10 +273,9 @@ DEBUGFLAG = /d2 /dEDEBUG
 DEBUGLINK = debug all
 TRANSDEBUG= -debug
 EUDEBUG=-D DEBUG
-!endif
-
-!ifeq HEAP_CHECK 1
-HEAPCHECKFLAG=/dHEAP_CHECK
+LIBRARY_NAME=eudbg
+!else
+LIBRARY_NAME=eu
 !endif
 
 !ifeq EXTRA_STATS 1
@@ -237,64 +291,128 @@ EX=$(EUBIN)\eui.exe
 !endif
 
 EXE=$(EX)
+
+# The default is to use the interpreter for everything
+# That way one can build everything with only the
+# interpreter.
+# Change to using the EXEs to keep your CPU cool using
+# --use-binary-translator
+!ifndef EC
+EC=$(EXE) $(INCDIR) $(EUDEBUG) $(I_FLAGS) $(TRUNKDIR)\source\ec.ex
+!endif
+
+EUTEST=$(EXE) -i $(TRUNKDIR)\include $(TRUNKDIR)\source\eutest.ex
+#EUTEST=$(EUBIN)\eutest.exe
+
 INCDIR=-i $(TRUNKDIR)\include
 
 PWD=$(%cdrive):$(%cwd)
 
+!ifndef EUDOC
+EUDOC=eudoc.exe
+!endif
+
+!ifndef CREOLE
+CREOLE=creole.exe
+!endif
+
 VARS=DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM) CONFIG=$(CONFIG)
-all :  .SYMBOLIC
-    @echo ------- ALL -----------
+all :  .SYMBOLIC core
+    @echo ------- ALL/OTHERS -----------
+	wmake -h library DEBUG=1 MANAGED_MEM=$(MANAGED_MEM) CONFIG=$(CONFIG)
+	wmake -h backend $(VARS)
+	wmake -h binder $(VARS)
+	wmake -h shrouder $(VARS)
+
+core : .SYMBOLIC
+    @echo ------- CORE -----------
+	wmake -h library $(VARS)
 	wmake -h interpreter $(VARS)
 	wmake -h translator $(VARS)
-	wmake -h winlibrary $(VARS)
-	wmake -h backend $(VARS)
 
-BUILD_DIRS=$(BUILDDIR)\intobj $(BUILDDIR)\transobj $(BUILDDIR)\WINlibobj $(BUILDDIR)\backobj
+code-page-db : $(BUILDDIR)\ecp.dat .SYMBOLIC
+
+$(BUILDDIR)\ecp.dat : $(TRUNKDIR)\bin\buildcpdb.ex $(TRUNKDIR)\source\codepage 
+	$(BUILDDIR)\eui -i $(TRUNKDIR)\include $(TRUNKDIR)\bin\buildcpdb.ex -p$(TRUNKDIR)\source\codepage -o$(BUILDDIR)
+
+BUILD_DIRS=$(BUILDDIR)\intobj $(BUILDDIR)\transobj $(BUILDDIR)\WINlibobj $(BUILDDIR)\WINlibobj1 $(BUILDDIR)\backobj $(BUILDDIR)\eutestdr
 
 distclean : .SYMBOLIC clean
-!ifndef RM
-	@ECHO Please run configure
-	error
-!endif
+	-$(RM) $(BUILDDIR)\*.wat
 	-$(RM) $(CONFIG)
-	-$(RM) version.h
 	-$(RM) Makefile
+	
 
-clean : .SYMBOLIC pcre
-!ifndef DELTREE
-	@ECHO Please run configure
-	error
-!endif
+clean : .SYMBOLIC mostlyclean docsclean
 	-@for %i in ($(BUILD_DIRS)) do -$(RMDIR) %i
-	-$(RM) $(BUILDDIR)\pcre\*.obj
-	-$(RM) $(BUILDDIR)\eu*.exe
-	-$(RM) $(BUILDDIR)\eu*.lib
-
+	-$(RM) $(BUILDDIR)\*.lib
+	-$(RM) $(BUILDDIR)\*.exe
+	
+docsclean : .SYMBOLIC
+	-@for %i in ($(BUILD_DIR)\html\*.*) do -$(RM) %i
+	-$(RM) $(BUILDDIR)\html\js\*.js
+	-$(RM) $(BUILDDIR)\html\images\*.*
+	-$(RMDIR) $(BUILDDIR)\html\js
+	-$(RMDIR) $(BUILDDIR)\html\png
+	-$(RMDIR) $(BUILDDIR)\html
+	-@for %i in ($(BUILD_DIR)\docs\*.*) do -$(RM) %i
+	-$(RM) $(BUILDDIR)\docs\js\*.js
+	-$(RM) $(BUILDDIR)\docs\images\*.*
+	-$(RMDIR) $(BUILDDIR)\docs\js
+	-$(RMDIR) $(BUILDDIR)\docs\images
+	-$(RMDIR) $(BUILDDIR)\docs
+	-$(RM) $(BUILDDIR)\euphoria.txt
+	-$(RM) $(BUILDDIR)\euphoria.pdf
+	
+	
+	
 nearlyclean mostlyclean : .SYMBOLIC	
 	-@for %i in ($(BUILD_DIRS)) do -$(RM) %i\*.obj
+	-@for %i in ($(BUILD_DIRS)) do -$(RM) %i\back\*.obj	
 	-$(RM) $(BUILDDIR)\pcre\*.obj
-	-$(RM) $(BUILDDIR)\eu*.exe
-	-$(RM) $(BUILDDIR)\eu*.lib
+	-$(RM) $(TRUNKDIR)\tests\ecp.dat
+	-$(RM) $(TRUNKDIR)\tests\*.c	
+	-$(RM) $(TRUNKDIR)\tests\*.obj
+	-$(RM) $(TRUNKDIR)\tests\*.h
 	
 clobber : .SYMBOLIC distclean
+	-$(RM) $(BUILDDIR)\ecp.dat
+	-$(RM) $(BUILDDIR)\*.a
 	-$(RMDIR) $(BUILDDIR)
 
 $(BUILD_DIRS) : .existsonly
 	mkdir $@
 	mkdir $@\back
 
-OS=WIN
-OSFLAG=EWINDOWS
-LIBTARGET=$(BUILDDIR)\eu.lib
 
+!ifdef PLAT
+!ifeq PLAT WIN
+OS=WIN
+!else
+OS=$(PLAT)
+!endif
+!else
+OS=WIN
+!endif
+
+
+# To tell the translator which compiler it should use.
+!ifeq OS WIN
+TRANS_CC_FLAG=-wat
+!else
+TRANS_CC_FLAG=-gcc
+!endif
+
+OSFLAG=EWINDOWS
+LIBTARGET=$(BUILDDIR)\$(LIBRARY_NAME).lib
 CC = wcc386
 .ERASE
-FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 $(CPU_FLAG) /otimra /s $(MEMFLAG) $(DEBUGFLAG) $(HEAPCHECKFLAG) /I..\
-BE_FLAGS = /e4 /ol /zp4 /d$(OSFLAG) $(CPU_FLAG) /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(SSE2) $(DEBUGFLAG) $(HEAPCHECKFLAG) $(EXTRACHECKFLAG) $(EXTRASTATSFLAG)
+FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /6r /otimra /s $(MEMFLAG) $(DEBUGFLAG) $(SETALIGN4) $(NOASSERT) $(HEAPCHECKFLAG) /I..\ $(EREL_TYPE)
+BE_FLAGS = /ol /zp4 /d$(OSFLAG) /6r /dEWATCOM  /dEOW $(SSE2) $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG) $(SETALIGN4) $(NOASSERT) $(HEAPCHECKFLAG) $(EXTRACHECKFLAG) $(EXTRASTATSFLAG) $(EREL_TYPE)
 	
-library : .SYMBOLIC version.h runtime
+library : .SYMBOLIC runtime
     @echo ------- LIBRARY -----------
-	wmake -h $(LIBTARGET) OS=$(OS) OBJDIR=$(OS)libobj $(VARS) MANAGED_MEM=$(MANAGED_MEM)
+	wmake -h $(LIBTARGET) OS=$(OS) OBJDIR=$(OS)libobj$(DEBUG) $(VARS) MANAGED_MEM=$(MANAGED_MEM)
 
 winlibrary : .SYMBOLIC
     @echo ------- WINDOWS LIBRARY -----------
@@ -307,8 +425,8 @@ runtime: .SYMBOLIC
 backendflag: .SYMBOLIC
 	set EBACKEND=/dBACKEND
 
-$(BUILDDIR)\eu.lib : $(BUILDDIR)\$(OBJDIR)\back $(EU_LIB_OBJECTS)
-	wlib -q $(BUILDDIR)\eu.lib $(EU_LIB_OBJECTS)
+$(LIBTARGET) : $(BUILDDIR)\$(OBJDIR)\back $(EU_LIB_OBJECTS)
+	wlib -q $(LIBTARGET) $(EU_LIB_OBJECTS)
 
 !ifdef OBJDIR
 
@@ -339,93 +457,167 @@ $(BUILDDIR)\$(OBJDIR)\back\be_magic.c
 	rmdir $(BUILDDIR)\objtmp
 
 
-exwsource : .SYMBOLIC version.h $(BUILDDIR)\$(OBJDIR)\main-.c
-ecwsource : .SYMBOLIC version.h $(BUILDDIR)\$(OBJDIR)\main-.c
-backendsource : .SYMBOLIC version.h $(BUILDDIR)\$(OBJDIR)\main-.c
-ecsource : .SYMBOLIC version.h $(BUILDDIR)\$(OBJDIR)\main-.c
-exsource : .SYMBOLIC version.h $(BUILDDIR)\$(OBJDIR)\main-.c
+exwsource : .SYMBOLIC $(BUILDDIR)\$(OBJDIR)\main-.c
+ecwsource : .SYMBOLIC $(BUILDDIR)\$(OBJDIR)\main-.c
+backendsource : .SYMBOLIC $(BUILDDIR)\$(OBJDIR)\main-.c
+ecsource : .SYMBOLIC $(BUILDDIR)\$(OBJDIR)\main-.c
+exsource : .SYMBOLIC $(BUILDDIR)\$(OBJDIR)\main-.c
 
 !endif
 # OBJDIR
 
-!ifdef EUPHORIA
-translate : .SYMBOLIC  
+
+!ifeq EUPHORIA 1
+translate source : .SYMBOLIC  
     @echo ------- TRANSLATE WIN -----------
-	$wmake -h exwsource EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
+	wmake -h exwsource EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
 	wmake -h ecwsource EX=$(EUBIN)\eui.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
 	wmake -h backendsource EX=$(EUBIN)\eui.exe EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
 
-testeu : .SYMBOLIC
+
+$(TRUNKDIR)\tests\ecp.dat : $(BUILDDIR)\ecp.dat
+	-copy $(BUILDDIR)\ecp.dat $(TRUNKDIR)\tests
+
+testeu : .SYMBOLIC  $(TRUNKDIR)\tests\ecp.dat
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR)
-	$(EXE) ..\source\eutest.ex -i ..\include -exe "$(FULLBUILDDIR)\eui.exe -batch $(TRUNKDIR)\source\eu.ex"
+	-$(EUTEST) -i ..\include $(TEST_EXTRA) -eui "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\eu.ex" -euc "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\ec.ex" $(LIST) $(TESTFILE)
 	cd ..\source
 
 !endif #EUPHORIA
 
-test : .SYMBOLIC
+sse2_test.exe: $(BUILDDIR)\intobj\back\be_sse2.obj $(BUILDDIR)\sse2_test.obj
+       wlink  $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el file $(BUILDDIR)\intobj\back\be_sse2.obj file $(BUILDDIR)\sse2_test.obj name sse2_test.exe
+
+test : .SYMBOLIC $(TRUNKDIR)\tests\ecp.dat
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR) 
-	$(EXE) ..\source\eutest.ex -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT)
+	$(EUTEST) $(TEST_EXTRA) $(VERBOSE_TESTS) -i ..\include -cc wat -eui $(FULLBUILDDIR)\eui.exe -euc $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -bind $(FULLBUILDDIR)\eubind.exe -eub $(BUILDDIR)\eub.exe $(LIST) $(TESTFILE)
 	cd ..\source
+
+coverage : .SYMBOLIC code-page-db
+	cd ..\tests
+	-copy $(BUILDDIR)\ecp.dat .
+	$(EUTEST) $(VERBOSE_TESTS) -i ..\include -eui "$(FULLBUILDDIR)\eui.exe" -coverage-db $(FULLBUILDDIR)\unit-test.edb -coverage $(TRUNKDIR)\include -coverage-pp "$(EXE) -i $(TRUNKDIR)\include $(TRUNKDIR)\bin\eucoverage.ex" -coverage-erase $(LIST)
+	-del ecp.dat
+	cd ..\source
+
+report: .SYMBOLIC
+	$(MAKE) ..\reports\report.html
 	
+..\reports\report.html: $(EU_ALL_FILES)
+	cd ..\tests
+	set EUCOMPILEDIR=$(TRUNKDIR) 
+	-$(EUTEST) $(VERBOSE_TESTS) -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -euc $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -log $(LIST)
+	$(EUTEST) -process-log -html > ..\reports\report.html
+	cd ..\source
 
-!ifdef BUILD_TOOLS
-$(BUILDDIR)\eutest.exe: $(BUILDDIR)\eutestdr\main-.c $(BUILDDIR)\eutestdr.wat $(BUILDDIR)\eu.lib $(BUILDDIR)\eutestdr
-	@%create $(BUILDDIR)\eutestdr\eutestdr.lbc
-	@%append $(BUILDDIR)\eutestdr\eutestdr.lbc option quiet
-	@%append $(BUILDDIR)\eutestdr\eutestdr.lbc option caseexact
-	@%append $(BUILDDIR)\eutestdr\eutestdr.lbc library ws2_32
-	@for %i in ($(EUTEST_OBJECTS)) do @%append $(BUILDDIR)\eutestdr\eutest.lbc file %i
-	wlink  $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @$(BUILDDIR)\eutestdr\eutestdr.lbc name $(BUILDDIR)\eutest.exe
+tester: .SYMBOLIC 
+	wmake -h $(BUILDDIR)\eutestdr\eutest.exe BUILD_TOOLS=1 OBJDIR=eutestdr
 
-$(BUILDDIR)\eutestdr.wat : $(BUILDDIR)\eutestdr\main-.c
-	@if exist $(BUILDDIR)\objtmp rmdir /Q /S $(BUILDDIR)\objtmp
-	@mkdir $(BUILDDIR)\objtmp
-	@copy $(BUILDDIR)\eutestdr\*.c $(BUILDDIR)\objtmp
-	@cd $(BUILDDIR)\objtmp
-	ren *.c *.obj
-	%create eutestdr.wat
-	%append eutestdr.wat $(EU_NAME_OBJECT) = &  
-	for %i in (*.obj) do @%append eutestdr.wat $(BUILDDIR)\eutestdr\%i & 
-	%append eutestdr.wat    
-	del *.obj
-	cd $(TRUNKDIR)\source
-	move $(BUILDDIR)\objtmp\eutestdr.wat $(BUILDDIR)
-	rmdir $(BUILDDIR)\objtmp
+binder : .SYMBOLIC $(BUILDDIR)\eubind.exe
 
+$(BUILDDIR)\eubind.exe : translator library
+	$(BUILDDIR)\euc -con -lib $(BUILDDIR)\eu.lib -i $(TRUNKDIR)\include -o $(BUILDDIR)\eubind.exe $(TRUNKDIR)\source\bind.ex
+	
+shrouder : .SYMBOLIC $(BUILDDIR)\eushroud.exe
 
-$(BUILDDIR)\eutestdr\main-.c : $(TRUNKDIR)\source\eutest.ex $(BUILDDIR)\eutestdr
-	-$(RM) $(BUILDDIR)\eutestdr\*.*
-	cd  $(BUILDDIR)\eutestdr
-	$(EUBIN)\euc.exe -nobuild -wat -plat $(TRANSDEBUG) $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\eutest.ex
-	cd $(TRUNKDIR)\source
+$(BUILDDIR)\eushroud.exe : translator library
+	$(BUILDDIR)\euc -con -lib $(BUILDDIR)\eu.lib -i $(TRUNKDIR)\include -o $(BUILDDIR)\eushroud.exe $(TRUNKDIR)\source\shroud.ex
+	
+tools: .SYMBOLIC
+    @echo ------- TOOLS -----------
+	wmake -h $(BUILDDIR)\eutest.exe $(VARS)
+	wmake -h $(BUILDDIR)\euloc.exe $(VARS)
+	wmake -h $(BUILDDIR)\eucoverage.exe $(VARS)
+	wmake -h $(BUILDDIR)\eudis.exe $(VARS)
+	wmake -h $(BUILDDIR)\eudist.exe $(VARS)
 
-$(BUILDDIR)\eutestdr :
-	mkdir $(BUILDDIR)\eutestdr
+tools-additional: .SYMBOLIC
+    @echo ------- ADDITIONAL TOOLS -----------
+	wmake -h $(BUILDDIR)\eudoc.exe $(VARS)
+	wmake -h $(BUILDDIR)\creole.exe $(VARS)
 
-!endif #BUILD_TOOLS
+tools-all: tools tools-additional
 
-$(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) 
+get-creole : $(TRUNKDIR)\source\creole\creole.ex
+get-eudoc : $(TRUNKDIR)\source\eudoc\eudoc.ex
+
+$(TRUNKDIR)\source\creole\creole.ex :
+	hg clone http://scm.openeuphoria.org/hg/creole $(TRUNKDIR)\source\creole
+
+$(TRUNKDIR)\source\eudoc\eudoc.ex :
+	hg clone http://scm.openeuphoria.org/hg/eudoc $(TRUNKDIR)\source\eudoc
+
+$(BUILDDIR)\eutest.exe: $(TRUNKDIR)\source\eutest.ex
+	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
+
+$(BUILDDIR)\euloc.exe: $(TRUNKDIR)\bin\euloc.ex
+	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
+
+$(BUILDDIR)\eucoverage.exe: $(TRUNKDIR)\bin\eucoverage.ex
+	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
+
+$(BUILDDIR)\eudis.exe: $(TRUNKDIR)\source\dis.ex
+	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
+
+$(BUILDDIR)\eudist.exe: $(TRUNKDIR)\source\eudist.ex
+	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
+
+$(BUILDDIR)\eudoc.exe: $(TRUNKDIR)\source\eudoc\eudoc.ex
+	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
+
+$(BUILDDIR)\creole.exe: $(TRUNKDIR)\source\creole\creole.ex
+	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
+
+$(BUILDDIR)\$(OBJDIR)\back\coverage.h : $(BUILDDIR)\$(OBJDIR)\main-.c
+	$(EXE) -i $(TRUNKDIR)\include coverage.ex $(BUILDDIR)\$(OBJDIR)
+
+$(BUILDDIR)\intobj\back\be_execute.obj : $(BUILDDIR)\intobj\back\coverage.h
+$(BUILDDIR)\intobj\back\be_runtime.obj : $(BUILDDIR)\intobj\back\coverage.h
+
+$(BUILDDIR)\transobj\back\be_execute.obj : $(BUILDDIR)\transobj\back\coverage.h
+$(BUILDDIR)\transobj\back\be_runtime.obj : $(BUILDDIR)\transobj\back\coverage.h
+
+$(BUILDDIR)\backobj\back\be_execute.obj : $(BUILDDIR)\backobj\back\coverage.h
+$(BUILDDIR)\backobj\back\be_runtime.obj : $(BUILDDIR)\backobj\back\coverage.h
+
+$(BUILDDIR)\$(OBJDIR)\back\be_machine.obj : $(BUILDDIR)\$(OBJDIR)\back\be_ver.h
+
+$(BUILDDIR)\mkver.exe: mkver.c
+	owcc -o $@ $<
+
+update-version-cache : .SYMBOLIC $(BUILDDIR)\mkver.exe
+	$(BUILDDIR)\mkver.exe $(HG) $(BUILDDIR)\ver.cache $(BUILDDIR)\$(OBJDIR)\back\be_ver.h
+
+$(BUILDDIR)\ver.cache : $(BUILDDIR)\mkver.exe
+	$(BUILDDIR)\mkver.exe $(HG) $(BUILDDIR)\ver.cache $(BUILDDIR)\$(OBJDIR)\back\be_ver.h
+
+$(BUILDDIR)\$(OBJDIR)\back\be_ver.h : $(BUILDDIR)\ver.cache $(BUILDDIR)\mkver.exe
+	$(BUILDDIR)\mkver.exe $(HG) $(BUILDDIR)\ver.cache $(BUILDDIR)\$(OBJDIR)\back\be_ver.h BE_VER_H
+
+$(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(CONFIG) eui.rc version_info.rc
 	@%create $(BUILDDIR)\$(OBJDIR)\euiw.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc option quiet
 	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc option caseexact
 	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc library ws2_32
+	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc library comctl32
 	@for %i in ($(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc file %i
 	wlink  $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\euiw.lbc name $(BUILDDIR)\eui.exe
-	wrc -q -ad exw.res $(BUILDDIR)\eui.exe
+	wrc -q -ad eui.rc $(BUILDDIR)\eui.exe
 	wlink $(DEBUGLINK) SYS nt_win op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\euiw.lbc name $(BUILDDIR)\euiw.exe
-	wrc -q -ad exw.res $(BUILDDIR)\euiw.exe
+	wrc -q -ad euiw.rc $(BUILDDIR)\euiw.exe
 
-interpreter : .SYMBOLIC version.h
+interpreter : .SYMBOLIC
 	wmake -h $(BUILDDIR)\intobj\main-.c EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=intobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 	wmake -h objlist OBJDIR=intobj $(VARS) EU_NAME_OBJECT=EU_INTERPRETER_OBJECTS
-	wmake -h $(BUILDDIR)\euiw.exe EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=intobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 	wmake -h $(BUILDDIR)\eui.exe EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=intobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
 install : .SYMBOLIC
 	@echo --------- install $(PREFIX) ------------
 	if /I $(PWD)==$(PREFIX)\source exit
+	if not exist $(PREFIX) mkdir $(PREFIX)
+	if not exist $(PREFIX)\source mkdir $(PREFIX)\source
 	for %i in (*.e) do @copy %i $(PREFIX)\source\
 	for %i in (*.ex) do @copy %i $(PREFIX)\source\
 	if not exist $(PREFIX)\include\std mkdir $(PREFIX)\include\std
@@ -435,16 +627,19 @@ install : .SYMBOLIC
 	copy ..\include\std\net\* $(PREFIX)\include\std\net
 	if not exist $(PREFIX)\include\std\win32 mkdir $(PREFIX)\include\std\win32
 	copy ..\include\std\win32\* $(PREFIX)\include\std\win32
-	if not exist $(PREFIX)\include\std\unix mkdir $(PREFIX)\include\std\unix
-	copy ..\include\std\unix\* $(PREFIX)\include\std\unix
 	if not exist $(PREFIX)\include\euphoria mkdir $(PREFIX)\include\euphoria
 	copy ..\include\euphoria\* $(PREFIX)\include\euphoria
+	@if not exist $(PREFIX)\bin mkdir $(PREFIX)\bin
+	copy ..\bin\*.ex $(PREFIX)\bin
+	copy ..\bin\*.bat $(PREFIX)\bin
 	@if exist $(BUILDDIR)\euc.exe copy $(BUILDDIR)\euc.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\euiw.exe copy $(BUILDDIR)\euiw.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\eui.exe copy $(BUILDDIR)\eui.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\eubw.exe copy $(BUILDDIR)\eubw.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\eub.exe copy $(BUILDDIR)\eub.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\eu.lib copy $(BUILDDIR)\eu.lib $(PREFIX)\bin\	
+	@if exist $(BUILDDIR)\eudbg.lib copy $(BUILDDIR)\eudbg.lib $(PREFIX)\bin\	
+	@if exist $(BUILDDIR)\ecp.dat copy $(BUILDDIR)\ecp.dat $(PREFIX)\bin\	
 
 installbin : .SYMBOLIC
 	@if exist $(BUILDDIR)\euc.exe copy $(BUILDDIR)\euc.exe $(PREFIX)\bin\
@@ -453,6 +648,7 @@ installbin : .SYMBOLIC
 	@if exist $(BUILDDIR)\eubw.exe copy $(BUILDDIR)\eubw.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\eub.exe copy $(BUILDDIR)\eub.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\eu.lib copy $(BUILDDIR)\eu.lib $(PREFIX)\bin\	
+	@if exist $(BUILDDIR)\eudbg.lib copy $(BUILDDIR)\eudbg.lib $(PREFIX)\bin\	
 	
 $(BUILDDIR)\euc.exe : $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	$(RM) $(BUILDDIR)\$(OBJDIR)\euc.lbc
@@ -462,10 +658,9 @@ $(BUILDDIR)\euc.exe : $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_TRAN
 	@%append $(BUILDDIR)\$(OBJDIR)\euc.lbc library ws2_32
 	@for %i in ($(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\euc.lbc file %i
 	wlink $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\euc.lbc name $(BUILDDIR)\euc.exe
-	wrc -q -ad exw.res $(BUILDDIR)\euc.exe
+	wrc -q -ad euc.rc $(BUILDDIR)\euc.exe
 
-
-translator : .SYMBOLIC version.h
+translator : .SYMBOLIC
     @echo ------- TRANSLATOR -----------
 	wmake -h $(BUILDDIR)\transobj\main-.c EX=$(EUBIN)\eui.exe EU_TARGET=ec. OBJDIR=transobj  $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 	wmake -h objlist OBJDIR=transobj EU_NAME_OBJECT=EU_TRANSLATOR_OBJECTS $(VARS)
@@ -478,22 +673,22 @@ $(BUILDDIR)\eubw.exe :  $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_BACKEND_RUNNER_OBJECT
 	@%append $(BUILDDIR)\$(OBJDIR)\eub.lbc option caseexact
 	@%append $(BUILDDIR)\$(OBJDIR)\eub.lbc library ws2_32
 	@for %i in ($(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\eub.lbc file %i
-	wlink $(DEBUGLINK) SYS nt_win op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\eub.lbc name $(BUILDDIR)\eubw.exe
-	wrc -q -ad exw.res $(BUILDDIR)\eubw.exe
-	wlink $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\eub.lbc name $(BUILDDIR)\eub.exe
-	wrc -q -ad exw.res $(BUILDDIR)\eub.exe
+	wlink $(DEBUGLINK) SYS nt op maxe=2 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\eub.lbc name $(BUILDDIR)\eub.exe
+	wrc -q -ad eub.rc $(BUILDDIR)\eub.exe
+	wlink $(DEBUGLINK) SYS nt_win op maxe=2 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\eub.lbc name $(BUILDDIR)\eubw.exe
+	wrc -q -ad eubw.rc $(BUILDDIR)\eubw.exe
 
-backend : .SYMBOLIC version.h backendflag
+backend : .SYMBOLIC backendflag
     @echo ------- BACKEND -----------
 	wmake -h $(BUILDDIR)\backobj\main-.c EX=$(EUBIN)\eui.exe EU_TARGET=backend. OBJDIR=backobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 	wmake -h objlist OBJDIR=backobj EU_NAME_OBJECT=EU_BACKEND_RUNNER_OBJECTS $(VARS)
 	wmake -h $(BUILDDIR)\eubw.exe EX=$(EUBIN)\eui.exe EU_TARGET=backend. OBJDIR=backobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
-$(BUILDDIR)\intobj\main-.c: $(BUILDDIR)\intobj\back $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) $(EU_INCLUDES)
-$(BUILDDIR)\transobj\main-.c: $(BUILDDIR)\transobj\back $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_INCLUDES)
-$(BUILDDIR)\backobj\main-.c: $(BUILDDIR)\backobj\back $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES) $(EU_INCLUDES)
+$(BUILDDIR)\intobj\main-.c: $(BUILDDIR)\intobj\back $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) $(EU_INCLUDES) $(CONFIG)
+$(BUILDDIR)\transobj\main-.c: $(BUILDDIR)\transobj\back $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_INCLUDES) $(CONFIG)
+$(BUILDDIR)\backobj\main-.c: $(BUILDDIR)\backobj\back $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES) $(EU_INCLUDES) $(CONFIG)
 
-!ifdef EUPHORIA
+!ifeq EUPHORIA 1
 # We should have ifdef EUPHORIA so that make doesn't decide
 # to update rev.e when there is no $(EX)
 be_rev.c : .recheck .always
@@ -502,22 +697,30 @@ be_rev.c : .recheck .always
 !ifdef EU_TARGET
 !ifdef OBJDIR
 $(BUILDDIR)\$(OBJDIR)\main-.c : $(EU_TARGET)ex $(BUILDDIR)\$(OBJDIR)\back $(EU_TRANSLATOR_FILES)
-	-$(RM) $(BUILDDIR)\$(OBJDIR)\back\*.*
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\*.*
+	-$(RM) $(TRUNKDIR)\source\main-.h
+	-$(RM) $(TRUNKDIR)\source\init-.c
+	-$(RM) $(TRUNKDIR)\source\main-.c
 	cd  $(BUILDDIR)\$(OBJDIR)
-	$(EUBIN)\euc.exe $(TRANSDEBUG) -nobuild -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\$(EU_TARGET)ex
+	$(EC) $(TRANSDEBUG) -nobuild $(TRANS_CC_FLAG) -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) -c $(TRUNKDIR)\source\eu.cfg $(TRUNKDIR)\source\$(EU_TARGET)ex
 	cd $(TRUNKDIR)\source
 
 $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex  $(BUILDDIR)\$(OBJDIR)\back $(EU_TRANSLATOR_FILES)
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\back\*.*
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\*.*
 	cd $(BUILDDIR)\$(OBJDIR)
-	$(EUBIN)\euc.exe  $(TRANSDEBUG) -nobuild -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\$(EU_TARGET)ex
+	$(EC)  $(TRANSDEBUG) -nobuild $(TRANS_CC_FLAG) -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) -c $(TRUNKDIR)\source\eu.cfg $(TRUNKDIR)\source\$(EU_TARGET)ex
 	cd $(TRUNKDIR)\source
+!else
+$(BUILDDIR)\$(OBJDIR)\main-.c $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : .EXISTSONLY
+	@echo Error: attempt to create main-.c without OBJDIR defined.
 !endif
+!else	
+$(BUILDDIR)\$(OBJDIR)\main-.c $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : .EXISTSONLY
+	@echo Error: attempt to create main-.c without OBJDIR defined.
 !endif
 !else
-$(BUILDDIR)\$(OBJDIR)\main-.c $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex $(BUILDDIR)\$(OBJDIR)\back
+$(BUILDDIR)\$(OBJDIR)\main-.c $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : .EXISTSONLY
 	@echo *****************************************************************
 	@echo If you have EUPHORIA installed you'll need to run configure again.
 	@echo Make is configured to not try to use the interpreter.
@@ -527,7 +730,7 @@ $(BUILDDIR)\$(OBJDIR)\main-.c $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)
 
 .c: $(BUILDDIR)\$(OBJDIR);$(BUILDDIR)\$(OBJDIR)\back
 .c.obj: 
-	$(CC) $(FE_FLAGS) $(BE_FLAGS) $[@ -fo=$^@
+	$(CC) $(FE_FLAGS) $(BE_FLAGS) -fr=$^@.err /I$(BUILDDIR)\$(OBJDIR)\back $[@ -fo=$^@
 	
 $(BUILDDIR)\$(OBJDIR)\back\be_inline.obj : ./be_inline.c $(BUILDDIR)\$(OBJDIR)\back
 	$(CC) /oe=40 $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
@@ -557,15 +760,6 @@ $(BUILDDIR)\$(OBJDIR)\back\be_symtab.obj : be_symtab.c *.h $(CONFIG)
 $(BUILDDIR)\$(OBJDIR)\back\be_w.obj : be_w.c *.h $(CONFIG) 
 $(BUILDDIR)\$(OBJDIR)\back\be_socket.obj : be_socket.c *.h $(CONFIG)
 $(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj : be_pcre.c *.h $(CONFIG) 
-$(BUILDDIR)\$(OBJDIR)\back\be_rev.obj : be_rev.c *.h $(CONFIG) 
-
-version.h: version.mak
-    @echo ------- VERSION.H -----------
-	@echo // DO NOT EDIT, EDIT version.mak INSTEAD > version.h
-	@echo $#define MAJ_VER $(MAJ_VER) >> version.h
-	@echo $#define MIN_VER $(MIN_VER) >> version.h
-	@echo $#define PAT_VER $(PAT_VER) >> version.h
-	@echo $#define REL_TYPE "$(REL_TYPE)" >> version.h
 
 !ifdef PCRE_OBJECTS	
 $(PCRE_OBJECTS) : pcre/*.c pcre/pcre.h.windows pcre/config.h.windows
@@ -575,7 +769,102 @@ $(PCRE_OBJECTS) : pcre/*.c pcre/pcre.h.windows pcre/config.h.windows
 	cd ..
 !endif
 
+###############################################################################
+#
+# Documentation
+#
+###############################################################################
 
-sse2_test.exe: $(BUILDDIR)\intobj\back\be_sse2.obj $(BUILDDIR)\sse2_test.obj
-	wlink  $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el file $(BUILDDIR)\intobj\back\be_sse2.obj file $(BUILDDIR)\sse2_test.obj name sse2_test.exe	
+#
+# HTML Manual
+#
+
+htmldoc: .SYMBOLIC $(BUILDDIR)\html\style.css $(BUILDDIR)\html\images\prev.png $(BUILDDIR)\html\images\next.png $(BUILDDIR)\html\index.html
+
+$(BUILDDIR)\docs\js : .EXISTSONLY $(BUILDDIR)\docs  
+	mkdir $^@
+
+$(BUILDDIR)\docs\images : .EXISTSONLY $(BUILDDIR)\docs 
+	mkdir $^@
+
+$(BUILDDIR)\docs: .EXISTSONLY
+	mkdir $^@
 	
+$(BUILDDIR)\docs\style.css : $(DOCDIR)\style.css $(BUILDDIR)\docs
+	copy $(DOCDIR)\style.css $(BUILDDIR)\docs
+
+$(BUILDDIR)\html\js : .EXISTSONLY $(BUILDDIR)\html  
+	mkdir $^@
+
+$(BUILDDIR)\html\images : .EXISTSONLY $(BUILDDIR)\html 
+	mkdir $^@
+
+$(BUILDDIR)\html: .EXISTSONLY
+	mkdir $^@
+	
+$(BUILDDIR)\html\style.css : $(DOCDIR)\style.css $(BUILDDIR)\html
+	copy $(DOCDIR)\style.css $(BUILDDIR)\html
+
+$(BUILDDIR)\html\images\prev.png : $(DOCDIR)\html\images\prev.png $(BUILDDIR)\html\images
+	copy $(DOCDIR)\html\images\prev.png $^@
+	
+$(BUILDDIR)\html\images\next.png : $(DOCDIR)\html\images\next.png $(BUILDDIR)\html\images
+	copy $(DOCDIR)\html\images\next.png $^@
+
+$(BUILDDIR)\docs\images\prev.png : $(DOCDIR)\html\images\prev.png $(BUILDDIR)\docs\images
+	copy $(DOCDIR)\html\images\prev.png $^@
+	
+$(BUILDDIR)\docs\images\next.png : $(DOCDIR)\html\images\next.png $(BUILDDIR)\docs\images
+	copy $(DOCDIR)\html\images\next.png $^@
+
+$(BUILDDIR)\euphoria.txt : $(EU_DOC_SOURCE) $(BUILDDIR)\html
+	$(EUDOC) -d HTML --strip=2 -a $(TRUNKDIR)\docs\manual.af -o $(BUILDDIR)\euphoria.txt
+
+$(BUILDDIR)\docs\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\template.html $(BUILDDIR)\docs
+	cd $(TRUNKDIR)\docs
+	$(CREOLE) -A -t=$(TRUNKDIR)\docs\template.html -o=$(BUILDDIR)\docs $(BUILDDIR)\euphoria.txt
+	cd $(TRUNKDIR)\source
+
+$(BUILDDIR)\html\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html $(BUILDDIR)\html
+	cd $(TRUNKDIR)\docs
+	$(CREOLE) -A -t=$(TRUNKDIR)\docs\offline-template.html -o=$(BUILDDIR)\html $(BUILDDIR)\euphoria.txt
+	cd $(TRUNKDIR)\source
+
+#
+# PDF manual
+#
+
+pdfdoc : $(BUILDDIR)\euphoria.pdf
+
+$(BUILDDIR)\pdf : .EXISTSONLY
+	mkdir $^@
+
+$(BUILDDIR)\pdf\euphoria.txt : $(EU_DOC_SOURCE) $(BUILDDIR)\pdf
+	$(EUDOC) -d PDF --single --strip=2 -a $(TRUNKDIR)\docs\manual.af -o $(BUILDDIR)\pdf\euphoria.txt
+
+$(BUILDDIR)\pdf\euphoria.tex : $(BUILDDIR)\pdf\euphoria.txt $(TRUNKDIR)\docs\template.tex $(BUILDDIR)\pdf
+	$(CREOLE) -f latex -A -t=$(TRUNKDIR)\docs\template.tex -o=$(BUILDDIR)\pdf $<
+
+$(BUILDDIR)\euphoria.pdf : $(BUILDDIR)\pdf\euphoria.tex $(BUILDDIR)\pdf
+	cd $(TRUNKDIR)\docs
+	pdflatex -aux-directory=$(BUILDDIR)\pdf -output-directory=$(BUILDDIR) $(BUILDDIR)\pdf\euphoria.tex
+	cd $(TRUNKDIR)\source
+
+pdfdoc-again: .SYMBOLIC $(BUILDDIR)\euphoria.pdf $(BUILDDIR)\pdf
+	cd $(TRUNKDIR)\docs
+	pdflatex -aux-directory=$(BUILDDIR)\pdf -output-directory=$(BUILDDIR) $(BUILDDIR)\pdf\euphoria.tex
+	cd $(TRUNKDIR)\source
+
+#
+# Distribution
+#
+
+manual : .SYMBOLIC $(BUILDDIR)\docs\index.html $(BUILDDIR)\docs\js\search.js $(BUILDDIR)\docs\style.css  $(BUILDDIR)\docs\images\next.png $(BUILDDIR)\docs\images\prev.png
+
+manual-send: .SYMBOLIC manual
+	$(SCP) $(TRUNKDIR)/docs/style.css $(BUILDDIR)/docs/*.html $(OE_USERNAME)@openeuphoria.org:/home/euweb/docs
+
+manual-reindex: .SYMBOLIC
+	$(SSH) $(OE_USERNAME)@openeuphoria.org "cd /home/euweb/prod/euweb/source/ && sh reindex_manual.sh"
+
+manual-upload: manual-send manual-reindex

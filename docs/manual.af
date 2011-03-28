@@ -3,37 +3,141 @@
 #
 # # is a comment
 # : is inline CREOLE markup
+# ifdef WORD
+# ...
+# end ifdef
+#
+# ... is skipped if the "WORD" was not defined via -d WORD
+# on the command line to eudoc.
 #
 # all other non-blank entries are treated as a file
 # name that should be read and inserted into the output
+#
+# NOTES:
+#
+# This particular file has two main defines:
+#
+#    * HTML - includes additional information that we do not
+#      wish to include in the PDF version of the manual due
+#      to the sheer size of the single download/viewing PDF.
+#
+#    * PDF - items that will only be included in the PDF version
+#      of the manual.
+#
+# When running, one should be sure to define either HTML or PDF
+# via a -d WORD argument to eudoc.
+#
 
 # Output file generation options
 :@@(title Euphoria v4.0)@
+
+ifdef HTML
 :%%maxnumlevel = 4
-:%%splitname = eu400
-:%%splitlevel = 2
 :%%toclevel = 3
-:<<TOC level=3>>
+:%%output=index
+:<<TOC level=1>>
+
+:@@(index <<font color="$(1)" text=`$(+)`>>)@
+:@@(subindex **$$(color #009999 bug fixed:)**)@
+end ifdef
+
+ifdef PDF
+:@@(index ``\index{$(1)}``)@
+:@@(subindex ``\index{$(1)!$(2)}``)@
+end ifdef
 
 ########
-# Front-Matter
+:%%output=eu_intro
+:= Euphoria Programming Language v4.0
+:@[toc|]
+:<<LEVELTOC level=1 depth=4>>
+
 ../docs/welcome.txt
-../docs/c.txt
-../docs/install.txt
-../docs/what2do.txt
-#TODO: other release notes
-../License.txt
+../docs/whatsnew4_0.txt
+../docs/licensing.txt
+../License.txt <nowiki
 ../docs/credits.txt
 
 ########
-# Language Reference
-../docs/refman_1.txt
-../docs/refman_2.txt
-../docs/syntax.txt
+:%%output=installation
+:= Installing Euphoria
+:<<LEVELTOC level=1 depth=4>>
+
+../docs/installing.txt
 
 ########
+:%%output=using
+:= Using Euphoria
+:<<LEVELTOC level=1 depth=4>>
+
+../docs/using_euphoria.txt
+
+########
+:%%output=langref_index
+:= Language Reference
+:<<LEVELTOC depth=2>>
+
+../docs/refman_2.txt
+
+########
+:%%output=syntax
+:= Formal Syntax
+:<<LEVELTOC level=1 depth=2>>
+
+../docs/syntax.txt
+../docs/internals.txt
+
+########
+:%%output=miniguide
 := Mini-Guides
-:<<LEVELTOC depth=3>>
+:<<LEVELTOC level=1 depth=2>>
+
+ifdef HTML
+:%%output=demos
+:== Bundled Demos
+:<<LEVELTOC level=2 depth=3>>
+../demo/allsorts.ex
+../demo/animal.ex
+../demo/ascii.ex
+../demo/buzz.ex
+../demo/callmach.ex
+../demo/color.ex
+../demo/csort.ex
+../demo/dep.exw
+../demo/eprint.ex
+../demo/eused.ex
+../demo/guru.ex
+../demo/hash.ex
+../demo/key.ex
+../demo/loaddb.ex
+../demo/mydata.ex
+../demo/news.ex
+../demo/pipes.ex
+../demo/queens.ex
+../demo/regexps.ex
+../demo/sanity.ex
+../demo/search.ex
+../demo/tree.ex
+../demo/where.ex
+../demo/bench/sieve8k.ex
+../demo/win32/dsearch.exw
+../demo/win32/taskwire.exw
+../demo/win32/window.exw
+../demo/win32/winwire.exw
+../demo/unix/callc.ex
+../demo/unix/mylib.ex
+../demo/unix/qsort.ex
+../demo/net/chat_client.ex
+../demo/net/chat_server.ex
+../demo/net/google_tts.ex
+../demo/net/httpd.ex
+../demo/net/pastey.ex
+../demo/net/sock_client.ex
+../demo/net/sock_server.ex
+../demo/net/udp_client.ex
+../demo/net/udp_server.ex
+../demo/net/wget.ex
+end ifdef
 
 ../docs/debug.txt
 ../docs/bind.txt
@@ -47,37 +151,39 @@
 ../docs/perform.txt
 
 ########
+:%%output=tools
 := Included Tools
-:<<LEVELTOC depth=3>>
+:<<LEVELTOC level=1 depth=2>>
 
 ../docs/eutest.txt
 ../docs/eudoc.txt
 ../docs/ed.txt
+../docs/dis.txt
+../docs/eudist.txt
 
 ########
-:= General Routine Reference
-: <<LEVELTOC depth=3>>
 
+:%%output=apiref
+:= API Reference
+:<<LEVELTOC level=1 depth=2>>
+
+# General Index
+../docs/builtins.txt
+
+# General Routines
 ../include/std/cmdline.e
 ../include/std/console.e
 ../include/std/datetime.e
 ../include/std/filesys.e
 ../include/std/io.e
-../include/std/math.e
-../include/std/mathcons.e
-../include/std/rand.e
-../include/std/mouse.e
 ../include/std/os.e
 ../include/std/pipeio.e
 ../include/std/pretty.e
-../include/std/stats.e
 ../include/std/task.e
 ../include/std/types.e
+../include/std/utils.e
 
-########
-:= Sequence Centric Routines
-: <<LEVELTOC depth=3>>
-
+# Sequence Routines
 ../include/std/convert.e
 ../include/std/get.e
 ../include/std/search.e
@@ -85,41 +191,38 @@
 ../include/std/serialize.e
 ../include/std/sort.e
 
-########
-:= String Centric Routines
-: <<LEVELTOC depth=3>>
-
+# String Routines
 ../include/std/locale.e
 ../include/std/localeconv.e
 ../include/std/regex.e
 ../include/std/text.e
-../include/std/unicode.e
+#../include/std/unicode.e
+#../include/std/ucstypes.e
 ../include/std/wildcard.e
+../include/std/base64.e
 
-########
-:= Data Structures
-: <<LEVELTOC depth=3>>
+# Math Routines
+../include/std/math.e
+../include/std/mathcons.e
+../include/std/rand.e
+../include/std/stats.e
 
+# Data Routines
 ../include/std/eds.e
 ../include/std/primes.e
+../include/std/flags.e
+../include/std/hash.e
 ../include/std/map.e
 ../include/std/stack.e
-../include/std/sets.e
 
-########
-:= Networking Routines
-: <<LEVELTOC depth=3>>
-
+# Network Routines
 ../include/std/socket.e
 ../include/std/net/common.e
 ../include/std/net/dns.e
 ../include/std/net/http.e
 ../include/std/net/url.e
 
-########
-:= Low Level Routines
-: <<LEVELTOC depth=3>>
-
+# Low Level Routines
 ../include/std/dll.e
 ../include/std/error.e
 ../include/std/eumem.e
@@ -127,38 +230,84 @@
 ../include/std/memory.e
 ../include/std/safe.e
 ../include/std/memconst.e
-../include/std/unix/mmap.e
 
-########
-:= Graphics
-: <<LEVELTOC depth=3>>
-
+# Graphic Routines
 ../include/std/graphcst.e
 ../include/std/graphics.e
 ../include/std/image.e
 
-########
-:= Euphoria Routines
-: <<LEVELTOC depth=3>>
-
+# Euphoria Routines
 ../include/euphoria/info.e
 ../include/euphoria/keywords.e
 ../include/euphoria/syncolor.e
 ../include/euphoria/tokenize.e
 ../include/std/unittest.e
 
-########
-:= Windows Routines
-: <<LEVELTOC depth=3>>
-
+# Windows Routines
 ../include/std/win32/msgbox.e
 ../include/std/win32/sounds.e
 
-########
-:= Release Notes
-: <<LEVELTOC depth=2>>
-:@@(color <<font color="$(1)" text=`$(+)`>>)@
-:@@(bugfix **$$(color #009999 bug fixed:)**)@
-:@@(doneby \\//$$(color #999900 Implemented by: $(0))//)@
+# Unsupported Features
+../docs/unsupported.txt
 
-../docs/relnotes400.txt
+########
+:%%output=relnotes
+:= Release Notes
+:<<LEVELTOC level=1 depth=2>>
+
+../docs/release/4.0.1.txt
+../docs/release/4.0.0.txt
+../docs/release/4.0.0.rc2.txt
+../docs/release/4.0.0.rc1.txt
+
+ifdef HTML
+../docs/release/3.1.1.txt
+../docs/release/3.1.0.txt
+../docs/release/3.0.2.txt
+../docs/release/3.0.1.txt
+../docs/release/3.0.0.txt
+../docs/release/2.5.0.txt
+../docs/release/2.5.0b.txt
+../docs/release/2.4.0.txt
+../docs/release/2.4.0b.txt
+../docs/release/2.4.0a.txt
+../docs/release/2.3.0.txt
+../docs/release/2.3.0b.txt
+../docs/release/2.3.0a.txt
+../docs/release/euc.txt
+../docs/release/euc-b2.txt
+../docs/release/euc-b1.txt
+../docs/release/euc-a3.txt
+../docs/release/euc-a3.txt
+../docs/release/euc-a2.txt
+../docs/release/euc-a1.txt
+../docs/release/2.2.0.txt
+../docs/release/2.2.0b.txt
+../docs/release/2.2.0-linux.txt
+../docs/release/2.2.0b-linux.txt
+../docs/release/2.2.0a-linux.txt
+../docs/release/2.2.0pa4.txt
+../docs/release/2.2.0pa3.txt
+../docs/release/2.2.0pa2.txt
+../docs/release/2.2.0pa1.txt
+../docs/release/2.1.0.txt
+../docs/release/2.1.0b.txt
+../docs/release/2.1.0a.txt
+../docs/release/2.0.0.txt
+../docs/release/2.0.0b.txt
+../docs/release/2.0.0a.txt
+../docs/release/1.5.1.txt
+../docs/release/1.5.0.txt
+../docs/release/1.4.2.txt
+../docs/release/1.4.1.txt
+../docs/release/1.4.0.txt
+../docs/release/1.3.0.txt
+../docs/release/1.2.0.txt
+../docs/release/1.1.0.txt
+../docs/release/1.0.0.txt
+
+########
+:%%output=key_index
+:= Index
+:<<INDEX search>>
+end ifdef

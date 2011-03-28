@@ -1,18 +1,17 @@
--- (c) Copyright - See License.txt
--- wildcard.e
-namespace wildcard
-
 --****
 -- == Wildcard Matching
--- **Page Contents**
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
+
+namespace wildcard
+
+ifdef not UNIX then
+	include std/text.e
+end ifdef
 
 --****
 -- === Routines
-
-include std/text.e as txt -- upper/lower
 
 function qmatch(sequence p, sequence s)
 -- find pattern p in string s
@@ -54,30 +53,30 @@ constant END_MARKER = -1
 -- Comments:
 --
 -- Character comparisons are case sensitive.
--- If you want case insensitive comparisons, pass both ##pattern## and ##string## through [[:upper]](), or both through [[:lower]](), before calling ##wildcard_match##().
+-- If you want case insensitive comparisons, pass both ##pattern## and ##string## through [[:upper]](), or both through [[:lower]](), before calling ##is_match##().
 --
 -- If you want to detect a pattern anywhere within a string, add * to each end of the pattern: 
 --  {{{
---  i = wildcard_match('*' & pattern & '*', string)
+--  i = is_match('*' & pattern & '*', string)
 --  }}}
 --  
 --  There is currently no way to treat * or ? literally in a pattern.
 --
 -- Example 1: 
 -- <eucode> 
---  i = wildcard_match("A?B*", "AQBXXYY")
+--  i = is_match("A?B*", "AQBXXYY")
 -- -- i is 1 (TRUE)
 -- </eucode>
 --
 -- Example 2:  
 -- <eucode> 
---  i = wildcard_match("*xyz*", "AAAbbbxyz")
+--  i = is_match("*xyz*", "AAAbbbxyz")
 -- -- i is 1 (TRUE)
 -- </eucode>
 --
 -- Example 3:
 -- <eucode> 
---  i = wildcard_match("A*B*C", "a111b222c")
+--  i = is_match("A*B*C", "a111b222c")
 -- -- i is 0 (FALSE) because upper/lower case doesn't match
 -- </eucode>
 --
@@ -85,9 +84,10 @@ constant END_MARKER = -1
 -- ##bin/search.ex##
 --
 -- See Also: 
--- [[:wildcard_file]], [[:upper]], [[:lower]], [[:Regular expressions]]
+-- [[:upper]], [[:lower]], [[:Regular Expressions]]
+--
 
-public function wildcard_match(sequence pattern, sequence string)
+public function is_match(sequence pattern, sequence string)
 	integer p, f, t 
 	sequence match_string
 	
@@ -132,57 +132,4 @@ public function wildcard_match(sequence pattern, sequence string)
 		end if
 	end while
 	return 0
-end function
-
---**
--- Determine whether a file name matches a wildcard pattern.
---
--- Parameters:
---		# ##pattern## : a string, the pattern to match
---		# ##filename## : the string to be matched against
---
--- Returns: 
---		An **integer**, TRUE if ##filename## matches ##pattern##, else FALSE.
---
--- Comments:
---
--- ~* matches any 0 or more characters, ? matches any single character. On //Unix// the 
--- character comparisons are case sensitive. On Windows they are not.
---
--- You might use this function to check the output of the [[:dir]]() routine for file names that match a pattern supplied by the user of your program.
---  
--- Example 1: 
--- <eucode> 
---  i = wildcard_file("AB*CD.?", "aB123cD.e")
--- -- i is set to 1 on Windows, 0 on Linux or FreeBSD
--- </eucode>
---
--- Example 2:  
--- <eucode> 
---  i = wildcard_file("AB*CD.?", "abcd.ex")
--- -- i is set to 0 on all systems, 
--- -- because the file type has 2 letters not 1
--- </eucode>
---
--- Example 3: 
--- ##bin/search.ex##
---
--- See Also: 
--- [[:wildcard_match]], [[:dir]]
-
-public function wildcard_file(sequence pattern, sequence filename)
-	ifdef not UNIX then
-		pattern = txt:upper(pattern)
-		filename = txt:upper(filename)
-	end ifdef
-	
-	if not find('.', pattern) then
-		pattern = pattern & '.'
-	end if
-	
-	if not find('.', filename) then
-		filename = filename & '.'
-	end if
-	
-	return wildcard_match(pattern, filename)
 end function

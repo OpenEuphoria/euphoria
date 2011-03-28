@@ -52,7 +52,8 @@ loop do
 		exit
 	end if
 	k += 1
-until k = 1000
+	until k = 1000
+end loop
 
 test_equal( "do loops (not) terminating at ", 1000, k )
 

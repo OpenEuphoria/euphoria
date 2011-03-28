@@ -7,6 +7,7 @@
 include std/cmdline.e
 include std/io.e
 include std/map.e
+include std/console.e
 
 constant 
 	BEGIN_TAG = "<eucode>",
@@ -23,7 +24,11 @@ object input_filename=map:get(params, "i"),
 	output_filename=map:get(params, "o")
 
 if atom(input_filename) or atom(output_filename) then
-	puts(1, "Usage: literate.ex -i input_file -o output_file\n")
+	ifdef WINDOWS and GUI then
+	    puts(1, "This program must be run from the command-line:\n\n")
+	end ifdef
+	puts(1, "Usage: eui literate.ex -i input_file -o output_file\n")
+	maybe_any_key()
 	abort(1)
 end if
 
@@ -36,11 +41,11 @@ while next_tag > 0 with entry do
 		out &= "/*\n" & in[pos..next_tag-1] & "*/\n"
 	end if
 
-	pos = match_from(END_TAG, in, next_tag) + length(END_TAG) 
+	pos = match(END_TAG, in, next_tag) + length(END_TAG) 
 
 	out &= in[next_tag + length(BEGIN_TAG)..pos - length(END_TAG) - 1] & "\n"
 entry
-	next_tag = match_from(BEGIN_TAG, in, pos)
+	next_tag = match(BEGIN_TAG, in, pos)
 end while
 
 out &= "/*\n" & in[pos..$] & "\n*/\n"

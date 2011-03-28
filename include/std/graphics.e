@@ -1,11 +1,15 @@
--- (c) Copyright - See License.txt
---
 --****
 -- == Graphics - Cross Platform
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
+
 namespace graphics
+
+include std/types.e
+
+public include std/console.e
+public include std/graphcst.e
 
 constant
 	M_GRAPHICS_MODE  = 5,
@@ -14,8 +18,6 @@ constant
 	M_SET_T_COLOR    = 9,
 	M_SET_B_COLOR    = 10,
 	M_GET_POSITION   = 25
-
-public include std/console.e
 
 --****
 -- === Routines
@@ -92,6 +94,8 @@ public include std/graphcst.e
 public procedure text_color(color c)
 -- set the foreground text color to c - text or graphics modes
 -- add 16 to get blinking
+	c = and_bits(c, 0x1F)
+	c = true_fgcolor[c+1]
 	machine_proc(M_SET_T_COLOR, c)
 end procedure
 
@@ -117,18 +121,106 @@ end procedure
 
 public procedure bk_color(color c)
 -- set the background color to c - text or graphics modes
+	c = and_bits(c, 0x1F)
+	c = true_bgcolor[c+1]
 	machine_proc(M_SET_B_COLOR, c)
 end procedure
 
-type boolean(integer n)
-	return n = n = 1
-end type
+--**
+-- Set the codes for the colors used in text_color and bk_color.
+--
+-- Parameters:
+-- 	# ##colorset## : A sequence in one of two formats. 
+--  ## Containing two sets of exactly 16 color numbers in which the first set 
+--  are foreground (text) colors and the other set are background colors.
+--  ## Containing a set of exactly sixteen color numbers. These are to be
+--  applied to both foreground and background.
+--
+-- Returns:
+--    A sequence: This contains two sets of 16 color values currently in
+--    use for FG and BG respectively.
+--
+-- Comments:
+-- * If the ##colorset## is omitted then this just returns the current values without
+--   changing anything.
+-- * A color set contains 16 values. You can access the color value for a specific color
+--   by using [X + 1] where 'X' is one of the Euphoria color constants such as ##RED##,
+--   ##BLUE##, etc ...
+-- * This can be used to change the meaning of the standard color codes for
+--   some consoles that are not using standard values. For example, the Unix default
+--   color value for RED is 1 and BLUE is 4, but you might need this to swapped. See
+--   code example 1. Another use might be to suppress highlighted (bold) colors. See
+--   code example 2.
+--
+-- Example 1:
+-- <eucode>	
+-- sequence cs
+-- cs = console_colors() -- Get the current FG and BG color values.
+-- cs[FGSET][RED + 1] = 4 -- set RED to 4
+-- cs[FGSET][BLUE + 1] = 1 -- set BLUE to 1
+-- cs[BGSET][RED + 1] = 4 -- set RED to 4
+-- cs[BGSET][BLUE + 1] = 1 -- set BLUE to 1
+-- console_colors(cs)
+-- </eucode>
+--
+-- Example 2:
+-- <eucode>	
+-- -- Prevent highlighted background colors
+-- sequence cs
+-- cs = console_colors()
+-- for i = GRAY + 1 to BRIGHT_WHITE + 1 do
+--    cs[BGSET][i] = cs[BGSET][i - 8]
+-- end for
+-- console_colors(cs)
+-- </eucode>
+--	
+-- See Also:
+--   [[:text_color]] [[:bk_color]]
+
+public function console_colors(sequence colorset = {})
+	sequence currentset
+	
+	-- Save the current values 
+	currentset = {true_fgcolor[1 .. 16], true_bgcolor[1 .. 16]}
+	
+	if length(colorset) = 16 then
+		-- A single set to be used for both fg and bg.
+		colorset = {colorset, colorset}
+	end if
+	
+	-- Check the sanity of the input, do nothing if it's not valid.
+	if length(colorset) != 2 then
+		return currentset
+	end if
+	if length(colorset[FGSET]) != 16 then
+	   	return currentset
+	end if
+	if not types:char_test( colorset[FGSET], {{0,15}} ) then
+	   	return currentset
+	end if
+	if length(colorset[BGSET]) != 16 then
+	   	return currentset
+	end if
+	if not types:char_test( colorset[BGSET], {{0,15}} ) then
+	   	return currentset
+	end if
+		
+	-- Set text colors
+	true_fgcolor[1..16]  = colorset[FGSET]
+	true_fgcolor[17..32] = colorset[FGSET] + BLINKING
+	
+	-- Set background colors.
+	true_bgcolor[1..16]  = colorset[BGSET]
+	true_bgcolor[17..32] = colorset[BGSET] + BLINKING
+
+	return currentset
+end function
 
 --**
 -- Determine whether text will wrap when hitting the rightmost column.
 --
 -- Parameters:
--- 		# ##on## : a boolean, 0 to truncate text, nonzero to wrap.
+-- 		# ##on## : an object, 0 to truncate text, anything else to wrap.
 --
 -- Comments:
 -- By default text will wrap.
@@ -148,26 +240,24 @@ end type
 -- See Also:
 --   [[:puts]], [[:position]]
 
-public procedure wrap(boolean on)
-	machine_proc(M_WRAP, on)
+public procedure wrap(object on = 1)
+	machine_proc(M_WRAP, not equal(on, 0))
 end procedure
 
 --**
 -- Scroll a region of text on the screen.
 --
 -- Parameters:
---		# ##amount## : an integer, the number of lines by which to scroll. This is >0 to scroll up and <0 to scroll down.
+--		# ##amount## : an integer, the number of lines by which to scroll. 
+--        This is >0 to scroll up and <0 to scroll down.
 -- 		# ##top_line## : the 1-based number of the topmost line to scroll.
 -- 		# ##bottom_line## : the 1-based number of the bottom-most line to scroll.
 --
 -- Comments:
--- inclusive. New blank lines will
--- appear at the top or bottom.
---
--- You could perform the scrolling operation using a series of calls to ##[:puts]]()##, 
+-- * New blank lines will appear at the vacated lines.
+-- * You could perform the scrolling operation using a series of calls to ##[:puts]]()##, 
 -- but ##scroll##() is much faster.
---
--- The position of the cursor after scrolling is not defined.
+-- * The position of the cursor after scrolling is not defined.
 --
 -- Example 1:
 --   ##bin/ed.ex##
@@ -176,23 +266,19 @@ end procedure
 --   [[:clear_screen]], [[:text_rows]]
 
 public procedure scroll(integer amount, 
-						positive_int top_line, 
-						positive_int bottom_line)
+						console:positive_int top_line, 
+						console:positive_int bottom_line)
 	machine_proc(M_SCROLL, {amount, top_line, bottom_line})
 end procedure
 
 --****
 -- === Graphics Modes
 
-type mode(integer x)
-	return (x >= -3 and x <= 19) or (x >= 256 and x <= 263)
-end type
-
 --**
 -- Attempt to set up a new graphics mode.
 --
 -- Parameters:
--- 		# ##m## : an integer, ignored.
+-- 		# ##x## : an object, but it will be ignored.
 --
 -- Returns:
 -- 		An **integer**, always returns zero. 
@@ -203,6 +289,6 @@ end type
 -- See Also:
 -- 		[[:video_config]]
 
-public function graphics_mode(mode m = -1)
+public function graphics_mode(object m = -1)
    return machine_func(M_GRAPHICS_MODE, m)
 end function

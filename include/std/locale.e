@@ -1,27 +1,23 @@
--- (c) Copyright - See License.txt
---
 --****
 -- ==  Locale Routines
--- **Page Contents**
 --
--- <<LEVELTOC depth=2>>
--- 
+-- <<LEVELTOC level=2 depth=4>>
+
 namespace locale
 
-include std/dll.e
-include std/machine.e
-include std/error.e
 include std/datetime.e as dt
-include std/text.e
-include std/io.e
-include std/map.e
-include std/localeconv.e as lcc
-include std/lcid.e as lcid
-include std/convert.e
+include std/dll.e
 include std/filesys.e
+include std/io.e
+include std/lcid.e as lcid
+include std/localeconv.e as lcc
+include std/machine.e
+include std/map.e
 include std/mathcons.e
 include std/search.e
-
+include std/text.e
+include std/eds.e
+include std/types.e
 
 ------------------------------------------------------------------------------------------
 --
@@ -29,7 +25,7 @@ include std/search.e
 --
 ------------------------------------------------------------------------------------------
 
-constant P = C_POINTER, I = C_INT
+constant P = dll:C_POINTER, I = dll:C_INT
 
 ------------------------------------------------------------------------------------------
 --
@@ -140,21 +136,21 @@ public function lang_load(sequence filename)
 	keylang = map:new()
 	altlang = map:new()
 	cont = 0
-	filename = defaultext(filename, "lng")
+	filename = filesys:defaultext(filename, "lng")
 
 	if sequence(lang_path) and length(lang_path) > 0 then
 		sequence tempname 
-		tempname = locate_file(filename, {lang_path})
+		tempname = filesys:locate_file(filename, {lang_path})
 		if equal(tempname, filename) then
-			filename = locate_file(filename)
+			filename = filesys:locate_file(filename)
 		else
 			filename = tempname
 		end if
 	else
-		filename = locate_file(filename)
+		filename = filesys:locate_file(filename)
 	end if
 
-	lines = read_lines(filename)
+	lines = io:read_lines(filename)
 	if atom(lines) then
 		return 0  -- Language maps unchanged.
 	end if
@@ -163,7 +159,7 @@ public function lang_load(sequence filename)
 		
 		if cont then
 
-			line = trim_tail(lines[i])
+			line = text:trim_tail(lines[i])
 			if line[$] = '&' then
 				msg &= line[1..$-1] & '\n'
 			else
@@ -173,7 +169,7 @@ public function lang_load(sequence filename)
 				cont = 0
 			end if
 		else
-			line = trim(lines[i])
+			line = text:trim(lines[i])
 			if length(line) = 0 then
 				continue
 			end if
@@ -191,15 +187,15 @@ public function lang_load(sequence filename)
 				continue
 			end if
 			
-			key = trim(line[1..delim-1])
+			key = text:trim(line[1..delim-1])
 			if line[$] = '&' then
 				cont = 1
-				msg = trim(line[delim+1..$-1])
+				msg = text:trim(line[delim+1..$-1])
 				if length(msg) > 0 then
 					msg &= '\n'
 				end if
 			else
-				msg = trim(line[delim+1..$])
+				msg = text:trim(line[delim+1..$])
 				map:put(keylang, key, msg)
 				map:put(altlang, msg, key)
 			end if
@@ -283,7 +279,7 @@ end function
 -- 		[[:set]], [[:lang_load]]
 
 public function translate(sequence word, object langmap = 0, object defval="", integer mode = 0)
-	if equal(defval, PINF) then
+	if equal(defval, mathcons:PINF) then
 		defval = word
 	end if
 	
@@ -295,6 +291,7 @@ public function translate(sequence word, object langmap = 0, object defval="", i
 			langmap = def_lang
 		end if
 	end if
+
 	if atom(langmap) or length(langmap) != 2 then
 		-- Not a valid language map passed.
 		return defval
@@ -305,7 +302,6 @@ public function translate(sequence word, object langmap = 0, object defval="", i
 	else
 		return map:get(langmap[2], word, defval)
 	end if
-
 end function
 
 --**
@@ -341,17 +337,20 @@ end function
 --    --> "G'day Bob, How's the family?"
 -- </eucode>
 -- 
+
 public function trsprintf(sequence fmt, sequence data, object langmap = 0)
 	for i = 1 to length(data) do
 		if sequence(data[i]) then
-			data[i] = translate(data[i], langmap, PINF)
-			if begins("__", data[i]) then
+			data[i] = translate(data[i], langmap, mathcons:PINF)
+			if search:begins("__", data[i]) then
 				data[i] = data[i][3 .. $]
 			end if
 		end if
 	end for
-	fmt = translate(fmt, langmap, PINF)
-	if begins("__", fmt) then
+
+	fmt = translate(fmt, langmap, mathcons:PINF)
+
+	if search:begins("__", fmt) then
 		fmt = fmt[3 .. $]
 	end if
 
@@ -365,99 +364,98 @@ end function
 --
 ------------------------------------------------------------------------------------------
 
-ifdef WIN32 then
-constant
-	lib = open_dll("MSVCRT.DLL"),
-	lib2 = open_dll("KERNEL32.DLL"),
-	f_strfmon = define_c_func(lib2, "GetCurrencyFormatA", {I, I, P, P, P, I}, I),
-	f_strfnum = define_c_func(lib2, "GetNumberFormatA", {I, I, P, P, P, I}, I),
-	f_setlocale = define_c_func(lib, "setlocale", {I, P}, P),
-	f_strftime = define_c_func(lib, "strftime", {P, I, P, P}, I),
-	LC_ALL         = 0,
---	LC_COLLATE     = 1,
---	LC_CTYPE       = 2,
-	LC_MONETARY    = 3,
-	LC_NUMERIC     = 4,
---	LC_TIME        = 5,
---	LC_MESSAGES    = 6,
-	$
+ifdef WINDOWS then
+	constant
+		lib = open_dll("MSVCRT.DLL"),
+		lib2 = open_dll("KERNEL32.DLL"),
+		f_strfmon = define_c_func(lib2, "GetCurrencyFormatA", {I, I, P, P, P, I}, I),
+		f_strfnum = define_c_func(lib2, "GetNumberFormatA", {I, I, P, P, P, I}, I),
+		f_setlocale = define_c_func(lib, "setlocale", {I, P}, P),
+		f_strftime = define_c_func(lib, "strftime", {P, I, P, P}, I),
+		LC_ALL         = 0,
+	--	LC_COLLATE     = 1,
+	--	LC_CTYPE       = 2,
+		LC_MONETARY    = 3,
+		LC_NUMERIC     = 4,
+	--	LC_TIME        = 5,
+	--	LC_MESSAGES    = 6,
+		$
 
-/* constant
-	FORMAT_SIZE    = 6 * 4,
-	NUM_DIGITS     = 0,
-	LEADING_ZERO   = 4,
-	GROUPING       = 8,
-	DECIMAL_SEP    = 12,
-	THOUSANDS_SEP  = 16,
-	NEGATIVE_ORDER = 20
-*/
-	sequence current_locale = ""
+	/* constant
+		FORMAT_SIZE    = 6 * 4,
+		NUM_DIGITS     = 0,
+		LEADING_ZERO   = 4,
+		GROUPING       = 8,
+		DECIMAL_SEP    = 12,
+		THOUSANDS_SEP  = 16,
+		NEGATIVE_ORDER = 20
+	*/
+		sequence current_locale = ""
 
 elsifdef LINUX then
-constant
-	lib = open_dll(""),
-	f_strfmon = define_c_func(lib, "strfmon", {P, I, P, C_DOUBLE}, I),
-	f_strfnum = -1,
-	f_setlocale = define_c_func(lib, "setlocale", {I, P}, P),
-	f_strftime = define_c_func(lib, "strftime", {P, I, P, P}, I),
-	LC_ALL      = 6,
---	LC_CTYPE    = 0,
-	LC_NUMERIC  = 1,
---	LC_TIME     = 2,
---	LC_COLLATE  = 3,
-	LC_MONETARY = 4,
---	LC_MESSAGES = 5,
-	$
+	constant
+		lib = dll:open_dll(""),
+		f_strfmon = dll:define_c_func(lib, "strfmon", {P, I, P, dll:C_DOUBLE}, I),
+		f_strfnum = -1,
+		f_setlocale = dll:define_c_func(lib, "setlocale", {I, P}, P),
+		f_strftime = dll:define_c_func(lib, "strftime", {P, I, P, P}, I),
+		LC_ALL      = 6,
+	--	LC_CTYPE    = 0,
+		LC_NUMERIC  = 1,
+	--	LC_TIME     = 2,
+	--	LC_COLLATE  = 3,
+		LC_MONETARY = 4,
+	--	LC_MESSAGES = 5,
+		$
 
-elsifdef FREEBSD or SUNOS then
-constant
-	lib = open_dll("libc.so"),
-	f_strfmon = define_c_func(lib, "strfmon", {P, I, P, C_DOUBLE}, I),
-	f_strfnum = -1,
-	f_setlocale = define_c_func(lib, "setlocale", {I, P}, P),
-	f_strftime = define_c_func(lib, "strftime", {P, I, P, P}, I),
-	LC_ALL      = 0,
---	LC_COLLATE  = 1,
---	LC_CTYPE    = 2,
-	LC_MONETARY = 3,
-	LC_NUMERIC  = 4,
---	LC_TIME     = 5,
---	LC_MESSAGES = 6,
-	$
+elsifdef BSD then
+	constant
+		lib = dll:open_dll("libc.so"),
+		f_strfmon = dll:define_c_func(lib, "strfmon", {P, I, P, dll:C_DOUBLE}, I),
+		f_strfnum = -1,
+		f_setlocale = dll:define_c_func(lib, "setlocale", {I, P}, P),
+		f_strftime = dll:define_c_func(lib, "strftime", {P, I, P, P}, I),
+		LC_ALL      = 0,
+	--	LC_COLLATE  = 1,
+	--	LC_CTYPE    = 2,
+		LC_MONETARY = 3,
+		LC_NUMERIC  = 4,
+	--	LC_TIME     = 5,
+	--	LC_MESSAGES = 6,
+		$
 
 elsifdef OSX then
-constant
-	lib = open_dll("libc.dylib"),
-	f_strfmon = define_c_func(lib, "strfmon", {P, I, P, C_DOUBLE}, I),
-	f_strfnum = -1,
-	f_setlocale = define_c_func(lib, "setlocale", {I, P}, P),
-	f_strftime = define_c_func(lib, "strftime", {P, I, P, P}, I),
-	LC_ALL      = 0,
---	LC_COLLATE  = 1,
--- 	LC_CTYPE    = 2,
-	LC_MONETARY = 3,
-	LC_NUMERIC  = 4,
---	LC_TIME     = 5,
---	LC_MESSAGES = 6,
-	$
+	constant
+		lib = dll:open_dll("libc.dylib"),
+		f_strfmon = dll:define_c_func(lib, "strfmon", {P, I, P, dll:C_DOUBLE}, I),
+		f_strfnum = -1,
+		f_setlocale = dll:define_c_func(lib, "setlocale", {I, P}, P),
+		f_strftime = dll:define_c_func(lib, "strftime", {P, I, P, P}, I),
+		LC_ALL      = 0,
+	--	LC_COLLATE  = 1,
+	-- 	LC_CTYPE    = 2,
+		LC_MONETARY = 3,
+		LC_NUMERIC  = 4,
+	--	LC_TIME     = 5,
+	--	LC_MESSAGES = 6,
+		$
 	
 elsedef
-
-constant
-	lib = -1
-	lib2 = -1
-	f_strfmon = -1
-	f_strfnum = -1
-	f_setlocale = -1
-	f_strftime = -1
-	LC_ALL         = -1,
---	LC_COLLATE     = -1,
---	LC_CTYPE       = -1,
-	LC_MONETARY    = -1,
-	LC_NUMERIC     = -1,
---	LC_TIME        = -1,
---	LC_MESSAGES    = -1,
-	$
+	constant
+		lib = -1,
+		lib2 = -1,
+		f_strfmon = -1,
+		f_strfnum = -1,
+		f_setlocale = -1,
+		f_strftime = -1,
+		LC_ALL         = -1,
+	--	LC_COLLATE     = -1,
+	--	LC_CTYPE       = -1,
+		LC_MONETARY    = -1,
+		LC_NUMERIC     = -1,
+	--	LC_TIME        = -1,
+	--	LC_MESSAGES    = -1,
+		$
 
 end ifdef
 
@@ -491,19 +489,19 @@ public function set(sequence new_locale)
 	sequence nlocale
 	
 	nlocale = lcc:decanonical(new_locale)
-	lAddr_localename = allocate_string(nlocale)
+	lAddr_localename = machine:allocate_string(nlocale)
 	ign = c_func(f_setlocale, {LC_MONETARY, lAddr_localename})
 	ign = c_func(f_setlocale, {LC_NUMERIC, lAddr_localename})
 	ign = c_func(f_setlocale, {LC_ALL, lAddr_localename})
-	free(lAddr_localename)
+	machine:free(lAddr_localename)
 	
 	if sequence(lang_path) then
 		-- Note: Failure to update language map does not fail this function.
 		def_lang = lang_load(nlocale)
 	end if
 
-	ign = (ign != NULL)
-	ifdef WIN32 then
+	ign = (ign != dll:NULL)
+	ifdef WINDOWS then
 		if ign then
 			current_locale = new_locale
 		end if
@@ -524,13 +522,13 @@ public function get()
 	sequence r
 	atom p
 
-	p = c_func(f_setlocale, {LC_ALL, NULL})
-	if p = NULL then
+	p = c_func(f_setlocale, {LC_ALL, dll:NULL})
+	if p = dll:NULL then
 		return ""
 	end if
 
 	r = peek_string(p)
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if equal(lcc:decanonical(r), lcc:decanonical(current_locale)) then
 			return current_locale
 		end if
@@ -544,39 +542,39 @@ end function
 -- Converts an amount of currency into a string representing that amount.
 --
 -- Parameters:
---		# ##amount## : an atom, the value to write out.
+--   # ##amount## : an atom, the value to write out.
 --
 -- Returns:
--- 		A **sequence**, a string that writes out ##amount## of current currency.
+--   A **sequence**, a string that writes out ##amount## of current currency.
 --
 -- Example 1:
 -- <eucode>
 -- -- Assuming an en_US locale
--- ? money(1020.5) -- returns"$1,020.50"
+-- money(1020.5) -- returns"$1,020.50"
 -- </eucode>
 --
 -- See Also:
 --		[[:set]], [[:number]]
+--
 
 public function money(object amount)
 	sequence result
-	integer size
 	atom pResult, pTmp
 
 	if f_strfmon != -1 then
 		ifdef UNIX then
-			pResult = allocate(4 * 160)
-			pTmp = allocate_string("%n")
-			size = c_func(f_strfmon, {pResult, 4 * 160, pTmp, amount})
-		elsifdef WIN32 then
-			pResult = allocate(4 * 160)
-			pTmp = allocate_string(sprintf("%.8f", {amount}))
-			size = c_func(f_strfmon, {lcid:get_lcid(get()), 0, pTmp, NULL, pResult, 4 * 160})
+			pResult = machine:allocate(4 * 160)
+			pTmp = machine:allocate_string("%n")
+			c_func(f_strfmon, {pResult, 4 * 160, pTmp, amount})
+		elsifdef WINDOWS then
+			pResult = machine:allocate(4 * 160)
+			pTmp = machine:allocate_string(sprintf("%.8f", {amount}))
+			c_func(f_strfmon, {lcid:get_lcid(get()), 0, pTmp, NULL, pResult, 4 * 160})
 		end ifdef
 	
 		result = peek_string(pResult)
-		free(pResult)
-		free(pTmp)
+		machine:free(pResult)
+		machine:free(pTmp)
 	
 		return result
 	else
@@ -596,7 +594,7 @@ end function
 -- Example 1:
 -- <eucode>
 -- -- Assuming an en_US locale
--- ? number(1020.5) -- returns "1,020.50"
+-- number(1020.5) -- returns "1,020.50"
 -- </eucode>
 --
 -- See Also:
@@ -604,36 +602,35 @@ end function
 
 public function number(object num)
 	sequence result
-	integer size
 	atom pResult, pTmp
 
 	ifdef UNIX then
 		if f_strfmon != -1 then
-			pResult = allocate(4 * 160)
+			pResult = machine:allocate(4 * 160)
 			if integer(num) then
-				pTmp = allocate_string("%!.0n")
+				pTmp = machine:allocate_string("%!.0n")
 			else
-				pTmp = allocate_string("%!n")
+				pTmp = machine:allocate_string("%!n")
 			end if
-			size = c_func(f_strfmon, {pResult, 4 * 160, pTmp, num})
+			c_func(f_strfmon, {pResult, 4 * 160, pTmp, num})
 		else
 			return text:format("[,,]", num)
 		end if
 		
-	elsifdef WIN32 then
+	elsifdef WINDOWS then
 		atom lpFormat
 		if f_strfnum != -1 then
-			pResult = allocate(4 * 160)
+			pResult = machine:allocate(4 * 160)
 			if integer(num) then
-				pTmp = allocate_string(sprintf("%d", {num}))
-				-- lpFormat must not only be allocated but completely populated
+				pTmp = machine:allocate_string(sprintf("%d", {num}))
+				-- lpFormat must not only be machine:allocated but completely populated
 				-- with values from the current locale.
 				lpFormat = NULL
 			else
 				lpFormat = NULL
-				pTmp = allocate_string(sprintf("%.15f", {num}))
+				pTmp = machine:allocate_string(sprintf("%.15f", {num}))
 			end if
-			size = c_func(f_strfnum, {lcid:get_lcid(get()), 0, pTmp, lpFormat, pResult, 4 * 160})
+			c_func(f_strfnum, {lcid:get_lcid(get()), 0, pTmp, lpFormat, pResult, 4 * 160})
 		else
 			return text:format("[,,]", num)
 		end if
@@ -643,8 +640,8 @@ public function number(object num)
 	end ifdef
 
 	result = peek_string(pResult)
-	free(pResult)
-	free(pTmp)
+	machine:free(pResult)
+	machine:free(pTmp)
 
 	-- Assumption: All locales remove trailing zeros and decimal point from integers
 	integer is_int = integer(num)
@@ -675,7 +672,7 @@ public function number(object num)
 			if result[i] != '0' then
 				if not find(result[i], "1234567890") then
 					-- Step 3. Remove decimal point and all zeros, preserving any trailing symbols.
-					result = result[1..i-1] & result[is_int .. $]
+					result = eu:remove(result, i, is_int - 1)
 				end if
 				exit
 			end if
@@ -685,18 +682,18 @@ public function number(object num)
 	return result
 end function
 
-function mk_tm_struct(dt:datetime dtm)
+function mk_tm_struct(datetime:datetime dtm)
 	atom pDtm
 
-	pDtm = allocate(36)
+	pDtm = machine:allocate(36)
 	poke4(pDtm,    dtm[SECOND])        -- int tm_sec
 	poke4(pDtm+4,  dtm[MINUTE])        -- int tm_min
 	poke4(pDtm+8,  dtm[HOUR])          -- int tm_hour
 	poke4(pDtm+12, dtm[DAY])           -- int tm_mday
 	poke4(pDtm+16, dtm[MONTH] - 1)     -- int tm_mon
 	poke4(pDtm+20, dtm[YEAR] - 1900)   -- int tm_year
-	poke4(pDtm+24, dt:weeks_day(dtm) - 1)    -- int tm_wday
-	poke4(pDtm+28, dt:years_day(dtm))        -- int tm_yday
+	poke4(pDtm+24, datetime:weeks_day(dtm) - 1)    -- int tm_wday
+	poke4(pDtm+28, datetime:years_day(dtm))        -- int tm_yday
 	poke4(pDtm+32, 0)                  -- int tm_isdst
 
 	return pDtm
@@ -714,32 +711,114 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- ? datetime("Today is a %A",dt:now())
+-- include std/datetime.e
+--
+-- datetime("Today is a %A", datetime:now())
 -- </eucode>
 --
 -- See Also:
 --   datetime:[[:format]]
+--
 
-public function datetime(sequence fmt, dt:datetime dtm)
+public function datetime(sequence fmt, datetime:datetime dtm)
 	atom pFmt, pRes, pDtm
-	integer size
 	sequence res
 
 	if f_strftime != -1 then
 		pDtm = mk_tm_struct(dtm)
-		pFmt = allocate_string(fmt)
-		pRes = allocate(1024)
-		size = c_func(f_strftime, {pRes, 256, pFmt, pDtm})
+		pFmt = machine:allocate_string(fmt)
+		pRes = machine:allocate(1024)
+		c_func(f_strftime, {pRes, 256, pFmt, pDtm})
 		res = peek_string(pRes)
-		free(pRes)
-		free(pFmt)
-		free(pDtm)
+		machine:free(pRes)
+		machine:free(pFmt)
+		machine:free(pDtm)
 	else
 		res = date()
 		res[1] += 1900
-		res = dt:format(res[1..6], fmt)
+		res = datetime:format(res[1..6], fmt)
 	end if
 	
 	return res
 end function
 
+--**
+-- Get the text associated with the message number in the requested locale.
+--
+-- Parameters:
+--   # ##MsgNum## : An integer. The message number whose text you are trying to get.
+--   # ##LocalQuals## : A sequence. Zero or more locale codes. Default is {}.
+--   # ##DBBase##: A sequence. The base name for the database files containing the
+--                 locale text strings. The default is "teksto".
+--
+-- Returns:
+-- A string **sequence**, the text associated with the message number and locale.\\
+-- The **integer** zero, if associated text can not be found for any reason.
+--
+-- Comments:
+-- * This first scans the database(s) linked to the locale codes supplied.
+-- * The database name for each locale takes the format of "<DBBase>_<Locale>.edb"
+-- so if the default DBBase is used, and the locales supplied are {"enus", "enau"}
+-- the databases scanned are "teksto_enus.edb" and "teksto_enau.edb".
+-- The database table name searched is "1" with the key being the message number,
+-- and the text is the record data.
+-- * If the message is not found in these databases (or the databases don't exist)
+-- a database called "<DBBase>.edb" is searched. Again the table name is "1" but
+-- it first looks for keys with the format {<locale>,msgnum} and failing that it
+-- looks for keys in the format {"", msgnum}, and if that fails it looks for a
+-- key of just the msgnum.
+--
+
+public function get_text(integer MsgNum, sequence LocalQuals = {}, sequence DBBase = "teksto")
+	integer db_res
+	object lMsgText
+	sequence dbname
+
+	db_res = -1
+	lMsgText = 0
+	-- First, scan through the specialized local dbs
+	if string(LocalQuals) and length(LocalQuals) > 0 then
+		LocalQuals = {LocalQuals}
+	end if
+	for i = 1 to length(LocalQuals) do
+		dbname = DBBase & "_" & LocalQuals[i] & ".edb"
+		db_res = eds:db_select( filesys:locate_file( dbname ), eds:DB_LOCK_READ_ONLY)
+		if db_res = eds:DB_OK then
+			db_res = eds:db_select_table("1")
+			if db_res = eds:DB_OK then
+				lMsgText = eds:db_fetch_record(MsgNum)
+				if sequence(lMsgText) then
+					exit
+				end if
+			end if
+		end if
+	end for
+
+	-- Next, scan through the generic db
+	if atom(lMsgText) then
+		dbname = filesys:locate_file( DBBase & ".edb" )
+		db_res = eds:db_select(	dbname, DB_LOCK_READ_ONLY)
+		if db_res = eds:DB_OK then
+			db_res = eds:db_select_table("1")
+			if db_res = eds:DB_OK then
+				for i = 1 to length(LocalQuals) do
+					lMsgText = eds:db_fetch_record({LocalQuals[i],MsgNum})
+					if sequence(lMsgText) then
+						exit
+					end if
+				end for
+				if atom(lMsgText) then
+					lMsgText = eds:db_fetch_record({"",MsgNum})
+				end if
+				if atom(lMsgText) then
+					lMsgText = eds:db_fetch_record(MsgNum)
+				end if
+			end if
+		end if
+	end if
+	if atom(lMsgText) then
+		return 0
+	else
+		return lMsgText
+	end if
+end function

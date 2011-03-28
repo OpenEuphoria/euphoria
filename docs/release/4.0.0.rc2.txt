@@ -1,0 +1,213 @@
+== Version 4.0.0 Release Candidate 2 December 8, 2010
+
+=== Deprecation
+
+* ##[[:find_from]]## and ##[[:match_from]]## have been deprecated. ##[[:find]]## and 
+  ##[[:match]]## accept an optional argument (##start##) allowing these functions to be a
+  100% drop in replacement.
+* ##OPT_EXTRAS## in ##std/cmdline.e## has been replaced by a more favored name ##EXTRAS##.
+* ##iff## from ##std/utils.e## has been replaced by a more favored name ##[[:iif]]##.
+
+=== Removed
+
+* [[ticket:371]], ##replace_all## has been removed as it was a duplicate of the
+                  more powerful [[:match_replace]] routine.
+* [[ticket:376]], ##mouse.e## and ##std/mouse.e##
+* [[ticket:484]], ##wildcard_file## is very DOS centric, doesn't act right at all on
+                  modern consoles. It has been removed.
+* [[ticket:486]], ##can_add## docs have been removed, they pointed to the name change
+                  of ##can_add## to ##binop_ok##, changed during beta stage.
+* [[ticket:487]], ##wildcard:new()##, method really didn't make sense as a planning
+                  stage for regex usage as too much would have to change, a simply call
+                  to new did not save much and possibly just caused bad programming
+                  methods to be used.
+* Support for alternate style eu.cfg sections, i.e. bind:unix and unix:bind were 
+  previously supported, now only the documented method: bind:unix is accepted.
+
+=== Bug Fixes
+
+* [[ticket:118]], ##object()## tests now function properly when translated.
+* [[ticket:169]], ##[[:find_nested]]## no longer defaults the ##rtn_id## parameter
+                  to ##-1## as that is the "invalid" return value of [[:routine_id]]
+                  in which case a typo in your routine id would be silently ignored
+* [[ticket:335]], ##eui## now only accepts -v, ~-~-version as parameters to display
+                  the version number instead of -v, ~-~-v, -version and ~-~-version.
+* [[ticket:338]], Fixed //Data Execution Prevention// for FreeBSD systems.
+* [[ticket:339]], Fixed locale for FreeBSD systems.
+* [[ticket:341]], Removed unused variables in the standard library.
+* [[ticket:343]], Resolution of unqualified symbols from other files is deferred until
+                  all files that could cause symbol resolution conflicts have been read.
+* [[ticket:345]], Forward patches now update the stack space for a routine when
+                  they create temps.
+* [[ticket:349]], Fixed resolution of qualified public symbols when the namespace points
+                  to the wrong file, but the namespace file directly includes the file with
+                  the actual routine
+* [[ticket:352]], A function with a defaulted parameter that is both forward
+                  referenced and inlined no longer crashes.
+* [[ticket:358]], The programs eutest, creolehtml, and eudoc now all support a
+                  command line option to display their version number.
+* [[ticket:362]], The handing of regular expressions which match the text but
+                  didn't have any matching sub-groups was not correct nor
+                  documented.
+* [[ticket:366]], Created a new module, base64, to implement the standard
+                  Base-64 encoding algorithms.
+* [[ticket:367]], ##[[:http_post]]## properly handles multi-part form data.
+* [[ticket:372]], When an application ends, it closes all the opened files. 
+                  However if it was ending due to an syntax error, it was
+                  closing those files before trying to access the message 
+                  text database that had been opened, thus causing a seek() to fail
+                  and crash the application.
+* [[ticket:378]], On Linux and FreeBSD, the socket tests failed to detect the
+                  correct error code.
+* [[ticket:392]], ##[[:seek]]## was not returning the correct failure code on
+                  some errors.
+* [[ticket:396]], Continue operations are now properly back patched.
+* [[ticket:391]], Watcom build system was lacking the ability to build the manual.
+* [[ticket:402]], ##[[:maybe_any_key]]## now works when run from the command line version
+                  of EUPHORIA even when run without a command-line shell.
+* [[ticket:403]], Many documentation examples used ? func() and showed the output in
+                  string format which ? does not do. It was misleading to the new person
+                  to Euphoria. Found instances have been updated.
+* [[ticket:405]], ##dis.ex## no longer creates a build directory for no reason.
+* [[ticket:409]], Calls to ##Head()## that should have altered the sequence in place
+                  did not, resulting in slower code.
+* [[ticket:417]], Accidental inclusion of TOC was removed
+* [[ticket:418]], ##-debug## ##eu.cfg## switch text was corrected
+* [[ticket:418]], Clarified what (all) and (translator) means
+* [[ticket:425]], Fixed crash when branches were inlined into the top level
+* [[ticket:426]], Eutest uses binary binder
+* [[ticket:429]], ##tokenize.e## no longer drops the first character of a backtick string
+* [[ticket:431]], ##tokenize.e## properly parses \xXX escapes
+* [[ticket:434]], ##tokenize.e## no longer strips leading zeros on numbers when using
+                  the ##[[:string_numbers]]## option.
+* [[ticket:435]], ##tokenize.e## handles 0?NN numbers properly now. Returns 
+                  ##[[:T_NUMBER]]## as the token type and either ##[[:TF_INT]]##
+                  or ##[[:TF_HEX]]## as the form. If ##[[:string_numbers]]## is
+                  enabled, the prefix is returned as part of the string, i.e.
+                  ##integer a = 0b0101## will return ##"0b0101"##.
+* [[ticket:439]], ##tokenize.e## fixed breakage with slice operator due to new string
+                  number parsing.
+* [[ticket:448]], Fixed ##splice()## translation.
+* [[ticket:453]], Reworked the way open files are cleaned up so that coverage works properly
+* [[ticket:457]], cmd_parse() now correctly honors the NO_HELP option and allows
+                  the coder to override the default help switches.
+* [[ticket:461]], Fixed error checking for invalid C routines for c_func / c_proc.
+* [[ticket:463]], Fixed large file support for MinGW
+* [[ticket:464]], Fixed translated for loops that could result in incorrectly emitted brackets
+* [[ticket:465]], Fixed stack space calculations for forward proc to func conversion and type checks.
+* [[ticket:466]], Fixed line reporting on compile time type check error.
+* [[ticket:467]], Fixed interpreter, translator and binder for handling multiple parameters
+                  when one comes from a eu.cfg file and the other from the command line, but
+                  the given option was designed to only be used ONCE, such as -batch
+* [[ticket:469]], Fixed translated block comments
+* [[ticket:471]], When using the ##-lib## parameter to ##euc##, it's canoncial path is used
+                  and it's existance is checked before translation has begun to prevent wasting
+                  time only to find the linker fails.
+* [[ticket:472]], eui --help display is now in a logical display order.
+* [[ticket:473]], euc --help display is now in a logical display order.
+* [[ticket:475]], Fixed memory leak with interpreted [[:rand]]
+* [[ticket:476]], ##euc## can now translated single character base filenames, i.e. h.ex
+* [[ticket:477]], ##canonical_path## expansion of ~ now works in MSYS and CMD.exe with 
+                  the MinGW build.
+* [[ticket:479]], Installer now writes a eu.cfg, appends at the confirmation of the user.
+* [[ticket:481]], RD_INPLACE, RD_PRESORTED, RD_SORT are now documented individually.
+* [[ticket:485]], Fixed scanner initialization to prevent invalid accesses.
+* [[ticket:490]], Fixed large file support for Watcom
+* [[ticket:491]], ##cmd_parse## now appends everything after the first extra to the 
+                  ##OPT_EXTRAS## entry when ##NO_VALIDATION_AFTER_FIRST_EXTRA## is supplied
+                  as a parsing option.
+* [[ticket:501]], rand_range(hi,lo) now works with lo > 30-bits. 
+* [[ticket:505]], Fixed front-end command line processing
+* [[ticket:509]], fix pointer handling in regex back end code
+* [[ticket:503]], When translating, temps that were thought to be either sequences or objects,
+  but were ultimately atoms were not having their possible min / max values reset, leading to 
+  incorrect C code being emitted.
+* Fixed [[:seek]] return value for large files on Linux.
+* [[:connect]] return value was documented incorrectly.
+* ##std/cmdline.e##, ##cmd_parse## sets the NO_CASE option when option does not have HAS_CASE.
+* ##std/cmdline.e##, ##cmd_parse## sets the NO_PARAMETER option when option does not have HAS_PARAMETER.
+* ##std/cmdline.e##, ##cmd_parse## sets the ONCE option when option does not have MULTIPLE.
+* The euphoria coded backend (eu.ex) in some cases did not handle recursive calls correctly.
+* Too numerous to list: Many documentation typo, spelling mistakes and formatting
+  errors have been corrected.
+* Removed many unnecessary ##[[:maybe_any_key]]## uses from the general demos
+* ##net/http.e## now properly handles ##{ {key,value}, ...}##, ##{ encoding_type, {key,val}, ...}##
+  and already encoded string data, ##"name=John%20Doe"##.
+* Fixed eutext.ex and std/unittest.e. Under some circumstances, they would report 100%
+  success even though there were some failures.
+* Fixed ##std/filesys.e## and ##std/locale.e## for use on OpenBSD and NetBSD.
+* Use POSIX random() to initialize random seed1 on non-Windows platforms.
+* Updated ##t_io.e## as OpenBSD and NetBSD allows seeking on STDIN, STDOUT and 
+  STDERR.
+* Now ensure internal C strings in be_pcre are properly null terminated.
+* Fixed version display information for NetBSD
+
+=== Enhancements/Changes
+
+* [[ticket:334]], *nix generic distribution build scripts are now combined for easier maintenance.
+* [[ticket:341]], [[ticket:344]], Many unused variables have been cleaned up in the 
+                  standard library.
+* [[ticket:363]], ##euc## now has an optional parameter ##-rc-file## that will compile
+                  and bind the resource file to windows executables.
+* [[ticket:411]], documented the ##$## character as applied to a sequence terminator.
+* [[ticket:413]], Qualified the standard library. With so many forward lookups this allows
+                  for a pretty large speedup when using multiple standard library includes.
+* [[ticket:499]], Add support for using '1', '2', and 'j' in place of F1, F2,
+                  and the DOWN_ARROW key in the Trace screen. This allows Unix users to use
+                  trace(1) even if we don't recognize escape sequences for their particular
+                  $TERM
+* [[ticket:513]], Moved [[:get_text]] from ##std/text##.e to ##std/locale.e##
+* ##manual-upload## target was added to GNU and Watcom makefiles
+* Formatted ##buzz.ex## example
+* ##euc## will always remove it's temporary build directory unless the ##-keep##
+  option is supplied. If one wants to keep the build directory for some reason, they
+  sould probably use ##-build-dir## as well, for example: ##euc -build-dir my-build 
+  hello.ex## which will automatically keep the build directory since it was user specified.
+* Converted ##bin/lines.ex## to use new language constructs and the standard library
+  as an example of how an application take advantage of 4.0. Code base went from 591
+  lines of code to 195 lines of code. Bugs were fixed, comment percentage calculations
+  and header/footer lines were added in the new, smaller version as well.\\
+  \\
+  This program also now has the ability to sort results by numerous options in normal
+  or reverse order.
+* Moved network demos from ##demos/## to ##demos/net## for better organization.
+* ##euphoria/tokenize.e## BLANK concept has changed. tokenize use to consume all newlines
+  and only report double blanks. It now simply tokenizes the data and returns a newline
+  if requested. ##keep_blanks## has been renamed to ##[[:keep_newlines]]## and 
+  ##T_BLANK## has been renamed to ##[[:T_NEWLINE]]##. Thus the tokenizer doesn't perform
+  any 'parser' functions, it simply tokenizes the source.
+* Added ##show_tokens##, ##token_names## and ##token_forms## to ##euphoria/tokenize.e## to
+  help in debugging both tokenize internal routines and applications that make use of
+  ##euphoria/tokenize.e##
+* Installer now creates a eu.cfg directory in EUDIR/bin
+* Speed improvements to map:put()
+* Demoted several "bin" programs to demos including:
+** ##ascii.ex##
+** ##eprint.ex##
+** ##eused.ex##
+** ##guru.ex##
+** ##key.ex##
+** ##search.ex##
+** ##where.ex##
+* All demos and bundled bin programs are unit tested to ensure at least eui -test passes
+* Removed ##analyze.ex## as it never was a finished, deployable product
+* eu.cfg "win32" sections ([win32], [bind:win32], [translate:win32], [bind:win32]) have
+  now all been changed to "windows", not "win32"
+* Removed demo/demo.doc and instead included in the header of each demo program what
+  they do and included them into a section in the manual about demos.
+* ##-test## parameter now displays warnings as well as errors
+* Translator speed optimizations.
+* Improved logging and error checking for sock_server.ex demo
+* Renamed ##bin/lines.ex## to ##bin/euloc.ex## since it's more Euphoria centric now.
+* Removed left-over translator command line parameter ##-fastfp## which was for DOS only.
+* Reuse memory buffer in HSIEH32 hash implementation
+* ##abbreviate_path## is used to cleanup the display from ##euc## regarding the Build 
+  Directory.
+* ##printf##s third argument is now optional. ##printf(1, "Hello\n", {})## is no longer
+  needed, it can be shortened to ##printf(1, "Hello\n")##
+* Added another hashing algorithm. HSIEH30 is identical to HSIEH32 but will only
+  ever return a 30-bit integer (a Euphoria integer).
+* Removed hash elements from map.e and placed them in a new standard library module, hash.e
+* Performance tweaks to maps. 
+* Removed support for ##emake.bat## build scripts, please use direct build or makefiles,
+  both of which ##euc## supports directly.

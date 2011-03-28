@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <time.h>
+
 #ifdef EUNIX
 #  include <sys/stat.h>
 #  include <unistd.h>
@@ -27,28 +28,24 @@
 #      include <graph.h>
 #  endif
 #endif
+
 #include <string.h>
+
 #ifdef EWINDOWS
 #  include <windows.h>
 #endif
+
 #include "alldefs.h"
+#include "global.h"
+#include "be_w.h"
+#include "be_machine.h"
+#include "be_runtime.h"
+#include "be_rterror.h"
 
 /******************/
 /* Local defines  */
 /******************/
 #define TAB_WIDTH 4    /* power of 2 assumed */
-
-/**********************/
-/* Imported variables */
-/**********************/
-extern int EuConsole;
-extern int current_screen;
-extern int line_max, col_max;
-extern int con_was_opened;
-extern struct videoconfig config;
-extern int low_on_space;
-extern unsigned current_bg_color;
-extern unsigned current_fg_color;
 
 /**********************/
 /* Exported variables */
@@ -100,23 +97,52 @@ struct char_cell alt_image_debug[MAX_LINES][MAX_COLS];
 /**********************/
 /* Declared functions */
 /**********************/
-#ifndef ESIMPLE_MALLOC
-char *EMalloc();
-char *ERealloc();
-#else
-#include "alloc.h"
-#endif
-// TODO: This is required due to a bug in global.h that Jim discovered.
-#ifdef EWINDOWS
-extern unsigned default_heap;
-#endif
+#include "be_alloc.h"
 static void expand_tabs();
 void SetPosition();
-void RTInternal();
+
 
 /*********************/
 /* Defined functions */
 /*********************/
+
+static int _has_console = 1;
+
+#if defined(EWINDOWS)
+#include <windows.h>
+
+typedef int (WINAPI *GCPLA)(LPDWORD, DWORD);
+
+void check_has_console() {
+	GCPLA gCPLA;
+	HMODULE kernel32;
+
+	kernel32 = LoadLibrary("kernel32.dll");
+	gCPLA = (GCPLA) GetProcAddress(kernel32, "GetConsoleProcessList");
+
+	if (gCPLA == NULL) {
+		_has_console = 0;
+		FreeLibrary(kernel32);
+	} 
+	else {
+		DWORD count, processList[3];
+
+		count = gCPLA(&processList, 3);
+		FreeLibrary(kernel32);
+		_has_console = (count > 1);
+	}
+}
+
+#else
+
+void check_has_console() {}
+
+#endif
+
+int has_console() {
+	return _has_console;
+}
+
 struct rccoord GetTextPositionP()
 {
         struct rccoord p;
@@ -125,11 +151,7 @@ struct rccoord GetTextPositionP()
         p.col = screen_col;
         return p;
 }
-void OutTextP(const char * c)
-{
-    printf(c);
-    fflush(stdout);
-}
+
 
 #ifdef EUNIX
 void screen_copy(struct char_cell a[MAX_LINES][MAX_COLS],
@@ -162,13 +184,27 @@ void screen_show()
 }
 #endif
 
+#if defined (EUNIX)
+void Set_Image(struct char_cell image[MAX_LINES][MAX_COLS], char vch, char fg, char bg)
+{
+  int i, j;
+  
+    for (i = 0; i < line_max; i++) {
+        for (j = 0; j < col_max; j++) {
+            image[i][j].ascii = vch;
+            image[i][j].fg_color = fg;
+            image[i][j].bg_color = bg;
+        }
+    }
+}
+#endif
+
 void InitInOut()
 /* Set up stdout and stderr. In EWINDOWS some stuff
    is initialized right away. The rest is done later if necesssary on first
    use of the console - see show_console() below. */
 {
     struct rccoord position;
-    int i, j;
 #ifdef EWINDOWS
     position.col = 1;   // should do these 2 properly
     position.row = 1;
@@ -188,15 +224,21 @@ void InitInOut()
     screen_line = position.row;
     screen_col = position.col;
 
-    for (i = 0; i < line_max; i++) {
-        for (j = 0; j < col_max; j++) {
-            screen_image[i][j].ascii = ' ';
-            screen_image[i][j].fg_color = 15;
-            screen_image[i][j].bg_color = 0;
-        }
-    }
+	Set_Image(screen_image, ' ', 15, 0);
 #endif
 }
+
+int console_application() {
+#if defined(EWINDOWS)
+	if (!have_console)
+			show_console();
+		
+	return already_had_console;
+#else
+	return 1;
+#endif
+}
+
 
 #if defined(EWINDOWS)
 void show_console()
@@ -332,7 +374,7 @@ static void MyWriteConsole(char *string, int nchars)
 // write a string of plain characters to the console and
 // update the cursor position
 {
-    int i;
+    unsigned long i;
     static int first = 0;
     CONSOLE_SCREEN_BUFFER_INFO console_info;
 
@@ -364,13 +406,13 @@ static void MyWriteConsole(char *string, int nchars)
 	    ch.Y = screen_loc.Top;
 		if (old_string == 0) {
 			oldstr_len = max(nchars + 3, 256);
-			old_string = (char *)malloc(oldstr_len);
+			old_string = (char *)EMalloc(oldstr_len);
 			if (old_string == 0) return;
 		}
 	
 		if (nchars > oldstr_len) {
 			oldstr_len = nchars + 3;
-			old_string = (char *)realloc(old_string, oldstr_len);
+			old_string = (char *)ERealloc(old_string, oldstr_len);
 			if (old_string == 0) return;
 		}
 	
@@ -395,7 +437,7 @@ static void MyWriteConsole(char *string, int nchars)
 // 	    if( line_buffer_size < console_info.dwMaximumWindowSize.X || line_buffer == NULL){
 	    if( line_buffer_size < console_info.dwSize.X || line_buffer == NULL){
 	        if (line_buffer != 0) {
-	            EFree(line_buffer);
+	            EFree((char *)line_buffer);
 	        }
 //	        line_buffer_size = console_info.dwMaximumWindowSize.X;
 	        line_buffer_size = console_info.dwSize.X;
@@ -490,7 +532,7 @@ static void expand_tabs(char *raw_string)
 
     if (expanded_string == 0) {
 	    screen_width = 200;
-	    expanded_string = (char *)malloc(screen_width + 3); // Extra 3 for \n\r\0
+	    expanded_string = (char *)EMalloc(screen_width + 3); // Extra 3 for \n\r\0
 	    expanded_ptr = expanded_string;
 	    expanded_end = expanded_string + screen_width;
     }
@@ -533,7 +575,7 @@ static void expand_tabs(char *raw_string)
 	            if (expanded_ptr >= expanded_end) {
 		            colpos = expanded_ptr - expanded_string;
 		            screen_width += 100;
-		            expanded_string = (char *)realloc(expanded_string, screen_width + 3);
+		            expanded_string = (char *)ERealloc(expanded_string, screen_width + 3);
 		            expanded_ptr = expanded_string + colpos;
 		            expanded_end = expanded_string + screen_width;
 	            }
@@ -568,7 +610,7 @@ static void expand_tabs(char *raw_string)
 //             if (expanded_ptr >= expanded_end) {
 // 	            colpos = expanded_ptr - expanded_string;
 // 	            screen_width += 100;
-// 	            expanded_string = (char *)realloc(expanded_string, screen_width + 3);
+// 	            expanded_string = (char *)ERealloc(expanded_string, screen_width + 3);
 // 	            expanded_ptr = expanded_string + colpos;
 // 	            expanded_end = expanded_string + screen_width;
 //             }
@@ -612,7 +654,7 @@ void screen_output(IFILE f, char *out_string)
 			collect_free = 80;
 			collect_len = len + collect_free;
             collect = EMalloc(collect_len + 1);
-			strlcpy(collect, out_string, collect_len);
+			copy_string(collect, out_string, collect_len);
             collect_next = len;
         }
         else {
@@ -623,8 +665,8 @@ void screen_output(IFILE f, char *out_string)
 			} else {
 				collect_len = len;
 			}
-			// safe to use strcpy here 'cos we already checked the remaining length.
-			strcpy(collect+collect_next, out_string);
+
+			copy_string(collect+collect_next, out_string, len+1);
             collect_free -= len;
             collect_next += len;
         }
@@ -679,11 +721,11 @@ void screen_output_va(IFILE f, char *out_string, va_list ap)
 	// figure out how long the string will be
 	nsize = vsnprintf(0, 0, out_string, ap);
 
-	buf = malloc(nsize+1); // add one for the trailing '\0'
+	buf = EMalloc(nsize+1); // add one for the trailing '\0'
 	vsnprintf(buf, nsize+1, out_string, ap);
 
 	screen_output(f, buf);
-	free(buf);
+	EFree(buf);
 }
 
 void screen_output_vararg(IFILE f, char *out_string, ...)
@@ -723,8 +765,12 @@ void ClearScreen()
 
 #ifdef EUNIX
     // ANSI code
-    iputs("\033[2J", stdout);  // clear screen
+    SetTColor(current_fg_color);
+    SetBColor(current_bg_color);
+    iputs("\E[2J", stdout);  // clear screen
+    iflush(stdout);
     SetPosition(1,1);
+    Set_Image(screen_image, ' ', current_fg_color, current_bg_color);
 #endif
 
     screen_line = 1;
@@ -735,19 +781,12 @@ void SetPosition(int line, int col)
 {
 #ifdef EUNIX
 #define SP_buflen (20)
-    char lbuff[SP_buflen];
-    char cbuff[SP_buflen];
+    char buff[SP_buflen];
 #endif
 
 #ifdef EUNIX
-    snprintf(lbuff, SP_buflen, "%d", line); lbuff[SP_buflen - 1] = '\0'; // ensure NULL
-    snprintf(cbuff, SP_buflen, "%d", col); cbuff[SP_buflen - 1] = '\0'; // ensure NULL
-    // ANSI code
-    iputs("\033[", stdout);
-    iputs(lbuff, stdout);
-    iputc(';', stdout);
-    iputs(cbuff, stdout);
-    iputc('H', stdout);
+    snprintf(buff, SP_buflen, "\E[%d;%dH", line, col);
+    iputs(buff, stdout);
     iflush(stdout);
 #endif
 
@@ -765,7 +804,7 @@ void SetPosition(int line, int col)
 
 #ifdef EWINDOWS
 
-void ReadInto(WORD * buf, LPTSTR * str, int size, int * n, int * m, WORD * saved, struct rccoord * pos)
+void ReadInto(WORD * buf, LPTSTR str, int size, unsigned long * n, unsigned long * m, WORD * saved, struct rccoord * pos)
 {
     COORD ch;
 
@@ -781,9 +820,9 @@ void ReadInto(WORD * buf, LPTSTR * str, int size, int * n, int * m, WORD * saved
     ReadConsoleOutputAttribute(console_output, buf, size, ch, m);
 }
 
-void WriteOutFrom(WORD * buf, LPTSTR * str, int n, int m, WORD * saved, struct rccoord * pos)
+void WriteOutFrom(WORD * buf, LPTSTR str, unsigned long n, unsigned long m, WORD * saved, struct rccoord * pos)
 {
-    int size1, size2;
+    unsigned long size1, size2;
     COORD ch;
     ch.X = 0;
     ch.Y = 0;
@@ -799,22 +838,22 @@ void WriteOutFrom(WORD * buf, LPTSTR * str, int n, int m, WORD * saved, struct r
 }
 
 TCHAR console_save_str[65536];
-int console_save_str_n = 0;
+unsigned long console_save_str_n = 0;
 WORD console_save_buf[65536];
-int console_save_buf_n = 0;
+unsigned long console_save_buf_n = 0;
 WORD console_save_saved = (WORD)-1;
 struct rccoord console_save_pos;
 
 TCHAR console_trace_str[65536];
-int console_trace_str_n = 0;
+unsigned long console_trace_str_n = 0;
 WORD console_trace_buf[65536];
-int console_trace_buf_n = 0;
+unsigned long console_trace_buf_n = 0;
 WORD console_trace_saved = (WORD)-1;
 struct rccoord console_trace_pos;
 
 void SaveNormal()
 {
-    int size = 65536;
+    unsigned long size = 65536;
     if (EuConsole){
         ReadInto(console_save_buf, console_save_str, size, &console_save_buf_n, &console_save_str_n, &console_save_saved, &console_save_pos);
     } else {
@@ -853,7 +892,6 @@ void RestoreNormal()
     }
 }
 
-extern void DisableControlCHandling();
 void DisableControlCHandling()
 {
 	// SetConsoleMode(console_input, ENABLE_MOUSE_INPUT);

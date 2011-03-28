@@ -1,0 +1,31 @@
+== Licensing
+
+This product is free and open source, and has benefited from the contributions
+of many people. You have complete royalty-free rights to distribute any
+Euphoria programs that you develop. You are also free to distribute the 
+interpreter, backend and even translator. You can ##shroud## or ##bind## 
+your program and distribute the resulting files royalty-free.
+
+You may incorporate any Euphoria source files from this package into your
+program, either "as is" or with your modifications. (You will probably need at
+least a few of the standard ##euphoria\include## files  in any large program).
+
+We would appreciate it if you told people that your program was developed using
+Euphoria, and gave them the address: [[http://www.openeuphoria.org/]] of our
+Web page, but we do not require any such acknowledgment.
+
+Icon files, such as ##euphoria.ico## in ##euphoria\bin##, may be distributed
+with or without your changes.
+
+The high-speed version of the Euphoria Interpreter back-end is written in ANSI
+C, and can be compiled with many different C compilers. The complete source
+code is in ##euphoria\source##, along with ##execute.e##, the alternate,
+Euphoria-coded back-end. The generous Open Source License allows both
+personal and commercial use, and unlike many other open source
+licenses, your changes do not have to be made open source.
+
+Some additional 3rd-party legal restrictions might apply when you use the
+[[:Euphoria To C Translator]].
+
+----
+

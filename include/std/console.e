@@ -1,16 +1,15 @@
-	-- (c) Copyright - See License.txt
---
 --****
 -- == Console
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
+
 namespace console
 
-include std/types.e
 include std/get.e
+include std/pretty.e
 include std/text.e
 include std/types.e
-include std/pretty.e
+
 public include std/graphcst.e
 
 -- machine() commands
@@ -23,7 +22,37 @@ constant
 	M_FREE_CONSOLE = 54,
 	M_GET_SCREEN_CHAR = 58,
 	M_PUT_SCREEN_CHAR = 59,
+	M_HAS_CONSOLE = 99,
 	$
+
+
+--****
+-- === Information
+
+--**
+-- Determing if the process has a console window or not
+--
+-- Returns:
+--   1 if there is more than one process attached to the current console, 
+--   0 if a console does not exist or only one process (EUPHORIA) is attached to
+--     the current console.
+--
+-- Notes:
+--   Method always returns 1 on *nix systems.
+--
+-- Examples:
+-- <eucode>
+-- include std/console.e
+--
+-- if has_console() then
+--     printf(1, "Hello Console!")
+-- end if
+-- </eucode>
+--
+
+public function has_console()
+	return machine_func(M_HAS_CONSOLE)
+end function
 
 --****
 -- === Cursor Style Constants
@@ -51,10 +80,12 @@ public constant
 -- 		<built-in> function get_key()
 --
 -- Description:
---     Return the key that was pressed by the user, without waiting. Special codes are returned for the function keys, arrow keys etc.
+--     Return the key that was pressed by the user, without waiting. Special 
+--  codes are returned for the function keys, arrow keys etc.
 --
 -- Returns:
---		An **integer**, either -1 if no key waiting, or the code of the next key waiting in keyboard buffer.
+--		An **integer**, either -1 if no key waiting, or the code of the next key
+--  waiting in keyboard buffer.
 --
 -- Comments:
 --     The operating system can hold a small number of key-hits in its keyboard buffer.
@@ -100,7 +131,7 @@ public constant
 -- See Also:
 -- 		[[:check_break]]
 
-public procedure allow_break(boolean b)
+public procedure allow_break( types:boolean b)
 	machine_proc(M_ALLOW_BREAK, b)
 end procedure
 
@@ -189,8 +220,6 @@ public procedure any_key(sequence prompt="Press Any Key to continue...", integer
 	puts(con, "\n")
 end procedure
 
-ifdef WIN32_GUI then
-
 --**
 -- Description:
 --   Display a prompt to the user and wait for any key **only** if the user is
@@ -217,16 +246,11 @@ ifdef WIN32_GUI then
 -- See Also:
 -- 	[[:wait_key]]
 
-    public procedure maybe_any_key(sequence prompt="Press Any Key to continue...", integer con = 1)
-        any_key(prompt, con)
-    end procedure
-
-elsedef
-
-	public procedure maybe_any_key(sequence prompt="", integer con=1)
-    end procedure
-
-end ifdef
+public procedure maybe_any_key(sequence prompt="Press Any Key to continue...", integer con = 1)
+	if not has_console() then
+		any_key(prompt, con)
+	end if
+end procedure
 
 --**
 -- Description:
@@ -276,8 +300,8 @@ public function prompt_number(sequence prompt, sequence range)
 		 answer = gets(0) -- make sure whole line is read
 		 puts(1, '\n')
 
-		 answer = value(answer)
-		 if answer[1] != GET_SUCCESS or sequence(answer[2]) then
+		 answer = stdget:value(answer)
+		 if answer[1] != stdget:GET_SUCCESS or sequence(answer[2]) then
 			  puts(1, "A number is expected - try again\n")
 		 else
 			 if length(range) = 2 then
@@ -338,8 +362,12 @@ type text_point(sequence p)
 		   and p[1] <= 200 and p[2] <= 500 -- rough sanity check
 end type
 
-public type positive_int(integer x)
-	return x >= 1
+public type positive_int(object x)
+	if integer(x) and x >= 1 then
+		return 1
+	else
+		return 0
+	end if
 end type
 
 --**
@@ -549,18 +577,18 @@ public procedure display_text_image(text_point xy, sequence text)
 	integer extra_col2, extra_lines
 	sequence vc, one_row
 
-	vc = video_config()
+	vc = graphcst:video_config()
 	if xy[1] < 1 or xy[2] < 1 then
 		return -- bad starting point
 	end if
-	extra_lines = vc[VC_LINES] - xy[1] + 1
+	extra_lines = vc[graphcst:VC_LINES] - xy[1] + 1
 	if length(text) > extra_lines then
 		if extra_lines <= 0 then
 			return -- nothing to display
 		end if
 		text = text[1..extra_lines] -- truncate
 	end if
-	extra_col2 = 2 * (vc[VC_COLUMNS] - xy[2] + 1)
+	extra_col2 = 2 * (vc[graphcst:VC_COLUMNS] - xy[2] + 1)
 	for row = 1 to length(text) do
 		one_row = text[row]
 		if length(one_row) > extra_col2 then
@@ -605,7 +633,7 @@ end procedure
 --   [[:display_text_image]], [[:get_screen_char]]
 
 public function save_text_image(text_point top_left, text_point bottom_right)
-	sequence image, row_chars, vc
+	sequence image, row_chars
 
 	image = {}
 	for row = top_left[1] to bottom_right[1] do
@@ -680,7 +708,7 @@ end procedure
 -- Comments:
 --  Euphoria will create a console text window for your program the first time that your
 --  program prints something to the screen, reads something from the keyboard, or in some
---  way needs a console. On WIN32 this window will automatically disappear when your program
+--  way needs a console. On WINDOWS this window will automatically disappear when your program
 --  terminates, but you can call free_console() to make it disappear sooner. On Linux or FreeBSD, 
 --  the text mode console is always there, but an xterm window will disappear after Euphoria 
 --  issues a "Press Enter" prompt at the end of execution.
@@ -699,7 +727,7 @@ end procedure
 --  When you use the trace facility, or when your program has an error, Euphoria will
 --  automatically create a console window to display trace information, error messages etc.
 --  
---  There's a WIN32 API routine, FreeConsole() that does something similar to
+--  There's a WINDOWS API routine, FreeConsole() that does something similar to
 --  free_console(). You should use ##free_console##() instead, because it lets the interpreter know
 --  that there is no longer a console to write to or read from.
 --
@@ -711,28 +739,28 @@ public procedure free_console()
 end procedure
 
 
---*
+--**
 -- Displays the supplied data on the console screen at the current cursor position.
 --
 -- Parameters:
--- # ##pData## : Any object.
+-- # ##data_in## : Any object.
 -- # ##args## : Optional arguments used to format the output. Default is 1.
 -- # ##finalnl## : Optional. Determines if a new line is output after the data.
 -- Default is to output a new line.
 --
 -- Comments:
--- * If ##pData## is an atom or integer, it is simply displayed.
--- * If ##pData## is a simple text string, then ##args## can be used to
---   produce a formatted output with ##pData## providing the [[:format]] string and
+-- * If ##data_in## is an atom or integer, it is simply displayed.
+-- * If ##data_in## is a simple text string, then ##args## can be used to
+--   produce a formatted output with ##data_in## providing the [[:text:format]] string and
 --   ##args## being a sequence containing the data to be formatted.
--- ** If the last character of ##pData## is an underscore character then it
+-- ** If the last character of ##data_in## is an underscore character then it
 -- is stripped off and ##finalnl## is set to zero. Thus ensuring that a new line
 -- is **not** output.
--- ** The formatting codes expected in ##pData## are the ones used by [[:format]].
--- It is not mandatory to use formatting codes, and if ##pData## does not contain
+-- ** The formatting codes expected in ##data_in## are the ones used by [[:text:format]].
+-- It is not mandatory to use formatting codes, and if ##data_in## does not contain
 -- any then it is simply displayed and anything in ##args## is ignored.
--- * If ##pData## is a sequence containing floating-point numbers, sub-sequences 
--- or integers that are not characters, then ##pData## is forwarded on to the
+-- * If ##data_in## is a sequence containing floating-point numbers, sub-sequences 
+-- or integers that are not characters, then ##data_in## is forwarded on to the
 --  [[:pretty_print]]() to display. 
 -- ** If ##args## is a non-empty sequence, it is assumed to contain the pretty_print formatting options.
 -- ** if ##args## is an atom or an empty sequence, the assumed pretty_print formatting
@@ -744,15 +772,22 @@ end procedure
 --
 -- Examples:
 -- <eucode>
--- display("Some plain text") -- Displays this string on the console plus a new line.
--- display("Your answer:",0)  -- Displays this string on the console without a new line.
+-- display("Some plain text") 
+--         -- Displays this string on the console plus a new line.
+-- display("Your answer:",0)  
+--        -- Displays this string on the console without a new line.
 -- display("cat")
--- display("Your answer:",,0) -- Displays this string on the console without a new line.
+-- display("Your answer:",,0) 
+--         -- Displays this string on the console without a new line.
 -- display("")
--- display("Your answer:_")   -- Displays this string, except the '_', on the console without a new line.
+-- display("Your answer:_")   
+--        -- Displays this string, 
+--        -- except the '_', on the console without a new line.
 -- display("dog")
--- display({"abc", 3.44554}) -- Displays the contents of 'res' on the console.
--- display("The answer to [1] was [2]", {"'why'", 42}) -- formats these with a new line.
+-- display({"abc", 3.44554}) 
+--        -- Displays the contents of 'res' on the console.
+-- display("The answer to [1] was [2]", {"'why'", 42}) 
+--        -- formats these with a new line.
 -- display("",2)
 -- display({51,362,71}, {1})
 -- </eucode>
@@ -772,29 +807,29 @@ end procedure
 -- }}}
 --
 
-public procedure display( object pData, object args = 1, integer finalnl = -918_273_645)
+public procedure display( object data_in, object args = 1, integer finalnl = -918_273_645)
 
-	if atom(pData) then
-		if integer(pData) then
-			printf(1, "%d", pData)
+	if atom(data_in) then
+		if integer(data_in) then
+			printf(1, "%d", data_in)
 		else
-			puts(1, trim(sprintf("%15.15f", pData), '0'))
+			puts(1, text:trim(sprintf("%15.15f", data_in), '0'))
 		end if
 
-	elsif length(pData) > 0 then
-		if t_display(pData) then
-			if pData[$] = '_' then
-				pData = pData[1..$-1]
+	elsif length(data_in) > 0 then
+		if types:t_display( data_in ) then
+			if data_in[$] = '_' then
+				data_in = data_in[1..$-1]
 				finalnl = 0
 			end if
 			
-			puts(1, format(pData, args))
+			puts(1, text:format(data_in, args))
 			
 		else
 			if atom(args) or length(args) = 0 then
-				pretty_print(1, pData, {2})
+				pretty:pretty_print(1, data_in, {2})
 			else
-				pretty_print(1, pData, args)
+				pretty:pretty_print(1, data_in, args)
 			end if
 		end if
 	else

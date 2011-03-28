@@ -1,18 +1,14 @@
-#!/usr/bin/exu -i /usr/share/euphoria/source/
+#!/usr/bin/eui -i /usr/share/euphoria/source/
 -- (c) Copyright - See License.txt
 --
 -- The Binder
 -- uses the Euphoria front-end, plus a special Euphoria-coded back-end
 
 ifdef ETYPE_CHECK then
-with type_check
+	with type_check
 elsedef
-without type_check
+	without type_check
 end ifdef
-
--- Disable SVN Revision banner
-with define EU_FULL_RELEASE
-
 
 include mode.e
 set_mode( "bind", 0 )
@@ -22,4 +18,3 @@ include il.e
 
 -- main program:
 include main.e
-

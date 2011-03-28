@@ -1,12 +1,10 @@
--- (c) Copyright - See License.txt
---
-
 --****
 -- == Errors and Warnings
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 -- === Routines
+
 namespace error
 
 constant
@@ -31,14 +29,15 @@ constant
 -- Example 1:
 -- <eucode>
 -- if PI = 3 then
---     crash("The whole structure of universe just changed - please reload solar_system.ex")
+--     crash("The structure of universe just changed -- reload solar_system.ex")
 -- end if
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
 -- if token = end_of_file then
---     crash("Test file #%d is bad, text read so far is %s\n", {file_number, read_so_far})
+--     crash("Test file #%d is bad, text read so far is %s\n", 
+--                                                   {file_number, read_so_far})
 -- end if
 -- </eucode>
 --
@@ -66,7 +65,8 @@ end procedure
 -- <eucode>
 -- crash_message("The password you entered must have at least 8 characters.")
 -- pwd_key = input_text[1..8]
--- -- if ##input_text## is too short, user will get a more meaningful message than 
+-- -- if ##input_text## is too short, 
+-- -- user will get a more meaningful message than 
 -- -- "index out of bounds".
 -- </eucode>
 --
@@ -249,7 +249,7 @@ end procedure
 -- </eucode>
 --
 -- See Also:
--- 	[[:crash_file]], [[:routine_id]], [[:Debugging and profiling]]
+-- 	[[:crash_file]], [[:routine_id]], [[:Debugging and Profiling]]
 
 public procedure crash_routine(integer func)
 	machine_proc(M_CRASH_ROUTINE, func)

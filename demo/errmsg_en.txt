@@ -26,7 +26,7 @@ table 1
 { 22, "a fallthru must be inside a switch"}
 { 23, "A namespace qualifier is needed to resolve '[1]'\nbecause '[2]' is declared as a global/public symbol in:\n[3]"}
 { 24, "a variable name is expected here"}
-{ 25, "a name is expected here"}
+{ 25, "found ... [1] ... but was expecting an identifier name"}
 { 26, "Argument [1] of [2] ([3]) is defaulted, but has no default value"}
 { 27, "An unknown 'with/without' option has been specified"}
 { 28, "a loop variable name is expected here"}
@@ -101,7 +101,7 @@ table 1
 { 97, "hex number not formed correctly"}
 { 98, "internal nested call parsing error"}
 { 99, "integer or constant expected"}
-{100, "improper syntax for include-as"}
+{100, "expecting 'as' or end-of line. Unexpected text on 'include' directive"}
 {101, "illegal character in source"}
 {102, "illegal character"}
 {103, "illegal character (ASCII 0) at line:col [1]:[2]"}
@@ -227,10 +227,10 @@ table 1
 {223, "[1]:[2] - built-in routine [3]() overridden again"}
 {224, "can't mix profile and profile_time"}
 {225, "[1]:[2] - Unknown warning name [3]"}
-{226, "[1] - local variable '[2]' is never assigned a value"}
+{226, "[1] - module variable '[2]' is never assigned a value"}
 {227, "[1] - private variable '[2]' of [3] is never assigned a value"}
-{228, "[1] - local constant '[2]' is not used"}
-{229, "[1] - local variable '[2]' is not used"}
+{228, "[1] - module constant '[2]' is not used"}
+{229, "[1] - module variable '[2]' is not used"}
 {230, "[1] - parameter '[2]' of [3] is not used"}
 {231, "[1] - private variable '[2]' of [3] is not used"}
 {232, "File '[1]' uses public symbols from '[2]', but does not include that file."}
@@ -320,6 +320,32 @@ table 1
 {316, "Internal error; Binding seek to checksum area failed!"}
 {317, "couldn't open [1]!"}
 {318, "Your custom icon file is too large."}
+{319, "Verbose output"}
+{320, "[1] - module variable '[2]' is assigned but never used"}
+{321, "[1] - parameter '[2]' of [3]() is assigned but never used"}
+{322, "[1] - private variable '[2]' of [3]() is assigned but never used"}
+{323, "Flags to pass to compiler (overrides internal compiler flags)"}
+{324, "Flags to pass to linker (overrides internal linker flags)"}
+{325, "Skipping  [1:3.0]% [2] (up-to-date)"}
+{326, "Force building, even if file is up-to-date"}
+{327, "[1] is deprecated ([2]:[3])"}
+{328, "Overrides the value of EUDIR"}
+{329, "Invalid character in HEX string"}
+{330, "Only enums may be declared as types"}
+{331, "Forward references are not supported for enums"}
+{332, "Indicate files or directories for which to gather coverage statistics"}
+{333, "Specify the filename for the coverage database."}
+{334, "Erase an existing coverage database and start a new coverage analysis."}
+{335, "Could not erase coverage database: [1]"}
+{336, "Could not create coverage table: [1]"}
+{337, "Could not create coverage database: [1]"}
+{338, "Exclude from coverage"}
+{339, "Error creating regex for coverage exclusion pattern '[1]'"}
+{340, "Expecting exactly two hexadecimal digits to follow the '\\x'"}
+{341, "Expecting exactly four hexadecimal digits to follow the '\\u'"}
+{342, "Expecting exactly eight hexadecimal digits to follow the '\\U'"}
+{343, "Expecting only '0', '1' or space to follow the '\\b'"}
+{344, "A numeric literal was expected"}
 
 
 --dump dump.txt

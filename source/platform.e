@@ -2,10 +2,11 @@
 --
 -- Platform settings
 --
+
 ifdef ETYPE_CHECK then
-with type_check
+	with type_check
 elsedef
-without type_check
+	without type_check
 end ifdef
 
 include std/os.e
@@ -13,13 +14,12 @@ include std/text.e
 include std/io.e
 
 public constant
-	ULINUX = LINUX + 0.3,
-	UFREEBSD = FREEBSD + 0.4,
-	UOSX = OSX + 0.5,
-	USUNOS = SUNOS + 0.6,
-	UOPENBSD = OPENBSD + 0.7,
-	UNETBSD = NETBSD + 0.8,
-	DEFAULT_EXTS = { ".ex", ".exw", ".exd", "", ".ex" }
+	ULINUX = LINUX,
+	UFREEBSD = FREEBSD,
+	UOSX = OSX,
+	UOPENBSD = OPENBSD,
+	UNETBSD = NETBSD,
+	DEFAULT_EXTS = { ".ex", ".exw", "", ".ex" }
 
 -- For cross-translation:
 public integer
@@ -28,22 +28,17 @@ public integer
 	IUNIX    = 0, TUNIX    = 0,
 	IBSD     = 0, TBSD     = 0,
 	IOSX     = 0, TOSX     = 0,
-	ISUNOS   = 0, TSUNOS   = 0,
 	IOPENBSD = 0, TOPENBSD = 0,
 	INETBSD  = 0, TNETBSD  = 0
 
 -- operating system:
-ifdef WIN32 then
+ifdef WINDOWS then
 	IWINDOWS = 1
 	TWINDOWS = 1
 
 elsifdef OSX then
 	IOSX = 1
 	TOSX = 1
-
-elsifdef SUNOS then
-	ISUNOS = 1
-	TSUNOS = 1
 
 elsifdef FREEBSD then
 	IBSD = 1
@@ -63,7 +58,7 @@ elsifdef LINUX then
 
 end ifdef
 
-ifdef OSX or SUNOS or FREEBSD or OPENBSD or NETBSD then
+ifdef OSX or FREEBSD or OPENBSD or NETBSD then
 	IBSD = 1
 	TBSD = 1
 end ifdef
@@ -89,8 +84,9 @@ public function host_platform()
 	return ihost_platform
 end function
 
-sequence unices = {ULINUX, UFREEBSD, UOSX, USUNOS, UOPENBSD, UNETBSD}
-public procedure set_host_platform( atom plat )
+sequence unices = { ULINUX, UFREEBSD, UOSX, UOPENBSD, UNETBSD }
+
+public procedure set_host_platform(atom plat)
 	ihost_platform = floor(plat)
 
 	TUNIX    = (find(ihost_platform, unices) != 0) 
@@ -98,7 +94,6 @@ public procedure set_host_platform( atom plat )
 	TBSD     = (ihost_platform = UFREEBSD)
 	TOSX     = (ihost_platform = UOSX)
 	TLINUX   = (ihost_platform = ULINUX)
-	TSUNOS   = (ihost_platform = USUNOS)
 	TOPENBSD = (ihost_platform = UOPENBSD)
 	TNETBSD  = (ihost_platform = UNETBSD)
 	IUNIX    = TUNIX
@@ -106,7 +101,6 @@ public procedure set_host_platform( atom plat )
 	IBSD     = TBSD
 	IOSX     = TOSX
 	ILINUX   = TLINUX
-	ISUNOS   = TSUNOS
 	IOPENBSD = TOPENBSD
 	INETBSD  = TNETBSD
 
@@ -121,7 +115,7 @@ public function GetPlatformDefines(integer for_translator = 0)
 	sequence local_defines = {}
 
 	if (IWINDOWS and not for_translator) or (TWINDOWS and for_translator) then
-		local_defines &= {"DOSFAMILY", "WINDOWS", "WIN32"}
+		local_defines &= {"WINDOWS", "WIN32"}
 		sequence lcmds = command_line()
 		
 		-- Examine the executable's image file to determine subsystem.
@@ -130,9 +124,9 @@ public function GetPlatformDefines(integer for_translator = 0)
 		if fh = -1 then
 			-- for some reason I can't open the file, so use the name instead.
  			if match("euiw", lower(lcmds[1])) != 0 then
- 				local_defines &= { "WIN32_GUI" }
+ 				local_defines &= { "GUI" }
  			else
- 				local_defines &= { "WIN32_CONSOLE" }
+ 				local_defines &= { "CONSOLE" }
  			end if
 		else
 			atom sk
@@ -164,28 +158,28 @@ public function GetPlatformDefines(integer for_translator = 0)
 				sk = 0
 			end if
 			if sk = 2 then
-				local_defines &= { "WIN32_GUI" }
+				local_defines &= { "GUI" }
 			elsif sk = 3 then
-				local_defines &= { "WIN32_CONSOLE" }
+				local_defines &= { "CONSOLE" }
 			else
-				local_defines &= { "WIN32_UNKNOWN" }
+				local_defines &= { "UNKNOWN" }
 			end if
 			close(fh)
 		end if
-	elsif (ILINUX and not for_translator) or (TLINUX and for_translator) then
-		local_defines &= {"UNIX", "LINUX"}
-	elsif (IOSX and not for_translator) or (TOSX and for_translator) then
-		local_defines &= {"UNIX", "BSD", "OSX"}
-	elsif (ISUNOS and not for_translator) or (TSUNOS and for_translator) then
-		local_defines &= {"UNIX", "BSD", "SUNOS"}
-	elsif (IOPENBSD and not for_translator) or (TOPENBSD and for_translator) then
-		local_defines &= { "UNIX", "BSD", "OPENBSD"}
-	elsif (INETBSD and not for_translator) or (TNETBSD and for_translator) then
-		local_defines &= { "UNIX", "BSD", "NETBSD"}
-	elsif (IBSD and not for_translator) or (TBSD and for_translator) then
-		local_defines &= {"UNIX", "BSD", "FREEBSD"}
+	else
+		local_defines = append( local_defines, "CONSOLE" )
+		if (ILINUX and not for_translator) or (TLINUX and for_translator) then
+			local_defines &= {"UNIX", "LINUX"}
+		elsif (IOSX and not for_translator) or (TOSX and for_translator) then
+			local_defines &= {"UNIX", "BSD", "OSX"}
+		elsif (IOPENBSD and not for_translator) or (TOPENBSD and for_translator) then
+			local_defines &= { "UNIX", "BSD", "OPENBSD"}
+		elsif (INETBSD and not for_translator) or (TNETBSD and for_translator) then
+			local_defines &= { "UNIX", "BSD", "NETBSD"}
+		elsif (IBSD and not for_translator) or (TBSD and for_translator) then
+			local_defines &= {"UNIX", "BSD", "FREEBSD"}
+		end if
 	end if
-
 	-- So the translator knows what to strip from defines if translating
 	-- to a different platform
 	return { "_PLAT_START" } & local_defines & { "_PLAT_STOP" }

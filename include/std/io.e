@@ -1,18 +1,15 @@
--- (c) Copyright - See License.txt
---
 --****
 -- == I/O
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
+
 namespace io
 
-include std/sort.e
-include std/wildcard.e
-include std/types.e
+include std/error.e
 include std/machine.e
 include std/text.e
-include std/sequence.e
-include std/error.e
+include std/search.e
+include std/types.e
 
 constant M_SEEK  = 19,
 		 M_WHERE = 20,
@@ -51,8 +48,8 @@ public constant EOF = (-1)
 --****
 -- === Read/Write Routines
 
---**
--- @[q_print]
+--****
+-- @[q_print|]
 -- Signature:
 -- <built-in> procedure ? (no parentheses around the unique parameter)
 --
@@ -68,7 +65,7 @@ public constant EOF = (-1)
 -- See Also:
 --   [[:print]]
 
---**
+--****
 -- Signature:
 -- <built-in> procedure print(integer fn, object x)
 --
@@ -82,30 +79,32 @@ public constant EOF = (-1)
 -- 		# ##x## : the object to print
 --
 -- Errors:
--- The target file or device must be open.
+-- The target file or device must be open and able to be written to.
 --
 -- Comments:
 -- This is not used to write to "binary" files as it only outputs text.
 --
 -- Example 1:
 -- <eucode>
--- print(STDOUT, "ABC")  -- output is:  "{65,66,67}"
--- puts(STDOUT, "ABC")   -- output is:  "ABC"
--- print(STDOUT, 65)     -- output is:  "65"
--- puts(STDOUT, 65)      -- output is:  "A"  (ASCII-65 ==> 'A')
--- puts(STDOUT, 65.1234) -- output is:  "65.1234"
--- puts(STDOUT, 65.1234) -- output is:  "A" (Converts to integer first)
+-- include std/io.e
+-- print(STDOUT, "ABC")   -- output is:  "{65,66,67}"
+-- puts (STDOUT, "ABC")    -- output is:  "ABC"
+-- print(STDOUT, "65")    -- output is:  "65"
+-- puts (STDOUT, 65)       -- output is:  "A"  (ASCII-65 ==> 'A')
+-- print(STDOUT, 65.1234) -- output is:  "65.1234"
+-- puts (STDOUT, 65.1234)  -- output is:  "A" (Converts to integer first)
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
+-- include std/io.e
 -- print(STDOUT, repeat({10,20}, 3)) -- output is: {{10,20},{10,20},{10,20}}
 -- </eucode>
 --
 -- See Also:
--- 		[[:?]], [[:puts]]
+-- 		[[:q_print|?]], [[:puts]]
 
---**
+--****
 -- Signature:
 -- <built-in> procedure printf(integer fn, sequence format, object values)
 --
@@ -123,17 +122,24 @@ public constant EOF = (-1)
 -- The target file or device must be open.
 --
 -- Comments:
--- A format specifier is a string of characters starting with a percent sign ( ~%~ ) and ending
--- in a letter. Some extra information may come in the middle.
+-- A //format specifier// is a string of characters starting with a percent sign ( ~%~ ) and ending
+-- in a letter. Some extra information may come in between those.
 --
--- ##format## will be scanned for format specifiers. Whenever one is found, the current value
+-- This procedure writes out the ##format## text to the output file ##fn##, 
+-- replacing format specifiers with the corresponding data from the ##values##
+-- parameter. Whenever a format specifiers is found in ##formatt##, the //N-th// item
 -- in ##values## will be turned into a string according to the format specifier. The resulting
--- string will be plugged in the result, as if replacing the modifier with the printed value.
--- Then moving on to next value and carrying the process on.
+-- string will the format specifier. This means that the first format specifier uses the
+-- first item in ##values##, the second format specifier the second item, etc ...
 --
--- This way, ##printf##() always takes
--- exactly 3 arguments, no matter how many values are to be printed. Only the length of the last
--- argument, containing the values to be printed, will vary.
+-- You must have at least as many items in ##values## as there are format specifiers
+-- in ##format##. This means that if there is only one format specifier then ##values##
+-- can be either an atom, integer or a non-empty sequence. And when there are more
+-- than one format specifier in ##format## then ##values## must be a sequence with 
+-- a length that is greater than or equal to the number of format specifiers present.
+--
+-- This way, ##printf##() always takes exactly 3 arguments, no matter how many
+-- values are to be printed.
 --
 -- The basic format specifiers are...
 --
@@ -151,69 +157,100 @@ public constant EOF = (-1)
 --
 -- Field widths can be added to the basic formats, e.g. %5d, %8.2f, %10.4s. The number
 -- before the decimal point is the minimum field width to be used. The number after
--- the decimal point is the precision to be used.
+-- the decimal point is the precision to be used for numeric values.
 --
 -- If the field width is negative, e.g. %-5d then the value will be left-justified
--- within the field. Normally it will be right-justified. If the field width
+-- within the field. Normally it will be right-justified, even strings. If the field width
 -- starts with a leading 0, e.g. %08d then leading zeros will be supplied to fill up
 -- the field. If the field width starts with a '+' e.g. %+7d then a plus sign will
 -- be printed for positive values.
 --
 -- Comments:
--- Watch out for the following common mistake:
+-- Watch out for the following common mistake, in which the intention is to
+-- output all the characters in the third parameter but which ends up by 
+-- only outputing the first character ...
 --
 -- <eucode>
--- name="John Smith"
--- printf(STDOUT, "%s", name)     -- error!
+-- include std/io.e
+-- sequence name="John Smith"
+-- printf(STDOUT, "My name is %s", name)
 -- </eucode>
 --
--- This will print only the first character, J, of name, as each element of
--- name is taken to be a separate value to be formatted. You must say this instead:
+-- The output of this will be //##My name is J##// because each format specifier
+-- uses exactly **one** item from the ##values## parameter. In this case we have
+-- only one specifier so it uses the first item in the ##values## parameter, which
+-- is the character 'J'. To fix this situation, you must ensure that the first
+-- item in the ##values## parameter is the entire text string and not just a
+--  character, so you need code this instead:
 --
 -- <eucode>
+-- include std/io.e
 -- name="John Smith"
--- printf(STDOUT, "%s", {name})   -- correct
+-- printf(STDOUT, "My name is %s", {name})
 -- </eucode>
 --
--- Now, the third argument of ##printf##() is a one-element sequence containing the
--- item to be formatted.
+-- Now, the third argument of ##printf##() is a one-element sequence containing all
+-- the text to be formatted.
 --
--- If there is only one ##%## format specifier, and if the value it stands for is an atom, then ##values## may be simply that atom.
+-- Also note that if there is only one format specifier then ##values## can 
+-- simply be an atom or integer.
 --
 -- Example 1:
 -- <eucode>
--- rate = 7.875
--- printf(my_file, "The interest rate is: %8.2f\n", rate)
+-- include std/io.e
+-- atom rate = 7.875
+-- printf(STDOUT, "The interest rate is: %8.2f\n", rate)
 --
 -- --      The interest rate is:     7.88
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
--- name="John Smith"
--- score=97
+-- include std/io.e
+-- sequence name="John Smith"
+-- integer score=97
 -- printf(STDOUT, "%15s, %5d\n", {name, score})
 --
--- --      John Smith,    97
+-- -- "     John Smith,    97"
 -- </eucode>
 --
 -- Example 3:
 -- <eucode>
+-- include std/io.e
 -- printf(STDOUT, "%-10.4s $ %s", {"ABCDEFGHIJKLMNOP", "XXX"})
 -- --      ABCD       $ XXX
 -- </eucode>
 --
 -- Example 4:
 -- <eucode>
--- printf(STDOUT, "%d  %e  %f  %g", 7.75) -- same value in different formats
+-- include std/io.e
+-- printf(STDOUT, "%d  %e  %f  %g", repeat(7.75, 4)) 
+--                   -- same value in different formats
 --
 -- --      7  7.750000e+000  7.750000  7.75
+-- </eucode>
+--
+-- **//NOTE//** that ##printf## cannot use an item in ##values## that contains
+-- nested sequences. Thus this is an error ...
+-- <eucode>
+-- include std/io.e
+-- sequence name = {"John", "Smith"}
+-- printf(STDOUT, "%s", {name} )
+-- </eucode>
+-- because the item that is used from the ##values## parameter contains two
+-- subsequences (strings in this case). To get the correct output you would
+-- need to do this instead ...
+--
+-- <eucode>
+-- include std/io.e
+-- sequence name = {"John", "Smith"}
+-- printf(STDOUT, "%s %s", {name[1], name[2]} )
 -- </eucode>
 --
 -- See Also:
 --     [[:sprintf]], [[:sprint]], [[:print]]
 
---**
+--****
 -- Signature:
 -- <built-in> procedure puts(integer fn, object text)
 --
@@ -240,6 +277,7 @@ public constant EOF = (-1)
 --
 -- Example 1:
 -- <eucode>
+-- include std/io.e
 -- puts(SCREEN, "Enter your first name: ")
 -- </eucode>
 --
@@ -251,7 +289,7 @@ public constant EOF = (-1)
 -- See Also:
 --   [[:print]]
 
---**
+--****
 -- Signature:
 -- <built-in> function getc(integer fn)
 --
@@ -279,7 +317,7 @@ public constant EOF = (-1)
 -- See Also:
 -- 		[[:gets]], [[:get_key]]
 
---**
+--****
 -- Signature:
 -- <built-in> function gets(integer fn)
 --
@@ -335,30 +373,13 @@ public constant EOF = (-1)
 --
 -- puts(1, "What is your name?\n")
 -- line = gets(0)  -- read standard input (keyboard)
--- line = line[1..length(line)-1] -- get rid of \n character at end
+-- line = line[1..$-1] -- get rid of \n character at end
 -- puts(1, '\n')   -- necessary
 -- puts(1, line & " is a nice name.\n")
 -- </eucode>
 --
 -- See Also:
 --		[[:getc]], [[:read_lines]]
-
---**
--- Signature:
--- <built-in> function get_key()
---
--- Description:
---     Get the next keystroke without waiting for it or echoing it on the console.
---
--- Parameters:
---		# None.
---
--- Returns:
---		An **integer**, the code number for the key pressed. If there is no key
---      press waiting, then this returns -1.
---
--- See Also:
--- 		[[:gets]], [[:getc]]
 
 constant CHUNK = 100
 
@@ -447,7 +468,7 @@ end function
 
 
 atom mem0, mem1, mem2, mem3
-mem0 = allocate(4)
+mem0 = machine:allocate(4)
 mem1 = mem0 + 1
 mem2 = mem0 + 2
 mem3 = mem0 + 3
@@ -514,7 +535,7 @@ end function
 -- 		[[:getc]], [[:gets]], [[:get_bytes]], [[:get_dstring]]
 
 public function get_integer16(integer fh)
--- read the 4 bytes as a single integer value at current position in file
+-- read the 2 bytes as a single integer value at current position in file
 	poke(mem0, getc(fh))
 	poke(mem1, getc(fh))
 	return peek2u(mem0)
@@ -542,7 +563,7 @@ end function
 -- See Also:
 -- 		[[:getc]], [[:gets]], [[:get_bytes]], [[:get_dstring]]
 
-public procedure put_integer32(integer fh, integer val)
+public procedure put_integer32(integer fh, atom val)
 	poke4(mem0, val)
 	puts(fh, peek({mem0,4}))
 end procedure
@@ -569,7 +590,7 @@ end procedure
 -- See Also:
 -- 		[[:getc]], [[:gets]], [[:get_bytes]], [[:get_dstring]]
 
-public procedure put_integer16(integer fh, integer val)
+public procedure put_integer16(integer fh, atom val)
 	poke2(mem0, val)
 	puts(fh, peek({mem0,2}))
 end procedure
@@ -639,36 +660,61 @@ public enum LOCK_SHARED, LOCK_EXCLUSIVE
 --**
 -- File number type
 
-public type file_number(integer f)
-	return f >= 0
+public type file_number(object f)
+	if integer(f) and f >= 0 then
+		return 1
+	else
+		return 0
+	end if
 end type
 
 --**
 -- File position type
 
-public type file_position(atom p)
-	return p >= -1
+public type file_position(object p)
+	if atom(p) and p >= -1 then
+		return 1
+	else
+		return 0
+	end if
 end type
 
 
 --**
 -- Lock Type
 
-public type lock_type(integer t)
-	return t = LOCK_SHARED or t = LOCK_EXCLUSIVE
+public type lock_type(object t)
+	if integer(t) and (t = LOCK_SHARED or t = LOCK_EXCLUSIVE) then
+		return 1
+	else
+		return 0
+	end if
 end type
 
 --**
 -- Byte Range Type
 
-public type byte_range(sequence r)
-	if length(r) = 0 then
-		return 1
-	elsif length(r) = 2 and r[1] <= r[2] then
-		return 1
-	else
+public type byte_range(object r)
+	if atom(r) then
 		return 0
 	end if
+	if length(r) = 0 then
+		return 1
+	end if
+	if length(r) != 2 then
+		return 0
+	end if
+	
+	if not (atom(r[1]) and atom(r[2])) then
+		return 0
+	end if
+	
+	if r[1] < 0 or r[2] < 0 then
+		return 0
+	end if
+	
+	return r[1] <= r[2]
+
 end type
 
 --****
@@ -729,10 +775,10 @@ end type
 --
 -- Close a file or device when done with it, flushing out any still-buffered characters prior.
 --
--- //WIN32// and //Unix//: Long filenames are fully supported for reading and writing and
+-- //WINDOWS// and //Unix//: Long filenames are fully supported for reading and writing and
 -- creating.
 --
--- //WIN32//: Be careful not to use the special device names in a file name, even if you add an
+-- //WINDOWS//: Be careful not to use the special device names in a file name, even if you add an
 -- extension. e.g. ##CON.TXT##, ##CON.DAT##, ##CON.JPG## etc. all refer to the ##CON## device,
 -- **not a file**.
 --
@@ -917,7 +963,7 @@ end procedure
 -- or writing it.
 --
 -- Under //Unix//, there are two types of locks that
--- you can request using the ##t## parameter. (Under //WIN32// the
+-- you can request using the ##t## parameter. (Under //WINDOWS// the
 -- parameter ##t## is ignored, but should be an integer.)
 -- Ask for a **shared** lock when you intend to read a file, and you want to
 -- temporarily block other processes from writing it. Ask for an
@@ -933,7 +979,7 @@ end procedure
 --     LOCK_EXCLUSIVE
 -- </eucode>
 --
--- On ///WIN32// you can lock a specified portion of a file using the ##r##  parameter.
+-- On ///WINDOWS// you can lock a specified portion of a file using the ##r##  parameter.
 -- ##r## is a sequence of the form: ##{first_byte, last_byte}##. It indicates the first byte and
 -- last byte in the file,  that the lock applies to. Specify the empty sequence ##{}##,
 -- if you want to lock the whole file, or don't specify it at all, as this is the default. In the current release for //Unix//, locks
@@ -946,7 +992,7 @@ end procedure
 -- On //Unix//, these locks are called advisory locks, which means they aren't enforced
 -- by the operating system. It is up to the processes that use a particular file to cooperate
 -- with each other. A process can access a file without first obtaining a lock on it. On
--- //WIN32// locks are enforced by the operating system.
+-- //Windows// locks are enforced by the operating system.
 --
 -- Example 1:
 -- <eucode>
@@ -986,7 +1032,7 @@ end function
 --
 -- Comments:
 -- You must have previously locked the
--- file using ##lock_file##(). On //WIN32// you can unlock a range of bytes within a
+-- file using ##lock_file##(). On //Windows// you can unlock a range of bytes within a
 -- file by specifying the ##r## as {first_byte, last_byte}. The same range of bytes
 -- must have been locked by a previous call to [[:lock_file]](). On //Unix// you can
 -- currently only lock or unlock an entire file. ##r## should be {} when you
@@ -1013,9 +1059,10 @@ end procedure
 --
 -- Parameters:
 --		##file## : an object, either a file path or the handle to an open file.
+--                 If this is an empty string, STDIN (the console) is used.
 --
 -- Returns:
---		A **sequence**, made of lines from the file, as [[:gets]] could read them.
+--		-1 on error or a **sequence**, made of lines from the file, as [[:gets]] could read them.
 --
 -- Comments:
 --	If ##file## was a sequence, the file will be closed on completion. Otherwise, it will remain open, but at end of file.
@@ -1043,7 +1090,11 @@ end procedure
 public function read_lines(object file)
 	object fn, ret, y
 	if sequence(file) then
-		fn = open(file, "r")
+		if length(file) = 0 then
+			fn = 0
+		else
+			fn = open(file, "r")
+		end if
 	else
 		fn = file
 	end if
@@ -1062,15 +1113,107 @@ public function read_lines(object file)
 			end ifdef
 		end if
 		ret = append(ret, y)
+		if fn = 0 then
+			puts(2, '\n')
+		end if
 	entry
 		y = gets(fn)
 	end while
 
-	if sequence(file) then
+	if sequence(file) and length(file) != 0 then
 		close(fn)
 	end if
 
 	return ret
+end function
+
+--**
+-- Process the contents of a file, one line at a time.
+--
+-- Parameters:
+-- # ##file## : an object. Either a file path or the handle to an open file. An 
+-- empty string signifies STDIN - the console keyboard.
+-- # ##proc## : an integer. The routine_id of a function that will process the line.
+-- # ##user_data## : on object. This is passed untouched to ##proc## for each line.
+--
+-- Returns:
+--	An object. If 0 then all the file was processed successfully. Anything else
+--  means that something went wrong and this is whatever value was returned by ##proc##.
+--
+-- Comments:
+--  * The function ##proc## must accept three parameters ...
+--    ** A sequence: The line to process. It will **not** contain an end-of-line character.
+--    ** An integer: The line number.
+--    ** An object : This is the ##user_data## that was passed to ##process_lines##.
+--	* If ##file## was a sequence, the file will be closed on completion. 
+--  Otherwise, it will remain open, and be positioned where ever reading stopped.
+--
+-- Example:
+-- <eucode>
+-- -- Format each supplied line according to the format pattern supplied as well.
+-- function show(sequence aLine, integer line_no, object data)
+--   writefln( data[1], {line_no, aLine})
+--   if data[2] > 0 and line_no = data[2] then
+--   	return 1
+--   else
+--   	return 0
+--   end if
+-- end function
+-- -- Show the first 20 lines.
+-- process_lines("sample.txt", routine_id("show"), {"[1z:4] : [2]", 20})
+-- </eucode>
+--
+-- See Also:
+--		[[:gets]], [[:read_lines]], [[:read_file]]
+
+public function process_lines(object file, integer proc, object user_data = 0)
+	integer fh
+	object aLine
+	object res
+	integer line_no = 0
+	
+	res = 0
+	if sequence(file) then
+		if length(file) = 0 then
+			fh = 0
+		else
+			fh = open(file, "r")
+		end if
+	else
+		fh = file
+	end if
+	if fh < 0 then 
+		return -1 
+	end if
+	
+	while sequence(aLine) with entry do
+		line_no += 1
+		if length(aLine) then
+			if aLine[$] = '\n' then
+				aLine = aLine[1 .. $-1]
+				ifdef UNIX then
+					if length(aLine) then
+						if aLine[$] = '\r' then
+							aLine = aLine[1 .. $-1]
+						end if
+					end if
+				end ifdef
+			end if
+		end if
+		res = call_func(proc, {aLine, line_no, user_data})
+		if not equal(res, 0) then
+			exit
+		end if
+		
+	entry
+		aLine = gets(fh)
+	end while
+
+	if sequence(file) and length(file) != 0 then
+		close(fh)
+	end if
+
+	return res
 end function
 
 --**
@@ -1183,7 +1326,15 @@ public enum
 --                     and the first byte value of 26 (Ctrl-Z) is interpreted as End-Of-File.
 --
 -- Returns:
---		A **sequence**, holding all the bytes in the file.
+--		A **sequence**, holding the entire file. 
+--
+-- Comments
+-- * When using BINARY_MODE, each byte in the file is returned as an element in
+--   the return sequence.
+-- * When not using BINARY_MODE, the file will be interpreted as a text file. This
+-- means that all line endings will be transformed to a single 0x0A character and
+-- the first 0x1A character (Ctrl-Z) will indicate the end of file (all data after this 
+-- will not be returned to the caller.)
 --
 -- Example 1:
 -- <eucode>
@@ -1207,7 +1358,6 @@ public function read_file(object file, integer as_text = BINARY_MODE)
 	integer fn
 	integer len
 	sequence ret
-	integer temp
 
 	if sequence(file) then
 		fn = open(file, "rb")
@@ -1216,9 +1366,9 @@ public function read_file(object file, integer as_text = BINARY_MODE)
 	end if
 	if fn < 0 then return -1 end if
 
-	temp = seek(fn, -1)
+	seek(fn, -1)
 	len = where(fn)
-	temp = seek(fn, 0)
+	seek(fn, 0)
 
 	ret = repeat(0, len)
 	for i = 1 to len do
@@ -1229,7 +1379,7 @@ public function read_file(object file, integer as_text = BINARY_MODE)
 		close(fn)
 	end if
 
-	ifdef DOSFAMILY or WINDOWS then
+	ifdef WINDOWS then
 		-- Remove any extra -1 (EOF) characters in case file
 		-- had been opened in Windows 'text mode'.
 		for i = len to 1 by -1 do
@@ -1242,22 +1392,25 @@ public function read_file(object file, integer as_text = BINARY_MODE)
 		end for
 	end ifdef
 
-	if as_text != BINARY_MODE then
-		fn = find(26, ret) -- Any Ctrl-Z found?
-		if fn then
-			-- Ok, so truncate the file data
-			ret = ret[1 .. fn - 1]
-		end if
+	if as_text = BINARY_MODE then
+		return ret
+	end if
+	
+	-- Treat as a text file.
+	fn = find(26, ret) -- Any Ctrl-Z found?
+	if fn then
+		-- Ok, so truncate the file data
+		ret = ret[1 .. fn - 1]
+	end if
 
-		-- Convert Windows endings
-		ret = replace_all(ret, {13,10}, {10})
-		if length(ret) > 0 then
-			if ret[$] != 10 then
-				ret &= 10
-			end if
-		else
-			ret = {10}
+	-- Convert Windows endings
+	ret = search:match_replace({13,10}, ret, {10})
+	if length(ret) > 0 then
+		if ret[$] != 10 then
+			ret &= 10
 		end if
+	else
+		ret = {10}
 	end if
 
 	return ret
@@ -1280,7 +1433,6 @@ end function
 --                     line endings (Ctrl-J).
 --         ** **DOS_TEXT** ensures that lines are written out with Windows style
 --                     line endings {Ctrl-L, Ctrl-J}.
---
 -- Returns:
 --     An **integer**, 1 on success, -1 on failure.
 --
@@ -1323,18 +1475,18 @@ public function write_file(object file, sequence data, integer as_text = BINARY_
 
 		if as_text = TEXT_MODE then
 			-- Standardize all line endings
-			data = replace_all(data, {13,10}, {10})
+			data = search:match_replace({13,10}, data, {10})
 
 		elsif as_text = UNIX_TEXT then
-			data = replace_all(data, {13,10}, {10})
+			data = search:match_replace({13,10}, data, {10})
 
 		elsif as_text = DOS_TEXT then
-			data = replace_all(data, {13,10}, {10})
-			data = replace_all(data, {10}, {13,10})
-
+			data = search:match_replace({13,10}, data, {10})
+			data = search:match_replace({10}, data, {13,10})
 		end if
 	end if
 
+		
 	if sequence(file) then
 		if as_text = TEXT_MODE then
 			fn = open(file, "w")
@@ -1365,11 +1517,15 @@ end function
 --		## : integer, The file handle.
 --		## : sequence, The format pattern.
 --      ## : object, The data that will be formatted.
+--      ## ##data_not_string##: object, If not 0 then the ##data## is not a string.
+--        By default this is 0 meaning that ##data## could be a single string.
 -- # Alternative way with first argument being the format pattern.
---		# : sequence, Format pattern.
---		# : sequence, The data that will be formatted,
---      # : object, The file to receive the formatted output. Default is
+--		## : sequence, Format pattern.
+--		## : sequence, The data that will be formatted,
+--      ## : object, The file to receive the formatted output. Default is
 --      to the STDOUT device (console).
+--      ## ##data_not_string##: object, If not 0 then the ##data## is not a string.
+--        By default this is 0 meaning that ##data## could be a single string.
 -- 
 -- Comments:
 -- * With the traditional arguments, the first argument must be an integer file handle.
@@ -1380,31 +1536,38 @@ end function
 --   in which case it is opened accordingly, written to and then closed.
 -- * With the alternative arguments, the third argument can a file handle, 
 --   in which case it is written to only
--- * The format pattern uses the formatting codes defined in [[:format]].
+-- * The format pattern uses the formatting codes defined in [[:text:format]].
 -- * When the data to be formatted is a single text string, it does not have to
 --   be enclosed in braces, 
 --
 -- Example 1:
 -- <eucode>
 -- -- To console
--- writef("Today is [4], [u2:3] [3:02], [1:4].", {Year, MonthName, Day, DayName})
+-- writef("Today is [4], [u2:3] [3:02], [1:4].", 
+--        {Year, MonthName, Day, DayName})
 -- -- To "sample.txt"
--- writef("Today is [4], [u2:3] [3:02], [1:4].", {Year, MonthName, Day, DayName}, "sample.txt")
+-- writef("Today is [4], [u2:3] [3:02], [1:4].", 
+--        {Year, MonthName, Day, DayName}, "sample.txt")
 -- -- To "sample.dat"
 -- integer dat = open("sample.dat", "w")
--- writef("Today is [4], [u2:3] [3:02], [1:4].", {Year, MonthName, Day, DayName}, dat)
+-- writef("Today is [4], [u2:3] [3:02], [1:4].", 
+--        {Year, MonthName, Day, DayName}, dat)
 -- -- Appended to "sample.log"
--- writef("Today is [4], [u2:3] [3:02], [1:4].", {Year, MonthName, Day, DayName}, {"sample.log", "a"})
+-- writef("Today is [4], [u2:3] [3:02], [1:4].", 
+--        {Year, MonthName, Day, DayName}, {"sample.log", "a"})
 -- -- Simple message to console
 -- writef("A message")
 -- -- Another console message
 -- writef(STDERR, "This is a []", "message")
+-- -- Outputs two numbers
+-- writef(STDERR, "First [], second []", {65, 100},, 1) 
+--      -- Note that {65, 100} is also "Ad"
 -- </eucode>
 --
 -- See Also:
---    [[:format]], [[:writefln]], [[:write_lines]]
+--    [[:text:format]], [[:writefln]], [[:write_lines]]
 
-public procedure writef(object fm, object data={}, object fn = 1)
+public procedure writef(object fm, object data={}, object fn = 1, object data_not_string = 0)
 	integer real_fn = 0
 	integer close_fn = 0
 	sequence out_style = "w"
@@ -1434,17 +1597,19 @@ public procedure writef(object fm, object data={}, object fn = 1)
 		real_fn = open(fn, out_style)
 		
 		if real_fn = -1 then
-			crash("Unable to write to '%s'", {fn})
+			error:crash("Unable to write to '%s'", {fn})
 		end if
 		close_fn = 1
 	else
 		real_fn = fn
 	end if
 	
-	if t_display(data) then
-		data = {data}
+	if equal(data_not_string, 0) then
+		if types:t_display(data) then
+			data = {data}
+		end if
 	end if
-    puts(real_fn, format(fm, data))
+    puts(real_fn, text:format( fm, data ) )
     if close_fn then
     	close(real_fn)
     end if
@@ -1458,6 +1623,8 @@ end procedure
 --		# ##data## : sequence, The data that will be formatted,
 --      # ##fn## : object, The file to receive the formatted output. Default is
 --      to the STDOUT device (console).
+--      # ##data_not_string##: object, If not 0 then the ##data## is not a string.
+--        By default this is 0 meaning that ##data## could be a single string.
 --
 -- Comments:
 -- * This is the same as [[:writef]], except that it always adds a New Line to 
@@ -1468,25 +1635,27 @@ end procedure
 --   an output type ("a" for append, "w" for write), it is opened accordingly, 
 --   written to and then closed.
 -- * When ##fn## is a file handle, it is written to only
--- * The ##fm## uses the formatting codes defined in [[:format]].
+-- * The ##fm## uses the formatting codes defined in [[:text:format]].
 --
 -- Example 1:
 -- <eucode>
 -- -- To console
--- writefln("Today is [4], [u2:3] [3:02], [1:4].", {Year, MonthName, Day, DayName})
+-- writefln("Today is [4], [u2:3] [3:02], [1:4].", 
+--          {Year, MonthName, Day, DayName})
 -- -- To "sample.txt"
--- writefln("Today is [4], [u2:3] [3:02], [1:4].", {Year, MonthName, Day, DayName}, "sample.txt")
+-- writefln("Today is [4], [u2:3] [3:02], [1:4].", 
+--          {Year, MonthName, Day, DayName}, "sample.txt")
 -- -- Appended to "sample.log"
--- writefln("Today is [4], [u2:3] [3:02], [1:4].", {Year, MonthName, Day, DayName}, {"sample.log", "a"})
+-- writefln("Today is [4], [u2:3] [3:02], [1:4].", 
+--          {Year, MonthName, Day, DayName}, {"sample.log", "a"})
 -- </eucode>
 --
 -- See Also:
---    [[:format]], [[:writef]], [[:write_lines]]
-public procedure writefln(object fm, object data={}, object fn = 1)
+--    [[:text:format]], [[:writef]], [[:write_lines]]
+public procedure writefln(object fm, object data={}, object fn = 1, object data_not_string = 0)
 	if integer(fm) then
-		writef(data & '\n', fn, fm)
+		writef(data & '\n', fn, fm, data_not_string)
 	else
-		writef(fm & '\n', data, fn)
+		writef(fm & '\n', data, fn, data_not_string)
 	end if
 end procedure
-

@@ -7,12 +7,11 @@
 		----------------------------------------------------------
 
 -- This program can be run with:
---     ex ed (quick response on 95/98/ME)
+--     eui  ed.ex (Windows or UNIX to use the current console Window)
 -- or
---     exu ed.ex  (Linux / FreeBSD)
--- or
---     exwc ed.ex (quicker response on XP 
---                 but some control-key combinations aren't recognized)
+--     euiw ed.ex (Windows will create a new Window you'll have to maximize)
+--  
+-- On XP some control-key combinations aren't recognized)
 --
 -- How it Works:
 -- * Using gets(), ed reads and appends each line of text into a 2-d "buffer",
@@ -59,7 +58,7 @@ constant CONTROL_B = 2,
 		 CONTROL_T = 20,
 		 CONTROL_U = 21   -- alternate key for PAGE-UP in Linux
 		 
-constant CAPS_LOCK = 314  -- exwc only
+constant CAPS_LOCK = 314  -- eui only
 
 integer ESCAPE, CR, NUM_PAD_ENTER, BS, HOME, END, CONTROL_HOME, CONTROL_END,
 		PAGE_UP, PAGE_DOWN, INSERT, NUM_PAD_SLASH,
@@ -101,8 +100,7 @@ ifdef UNIX then
 	CONTROL_DELETE = DELETE -- key for line-delete 
 							-- (not available on some systems)
 	NUM_PAD_SLASH = -999  -- Please check on console and Xterm
-elsedef
-	-- DOS/Windows
+elsifdef WINDOWS then
 	SAFE_CHAR = 14
 	delete_cmd = "del "
 	compare_cmd = "fc /T "
@@ -111,8 +109,8 @@ elsedef
 	BS = 8
 	HOME = 327
 	END = 335
-	CONTROL_HOME = 375
-	CONTROL_END = 373
+	CONTROL_HOME = 583
+	CONTROL_END = 591
 	PAGE_UP = 329
 	PAGE_DOWN = 337
 	INSERT = 338
@@ -120,27 +118,17 @@ elsedef
 	XDELETE = -999 -- never
 	ARROW_LEFT = 331
 	ARROW_RIGHT = 333
-	CONTROL_ARROW_LEFT = 371
-	CONTROL_ARROW_RIGHT = 372
+	CONTROL_ARROW_LEFT = 587
+	CONTROL_ARROW_RIGHT = 589
 	ARROW_UP = 328
 	ARROW_DOWN = 336
 	F1 = 315
-	F10 = 324
-	
-	ifdef WIN32 then
-				F11 = 343
-				F12 = 344
-				NUM_PAD_ENTER = 284
-				NUM_PAD_SLASH = 309
-	elsedef
-				F11 = 389
-				F12 = 390
-				NUM_PAD_ENTER = 13
-				NUM_PAD_SLASH = -999 -- Never needed
-	end ifdef
-	
-	CONTROL_DELETE = 403 -- key for line-delete 
-						 -- (not available on some systems)
+	F10 = 324	
+	F11 = 343
+	F12 = 344
+	NUM_PAD_ENTER = 284
+	NUM_PAD_SLASH = 309	
+	CONTROL_DELETE = 595 -- key for line-delete 
 end ifdef
 
 
@@ -1735,9 +1723,9 @@ procedure get_escape(boolean help)
 		first_bold("new ")
 		if dot_e then
 			ifdef UNIX then
-				first_bold("exu ")
+				first_bold("eui ")
 			elsedef
-				first_bold("ex ")
+				first_bold("eui ")
 			end ifdef
 		end if
 		first_bold("dos ")
@@ -1870,6 +1858,8 @@ procedure get_escape(boolean help)
 				else
 					answer = "yes"
 				end if
+			else
+				answer = "yes"
 			end if
 			if answer[1] = 'y' then
 				system(self_command & SLASH & "html" & SLASH & "index.html")
@@ -2266,8 +2256,14 @@ procedure edit_file()
 					insert_kill_buffer()
 
 				elsif key = BS then
-					arrow_left()
-					delete_char()
+					if b_col > 1 then
+						arrow_left()
+						delete_char()
+					elsif b_line > 1 then
+						arrow_up()
+						goto_line(b_line, length(buffer[b_line]))
+						delete_char()						
+					end if
 
 				elsif key = HOME then
 					b_col = 1
@@ -2325,8 +2321,8 @@ procedure ed(sequence command)
 -- start editing a new file
 -- ed.ex is executed by ed.bat
 -- command line will be:
---    ex ed.ex              - get filename from ex.err, or user
---    ex ed.ex filename     - filename specified
+--    eui ed.ex              - get filename from ex.err, or user
+--    eui ed.ex filename     - filename specified
 
 	file_number file_no
 
@@ -2342,7 +2338,7 @@ procedure ed(sequence command)
 	else
 		file_name = get_err_line()
 	end if
-	wrap(0)
+	graphics:wrap(0)
 	if length(file_name) = 0 then
 		-- we still don't know the file name - so ask user
 		puts(SCREEN, "file name: ")
@@ -2386,6 +2382,13 @@ procedure ed(sequence command)
 	
 	if multi_color then
 		init_class()
+		set_colors({
+				{"NORMAL", NORMAL_COLOR},
+				{"COMMENT", COMMENT_COLOR},
+				{"KEYWORD", KEYWORD_COLOR},
+				{"BUILTIN", BUILTIN_COLOR},
+				{"STRING", STRING_COLOR},
+				{"BRACKET", BRACKET_COLOR}})	
 	end if
 
 	file_name = file_name[1..length(file_name)-1] -- remove ' '
@@ -2445,7 +2448,7 @@ procedure ed_main()
 
 	while length(window_list) > 0 do
 		ed(cl)
-		cl = {"ex", "ed.ex" , file_name}
+		cl = {"eui", "ed.ex" , file_name}
 	end while
 
 	-- exit editor

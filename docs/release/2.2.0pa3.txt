@@ -1,0 +1,26 @@
+== Version 2.2 Pre Alpha #3 Linux July 8, 1999
+
+*  In an **xterm** window, **exu** will
+  prompt you to hit **Enter** before it exits. Without this, **xterm**
+  restores the screen so fast that you don't see any output or error messages.
+*  An internal coding change was made to Euphoria's
+  **rand()** function.
+  (The algorithm has not changed.)
+  Hopefully this will
+  allow rand() to work on all distributions of
+  **Linux**. Please let us know if
+  rand() still fails.
+*  **ed:** The **Esc h** command will
+  display the Euphoria help files. This was broken in pre-alpha#2.
+*  In an **xterm** window, Euphoria's
+  **video_config()** now reports the correct
+  number of lines and columns - this helps
+  **ed** to work much better.
+  **ed** will work with the initial size of
+  window in effect when **ed** starts up.
+*  **ed:** **F1**, **F2**, **F3**,
+  **F4**, **Home**, **End**, and the **Delete** key work now in
+  **xterm** (under Red Hat 5.2 at least). The other F-keys were already
+  working. **PageUp/PageDown** and some other keys still don't work - feel
+  free to add your own alternate keys.
+*  **exu** is now even smaller - just 82K.

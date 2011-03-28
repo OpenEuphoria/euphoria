@@ -2,6 +2,7 @@ include std/cmdline.e
 include std/io.e
 include std/map.e
 include std/text.e
+include std/console.e
 
 constant cmd_params = {
 	{ "i", 0, "Input filename", { NO_CASE, HAS_PARAMETER } },
@@ -14,7 +15,11 @@ object input_filename=map:get(params, "i"),
 	output_filename=map:get(params, "o")
 
 if atom(input_filename) or atom(output_filename) then
-	puts(1, "Usage: etmltest.ex -i input_file -o output_file\n")
+	ifdef WINDOWS and GUI then
+		puts(1, "This program must be run from the command-line:\n\n")
+	end ifdef
+	puts(1, "Usage: eui etml.ex -i input_file -o output_file\n")
+	maybe_any_key()
 	abort(1)
 end if
 
@@ -33,7 +38,7 @@ while next_tag > 0 with entry do
 		out &= "\tresult &= \"\"\"" & in[pos..next_tag-1] & "\"\"\"\n"
 	end if
 
-	pos = match_from("%>", in, next_tag) + 2
+	pos = match("%>", in, next_tag) + 2
 	
 	sequence tag = trim(in[next_tag+2..pos-3])
 	
@@ -49,7 +54,7 @@ while next_tag > 0 with entry do
 	end switch
 
 entry
-	next_tag = match_from("<%", in, pos)
+	next_tag = match("<%", in, pos)
 end while
 
 out &= "\tresult &= \"\"\"" & in[pos..$] & "\"\"\"\n"

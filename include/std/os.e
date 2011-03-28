@@ -1,22 +1,22 @@
-namespace os
-
 --****
 -- == Operating System Helpers
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 
-include std/sequence.e
-include std/text.e
-include std/machine.e
+namespace os
 
-include std/dll.e
+ifdef WINDOWS then
+	include std/dll.e
+end ifdef
+
+include std/machine.e
 
 ifdef UNIX then
 
 	public constant CMD_SWITCHES = "-"
 
-elsifdef DOSFAMILY or WINDOWS then
+elsifdef WINDOWS then
 
 	public constant CMD_SWITCHES = "-/"
 
@@ -32,12 +32,11 @@ constant
 --
 
 public enum
-	DOS32 = 1, -- Required for traninit.e and platform.e, remove once DOS32 is removed from backend.
 	WIN32 = 2,
+	WINDOWS = WIN32,
 	LINUX,
 	OSX,
-	SUNOS,
-	OPENBSD,
+	OPENBSD = 6,
 	NETBSD,
 	FREEBSD
 
@@ -45,10 +44,9 @@ public enum
 -- These constants are returned by the [[:platform]] function.
 --
 -- * ##WIN32##   ~-- Host operating system is Windows
--- * ##LINUX##   ~-- Host operating system is Linux **or** FreeBSD
--- * ##FREEBSD## ~-- Host operating system is Linux **or** FreeBSD
+-- * ##LINUX##   ~-- Host operating system is Linux
+-- * ##FREEBSD## ~-- Host operating system is FreeBSD
 -- * ##OSX##     ~-- Host operating system is Mac OS X
--- * ##SUNOS##   ~-- Host operating system is Sun's OpenSolaris
 -- * ##OPENBSD## ~-- Host operating system is OpenBSD
 -- * ##NETBSD##  ~-- Host operating system is NetBSD
 --
@@ -77,6 +75,10 @@ public function instance()
 	return machine_func(M_INSTANCE, 0)
 end function
 
+ifdef WINDOWS then
+	atom cur_pid = -1
+end ifdef
+
 --**
 -- Return the ID of the current Process (pid)
 --
@@ -88,16 +90,12 @@ end function
 -- mypid = get_pid()
 -- </eucode>
 
-ifdef DOSFAMILY or WINDOWS then
-atom cur_pid = -1
-end ifdef
 public function get_pid()
 	ifdef UNIX then
 		return machine_func(M_INSTANCE, 0)
-	end ifdef
-	ifdef DOSFAMILY or WINDOWS then
+	elsifdef WINDOWS then
 		if cur_pid = -1 then
-			cur_pid = define_c_func(open_dll("kernel32.dll"), "GetCurrentProcessId", {}, C_INT)
+			cur_pid = dll:define_c_func( dll:open_dll("kernel32.dll"), "GetCurrentProcessId", {}, dll:C_DWORD)
 			if cur_pid >= 0 then
 				cur_pid = c_func(cur_pid, {})
 			end if
@@ -107,9 +105,8 @@ public function get_pid()
 	end ifdef
 end function
 
-
-ifdef WIN32 then
-	constant M_UNAME = define_c_func(open_dll("kernel32.dll"), "GetVersionExA", {C_POINTER}, C_INT)
+ifdef WINDOWS then
+	constant M_UNAME = dll:define_c_func( dll:open_dll("kernel32.dll"), "GetVersionExA", { dll:C_POINTER }, dll:C_INT)
 elsifdef UNIX then
 	constant M_UNAME = 76
 end ifdef
@@ -148,11 +145,11 @@ end ifdef
 -- On non Unix platforms, calling the machine_func() directly returns 0.
 
 public function uname()
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		atom buf
 		sequence sbuf
 		integer maj, mine, build, plat
-		buf = allocate(148)
+		buf = machine:allocate(148)
 		poke4(buf, 148)
 		if c_func(M_UNAME, {buf}) then
 			maj = peek4u(buf+4)
@@ -204,8 +201,10 @@ public function uname()
 			end if
 			sbuf = append(sbuf, peek_string(buf+20))
 			sbuf &= {plat, build, mine, maj}
+			machine:free( buf )
 			return sbuf
 		else
+			machine:free( buf )
 			return {}
 		end if
 	elsifdef UNIX then
@@ -227,7 +226,7 @@ end function
 -- An **integer**, 1 if host system is a newer Windows (NT/2K/XP/Vista), else 0.
 
 public function is_win_nt()
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		sequence s
 		s = uname()
 		return equal(s[1], "WinNT")
@@ -314,11 +313,13 @@ end function
 -- An **integer**,
 -- <eucode>
 -- public constant
---     WIN32   = 2,
---     LINUX   = 3,
---     FREEBSD = 3, -- NOTE: same as LINUX.
---     OSX     = 4,
---     SUNOS   = 5
+--     WIN32 = WINDOWS,
+--     LINUX,
+--     FREEBSD,
+--     OSX,
+--	   OPENBSD,
+--     NETBSD,
+--     FREEBSD
 -- </eucode>
 --
 -- Comments:
@@ -330,7 +331,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
---  ifdef WIN32 then
+--  ifdef WINDOWS then
 --     -- call system Beep routine
 --     err = c_func(Beep, {0,0})
 -- elsedef
@@ -384,7 +385,7 @@ end function
 --
 -- Example 2:
 -- <eucode>
---  system("ex \\test\\myprog.ex < indata > outdata", 2)
+--  system("eui \\test\\myprog.ex < indata > outdata", 2)
 -- -- executes myprog by redirecting standard input and
 -- -- standard output
 -- </eucode>
@@ -419,11 +420,11 @@ end function
 --
 -- If it is not possible to run the program, ##system_exec##() will return -1.
 --
--- On //WIN32//, ##system_exec##() will only run .exe and .com programs.
+-- On //WINDOWS//, ##system_exec##() will only run .exe and .com programs.
 -- To run .bat files, or built-in shell commands, you need [[:system]](). Some commands,
 -- such as DEL, are not programs, they are actually built-in to the command interpreter.
 --
--- On //WIN32//, ##system_exec##() does not allow the use of command-line redirection in ##command##.
+-- On //WINDOWS//, ##system_exec##() does not allow the use of command-line redirection in ##command##.
 -- Nor does it allow you to quote strings that contain blanks, such as file names.
 --
 -- exit codes from Windows programs are normally in the range 0 to 255, with 0 indicating "success".
@@ -449,7 +450,7 @@ end function
 -- Example 2:
 -- <eucode>
 --  -- executes myprog with two file names as arguments
--- if system_exec("ex \\test\\myprog.ex indata outdata", 2) then
+-- if system_exec("eui \\test\\myprog.ex indata outdata", 2) then
 --     puts(2, "failure!\n")
 -- end if
 -- </eucode>
@@ -486,52 +487,9 @@ end function
 
 public procedure sleep(atom t)
 -- go to sleep for t seconds
--- allowing (on WIN32 and Linux) other processes to run
+-- allowing other processes to run
 	if t >= 0 then
 		machine_proc(M_SLEEP, t)
 	end if
 end procedure
-
---****
--- Signature:
--- <built-in> function include_paths(integer convert)
---
--- Description:
--- Returns the list of include paths, in the order in which they are searched
---
--- Parameters:
---    # ##convert## : an integer, nonzero to include converted path entries
---    that were not validated yet.
---
--- Returns:
---	A **sequence**, of strings, each holding a fully qualified include path.
---
--- Comments:
---
--- ##convert## is checked only under //Windows//. If a path has accented characters in it, then
--- it may or may not be valid to convert those to the OEM code page. Setting ##convert## to a nonzero value
--- will force conversion for path entries that have accents and which have not been checked to be valid yet.
--- The extra entries, if any, are returned at the end of the returned sequence.
---
--- The paths are ordered in the order they are searched:
--- # current directory
--- # configuration file,
--- # command line switches,
--- # EUINC
--- # a default based on EUDIR.
---
--- Example 1:
--- <eucode>
--- sequence s = include_paths(0)
--- -- s might contain
--- {
---   "/usr/euphoria/tests",
---   "/usr/euphoria/include",
---   "./include",
---   "../include"
--- }
--- </eucode>
---
--- See Also:
--- [[:eu.cfg]], [[:include]], [[:option_switches]]
 

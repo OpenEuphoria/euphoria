@@ -1,11 +1,7 @@
--- (c) Copyright - See License.txt
---
-namespace unittest
-
 --****
 -- == Unit Testing Framework
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 -- === Background
 -- Unit testing is the process of assuring that the smallest programming units
@@ -65,17 +61,23 @@ namespace unittest
 -- the ##test_report##() procedure. To get a better feel for unit testing, have
 -- a look at the provided test cases for the standard library in the //tests//
 -- directory.
+--
+-- When included in your program, unittest.e sets a crash handler to log a crash 
+-- as a failure.
+
+namespace unittest
+
+include std/console.e
+include std/filesys.e
+include std/io.e
+include std/math.e
+include std/pretty.e
+include std/search.e
+include std/error.e
 
 --****
 -- === Constants
 --
-
-include std/io.e
-include std/pretty.e
-include std/search.e
-include std/filesys.e
-include std/math.e
-include std/types.e
 
 --
 -- Public Variables
@@ -100,7 +102,7 @@ integer verbose = TEST_SHOW_FAILED_ONLY
 integer abort_on_fail = 0
 integer wait_on_summary = 0
 integer accumulate_on_summary = 0
-integer logging = 0, log_fh = 0
+integer log_fh = 0
 
 --
 -- Private utility functions
@@ -112,17 +114,33 @@ procedure add_log(object data)
 	end if
 
 	puts(log_fh, "entry = ")
-	pretty_print(log_fh, data, {2, 2, 1, 78, "%d", "%.15g"})
+	pretty:pretty_print(log_fh, data, {2, 2, 1, 78, "%d", "%.15g"})
 	puts(log_fh, "\n")
-	flush(log_fh)
+	io:flush(log_fh)
 end procedure
 
-procedure test_failed(sequence name, object a, object b)
+procedure test_failed(sequence name, object a, object b, integer TF = 0)
 	if verbose >= TEST_SHOW_FAILED_ONLY then
 		printf(2, "  failed: %s, expected: ", {name})
-		pretty_print(2, a, {2,2,1,78,"%d", "%.15g"})
+		if TF then
+			if not equal(a,0) then
+				puts(2, "TRUE")
+			else
+				puts(2, "FALSE")
+			end if
+		else
+			pretty:pretty_print(2, a, {2,2,1,78,"%d", "%.15g"})
+		end if
 		puts(2, " but got: ")
-		pretty_print(2, b, {2,2,1,78,"%d", "%.15g"})
+		if TF and integer(b) then
+			if not equal(b,0) then
+				puts(2, "TRUE")
+			else
+				puts(2, "FALSE")
+			end if
+		else
+			pretty:pretty_print(2, b, {2,2,1,78,"%d", "%.15g"})
+		end if
 		puts(2, "\n")
 	end if
 
@@ -177,8 +195,8 @@ end procedure
 --
 -- If a file crashes when it should not, this event is reported no matter the verbosity level.
 --
--- The command line switch ""-failed" causes verbosity to be set to medium at startup. The
--- command line switch ""-all" causes verbosity to be set to high at startup.
+-- The command line switch "-failed" causes verbosity to be set to medium at startup. The
+-- command line switch "-all" causes verbosity to be set to high at startup.
 --
 -- See Also:
 -- [[:test_report]]
@@ -259,6 +277,7 @@ public procedure test_report()
 	atom score
 	integer fh
 	sequence fname
+	sequence respc
 
 	if tests_failed > 0 or verbose >= TEST_SHOW_ALL then
 		if test_count = 0 then
@@ -267,8 +286,15 @@ public procedure test_report()
 			score = (tests_passed / test_count) * 100
 		end if
 
-		printf(2, "  %d tests run, %d passed, %d failed, %.1f%% success\n",
-			{test_count, tests_passed, tests_failed, score})
+		respc = sprintf("%1.f%%", score)
+		if equal(respc, "100%") then
+			if tests_failed > 0 then
+				-- this can happen when the number of tests is huge and the number of fails is tiny.
+				respc = "99.99%" -- Cannot have 100% if any tests failed.
+			end if
+		end if
+		printf(2, "  %d tests run, %d passed, %d failed, %s success\n",
+			{test_count, tests_passed, tests_failed, respc})
 	end if
 
 	if accumulate_on_summary then
@@ -292,19 +318,25 @@ public procedure test_report()
 	
 	if match("t_c_", filename) = 1 then
 		puts(2, "  test should have failed but was a success\n")
+		if wait_on_summary then
+			console:maybe_any_key("Press a key to exit")
+		end if
 		abort(0)
 	else
+		if wait_on_summary then
+			console:maybe_any_key("Press a key to exit")
+		end if
 		abort(tests_failed > 0)
 	end if
 end procedure
 
-procedure record_result(integer success, sequence name, object a, object b)
+procedure record_result(integer success, sequence name, object a, object b, integer TF = 0)
 	test_count += 1
 
 	if success then
 		test_passed(name)
 	else
-		test_failed(name, a, b)
+		test_failed(name, a, b, TF)
 	end if
 end procedure
 
@@ -342,7 +374,7 @@ public procedure test_equal(sequence name, object expected, object outcome)
 		success = 1	
 	elsif equal(0*expected, 0*outcome) then
 		-- for complicated sequences values
-		success = max(abs(expected-outcome)) < 1e-9
+		success = math:max( math:abs( expected - outcome ) ) < 1e-9
 	else
 		success = 0
 	end if
@@ -379,12 +411,12 @@ public procedure test_not_equal(sequence name, object a, object b)
 			success = ((b-a) >= 1e-9)
 		end if
 	end if
-	a = "anything but '" & pretty_sprint( a, {2,2,1,78,"%d", "%.15g"}) & "'"
+	a = "anything but '" & pretty:pretty_sprint( a, {2,2,1,78,"%d", "%.15g"}) & "'"
 	record_result(success, name, a, b)
 end procedure
 
 --**
--- Records whether a test passes by comparing two values.
+-- Records whether a test passes.
 --
 -- Parameters:
 --		# ##name## : a string, the name of the test
@@ -395,16 +427,38 @@ end procedure
 -- atom is zero or not. Use [[:test_equal]]() instead in this case.
 --
 -- See Also:
--- [[:test_equal]], [[:test_not_equal]], [[:test_false]], [[:test_pass]], [[test_fail]]
+-- [[:test_equal]], [[:test_not_equal]], [[:test_false]], [[:test_pass]], [[:test_fail]]
 
 public procedure test_true(sequence name, object outcome)
-	integer success
-	if sequence(outcome) then
-		success = 0
+	record_result(not equal(outcome,0), name, 1, outcome, 1 )
+end procedure
+
+--**
+-- Records whether a test passes. If it fails, the program also fails.
+--
+-- Parameters:
+--		# ##name## : a string, the name of the test
+--		# ##outcome## : an object, some actual value that should not be zero.
+--
+-- Comments:
+-- This is identical to ##test_true()## except that if the test fails, the
+-- program will also be forced to fail at this point.
+--
+-- See Also:
+-- [[:test_equal]], [[:test_not_equal]], [[:test_false]], [[:test_pass]], [[:test_fail]]
+
+public procedure assert(object name, object outcome)
+	if sequence(name) then
+		test_true(name, outcome)
+		if equal(outcome,0) then
+			error:crash(name)
+		end if
 	else
-		success = (outcome != 0)
+		test_true(outcome, name)
+		if equal(name,0) then
+			error:crash(outcome)
+		end if
 	end if
-	record_result(success, name, 1, outcome )
 end procedure
 
 --**
@@ -422,13 +476,7 @@ end procedure
 -- [[:test_equal]], [[:test_not_equal]], [[:test_true]], [[:test_pass]], [[:test_fail]]
 
 public procedure test_false(sequence name, object outcome)
-	integer success
-	if not integer(outcome) then
-		success = 0
-	else
-		success = (outcome = 0)
-	end if
-	record_result(success, name, 0, outcome)
+	record_result(equal(outcome, 0), name, 0, outcome, 1)
 end procedure
 
 --**
@@ -438,10 +486,11 @@ end procedure
 --		# ##name## : a string, the name of the test
 --
 -- See Also:
--- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_false]], [[:test_pass]]
+-- [[:test_equal]], [[:test_not_equal]], [[:test_true]], [[:test_false]], [[:test_pass]]
+--
 
 public procedure test_fail(sequence name)
-	record_result(0, name, 1, 0)
+	record_result(0, name, 1, 0, 1)
 end procedure
 
 --**
@@ -454,7 +503,7 @@ end procedure
 -- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_false]], [[:test_fail]]
 
 public procedure test_pass(sequence name)
-	record_result(1, name, 1, 1)
+	record_result(1, name, 1, 1, 1)
 end procedure
 
 sequence cmd = command_line()
@@ -462,8 +511,8 @@ filename = cmd[2]
 
 
 -- strip off path information
-while find( SLASH, filename ) do
-	filename = filename[find( SLASH, filename )+1..$]
+while find( filesys:SLASH, filename ) do
+	filename = filename[find( filesys:SLASH, filename )+1..$]
 end while
 
 for i = 3 to length(cmd) do
@@ -473,7 +522,7 @@ for i = 3 to length(cmd) do
 		set_test_verbosity(TEST_SHOW_FAILED_ONLY)
 	elsif equal(cmd[i], "-wait") then
 		set_wait_on_summary(1)
-	elsif begins(cmd[i], "-accumulate") then
+	elsif search:begins(cmd[i], "-accumulate") then
 		set_accumulate_summary(1)
 	elsif equal(cmd[i], "-log") then
 		log_fh = open("unittest.log", "a")
@@ -487,13 +536,14 @@ end for
 
 ifdef not CRASH then
 
-include std/error.e
+
 
 function test_crash( object o )
 	test_fail( "unittesting crashed" )
 	test_report()
-	return 0
+	o = 0
+	return o
 end function
-crash_routine( routine_id( "test_crash" ) )
+error:crash_routine( routine_id( "test_crash" ) )
 
 end ifdef

@@ -1,8 +1,9 @@
 -- (c) Copyright - See License.txt
+
 ifdef ETYPE_CHECK then
-with type_check
+	with type_check
 elsedef
-without type_check
+	without type_check
 end ifdef
 
 include std/map.e as map
@@ -73,6 +74,10 @@ export procedure Block_var( symtab_index sym )
 -- Adds the specified var to the current block
 	sequence block = block_stack[$]
 	block_stack[$] = 0
+	if length(block_stack) > 1 then
+		-- don't record for top level blocks
+		SymTab[sym][S_BLOCK] = block[BLOCK_SYM]
+	end if
 	
 	if length(block[BLOCK_VARS]) then
 		SymTab[block[BLOCK_VARS][$]][S_NEXT_IN_BLOCK] = sym
@@ -93,8 +98,9 @@ end procedure
 procedure NewBlock( integer opcode, object block_label )
 -- creates a SymTab entry for the new block and returns the symtab_index
 
-	SymTab = append( SymTab, repeat( 0, SIZEOF_VAR_ENTRY ) )
+	SymTab = append( SymTab, repeat( 0, SIZEOF_BLOCK_ENTRY ) )
 	SymTab[$][S_MODE] = M_BLOCK
+	SymTab[$][S_FIRST_LINE] = gline_number
 	
 	sequence block = repeat( 0, BLOCK_SIZE-1 )
 	block[BLOCK_SYM]    = length(SymTab)
@@ -150,7 +156,7 @@ export procedure block_label( sequence label_name )
 -- sets the label for the current block
 	block_stack[$][BLOCK_LABEL] = label_name
 	SymTab[current_block][S_NAME] = sprintf( "BLOCK: %s-%s", 
-		{opnames[block_stack[$][BLOCK_OPCODE]], label_name})
+		{ block_type_name(block_stack[$][BLOCK_OPCODE]), label_name})
 end procedure
 
 function pop_block()
@@ -161,6 +167,7 @@ function pop_block()
 	
 	sequence  block = block_stack[$]
 	block_stack = block_stack[1..$-1]
+	SymTab[block[BLOCK_SYM]][S_LAST_LINE] = gline_number
 	
 	ifdef BDEBUG then
 		printf(1,"Popping block %s\n", {SymTab[block[BLOCK_SYM]][S_NAME]})

@@ -7,7 +7,7 @@ ifdef not NO_INET then
 	object check_ip = 0
 	sequence check_ip_name
 
-	_ = host_by_name("www.example.com")
+	_ = host_by_name("localhost")
 	if sequence(_) then
 		test_equal("host_by_name #1", 4, length(_))
 		test_true("host_by_name #2", sequence(_[HOST_OFFICIAL_NAME]))

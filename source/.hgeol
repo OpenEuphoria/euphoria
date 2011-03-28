@@ -1,0 +1,5 @@
+[patterns]
+Makefile.wat = native
+Makefile.gnu = native
+*.dst = native
+Jamfile = native

@@ -1,9 +1,7 @@
-namespace memory
-
 --****
 -- == Memory Management - Low-Level
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 -- === Usage Notes
 --@[safe.e]
@@ -37,170 +35,61 @@ namespace memory
 -- file.
 --
 
+namespace memory
+
 public include std/memconst.e
-include std/types.e
-include std/error.e
+
+-- biggest address on a 32-bit machine
+constant MAX_ADDR = power(2, 32)-1
 
 ifdef DATA_EXECUTE then
 	include std/machine.e
 end ifdef
 
--- biggest address on a 32-bit machine
-constant MAX_ADDR = power(2, 32)-1
+without warning &= (not_used)
 
+public integer edges_only 
 
 --**
 -- Positive integer type
 
-export type positive_int(integer x)
-        return x >= 1
+export type positive_int(object x)
+	if not integer(x) then
+		return 0
+	end if
+    return x >= 1
 end type
 
 --**
 -- Machine address type
 
-public type machine_addr(atom a)
+public type machine_addr(object a)
 -- a 32-bit non-null machine address 
-        return a > 0 and a <= MAX_ADDR and floor(a) = a
+	if not atom(a) then
+		return 0
+	end if
+	
+	if not integer(a)then
+		if floor(a) != a then
+			return 0
+		end if
+	end if
+	
+	return a > 0 and a <= MAX_ADDR
 end type
 
-
---****
--- === Memory allocation
---
-
---**
--- Allocate a contiguous block of data memory.
---
--- Parameters:
---   # ##n## : a positive integer, the size of the requested block.
---   # ##cleanup## : an integer, if non-zero, then the returned pointer will be
---     automatically freed when its reference count drops to zero, or
---     when passed as a parameter to [[:delete]].
---
--- Return:
---   An **atom**, the address of the allocated memory or 0 if the memory
---   can't be allocated.
---
--- Comments:
--- Since ##allocate_string##() allocates memory, you are responsible to
--- [[:free]]() the block when done with it if ##cleanup## is zero.
--- If ##cleanup## is non-zero, then the memory can be freed by calling
--- [[:delete]], or when the pointer's reference count drops to zero.
--- When you are finished using the block, you should pass the address of the block to 
--- ##[[:free]]()## if ##cleanup## is zero. If ##cleanup## is non-zero, then the memory
--- can be freed by calling [[:delete]], or when the pointer's reference count drops to zero.
--- This will free the block and make the memory available for other purposes. When 
--- your program terminates, the operating system will reclaim all memory for use with other 
--- programs.  An address returned by this function shouldn't be passed to ##[[:call]]()##.
--- For that purpose you may use ##[[:allocate_code]]()## instead. 
---
--- The address returned will be at least 4-byte aligned.
---
--- Example 1:
--- <eucode>
--- buffer = allocate(100)
--- for i = 0 to 99 do
---     poke(buffer+i, 0)
--- end for
--- </eucode>
---                  
--- See Also:
---     [[:free]], [[:peek]], [[:poke]], [[:mem_set]], [[:allocate_code]]
-
-public function allocate(positive_int n, integer cleanup = 0)
-	atom addr
-	-- Allocate n bytes of memory and return the address.
-	-- Free the memory using free() below.
-	ifdef not DATA_EXECUTE then
-		addr = machine_func(M_ALLOC, n )
-	elsedef
-		addr = allocate_protect( n, 1, PAGE_READ_WRITE_EXECUTE )
-	end ifdef
-	if cleanup then
-		return delete_routine( addr, FREE_RID )
-	else
-		return addr
-	end if
-end function
-
---**
--- Allocate n bytes of memory and return the address.
--- Free the memory using free() below.
-
-public function allocate_data(positive_int n, integer cleanup = 0)
-	if cleanup then
-		return delete_routine( machine_func(M_ALLOC, n ), FREE_RID )
-	else
-		return machine_func(M_ALLOC, n)
-	end if
-end function
-
-
---**
--- Free up a previously allocated block of memory.
--- @[machine:free]
---
--- Parameters:
---  # ##addr##, either a single atom or a sequence of atoms; these are addresses of a blocks to free.
---
--- Comments:
---  * Use ##free##() to return blocks of memory the during execution. This will reduce the chance of 
---   running out of memory or getting into excessive virtual memory swapping to disk. 
--- * Do not reference a block of memory that has been freed. 
--- * When your program terminates, all allocated memory will be returned to the system.
--- * ##addr## must have been allocated previously using [[:allocate]](). You
---   cannot use it to relinquish part of a block. Instead, you have to allocate
---   a block of the new size, copy useful contents from old block there and
---   then ##free##() the old block.  
--- * If the memory was allocated and automatic cleanup
---   was specified, then do not call ##free()## directly.  Instead, use [[:delete]].
--- * An ##addr## of zero is simply ignored.
---
--- Example 1:
---   ##demo/callmach.ex##
---
--- See Also:
---     [[:allocate]], [[:free_code]]
-
-public procedure free(object addr)
-	if number_array (addr) then
-		if ascii_string(addr) then
-			crash("free(\"%s\") is not a valid address", {addr})
+-- Internal use of the library only.  free() calls this.  It works with
+-- only atoms and in the SAFE implementation is different.
+export procedure deallocate(atom addr)
+	ifdef DATA_EXECUTE and WINDOWS then
+		if dep_works() then
+			c_func( VirtualFree_rid, { addr, 1, MEM_RELEASE } )
+			return
 		end if
-		
-		for i = 1 to length(addr) do
-			free(addr[i])
-		end for
-		return
-	elsif sequence(addr) then
-		crash("free() called with nested sequence")
-	end if
-	
-	if addr = 0 then
-		-- Special case, a zero address is assumed to be an uninitialized pointer,
-		-- so it is ignored.
-		return
-	end if
-	
-	if machine_addr(addr) then
-		ifdef not DATA_EXECUTE then
-	        	machine_proc(M_FREE, addr)
-		elsedef	
-			if not dep_works() then
-		        	machine_proc(M_FREE, addr)
-				return
-			end if
-		
-			ifdef WIN32 then
-				c_func( VirtualFree_rid, { addr-BORDER_SPACE, 1, MEM_RELEASE } )
-			end ifdef
-		end ifdef
-	else
-		crash("free(%g) is not a valid address", addr)
-	end if
+	end ifdef
+   	machine_proc( memconst:M_FREE, addr)
 end procedure
-FREE_RID = routine_id("free")
+memconst:FREE_RID = routine_id("deallocate")
 
 
 --****
@@ -226,7 +115,7 @@ FREE_RID = routine_id("free")
 -- Errors:
 --
 -- [[:peek | Peeking]] in memory you don't own may be blocked by the OS, and cause a
--- machine exception. The safe.e include file can catch this sort of issues.
+-- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
@@ -279,7 +168,7 @@ FREE_RID = routine_id("free")
 -- Errors:
 --
 -- [[:peek | Peeking]] in memory you don't own may be blocked by the OS, and cause
--- a machine exception. The safe.e include file can catch this sort of issues.
+-- a machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
@@ -333,7 +222,7 @@ FREE_RID = routine_id("free")
 --
 -- Errors:
 -- Peeking in memory you don't own may be blocked by the OS, and cause
--- a machine exception. The safe.e include file can catch this sort of issues.
+-- a machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
@@ -390,7 +279,7 @@ FREE_RID = routine_id("free")
 --
 -- Errors:
 --      Peek() in memory you don't own may be blocked by the OS, and cause a
--- machine exception. The safe.e include file can catch this sort of issues.
+-- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
@@ -415,9 +304,11 @@ FREE_RID = routine_id("free")
 -- <eucode>
 -- -- The following are equivalent:
 -- -- method 1
+-- Get 4 2-byte numbers starting address 100.
 -- s = {peek2u(100), peek2u(102), peek2u(104), peek2u(106)}
 --
 -- -- method 2
+-- Get 4 2-byte numbers starting address 100.
 -- s = peek2u({100, 4})
 -- </eucode>
 -- 
@@ -442,11 +333,11 @@ FREE_RID = routine_id("free")
 -- Returns:
 -- An **object**, either an atom if the input was a single address, or a
 -- sequence of atoms if a sequence was passed. In both cases, atoms returned
--- are double words, in the range 0..power(2,32)-1.
+-- are double words, in the range -power(2,31)..power(2,31)-1.
 --
 -- Errors:
 -- Peeking in memory you don't own may be blocked by the OS, and cause a
--- machine exception. The safe.e include file can catch this sort of issues.
+-- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
@@ -498,12 +389,11 @@ FREE_RID = routine_id("free")
 -- Returns:
 --              An **object**, either an atom if the input was a single address, or
 -- a sequence of atoms if a sequence was passed. In both cases, atoms
--- returned are double words, in the range 
--- -power(2,31)..power(2,31)-1.
+-- returned are double words, in the range 0..power(2,32)-1. 
 --
 -- Errors:
 --      Peek() in memory you don't own may be blocked by the OS, and cause
--- a machine exception. The safe.e include file can catch this sort of issues.
+-- a machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
@@ -578,7 +468,7 @@ FREE_RID = routine_id("free")
 --
 -- Errors:
 --      Poke() in memory you don't own may be blocked by the OS, and cause a
--- machine exception. The safe.e include file can catch this sort of issues.
+-- machine exception. The -D SAFE option will make ##poke()## catch this sort of issues.
 --
 -- Comments:
 --
@@ -627,7 +517,7 @@ FREE_RID = routine_id("free")
 --
 -- Errors:
 --      Poke() in memory you don't own may be blocked by the OS, and cause a
--- machine exception. The safe.e include file can catch this sort of issues.
+-- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
 --
 -- Comments: 
 --
@@ -678,7 +568,7 @@ FREE_RID = routine_id("free")
 --
 -- Errors:
 --      Poke() in memory you don't own may be blocked by the OS, and cause a
--- machine exception. The safe.e include file can catch this sort of issues.
+-- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
 --
 -- Comments: 
 --
@@ -814,9 +704,10 @@ public integer check_calls = 1
 --****
 -- === Safe memory access
 
+without warning strict
 --**
 -- Description: Add a block of memory to the list of safe blocks maintained
--- by safe.e (the debug version of machine.e). The block starts at address a.
+-- by safe.e (the debug version of memory.e). The block starts at address a.
 -- The length of the block is i bytes.
 --
 -- Parameters:
@@ -859,15 +750,13 @@ public integer check_calls = 1
 --   [[:unregister_block]], [[:safe.e]]
 
 public procedure register_block(atom block_addr, atom block_len, integer protection )
-	-- NOP to avoid strict lint
-	block_addr = block_addr
-	block_len = block_len
+	-- Only implemented in safe.e
 end procedure
 
-
+without warning strict
 --**
 -- Remove a block of memory from the list of safe blocks maintained by safe.e
--- (the debug version of machine.e).
+-- (the debug version of memory.e).
 --
 -- Parameters:
 --              # ##block_addr## : an atom, the start address of the block
@@ -889,10 +778,10 @@ end procedure
 --   [[:register_block]], [[:safe.e]]
 
 public procedure unregister_block(atom block_addr)
-	-- NOP to avoid strict lint
-	block_addr =  block_addr
+	-- Only implemented in safe.e
 end procedure
 
+without warning strict
 --**
 -- Scans the list of registered blocks for any corruption.
 --
@@ -913,10 +802,19 @@ end procedure
 -- See Also:
 -- [[:register_block]], [[:unregister_block]]
 
+public function safe_address(atom start, integer len, positive_int action)
+	-- Only implemented in safe.e
+	return 1
+end function
+
+without warning strict
 public procedure check_all_blocks()
+	-- Only implemented in safe.e
 end procedure
 
+without warning strict
 export function prepare_block( atom addr, integer a, integer protection )
+	-- Only implemented in safe.e
 	return addr
 end function
 
@@ -924,15 +822,18 @@ export constant BORDER_SPACE = 0
 export constant leader = repeat('@', BORDER_SPACE)
 export constant trailer = repeat('%', BORDER_SPACE)
 
-export type bordered_address( atom addr )
+export type bordered_address( object addr )
+	if not atom(addr) then
+		return 0
+	end if
 	return 1
 end type
 
 
 with warning
 
--- ****
--- === Automatic Resource Management
+--****
+--=== Automatic Resource Management
 --
 -- Euphoria objects are automatically garbage collected when they are no
 -- longer referenced anywhere.  Euphoria also provides the ability to manage 
@@ -942,7 +843,7 @@ with warning
 
 --****
 -- Signature:
--- <built-in>function delete_routine( object x, integer rid )
+-- <built-in> function delete_routine( object x, integer rid )
 -- 
 -- Description:
 -- Associates a routine for cleaning up after a euphoria object.
@@ -961,7 +862,8 @@ with warning
 -- 
 -- The second way for the delete routine to be called is when its
 -- reference count is reduced to 0.  Before its memory is freed, the
--- delete routine is called.
+-- delete routine is called. A default delete will be used if the cleanup 
+-- parameter to one of the [[:allocate]] routines is true. 
 -- 
 -- delete_routine() may be called multiple times for the same object.
 -- In this case, the routines are called in reverse order compared to
@@ -969,7 +871,7 @@ with warning
 
 --****
 -- Signature:
--- <built-in>procedure delete( object x )
+-- <built-in> procedure delete( object x )
 -- 
 -- Description:
 -- Calls the cleanup routines associated with the object, and removes the
@@ -984,25 +886,26 @@ with warning
 -- unchanged, though the cleanup routine will no longer be associated
 -- with the object.
 
+--**
 -- Returns 1 if the DEP executing data only memory would cause an exception
 export function dep_works()
-	ifdef WIN32 then
-		return DEP_really_works		
+	ifdef WINDOWS then
+		return (DEP_really_works and use_DEP)
 	end ifdef
 
-	return 0
+	return 1
 end function
 
 export atom VirtualFree_rid
 
 public procedure free_code( atom addr, integer size, valid_wordsize wordsize = 1 )
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if dep_works() then
 			c_func(VirtualFree_rid, { addr, size*wordsize, MEM_RELEASE })
 		else
-			machine_proc(M_FREE,addr)
+			machine_proc( memconst:M_FREE, addr)
 		end if
 	elsedef
-		machine_proc(M_FREE,addr)
+		machine_proc( memconst:M_FREE, addr)
 	end ifdef
 end procedure

@@ -27,18 +27,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <assert.h>
 #ifdef EWINDOWS
 #include <windows.h>
 #endif
 #include "alldefs.h"
-#include "alloc.h"
 #include "be_runtime.h"
 #include "global.h"
+#include "be_alloc.h"
 
 /******************/
 /* Local defines  */
 /******************/
-#define NUMBER_OF_SIZES 14      /* number of size lists in pool */
+#define NUMBER_OF_FBL 14        /* number of lists in free block set */
 #define STR_CHUNK_SIZE 4096     /* chars */
 #define SYM_CHUNK_SIZE 50       /* entries */
 #define TMP_CHUNK_SIZE 50       /* entries */
@@ -47,15 +48,7 @@
 /**********************/
 /* Imported variables */
 /**********************/
-extern int Executing;
-extern symtab_ptr CurrentSub;
-extern int temps_allocated;
-extern IFILE obj_file;
-extern unsigned char *src_buf;
 extern int Argc;
-#ifdef EWINDOWS
-extern unsigned default_heap;
-#endif
 
 /**********************/
 /* Exported variables */
@@ -65,12 +58,13 @@ extern unsigned default_heap;
 char *malloc_options="A"; // abort
 #endif
 
-#ifdef EUNIX
-int pagesize;  // needed for Linux only, not FreeBSD
-#endif
+long pagesize;  // needed for Linux or Windows only, not FreeBSD
 
 int eu_dll_exists = FALSE; // a Euphoria .dll is being used
+#if defined(EALIGN4)
 int align4 = 0;
+#endif
+
 int low_on_space = FALSE;  // are we almost out of memory?
 unsigned cache_size = 0;
 symtab_ptr call_back_arg1, call_back_arg2, call_back_arg3, call_back_arg4,
@@ -87,103 +81,108 @@ long funny_align = 0;           /* number mallocs not 8-aligned */
 #endif
 
 #ifdef HEAP_CHECK
-long bytes_allocated = 0;       /* current number of object blocks alloc'd */
-long max_bytes_allocated = 0;   /* high water mark */
+unsigned long bytes_allocated = 0;       /* current number of object blocks alloc'd */
+unsigned long max_bytes_allocated = 0;   /* high water mark */
 #endif
 
-s1_ptr d_list = NULL;
-struct block_list *pool_map[MAX_CACHED_SIZE/RESOLUTION+1]; /* maps size desired
+d_ptr d_list = NULL;
+//static int dblcnt = 0;
+static struct block_list *pool_map[MAX_CACHED_SIZE/RESOLUTION+1]; /* maps size desired
 														  to appropriate list */
 
 
 /*******************/
 /* Local variables */
 /*******************/
-static struct block_list pool[NUMBER_OF_SIZES]; /* pool of free blocks */
+static struct block_list freeblk_list[NUMBER_OF_FBL]; /* set of free block lists */
 						 /* elements not power of 2 - but not used much */
-
-static char *str_free_ptr;
-static unsigned int chars_remaining = 0;
-
-static symtab_ptr sym_free_ptr;
-static unsigned int syms_remaining = 0;
-
-static temp_ptr tmp_free_ptr;
-static unsigned int tmps_remaining = 0;
 
 /**********************/
 /* Declared functions */
 /**********************/
-#ifndef ESIMPLE_MALLOC
-char *EMalloc(unsigned long);
-char *ERealloc(unsigned char *, unsigned long);
-void EFree(unsigned char *);
-#endif
 #ifndef EWINDOWS
 void free();
 #endif
-object NewString();
-static void AlreadyFree();
-size_t _msize();
 
 /*********************/
 /* Defined functions */
 /*********************/
 
-#ifdef HEAP_CHECK
-
+#ifndef RUNTIME
 void RTInternal(char *msg, ...)
 // Internal error
 {
 	va_list ap;
 	va_start(ap, msg);
-	RTFatal_va(msg);
+	RTFatal_va(msg, ap);
 	va_end(ap);
 }
+#endif
 
+#if defined(HEAP_CHECK) || defined(EXTRA_CHECK)
 
 void check_pool()
 {
 		int i;
+		struct block_list *first_fbl;
+		struct block_list *last_fbl;
 
+		first_fbl = &freeblk_list[0];
+		last_fbl = &freeblk_list[NUMBER_OF_FBL-1];
 		for (i = 0; i < MAX_CACHED_SIZE/RESOLUTION; i++) {
-			if (pool_map[i] < pool || pool_map[i] > pool+NUMBER_OF_SIZES-1)
+			if (pool_map[i] < first_fbl || pool_map[i] > last_fbl) {
 				RTInternal("Corrupt pool_map!");
+		}
 		}
 }
 #endif
-
 symtab_ptr tmp_alloc()
 /* return pointer to space for a temporary var/literal constant */
 {
 	return (symtab_ptr)EMalloc(sizeof(struct temp_entry));
 }
 
+#ifdef EWINDOWS
+long getpagesize (void) {
+    static long g_pagesize = 0;
+    if (! g_pagesize) {
+        SYSTEM_INFO system_info;
+        GetSystemInfo (&system_info);
+        g_pagesize = system_info.dwPageSize;
+    }
+    return g_pagesize;
+}
+#endif
+
 void InitEMalloc()
 /* initialize storage allocator */
 {
 	int i, j, p;
-#ifdef EUNIX
+	static int done = 0 ;
+
+	if (done) return;
+	done = 1;
 	pagesize = getpagesize();
-#else
-	eu_dll_exists = (Argc == 0);  // Argc is 0 only in Euphoria .dll
-	pool[0].size = 8;
-	pool[0].first = NULL;
+#ifndef UNIX
+	// DJP // eu_dll_exists = (Argc == 0);  // Argc is 0 only in Euphoria .dll
+	freeblk_list[0].size = 8;
+	freeblk_list[0].first = NULL;
 	p = RESOLUTION * 2;
-	for (i = 1; i < NUMBER_OF_SIZES; i = i + 2) {
-		pool[i].size = p;
-		pool[i].first = NULL;
-		if (i+1 < NUMBER_OF_SIZES) {
-			pool[i+1].size = 3 * p / 2;
-			pool[i+1].first = NULL;
+	for (i = 1; i < NUMBER_OF_FBL; i = i + 2) {
+		freeblk_list[i].size = p;
+		freeblk_list[i].first = NULL;
+		if (i+1 < NUMBER_OF_FBL) {
+			freeblk_list[i+1].size = 3 * p / 2;
+			freeblk_list[i+1].first = NULL;
 			p = p * 2;
 		}
 	}
+
 	j = 0;
 	for (i = 0; i <= MAX_CACHED_SIZE / RESOLUTION; i++) {
-		if (pool[j].size < i * RESOLUTION)
+		if (freeblk_list[j].size < i * RESOLUTION)
 			j++;
-		pool_map[i] = &pool[j];
+		pool_map[i] = &freeblk_list[j];
 	}
 #endif
 	call_back_arg1 = tmp_alloc();
@@ -235,20 +234,21 @@ void StorageStats()
 	free_block_ptr p;
 	s1_ptr s;
 
-	s = d_list;
+	assert(((unsigned long)d_list & 7) == 0);	
+	s = (s1_ptr)d_list;
 	n = 0;
 	while (s != NULL) {
 		n++;
 		s = (s1_ptr)((free_block_ptr)s)->next;
-		if ((long)s % 8 != 0)
+		if ((unsigned long)s % 8 != 0)
 			iprintf(stderr, "misaligned s1d pointer!\n");
 	}
 	printf("\nd_list: %ld   ", n);
 
-	for (i = 0; i < NUMBER_OF_SIZES; i++) {
-		printf("%d:", pool[i].size);
+	for (i = 0; i < NUMBER_OF_FBL; i++) {
+		printf("%d:", freeblk_list[i].size);
 		n = 0;
-		p = pool[i].first;
+		p = freeblk_list[i].first;
 		while (p != NULL) {
 			n++;
 			p = p->next;
@@ -263,120 +263,146 @@ void StorageStats()
 void Allocated(long n)
 /* record that n bytes were allocated */
 {
-	if (n < 0 || n >= 40000000L) {
-		RTInternal("bad value passed to Allocated (%d)", n);
-	}
+#if !defined(NDEBUG)
+	unsigned long prev_value;
+#endif
+
+	if (n == 0) return;
+
+#if !defined(NDEBUG)
+	assert(n > 0);
+	prev_value = bytes_allocated;
+#endif
 	bytes_allocated += n;
+#if !defined(NDEBUG)
+	// Check for overflow
+	assert(bytes_allocated > prev_value);
+#endif
+
 	if (bytes_allocated > max_bytes_allocated)
 		max_bytes_allocated = bytes_allocated;
+
 }
 
-static DeAllocated(long n)
+static void DeAllocated(long n)
 /* record that n bytes were freed */
 {
+#if !defined(NDEBUG)
+	unsigned long prev_value;
+#endif
+
+	if (n == 0) return;
+
+#if !defined(NDEBUG)
+	prev_value = bytes_allocated;
+#endif
 	bytes_allocated -= n;
-	if (n < 0 || n >= 40000000L)
-		RTInternal("bad value passed to DeAllocated");
-#ifdef FIX
-	if (bytes_allocated < 0 || bytes_allocated >= 140000000L) {
-		RTInternal("DeAllocated: bytes_allocated is %d, n is %d\n",
-				bytes_allocated, n);
-	}
+#if !defined(NDEBUG)
+	// Check for underflow
+	assert(bytes_allocated < prev_value);
 #endif
 }
 
-void Trash(char *p, long nbytes)
 /* write garbage into freed storage block to prevent accidental reuse */
-{
-	while (nbytes-- > 0)
-		*p++ = (char)0x11;
-}
 #endif // HEAP_CHECK
 
+#ifndef ESIMPLE_MALLOC
 static void Free_All()
-/* free the entire storage cache back to the malloc arena */
+/* release the entire storage cache back to the heap */
 {
-	int i, alignment;
+	int i;
 	struct block_list *list;
 	s1_ptr s;
 	unsigned char *p;
 
-	for (i = 0; i < NUMBER_OF_SIZES; i++) {
-		list = &pool[i];
+	for (i = 0; i < NUMBER_OF_FBL; i++) {
+		list = &freeblk_list[i];
 		s = (s1_ptr)list->first;
 		while (s != NULL) {
 			p = (unsigned char *)s;
 			s = (s1_ptr)((free_block_ptr)s)->next;
+			#if defined(EALIGN4)
 			if (align4 && *(int *)(p-4) == MAGIC_FILLER)
 				p = p - 4;
+			#endif
 			free(p);
 		}
 		list->first = NULL;
 	}
-	/* now do the S1D list */
-	s = d_list;
+	/* now do the doubles list */
+	assert(((unsigned long)d_list & 7) == 0);		
+	s = (s1_ptr)d_list;
 	while (s != NULL) {
 		p = (unsigned char *)s;
 		s = (s1_ptr)((free_block_ptr)s)->next;
+		#if defined(EALIGN4)
 		if (align4 && *(int *)(p-4) == MAGIC_FILLER)
 			p = p - 4;
+		#endif
 		free(p);
 	}
 	d_list = NULL;
 	cache_size = 0;
 }
-
-static void Recycle()
-/* Try to recycle some cached blocks back to heap.
-   With write-back CPU cache, it might be better
-   to free an older block on the list, not the most-recently freed,
-   but we only have a singly-linked list */
-{
-	register struct block_list *list;
-	unsigned char *p;
-	int i;
-
-#ifdef EXTRA_STATS
-	recycles++;
 #endif
-	/* try to take one from D list */
-	if (d_list != NULL) {
-		p = (unsigned char *)d_list;
-		d_list = (s1_ptr)((free_block_ptr)d_list)->next;
-		if (align4 && *(int *)(p-4) == MAGIC_FILLER)
-			p = p - 4;
-		free(p); /* give it back to malloc arena */
-		cache_size -= 1;
-	}
 
-	/* try to take one from each other list */
-	for (i = 0; i < NUMBER_OF_SIZES; i++) {
-		list = &pool[i];
-		if (list->first != NULL) {
-			p = (char *)list->first;
-			list->first = ((free_block_ptr)p)->next;
-			if (align4 && *(int *)(p-4) == MAGIC_FILLER)
-				p = p - 4;
-			free(p); /* give it back to malloc arena */
-			cache_size -= 2;
-		}
-	}
-}
+// #ifndef ESIMPLE_MALLOC
+// static void Recycle()
+// /* Try to recycle some cached blocks back to heap.
+//    With write-back CPU cache, it might be better
+//    to free an older block on the list, not the most-recently freed,
+//    but we only have a singly-linked list */
+// {
+// 	register struct block_list *list;
+// 	char *p;
+// 	int i;
+//
+// #ifdef EXTRA_STATS
+// 	recycles++;
+// #endif
+// 	/* try to take one from D list */
+// 	if (d_list != NULL) {
+// 		p = (char *)d_list;
+// 		d_list = (d_ptr)((free_block_ptr)d_list)->next;
+// 		#if defined(EALIGN4)
+// 		if (align4 && *(int *)(p-4) == MAGIC_FILLER)
+// 			p = p - 4;
+// 		#endif
+// 		free(p); /* give it back to heap */
+// 		cache_size--;
+// 	}
+//
+// 	/* try to take one from each other list */
+// 	for (i = 0; i < NUMBER_OF_FBL; i++) {
+// 		list = &freeblk_list[i];
+// 		if (list->first != NULL) {
+// 			p = (char *)list->first;
+// 			list->first = ((free_block_ptr)p)->next;
+// 			#if defined(EALIGN4)
+// 			if (align4 && *(int *)(p-4) == MAGIC_FILLER)
+// 				p = p - 4;
+// 			#endif
+// 			free(p); /* give it back to heap */
+// 			cache_size--;
+// 		}
+// 	}
+// }
+// #endif
 
-static void SpaceMessage()
+void SpaceMessage()
 {
 	/* should we free up something first, to ensure iprintf's work? */
-
 	RTFatal("Your program has run out of memory.\nOne moment please...");
 }
 
+#ifndef ESIMPLE_MALLOC
 static char *Out_Of_Space(long nbytes)
-/* malloc failed - make one last attempt */
+/* allocation failed - make one last attempt */
 {
 	long *p;
 
 	Free_All();
-	p = (long *)malloc(nbytes);
+	p = NULL;/*(long *)malloc(nbytes);*/
 	if (p == NULL) {
 		low_on_space = TRUE;
 		SpaceMessage();
@@ -386,41 +412,51 @@ static char *Out_Of_Space(long nbytes)
 		return (char *)p;
 	}
 }
-
+#endif
 #ifndef ESIMPLE_MALLOC
 char *EMalloc(unsigned long nbytes)
 /* storage allocator */
 /* Always returns a pointer that has 8-byte alignment (essential for our
    internal representation of an object). */
 {
-	unsigned char *p;
-	unsigned char *temp;
+	char *p;
+	free_block_ptr temp;
 	register struct block_list *list;
+#if defined(EALIGN4)
 	int alignment;
-	int min_align;
+#endif
+	struct block_list * last_FBL;
 
-#if defined(EUNIX) || defined(ESIMPLE_MALLOC)
-
-		return malloc(nbytes);
-#else
 #ifdef HEAP_CHECK
 	long size;
+#endif
 
+#ifdef HEAP_CHECK
 	check_pool();
 #endif
-	nbytes += align4; // allow for possible 4-aligned malloc pointers
+#if defined(EALIGN4)
+	nbytes += align4; // allow for 4-aligned addresses that are not always 8-aligned.
+#endif
 
 	if (nbytes <= MAX_CACHED_SIZE) {
 		/* See if we have a block of this size in our cache.
 		   Every block in the cache is 8-aligned. */
 
-		list = pool_map[((nbytes & 7) != 0) + (nbytes >> LOG_RESOLUTION)];
+		list = pool_map[((nbytes + RESOLUTION - 1) >> LOG_RESOLUTION)];
 #ifdef HEAP_CHECK
 		if (list->size < nbytes) {
 			RTInternal("Alloc - size is %d, nbytes is %d", list->size, nbytes);
 		}
 #endif
-		temp = (char *)list->first;
+		temp = list->first;
+
+		if (temp == NULL) {
+			last_FBL = &freeblk_list[NUMBER_OF_FBL-1];
+			if (list < last_FBL) {
+				list++;
+				temp = list->first;
+			}
+		}
 
 		if (temp != NULL) {
 			/* a cache hit */
@@ -428,20 +464,22 @@ char *EMalloc(unsigned long nbytes)
 #ifdef EXTRA_STATS
 			a_hit++;
 #endif
-			list->first = ((free_block_ptr)temp)->next;
-			cache_size -= 2;
+			list->first = temp->next;
+			cache_size--;
 
 #ifdef HEAP_CHECK
 			if (cache_size > 100000000)
 				RTInternal("cache size is bad");
-			p = temp;
+			p = (char *)temp;
+			#if defined(EALIGN4)
 			if (align4 && *(int *)(p-4) == MAGIC_FILLER)
 				p = p - 4;
 			if (((unsigned long)temp) & 3)
 				RTInternal("unaligned address in storage cache");
+			#endif
 			Allocated(block_size(p));
 #endif
-			return temp; /* will be 8-aligned */
+			return (char *)temp; /* will be 8-aligned */
 		}
 		else {
 			nbytes = list->size; /* better to grab bigger size
@@ -456,21 +494,26 @@ char *EMalloc(unsigned long nbytes)
 		a_too_big++;
 #endif
 
-	if (cache_size > CACHE_LIMIT) {
-		// cache is not helping, free some blocks back to general heap
-		Recycle();
-	}
+// *** COMMENTED OUT (D.Parnell) because I'm not sure if this really helps anything.
+// 	if (cache_size >= CACHE_LIMIT) {
+// 		// cache is not helping, free some blocks back to general heap
+// 		Recycle();
+// 	}
 
 	do {
 		p = malloc(nbytes+8);
-
+// 		assert(p);
 		if (p == NULL) {
-			p = Out_Of_Space(nbytes);
+			printf("couldn't alloc %d bytes\n", nbytes );
+			// Only triggered if asserts are turned off.
+			p = Out_Of_Space(nbytes + 8);
 		}
 
 #ifdef HEAP_CHECK
 		Allocated(block_size(p));
 #endif
+
+#if defined(EALIGN4)
 		/* get 8-byte alignment */
 		alignment = ((unsigned long)p) & 7;
 
@@ -481,11 +524,14 @@ char *EMalloc(unsigned long nbytes)
 						   // (this case is remotely possible on Win95 only)
 			return p;   // already 8-aligned, should happen most of the time
 		}
-		if (alignment != 4)
+
+		if (alignment != 4) {
 			RTFatal("malloc block NOT 4-byte aligned!\n");
+		}
 
 		if (align4) {
 			*(int *)p = MAGIC_FILLER;
+			assert((((unsigned int)p + 4) & 7) == 0);
 			return p+4;
 		}
 
@@ -493,23 +539,21 @@ char *EMalloc(unsigned long nbytes)
 		free(p);
 		align4 = 4;  // start handling 4-aligned blocks
 		nbytes += align4;
-	} while (TRUE);
+#else
+		assert(((unsigned int)p & 7) == 0);
+		return p;
 #endif
-// !EUNIX
+	} while (TRUE);
 }
 
-void EFree(unsigned char *p)
+void EFree(char *p)
 /* free storage pointed to by p. p is an 8-byte aligned pointer */
 {
 	char *q;
 	register long nbytes;
 	register struct block_list *list;
-	int align;
 
-#if defined(EUNIX) || defined(ESIMPLE_MALLOC)
-		free(p);
-		return;
-#else
+
 #ifdef HEAP_CHECK
 	check_pool();
 
@@ -517,25 +561,29 @@ void EFree(unsigned char *p)
 		RTInternal("EFree: badly aligned pointer");
 #endif // HEAP_CHECK
 	q = p;
-	if (align4 && *(int *)(p-4) == MAGIC_FILLER)
+	#if defined(EALIGN4)
+	if (align4 && *(int *)(p-4) == MAGIC_FILLER) {
 		q = q - 4;
+	}
+	#endif
 	nbytes = block_size(q);
 #ifdef HEAP_CHECK
-	if ((nbytes & 1) != 0)
+	if ((nbytes <= MAX_CACHED_SIZE) && ((nbytes & 1) != 0)) {
 		RTInternal("EFree: already free?");
+	}
 	DeAllocated(nbytes);
-	if (nbytes < RESOLUTION || nbytes > 40000000L || (nbytes % 4 != 0)) {
+	if (nbytes <= MAX_CACHED_SIZE && ((nbytes < RESOLUTION) || (nbytes % 4 != 0))) {
 		RTInternal("Free - bad nbytes: %d\n", nbytes);
 		/* what if compile time? */
 	}
-	Trash(p, nbytes - ((char *)p - q));
+	Trash(p, nbytes - (p - q));
 #endif // HEAP_CHECK
 
-	if (nbytes > MAX_CACHED_SIZE || (eu_dll_exists && cache_size > CACHE_LIMIT)) {
+	if (nbytes > MAX_CACHED_SIZE || (cache_size > CACHE_LIMIT)) {
 		free(q); /* too big to cache, or cache is full */
 	}
 	else {
-		list = pool_map[((nbytes & 7) != 0) + (nbytes >> LOG_RESOLUTION)];
+		list = pool_map[((nbytes + RESOLUTION - 1) >> LOG_RESOLUTION)];
 		if (list->size > nbytes) {
 			/* only happens with non-standard size (from realloc maybe) */
 			list--;
@@ -550,11 +598,74 @@ void EFree(unsigned char *p)
 #endif // HEAP_CHECK
 		((free_block_ptr)p)->next = list->first;
 		list->first = (free_block_ptr)p;
-		cache_size += 2;
+		cache_size++;
 	}
-#endif // linux
+
 }
-#endif // !ESIMPLE_MALLOC
+
+#else
+#if !defined(EWINDOWS) && !defined(EUNIX)
+// Version of allocation routines for systems that might not return allocations
+// that are 4-byte aligned.
+char *EMalloc(unsigned long nbytes)
+/* storage allocator */
+/* Always returns a pointer that has 8-byte alignment (essential for our
+   internal representation of an object). */
+{
+	char *p;
+	char *a;
+	unsigned long adj;
+
+	// Add max possible adjustment (7) plus 1 to store adjustment value,
+	// plus 4 to store the requested size.
+	a = (char *)malloc(nbytes + 1 + sizeof(nbytes) + 7);
+	assert(a);
+	a += 1 + sizeof(nbytes);	// Skip over the stored stuff.
+	adj = (unsigned long)a & 7;
+	if (adj) {
+		adj = 8 - adj;
+		p = a + adj;
+	}
+	else
+		p = a;
+	assert( ((unsigned long)p & 7) == 0);
+	*(p-1) = (char)adj;
+	*((unsigned long*)(p - 1 - sizeof(nbytes))) = nbytes;
+	return p;
+}
+
+void EFree(char *p)
+{
+	// 'p' must have been allocated by EMalloc.
+	unsigned char adj;
+
+	assert(p);
+	adj = *(p-1);
+	p = p - 1 - sizeof(unsigned long) - adj;
+	free(p);
+}
+
+char *ERealloc(char *orig, unsigned long newsize)
+{
+	char *newadr;
+	unsigned long oldsize;
+	int res;
+
+	newadr = EMalloc(newsize);
+	oldsize = *((unsigned long*)(orig - 1 - sizeof(oldsize)));
+
+    res = memcopy(newadr, newsize, orig, (oldsize > newsize ? newsize : oldsize));
+	if (res != 0) {
+		RTFatal("Internal error: ERealloc memcopy failed (%d).", res);
+	}
+
+	EFree(orig);
+
+	return newadr;
+}
+#endif // not windows and not unix
+
+#endif
 
 #ifndef EUNIX
 #ifndef EWINDOWS
@@ -602,7 +713,7 @@ int heap_dump(char *ptr)
 #endif // EUNIX
 
 #ifndef ESIMPLE_MALLOC
-char *ERealloc(unsigned char *orig, unsigned long newsize)
+char *ERealloc(char *orig, unsigned long newsize)
 /* Enlarge or shrink a malloc'd block.
    orig must not be NULL - not supported.
    Return a pointer to a storage area of the desired size
@@ -615,14 +726,11 @@ char *ERealloc(unsigned char *orig, unsigned long newsize)
 	unsigned long oldsize;
 	int res;
 
-#if defined(EUNIX) || defined(ESIMPLE_MALLOC)
-
-	// we always have 8-alignment
-	return realloc(orig, newsize);  // should do bookkeeping on block size?
-#else
 	p = orig;
+	#if defined(EALIGN4)
 	if (align4 && *(int *)(p-4) == MAGIC_FILLER)
 		p = p - 4;
+	#endif
 	oldsize = block_size(p);
 	newsize += 8;
 
@@ -668,13 +776,12 @@ char *ERealloc(unsigned char *orig, unsigned long newsize)
 	q = EMalloc(newsize);
 	/* copy the data to it's new location */
 	/* OPTIMIZE? we may be copying more than the actual live data */
-    res = memcopy(q, newsize, orig, oldsize - (orig - (unsigned char *)p));
+    res = memcopy(q, newsize, orig, oldsize - (orig - p));
 	if (res != 0) {
 		RTFatal("Internal error: ERealloc memcopy failed (%d).", res);
 	}
 	EFree(orig);
 	return q;
-#endif
 }
 #endif // !ESIMPLE_MALLOC
 
@@ -691,31 +798,15 @@ static void AlreadyFree(free_block_ptr q, free_block_ptr p)
 #endif
 
 #ifdef HEAP_CHECK
-void freeD(p)
 /* free double storage block */
-unsigned char *p;
+void freeD(unsigned char *p)
 {
-	long nbytes;
-	char *q;
-	int alignment;
-
-	q = p;
-	if (align4 && *(int *)(p-4) == MAGIC_FILLER)
-		q = q - 4;
-	nbytes = block_size(q);
-	DeAllocated(nbytes);
-	if ((long)p % 8 != 0)
-		RTInternal("freeS1: misaligned pointer returned");
-	if (nbytes < D_SIZE	|| nbytes > 1024)
-		RTInternal("FreeD - bad nbytes ");
+	assert(((unsigned long)p & 7) == 0);		
 	Trash(p, D_SIZE);
 	AlreadyFree((free_block_ptr)d_list, (free_block_ptr)p);
 
-	((d_ptr)p)->dbl = 1e300;  // ->next overlaps with this anyway
-
 	((free_block_ptr)p)->next = (free_block_ptr)d_list;
-	d_list = (s1_ptr)p;
-	cache_size += 1;
+	d_list = (d_ptr)p;
 }
 #endif
 
@@ -726,8 +817,9 @@ s1_ptr NewS1(long size)
         unsigned long address;
 		int i;
         register s1_ptr s1;
-        if (size > 1073741800) {
-                // multiply by 4 could overflow 32 bits
+	assert(size >= 0);
+	if ((unsigned long)size > MAX_SEQ_LEN) {
+		// Ensure it doesn't overflow
                 SpaceMessage();
         }
         address = (unsigned long)EMalloc(sizeof(struct s1) + (size+1) * sizeof(object) + BASE_ALIGN_SIZE);
@@ -748,22 +840,24 @@ s1_ptr NewS1(long size)
         return(s1);
 }
 
-object NewString(unsigned char *s)
-/* create a new string sequence */
+object NewSequence(char *data, int len)
+/* create a new sequence that may contain binary data */
 {
-	int len;
 	object_ptr obj_ptr;
 	s1_ptr c1;
 
-	len = strlen(s);
 	c1 = NewS1((long)len);
 	obj_ptr = (object_ptr)c1->base;
-	if (len > 0) {
-		do {
-			*(++obj_ptr) = (unsigned char)*s++;
-		} while (--len > 0);
+	for ( ; len > 0; --len) {
+		*(++obj_ptr) = (unsigned char)*data++;
 	}
 	return MAKE_SEQ(c1);
+}
+
+object NewString(char *s)
+/* create a new string sequence */
+{
+	return NewSequence(s, strlen(s));
 }
 
 s1_ptr SequenceCopy(register s1_ptr a)
@@ -797,20 +891,121 @@ char *TransAlloc(unsigned long size){
 	return EMalloc( size );
 }
 
-#if defined(ELINUX) || defined(EMINGW)
-size_t strlcpy(char *dest, char *src, size_t maxlen)
+/* ----------------------------------------------------------------------
+  :: copy_string ::
+ Returns 0 if destination cannot fit any source characters otherwise
+ the absolute return value is the number of characters from source that
+ have been copied. If the return value is negative, it means that not
+ all of the source has been copied.
+
+ To test if truncation occurred, the return value will be <= 0.
+ 
+ src must be null terminated.
+*/
+long copy_string(char *dest, char *src, size_t bufflen)
 {
-	strncpy(dest, src, maxlen);
-	dest[maxlen-1] = 0;
-	return strlen(src);
+	long n;
+	n = 0;
+	while (bufflen > 1 && *src != '\0') {
+		*dest++ = *src++;
+		n++;
+		bufflen--;
+	}
+	if (n > 0) {	// At least one char was copied.
+		*dest = '\0';
+	 	if (*src != '\0')
+	 		n = -n; // Only some of source was copied to the destination
+ 	}
+	else {
+		// Destination too small
+		if (bufflen > 0)
+			*dest = '\0';
+	}
+	return n;
 }
 
-size_t strlcat(char *dest, char *src, size_t maxlen)
+/* ----------------------------------------------------------------------
+  :: append_string ::
+ Returns 0 if destination cannot fit any source characters otherwise
+ the absolute return value is the number of characters from source that
+ have been copied. If the return value is negative, it means that not
+ all of the source has been copied.
+
+ To test if truncation occurred, the return value will be <= 0.
+*/
+long append_string(char *dest, char *src, size_t bufflen)
 {
-	int orig_dest_len = strlen(dest);
-	strncat(dest, src, maxlen-1);
-	dest[maxlen-1] = 0;
-	return orig_dest_len + strlen(src);
+
+	int dest_len;
+
+	dest_len = strlen(dest);
+	if ((size_t)dest_len + 1 < bufflen) {
+		return copy_string(dest + dest_len, src, bufflen - dest_len);
+	}
+
+	if ((size_t)dest_len + 1 == bufflen)
+		*(dest + dest_len) = '\0';
+
+	return 0;
 }
+
+static void new_dbl_block(unsigned int cnt)
+{
+	free_block_ptr dbl_block;
+	d_ptr n;
+	unsigned int dsize;
+	unsigned int blksize;
+	int chkcnt;
+#ifdef HEAP_CHECK
+	char *q;
 #endif
+
+	// Each element in the array must be on an 8-byte boundary.
+	dsize = (D_SIZE + 7) & (~7);
+
+	blksize = cnt * dsize;
+	dbl_block = (free_block_ptr)EMalloc( blksize );
+	assert(((unsigned long)dbl_block & 7) == 0);
+
+#ifdef HEAP_CHECK
+	Trash((char *)dbl_block, blksize);
+	q = (char *)dbl_block;
+	#if defined(EALIGN4)
+	if (align4 && *(int *)(q-4) == MAGIC_FILLER)
+		q = q - 4;
+	#endif
+	Allocated(block_size(q));
+#endif
+
+	chkcnt = 0;
+	d_list = (d_ptr)dbl_block;
+	while(cnt > 1) {
+		--cnt;
+		n = (d_ptr)((char *)dbl_block + dsize);
+		dbl_block->next = (free_block_ptr)n;
+		dbl_block = (free_block_ptr)n;
+		chkcnt++;
+	}
+	dbl_block->next = NULL;
+	chkcnt++;
+}
+
+object NewDouble(double d)
+/* allocate space for a new double value */
+{
+	register d_ptr new_dbl;
+
+	if (d_list == NULL) {
+		new_dbl_block(1024);
+	}
+
+	new_dbl = d_list;
+	assert(((unsigned long)new_dbl & 7) == 0);
+	d_list = (d_ptr)((free_block_ptr)new_dbl)->next;
+
+	new_dbl->ref = 1;
+	new_dbl->dbl = d;
+	new_dbl->cleanup = 0;
+	return MAKE_DBL(new_dbl);
+}
 

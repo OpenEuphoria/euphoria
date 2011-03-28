@@ -2,10 +2,13 @@
 --
 -- mini Euphoria front-end for stand-alone back-end
 -- we redundantly declare some things to keep the size down
+
+with define BACKEND
+
 ifdef ETYPE_CHECK then
-with type_check
+	with type_check
 elsedef
-without type_check
+	without type_check
 end ifdef
 
 include mode.e
@@ -29,6 +32,7 @@ include cominit.e
 include pathopen.e
 include preproc.e
 include msgtext.e
+include intinit.e
 
 sequence misc
 integer il_file = 0
@@ -39,7 +43,7 @@ procedure fatal(sequence msg)
 -- fatal error 
     puts(2, msg)
     puts(2, '\n')
-    any_key( GetMsgText(277, 0) )
+    maybe_any_key( GetMsgText(277, 0) )
 	abort(1)
 end procedure
 
@@ -131,39 +135,44 @@ procedure InputIL()
 	AnyStatementProfile = misc[3]
 	sample_size = misc[4]
 	gline_number = misc[5]
-	file_name = misc[6]
+	known_files = misc[6]
 	
 	SymTab = fdecompress(0)
 	slist = fdecompress(0)
 	file_include = fdecompress(0)
 	switches = fdecompress(0)
+	include_matrix = fdecompress(0)
 end procedure
 
 sequence cl
 object filename
 
 cl = command_line()
+Argv = cl
+Argc = length( Argv )
 
 -- open our own .exe file
 ifdef UNIX then
-	sequence tmp_fname = e_path_find(cl[1])
-	if sequence(tmp_fname) then
-		current_db = open(tmp_fname, "rb")
+	filename = e_path_find(cl[1])
+	if sequence(filename) then
+		current_db = open(filename, "rb")
 	else
+		filename = cl[1]
 		current_db = -1
 	end if
 elsedef
-	current_db = open(cl[1], "rb") 
+	filename = cl[1]
+	current_db = open(filename, "rb") 
 end ifdef
 
 if current_db = -1 then
-	fatal( GetMsgText(299) )
+	fatal( GetMsgText(299, 1, {filename}) )
 end if
 
 -- Must be less than or equal to actual backend size.
 -- We seek to this position and then search for the marker.
 
-ifdef FREEBSD or OSX or SUNOS then
+ifdef FREEBSD or OSX then
 	constant OUR_SIZE = 150000 -- eub for FreeBSD (not compressed)
 
 elsifdef LINUX then

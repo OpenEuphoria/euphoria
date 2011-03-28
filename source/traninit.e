@@ -1,6 +1,6 @@
 --
 -- (c) Copyright - See License.txt
--- 
+--
 --****
 -- == traninit.e: Initialize the translator
 --
@@ -14,6 +14,28 @@
 -- If the user doesn't select it then it will try all of the environment
 -- variables and use the selected platform to determine which compiler must
 -- be used.
+
+-- If you are translating to another platform, we expect you to take the
+-- C files and compile natively rather than using a cross compiler
+--
+-- From the GNU terminology there are three platforms ##target##, ##host##, and ##build##.
+-- For the translator that will be built using this file there are four:
+--
+-- |= GNU platform name |= Description |= Variable Names |
+-- |##target##   | The newly translated and compiled translator will translate to
+--                 any target platform for this translator... | none|
+-- |##host##     | The platform of the host this translated compiled translator will run on.|
+--                 ##TUNIX##, TLINUX, TWINDOWS, ##T/osname/## |
+-- |##build##    | The platform where the building utilities make, wmake, compiler
+--                 and assembler are run.| ##TUNIX##, TLINUX, TWINDOWS, ##T/osname/##|
+-- |##translate##| The platform where the current translator is run on|platform()|
+--
+-- ifdef OSNAME and platform() is for our translation platform,
+-- TOSNAME is for the target platform.
+-- We assume that the target platform is the same as our build platform.
+-- Thus, no cross compilers.
+
+
 ifdef ETYPE_CHECK then
 	with type_check
 elsedef
@@ -24,7 +46,7 @@ include std/cmdline.e
 include std/error.e
 include std/filesys.e
 include std/get.e
-include std/map.e as m
+include std/map.e
 include std/os.e
 include std/sort.e
 include std/text.e
@@ -49,70 +71,82 @@ end function
 set_extract_options( routine_id("extract_options") )
 
 sequence trans_opt_def = {
-	{ "silent",        0, GetMsgText(177,0), { NO_CASE } },
-	{ "verbose",	   0, GetMsgText(319,0), { NO_CASE } },
-	{ "wat",           0, GetMsgText(178,0), { NO_CASE } },
-	{ "gcc",           0, GetMsgText(180,0), { NO_CASE } },
-	{ "cflags", 	   0, GetMsgText(323,0), { NO_CASE, HAS_PARAMETER, "flags" } },
-	{ "lflags", 	   0, GetMsgText(324,0), { NO_CASE, HAS_PARAMETER, "flags" } },
-	{ "com",           0, GetMsgText(181,0), { NO_CASE, HAS_PARAMETER, "dir" } },
-	{ "con",           0, GetMsgText(182,0), { NO_CASE } },
-	{ "dll",           0, GetMsgText(183,0), { NO_CASE } },
-	{ "so",            0, GetMsgText(184,0), { NO_CASE } },
-	{ "plat",          0, GetMsgText(185,0), { NO_CASE, HAS_PARAMETER, "platform" } },
-	{ "lib",           0, GetMsgText(186,0), { NO_CASE, HAS_PARAMETER, "filename" } },
-	{ "fastfp",        0, GetMsgText(187,0), { NO_CASE } },
-	{ "stack",         0, GetMsgText(188,0), { NO_CASE, HAS_PARAMETER, "size" } },
-	{ "debug",         0, GetMsgText(189,0), { NO_CASE } },
-	{ "maxsize",       0, GetMsgText(190,0), { NO_CASE, HAS_PARAMETER, "size" } },
-	{ "keep",          0, GetMsgText(191,0), { NO_CASE } },
-	{ "makefile",      0, GetMsgText(192,0), { NO_CASE } },
-	{ "makefile-full", 0, GetMsgText(193,0), { NO_CASE } },
-	{ "cmakefile",     0, GetMsgText(194,0), { NO_CASE } },
-	{ "emake",         0, GetMsgText(195,0), { NO_CASE } },
-	{ "nobuild",       0, GetMsgText(196,0), { NO_CASE } },
-	{ "builddir",      0, GetMsgText(197,0), { NO_CASE, HAS_PARAMETER, "dir" } },
-	{ "o",             0, GetMsgText(198,0), { NO_CASE, HAS_PARAMETER, "filename" } }
+	{ "debug",            0, GetMsgText(189,0), { } },
+	{ "plat",             0, GetMsgText(185,0), { HAS_PARAMETER, "platform" } },
+	{ "con",              0, GetMsgText(182,0), { } },
+	{ "dll",              0, GetMsgText(183,0), { } },
+	{ "so",               0, GetMsgText(184,0), { } },
+	{ "o",                0, GetMsgText(198,0), { HAS_PARAMETER, "filename" } },
+	{ "build-dir",        0, GetMsgText(197,0), { HAS_PARAMETER, "dir" } },
+	{ "rc-file",          0, GetMsgText(171,0), { HAS_PARAMETER, "filename" } },
+	{ "wat",              0, GetMsgText(178,0), { } },
+	{ "gcc",              0, GetMsgText(180,0), { } },
+	{ "com",              0, GetMsgText(181,0), { HAS_PARAMETER, "dir" } },
+	{ "cflags", 	      0, GetMsgText(323,0), { HAS_PARAMETER, "flags" } },
+	{ "lflags", 	      0, GetMsgText(324,0), { HAS_PARAMETER, "flags" } },
+	{ "lib",              0, GetMsgText(186,0), { HAS_PARAMETER, "filename" } },
+	{ "stack",            0, GetMsgText(188,0), { HAS_PARAMETER, "size" } },
+	{ "maxsize",          0, GetMsgText(190,0), { HAS_PARAMETER, "size" } },
+	{ "keep",             0, GetMsgText(191,0), { } },
+	{ "nobuild",          0, GetMsgText(196,0), { } },
+	{ "force-build",      0, GetMsgText(326,0), { } },
+	{ "makefile",         0, GetMsgText(193,0), { } },
+	{ "makefile-partial", 0, GetMsgText(192,0), { } },
+	{ "silent",           0, GetMsgText(177,0), { } },
+	{ "verbose",	      0, GetMsgText(319,0), { } },
+	$
 }
 
 add_options( trans_opt_def )
 
-procedure translator_help()
-	ShowMsg(1, 199)
-	show_help( get_common_options(), NO_HELP)
-	ShowMsg(1, 200)
-	show_help(trans_opt_def, NO_HELP)
-end procedure
-
 --**
 -- Process the translator command-line options
 
+include std/console.e
 export procedure transoptions()
-	Argv &= GetDefaultArgs()
+	sequence tranopts = get_options()
+	
+	sequence argv_to_parse = Argv[1..2]
+	if length(Argv) > 2 then
+		argv_to_parse &= merge_parameters(GetDefaultArgs(), Argv[3..$], tranopts)
+	else
+		argv_to_parse &= GetDefaultArgs()
+	end if
+
+	Argv = expand_config_options(argv_to_parse)
 
 	Argv = expand_config_options(Argv)
 	Argc = length(Argv)
-	m:map opts = cmd_parse( get_options(), routine_id("translator_help"), Argv)
+	
+	map:map opts = cmd_parse( tranopts, , Argv)
 
 	handle_common_options(opts)
 
-	sequence opt_keys = m:keys(opts)
+	sequence opt_keys = map:keys(opts)
 	integer option_w = 0
 
 	for idx = 1 to length(opt_keys) do
 		sequence key = opt_keys[idx]
-		object val = m:get(opts, key)
+		object val = map:get(opts, key)
 
 		switch key do
 			case "silent" then
 				silent = TRUE
-			
+
 			case "verbose" then
 				verbose = TRUE
-			
+				
+			case "rc-file" then
+				rc_file[D_NAME] = canonical_path(val)
+				rc_file[D_ALTNAME] = adjust_for_command_line_passing((rc_file[D_NAME]))
+				if not file_exists(rc_file[D_NAME]) then
+					ShowMsg(2, 349, { val })
+					abort(1)
+				end if
+
 			case "cflags" then
 				cflags = val
-			
+
 			case "lflags" then
 				lflags = val
 
@@ -127,7 +161,7 @@ export procedure transoptions()
 
 			case "con" then
 				con_option = TRUE
-				OpDefines &= { "EUC_CON" }
+				OpDefines &= { "CONSOLE" }
 
 			case "dll", "so" then
 				dll_option = TRUE
@@ -135,6 +169,9 @@ export procedure transoptions()
 
 			case "plat" then
 				switch upper(val) do
+					-- please update comments in Makefile.gnu, Makefile.wat, configure and
+					-- configure.bat; and the help section in configure and configure.bat; and
+					-- the message 201 in msgtext.e if you add another platform.
 					case "WIN" then
 						set_host_platform( WIN32 )
 
@@ -147,9 +184,6 @@ export procedure transoptions()
 					case "OSX" then
 						set_host_platform( UOSX )
 
-					case "SUNOS" then
-						set_host_platform( USUNOS )
-
 					case "OPENBSD" then
 						set_host_platform( UOPENBSD )
 
@@ -157,15 +191,16 @@ export procedure transoptions()
 						set_host_platform( UNETBSD )
 
 					case else
-						ShowMsg(2, 201, { val })
+						ShowMsg(2, 201, { val, "WIN, LINUX, FREEBSD, OSX, OPENBSD, NETBSD" })
 						abort(1)
 				end switch
 
 			case "lib" then
-				user_library = val
-
-			case "fastfp" then
-				fastfp = TRUE
+				user_library = canonical_path(val)
+				if not file_exists(user_library) then
+					ShowMsg(2, 348, { val })
+					abort(1)
+				end if
 
 			case "stack" then
 				sequence tmp = value(val)
@@ -191,43 +226,72 @@ export procedure transoptions()
 			case "keep" then
 				keep = TRUE
 
+			case "makefile-partial" then
+				build_system_type = BUILD_MAKEFILE_PARTIAL
+
 			case "makefile" then
-				build_system_type = BUILD_MAKEFILE
-
-			case "makefile-full" then
 				build_system_type = BUILD_MAKEFILE_FULL
-
-			case "cmakefile" then
-				build_system_type = BUILD_CMAKE
-
-			case "emake" then
-				build_system_type = BUILD_EMAKE
 
 			case "nobuild" then
 				build_system_type = BUILD_NONE
 
-			case "builddir" then
+			case "build-dir" then
 				output_dir = val
 				if find(output_dir[$], "/\\") = 0 then
 					output_dir &= '/'
 				end if
 
+			case "force-build" then
+				force_build = 1
+
 			case "o" then
-				exe_name = val
+				exe_name[D_NAME] = val
 		end switch
 	end for
 
-	if length(m:get(opts, "extras")) = 0 then
+	if length(exe_name[D_NAME]) and not absolute_path(exe_name[D_NAME]) then
+		exe_name[D_NAME] = current_dir() & SLASH & exe_name[D_NAME]
+	end if
+	exe_name[D_ALTNAME] = adjust_for_command_line_passing(exe_name[D_NAME])
+	
+	if length(map:get(opts, OPT_EXTRAS)) = 0 then
 		-- No source supplied on command line
 		show_banner()
 		ShowMsg(2, 203)
-		translator_help()
+		-- translator_help()
+		show_help(tranopts,, Argv)
 
 		abort(1)
 	end if
-
+	
 	OpDefines &= { "EUC" }
 
+	if host_platform() = WIN32 and not con_option then
+		OpDefines = append( OpDefines, "GUI" )
+	elsif not find( "CONSOLE", OpDefines ) then
+		OpDefines = append( OpDefines, "CONSOLE" )
+	end if
+
+	ifdef not EUDIS then
+		if build_system_type = BUILD_DIRECT and length(output_dir) = 0 then
+			output_dir = temp_file("." & SLASH, "build-", "")
+			if find(output_dir[$], "/\\") = 0 then
+				output_dir &= '/'
+			end if
+	
+			if not silent then
+				printf(1, "Build directory: %s\n", { abbreviate_path(output_dir) })
+			end if
+			
+			remove_output_dir = 1
+		end if
+	end ifdef
+	
+	if length(rc_file[D_NAME]) then
+		res_file[D_NAME] = canonical_path(output_dir & filebase(rc_file[D_NAME]) & ".res")
+		res_file[D_ALTNAME] = adjust_for_command_line_passing(res_file[D_NAME])
+	end if
+	
 	finalize_command_line(opts)
 end procedure
 
@@ -248,7 +312,7 @@ procedure OpenCFiles()
 	emit_c_output = TRUE
 
 	c_puts("#include \"")
-	c_puts("include" & SLASH & "euphoria.h\"\n")
+	c_puts("include/euphoria.h\"\n")
 
 	c_puts("#include \"main-.h\"\n\n")
 	c_h = open(output_dir & "main-.h", "w")
@@ -292,7 +356,16 @@ procedure InitBackEnd(integer c)
 			end if
 
 			if atom(wat_path) then
-				CompileErr(159)
+				if build_system_type = BUILD_DIRECT then
+					-- We know the building process will fail when the translator starts
+					-- calling the compiler.  So, the process fails here.
+					CompileErr(159)
+				else
+					-- In this case, the user has to call something to compile after the
+					-- translation.  The user may set up the environment after the translation or
+					-- the environment may be on another machine on the network.
+					Warning(159, translator_warning_flag)
+				end if
 			elsif find(' ', wat_path) then
 				Warning( 214, translator_warning_flag)
 			elsif atom(getenv("INCLUDE")) then
@@ -308,10 +381,6 @@ procedure InitBackEnd(integer c)
 			CompileErr(150)
 
 	end switch
-
-	if fastfp then
-		CompileErr(93)
-	end if
 end procedure
 mode:set_init_backend( routine_id("InitBackEnd") )
 

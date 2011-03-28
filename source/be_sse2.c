@@ -1,10 +1,11 @@
+/* Make sure this is included in be_alloc.h */
+
 #include <conio.h>
 #include <malloc.h>
 #include "execute.h"
 #include "reswords.h"
-typedef int symtab_ptr;
-#include "alloc.h"
-#include "sse2.h"
+#include "be_alloc.h"
+
 /* the following are pointers to 4 element arrays of their
  non-vector counter parts.
  For example:
@@ -113,7 +114,7 @@ void load_vector_registers();
 	"movdqa xmm7, [ebx]"\
 	modify [ebx];
 
-/* routine saves the mmx register values intoa variable */
+/* routine saves the mmx register values into a variable */
 void save_vector_registers();
 #pragma aux save_vector_registers = \
 	"mov ebx, vregs_temp"\
@@ -133,6 +134,7 @@ void save_vector_registers();
 	"add ebx, 16"\
 	"movdqa [ebx], xmm7"\
 	modify [ebx];
+
 
 
 /* The following operates on two 4-element arrays of objects and places the result in the array 

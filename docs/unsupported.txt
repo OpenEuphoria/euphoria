@@ -1,0 +1,89 @@
+== Unsupported Features
+
+:<<LEVELTOC level=2 depth=4>>
+
+These are features that have been implemented either partly
+or fully, but are not officially part of the Euphoria Language. They may
+one day be officially sanctioned and thus fully supported, but that is
+not certain. And even if an unsupported feature does make it way into
+the language, it may not be exactly what is documented in this section.
+
+So if you use **any** of these unsupported features then be aware that your code
+might break in future releases.
+
+=== UTF Encoded String Literals
+
+* using word strings hexadecimal (for utf-16) and double word hexadecimal 
+(for utf-32)  e.g.
+
+<eucode>
+u"65 66 67 AE" -- ==> {#65,#66,#67,#AE}
+U"65 66 67 AE" -- ==> {#65,#66,#67,#AE}
+</eucode>
+
+The value of the strings above are equivalent.  
+Spaces seperate values to other elements.  
+When you put too many hex characters together for the kind of string they are
+split up appropriately for you:
+
+<eucode>
+x"6566 67AE"  -- 8-bit  ==> {#65,#66,#67,#AE}
+u"6566 67AE"  -- 16-bit ==> {#6566,#67AE}
+U"6566 67AE"  -- 32-bit ==> {#6566,#67AE}
+U"6566_67AE"  -- 32-bit ==> {#656667AE} 
+              --            Uses '_' to aid readability for long values.
+U"656667AE"   -- 32-bit ==> {#656667AE}
+</eucode>
+
+String literals encoded as ASCII, UTF-8, UTF-16, UTF-32 or really any encoding
+that uses elements that are 32-bits long or shorter can be built with U"" 
+syntax.
+Literals of encodings that have 16-bit long or shorter or 8-bit long or shorter
+elements can be built using u"" syntax or x"" syntax  respectively.  
+Use delimiters, such as spaces and underscores, to break the ambiguity and
+improve readability. 
+
+The following is code with a vaild UTF8 encoded string:
+
+<eucode>
+sequence utf8_val = x"3e 65" -- This is ">e"
+</eucode>
+
+**However,** it is up to the coder to know the correct code-point values for
+these to make any sense in the encoding the coder is using. That is to say,
+it is possible for the coder to use the x"", u"", and U"" syntax to create
+literals that are **not valid** UTF strings.
+
+!!
+!! WHERE? The link is invalid, I do not see any in the manual
+!!
+!! There are routines for working with Unicode strings and for
+!! validating, converting and working with Unicode strings. See
+!! [[:Unicode]].
+!!
+
+Hexadecimal strings can be used to encode UTF-8 strings, even though the 
+resulting string does not have to be a valid UTF-8 string. 
+
+**The rules for unicode strings are...**
+
+# they begin with the pair ##u"## for UTF-16 and ##U"## for UTF-32 strings, and
+ end with a double-quote (##"##) character
+# they can only contain hexadecimal digits (0-9 A-F a-f), and space, underscore,
+ tab, newline, carriage-return. Anything else is invalid.
+# an underscore is simply ignored, as if it was never there. It is used to aid
+ readability.
+# For UTF-16 strings, each set of four contiguous hex digits represent a single 
+sequence element with a value from 0x0000 to 0xFFFF
+# For UTF-32 strings, each set of eight contiguous hex digits represent a single
+sequence element with a value from 0x0000 to 0xFFFFFFFF
+# they can span multiple lines
+# The non-hex digits are treated as punctuation and used to delimit individual 
+  values.
+# The resulting string does not have to be a valid UTF-16/UTF-32 string.
+
+<eucode>
+u"1 2 34 5678AbC" == {0x0001, 0x0002, 0x0034, 0x5678, 0x0ABC}
+U"1 2 34 5678AbC" == {0x0000_0001, 0x0000_0002, 0x0000_0034, 0x05678ABC}
+U"1 2 34 5_678_AbC" == {0x0000_0001, 0x0000_0002, 0x0000_0034, 0x0567_8ABC}
+</eucode>

@@ -1,5 +1,0 @@
-SubDir TOP demo ;
-
-EuMain bench : [ FDirName $(SUBDIR) bench.ex ] ;
-InstallBin bin : bench ;
-

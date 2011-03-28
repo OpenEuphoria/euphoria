@@ -83,10 +83,6 @@ end if
 with type_check
 
 puts(1, "\n\t\tUsing Debug Version of machine.e\n")
-atom t
-t = time()
-while time() < t + 3 do
-end while
 
 constant OK = 1, BAD = 0
 constant M_ALLOC = 16,
@@ -211,27 +207,8 @@ end function
 
 procedure die(sequence msg)
 -- Terminate with a message.
--- makes warning beeps first so you can see what's happening on the screen
     atom t
-    
-    for i = 1 to 7 do
-	machine_proc(M_SOUND, 1000)
-	t = time()
-	while time() < t + .1 do
-	end while
-	machine_proc(M_SOUND, 0)
-	t = time()
-	while time() < t + .1 do
-	end while
-    end for
-    puts(1, "\n *** Press Enter *** ")
-    if getc(0) then
-    end if
-    if machine_func(5, -1) then -- graphics_mode
-    end if
     puts(1, "\n\n" & msg & "\n\n")
-    if getc(0) then
-    end if
     ? 1/0 -- force traceback
 end procedure
 
@@ -246,7 +223,7 @@ end function
 
 without warning
 -- override "peek" with debug peek
-global function peek(object x)
+override function peek(object x)
 -- safe version of peek 
     integer len
     atom a
@@ -270,7 +247,7 @@ function original_peek4s(object x)
 end function
 
 -- override "peek4s" with debug peek4s
-global function peek4s(object x)
+override function peek4s(object x)
 -- safe version of peek4s 
     integer len
     atom a
@@ -294,7 +271,7 @@ function original_peek4u(object x)
 end function
 
 -- override "peek4u" with debug peek4u
-global function peek4u(object x)
+override function peek4u(object x)
 -- safe version of peek4u 
     integer len
     atom a
@@ -317,7 +294,7 @@ procedure original_poke(atom a, object v)
     poke(a, v)
 end procedure
 
-global procedure poke(atom a, object v)
+override procedure poke(atom a, object v)
 -- safe version of poke 
     integer len
     
@@ -337,7 +314,7 @@ procedure original_poke4(atom a, object v)
     poke4(a, v)
 end procedure
 
-global procedure poke4(atom a, object v)
+override procedure poke4(atom a, object v)
 -- safe version of poke4 
     integer len
     
@@ -575,10 +552,7 @@ end function
 
 global function allocate_low(positive_int n)
 -- allocate memory block and add it to safe list
-    atom a
-    
-    a = machine_func(M_ALLOC_LOW, n+BORDER_SPACE*2)
-    return prepare_block(a, n)
+    return allocate( n )
 end function
 
 global procedure free(machine_addr a)
@@ -608,34 +582,9 @@ global procedure free(machine_addr a)
     die("ATTEMPT TO FREE USING AN ILLEGAL ADDRESS!")
 end procedure
 
-global procedure free_low(low_machine_addr a)
+global procedure free_low(machine_addr a)
 -- free low address a - make sure it was allocated
-    integer n
-    
-    if a > 1024*1024 then
-	die("TRYING TO FREE A HIGH ADDRESS USING free_low!")
-    end if
-    for i = 1 to length(safe_address_list) do
-	if safe_address_list[i][1] = a then
-	    -- check pre and post block areas
-	    if safe_address_list[i][3] <= 0 then
-		die("ATTEMPT TO FREE A BLOCK THAT WAS NOT ALLOCATED!")
-	    end if
-	    n = safe_address_list[i][2]
-	    if not equal(leader, original_peek({a-BORDER_SPACE, BORDER_SPACE})) then
-		show_block(safe_address_list[i])
-	    elsif not equal(trailer, original_peek({a+n, BORDER_SPACE})) then
-		show_block(safe_address_list[i])
-	    end if          
-	    machine_proc(M_FREE_LOW, a-BORDER_SPACE)
-	    -- remove it from list
-	    safe_address_list = 
-			safe_address_list[1..i-1] &
-			safe_address_list[i+1..$]
-	    return
-	end if
-    end for
-    die("ATTEMPT TO FREE USING AN ILLEGAL ADDRESS!")
+    free( a )
 end procedure
 
 global constant REG_LIST_SIZE = 10
@@ -644,18 +593,6 @@ type register_list(sequence r)
 -- a list of register values
     return length(r) = REG_LIST_SIZE
 end type
-
-global function dos_interrupt(integer int_num, register_list input_regs)
--- call the DOS operating system via software interrupt int_num, using the
--- register values in input_regs. A similar register_list is returned.
--- It contains the register values after the interrupt.
-    object r
-    r = machine_func(M_INTERRUPT, {int_num, input_regs})
-    if check_calls then
-	check_all_blocks()
-    end if
-    return r
-end function
 
 
 ----------- the rest is identical to machine.e ------------------------------
