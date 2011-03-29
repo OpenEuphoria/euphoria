@@ -223,7 +223,7 @@ export function load_euphoria_config( sequence file )
 		file &= "eu.cfg"
 	end if
 	
-	conf_path = canonical_path( file,,1 )
+	conf_path = canonical_path( file,,CORRECT )
 	
 	-- Prevent recursive configuration loads.
 	if find(conf_path, seen_conf) != 0 then
