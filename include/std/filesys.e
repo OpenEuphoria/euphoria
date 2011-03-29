@@ -319,7 +319,7 @@ public function dir(sequence name)
 		end if
 
 		-- Get directory contents
-		dir_data = machine_func(M_DIR, the_dir)
+		dir_data = dir( the_dir )
 
 		-- Did an error occur?
 		if atom(dir_data) then
@@ -1609,7 +1609,7 @@ public function canonical_path(sequence path_in, integer directory_given = 0, ca
 	
 	for i = length(sl)-1 to 1 by -1 label "partloop" do
 		sequence part = lPath[1..sl[i]-1]
-		object list = machine_func(M_DIR, part & SLASH)
+		object list = dir( part & SLASH )
 		sequence supplied_name = lPath[sl[i]+1..sl[i+1]-1]
 		
 		if atom(list) then
