@@ -1257,11 +1257,11 @@ static object Dir(object x)
 			obj_ptr[7] = date_time->tm_hour;
 			obj_ptr[8] = date_time->tm_min;
 			obj_ptr[9] = date_time->tm_sec;
-
-			obj_ptr[10]= 0; // Millisecs not implemented
-			obj_ptr[11]= 0; // Alternate name not used.
+			
 		}
-
+		obj_ptr[10]= 0; // Millisecs not implemented
+		obj_ptr[11]= 0; // Alternate name not used.
+		
 		/* append row to overall result (ref count 1)*/
 		Append((object_ptr)&result, (object)result, MAKE_SEQ(row));
 		if (dirp == NULL)
