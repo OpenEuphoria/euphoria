@@ -262,7 +262,7 @@ MEMFLAG = $(MEMFLAG) /dINT_CODES
 !endif
 
 !ifndef DEBUG
-DEBUG=0
+DEBUG=
 !endif
 
 !ifeq DEBUG 1
@@ -277,7 +277,7 @@ LIBRARY_NAME=eu
 !endif
 
 !ifndef EXTRA_STATS
-EXTRA_STATS=0
+EXTRA_STATS=
 !endif
 
 !ifeq EXTRA_STATS 1
@@ -285,7 +285,7 @@ EXTRASTATSFLAG=/dEXTRA_STATS
 !endif
 
 !ifndef EXTRA_CHECK
-EXTRA_CHECK = 0
+EXTRA_CHECK=
 !endif
 
 !ifeq EXTRA_CHECK 1
