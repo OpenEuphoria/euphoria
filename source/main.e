@@ -89,7 +89,7 @@ function GetSourceName()
 			return -1
 		end if
 	end if
-	known_files[$] = canonical_path(real_name,,CORREC)
+	known_files[$] = canonical_path(real_name,,CORRECT)
 	known_files_hash &= hash(known_files[$], stdhash:HSIEH32)
 	finished_files &= 0
 	file_include_depend = append( file_include_depend, { length( known_files ) } )
