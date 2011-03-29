@@ -261,6 +261,10 @@ BUILDDIR=.
 MEMFLAG = $(MEMFLAG) /dINT_CODES
 !endif
 
+!ifndef DEBUG
+DEBUG=0
+!endif
+
 !ifeq DEBUG 1
 DEBUGFLAG = /d2 /dEDEBUG 
 #DEBUGFLAG = /d2 /dEDEBUG /dDEBUG_OPCODE_TRACE
@@ -272,8 +276,16 @@ LIBRARY_NAME=eudbg
 LIBRARY_NAME=eu
 !endif
 
+!ifndef EXTRA_STATS
+EXTRA_STATS=0
+!endif
+
 !ifeq EXTRA_STATS 1
 EXTRASTATSFLAG=/dEXTRA_STATS
+!endif
+
+!ifndef EXTRA_CHECK
+EXTRA_CHECK = 0
 !endif
 
 !ifeq EXTRA_CHECK 1
@@ -419,10 +431,10 @@ runtime: .SYMBOLIC
 backendflag: .SYMBOLIC
 	set EBACKEND=/dBACKEND
 
+!ifdef OBJDIR
+
 $(LIBTARGET) : $(BUILDDIR)\$(OBJDIR)\back $(EU_LIB_OBJECTS)
 	wlib -q $(LIBTARGET) $(EU_LIB_OBJECTS)
-
-!ifdef OBJDIR
 
 objlist : .SYMBOLIC
 	wmake -h $(VARS) OS=$(OS) EU_NAME_OBJECT=$(EU_NAME_OBJECT) OBJDIR=$(OBJDIR) $(BUILDDIR)\$(OBJDIR).wat EX=$(EUBIN)\eui.exe
@@ -561,8 +573,10 @@ $(BUILDDIR)\eudoc.exe: $(TRUNKDIR)\source\eudoc\eudoc.ex
 $(BUILDDIR)\creole.exe: $(TRUNKDIR)\source\creole\creole.ex
 	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
 
+!ifdef OBJDIR
 $(BUILDDIR)\$(OBJDIR)\back\coverage.h : $(BUILDDIR)\$(OBJDIR)\main-.c
 	$(EXE) -i $(TRUNKDIR)\include coverage.ex $(BUILDDIR)\$(OBJDIR)
+!endif
 
 $(BUILDDIR)\intobj\back\be_execute.obj : $(BUILDDIR)\intobj\back\coverage.h
 $(BUILDDIR)\intobj\back\be_runtime.obj : $(BUILDDIR)\intobj\back\coverage.h
@@ -573,18 +587,21 @@ $(BUILDDIR)\transobj\back\be_runtime.obj : $(BUILDDIR)\transobj\back\coverage.h
 $(BUILDDIR)\backobj\back\be_execute.obj : $(BUILDDIR)\backobj\back\coverage.h
 $(BUILDDIR)\backobj\back\be_runtime.obj : $(BUILDDIR)\backobj\back\coverage.h
 
+!ifdef OBJDIR
+
 $(BUILDDIR)\$(OBJDIR)\back\be_machine.obj : $(BUILDDIR)\$(OBJDIR)\back\be_ver.h
+
+!endif
+
 
 $(BUILDDIR)\mkver.exe: mkver.c
 	owcc -o $@ $<
 
+!ifdef OBJDIR
 update-version-cache : .SYMBOLIC $(BUILDDIR)\mkver.exe
 	$(BUILDDIR)\mkver.exe $(HG) $(BUILDDIR)\ver.cache $(BUILDDIR)\$(OBJDIR)\back\be_ver.h
 
-$(BUILDDIR)\ver.cache : $(BUILDDIR)\mkver.exe
-	$(BUILDDIR)\mkver.exe $(HG) $(BUILDDIR)\ver.cache $(BUILDDIR)\$(OBJDIR)\back\be_ver.h
-
-$(BUILDDIR)\$(OBJDIR)\back\be_ver.h : $(BUILDDIR)\ver.cache $(BUILDDIR)\mkver.exe
+$(BUILDDIR)\$(OBJDIR)\back\be_ver.h $(BUILDDIR)\ver.cache : $(BUILDDIR)\mkver.exe
 	$(BUILDDIR)\mkver.exe $(HG) $(BUILDDIR)\ver.cache $(BUILDDIR)\$(OBJDIR)\back\be_ver.h BE_VER_H
 
 $(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(CONFIG) eui.rc version_info.rc
@@ -598,6 +615,7 @@ $(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_COR
 	wrc -q -ad eui.rc $(BUILDDIR)\eui.exe
 	wlink $(DEBUGLINK) SYS nt_win op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\euiw.lbc name $(BUILDDIR)\euiw.exe
 	wrc -q -ad euiw.rc $(BUILDDIR)\euiw.exe
+!endif
 
 interpreter : .SYMBOLIC
 	wmake -h $(BUILDDIR)\intobj\main-.c EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=intobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
@@ -640,7 +658,8 @@ installbin : .SYMBOLIC
 	@if exist $(BUILDDIR)\eub.exe copy $(BUILDDIR)\eub.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\eu.lib copy $(BUILDDIR)\eu.lib $(PREFIX)\bin\	
 	@if exist $(BUILDDIR)\eudbg.lib copy $(BUILDDIR)\eudbg.lib $(PREFIX)\bin\	
-	
+
+!ifdef OBJDIR	
 $(BUILDDIR)\euc.exe : $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	$(RM) $(BUILDDIR)\$(OBJDIR)\euc.lbc
 	@%create $(BUILDDIR)\$(OBJDIR)\euc.lbc
@@ -650,6 +669,7 @@ $(BUILDDIR)\euc.exe : $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_TRAN
 	@for %i in ($(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\euc.lbc file %i
 	wlink $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\euc.lbc name $(BUILDDIR)\euc.exe
 	wrc -q -ad euc.rc $(BUILDDIR)\euc.exe
+!endif
 
 translator : .SYMBOLIC
     @echo ------- TRANSLATOR -----------
@@ -657,6 +677,7 @@ translator : .SYMBOLIC
 	wmake -h objlist OBJDIR=transobj EU_NAME_OBJECT=EU_TRANSLATOR_OBJECTS $(VARS)
 	wmake -h $(BUILDDIR)\euc.exe EX=$(EUBIN)\eui.exe EU_TARGET=ec. OBJDIR=transobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
+!ifdef OBJDIR
 $(BUILDDIR)\eubw.exe :  $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
     @echo ------- BACKEND WIN -----------
 	@%create $(BUILDDIR)\$(OBJDIR)\eub.lbc
@@ -668,6 +689,8 @@ $(BUILDDIR)\eubw.exe :  $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_BACKEND_RUNNER_OBJECT
 	wrc -q -ad eub.rc $(BUILDDIR)\eub.exe
 	wlink $(DEBUGLINK) SYS nt_win op maxe=2 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\eub.lbc name $(BUILDDIR)\eubw.exe
 	wrc -q -ad eubw.rc $(BUILDDIR)\eubw.exe
+
+!endif
 
 backend : .SYMBOLIC backendflag
     @echo ------- BACKEND -----------
@@ -703,14 +726,17 @@ $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex  $(BUILDDIR)\$(OBJDIR)\back
 	$(EC)  $(TRANSDEBUG) -nobuild $(TRANS_CC_FLAG) -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) -c $(TRUNKDIR)\source\eu.cfg $(TRUNKDIR)\source\$(EU_TARGET)ex
 	cd $(TRUNKDIR)\source
 !else
-$(BUILDDIR)\$(OBJDIR)\main-.c $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : .EXISTSONLY
-	@echo Error: attempt to create main-.c without OBJDIR defined.
-!endif
-!else	
-$(BUILDDIR)\$(OBJDIR)\main-.c $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : .EXISTSONLY
+# OBJDIR doesn't exist
+$(BUILDDIR)\\main-.c $(BUILDDIR)\\$(EU_TARGET)c : .EXISTSONLY
 	@echo Error: attempt to create main-.c without OBJDIR defined.
 !endif
 !else
+#EU_TARGET doesn't exist
+$(BUILDDIR)\\main-.c $(BUILDDIR)\\c : .EXISTSONLY
+	@echo Error: attempt to create main-.c without EU_TARGET defined.
+!endif
+!else
+#No EUPHORIA installed 
 $(BUILDDIR)\$(OBJDIR)\main-.c $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : .EXISTSONLY
 	@echo *****************************************************************
 	@echo If you have EUPHORIA installed you'll need to run configure again.
@@ -719,6 +745,7 @@ $(BUILDDIR)\$(OBJDIR)\main-.c $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : .EXISTSONLY
 
 !endif
 
+!ifdef OBJDIR
 .c: $(BUILDDIR)\$(OBJDIR);$(BUILDDIR)\$(OBJDIR)\back
 .c.obj: 
 	$(CC) $(FE_FLAGS) $(BE_FLAGS) -fr=$^@.err /I$(BUILDDIR)\$(OBJDIR)\back $[@ -fo=$^@
@@ -751,6 +778,9 @@ $(BUILDDIR)\$(OBJDIR)\back\be_symtab.obj : be_symtab.c *.h $(CONFIG)
 $(BUILDDIR)\$(OBJDIR)\back\be_w.obj : be_w.c *.h $(CONFIG) 
 $(BUILDDIR)\$(OBJDIR)\back\be_socket.obj : be_socket.c *.h $(CONFIG)
 $(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj : be_pcre.c *.h $(CONFIG) 
+
+# end of OBJDIR exists
+!endif
 
 !ifdef PCRE_OBJECTS	
 $(PCRE_OBJECTS) : pcre/*.c pcre/pcre.h.windows pcre/config.h.windows
