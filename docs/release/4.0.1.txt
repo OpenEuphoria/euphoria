@@ -58,6 +58,9 @@
   will use the conventions of the OS for line breaks. 
 * [[ticket:639]] In place RHS slice (on sequence with reference count 1), followed by in 
   place ##[[:splice]]## (on sequence still with reference count 1) works correctly
+* [[ticket:640]] Fix ##[[:dir]]## when a file cannot be stat()ed
+* [[ticket:641]] Use ##[[:dir]]## instead of just calling raw machine_func in 
+  ##[[:canonical_path]]## and ##[[:abbreviate_path]]##
 
 === Enhancements
 
