@@ -1599,66 +1599,71 @@ public function canonical_path(sequence path_in, integer directory_given = 0, ca
 		lPath = lDrive & lPath
 	end ifdef
 	
-	sequence sl = find_all(SLASH,lPath) -- split apart lPath
-	integer short_name = and_bits(TO_SHORT,case_flags)=TO_SHORT
-	integer correct_name = and_bits(case_flags,CORRECT)=CORRECT
-	integer lower_name = and_bits(TO_LOWER,case_flags)=TO_LOWER
-	if lPath[$] != SLASH then
-		sl = sl & {length(lPath)+1}
-	end if
+	if case_flags = TO_LOWER then
+		lPath = lower( lPath )
 	
-	for i = length(sl)-1 to 1 by -1 label "partloop" do
-		sequence part = lPath[1..sl[i]-1]
-		object list = dir( part & SLASH )
-		sequence supplied_name = lPath[sl[i]+1..sl[i+1]-1]
+	elsif case_flags != AS_IS then
+		sequence sl = find_all(SLASH,lPath) -- split apart lPath
+		integer short_name = and_bits(TO_SHORT,case_flags)=TO_SHORT
+		integer correct_name = and_bits(case_flags,CORRECT)=CORRECT
+		integer lower_name = and_bits(TO_LOWER,case_flags)=TO_LOWER
+		if lPath[$] != SLASH then
+			sl = sl & {length(lPath)+1}
+		end if
 		
-		if atom(list) then
-			if lower_name then
-				lPath = part & lower(lPath[sl[i]..$])
-			end if
-			continue
-		end if
+		for i = length(sl)-1 to 1 by -1 label "partloop" do
+			sequence part = lPath[1..sl[i]-1]
+			object list = dir( part & SLASH )
+			sequence supplied_name = lPath[sl[i]+1..sl[i+1]-1]
 			
-		-- check for a case sensitive match
-		for j = 1 to length(list) do
-			sequence read_name = list[j][D_NAME]
-			if equal(read_name, supplied_name) then
-				if short_name and sequence(list[j][D_ALTNAME]) then
-					lPath = lPath[1..sl[i]] & list[j][D_ALTNAME] & lPath[sl[i+1]..$]
-					sl[$] = length(lPath)+1
+			if atom(list) then
+				if lower_name then
+					lPath = part & lower(lPath[sl[i]..$])
 				end if
-				continue "partloop"
+				continue
 			end if
+				
+			-- check for a case sensitive match
+			for j = 1 to length(list) do
+				sequence read_name = list[j][D_NAME]
+				if equal(read_name, supplied_name) then
+					if short_name and sequence(list[j][D_ALTNAME]) then
+						lPath = lPath[1..sl[i]] & list[j][D_ALTNAME] & lPath[sl[i+1]..$]
+						sl[$] = length(lPath)+1
+					end if
+					continue "partloop"
+				end if
+			end for
+				
+			-- the only way we get in this block is when the entity above is on
+			-- a case-insensitive file system.  
+			for j = 1 to length(list) do
+				sequence read_name = list[j][D_NAME]
+				if equal(lower(read_name), lower(supplied_name)) then
+					if short_name and sequence(list[j][D_ALTNAME]) then
+						lPath = lPath[1..sl[i]] & list[j][D_ALTNAME] & lPath[sl[i+1]..$]
+						sl[$] = length(lPath)+1
+					end if
+					if correct_name then
+						lPath = lPath[1..sl[i]] & read_name & lPath[sl[i+1]..$]
+					end if
+					continue "partloop"
+				end if
+			end for
+				
+			-- Entitiy doesn't exist.  Change the remaining to lowercase
+			-- if requested with case_flags.
+			if and_bits(TO_LOWER,case_flags) then
+				lPath = lPath[1..sl[i]-1] & lower(lPath[sl[i]..$])
+			end if
+			exit
 		end for
-			
-		-- the only way we get in this block is when the entity above is on
-		-- a case-insensitive file system.  
-		for j = 1 to length(list) do
-			sequence read_name = list[j][D_NAME]
-			if equal(lower(read_name), lower(supplied_name)) then
-				if short_name and sequence(list[j][D_ALTNAME]) then
-					lPath = lPath[1..sl[i]] & list[j][D_ALTNAME] & lPath[sl[i+1]..$]
-					sl[$] = length(lPath)+1
-				end if
-				if correct_name then
-					lPath = lPath[1..sl[i]] & read_name & lPath[sl[i+1]..$]
-				end if
-				continue "partloop"
-			end if
-		end for
-			
-		-- Entitiy doesn't exist.  Change the remaining to lowercase
-		-- if requested with case_flags.
-		if and_bits(TO_LOWER,case_flags) then
-			lPath = lPath[1..sl[i]-1] & lower(lPath[sl[i]..$])
+		if and_bits(case_flags,or_bits(CORRECT,TO_LOWER))=TO_LOWER and length(lPath) then
+			lPath = lower(lPath)
 		end if
-		exit
-	end for
-	if and_bits(case_flags,or_bits(CORRECT,TO_LOWER))=TO_LOWER and length(lPath) then
-		lPath = lower(lPath)
-	end if
-	if correct_name and length(lPath) then
-		lPath[1] = upper(lPath[1])
+		if correct_name and length(lPath) then
+			lPath[1] = upper(lPath[1])
+		end if
 	end if
 	
 	return lPath
