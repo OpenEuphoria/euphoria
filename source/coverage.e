@@ -194,9 +194,10 @@ export procedure add_coverage( sequence cover_this )
 				end if
 			
 			elsif regex:has_match( eu_file, files[i][D_NAME] ) then
-				path = canonical_path( cover_this & SLASH & files[i][D_NAME],, CORRECT )
-				if not find( path, covered_files ) and not excluded( path ) then
-					new_covered_path( path )
+				-- this is canonical
+				sequence subpath = path & SLASH & files[i][D_NAME]
+				if not find( subpath, covered_files ) and not excluded( subpath ) then
+					new_covered_path( subpath )
 				end if
 			end if
 		end for
