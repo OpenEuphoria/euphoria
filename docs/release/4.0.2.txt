@@ -3,4 +3,4 @@
 === Bug Fixes
 
 * Fixed ##[[:canonical_path]]## performance issues introduced in 4.0.1.
-* Fixed ##[[:dir]]## can now handle multiple wildcards on non-Windows platforms
+* [[ticket:646]] ##[[:dir]]## can now handle multiple wildcards on non-Windows platforms
