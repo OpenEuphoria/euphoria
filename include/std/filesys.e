@@ -194,6 +194,20 @@ public enum
 
 public constant W_BAD_PATH = -1 -- error code
 
+function find_first_wildcard( sequence name, integer from = 1 )
+	integer asterisk_at = eu:find('*', name, from)
+	integer question_at = eu:find('?', name, from)
+	integer first_wildcard_at = asterisk_at
+	if asterisk_at or question_at then
+		-- Empty if so that we can short circuit if * is found, otherwise
+		-- we would have to run a search for * and ? even if * is found.
+		if question_at and question_at < asterisk_at then
+			first_wildcard_at = question_at
+		end if
+	end if
+	return first_wildcard_at
+end function
+
 --**
 -- Return directory information for the specified file or directory.
 --
@@ -295,40 +309,58 @@ public function dir(sequence name)
 	ifdef WINDOWS then
 		return machine_func(M_DIR, name)
 	elsedef
-		object dir_data, data, the_name, the_dir
+		object dir_data, data, the_name, the_dir, the_suffix
 		integer idx
 
 		-- Did the user give a wildcard? If not, just return the standard dir.
-		if eu:find('*', name) > 0 or eu:find('?', name) > 0 then
-			-- Empty if so that we can short circuit if * is found, otherwise
-			-- we would have to run a search for * and ? even if * is found.
-		else
+		integer first_wildcard_at = find_first_wildcard( name )
+		if first_wildcard_at = 0 then
 			return machine_func(M_DIR, name)
 		end if
 
 		-- Is there a path involved?
-		if eu:find(SLASH, name) = 0 then
+		if first_wildcard_at then
+			idx = search:rfind(SLASH, name, first_wildcard_at )
+		else
+			idx = search:rfind(SLASH, name )
+		end if
+		
+		if idx = 0 then
 			the_dir = "."
 			the_name = name
 		else
 			-- Find a SLASH character and break the name there resulting in
 			-- a directory and file name.
-			idx = search:rfind(SLASH, name)
 			the_dir = name[1 .. idx]
-			the_name = name[idx+1 .. $]
+			integer next_slash = 0
+			if first_wildcard_at then
+				next_slash = eu:find( SLASH, name, first_wildcard_at )
+			end if
+			
+			if next_slash then
+				first_wildcard_at = find_first_wildcard( name, next_slash )
+				if first_wildcard_at then
+					the_name = name[idx+1..next_slash-1]
+					the_suffix = name[next_slash..$]
+				end if
+			else
+				the_name = name[idx+1 .. $]
+				the_suffix = 0
+			end if
+			
 		end if
 
 		-- Get directory contents
 		dir_data = dir( the_dir )
-
+		
 		-- Did an error occur?
 		if atom(dir_data) then
 			return dir_data
 		end if
-
-		data = {}
+		
 		-- Filter the directory contents returning only those items
 		-- matching name.
+		data = {}
 		for i = 1 to length(dir_data) do
 			if wildcard:is_match(the_name, dir_data[i][1]) then
 					data = append(data, dir_data[i])
@@ -339,6 +371,22 @@ public function dir(sequence name)
 			-- no matches found, act like it doesn't exist
 			return -1
 		end if
+		
+		if sequence( the_suffix ) then
+			sequence wild_data = {}
+			for i = 1 to length( dir_data ) do
+				sequence interim_dir = the_dir & dir_data[i][D_NAME] & SLASH
+				object dir_results = dir( interim_dir & the_suffix )
+				if sequence( dir_results ) then
+					for j = 1 to length( dir_results ) do
+						dir_results[j][D_NAME] = interim_dir & dir_results[j][D_NAME]
+					end for
+					wild_data &= dir_results
+				end if
+			end for
+			return wild_data
+		end if
+		
 		return data
 	end ifdef
 end function
