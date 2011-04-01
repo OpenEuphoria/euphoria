@@ -341,7 +341,14 @@ code-page-db : $(BUILDDIR)\ecp.dat .SYMBOLIC
 $(BUILDDIR)\ecp.dat : $(TRUNKDIR)\bin\buildcpdb.ex $(TRUNKDIR)\source\codepage 
 	$(BUILDDIR)\eui -i $(TRUNKDIR)\include $(TRUNKDIR)\bin\buildcpdb.ex -p$(TRUNKDIR)\source\codepage -o$(BUILDDIR)
 
-BUILD_DIRS=$(BUILDDIR)\intobj $(BUILDDIR)\transobj $(BUILDDIR)\WINlibobj $(BUILDDIR)\WINlibobj1 $(BUILDDIR)\backobj $(BUILDDIR)\eutestdr
+BUILD_DIRS= &
+	$(BUILDDIR)\intobj &
+	$(BUILDDIR)\transobj &
+	$(BUILDDIR)\WINlibobj &
+	$(BUILDDIR)\WINlibobj1 &
+	$(BUILDDIR)\backobj &
+	$(BUILDDIR)\eutestdr &
+	$(BUILDDIR)\include
 
 distclean : .SYMBOLIC clean
 	-$(RM) $(BUILDDIR)\*.wat
@@ -589,7 +596,7 @@ $(BUILDDIR)\backobj\back\be_runtime.obj : $(BUILDDIR)\backobj\back\coverage.h
 
 !ifdef OBJDIR
 
-$(BUILDDIR)\$(OBJDIR)\back\be_machine.obj : $(BUILDDIR)\$(OBJDIR)\back\be_ver.h $(BUILDDIR)\be_ver.h
+$(BUILDDIR)\$(OBJDIR)\back\be_machine.obj : $(BUILDDIR)\include\be_ver.h
 
 !endif
 
@@ -597,17 +604,12 @@ $(BUILDDIR)\$(OBJDIR)\back\be_machine.obj : $(BUILDDIR)\$(OBJDIR)\back\be_ver.h 
 $(BUILDDIR)\mkver.exe: mkver.c
 	owcc -o $@ $<
 
-update-version-cache : .SYMBOLIC $(BUILDDIR)\be_ver.h
+update-version-cache : .SYMBOLIC $(BUILDDIR)\include\be_ver.h
 
-(BUILDDIR)\be_ver.h $(BUILDDIR)\ver.cache : $(BUILDDIR)\mkver.exe .always .recheck
-	$(BUILDDIR)\mkver.exe $(HG) $(BUILDDIR)\ver.cache $(BUILDDIR)\be_ver.h
+$(BUILDDIR)\include\be_ver.h $(BUILDDIR)\ver.cache : $(BUILDDIR)\mkver.exe .always .recheck
+	$(BUILDDIR)\mkver.exe $(HG) $(BUILDDIR)\ver.cache $(BUILDDIR)\include\be_ver.h
 
 !ifdef OBJDIR
-
-$(BUILDDIR)\$(OBJDIR)\back\be_ver.h : $(BUILDDIR)\$(OBJDIR)
-	-del $(BUILDDIR)\$(OBJDIR)\back\be_ver.h
-	echo $#include "..\..\be_ver.h" > $(BUILDDIR)\$(OBJDIR)\back\be_ver.h
-
 
 $(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(CONFIG) eui.rc version_info.rc
 	@%create $(BUILDDIR)\$(OBJDIR)\euiw.lbc
@@ -765,7 +767,7 @@ $(BUILDDIR)\$(OBJDIR)\main-.c $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : .EXISTSONLY
 !ifdef OBJDIR
 .c: $(BUILDDIR)\$(OBJDIR);$(BUILDDIR)\$(OBJDIR)\back
 .c.obj: 
-	$(CC) $(FE_FLAGS) $(BE_FLAGS) -fr=$^@.err /I$(BUILDDIR)\$(OBJDIR)\back $[@ -fo=$^@
+	$(CC) $(FE_FLAGS) $(BE_FLAGS) -fr=$^@.err /I$(BUILDDIR)\$(OBJDIR)\back /I$(BUILDDIR)\include $[@ -fo=$^@
 	
 $(BUILDDIR)\$(OBJDIR)\back\be_inline.obj : ./be_inline.c $(BUILDDIR)\$(OBJDIR)\back
 	$(CC) /oe=40 $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
