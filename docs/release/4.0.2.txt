@@ -6,3 +6,5 @@
 * [[ticket:646]] ##[[:dir]]## can now handle multiple wildcards on non-Windows platforms
 * [[ticket:647]] The version detection system has been improved so that all binaries use
   the same C header file, which should prevent the potential of mismatched versions.
+* [[ticket:644]] ##[[:canonical_path]]## leaves alone path components (and anything after them)
+  with wildcards.

@@ -1589,6 +1589,21 @@ public function canonical_path(sequence path_in, integer directory_given = 0, ca
 		end if
 	end ifdef
 
+	sequence wildcard_suffix
+	integer first_wildcard_at = find_first_wildcard( lPath )
+	if first_wildcard_at then
+		integer last_slash = search:rfind( SLASH, lPath, first_wildcard_at )
+		if last_slash then
+			wildcard_suffix = lPath[last_slash..$]
+			lPath = remove( lPath, last_slash, length( lPath ) )
+		else
+			wildcard_suffix = lPath
+			lPath = ""
+		end if
+	else
+		wildcard_suffix = ""
+	end if
+	
 	-- If a relative path, prepend the PWD of the appropriate drive.
 	if ((length(lPath) = 0) or not find(lPath[1], "/\\")) then
 		ifdef UNIX then
@@ -1714,7 +1729,7 @@ public function canonical_path(sequence path_in, integer directory_given = 0, ca
 		end if
 	end if
 	
-	return lPath
+	return lPath & wildcard_suffix
 end function
 
 
