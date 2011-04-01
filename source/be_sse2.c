@@ -1,11 +1,11 @@
 /* Make sure this is included in be_alloc.h */
-
+#define NOVALUE ((long)0xbfffffffL)
 #include <conio.h>
 #include <malloc.h>
 #include "execute.h"
 #include "reswords.h"
 #include "be_alloc.h"
-
+//#include "..\include\euphoria.h"
 /* the following are pointers to 4 element arrays of their
  non-vector counter parts.
  For example:
@@ -135,65 +135,6 @@ void save_vector_registers();
 	"movdqa [ebx], xmm7"\
 	modify [ebx];
 
-
-
-/* The following operates on two 4-element arrays of objects and places the result in the array 
-   pointed to by dest.  If the repective elements of ptr1[i], and ptr2[i] both are ATOM_INT() type,
-   they are added and the sum is stored into dest[i].  If there is overflow overunder_128bit[i] 
-   is set to a non-zero number.  If either of the elements ptr1[i] or ptr2[i] are not integers the 
-   integer_128bit[i] variable is set to a non-zero number.  If all four elements were added without
-   overflow and were all integers then and only then will iterate_over_double_words be false.
-   
-	NB: can't move a variable value directly to MMX */
-unsigned long sse2_paddo3( object_ptr dest, object_ptr ptr1, object_ptr ptr2);
-#pragma aux sse2_paddo3 = \
-	/* edx = dest, eax = ptr1, ecx = ptr2 */\
-	"movdqa xmm1, [eax]"\
-	"MOVDQA XMM2, XMM1"\
-	"MOVDQA XMM4, [ECX]"\
-	"MOVDQA XMM5, XMM4"\
-	"movdqa xmm6, xmm5"\
-	"mov ebx, NOVALUE_128bit"\
-	"movdqa xmm7, [ebx]"\
-	"pcmpgtd xmm2, xmm7"\
-	/*XMM2 = ((signed)ptr1[0..3] > (signed)NOVALUE_128bit[0..3])*/\
-	/*XMM2[i] = -1 where ptr1[i] is an atom integer  */\ 	
-	"pcmpgtd xmm6, xmm7"\
-	/* XMM6 = (ptr2[0..3] > NOVALUE_128bit[0..3])*/\
-	/* XMM6[i] = -1 where ptr2[i] is an atom integer*/\
-	"andps xmm2, xmm6"\
-	"mov ebx, integer_128bit"\
-	"movdqa [ebx], xmm2"\
-	"paddd xmm1, xmm5"\
-	"andps xmm1, xmm2"\
-	"movdqa [edx], xmm1"\
-	"mov ebx, MININT_128bit"\
-	"movdqa xmm6, [ebx]"\
-	/* xmm6 = MININT, XMM2 is our int mask, XMM0 and XMM4 are *ptr1 and *ptr2 repectively.*/\
-	/* xmm1 is the sum.*/\
-	"movdqa xmm3, xmm1"\
-	"pcmpgtd xmm6, xmm1"\
-	"mov ebx, MAXINT_128bit"\
-	"movdqa xmm5, [ebx]"\
-	"pcmpgtd xmm3, xmm5"\
-	"orps xmm6, xmm3"\
-	"mov ebx, overunder_128bit"\
-	"movdqa [ebx], xmm6"\
-	/* Here xmm1, xmm4 are *ptr[12], xmm2 is our int mask, xmm6 is our over under mask */\
-	"mov ebx, MINUSONES_128bit"\
-	"andnps xmm2, [ebx]"\
-	/* Here xmm2 is our negated int mask */\
-	"orps xmm6, xmm2"\
-	/* Here xmm6 is a mask that if it is true it needs to be handled in a DQ word loop 	*/\
-	"PACKSSDW XMM6, XMM6"\
-	"PACKSSWB XMM6, XMM6"\
-	"MOVD iterate_over_double_words, XMM6"\
-	"MOV ebx, iterate_over_double_words"\
-	"EMMS"\
-	modify [EBX]\
-	parm [EDX] [EAX] [ECX]\
-	value [EBX];
-
 	/* Returns true iff the four sequential elements pointed to by ptr1 are all ATOM_INTs */
 unsigned long sse2_are_all_atom_ints( object_ptr ptr1 );
 #pragma aux sse2_are_all_atom_ints = \
@@ -212,8 +153,11 @@ unsigned long sse2_are_all_atom_ints( object_ptr ptr1 );
 	parm [EAX]\
 	value [EBX];
 
-	/* Sum the eight integers pointed to by ptr1 and ptr2 as if they were ATOM_INTs.  
-	The results is written to the location pointed to by dest.*/
+/* Sum the eight integers pointed to by ptr1 and ptr2 as if they were ATOM_INTs.  
+   The results is written to the location pointed to by dest.   Overflow and 
+   underflow is packed into a 32 bit value and returned.  The returned value, once put into
+   a variable can be accessed as a string of bytes, str.  For i=0..3, if str[i] 
+   is non 0 then there is an overflow at dest[i].  */
 unsigned long sse2_paddi3( object_ptr dest, object_ptr ptr1, object_ptr ptr2);
 #pragma aux sse2_paddi3 = \
 	/* edx = dest, eax = ptr1, ecx = ptr2 */\
@@ -239,18 +183,17 @@ unsigned long sse2_paddi3( object_ptr dest, object_ptr ptr1, object_ptr ptr2);
 	parm [EDX] [EAX] [ECX]\
 	value [ebx];
 	
-	/* The set of possible values for ATOM_INT form a group under: OR, AND, and XOR.
-	In plain English, once we know the inputs are ATOM_INTs the results will also
-	be ATOM_INTs */
+/* The set of possible values for ATOM_INT form a group under: OR, AND, and XOR.
+ In plain English, once we know the inputs are ATOM_INTs the results will also
+ be ATOM_INTs */
 	
  unsigned long sse2_pori3( object_ptr dest, object_ptr ptr1, object_ptr ptr2);
  #pragma aux sse2_pori3 = \
 	/* edx = dest, eax = ptr1, ecx = ptr2 */\
 	"movdqa xmm1, [eax]"\
 	"por xmm1, [ecx]"\
-	"movdqa [edx], xmm1"\
 	/* write result to memory location */\
-	"xor ebx, ebx"\
+	"movdqa [edx], xmm1"\
 	"EMMS"\
 	modify [ebx]\
 	parm [EDX] [EAX] [ECX]\
@@ -262,9 +205,8 @@ unsigned long sse2_paddi3( object_ptr dest, object_ptr ptr1, object_ptr ptr2);
 	"movdqa xmm1, [eax]"\
 	"movdqa xmm5, [ecx]"\
 	"pand xmm1, xmm5"\
-	"movdqa [edx], xmm1"\
 	/* write result to memory location */\
-	"xor ebx, ebx"\
+	"movdqa [edx], xmm1"\
 	"EMMS"\
 	modify [ebx]\
 	parm [EDX] [EAX] [ECX]\
@@ -276,9 +218,8 @@ unsigned long sse2_pxori3( object_ptr dest, object_ptr ptr1, object_ptr ptr2);
 	"movdqa xmm1, [eax]"\
 	"movdqa xmm5, [ecx]"\
 	"pxor xmm1, xmm5"\
-	"movdqa [edx], xmm1"\
 	/* write result to memory location */\
-	"xor ebx, ebx"\
+	"movdqa [edx], xmm1"\
 	"EMMS"\
 	modify [ebx]\
 	parm [EDX] [EAX] [ECX]\
@@ -363,105 +304,6 @@ void sse2_eqi3( object_ptr dest, object_ptr eax, object_ptr ebx );
 	parm [edx] [eax] [ebx];
 
 
-	
-	
-object_ptr sse2_binary_ss_op( int op, object a, object top, int *sse_fn(object_ptr,object_ptr,object_ptr) ) {
-	struct s1 * dest;
-	struct s1 * sa, * sb;
-	int k, length;
-	object_ptr dp,ap,bp, tempb;
-	struct s1 * control;
-	object controlobj;
-	signed long int * ou;
-	signed long int * in;
-	signed long int j;
-	unsigned long which_int_a, which_int_b;
-	sa = SEQ_PTR(a);
-	sb = SEQ_PTR(top);
-	if (sa->length != sb->length) {
-		RTFatal(
-		"Sequences are of differing lenghts can not be added together.");
-	}
-	tempb = vreg_temp;	
-	dest = NewS1(sa->length);
-	dest->base[sa->length+1] = NOVALUE;
-	ap = &sa->base[1];
-	bp = &sb->base[1];
-	dp = &dest->base[1];
-	k = 0;
-	iterate_over_double_words = 0;
-	length = sa->length  & -(sizeof(vreg)/sizeof(object));
-	while (k < length) {
-		which_int_a = sse2_are_all_atom_ints(ap);
-		if ( which_int_a == (unsigned int)-1 && 
-			((which_int_b = sse2_are_all_atom_ints(bp)) == (unsigned int)-1) ) {
-			if ((*sse_fn)( dp, ap, bp )) {
-				do {
-					*dp = NewDouble(*dp);
-					++dp;
-					++k;
-				} while (k%4);
-			} else {
-				dp += sizeof(vreg)/sizeof(object);
-				k  += sizeof(vreg)/sizeof(object);
-			}
-			ap += sizeof(vreg)/sizeof(object);
-			bp += sizeof(vreg)/sizeof(object);
-		} else {
-			do {
-				if (((char*)&which_int_a)[k%4]) { // is atom_int(*ap)?
-					if (IS_ATOM_INT(*bp))
-						*dp = INT_VAL(*ap) + INT_VAL(*bp);
-					else if (IS_ATOM(*bp))
-						*dp = NewDouble(INT_VAL(*ap) + DBL_PTR(*bp)->dbl);
-					else 
-						*dp = binary_op(op,*ap,*bp);
-				} else if (IS_ATOM(*ap)) {
-					if (IS_ATOM_INT(*bp))
-						*dp = NewDouble(DBL_PTR(*ap)->dbl + INT_VAL(*bp));
-					else if (IS_ATOM(*bp))
-						*dp = NewDouble(DBL_PTR(*ap)->dbl + DBL_PTR(*bp)->dbl);
-					else
-						*dp = binary_op(op,*ap,*bp);
-				} else {
-					if (IS_SEQUENCE(*bp) && (((unsigned int)SEQ_PTR(*bp)->base) % 16 == 12)
-						&& (((unsigned int)SEQ_PTR(*ap)->base) % 16 == 12)) 
-							*dp = sse2_binary_ss_op(op,*ap,*bp,sse_fn);
-					else
-							*dp = binary_op(op,*ap,*bp);
-				}
-				++ap, ++bp, ++dp, ++k;
-			} while (k % 4);
-		} // else 
-	} // while
-	sse2_paddo3(tempb, ap, bp );
-	length = dest->length = sa->length;
-	dest->base[sa->length+1] = NOVALUE;
-	for (++k,j = 0; k <= length; ++k,++j ) {
-			if (overunder_128bit[j]) 
-				dest->base[k] = NewDouble( tempb[j] );
-			else if (integer_128bit[j])
-				dest->base[k] = tempb[j];
-			else
-				dest->base[k] = binary_op(op, sa->base[k], sb->base[k]);
-	}
-#   ifdef EXTRA_CHECK					
-		if (compare(MAKE_SEQ(dest),controlobj = binary_op(op,a,top))) {
-			int j;
-			control = SEQ_PTR(controlobj);
-			for (j=1;j<=dest->length;++j) {
-				if (dest->base[j] != control->base[j] &&
-					(  (IS_ATOM_INT(dest->base[j]) && IS_ATOM_INT(control->base[j])) ||
-						compare(dest->base[j],control->base[j])   )  )
-					break;
-			}
-			RTFatal("SSE code discrepancy:"
-				"results not consistent with old version. Index %d\n", j);																
-		}
-#	endif
-	return top = MAKE_SEQ(dest);	
-}
-		
 object_ptr padds2(object a, object top) {
 	struct s1 * dest;
 	struct s1 * sa, * sb;
@@ -487,17 +329,23 @@ object_ptr padds2(object a, object top) {
 	dp = &dest->base[1];
 	k = 0;
 	iterate_over_double_words = 0;
-	length = sa->length  & -(sizeof(vreg)/sizeof(object));
+	length = sa->length;
 	while (k < length) {
 		which_int_a = sse2_are_all_atom_ints(ap);
 		if ( which_int_a == (unsigned int)-1 && 
 			((which_int_b = sse2_are_all_atom_ints(bp)) == (unsigned int)-1) ) {
-			if (sse2_paddi3( dp, ap, bp )) {
+			unsigned char overflows[4];
+			unsigned long iof;
+			if (iof = sse2_paddi3( dp, ap, bp )) {
+				unsigned char * ofptr;
+				*(unsigned long*)(overflows) = iof;
+				ofptr = &overflows[0];
 				do {
-					*dp = NewDouble(*dp);
+					if (*(ofptr++)) { 
+						*dp = NewDouble(*dp);
+					}
 					++dp;
-					++k;
-				} while (k%4);
+				} while (++k%4);
 			} else {
 				dp += sizeof(vreg)/sizeof(object);
 				k  += sizeof(vreg)/sizeof(object);
@@ -507,12 +355,19 @@ object_ptr padds2(object a, object top) {
 		} else {
 			do {
 				if (((char*)&which_int_a)[k%4]) { // is atom_int(*ap)?
-					if (IS_ATOM_INT(*bp))
+					if (IS_ATOM_INT(*bp)) {
 						*dp = INT_VAL(*ap) + INT_VAL(*bp);
-					else if (IS_ATOM(*bp))
+						if (*dp > MAXINT || *dp < MININT) {
+							*dp = NewDouble(*dp);
+						}				
+					} else if (IS_ATOM(*bp)) {
 						*dp = NewDouble(INT_VAL(*ap) + DBL_PTR(*bp)->dbl);
-					else 
+					} else {
 						*dp = binary_op(PLUS,*ap,*bp);
+					}
+				} else if (*ap == NOVALUE) {
+					*dp = *ap;
+					break;	
 				} else if (IS_ATOM(*ap)) {
 					if (IS_ATOM_INT(*bp))
 						*dp = NewDouble(DBL_PTR(*ap)->dbl + INT_VAL(*bp));
@@ -531,19 +386,14 @@ object_ptr padds2(object a, object top) {
 			} while (k % 4);
 		} // else 
 	} // while
-	sse2_paddo3(tempb, ap, bp );
-	length = dest->length = sa->length;
-	dest->base[sa->length+1] = NOVALUE;
-	for (++k,j = 0; k <= length; ++k,++j ) {
-			if (overunder_128bit[j]) 
-				dest->base[k] = NewDouble( tempb[j] );
-			else if (integer_128bit[j])
-				dest->base[k] = tempb[j];
-			else
-				dest->base[k] = binary_op(PLUS, sa->base[k], sb->base[k]);
-	}
-#   ifdef EXTRA_CHECK					
+	dest->base[length+1] = NOVALUE;
+#   ifdef EXTRA_CHECK
+	/* Use the old way to check the answer for SSE2.... makes this slower than
+	 * the original implementation. */
 		if (compare(MAKE_SEQ(dest),controlobj = binary_op(PLUS,a,top))) {
+			
+			/* failure!  Now, this part will find where in the sequence we went wrong.
+			 * */
 			int j;
 			control = SEQ_PTR(controlobj);
 			for (j=1;j<=dest->length;++j) {
@@ -554,6 +404,8 @@ object_ptr padds2(object a, object top) {
 			}
 			RTFatal("SSE code discrepancy:"
 				"results not consistent with old version. Index %d\n", j);																
+		} else {
+			DeRefDS(controlobj);
 		}
 #	endif
 	return top = MAKE_SEQ(dest);
