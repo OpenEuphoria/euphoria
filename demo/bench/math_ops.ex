@@ -7,13 +7,13 @@ sequence ans
 constant neg_prefixes = { {0.001,"m"} , {0.00_000_1,"mc"}, {0.00_000_000_1,"n"}, {0.00_000_000_000_1,"p"} }
 function get_metric_prefix( atom value )
 	if not value then
-		return ""
+		return {1,""}
 	end if
 	atom digit_count = floor(log(value)/log(1000))
-	if digit_count < 0 then
+	if digit_count < 0 and digit_count > -4 then
 		return neg_prefixes[-digit_count]
 	end if
-	return ""
+	return {1,""}
 end function
 
 constant inner_trials = 1_000
@@ -39,4 +39,3 @@ sequence prefix = get_metric_prefix(stats[1])
 stats /= prefix[1]
 printf(1, "Time to add two 5000 long sequences: %.3f +- %f %ss\n", append(stats,prefix[2]) )
 
-	
