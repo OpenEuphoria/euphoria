@@ -309,7 +309,7 @@ public function dir(sequence name)
 	ifdef WINDOWS then
 		return machine_func(M_DIR, name)
 	elsedef
-		object dir_data, data, the_name, the_dir, the_suffix
+		object dir_data, data, the_name, the_dir, the_suffix = 0
 		integer idx
 
 		-- Did the user give a wildcard? If not, just return the standard dir.
