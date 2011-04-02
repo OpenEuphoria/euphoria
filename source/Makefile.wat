@@ -347,7 +347,9 @@ BUILD_DIRS= &
 	$(BUILDDIR)\WINlibobj &
 	$(BUILDDIR)\WINlibobj1 &
 	$(BUILDDIR)\backobj &
-	$(BUILDDIR)\eutestdr &
+	$(BUILDDIR)\eutestdr
+
+INCLUDE_DIR = &
 	$(BUILDDIR)\include
 
 distclean : .SYMBOLIC clean
@@ -357,9 +359,10 @@ distclean : .SYMBOLIC clean
 	
 
 clean : .SYMBOLIC mostlyclean docsclean
-	-@for %i in ($(BUILD_DIRS)) do -$(RMDIR) %i
+	-@for %i in ($(BUILD_DIRS) $(INCLUDE_DIR)) do -$(RMDIR) %i
 	-$(RM) $(BUILDDIR)\*.lib
 	-$(RM) $(BUILDDIR)\*.exe
+	-$(RM) $(BUILDDIR)\ver.cache
 	
 docsclean : .SYMBOLIC
 	-@for %i in ($(BUILD_DIR)\html\*.*) do -$(RM) %i
@@ -393,11 +396,10 @@ clobber : .SYMBOLIC distclean
 	-$(RM) $(BUILDDIR)\*.a
 	-$(RMDIR) $(BUILDDIR)
 
-$(BUILD_DIRS) : .existsonly
+$(BUILD_DIRS) : .EXISTSONLY
 	mkdir $@
 	mkdir $@\back
-
-
+	
 !ifdef PLAT
 !ifeq PLAT WIN
 OS=WIN
@@ -550,8 +552,8 @@ tools-additional: .SYMBOLIC
 
 tools-all: tools tools-additional
 
-get-creole : $(TRUNKDIR)\source\creole\creole.ex
-get-eudoc : $(TRUNKDIR)\source\eudoc\eudoc.ex
+get-creole: $(TRUNKDIR)\source\creole\creole.ex
+get-eudoc: $(TRUNKDIR)\source\eudoc\eudoc.ex
 
 $(TRUNKDIR)\source\creole\creole.ex :
 	hg clone http://scm.openeuphoria.org/hg/creole $(TRUNKDIR)\source\creole
@@ -596,18 +598,20 @@ $(BUILDDIR)\backobj\back\be_runtime.obj : $(BUILDDIR)\backobj\back\coverage.h
 
 !ifdef OBJDIR
 
-$(BUILDDIR)\$(OBJDIR)\back\be_machine.obj : $(BUILDDIR)\include\be_ver.h
+$(BUILDDIR)\$(OBJDIR)\back\be_machine.obj : $(INCLUDE_DIR)\be_ver.h
 
 !endif
 
-
+$(INCLUDE_DIR) : .EXISTSONLY
+	mkdir $^@
+     
 $(BUILDDIR)\mkver.exe: mkver.c
 	owcc -o $@ $<
 
-update-version-cache : .SYMBOLIC $(BUILDDIR)\include\be_ver.h
+update-version-cache : .SYMBOLIC $(INCLUDE_DIR)\be_ver.h
 
-$(BUILDDIR)\include\be_ver.h $(BUILDDIR)\ver.cache : $(BUILDDIR)\mkver.exe .always .recheck
-	$(BUILDDIR)\mkver.exe $(HG) $(BUILDDIR)\ver.cache $(BUILDDIR)\include\be_ver.h
+$(INCLUDE_DIR)\be_ver.h $(BUILDDIR)\ver.cache : $(INCLUDE_DIR) $(BUILDDIR)\mkver.exe .always .recheck
+	$(BUILDDIR)\mkver.exe $(HG) $(BUILDDIR)\ver.cache $(INCLUDE_DIR)\be_ver.h
 
 !ifdef OBJDIR
 
@@ -767,7 +771,7 @@ $(BUILDDIR)\$(OBJDIR)\main-.c $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : .EXISTSONLY
 !ifdef OBJDIR
 .c: $(BUILDDIR)\$(OBJDIR);$(BUILDDIR)\$(OBJDIR)\back
 .c.obj: 
-	$(CC) $(FE_FLAGS) $(BE_FLAGS) -fr=$^@.err /I$(BUILDDIR)\$(OBJDIR)\back /I$(BUILDDIR)\include $[@ -fo=$^@
+	$(CC) $(FE_FLAGS) $(BE_FLAGS) -fr=$^@.err /I$(BUILDDIR)\$(OBJDIR)\back /I$(INCLUDE_DIR) $[@ -fo=$^@
 	
 $(BUILDDIR)\$(OBJDIR)\back\be_inline.obj : ./be_inline.c $(BUILDDIR)\$(OBJDIR)\back
 	$(CC) /oe=40 $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
