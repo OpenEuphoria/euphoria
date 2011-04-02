@@ -8,3 +8,5 @@
   the same C header file, which should prevent the potential of mismatched versions.
 * [[ticket:644]] ##[[:canonical_path]]## leaves alone path components (and anything after them)
   with wildcards.
+* Fixed compiler directives about functions that don't return.  Removed some that were obsolete,
+  and corrected for MinGW to use the GCC directives.
