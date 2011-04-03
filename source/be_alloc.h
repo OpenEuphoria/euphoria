@@ -206,10 +206,11 @@ extern object NewDouble(double d);
 extern long copy_string(char *dest, char *src, size_t bufflen);
 extern long append_string(char *dest, char *src, size_t bufflen);
 
-extern void SpaceMessage();
+extern void SpaceMessage()
 #if defined(EUNIX) || defined(EMINGW)
 __attribute__ ((noreturn))
 #else
 #pragma aux SpaceMessage aborts;
 #endif
+;
 #endif

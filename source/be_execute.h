@@ -46,9 +46,9 @@ extern int **jumptab; // initialized in do_exec()
 #endif //not INT_CODES
 
 void do_exec(int *start_pc);
-void fe_set_pointers();
+void fe_set_pointers( void );
 void Execute(int *start_index);
 void InitStack(int size, int toplevel);
-void InitExecute();
+void InitExecute( void );
 
 #endif
