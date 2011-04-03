@@ -345,27 +345,47 @@ all :
 
 
 BUILD_DIRS=\
-	$(BUILDDIR)/intobj/back \
-	$(BUILDDIR)/transobj/back \
-	$(BUILDDIR)/libobj/back \
-	$(BUILDDIR)/libobjdbg/back \
-	$(BUILDDIR)/backobj/back \
+	$(BUILDDIR)/intobj/back/ \
+	$(BUILDDIR)/transobj/back/ \
+	$(BUILDDIR)/libobj/back/ \
+	$(BUILDDIR)/libobjdbg \
+	$(BUILDDIR)/libobjdbg/back/ \
+	$(BUILDDIR)/backobj/back/ \
 	$(BUILDDIR)/intobj/ \
 	$(BUILDDIR)/transobj/ \
 	$(BUILDDIR)/libobj/ \
 	$(BUILDDIR)/backobj/ \
-	$(BUILDDIR)/include
+	$(BUILDDIR)/include/
 
 
 clean : 	
-	-rm -fr $(BUILDDIR)
-	-rm -fr $(BUILDDIR)/backobj
-	-rm -f ver.dat
+	-for f in $(BUILD_DIRS) ; do \
+		rm -r $${f} ; \
+	done ;
+	-rm -r $(BUILDDIR)/pcre
+	-rm $(BUILDDIR)/*pdf
+	-rm $(BUILDDIR)/*txt
+	-rm -r $(BUILDDIR)/*-build
+	-rm $(BUILDDIR)/eui
+	-rm $(BUILDDIR)/euc
+	-rm $(BUILDDIR)/eub
+	-rm $(BUILDDIR)/eu.a
+	-rm $(BUILDDIR)/eudbg.a
+	-for f in $(EU_TOOLS) ; do \
+		rm $${f} ; \
+	done ;
+	-rm $(BUILDDIR)/ver.cache
+	-rm $(BUILDDIR)/mkver
+	-rm -r $(BUILDDIR)/html
+	-rm -r $(BUILDDIR)/coverage
+	-rm -r $(BUILDDIR)/manual
+	
 
 clobber distclean : clean
 	-rm -f $(CONFIG)
 	-rm -f Makefile
 	-rm -fr $(BUILDDIR)
+	-rm eu.cfg
 
 ifeq "$(MINGW)" "1"
 	-rm -f $(BUILDDIR)/{$(EBACKENDC),$(EEXUW)}
@@ -423,7 +443,7 @@ binder : translator library
 .PHONY : interpreter
 .PHONY : translator
 .PHONY : svn_rev
-.PHONY : code-page-db
+.PHONY : code-page-db-rm $(BUILDDIR)/eui
 .PHONY : binder
 
 euisource : $(BUILDDIR)/intobj/main-.c
