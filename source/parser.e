@@ -2688,7 +2688,6 @@ procedure While_statement()
 		backpatch(bp2, length(Code)+1)
 	end if
 	exit_loop(exit_base)
-	temps = pop_temps()
 	push_temps( temps )
 end procedure
 
