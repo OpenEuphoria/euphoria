@@ -11,3 +11,8 @@
 * Fixed compiler directives about functions that don't return.  Removed some that were obsolete,
   and corrected for MinGW to use the GCC directives.
 * [[ticket:648]] Fix small memory leak from while loops
+
+=== New Functionality
+
+* The ##std\rand.e function##, **##sample()##**, now implements both //with replacement//
+and //without replacement// sampling methods.
