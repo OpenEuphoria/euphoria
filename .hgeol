@@ -1,0 +1,11 @@
+[patterns]
+**.e = native
+**.ex = native
+**.exw = native
+file_id.diz = native
+**.txt = native
+**.h = native
+**.c = native
+**.doc = native
+**eu.cfg = native
+
