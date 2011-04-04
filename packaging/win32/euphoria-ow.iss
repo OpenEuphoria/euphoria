@@ -279,6 +279,7 @@ var euCfgContents_tested : String;
 var path : String;
 var include : String;
 var watcom : String;
+var eu_auto_exec_bat : String;
 // Delete what the installer created at runtime.
 begin
   euCfgFName := ExpandConstant('{app}\bin\eu.cfg');

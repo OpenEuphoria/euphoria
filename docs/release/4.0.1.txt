@@ -1,6 +1,6 @@
-== Version 4.0.1 Date TBD
+== Version 4.0.1 March 29, 2011
 
-== Bug Fixes
+=== Bug Fixes
 
 * Renamed implicit Top Level SubProgram to an illegal name.  Previously used "_toplevel_",
   which became a legal name for euphoria 4.0
@@ -54,17 +54,22 @@
 * [[ticket:632]] fix trace screen prompts to prompt to continue
 * [[ticket:633]] On Windows, ##[[:dir]]## was incorrectly case sensitive if wildcards were used.
 * [[ticket:624]] Fixed regex function ##[[:is_match]]## to use the ##from## parameter
+* [[ticket:596]] Worked around GNU C problem of a lack of alias attribute support on some Mac OS X machines.
+* [[ticket:636]] Source files checked out from Mercurial (and thus distributed packages) 
+  will use the conventions of the OS for line breaks. 
+* [[ticket:639]] In place RHS slice (on sequence with reference count 1), followed by in 
+  place ##[[:splice]]## (on sequence still with reference count 1) works correctly
+* [[ticket:640]] Fix ##[[:dir]]## when a file cannot be stat()ed
+* [[ticket:641]] Use ##[[:dir]]## instead of just calling raw machine_func in 
+  ##[[:canonical_path]]## and ##[[:abbreviate_path]]##
 
-== Enhancements
+=== Enhancements
 
 * Added parsing of two digit years to ##std/datetime.e## ##[[:parse]]##.
 * [[ticket:516]] added ##[[:join_path]]## and ##[[:split_path]]## routines.
 * ##[[:current_dir]]()## now always returns an upper case letter for the drive
   id.
-
-== Deprecated
-
-* ##[[:canonical_path]]()##'s third parameter, ##no_case##, has been deprecated. If you are doing
-  path comparisons on windows, use lower() or upper() instead of using the ##no_case##
-  parameter.
-
+* ##[[:canonical_path]]()## can now leave the case alone, lower the case,
+  correct the case, and even get short file names for programs that still 
+  cannot handle quoted arguments at the command line.
+  

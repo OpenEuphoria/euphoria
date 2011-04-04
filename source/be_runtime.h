@@ -6,7 +6,7 @@
 #include "reswords.h"
 
 void de_reference(s1_ptr a);
-void UserCleanup(int status);
+
 
 #define FIRST_USER_FILE 3
 #define MAX_USER_FILE 40
@@ -52,31 +52,43 @@ extern struct op_info optable[MAX_OPCODE+1];
 
 void debug_msg(char *msg);
 
-void RTFatal(char *, ...)
-#ifdef EUNIX
+void UserCleanup(int status)
+#if defined(EUNIX) || defined(EMINGW)
 __attribute__ ((noreturn))
+#else
+#pragma aux UserCleanup aborts;
+#endif
+;
+
+void RTFatal(char *, ...)
+#if defined(EUNIX) || defined(EMINGW)
+__attribute__ ((noreturn))
+#else
+#pragma aux RTFatal aborts;
 #endif
 ;
 void RTInternal(char *msg, ...)
-#ifdef EUNIX
+#if defined(EUNIX) || defined(EMINGW)
 __attribute__ ((noreturn))
+#else
+#pragma aux RTInternal aborts;
 #endif
 ;
 void RTFatal_va(char *msg, va_list ap)
-#ifdef EUNIX
+#if defined(EUNIX) || defined(EMINGW)
 __attribute__ ((noreturn))
+#else
+#pragma aux RTFatal_va aborts;
 #endif
 ;
 void Cleanup()
-#ifdef EUNIX
+#if defined(EUNIX) || defined(EMINGW)
 __attribute__ ((noreturn))
+#else
+#pragma aux Cleanup aborts;
 #endif
 ;
-void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap)
-#ifdef EUNIX
-__attribute__ ((noreturn))
-#endif
-;
+
 
 #ifdef EUNIX
 char key_buff[KEYBUFF_SIZE];

@@ -468,8 +468,8 @@ function setup_build()
 				end if
 			end if
 
-			l_flags &= sprintf(" FILE %s LIBRARY ws2_32", { user_library })
-			l_flags &= sprintf(" FILE %s LIBRARY comdlg32", { user_library })
+			l_flags &= sprintf(" FILE %s LIBRARY ws2_32 LIBRARY comdlg32", { user_library })
+			
 			
 			-- resource file, executable file
 			rc_comp = "wrc -DSRCDIR=\"" & adjust_for_command_line_passing(current_dir()) & "\" -q -fo=[2] -ad [1] [3]"

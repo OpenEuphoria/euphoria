@@ -352,26 +352,47 @@ all :
 
 
 BUILD_DIRS=\
-	$(BUILDDIR)/intobj/back \
-	$(BUILDDIR)/transobj/back \
-	$(BUILDDIR)/libobj/back \
-	$(BUILDDIR)/libobjdbg/back \
-	$(BUILDDIR)/backobj/back \
+	$(BUILDDIR)/intobj/back/ \
+	$(BUILDDIR)/transobj/back/ \
+	$(BUILDDIR)/libobj/back/ \
+	$(BUILDDIR)/libobjdbg \
+	$(BUILDDIR)/libobjdbg/back/ \
+	$(BUILDDIR)/backobj/back/ \
 	$(BUILDDIR)/intobj/ \
 	$(BUILDDIR)/transobj/ \
 	$(BUILDDIR)/libobj/ \
-	$(BUILDDIR)/backobj/
+	$(BUILDDIR)/backobj/ \
+	$(BUILDDIR)/include/
 
 
 clean : 	
-	-rm -fr $(BUILDDIR)
-	-rm -fr $(BUILDDIR)/backobj
-	-rm -f ver.dat
+	-for f in $(BUILD_DIRS) ; do \
+		rm -r $${f} ; \
+	done ;
+	-rm -r $(BUILDDIR)/pcre
+	-rm $(BUILDDIR)/*pdf
+	-rm $(BUILDDIR)/*txt
+	-rm -r $(BUILDDIR)/*-build
+	-rm $(BUILDDIR)/eui
+	-rm $(BUILDDIR)/euc
+	-rm $(BUILDDIR)/eub
+	-rm $(BUILDDIR)/eu.a
+	-rm $(BUILDDIR)/eudbg.a
+	-for f in $(EU_TOOLS) ; do \
+		rm $${f} ; \
+	done ;
+	-rm $(BUILDDIR)/ver.cache
+	-rm $(BUILDDIR)/mkver
+	-rm -r $(BUILDDIR)/html
+	-rm -r $(BUILDDIR)/coverage
+	-rm -r $(BUILDDIR)/manual
+	
 
 clobber distclean : clean
 	-rm -f $(CONFIG)
 	-rm -f Makefile
 	-rm -fr $(BUILDDIR)
+	-rm eu.cfg
 
 ifeq "$(MINGW)" "1"
 	-rm -f $(BUILDDIR)/{$(EBACKENDC),$(EEXUW)}
@@ -429,18 +450,18 @@ binder : translator library $(EU_BACKEND_RUNNER_FILES)
 .PHONY : interpreter
 .PHONY : translator
 .PHONY : svn_rev
-.PHONY : code-page-db
+.PHONY : code-page-db-rm $(BUILDDIR)/eui
 .PHONY : binder
 
 euisource : $(BUILDDIR)/intobj/main-.c
 euisource :  EU_TARGET = int.ex
-euisource : $(BUILDDIR)/$(OBJDIR)/back/be_ver.h
+euisource : $(BUILDDIR)/include/be_ver.h
 eucsource : $(BUILDDIR)/transobj/main-.c
 eucsource :  EU_TARGET = ec.ex
-eucsource : $(BUILDDIR)/$(OBJDIR)/back/be_ver.h
+eucsource : $(BUILDDIR)/include/be_ver.h
 backendsource : $(BUILDDIR)/backobj/main-.c
 backendsource :  EU_TARGET = backend.ex
-backendsource : $(BUILDDIR)/$(OBJDIR)/back/be_ver.h
+backendsource : $(BUILDDIR)/include/be_ver.h
 
 source : builddirs
 	$(MAKE) euisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
@@ -498,7 +519,7 @@ else
 	$(CC) $(EOSFLAGS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(PROFILE_FLAGS) $(MSIZE) -o $(BUILDDIR)/$(EEXU)
 endif
 
-$(BUILDDIR)/$(OBJDIR)/back/be_machine.o : $(BUILDDIR)/$(OBJDIR)/back/be_ver.h
+$(BUILDDIR)/$(OBJDIR)/back/be_machine.o : $(BUILDDIR)/include/be_ver.h
 
 ifeq "$(EMINGW)" "1"
 $(EUC_RES) : euc.rc version_info.rc eu.manifest
@@ -540,7 +561,7 @@ endif
 
 .PHONY: update-version-cache
 update-version-cache : $(MKVER)
-	$(WINE) $(MKVER) $(HG) $(BUILDDIR)/ver.cache $(BUILDDIR)/$(OBJDIR)/back/be_ver.h $(EREL_TYPE)$(RELEASE)
+	$(WINE) $(MKVER) "$(HG)" "$(BUILDDIR)/ver.cache" "$(BUILDDIR)/include/be_ver.h" $(EREL_TYPE)$(RELEASE)
 
 $(MKVER): mkver.c
 	$(CC) -o $@ $<
@@ -548,7 +569,7 @@ $(MKVER): mkver.c
 
 $(BUILDDIR)/ver.cache : update-version-cache
 
-$(BUILDDIR)/$(OBJDIR)/back/be_ver.h:  $(BUILDDIR)/ver.cache
+$(BUILDDIR)/include/be_ver.h:  $(BUILDDIR)/ver.cache
 	
 
 ###############################################################################
@@ -911,7 +932,7 @@ endif
 
 ifneq "$(OBJDIR)" ""
 $(BUILDDIR)/$(OBJDIR)/back/%.o : %.c $(CONFIG_FILE)
-	$(CC) $(BE_FLAGS) $(EBSDFLAG) -I $(BUILDDIR)/$(OBJDIR)/back $*.c -o$(BUILDDIR)/$(OBJDIR)/back/$*.o
+	$(CC) $(BE_FLAGS) $(EBSDFLAG) -I $(BUILDDIR)/$(OBJDIR)/back -I $(BUILDDIR)/include $*.c -o$(BUILDDIR)/$(OBJDIR)/back/$*.o
 
 $(BUILDDIR)/$(OBJDIR)/back/be_callc.o : ./$(BE_CALLC).c $(CONFIG_FILE)
 	$(CC) -c -Wall $(EOSTYPE) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -fsigned-char -Os -O3 -ffast-math -fno-defer-pop $(CALLC_DEBUG) $(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.o
@@ -924,8 +945,6 @@ ifdef PCRE_OBJECTS
 $(PREFIXED_PCRE_OBJECTS) : $(patsubst %.o,pcre/%.c,$(PCRE_OBJECTS)) pcre/config.h.unix pcre/pcre.h.unix
 	$(MAKE) -C pcre all CC="$(PCRE_CC)" PCRE_CC="$(PCRE_CC)" EOSTYPE="$(EOSTYPE)" EOSFLAGS="$(EOSPCREFLAGS)" CONFIG=../$(CONFIG)
 endif
-
-#$(BUILDDIR)/$(OBJDIR)/back/be_machine.o: $(BUILDDIR)/$(OBJDIR)/back/be_ver.h
 
 depend :
 	makedepend -fMakefile.gnu -Y. -I. *.c -p'$$(BUILDDIR)/intobj/back/'

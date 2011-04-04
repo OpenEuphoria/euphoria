@@ -200,6 +200,20 @@ public enum
 
 public constant W_BAD_PATH = -1 -- error code
 
+function find_first_wildcard( sequence name, integer from = 1 )
+	integer asterisk_at = eu:find('*', name, from)
+	integer question_at = eu:find('?', name, from)
+	integer first_wildcard_at = asterisk_at
+	if asterisk_at or question_at then
+		-- Empty if so that we can short circuit if * is found, otherwise
+		-- we would have to run a search for * and ? even if * is found.
+		if question_at and question_at < asterisk_at then
+			first_wildcard_at = question_at
+		end if
+	end if
+	return first_wildcard_at
+end function
+
 --**
 -- Return directory information for the specified file or directory.
 --
@@ -301,40 +315,58 @@ public function dir(sequence name)
 	ifdef WINDOWS then
 		return machine_func(M_DIR, name)
 	elsedef
-		object dir_data, data, the_name, the_dir
+		object dir_data, data, the_name, the_dir, the_suffix = 0
 		integer idx
 
 		-- Did the user give a wildcard? If not, just return the standard dir.
-		if eu:find('*', name) > 0 or eu:find('?', name) > 0 then
-			-- Empty if so that we can short circuit if * is found, otherwise
-			-- we would have to run a search for * and ? even if * is found.
-		else
+		integer first_wildcard_at = find_first_wildcard( name )
+		if first_wildcard_at = 0 then
 			return machine_func(M_DIR, name)
 		end if
 
 		-- Is there a path involved?
-		if eu:find(SLASH, name) = 0 then
+		if first_wildcard_at then
+			idx = search:rfind(SLASH, name, first_wildcard_at )
+		else
+			idx = search:rfind(SLASH, name )
+		end if
+		
+		if idx = 0 then
 			the_dir = "."
 			the_name = name
 		else
 			-- Find a SLASH character and break the name there resulting in
 			-- a directory and file name.
-			idx = search:rfind(SLASH, name)
 			the_dir = name[1 .. idx]
-			the_name = name[idx+1 .. $]
+			integer next_slash = 0
+			if first_wildcard_at then
+				next_slash = eu:find( SLASH, name, first_wildcard_at )
+			end if
+			
+			if next_slash then
+				first_wildcard_at = find_first_wildcard( name, next_slash )
+				if first_wildcard_at then
+					the_name = name[idx+1..next_slash-1]
+					the_suffix = name[next_slash..$]
+				end if
+			else
+				the_name = name[idx+1 .. $]
+				the_suffix = 0
+			end if
+			
 		end if
 
 		-- Get directory contents
-		dir_data = machine_func(M_DIR, the_dir)
-
+		dir_data = dir( the_dir )
+		
 		-- Did an error occur?
 		if atom(dir_data) then
 			return dir_data
 		end if
-
-		data = {}
+		
 		-- Filter the directory contents returning only those items
 		-- matching name.
+		data = {}
 		for i = 1 to length(dir_data) do
 			if wildcard:is_match(the_name, dir_data[i][1]) then
 					data = append(data, dir_data[i])
@@ -345,6 +377,22 @@ public function dir(sequence name)
 			-- no matches found, act like it doesn't exist
 			return -1
 		end if
+		
+		if sequence( the_suffix ) then
+			sequence wild_data = {}
+			for i = 1 to length( dir_data ) do
+				sequence interim_dir = the_dir & dir_data[i][D_NAME] & SLASH
+				object dir_results = dir( interim_dir & the_suffix )
+				if sequence( dir_results ) then
+					for j = 1 to length( dir_results ) do
+						dir_results[j][D_NAME] = interim_dir & dir_results[j][D_NAME]
+					end for
+					wild_data &= dir_results
+				end if
+			end for
+			return wild_data
+		end if
+		
 		return data
 	end ifdef
 end function
@@ -1437,18 +1485,38 @@ public function absolute_path(sequence filename)
 end function
 
 
+public enum
+	AS_IS = 0, TO_LOWER = 1, CORRECT = 2, TO_SHORT = 4
+
+
+public type case_flagset_type(integer x)
+	return x >= AS_IS and x < 2*TO_SHORT
+end type
+
+
 --**
 -- Returns the full path and file name of the supplied file name.
 --
 -- Parameters:
 --	# ##path_in## : A sequence. This is the file name whose full path you want.
---  # ##directory_given## : An integer. This is zero if ##path_in## is 
+--  #   ##directory_given## : An integer. This is zero if ##path_in## is 
 --  to be interpreted as a file specification otherwise it is assumed to be a
 --  directory specification. The default is zero.
---  # ##no_case## : An integer. Only applies to the Windows platform. If zero (the default) 
---  the path name is returned using the same case as supplied, otherwise the
---  returned value is all in lowercase.
---  
+--  # ##case_flags## : An integer. This is a combination of flags.  
+--            AS_IS      =  Includes no flags
+--            TO_LOWER   =  If passed will convert the part of the path not affected by
+--                          other case flags to lowercase.
+--            CORRECT    =  If passed will correct the parts of the filepath that
+--                          exist in the current filesystem in parts of the filesystem
+--                          that is case insensitive.  This should  work on WINDOWS
+--                          or SMB mounted volumes on UNIX or certain Mac OS filesystems.
+--
+--           TO_LOWER    =  If passed alone the entire path is converted to lowercase.
+--           or_bits(TO_LOWER,CORRECT) = If these flags are passed together the the part that
+--                          exists has the case of that of the filesystem.  The part that
+--                          doesn't is converted to lower case.
+--           TO_SHORT    =  If passed the elements of the path that exist are also converted
+--                          to their WINDOWS short names if avaliable.  
 --
 -- Returns:
 --     A **sequence**, the full path and file name.
@@ -1468,18 +1536,25 @@ end function
 -- res = canonical_path("../abc.def")
 -- -- res is now "/usr/foo/abc.def"
 -- </eucode>
-
-public function canonical_path(sequence path_in, integer directory_given = 0, integer no_case = 0)
+--
+-- Example 2:
+-- <eucode>
+-- -- res is "C:\Program Files" on systems that have that directory.
+-- res = canonical_path("c:\pRoGrAm FiLeS", CORRECT)
+-- </eucode>
+public function canonical_path(sequence path_in, integer directory_given = 0, case_flagset_type case_flags = AS_IS)
+	
     sequence lPath = ""
     integer lPosA = -1
     integer lPosB = -1
     sequence lLevel = ""
     object lHome
-
+    path_in = path_in
+    
 	ifdef UNIX then
 		lPath = path_in
 	elsedef
-	    sequence lDrive = ""
+	    sequence lDrive
 	    -- Replace unix style separators with Windows style
 	    lPath = match_replace("/", path_in, SLASH)
 	end ifdef
@@ -1510,7 +1585,7 @@ public function canonical_path(sequence path_in, integer directory_given = 0, in
 		end if
     end if
 
-	ifdef not UNIX then
+	ifdef WINDOWS then
 		-- Strip off any drive letter attached.
 	    if ( (length(lPath) > 1) and (lPath[2] = ':' ) ) then
 			lDrive = lPath[1..2]
@@ -1520,6 +1595,21 @@ public function canonical_path(sequence path_in, integer directory_given = 0, in
 		end if
 	end ifdef
 
+	sequence wildcard_suffix
+	integer first_wildcard_at = find_first_wildcard( lPath )
+	if first_wildcard_at then
+		integer last_slash = search:rfind( SLASH, lPath, first_wildcard_at )
+		if last_slash then
+			wildcard_suffix = lPath[last_slash..$]
+			lPath = remove( lPath, last_slash, length( lPath ) )
+		else
+			wildcard_suffix = lPath
+			lPath = ""
+		end if
+	else
+		wildcard_suffix = ""
+	end if
+	
 	-- If a relative path, prepend the PWD of the appropriate drive.
 	if ((length(lPath) = 0) or not find(lPath[1], "/\\")) then
 		ifdef UNIX then
@@ -1576,12 +1666,76 @@ public function canonical_path(sequence path_in, integer directory_given = 0, in
 	
 	ifdef WINDOWS then
 		lPath = lDrive & lPath
-		if no_case then
+	end ifdef
+	
+	if case_flags = TO_LOWER then
+		lPath = lower( lPath )
+	
+	elsif case_flags != AS_IS then
+		sequence sl = find_all(SLASH,lPath) -- split apart lPath
+		integer short_name = and_bits(TO_SHORT,case_flags)=TO_SHORT
+		integer correct_name = and_bits(case_flags,CORRECT)=CORRECT
+		integer lower_name = and_bits(TO_LOWER,case_flags)=TO_LOWER
+		if lPath[$] != SLASH then
+			sl = sl & {length(lPath)+1}
+		end if
+		
+		for i = length(sl)-1 to 1 by -1 label "partloop" do
+			sequence part = lPath[1..sl[i]-1]
+			object list = dir( part & SLASH )
+			sequence supplied_name = lPath[sl[i]+1..sl[i+1]-1]
+			
+			if atom(list) then
+				if lower_name then
+					lPath = part & lower(lPath[sl[i]..$])
+				end if
+				continue
+			end if
+				
+			-- check for a case sensitive match
+			for j = 1 to length(list) do
+				sequence read_name = list[j][D_NAME]
+				if equal(read_name, supplied_name) then
+					if short_name and sequence(list[j][D_ALTNAME]) then
+						lPath = lPath[1..sl[i]] & list[j][D_ALTNAME] & lPath[sl[i+1]..$]
+						sl[$] = length(lPath)+1
+					end if
+					continue "partloop"
+				end if
+			end for
+				
+			-- the only way we get in this block is when the entity above is on
+			-- a case-insensitive file system.  
+			for j = 1 to length(list) do
+				sequence read_name = list[j][D_NAME]
+				if equal(lower(read_name), lower(supplied_name)) then
+					if short_name and sequence(list[j][D_ALTNAME]) then
+						lPath = lPath[1..sl[i]] & list[j][D_ALTNAME] & lPath[sl[i+1]..$]
+						sl[$] = length(lPath)+1
+					end if
+					if correct_name then
+						lPath = lPath[1..sl[i]] & read_name & lPath[sl[i+1]..$]
+					end if
+					continue "partloop"
+				end if
+			end for
+				
+			-- Entitiy doesn't exist.  Change the remaining to lowercase
+			-- if requested with case_flags.
+			if and_bits(TO_LOWER,case_flags) then
+				lPath = lPath[1..sl[i]-1] & lower(lPath[sl[i]..$])
+			end if
+			exit
+		end for
+		if and_bits(case_flags,or_bits(CORRECT,TO_LOWER))=TO_LOWER and length(lPath) then
 			lPath = lower(lPath)
 		end if
-	end ifdef
-
-	return lPath
+		if correct_name and length(lPath) then
+			lPath[1] = upper(lPath[1])
+		end if
+	end if
+	
+	return lPath & wildcard_suffix
 end function
 
 
@@ -1594,7 +1748,7 @@ function fs_case(sequence s)
 	-- Normally Windows is insensitive and others are sensitive.  
 	-- On the other hand:
 	--        EXT2 filesystem mounted on Windows is case sensitive.
-	--        OS X's filesystems may be insensitive so in this case we want
+	--        OS X's filesystems may be insensitive.
 	--        SMB filesystems mounted on UNIX are insensitive.
 	ifdef WINDOWS then
 		return lower(s)

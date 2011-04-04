@@ -323,25 +323,37 @@ public function roll(object desired, integer sides = 6)
 end function
 
 --**
--- Selects a random sample sub-set of items from a population set.
+-- Selects a set of random samples from a population set. This can be done with either
+-- the "with-replacement" or "without-replacement" methods. When using the "with-replacement"
+-- method, after each sample is taken it is returned to the population set so that it
+-- could possible be taken again. The "without-replacement" method does not return the sample so
+-- these items can only ever be chosen once.
 --
 -- Parameters:
--- # ##full_set## : a sequence. The set of items from which to take a sample.
+-- # ##population## : a sequence. The set of items from which to take a sample.
 -- # ##sample_size##: an integer. The number of samples to take.
--- # ##return_remaining##: an integer. If non-zero, the sub-set not selected is also returned.
--- If zero, the default, only the sampled set is returned.
+-- # ##sampling_method##: an integer.
+-- ## When < 0, "with-replacement" method used.
+-- ## When = 0, "without-replacement" method used and a single set of samples returned.
+-- ## When > 0, "without-replacement" method used and a sequence containing the
+--              set of samples (chosen items) and the set unchosen items, is returned.
 --
 -- Returns:
---    a sequence. When ##return_remaining## = 0 then this is the set of samples, otherwise
---   it returns a two-element sequence; the first is the samples, and the second
---   is the remainder of the population (in the original order).
+--   A sequence. When ##sampling_method## less than or equal to 0 then this is 
+--   the set of samples, otherwise it returns a two-element sequence; the first
+--   is the samples, and the second is the remainder of the population
+--  (in the original order).
 --
 -- Comments:
 -- * If ##sample_size## is less than 1, an empty set is returned.
--- * If ##sample_size## is greater than or equal to the population count, 
---   the entire population set is returned, but in a random order.
+-- * When using "without-replacement" method, if ##sample_size## is greater than
+--   or equal to the population count, the entire population set is returned,
+--   but in a random order.
+-- * When using "with-replacement" method, if ##sample_size## can be any positive
+--   integer, thus it is possible to return more samples than there are items in
+--   the population set as items can be chosen more than once.
 --
--- Example 1:
+-- Example 1 (without replacement):
 -- <eucode>
 -- set_rand("example")
 -- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", 1)})  
@@ -356,60 +368,83 @@ end function
 --     --> "omntrqsbjguaikzywvxflpedc"
 -- </eucode>
 --
--- Example 2:
+-- Example 2 (with replacement):
+-- <eucode>
+-- set_rand("example")
+-- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", 1, -1)})  
+--      --> "t"
+-- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", 5, -1)})  
+--      --> "fzycn"
+-- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", -1, -1)}) 
+--      --> ""
+-- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", 26, -1)}) 
+--      --> "keeamenuvvfyelqapucerghgfa"
+-- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", 45, -1)}) 
+--     --> "orwpsaxuwuyrbstqqwfkykujukuzkkuxvzvzniinnpnxm"
+-- </eucode>
+--
+-- Example 3:
 -- <eucode>
 -- -- Deal 4 hands of 5 cards from a standard deck of cards.
 -- sequence theDeck
 -- sequence hands = {}
 -- sequence rt
--- function new_deck()
+-- function new_deck(integer suits = 4, integer cards_per_suit = 13, integer wilds = 0)
 -- 	sequence nd = {}
--- 	for i = 1 to 4 do
--- 		for j = 1 to 13 do
+-- 	for i = 1 to suits do
+-- 		for j = 1 to cards_per_suit do
 -- 			nd = append(nd, {i,j})
 -- 		end for
 -- 	end for
+--  for i = 1 to wilds do
+--      nd = append(nd, {suits+1 , i})
+--  end for
 -- 	return nd
 -- end function
--- theDeck = new_deck()
+--
+-- theDeck = new_deck(4, 13, 2) -- Build the initial deck of cards
 -- for i = 1 to 4 do
+--  -- Pick out 5 cards and also return the remaining cards.
 -- 	rt = sample(theDeck, 5, 1)
--- 	theDeck = rt[2]
+-- 	theDeck = rt[2] -- replace the 'deck' with the remaining cards.
 -- 	hands = append(hands, rt[1])
 -- end for
 --
 -- </eucode>
-public function sample(sequence full_set, integer sample_size, integer return_remaining = 0)
+public function sample(sequence population, integer sample_size, integer sampling_method = 0)
 	sequence lResult
 	integer lIdx
 	integer lChoice
-	integer lLen
 	
 	if sample_size < 1 then
-		if return_remaining then
-			return {{}, full_set}	
+		-- An empty sample requested.
+		if sampling_method > 0 then
+			return {{}, population}	
 		else
 			return {}
 		end if
 	end if
 	
-	if sample_size >= length(full_set) then
-		sample_size = length(full_set)
+	if sampling_method >= 0 and sample_size >= length(population) then
+		-- Adjust maximum sample size for WOR method.
+		sample_size = length(population)
 	end if
 	
 	lResult = repeat(0, sample_size)
 	lIdx = 0
-	lLen = length(full_set)
 	while lIdx < sample_size do
-		lChoice = rand(lLen)
+		lChoice = rand(length(population))
 		lIdx += 1
-		lResult[lIdx] = full_set[lChoice]
-		lLen -= 1
-		full_set[lChoice .. $-1] = full_set[lChoice+1 .. $]
+		lResult[lIdx] = population[lChoice]
+		
+		if sampling_method >= 0 then
+			-- WOR method so remove the item from the population
+			population = remove(population, lChoice)
+		end if
 	end while
 
-	if return_remaining then
-		return {lResult, full_set[1 .. $ - sample_size]}	
+	if sampling_method > 0 then
+		return {lResult, population}	
 	else
 		return lResult
 	end if
