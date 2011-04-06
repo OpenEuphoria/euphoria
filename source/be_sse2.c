@@ -135,7 +135,7 @@ void save_vector_registers();
 	"movdqa [ebx], xmm7"\
 	modify [ebx];
 
-	/* Returns true iff the four sequential elements pointed to by ptr1 are all ATOM_INTs */
+/* Returns true iff the four sequential elements pointed to by ptr1 are all ATOM_INTs */
 unsigned long sse2_are_all_atom_ints( object_ptr ptr1 );
 #pragma aux sse2_are_all_atom_ints = \
 	/* edx = dest, eax = ptr1, ecx = ptr2 */\
@@ -182,11 +182,11 @@ unsigned long sse2_paddi3( object_ptr dest, object_ptr ptr1, object_ptr ptr2);
 	modify [ebx]\
 	parm [EDX] [EAX] [ECX]\
 	value [ebx];
-	
+
+
 /* The set of possible values for ATOM_INT form a group under: OR, AND, and XOR.
  In plain English, once we know the inputs are ATOM_INTs the results will also
  be ATOM_INTs */
-	
  unsigned long sse2_pori3( object_ptr dest, object_ptr ptr1, object_ptr ptr2);
  #pragma aux sse2_pori3 = \
 	/* edx = dest, eax = ptr1, ecx = ptr2 */\
@@ -274,9 +274,9 @@ unsigned long sse2_psli3( object_ptr dest, object_ptr ptr1, object ecx);
 unsigned long sse2_cmpi3( object_ptr dest, object_ptr ptr1, object_ptr ptr2 );
 #pragma aux sse2_cmpi3 = \
 	"movdqa xmm0, [eax]"\
-	"movdqa xmm2, [eax]"\
+	"movdqa xmm2, xmm0"\
 	"movdqa xmm1, [ebx]"\
-	"movdqa xmm3, [ebx]"\
+	"movdqa xmm3, xmm1"\
 	"movdqa xmm4, [ONES_128bit]"\
 	"pcmpgtd xmm3, xmm0" /*xmm0[] < xmm1[] --> xmm3[] = -1*/\
 	"pcmpeqd xmm1, xmm2"  /*xmm1[] = xmm2[] --> xmm1[] = -1*/\
@@ -294,16 +294,141 @@ unsigned long sse2_cmpi3( object_ptr dest, object_ptr ptr1, object_ptr ptr2 );
 
 	/* dest = (eax[0..3] == ebx[0..3]) */
 	/* After the op. dest[i] is -1 if eax[i] == ebx[i] and 0 otherwise for i = 0..3*/
-void sse2_eqi3( object_ptr dest, object_ptr eax, object_ptr ebx );
+unsigned long sse2_eqi3( object_ptr dest, object_ptr eax, object_ptr ebx );
 #pragma aux sse2_eqi3 = \
 	"movdqa xmm1, [eax]"\
 	"pcmpeqd xmm1, [ebx]"  /*xmm1[] = xmm2[] --> xmm1[] = -1*/\
 	/* write result to memory location */\
 	"movdqa [edx], xmm1"\
+	"xor edx, edx"\
 	"emms"\
-	parm [edx] [eax] [ebx];
+	modify [edx]\
+	parm [edx] [eax] [ebx]\
+	value [edx];
+
+/* Sets all i=0..3 vector_ptr[i] to value. */
+/* Warning up tested code! */
+void sse2_set( object_ptr vector_ptr, object value );
+#pragma aux sse2_set = \
+	"mov ecx,4"\
+	"rep stosd"\
+	parm [edi] [eax];
 
 
+/* Compares 'dest' to 'b'.  Returns a fatal error if the differ.
+ *
+ * We use this to compare the result of our sse2 functions using the standard (plain C)
+ * compare function to the output of standard function.   This only happens when
+ * EXTRA_CHECK is turned on.  Don't benchmark with EXTRA_CHECK ! */
+#ifdef EXTRA_CHECK
+#define compare_check(dest,b) 	if (compare(MAKE_SEQ(dest),controlobj = b)) {\
+		\
+		/* failure!  Now, this part will find where in the sequence we went wrong.\
+		 * */\
+		int j;\
+		control = SEQ_PTR(controlobj);\
+		for (j=1;j<=dest->length;++j) {\
+			if (dest->base[j] != control->base[j] &&\
+				(  (IS_ATOM_INT(dest->base[j]) && IS_ATOM_INT(control->base[j])) ||\
+					compare(dest->base[j],control->base[j])   )  )\
+				break;\
+		}\
+		RTFatal("SSE code discrepancy:"\
+			"results not consistent with old version. Index %d\n", j);\
+	} else {\
+		DeRefDS(controlobj);\
+	} 0
+#else
+#define compare_check(dest,b) 0
+#endif
+
+/* Returns true if s->base[1] is aligned appropriately for our macros and functions
+ * we have defined here. */
+inline static int sse2_aligned(struct s1 * s) {
+	return ((unsigned long)s->base) % 16 == 12;
+}
+
+
+
+// adds a sequence (and it should contain mostly integers), 'a', to the integer
+// atom top. 
+// Always allocates a new sequence
+object_ptr paddsi(object a, object top) {
+	struct s1 * dest;
+	struct s1 * sa;
+	int sb;
+	int k, length;
+	object_ptr dp,ap,bp, tempb;
+	struct s1 * control;
+	object controlobj;
+	signed long int * ou;
+	signed long int * in;
+	signed long int j;
+	unsigned long which_int_a, which_int_b;
+	sa = SEQ_PTR(a);
+	sb = INT_VAL(top);
+	sse2_set(vreg_temp,sb);
+	dest = NewS1(sa->length);
+	dest->base[sa->length+1] = NOVALUE;
+	ap = &sa->base[1];
+	dp = &dest->base[1];
+	k = 0;
+	iterate_over_double_words = 0;
+	length = sa->length;
+	while (k < length) {
+		which_int_a = sse2_are_all_atom_ints(ap);
+		if ( which_int_a == (unsigned int)-1 ) {
+			unsigned char overflows[4];
+			unsigned long iof;
+			if (iof = sse2_paddi3( dp, ap, vreg_temp )) {
+				unsigned char * ofptr;
+				*(unsigned long*)(overflows) = iof;
+				ofptr = &overflows[0];
+				do {
+					if (*(ofptr++)) { 
+						*dp = NewDouble(*dp);
+					}
+					++dp;
+				} while (++k%4);
+			} else {
+				dp += sizeof(vreg)/sizeof(object);
+				k  += sizeof(vreg)/sizeof(object);
+			}
+			ap += sizeof(vreg)/sizeof(object);
+		} else {
+			do {
+				if (((char*)&which_int_a)[k%4]) { // is atom_int(*ap)?
+					*dp = INT_VAL(*ap) + sb;
+					if (*dp > MAXINT || *dp < MININT) {
+						*dp = NewDouble(*dp);
+					}
+				} else if (*ap == NOVALUE) {
+					*dp = *ap;
+					break;	
+				} else if (IS_ATOM(*ap)) {
+					*dp = NewDouble(DBL_PTR(*ap)->dbl + sb);
+				} else if (sse2_aligned(SEQ_PTR(*ap))) {
+					*dp = paddsi(*ap,sb);
+				} else {
+					*dp = binary_op(PLUS,*ap,sb);
+				}
+				++ap, ++bp, ++dp, ++k;
+			} while (k % 4);
+		} // else 
+	} // while
+	dest->base[length+1] = NOVALUE;
+	compare_check(dest,binary_op(PLUS,a,top));
+	return top = MAKE_SEQ(dest);
+}
+
+// adds an integer, 'a', to a sequence, 'top', and returns the result.
+// Always allocates a new sequence
+object_ptr paddis(object a, object top) {
+	return paddsi(top,a);
+}
+
+// adds a sequence, 'a', to a sequence, 'top', and returns the result.
+// Always allocates a new sequence
 object_ptr padds2(object a, object top) {
 	struct s1 * dest;
 	struct s1 * sa, * sb;
@@ -319,7 +444,7 @@ object_ptr padds2(object a, object top) {
 	sb = SEQ_PTR(top);
 	if (sa->length != sb->length) {
 		RTFatal(
-		"Sequences are of differing lenghts can not be added together.");
+		"Sequences are of differing lengths can not be added together.");
 	}
 	tempb = vreg_temp;	
 	dest = NewS1(sa->length);
@@ -387,27 +512,167 @@ object_ptr padds2(object a, object top) {
 		} // else 
 	} // while
 	dest->base[length+1] = NOVALUE;
-#   ifdef EXTRA_CHECK
-	/* Use the old way to check the answer for SSE2.... makes this slower than
-	 * the original implementation. */
-		if (compare(MAKE_SEQ(dest),controlobj = binary_op(PLUS,a,top))) {
-			
-			/* failure!  Now, this part will find where in the sequence we went wrong.
-			 * */
-			int j;
-			control = SEQ_PTR(controlobj);
-			for (j=1;j<=dest->length;++j) {
-				if (dest->base[j] != control->base[j] &&
-					(  (IS_ATOM_INT(dest->base[j]) && IS_ATOM_INT(control->base[j])) ||
-						compare(dest->base[j],control->base[j])   )  )
-					break;
-			}
-			RTFatal("SSE code discrepancy:"
-				"results not consistent with old version. Index %d\n", j);																
-		} else {
-			DeRefDS(controlobj);
-		}
-#	endif
+	compare_check(dest,binary_op(PLUS,a,top));
 	return top = MAKE_SEQ(dest);
 }
 
+
+
+#if UNTESTED_FUNCTIONS
+// Implementation Note: This is untested code that doesn't yet compile.
+// Inspect, inspect, inspect
+// Test test test
+
+typedef unsigned long (*packedop_fn_t)(object_ptr destination, object_ptr p1, object_ptr p2);
+
+struct function_row {
+	object (*int_fn)(object a, object b);
+	object (*dbl_fn)(d_ptr a, d_ptr b);
+	packedop_fn_t packedop3;
+};
+
+extern object less(object, object);
+extern object Dless(d_ptr, d_ptr);
+extern object greatereq(object, object);
+extern object Dgreatereq(d_ptr, d_ptr);
+extern object add(object, object);
+extern object Dadd(d_ptr, d_ptr);
+
+
+// Note: apparently things defined with pragma aux are macros,
+// we could rewrite pOpa2 as a macro...  
+// If we do we can have one for where we need to check for overflow
+// and another where we don't.  Then we only concentrate on working with
+// the int[4] vectors.
+struct function_row sse_op_table[12] = {
+	{ NULL, NULL, NULL },
+	{ less, Dless, NULL },
+	{ greatereq, Dgreatereq, NULL },
+	{NULL, NULL, NULL}, //{ equals, Dequals, NULL },
+	{NULL, NULL, NULL}, // { noteq, Dnoteq, NULL },
+	{NULL, NULL, NULL},//{ lesseq, Dlesseq, NULL },
+	{NULL, NULL, NULL},//{ not, Dnot, NULL },
+	{NULL, NULL, NULL},//{ and, Dand, NULL },
+	{NULL, NULL, NULL},//{ or, Dor, NULL },
+	{NULL, NULL, NULL},//{minus, Dminus, NULL},
+	{add, Dadd, sse2_paddi3 }
+};
+
+// performs OP on a with top.  The caller must handle the INT,INT case.
+// At least one should be a sequence.  Yet, the other can be object,
+// an atom integer, an atom double or another sequence.
+object_ptr pOPa2(int op, object a, object top) {
+	struct s1 * dest;
+	struct s1 * sa, * sb;
+	long  k;
+	short stepa, stepb;
+	long length;
+	object_ptr dp,ap,bp, tempb;
+	struct s1 * control;
+	object controlobj;
+	d_ptr dbltemp_ptr;
+	signed long int j;
+	unsigned long which_int_a, which_int_b;
+	length = -1;
+#define setup_object_or_bail(sc,c,stepc,cp) \
+	if (stepc = IS_SEQUENCE(c)) { \
+		stepc = sizeof(vreg)/sizeof(object);\
+		sc = SEQ_PTR(c);\
+		if (!sse2_aligned(sc)) {\
+			return binary_op(op,c,top);\
+		} \
+		length = sc->length;\
+		cp = sc->base;\
+		++cp;\
+	} else {\
+		sc = NULL;\
+		stepc = 0;\
+		sse2_set(vreg_temp, c);\
+		cp = vreg_temp;\
+	} 0
+	// setup all objects
+	setup_object_or_bail(sa,a,stepa,ap);
+	setup_object_or_bail(sb,top,stepb,bp);
+	if (length >= 0 && sa->length != sb->length) {
+		RTFatal(
+		"Sequences are of differing lengths can not be added together.");
+	} else if (length == -1) {
+		RTFatal("No sequences supplied.");
+	}
+	// Now, at least one is a sequence and all sequences are sse aligned.
+	dest = NewS1(length);
+	dest->base[length] = NOVALUE;
+	dp = &dest->base[1];
+	k = 0;
+	
+	while (k < length) {
+		which_int_a = sse2_are_all_atom_ints(ap);
+		if ( which_int_a == (unsigned int)-1 && 
+			((which_int_b = sse2_are_all_atom_ints(bp)) == (unsigned int)-1) ) {
+			unsigned char overflows[4];
+			unsigned long iof;
+			if (iof = (sse_op_table[op]).packedop3( dp, ap, bp )) {
+				unsigned char * ofptr;
+				*(unsigned long*)(overflows) = iof;
+				ofptr = &overflows[0];
+				if (*(ofptr++)) {
+					*dp = NewDouble(*dp);
+				}
+				++dp;
+				if (*(ofptr++)) {
+					*dp = NewDouble(*dp);
+				}
+				++dp;
+				if (*(ofptr++)) {
+					*dp = NewDouble(*dp);
+				}
+				++dp;
+				if (*(ofptr++)) {
+					*dp = NewDouble(*dp);
+				}
+				++dp;
+			} else {
+				dp += sizeof(vreg)/sizeof(object);
+				k  += sizeof(vreg)/sizeof(object);
+			}
+			ap += stepa;
+			bp += stepb;
+		} else {
+			do {
+				if (((char*)&which_int_a)[k%4]) { // is atom_int(*ap)?
+					if (IS_ATOM_INT(*bp)) {
+						*dp = (sse_op_table[op].int_fn)(INT_VAL(*ap),INT_VAL(*bp));
+						if (*dp > MAXINT || *dp < MININT) {
+							*dp = NewDouble(*dp);
+						}	
+					} else if (IS_ATOM(*bp)) {
+						*dp = (sse_op_table[op].dbl_fn)(DBL_PTR(NewDouble((double)INT_VAL(*ap))),DBL_PTR(*bp));
+					} else {
+						*dp = pOPa2(op,*ap,*bp);
+					}
+				} else if (*ap == NOVALUE) {
+					*dp = *ap;
+					break;
+				} else if (IS_ATOM(*ap)) {
+					if (IS_ATOM_INT(*bp))
+						*dp = (sse_op_table[op].dbl_fn)(DBL_PTR(*ap),DBL_PTR(NewDouble(INT_VAL(*bp))));
+					else if (IS_ATOM(*bp))
+						*dp = (*sse_op_table[op].dbl_fn)(DBL_PTR(*ap),DBL_PTR(*bp));
+					else
+						*dp = pOPa2(op,*ap,*bp);
+				} else {
+					if (IS_SEQUENCE(*bp) && (((unsigned int)SEQ_PTR(*bp)->base) % 16 == 12)
+						&& (((unsigned int)SEQ_PTR(*ap)->base) % 16 == 12)) 
+							*dp = pOPa2(op,*ap,*bp);
+					else
+							*dp = binary_op(op,*ap,*bp);
+				}
+				++ap, ++bp, ++dp, ++k;
+			} while (k % 4);
+		} // else 
+	} // while
+	dest->base[length+1] = NOVALUE;
+	compare_check(dest,binary_op(op,a,top));
+	return top = MAKE_SEQ(dest);
+}
+#endif
