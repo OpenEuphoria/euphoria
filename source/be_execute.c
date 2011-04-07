@@ -67,7 +67,9 @@
 #include "be_callc.h"
 #include "coverage.h"
 #include "be_execute.h"
-
+#if SSE2
+#include "include/be_sse2.h"
+#endif
 /******************/
 /* Local defines  */
 /******************/
@@ -1968,7 +1970,15 @@ void do_exec(int *start_pc)
 				}
 				else {
 					tpc = pc;
-					top = binary_op(PLUS, ATOM_1, top);
+#					if SSE2
+						if (sse2_aligned_object(top)) {
+							top = paddsi(top, ATOM_1);
+						} else {
+							top = binary_op(PLUS, ATOM_1, top);
+						}
+#					else
+						top = binary_op(PLUS, ATOM_1, top);
+#					endif
 				}
 				DeRefx(*(object_ptr)a);
 				*(object_ptr)a = top;
@@ -2682,10 +2692,12 @@ void do_exec(int *start_pc)
 							((int)&(SEQ_PTR(a)->base[1]) % BASE_ALIGN_SIZE == 0) && 							 
 							((int)&(SEQ_PTR(top)->base[1]) % BASE_ALIGN_SIZE == 0)) {
 							top = padds2(a,top);
-							goto aresult;
+						} else {
+							top = binary_op(PLUS,a,top);
 						}
+#					else
+						top = binary_op(PLUS, a, top);
 #					endif // SSE2				
-					top = binary_op(PLUS, a, top);
 
 				aresult:
 					/* store result and DeRef */

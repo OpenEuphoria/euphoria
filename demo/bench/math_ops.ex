@@ -1,5 +1,7 @@
 include std/math.e
 include std/stats.e
+include std/console.e
+
 sequence s1 = rand(repeat(255,5000))
 sequence s2 = rand(repeat(255,5000))
 sequence ans
@@ -38,4 +40,4 @@ sequence stats = average(timing_data) & 2*stdev(timing_data)
 sequence prefix = get_metric_prefix(stats[1])
 stats /= prefix[1]
 printf(1, "Time to add two 5000 long sequences: %.3f +- %f %ss\n", append(stats,prefix[2]) )
-
+maybe_any_key("Press any key to Close")

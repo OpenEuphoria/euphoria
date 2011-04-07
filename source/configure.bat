@@ -99,7 +99,7 @@ IF "%1" == "--extracheck" (
 
 IF "%1" =="--sse2" (
 	echo SSE2=-DSSE2=1 >> config.wat
-	echo CPU_FLAG=/6r  >> config.wat
+	echo CPU_FLAG=/6r -DSSE2=1  >> config.wat
 	SET SSE2_ENABLED=1
 	GOTO EndLoop
 )
