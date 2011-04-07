@@ -12,7 +12,7 @@
 
 #define MAJ_VER 4 
 #define MIN_VER 0 
-#define PAT_VER 2 
+#define PAT_VER 3 
 
 #ifndef EREL_TYPE
 #  define REL_TYPE "development"
