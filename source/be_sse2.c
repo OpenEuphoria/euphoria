@@ -92,7 +92,16 @@ void * malloc_aligned(unsigned long size, unsigned long alignment_size) {
 	return outptr;
 }
 
+int sse2_base_aligned_object(object s) {
+	return (((unsigned long)SEQ_PTR(s)->base) % 16 == 12);
+} 
 
+int sse2_base_aligned_s1ptr(struct s1 * s) {
+	return ((unsigned long)(s->base) % 16 == 12);
+} 
+int sse2_aligned_s1ptr(struct s1 * s) {
+	return ((unsigned long)(s->base) % 16 == 12);
+} 
 
 void load_vector_registers();
 #pragma aux load_vector_registers = \

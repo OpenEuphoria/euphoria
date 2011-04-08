@@ -1971,7 +1971,7 @@ void do_exec(int *start_pc)
 				else {
 					tpc = pc;
 #					if SSE2
-						if (sse2_aligned_object(top)) {
+						if (sse2_base_aligned_object(top)) {
 							top = paddsi(top, ATOM_1);
 						} else {
 							top = binary_op(PLUS, ATOM_1, top);
@@ -2685,19 +2685,22 @@ void do_exec(int *start_pc)
 						else if (IS_ATOM_DBL(top)) {
 							top = Dadd(DBL_PTR(a), DBL_PTR(top));
 							goto aresult;
-						}
+						}								
+					} else {
+						// a is a sequence.
+#						if SSE2 
+							if (sse2_base_aligned_object(a)) {
+								if (IS_ATOM_INT(top)) {
+									top = paddis(top,a);
+									goto aresult;
+								} else if (IS_SEQUENCE(top) && sse2_base_aligned_object(top)) {
+									top = padds2(a,top);
+									goto aresult;
+								}
+							}
+#						endif // SSE2	
 					}
-#					if SSE2 
-						if (IS_SEQUENCE(top) && IS_SEQUENCE(a) &&
-							((int)&(SEQ_PTR(a)->base[1]) % BASE_ALIGN_SIZE == 0) && 							 
-							((int)&(SEQ_PTR(top)->base[1]) % BASE_ALIGN_SIZE == 0)) {
-							top = padds2(a,top);
-						} else {
-							top = binary_op(PLUS,a,top);
-						}
-#					else
-						top = binary_op(PLUS, a, top);
-#					endif // SSE2				
+					top = binary_op(PLUS, a, top);
 
 				aresult:
 					/* store result and DeRef */
