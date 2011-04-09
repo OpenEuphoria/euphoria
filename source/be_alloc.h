@@ -206,12 +206,16 @@ extern object NewDouble(double d);
 extern long copy_string(char *dest, char *src, size_t bufflen);
 extern long append_string(char *dest, char *src, size_t bufflen);
 
+#if defined(__GNUC__)
+extern void SpaceMessage() __attribute__ ((noreturn));
+#elif defined(__WATCOMC__)
 extern void SpaceMessage();
-
+#pragma aux SpaceMessage aborts;
 #ifdef SSE2
 #include "sse2.h"
 #else
 #define BASE_ALIGN_SIZE 4
 #endif
-
 #endif
+
+#endif /* BE_ALLOC_H_ */

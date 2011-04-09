@@ -43,7 +43,7 @@
 	#ifdef EMINGW
 		#define _WIN32_IE 0x0400
 	#endif
-#include <windows.h>
+	#include <windows.h>
 	#include <commctrl.h>
 #endif
 
@@ -263,7 +263,7 @@ struct op_info optable[MAX_OPCODE+1] = {
 {x, x},
 {x, x},
 {x, x},
-/* 130 */ {x, x},
+  /* 130 */ {x, x},
 			// two removed
 {x, x},
 {x, x},
@@ -290,10 +290,10 @@ struct op_info optable[MAX_OPCODE+1] = {
 {x, x},
 {x, x}, 
 {x, x},  // platform - never actually emitted
-{x, x},
-{x, x},
-{x, x},
-{x, x},
+{x, x}, 
+{x, x}, 
+{x, x}, 
+{x, x}, 
 {x, x},/* 160 */
 {x, x},
 {x, x},
@@ -783,17 +783,19 @@ s1_ptr Add_internal_space(object a,int at,int len)
 	object temp;
 	int i;
 	int new_len;
-	object_ptr p,q, old_base;
+	object_ptr p,q;
 	s1_ptr seq = SEQ_PTR(a);
 	int nseq = seq->length;
 	if (seq->ref == 1 ){
 		if( len >= seq->postfill ){
+			int base_offset;
 			new_len = EXTRA_EXPAND(nseq + len);
-			old_base = seq->base;
-			new_seq = (s1_ptr)ERealloc((char *)seq, (1+new_len)*sizeof(s1_ptr) + sizeof( struct s1 ));
-			new_seq->base = ((object_ptr)new_seq) + ( old_base - ((object_ptr)seq) );
+			base_offset = (object_ptr)seq->base - (object_ptr)seq;
+			new_seq = (s1_ptr)ERealloc((char *)seq, (new_len + 1)*sizeof(s1_ptr) + sizeof( struct s1 ));
+			new_seq->base = (object_ptr)(new_seq) + base_offset;
 			seq = new_seq;
 			seq->postfill = new_len - (len + nseq) - 1;
+
 		}
 		else{
 			seq->postfill -= len;
@@ -1293,24 +1295,24 @@ object Repeat(object item, object repcount)
 		(DBL_PTR(item)->ref) += count;
 	}
 
-		while (count >= 10) {
-			*obj_ptr++   = item; // 1
-			*obj_ptr++   = item; // 2
-			*obj_ptr++   = item; // 3
-			*obj_ptr++   = item; // 4
-			*obj_ptr++   = item; // 5
-			*obj_ptr++   = item; // 6
-			*obj_ptr++   = item; // 7
-			*obj_ptr++   = item; // 8
-			*obj_ptr++   = item; // 9
-			*obj_ptr++   = item; // 10
-			count -= 10;
-		};
+	while (count >= 10) {
+		*obj_ptr++   = item; // 1
+		*obj_ptr++   = item; // 2
+		*obj_ptr++   = item; // 3
+		*obj_ptr++   = item; // 4
+		*obj_ptr++   = item; // 5
+		*obj_ptr++   = item; // 6
+		*obj_ptr++   = item; // 7
+		*obj_ptr++   = item; // 8
+		*obj_ptr++   = item; // 9
+		*obj_ptr++   = item; // 10
+		count -= 10;
+	};
 
-		while (count > 0) {
-			*obj_ptr++ = item;
-			count--;
-		};
+	while (count > 0) {
+		*obj_ptr++ = item;
+		count--;
+	};
 
 	return MAKE_SEQ(s1);
 }
@@ -1352,13 +1354,14 @@ void udt_clean_rt( object o, long rid ){
 void udt_clean( object o, long rid ){
 
 	int *code;
-	// seq struct on the stack
-	object seq[(sizeof(struct s1))/sizeof(object)+2/*alignment*/+2/*base elements*/];
+	char seq[8+2*sizeof(object)+sizeof(struct s1)]; // seq struct on the stack
 	s1_ptr s;
 	object args;
 	int pre_ref;
 	int *save_tpc;
-	s = (s1_ptr)( (int)&seq + ( 8 - ( ((int)&seq) & 7 ) ));
+
+	// Need to make sure that s is 8-byte aligned
+	s = (s1_ptr)( ((object)&seq[7])  & ~7 );
 	s->base = (((object_ptr)(s+1))-1);
 	s->ref = 2;
 	s->length = 1;
@@ -1401,7 +1404,7 @@ void udt_clean( object o, long rid ){
 	}
 	else{
 		DeRefDS( o );
-}
+	}
 }
 #endif
 
@@ -2198,7 +2201,7 @@ unsigned long good_rand()
 
 	if (!rand_was_set && seed1 == 0 && seed2 == 0) {
 		// First time thru.
-			setran();
+		setran();
 	}
 
 	/* seed = seed * ROOT % PRIME */
@@ -2691,7 +2694,7 @@ static unsigned int calc_hsieh32(object a)
 	int has_string;
 
 	IS_DOUBLE_AN_INTEGER(a)
- 	if (IS_ATOM_INT(a)) {
+	if (IS_ATOM_INT(a)) {
 	 	tf.integer = a;
 	 	lHashVal = hsieh32(tf.tfc, 4, a*2 - 1);
  	}
@@ -2723,7 +2726,7 @@ static unsigned int calc_hsieh32(object a)
 							hsieh_tempsize = SEQ_PTR(a)->length;
 							if( hsieh_tempstr != 0 ){
 								hsieh_tempstr = ERealloc( hsieh_tempstr, hsieh_tempsize );
-					}
+							}
 							else{
 								hsieh_tempstr = EMalloc( hsieh_tempsize );
 							}
@@ -2822,12 +2825,12 @@ unsigned int calc_fletcher32(object a)
 		}
 		else{
 			tf.ieee_double = a_dbl;
-		for(tfi = 0; tfi < 4; tfi++)
-		{
-			lA += tf.tfc[tfi];
-			lB += lA;
+			for(tfi = 0; tfi < 4; tfi++)
+			{
+				lA += tf.tfc[tfi];
+				lB += lA;
+			}
 		}
-	}
 	}
 	else { /* input is a sequence */
 		int lChar;
@@ -3368,7 +3371,7 @@ void RHS_Slice( object a, object start, object end)
 	length = endval - startval + 1;
 
 #ifndef ERUNTIME
-	CheckSlice(a, startval, endval, length);
+	CheckSlice( a, startval, endval, length);
 #endif
 
 
@@ -4531,7 +4534,7 @@ int get_key(int wait)
 			SetConsoleMode(console_input, ENABLE_LINE_INPUT |
 									ENABLE_ECHO_INPUT |
 									ENABLE_PROCESSED_INPUT);
-									
+
 			return a;
 		}
 #else
@@ -4541,7 +4544,7 @@ int get_key(int wait)
 				a = 256 + getch();
 				if ( 0x8000 & GetAsyncKeyState(VK_CONTROL)) {
 					a += 256;
-			}
+				}
 				if ( 0x8000 & GetAsyncKeyState(VK_SHIFT)) {
 					a += 512;
 				}
@@ -4786,10 +4789,7 @@ void eu_startup(struct routine_list *rl, struct ns_list *nl, unsigned char **ip,
 	clk_tck = clk;
 	xstdin = (void *)stdin;
         eustart_time = current_time();
-#	if SSE2	
-		sse2_variable_init();
-#	endif		
-	InitInOut();
+        InitInOut();
 	InitGraphics();
 	InitEMalloc();
 	InitFiles();
@@ -5643,7 +5643,7 @@ void Cleanup(int status)
 #ifdef EUNIX
 	if (use_prompt() && have_console &&
 		(config.numtextrows < 24 || config.numtextrows > 25 || config.numtextcols != 80 ||
-		((xterm = getenv("TERM")) != NULL &&
+			((xterm = getenv("TERM")) != NULL &&
 		  		strcmp_ins(xterm, "xterm") == 0))) 
 	{
 		screen_output(stderr, "\n\nPress Enter...\n");
@@ -5673,11 +5673,11 @@ void Cleanup(int status)
 	{
 		symtab_ptr sym = TopLevelSub;
 		while( sym ){
-			if( sym->mode = M_NORMAL && 
+			if( sym->mode = M_NORMAL &&
 				(sym->token == PROC ||
-				sym->token == FUNC || 
+				sym->token == FUNC ||
 				sym->token == TYPE)){
-					
+
 // 				EFree( sym->u.subp.code );
 				EFree( sym->u.subp.linetab );
 			}
@@ -6113,8 +6113,8 @@ void Replace( replace_ptr rb )
 				if( target != NOVALUE ){
 					DeRef(target);
 				}
-					RefDS( copy_to );
-				}
+				RefDS( copy_to );
+			}
 			else if( SEQ_PTR( copy_to )->ref != 1 ){
 				RefDS( copy_to );
 			}
@@ -6210,6 +6210,7 @@ int memcopy( void *dest, size_t avail, void *src, size_t len)
 {
 	// Only copies memory if both dest and source are valid addresses, and
 	// all of the source can be copied.
+
 	if (dest == 0) return -1; // No destination supplied
 	if (src == 0) return -2; // No source supplied
 	if (len > avail) return -3; // Source is too large;
@@ -6222,6 +6223,7 @@ int memcopy( void *dest, size_t avail, void *src, size_t len)
 cleanup_ptr ChainDeleteRoutine( cleanup_ptr old, cleanup_ptr prev ){
 	cleanup_ptr new_cup;
 	int res;
+
 	new_cup = (cleanup_ptr)EMalloc( sizeof(struct cleanup) );
 	res = memcopy( new_cup, sizeof(struct cleanup), old, sizeof(struct cleanup) );
 	if (res != 0) {

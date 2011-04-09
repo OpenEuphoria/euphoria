@@ -834,8 +834,8 @@ s1_ptr NewS1(long size)
         // set such that s1->base is a multiple of BASE_ALIGN_SIZE
         for (; ((unsigned int)s1->base) % BASE_ALIGN_SIZE; s1->base++) *s1->base = MAKE_SEQ(NULL);		
         s1->base -= 1;  // point to "0th" element.  So now s1->base[1] is BASE_ALIGN_SIZE aligned.
-		for (i = 1; i <= size; ++i )
-			s1->base[i] = MAKE_SEQ(NULL);
+	for (i = 1; i <= size; ++i )
+		s1->base[i] = MAKE_SEQ(NULL);
         s1->base[size+1] = NOVALUE;
         return(s1);
 }

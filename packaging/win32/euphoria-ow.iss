@@ -12,8 +12,8 @@
 ;
 [Setup]
 AppName=Euphoria
-AppVersion=4.0.1
-AppVerName=Euphoria v4.0.1
+AppVersion=4.0.3
+AppVerName=Euphoria v4.0.3
 AppPublisher=OpenEuphoria Group
 AppPublisherURL=http://openeuphoria.org
 AppSupportURL=http://openeuphoria.org
@@ -25,7 +25,7 @@ LicenseFile=..\..\license.txt
 DisableStartupPrompt=yes
 DisableReadyPage=yes
 OutputDir=.\
-OutputBaseFilename=euphoria-4.0.1-ow
+OutputBaseFilename=euphoria-4.0.3-ow
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
@@ -279,6 +279,7 @@ var euCfgContents_tested : String;
 var path : String;
 var include : String;
 var watcom : String;
+var eu_auto_exec_bat : String;
 // Delete what the installer created at runtime.
 begin
   euCfgFName := ExpandConstant('{app}\bin\eu.cfg');

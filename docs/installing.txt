@@ -7,6 +7,12 @@ operating system.
 
 === Windows
 
+
+*Be careful*, Windows 95 is no longer supported with EUPHORIA.  If Windows 95 has
+been patched with winsock it will work but Microsoft is no longer supplying this.
+
+EUPHORIA is frequently tested on versions Windows XP, Vista, 7.
+
 To install Euphoria on //Windows//, visit the following URL:
 
 :http://openeuphoria.org/wiki/view/DownloadEuphoria.wc
@@ -23,8 +29,18 @@ Download the latest //Windows// installer found under the Binary Releases
 heading of the Current version of Euphoria. Run the program and follow the 
 prompts to get Euphoria installed.
    
-The installer copies the required files and adds ##euphoria\bin## to your path.
-It also sets the environment variable **EUDIR** to the Euphoria directory.
+The installer copies the required files; adds the binary subdirectory to 
+your path, if you leave 'update environment' checked; and if you leave 
+'Associate file extensions' checked, it associates icons and various actions to
+EUPHORIA file extensions.  Please do not open 'Euphoria Console Files' from Explorer;
+they are meant to be run from the command line.
+
+The installer does not set the environment variable **EUDIR** to the Euphoria 
+directory even though many third-party programs expect that to be set.  This is
+so an older version of EUPHORIA can also still work on the same system.
+You can set this environment variable in the Control Panel in 
+'System and Maintenance\System' under 'Advanced Settings'.
+
 
 === Linux and FreeBSD
 

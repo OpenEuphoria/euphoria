@@ -45,9 +45,9 @@ extern int col_max;  /* current number of text columns on screen */
 int consize_ioctl;	/* 1 if line_max or col_max came from ioctl */
 #endif
 
-int use_prompt();
-void EndGraphics();
-void InitGraphics();
+int use_prompt( void );
+void EndGraphics( void );
+void InitGraphics( void );
 object SetTColor(object x);
 object SetBColor(object x);
 
@@ -62,7 +62,7 @@ object memory_set(object d, object v, object n);
 unsigned long get_pos_int(char *where, object x);
 
 void NewConfig(int raise_console);
-double current_time();
+double current_time( void );
 #ifdef EWINDOWS
 long __stdcall Win_Machine_Handler(LPEXCEPTION_POINTERS p);
 #endif

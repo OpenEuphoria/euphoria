@@ -61,7 +61,7 @@ export procedure init_coverage()
 	
 	if equal( coverage_db_name, "" ) then
 		sequence cmd = command_line()
-		coverage_db_name = canonical_path( filebase( cmd[2] ) & "-cvg.edb",, 1 )
+		coverage_db_name = canonical_path( filebase( cmd[2] ) & "-cvg.edb" )
 	end if
 	
 	if coverage_erase and file_exists( coverage_db_name ) then
@@ -182,7 +182,7 @@ end procedure
 -- Add the specified file or directory to the coverage analysis.
 export procedure add_coverage( sequence cover_this )
 	
-	sequence path = canonical_path( cover_this,,1 )
+	sequence path = canonical_path( cover_this,, CORRECT )
 	
 	if file_type( path ) = FILETYPE_DIRECTORY then
 		sequence files = dir( path  )
@@ -194,9 +194,10 @@ export procedure add_coverage( sequence cover_this )
 				end if
 			
 			elsif regex:has_match( eu_file, files[i][D_NAME] ) then
-				path = canonical_path( cover_this & SLASH & files[i][D_NAME],,1 )
-				if not find( path, covered_files ) and not excluded( path ) then
-					new_covered_path( path )
+				-- this is canonical
+				sequence subpath = path & SLASH & files[i][D_NAME]
+				if not find( subpath, covered_files ) and not excluded( subpath ) then
+					new_covered_path( subpath )
 				end if
 			end if
 		end for

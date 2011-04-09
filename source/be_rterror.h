@@ -35,4 +35,12 @@ void RangeReading(object subs, int len);
 void BadSubscript(object subs, long length);
 void NoValue(symtab_ptr s);
 
+void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap)
+#if defined(EUNIX) || defined(EMINGW)
+ __attribute__ ((noreturn))
+#else
+#pragma aux CleanUpError_va aborts;
+#endif
+;
+
 #endif

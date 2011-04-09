@@ -179,6 +179,8 @@ test_equal( "canonical_path() #9", lower(current_dir() & SLASH & "UPPERNAME"), c
 test_equal( "canonical_path() #10",current_dir() & SLASH & lower("UPPERNAME"),  canonical_path( "UPPERNAME",,or_bits(TO_LOWER,CORRECT)))
 test_equal( "canonical_path() #11",current_dir() & SLASH, canonical_path(lower(current_dir()), 1, CORRECT)) 
 
+test_equal( "canonical_path() #12", current_dir() & SLASH & "*.txt", canonical_path( "*.txt" ) )
+test_equal( "canonical_path() #13", current_dir() & SLASH & "*.txt", canonical_path( "../tests/*.txt" ) )
 
 ifdef WINDOWS then
 	object program_files = getenv("ProgramFiles")

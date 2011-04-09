@@ -52,10 +52,10 @@ ifdef WINDOWS then
 	test_equal("WINDOWS test", 2, platform())
 end ifdef
 
-ifdef EU4_0_1 then
-    test_pass("EU4_0_1")
+ifdef EU4_0_3 then
+    test_pass("EU4_0_3")
 elsedef
-    test_fail("EU4_0_1")
+    test_fail("EU4_0_3")
 end ifdef
 
 ifdef EU4_0 then

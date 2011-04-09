@@ -4,9 +4,9 @@
 #include "global.h"
 #include "execute.h"
 
-void screen_show();
-void InitInOut();
-int has_console();
+void screen_show(void);
+void InitInOut(void);
+int has_console(void);
 
 #ifdef EUNIX
 void screen_copy(struct char_cell a[MAX_LINES][MAX_COLS],
@@ -28,8 +28,8 @@ struct char_cell alt_image_debug[MAX_LINES][MAX_COLS];
 	0 - if this is a Windows Windowed application.
 */
 
-extern void check_has_console();
-extern int console_application();
+extern void check_has_console(void);
+extern int console_application(void);
 
 #ifdef EWINDOWS
 void SaveNormal();
@@ -57,13 +57,13 @@ extern char *collect;    /* to collect sprintf/sprint output */
 extern int have_console;  // is there a console window yet?
 extern int already_had_console; /* were we created with a console window or did we have to allocate our own? */
 
-void ClearScreen();
+void ClearScreen(void);
 void SetPosition(int line, int col);
 struct rccoord GetTextPositionP();
 void screen_output(IFILE f, char *out_string);
 void screen_output_va(IFILE f, char *out_string, va_list ap);
 void screen_output_vararg(IFILE f, char *out_string, ...);
-void buffer_screen();
-void flush_screen();
+void buffer_screen(void);
+void flush_screen(void);
 
 #endif

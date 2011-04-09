@@ -1,0 +1,18 @@
+== Version 4.0.2 April 5, 2011
+
+=== Bug Fixes
+
+* Fixed ##[[:canonical_path]]## performance issues introduced in 4.0.1.
+* [[ticket:646]] ##[[:dir]]## can now handle multiple wildcards on non-Windows platforms
+* [[ticket:647]] The version detection system has been improved so that all binaries use
+  the same C header file, which should prevent the potential of mismatched versions.
+* [[ticket:644]] ##[[:canonical_path]]## leaves alone path components (and anything after them)
+  with wildcards.
+* Fixed compiler directives about functions that don't return.  Removed some that were obsolete,
+  and corrected for MinGW to use the GCC directives.
+* [[ticket:648]] Fix small memory leak from while loops
+
+=== New Functionality
+
+* The ##std\rand.e function##, **##sample()##**, now implements both //with replacement//
+and //without replacement// sampling methods.

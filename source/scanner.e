@@ -739,7 +739,7 @@ procedure IncludePush()
 
 	new_file_handle = path_open() -- sets new_include_name to full path
 
-	new_hash = hash(canonical_path(new_include_name,,1), stdhash:HSIEH32)
+	new_hash = hash(canonical_path(new_include_name,,CORRECT), stdhash:HSIEH32)
 
 	idx = find(new_hash, known_files_hash)
 	if idx then

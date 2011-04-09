@@ -12,8 +12,8 @@
 ;
 [Setup]
 AppName=Euphoria
-AppVersion=4.0.1
-AppVerName=Euphoria v4.0.1
+AppVersion=4.0.3
+AppVerName=Euphoria v4.0.3
 AppPublisher=OpenEuphoria Group
 AppPublisherURL=http://openeuphoria.org
 AppSupportURL=http://openeuphoria.org
@@ -25,7 +25,7 @@ LicenseFile=..\..\license.txt
 DisableStartupPrompt=yes
 DisableReadyPage=yes
 OutputDir=.\
-OutputBaseFilename=euphoria-4.0.1
+OutputBaseFilename=euphoria-4.0.3
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
