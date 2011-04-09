@@ -67,9 +67,6 @@
 #include "be_callc.h"
 #include "coverage.h"
 #include "be_execute.h"
-#if SSE2
-#include "include/be_sse2.h"
-#endif
 /******************/
 /* Local defines  */
 /******************/
@@ -616,21 +613,21 @@ void wcthread(long x);
 long wcinc2pc(long x);
 #pragma aux wcinc2pc = \
 		"ADD ECX, 8" \
-		modify [ECX] \
+		modify [] \
 		value [ECX] \
 		parm [ECX];
 
 long wcinc4pc(long x);
 #pragma aux wcinc4pc = \
 		"ADD ECX, 16" \
-		modify [ECX] \
+		modify [] \
 		value [ECX] \
 		parm [ECX];
 
 long wcinc5pc(long x);
 #pragma aux wcinc5pc = \
 		"ADD ECX, 20" \
-		modify [ECX] \
+		modify [] \
 		value [ECX] \
 		parm [ECX];
 
@@ -643,7 +640,7 @@ long wcinc5pc(long x);
 long wcinc3pc(long x);
 #pragma aux wcinc3pc = \
 		"ADD ECX, 12" \
-		modify [ECX] \
+		modify [] \
 		value [ECX] \
 		parm [ECX];
 #define inc3pc() do { pc = (int *)wcinc3pc((long)pc); } while (0)
@@ -653,7 +650,7 @@ void threadpc3(void);
 #pragma aux threadpc3 = \
 		"MOV ECX, EDI" \
 		"jmp [ECX]"    \
-		modify [ECX];
+		modify [EAX EBX ECX EDX];
 
 #define BREAK break
 #include "redef.h"
@@ -1221,7 +1218,7 @@ void symtab_set_pointers()
 			}
 			else{
 				s->u.var.declared_in = (symtab_ptr)SET_OPERAND( s->u.var.declared_in );
-		}
+			}
 		}
 		else if (s->mode == M_CONSTANT ) {
 			if (s->obj) {
@@ -2529,11 +2526,11 @@ void do_exec(int *start_pc)
 					}
 					top = ATOM_1;
 				}
-					obj_ptr = (object_ptr)pc[2];
-					DeRefx(*obj_ptr);
-					*obj_ptr = top;
-					inc3pc();
-					thread();
+				obj_ptr = (object_ptr)pc[2];
+				DeRefx(*obj_ptr);
+				*obj_ptr = top;
+				inc3pc();
+				thread();
 				BREAK;
 
 				/* ---------- start of unary ops ----------------- */
@@ -3141,7 +3138,7 @@ void do_exec(int *start_pc)
 						pc = (int *)pc[3];
 						thread();
 						BREAK;
-				}
+					}
 				}
 				else if (IS_ATOM_DBL(top)) {
 					if (DBL_PTR(top)->dbl == 0.0) {
@@ -3167,7 +3164,7 @@ void do_exec(int *start_pc)
 						pc = (int *)pc[3];
 						thread();
 						BREAK;
-				}
+					}
 				}
 				else if (IS_ATOM_DBL(top)) {
 					if (DBL_PTR(top)->dbl == 0.0) {
@@ -3239,7 +3236,7 @@ void do_exec(int *start_pc)
 						pc = (int *)pc[3];
 						thread();
 						BREAK;
-				}
+					}
 				}
 				else if (IS_ATOM_DBL(top)) {
 					if (DBL_PTR(top)->dbl != 0.0) {
@@ -3265,7 +3262,7 @@ void do_exec(int *start_pc)
 						pc = (int *)pc[3];
 						thread();
 						BREAK;
-				}
+					}
 				}
 				else if (IS_ATOM_DBL(top)) {
 					if (DBL_PTR(top)->dbl != 0.0) {
@@ -3787,10 +3784,10 @@ void do_exec(int *start_pc)
 				result_ptr = 0;
 				pc += 2;
 				while( (sym = sym->next_in_block) ){
-						DeRef(sym->obj);
-						sym->obj = NOVALUE;
+					DeRef(sym->obj);
+					sym->obj = NOVALUE;
 
-					}
+				}
 				thread();
 
 			case L_ROUTINE_ID:
@@ -4401,7 +4398,7 @@ void do_exec(int *start_pc)
 
 				if (b)
 					*(object_ptr)pc[2] = (signed char)*poke_addr;
-					else
+				else
 					*(object_ptr)pc[2] = (unsigned char)*poke_addr;
 
 				inc3pc();

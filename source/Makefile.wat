@@ -160,6 +160,9 @@ EU_BACKEND_OBJECTS = &
 !ifneq INT_CODES 1
 	$(BUILDDIR)\$(OBJDIR)\back\be_magic.obj &
 !endif	
+!ifdef SSE2
+	$(BUILDDIR)\$(OBJDIR)\back\be_sse2.obj &
+!endif
 	$(BUILDDIR)\$(OBJDIR)\back\be_execute.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_decompress.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_task.obj &
@@ -422,8 +425,8 @@ OSFLAG=EWINDOWS
 LIBTARGET=$(BUILDDIR)\$(LIBRARY_NAME).lib
 CC = wcc386
 .ERASE
-FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s $(MEMFLAG) $(DEBUGFLAG) $(SETALIGN4) $(NOASSERT) $(HEAPCHECKFLAG) /I..\ $(EREL_TYPE)
-BE_FLAGS = /ol /zp4 /d$(OSFLAG) /5r /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG) $(SETALIGN4) $(NOASSERT) $(HEAPCHECKFLAG) $(EXTRACHECKFLAG) $(EXTRASTATSFLAG) $(EREL_TYPE)
+FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 $(CPU_FLAG) /otimra /s $(MEMFLAG) $(DEBUGFLAG) $(SETALIGN4) $(NOASSERT) $(HEAPCHECKFLAG) /I..\ $(EREL_TYPE)
+BE_FLAGS = /ol /zp4 /d$(OSFLAG) $(CPU_FLAG) $(SSE2) /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG) $(SETALIGN4) $(NOASSERT) $(HEAPCHECKFLAG) $(EXTRACHECKFLAG) $(EXTRASTATSFLAG) $(EREL_TYPE)
 	
 library : .SYMBOLIC runtime
     @echo ------- LIBRARY -----------
