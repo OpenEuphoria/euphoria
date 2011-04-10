@@ -2682,7 +2682,14 @@ void do_exec(int *start_pc)
 						else if (IS_ATOM_DBL(top)) {
 							top = Dadd(DBL_PTR(a), DBL_PTR(top));
 							goto aresult;
-						}								
+						} 
+						// top is a sequence
+#						if SSE2
+							if (IS_ATOM_INT(a) && sse2_base_aligned_object(top)) {
+								top = paddis(a,top);
+								goto aresult;
+							}
+#						endif
 					} else {
 						// a is a sequence.
 #						if SSE2 
