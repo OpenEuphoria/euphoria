@@ -1700,7 +1700,7 @@ void do_exec(intptr_t *start_pc)
 #ifndef BACKEND
 	int *iptr;
 #endif
-	int file_no;
+	object file_no;
 
 	int end_pos;
 	int going_up;
