@@ -332,6 +332,9 @@ override function peek(object x)
 		a = x
 	else
 		len = x[2]
+		if len = 0 then
+			return {}
+		end if
 		a = x[1]
 	end if
 	if safe_address(a, len, A_READ) then
@@ -351,6 +354,9 @@ override function peeks(object x)
 		a = x
 	else
 		len = x[2]
+		if len = 0 then
+			return {}
+		end if
 		a = x[1]
 	end if
 	if safe_address(a, len, A_READ) then
@@ -370,6 +376,9 @@ override function peek2u(object x)
 		a = x
 	else
 		len = x[2] * 2
+		if len = 0 then
+			return {}
+		end if
 		a = x[1]
 	end if
 	if safe_address(a, len, A_READ) then
@@ -389,6 +398,9 @@ override function peek2s(object x)
 		a = x
 	else
 		len = x[2] * 2
+		if len = 0 then
+			return {}
+		end if
 		a = x[1]
 	end if
 	if safe_address(a, len, A_READ) then
@@ -408,6 +420,9 @@ override function peek4s(object x)
 		a = x
 	else
 		len = x[2]*4
+		if len = 0 then
+			return {}
+		end if
 		a = x[1]
 	end if
 	if safe_address(a, len, A_READ) then
@@ -427,6 +442,9 @@ override function peek4u(object x)
 		a = x
 	else
 		len = x[2]*4
+		if len = 0 then
+			return {}
+		end if
 		a = x[1]
 	end if
 	if safe_address(a, len, A_READ) then
@@ -466,6 +484,9 @@ override procedure poke(atom a, object v)
 		len = 1
 	else
 		len = length(v)
+		if len = 0 then
+			return
+		end if
 	end if
 	if safe_address(a, len, A_WRITE) then
 		eu:poke(a, v)
@@ -482,6 +503,9 @@ override procedure poke2(atom a, object v)
 		len = 2
 	else
 		len = length(v) * 2
+		if len = 0 then
+			return
+		end if
 	end if
 	if safe_address(a, len, A_WRITE) then
 		eu:poke2(a, v)
@@ -498,6 +522,9 @@ override procedure poke4(atom a, object v)
 		len = 4
 	else
 		len = length(v)*4
+		if len = 0 then
+			return
+		end if
 	end if
 	if safe_address(a, len, A_WRITE) then
 		eu:poke4(a, v)
@@ -508,6 +535,9 @@ end procedure
 
 override procedure mem_copy(machine_addr target, machine_addr source, natural len)
 -- safe mem_copy
+	if len = 0 then
+		return
+	end if
 	if not safe_address(target, len, A_WRITE) then 
 		die("BAD MEM_COPY TARGET" & bad_address(target))
 	elsif not safe_address(source, len, A_READ) then
@@ -519,6 +549,9 @@ end procedure
 
 override procedure mem_set(machine_addr target, atom value, natural len)
 -- safe mem_set
+	if len = 0 then
+		return
+	end if
 	if safe_address(target, len, A_WRITE) then
 		eu:mem_set(target, value, len)
 	else
