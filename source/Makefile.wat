@@ -586,20 +586,6 @@ $(BUILDDIR)\creole.exe: $(TRUNKDIR)\source\creole\creole.ex
 	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
 
 !ifdef OBJDIR
-$(BUILDDIR)\$(OBJDIR)\back\coverage.h : $(BUILDDIR)\$(OBJDIR)\main-.c
-	$(EXE) -i $(TRUNKDIR)\include coverage.ex $(BUILDDIR)\$(OBJDIR)
-!endif
-
-$(BUILDDIR)\intobj\back\be_execute.obj : $(BUILDDIR)\intobj\back\coverage.h
-$(BUILDDIR)\intobj\back\be_runtime.obj : $(BUILDDIR)\intobj\back\coverage.h
-
-$(BUILDDIR)\transobj\back\be_execute.obj : $(BUILDDIR)\transobj\back\coverage.h
-$(BUILDDIR)\transobj\back\be_runtime.obj : $(BUILDDIR)\transobj\back\coverage.h
-
-$(BUILDDIR)\backobj\back\be_execute.obj : $(BUILDDIR)\backobj\back\coverage.h
-$(BUILDDIR)\backobj\back\be_runtime.obj : $(BUILDDIR)\backobj\back\coverage.h
-
-!ifdef OBJDIR
 
 $(BUILDDIR)\$(OBJDIR)\back\be_machine.obj : $(INCLUDE_DIR)\be_ver.h
 
