@@ -345,7 +345,7 @@ Indicates that a variable has not been assigned and also terminates a sequence.
 <internal> signed int MININT
 </eucode>
 
-The minimal Euphoria integer.
+The minimal Euphoria integer.  This is -(2^^30).
 
 
 @[:internals:MAXINT|]
@@ -354,4 +354,44 @@ The minimal Euphoria integer.
 <internal> signed int MAXINT
 </eucode>
 
-The maximal Euphoria integer.
+The maximal Euphoria integer.  This is 2^30.
+
+@[:internals:HIGH_BITS]
+==== HIGH_BITS
+<eucode>
+<internal> signed int HIGH_BITS
+</eucode>
+
+HIGH_BITS is an integer value such that if another integer value c lies outside of the range 
+between MININT and MAXINT, c+HIGH_BITS will be non-negative.
+
+===== Proof that HIGH_BITS exists and is #C000_0000 on 32-bit version of EUPHORIA.
+   *In the following expressions powers have higher precedence than unuary minus.*
+   if c is a non-ATOM-INT value, then
+   
+   c belongs to the set  [-2^^31^^,-2^^30^^-1(=NOVALUE)] U [2^^30^^,2^^31^^].
+   
+   c+-2^^30^^ belongs to the set  [-2^^31^^-2^^30^^,-2^^30^^-1-2^^30^^] U [2^^30^^-2^^30^^,2^^30^^]
+    which is [-3*2^^30^^,-2^^31^^-1] U [0,2^^30^^].  However the lower values wrap around 
+    to non-negative numbers:
+    
+   -2^^31^^-1 wraps to 2^^31^^-1.  -3*2^^30^^ wraps around to 2^^30^^.
+   
+   c+-2^^30^^ belongs to the set  [2^^30^^,2^^31^^-1] U [0,2^^30^^] = [0,2^^31^^-1]
+   
+   This is the set of all non-negative numbers that can fit into 32-bit signed
+   longs.  -2^^30^^ is the unsigned version of #C000_0000.  QED.
+   
+   A visual way of looking at it is, adding #C000_0000 to the set of non-ATOM_INTS 
+   rotates the set to the negative side by -MININT (2^30).  The already negative ones wrap 
+   around to the positive; the positive numbers stay positive and hug the zero.  
+   Since adding #C000_0000 on registers is 1-1 and onto, we also know that ATOM_INTs
+   will all be mapped to negative signed longs.
+   
+   
+===== Testing for Overflow:
+    There are two ways to test for overflow:
+    	1. (c > MAXINT) || (c < MININT)
+        2. (c + HIGH_BITS) >= 0
+        
+
