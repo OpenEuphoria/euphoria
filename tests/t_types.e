@@ -439,4 +439,23 @@ if 1 then
 	test_pass( "ignored return for built-in type call in statement list" )
 end if
 
+ 
+function return_atom() 
+	return 1.0 
+end function 
+
+procedure test_ticket_655()
+	atom result = 0 
+
+	test_equal("return_atom()/2 = .5", 0.5, return_atom()/2) 
+	-- this is a typecheck error 
+	-- integer retval_int = return_atom()/2 
+	
+	integer retval_int = return_atom() 
+	result = retval_int/2 
+	
+	test_equal("result = return_atom()/2 = .5", 0.5, result) 
+end procedure
+test_ticket_655()
+
 test_report()
