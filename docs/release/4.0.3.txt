@@ -1,2 +1,7 @@
 == Version 4.0.3 Release Date TBD
 
+=== Bug Fixes
+
+* [[ticket:655]] Integer values stored as doubles weren't being correctly
+  coerced back to euphoria integers in translated code.
+
