@@ -1,5 +1,5 @@
 include std/unittest.e
-set_test_verbosity( TEST_SHOW_ALL )
+
 test_equal( "and_bits 1", 1, and_bits( 1, 3 ) )
 
 atom i1 = 1, i2 = 3
