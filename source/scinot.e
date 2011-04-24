@@ -7,73 +7,53 @@ end ifdef
 
 include std/convert.e
 
---/topic Introduction
---/info
+--****
+-- == Scientific Notation Parsing
 --
---scientific.e was written by Matt Lewis (matthewwalkerlewis@gmail.com)
+-- <<LEVELTOC level=2 depth=4>>
 --
---It's purpose is to parse numbers in scientific notation to the maximum
---precision allowed by the IEEE 754 floating point standard.
---
---
---LICENSE AND DISCLAIMER
---/code
---The MIT License
---
---Copyright (c) 2007 Matt Lewis
---
--- Permission is hereby granted, free of charge, to any person obtaining a copy of this 
--- software and associated documentation files (the "Software"), to deal in the Software 
--- without restriction, including without limitation the rights to use, copy, modify, merge,
---publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons 
--- to whom the Software is furnished to do so, subject to the following conditions:
---
--- The above copyright notice and this permission notice shall be included in all copies or 
--- substantial portions of the Software.
---/endcode
---/code
---THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
---INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
---PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
---FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
---OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
---DEALINGS IN THE SOFTWARE.
---/endcode
-
---/topic Scientific Notation
---/info
---Parsing routines
---The parsing functions require a sequence containing a correctly formed scientific notation
---representation of a number.  The general pattern is an optional negative sign (-), a number, 
---usually with a decimal point, followed by an upper case or lower case 'e', then optionally 
---a plus (+) or a minus (-) sign, and an integer.  There should be no spaces or other characters.  
---The following are valid numbers:
---/code
---      1e0
---      3.1415e-2
---      -9.0E+3
---/endcode
---This library evaluates scientific notation to the highest level of precision possible using
---Euphoria atoms.  An atom can have up to 16 digits of precision.  A number represented by
---scientific notation could contain up to 17 digits.  The 17th supplied digit may have an
---effect upon the value of the atom due to rounding errors in the calculations.  
---
---This doesn't mean that if the 17th digit is 5 or higher, you should include it.  The 
---calculations are much more complicated, because a decimal fraction has to be converted to a 
---binary fraction, and there's not really a one-to-one correspondence between the decimal 
---digits and the bits in the resulting atom.  The 18th or higher digit, however, will never 
---have an effect on the resulting atom.
---
---The biggest and smallest (magnitude) atoms possible are: 
---/code
+-- === Parsing routines
+-- The parsing functions require a sequence containing a correctly formed scientific notation
+-- representation of a number.  The general pattern is an optional negative sign (-), a number, 
+-- usually with a decimal point, followed by an upper case or lower case 'e', then optionally 
+-- a plus (+) or a minus (-) sign, and an integer.  There should be no spaces or other characters.  
+-- The following are valid numbers:
+-- {{{
+-- 1e0
+-- 3.1415e-2
+-- -9.0E+3
+-- }}}
+-- This library evaluates scientific notation to the highest level of precision possible using
+-- Euphoria atoms.  An atom in 32-bit euphoria can have up to 16 digits of precision 
+-- (19 in 64-bit euphoria).  A number represented by scientific notation could contain up to 17 
+-- (or 20) digits.  The 17th (or 20th) supplied digit may have an effect upon the value of the 
+-- atom due to rounding errors in the calculations.  
+-- 
+-- This doesn't mean that if the 17th (or 20th) digit is 5 or higher, you should include it.  The 
+-- calculations are much more complicated, because a decimal fraction has to be converted to a 
+-- binary fraction, and there's not really a one-to-one correspondence between the decimal 
+-- digits and the bits in the resulting atom.  The 18th or higher digit, however, will never 
+-- have an effect on the resulting atom.
+-- 
+-- The biggest and smallest (magnitude) atoms possible are: 
+-- {{{
+-- 32-bit:
 --    1.7976931348623157e+308
 --    4.9406564584124654e-324 
---/endcode
+-- }}}
 
---/topic Low level
---/info
---Helper routines
---
+
+--****
+-- === Floating Point Types
+
+public enum type floating_point
+--** DOUBLE: IEEE 754 double (64-bit) floating point format. 
+-- The native 32-bit euphoria floating point representation.
+	DOUBLE,
+--** EXTENDED: 80-bit floating point format.
+-- The native 64-bit euphoria floating point reprepresentation.
+	EXTENDED
+end type
 
 -- taken from misc.e to avoid including
 function reverse(sequence s)
@@ -138,12 +118,16 @@ function borrow( sequence a, integer radix )
 	return a
 end function
 
---/topic Low level
---/func bits_to_bytes( sequence bits )
+--**
+-- Description:
+-- Takes a sequence of bits (all elements either 0 or 1) and converts it
+-- into a sequence of bytes.
 --
---Takes a sequence of bits (all elements either 0 or 1) and converts it
---into a sequence of bytes.
-public  function bits_to_bytes( sequence bits )
+-- Parameters:
+--  # ##bits## : sequence of ones and zeroes
+--
+-- Returns a sequence of 8-bit integers
+public function bits_to_bytes( sequence bits )
 	sequence bytes
 	integer r
 	r = remainder( length(bits), 8 )
@@ -158,11 +142,16 @@ public  function bits_to_bytes( sequence bits )
 	return bytes
 end function
 
---/topic Low level
---/func bytes_to_bits( sequence bytes )
+--**
+-- Description
+-- Converts a sequence of bytes (all elements integers between 0 and 255) and
+-- converts it into a sequence of bits.
 --
---Converts a sequence of bytes (all elements integers between 0 and 255) and
---converts it into a sequence of bits.
+-- Parameters:
+--  # ##bytes## : sequence of values from 0-255
+--
+-- Returns:
+--	Sequence of bits (ones and zeroes)
 public  function bytes_to_bits( sequence bytes )
 	sequence bits
 	bits = {}
@@ -276,20 +265,24 @@ constant
 	EXTENDED_EXP_BIAS    =  16383,
 	$
 
-public enum type floating_point
-	DOUBLE,
-	EXTENDED
-end type
 
---/topic Scientific Notation
---/func scientific_to_float( sequence s, floating_point fp )
+--**
+-- Description:
+-- Takes a string reprepresentation of a number in scientific notation and
+-- the requested precision (DOUBLE or EXTENDED) and returns a sequence of 
+-- bytes in the raw format of an IEEE 754 double or extended
+-- precision floating point number.  This value can be passed to the euphoria
+-- library function, ##[[:float64_to_atom]]## or ##[[:float80_to_atom]]##, respectively.
+-- Note: does not check if the string exceeds IEEE 754 double precision limits.
 --
---Takes a string reprepresentation of a number in scientific notation and
---the requested precision (DOUBLE or EXTENDED) and returns a sequence of 
---bytes in the raw format of an IEEE 754 double or extende3d
---precision floating point number.  This value can be passed to the euphoria
---library function, float64_to_atom(). or float80_to_atom(), respectively.
---Note: does not check if the string exceeds IEEE 754 double precision limits.
+-- Parameters:
+--	# ##s## : string representation of a number, e.g., "1.23E4"
+--	# ##fp## : the required precision for the ultimate representation
+--	## ##DOUBLE## Use IEEE 754, the euphoria representation used in 32-bit euphoria
+--	## ##EXTENDED## Use Extended Floating Point, the euphoria representation in 64-bit euphoria
+--
+-- Returns:
+-- Sequence of bytes that represents the physical form of the converted floating point number.
 public  function scientific_to_float( sequence s, floating_point fp )
 	integer dp, e, exp
 	sequence int_bits, frac_bits, mbits, ebits, sbits
@@ -457,11 +450,20 @@ public  function scientific_to_float( sequence s, floating_point fp )
 	return bits_to_bytes( mbits & ebits & sbits )
 end function
 
---/topic Scientific Notation
---/func scientific_to_atom( sequence s )
+--**
+-- Description:
+-- Takes a string reprepresentation of a number in scientific notation and returns
+-- an atom.
 --
---Takes a string reprepresentation of a number in scientific notation and returns
---an atom.
+-- Parameters:
+--	# ##s## : string representation of a number, e.g., "1.23E4"
+--	# ##fp## : the required precision for the ultimate representation
+--	## ##DOUBLE## Use IEEE 754, the euphoria representation used in 32-bit euphoria
+--	## ##EXTENDED## Use Extended Floating Point, the euphoria representation in 64-bit euphoria
+-- 
+-- Returns:
+-- Euphoria atom floating point number.
+
 public  function scientific_to_atom( sequence s, floating_point fp )
 	sequence float = scientific_to_float( s, fp )
 	if fp = DOUBLE then
