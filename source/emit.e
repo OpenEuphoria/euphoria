@@ -548,6 +548,7 @@ op_temp_ref[FLOOR_DIV]        = NEW_REFERENCE
 op_temp_ref[AND_BITS]         = NEW_REFERENCE
 op_temp_ref[OR_BITS]          = NEW_REFERENCE
 op_temp_ref[XOR_BITS]         = NEW_REFERENCE
+op_temp_ref[NOT_BITS]         = NEW_REFERENCE
 op_temp_ref[POWER]            = NEW_REFERENCE
 op_temp_ref[LESS]             = NEW_REFERENCE
 op_temp_ref[GREATER]          = NEW_REFERENCE

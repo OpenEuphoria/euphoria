@@ -1467,16 +1467,23 @@ procedure TypeCheck(symtab_index var)
 
 	if TRANSLATE then
 		if OpTypeCheck then
-			if which_type != object_type then
-				if SymTab[which_type][S_EFFECT] then
-					-- only call user-defined types that have side-effects
-					emit_opnd(var)
-					op_info1 = which_type
-					--emit_op(PROC)
-					emit_or_inline()
-					emit_op(TYPE_CHECK)
-				end if
-			end if
+			switch which_type do
+				case object_type, sequence_type, atom_type then
+					-- do nothing
+				case integer_type then
+					-- need to do this to coerce atoms to integers
+					op_info1 = var
+					emit_op(INTEGER_CHECK)
+				case else
+					if SymTab[which_type][S_EFFECT] then
+						-- only call user-defined types that have side-effects
+						emit_opnd(var)
+						op_info1 = which_type
+						--emit_op(PROC)
+						emit_or_inline()
+						emit_op(TYPE_CHECK)
+					end if
+			end switch
 		end if
 
 	else

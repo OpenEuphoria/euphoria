@@ -927,6 +927,8 @@ procedure CUnaryOp(integer pc, sequence op_int, sequence op_gen)
 
 	if TypeIs(Code[pc+1], TYPE_INTEGER) then
 		target_type = TYPE_ATOM
+	elsif Code[pc] = NOT_BITS and TypeIsIn( Code[pc+1], TYPES_IAD ) then
+		target_type = TYPE_ATOM
 	else
 		target_type = GType(Code[pc+1])
 	end if
