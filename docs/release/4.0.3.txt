@@ -5,3 +5,7 @@
 * [[ticket:655]] Integer values stored as doubles weren't being correctly
   coerced back to euphoria integers in translated code.
 * [[ticket:656]] Translated ##[[:not_bits]]## made incorrect type assumptions
+
+=== Enhancements
+
+* Minor changes to eutest output to read its console output
