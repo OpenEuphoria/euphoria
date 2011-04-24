@@ -6,6 +6,7 @@ elsedef
 end ifdef
 
 include std/convert.e
+include std/dll.e
 
 --****
 -- == Scientific Notation Parsing
@@ -47,6 +48,9 @@ include std/convert.e
 -- === Floating Point Types
 
 public enum type floating_point
+--** NATIVE: Use whatever is the appropriate format based upon the version of
+-- euphoria being used (DOUBLE for 32-bit, EXTENDED for 64-bit)
+	NATIVE,
 --** DOUBLE: IEEE 754 double (64-bit) floating point format. 
 -- The native 32-bit euphoria floating point representation.
 	DOUBLE,
@@ -54,6 +58,13 @@ public enum type floating_point
 -- The native 64-bit euphoria floating point reprepresentation.
 	EXTENDED
 end type
+
+integer NATIVE_FORMAT
+if sizeof( C_POINTER ) = 32 then
+	NATIVE_FORMAT = DOUBLE
+else
+	NATIVE_FORMAT = EXTENDED
+end if
 
 -- taken from misc.e to avoid including
 function reverse(sequence s)
@@ -283,12 +294,14 @@ constant
 --
 -- Returns:
 -- Sequence of bytes that represents the physical form of the converted floating point number.
-public  function scientific_to_float( sequence s, floating_point fp )
+public  function scientific_to_float( sequence s, floating_point fp = NATIVE )
 	integer dp, e, exp
 	sequence int_bits, frac_bits, mbits, ebits, sbits
 	
 	integer significand, exponent, min_exp, exp_bias
-	
+	if fp = NATIVE then
+		fp = NATIVE_FORMAT
+	end if
 	if fp = DOUBLE then
 		significand = DOUBLE_SIGNIFICAND
 		exponent    = DOUBLE_EXPONENT
@@ -464,7 +477,10 @@ end function
 -- Returns:
 -- Euphoria atom floating point number.
 
-public  function scientific_to_atom( sequence s, floating_point fp )
+public  function scientific_to_atom( sequence s, floating_point fp = NATIVE )
+	if fp = NATIVE then
+		fp = NATIVE_FORMAT
+	end if
 	sequence float = scientific_to_float( s, fp )
 	if fp = DOUBLE then
 		return float64_to_atom( float )

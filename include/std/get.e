@@ -9,6 +9,7 @@ namespace stdget
 
 include std/error.e
 include std/io.e
+include std/scinot.e
 
 --****
 -- === Error Status Constants
@@ -169,6 +170,7 @@ function get_number()
 	natural ndigits
 	integer hex_digit
 	atom mantissa, dec, e_mag
+	sequence number_string = { ch }
 
 	sign = +1
 	mantissa = 0
@@ -178,23 +180,27 @@ function get_number()
 	if ch = '-' then
 		sign = -1
 		get_ch()
+		number_string &= ch
 		if ch='-' then
 			return read_comment()
 		end if
 	elsif ch = '+' then
 		get_ch()
+		number_string &= ch
 	end if
 
 	-- get mantissa
 	if ch = '#' then
 		-- process hex integer and return
 		get_ch()
+		number_string &= ch
 		while TRUE do
 			hex_digit = find(ch, HEX_DIGITS)-1
 			if hex_digit >= 0 then
 				ndigits += 1
 				mantissa = mantissa * 16 + hex_digit
 				get_ch()
+				number_string &= ch
 			else
 				if ndigits > 0 then
 					return {GET_SUCCESS, sign * mantissa}
@@ -210,17 +216,20 @@ function get_number()
 		ndigits += 1
 		mantissa = mantissa * 10 + (ch - '0')
 		get_ch()
+		number_string &= ch
 	end while
 
 	if ch = '.' then
 		-- get fraction
 		get_ch()
+		number_string &= ch
 		dec = 10
 		while ch >= '0' and ch <= '9' do
 			ndigits += 1
 			mantissa += (ch - '0') / dec
 			dec *= 10
 			get_ch()
+			number_string &= ch
 		end while
 	end if
 
@@ -231,40 +240,31 @@ function get_number()
 	mantissa = sign * mantissa
 
 	if ch = 'e' or ch = 'E' then
+		
 		-- get exponent sign
-		e_sign = +1
-		e_mag = 0
 		get_ch()
+		number_string &= ch
 		if ch = '-' then
-			e_sign = -1
 			get_ch()
+			number_string &= ch
 		elsif ch = '+' then
 			get_ch()
+			number_string &= ch
 		end if
+		
 		-- get exponent magnitude
 		if ch >= '0' and ch <= '9' then
-			e_mag = ch - '0'
-			get_ch()
-			while ch >= '0' and ch <= '9' do
-				e_mag = e_mag * 10 + ch - '0'
+			
+			while ch >= '0' and ch <= '9' with entry do
+				number_string &= ch
+			entry
 				get_ch()
 			end while
 		else
 			return {GET_FAIL, 0} -- no exponent
 		end if
-		e_mag *= e_sign
-		if e_mag > 308 then
-			-- rare case: avoid power() overflow
-			mantissa *= power(10, 308)
-			if e_mag > 1000 then
-				e_mag = 1000
-			end if
-			for i = 1 to e_mag - 308 do
-				mantissa *= 10
-			end for
-		else
-			mantissa *= power(10, e_mag)
-		end if
+		
+		mantissa = scientific_to_atom( number_string )
 	end if
 
 	return {GET_SUCCESS, mantissa}
