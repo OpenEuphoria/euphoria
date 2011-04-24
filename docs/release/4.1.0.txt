@@ -11,3 +11,6 @@
   from all files sorted by descending routine size
 * Added [[:poke_pointer]] and [[:peek_pointer]]
 * New [[:sizeof]] built-in for determining size of certain data types.
+* [[ticket:631]] Scientific parsing code moved from the euphoria source directory and into the
+  standard library.  Routines in ##std/get.e## now return the proper precision data
+  based on the native platform (32 or 64 bits).
