@@ -214,6 +214,7 @@ end ifdef
 ../include/std/hash.e
 ../include/std/map.e
 ../include/std/stack.e
+../include/std/scinot.e
 
 # Network Routines
 ../include/std/socket.e

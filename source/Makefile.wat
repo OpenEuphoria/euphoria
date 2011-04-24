@@ -129,7 +129,6 @@ EU_CORE_FILES = &
 	preproc.e &
 	reswords.e &
 	scanner.e &
-	scinot.e &
 	shift.e &
 	symtab.e
 

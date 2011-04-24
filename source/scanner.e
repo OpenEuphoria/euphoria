@@ -11,18 +11,19 @@ end ifdef
 include std/error.e
 include std/filesys.e
 include std/get.e
+include std/hash.e
 include std/machine.e
+include std/scinot.e
 include std/search.e
 include std/sequence.e
 include std/text.e
-include std/hash.e
 
 include global.e
 include common.e
 include platform.e
 include reswords.e as res
 include symtab.e
-include scinot.e
+
 include fwdref.e
 include error.e
 include keylist.e
