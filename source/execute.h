@@ -436,6 +436,7 @@ struct char_cell {
 #define M_A_TO_F80           100
 #define M_F80_TO_A           101
 #define M_INFINITY           102
+#define M_CALL_STACK         103
 
 enum CLEANUP_TYPES {
 	CLEAN_UDT,

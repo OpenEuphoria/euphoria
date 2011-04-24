@@ -3166,6 +3166,14 @@ object machine(object opcode, object x)
 				
 			case M_INFINITY:
 				return NewDouble( (eudouble) INFINITY );
+				
+			case M_CALL_STACK:
+#ifndef ERUNTIME
+				return eu_call_stack();
+#else
+				// translated code returns empty call stack
+				return MAKE_SEQ( NewS1( 0 ) );
+#endif
 
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:

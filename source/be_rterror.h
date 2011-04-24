@@ -46,3 +46,6 @@ void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap)
 ;
 
 #endif
+
+
+object eu_call_stack();
