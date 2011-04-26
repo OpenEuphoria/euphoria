@@ -2,6 +2,7 @@ namespace debug
 
 include std/dll.e
 include std/machine.e
+include euphoria/symstruct.e
 
 without trace
 
@@ -13,10 +14,7 @@ without trace
 constant M_CALL_STACK = 103
 
 --****
--- === Debugging Constants
-
---****
--- ==== Call Stack Constants
+-- === Call Stack Constants
 
 public enum
 --** CS_ROUTINE_NAME: index of the routine name in the sequence returned by [[:call_stack]]
@@ -26,6 +24,36 @@ public enum
 --** CS_LINE_NO: index of the line number in the sequence returned by [[:call_stack]]
 	CS_LINE_NO,
 	$
+
+--****
+--=== DEBUG_ROUTINE Enum Type
+-- These constants are used to register euphoria routines that handle various debugger
+-- tasks, displaying information or waiting for user input.
+
+public enum type DEBUG_ROUTINE
+--**** 
+-- Signature:
+-- SHOW_DEBUG
+--Description: 
+-- a procedure that takes an integer parameter that represents the current line in the global line table
+	SHOW_DEBUG,
+--****
+-- Signature:
+-- DISPLAY_VAR
+-- Description:
+-- A procedure that takes a pointer to the variable in the symbol table, and a flag to indicate whether the user requested this variable or not.  Euphoria generally
+-- calls this when a variable is assigned to.
+	DISPLAY_VAR,
+--****
+-- Signature:
+-- UPDATE_GLOBALS
+-- Description:
+-- A procedure called when the debug screen should update the display of any non-private
+-- variables
+	UPDATE_GLOBALS,
+--** DEBUG_SCREEN: called when the debugger should finish displaying and wait for user input before continuing
+	DEBUG_SCREEN
+end type
 
 --****
 --=== Debugging Routines
@@ -47,10 +75,12 @@ end function
 
 
 atom
-	symbol_table = 0,
-	slist        = 0,
-	op_table     = 0,
-	data_buffer  = 0,
+	symbol_table    = 0,
+	slist           = 0,
+	op_table        = 0,
+	data_buffer     = 0,
+	read_object_cid = -1,
+	file_name_ptr   = 0,
 	$
 
 integer
@@ -95,6 +125,8 @@ enum type INIT_ACCESSORS
 	IA_SYMTAB,
 	IA_SLIST,
 	IA_OPS,
+	IA_READ_OBJECT,
+	IA_FILE_NAME,
 	$
 end type
 
@@ -110,8 +142,7 @@ end type
 
 --**
 -- Description:
--- Initializes an external debugger.  This procedure is called automatically
--- when interpreted to intialize the external debugger.  It can also be called
+-- Initializes an external debugger.  It can also be called
 -- from a debugger compiled into a DLL / SO.
 -- 
 -- Parameters:
@@ -129,29 +160,21 @@ public procedure initialize_debugger( atom init_ptr )
 	
 	
 	sequence init_data = c_func( define_c_func( "", { '+', init_ptr}, { E_SEQUENCE }, E_SEQUENCE ), { init_params } )
-	symbol_table = init_data[IA_SYMTAB]
-	slist        = init_data[IA_SLIST]
-	op_table     = init_data[IA_OPS]
+	symbol_table     = init_data[IA_SYMTAB]
+	slist            = init_data[IA_SLIST]
+	op_table         = init_data[IA_OPS]
+	read_object_cid  = define_c_func( "", { '+', init_data[IA_READ_OBJECT] }, { C_POINTER }, E_OBJECT )
+	file_name_ptr    = init_data[IA_FILE_NAME]
+	
 end procedure
 
-ifdef not EUC then
-	-- go ahead and fire it up
-	initialize_debugger( machine_func( M_INIT_DEBUGGER, {} ) )
-end ifdef
-
-public enum type DEBUG_ROUTINE
-	SHOW_DEBUG,
-	DISPLAY_VAR,
-	UPDATE_GLOBALS,
-	DEBUG_SCREEN
-end type
 
 -- **
 -- Description:
 -- Used to initialize the external debuggers handlers.
 -- 
 -- Parameters:
--- # ##rtn## : A [[:DEBUG_ROUTINE]] enum that signifies which routine
+-- # ##rtn## : A [[:DEBUG_ROUTINE Enum Type]] enum that signifies which routine
 -- # ##rid## : The routine id that will be called when a specified debugging routine is called
 public procedure set_debug_rid( DEBUG_ROUTINE rtn, integer rid )
 	switch rtn do
@@ -165,3 +188,27 @@ public procedure set_debug_rid( DEBUG_ROUTINE rtn, integer rid )
 			debug_screen_rid = rid
 	end switch
 end procedure
+
+public function read_object( atom sym )
+	return c_func( read_object_cid, { sym } )
+end function
+
+public function get_name( atom sym )
+	return peek_string( peek_pointer( sym + ST_NAME ) )
+end function
+
+public function get_source( integer line )
+	return peek_string( peek_pointer( slist + SL_SIZE * line + SL_SRC ) )
+end function
+
+public function get_file_no( integer line )
+	return peek( slist + line * SL_SIZE + SL_FILE_NO )
+end function
+
+public function get_file_name( integer file_no )
+	return peek_string( peek_pointer( file_name_ptr + sizeof( C_POINTER ) * file_no ) )
+end function
+
+public function get_file_line( integer line )
+	return peek2u( slist + line * SL_SIZE + SL_LINE )
+end function

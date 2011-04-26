@@ -207,7 +207,8 @@ EU_BACKEND_RUNNER_FILES = &
 	.\backend.ex
 
 EU_INCLUDES = $(TRUNKDIR)\include\std\*.e $(TRUNKDIR)\include\*.e &
-		$(TRUNKDIR)\include\euphoria\*.e
+		$(TRUNKDIR)\include\euphoria\*.e &
+		$(TRUNKDIR)\include\euphoria\debug\*.e
 
 EU_ALL_FILES = *.e $(EU_INCLUDES) &
 		 int.ex ec.ex backend.ex

@@ -327,14 +327,13 @@ EU_LIB_OBJECTS = \
 	$(PREFIXED_PCRE_OBJECTS)
 	
 
-INCDIR = $(TRUNKDIR)/include/std
-
 EU_STD_INC = \
 	$(wildcard $(INCDIR)/std/*.e) \
 	$(wildcard $(INCDIR)/std/unix/*.e) \
 	$(wildcard $(INCDIR)/std/net/*.e) \
 	$(wildcard $(INCDIR)/std/win32/*.e) \
-	$(wildcard $(INCDIR)/euphoria/*.e)
+	$(wildcard $(INCDIR)/euphoria/*.e) \
+	$(wildcard $(INCDIR)/euphoria/debug/*.e)
 
 DOCDIR = $(TRUNKDIR)/docs
 EU_DOC_SOURCE = \
@@ -622,7 +621,7 @@ $(BUILDDIR)/html/js/prototype.js: $(DOCDIR)/prototype.js  $(BUILDDIR)/html/js
 	copy $(DOCDIR)/prototype.js $^@
 
 htmldoc : $(BUILDDIR)/html/index.html
-
+	echo $(EU_STD_INC)
 #
 # PDF manual
 #

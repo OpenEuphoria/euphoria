@@ -46,10 +46,16 @@ void ExternalDebugScreen(){
 	((void (*)())UserDebugScreen)();
 }
 
+object read_object( object_ptr ptr ){
+	return *ptr;
+}
+
 enum INIT_ACCESSORS {
 	IA_SYMTAB = 1,
 	IA_SLIST,
-	IA_OPS 
+	IA_OPS,
+	IA_READ_OBJECT,
+	IA_FILE_NAME
 };
 
 enum INIT_PARAMS {
@@ -73,11 +79,14 @@ object init_debug( object params ){
 	UserDisplayVar    = get_pos_int( "user display var callback", params_s1->base[IP_DISPLAY_VAR] );
 	UserUpdateGlobals = get_pos_int( "user update globals callback", params_s1->base[IP_UPDATE_GLOBALS] );
 	UserDebugScreen   = get_pos_int( "user debug screen callback", params_s1->base[IP_DEBUG_SCREEN] );
-	ptrs = NewS1( 3 );
 	
-	ptrs->base[IA_SYMTAB] = box_ptr( (uintptr_t) fe.st );
-	ptrs->base[IA_SLIST]  = box_ptr( (uintptr_t) fe.sl );
-	ptrs->base[IA_OPS]    = box_ptr( (uintptr_t) jumptab );
+	ptrs = NewS1( 5 );
+	
+	ptrs->base[IA_SYMTAB]      = box_ptr( (uintptr_t) fe.st );
+	ptrs->base[IA_SLIST]       = box_ptr( (uintptr_t) fe.sl );
+	ptrs->base[IA_OPS]         = box_ptr( (uintptr_t) jumptab );
+	ptrs->base[IA_READ_OBJECT] = box_ptr( (uintptr_t) &read_object );
+	ptrs->base[IA_FILE_NAME]   = box_ptr( (uintptr_t) file_name );
 	
 	return MAKE_SEQ( ptrs );
 }
@@ -85,3 +94,4 @@ object init_debug( object params ){
 object init_debug_addr(){
 	return box_ptr( (uintptr_t) &init_debug );
 }
+
