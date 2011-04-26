@@ -38,6 +38,7 @@
 #include "be_socket.h"
 #include "be_coverage.h"
 #include "be_syncolor.h"
+#include "be_debug.h"
 
 #ifdef ELINUX
 #include <malloc.h>
@@ -3174,7 +3175,15 @@ object machine(object opcode, object x)
 				// translated code returns empty call stack
 				return MAKE_SEQ( NewS1( 0 ) );
 #endif
-
+			case M_INIT_DEBUGGER:
+#ifndef ERUNTIME
+				{
+					return init_debug_addr();
+				}
+#else
+				// translated code doesn't do anything
+				return 0;
+#endif
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:
 				/* could be out-of-range int, or double, or sequence */

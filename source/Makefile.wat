@@ -163,6 +163,7 @@ EU_BACKEND_OBJECTS = &
 	$(BUILDDIR)\$(OBJDIR)\back\be_callc.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_coverage.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_decompress.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_debug.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_execute.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_inline.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_machine.obj &
@@ -776,6 +777,7 @@ $(BUILDDIR)\$(OBJDIR)\back\be_magic.obj : $(BUILDDIR)\$(OBJDIR)\back\be_magic.c
 
 $(BUILDDIR)\$(OBJDIR)\back\be_execute.obj : be_execute.c *.h $(CONFIG)
 $(BUILDDIR)\$(OBJDIR)\back\be_decompress.obj : be_decompress.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_debug.obj : be_debug.c *.h $(CONFIG) 
 $(BUILDDIR)\$(OBJDIR)\back\be_task.obj : be_task.c *.h $(CONFIG) 
 $(BUILDDIR)\$(OBJDIR)\back\be_main.obj : be_main.c *.h $(CONFIG) 
 $(BUILDDIR)\$(OBJDIR)\back\be_alloc.obj : be_alloc.c *.h $(CONFIG) 

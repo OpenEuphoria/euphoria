@@ -46,6 +46,7 @@
 #include "be_alloc.h"
 #include "be_syncolor.h"
 #include "be_task.h"
+#include "be_debug.h"
 
 /******************/
 /* Local defines  */
@@ -515,7 +516,11 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 #define DV_len (40)
 	char val_string[DV_len];
 	int add_char, iv;
-		
+	
+	if( external_debugger ){
+		ExternalDisplayVar( s_ptr, user_requested );
+		return;
+	}
 	GetViewPort( &vp );
 	add_char = 0;
 	if (TEXT_MODE)
@@ -672,6 +677,10 @@ void UpdateGlobals()
 	int i;
 	struct EuViewPort vp;
 	
+	if( external_debugger ){
+		ExternalUpdateGlobals();
+		return;
+	}
 	GetViewPort( &vp );
 	
 	if (TEXT_MODE)
@@ -711,6 +720,11 @@ void ShowDebug()
 	
 	struct EuViewPort vp;
 
+	if( external_debugger ){
+		ExternalShowDebug();
+		return;
+	}
+	
 	if (current_screen == DEBUG_SCREEN)
 		return;
 	
@@ -859,6 +873,10 @@ static void DebugCommand()
 void DebugScreen()
 /* Display the debug screen, if it is not already there */
 {
+	if( external_debugger ){
+		ExternalDebugScreen();
+		return;
+	}
 	/* set up the debug screen */
 	if (current_screen == DEBUG_SCREEN)
 		ShowTraceLine(start_line);

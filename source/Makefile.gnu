@@ -293,6 +293,7 @@ PREFIXED_PCRE_OBJECTS = $(addprefix $(BUILDDIR)/pcre/,$(PCRE_OBJECTS))
 	
 EU_BACKEND_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_decompress.o \
+	$(BUILDDIR)/$(OBJDIR)/back/be_debug.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_execute.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_task.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_main.o \
