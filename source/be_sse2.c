@@ -92,16 +92,20 @@ void * malloc_aligned(unsigned long size, unsigned long alignment_size) {
 	return outptr;
 }
 
-int sse2_base_aligned_object(object s) {
+inline int sse2_base_aligned_object(object s) {
 	return (((unsigned long)SEQ_PTR(s)->base) % 16 == 12);
 } 
 
-int sse2_base_aligned_s1ptr(struct s1 * s) {
+inline int sse2_base_aligned_s1ptr(struct s1 * s) {
 	return ((unsigned long)(s->base) % 16 == 12);
 } 
-int sse2_aligned_s1ptr(struct s1 * s) {
+inline int sse2_aligned_s1ptr(struct s1 * s) {
 	return ((unsigned long)(s->base) % 16 == 12);
 } 
+
+void emms();
+#pragma aux emms = \
+	"emms";
 
 void load_vector_registers();
 #pragma aux load_vector_registers = \
@@ -157,7 +161,6 @@ unsigned long sse2_are_all_atom_ints( object_ptr ptr1 );
 	"PACKSSDW XMM1, XMM1"\
 	"PACKSSWB XMM1, XMM1"\
 	"MOVD ebx, XMM1"\
-	"EMMS"\
 	modify [EBX]\
 	parm [EAX]\
 	value [EBX];
@@ -187,7 +190,6 @@ unsigned long sse2_paddi3( object_ptr dest, object_ptr ptr1, object_ptr ptr2);
 	"packssdw xmm1, xmm1"\
 	"packsswb xmm1, xmm1"\
 	"movd ebx, xmm1"\
-	"EMMS"\
 	modify [ebx]\
 	parm [EDX] [EAX] [ECX]\
 	value [ebx];
@@ -203,7 +205,6 @@ unsigned long sse2_paddi3( object_ptr dest, object_ptr ptr1, object_ptr ptr2);
 	"por xmm1, [ecx]"\
 	/* write result to memory location */\
 	"movdqa [edx], xmm1"\
-	"EMMS"\
 	modify [ebx]\
 	parm [EDX] [EAX] [ECX]\
 	value [ebx];
@@ -216,7 +217,6 @@ unsigned long sse2_paddi3( object_ptr dest, object_ptr ptr1, object_ptr ptr2);
 	"pand xmm1, xmm5"\
 	/* write result to memory location */\
 	"movdqa [edx], xmm1"\
-	"EMMS"\
 	modify [ebx]\
 	parm [EDX] [EAX] [ECX]\
 	value [ebx];
@@ -229,7 +229,6 @@ unsigned long sse2_pxori3( object_ptr dest, object_ptr ptr1, object_ptr ptr2);
 	"pxor xmm1, xmm5"\
 	/* write result to memory location */\
 	"movdqa [edx], xmm1"\
-	"EMMS"\
 	modify [ebx]\
 	parm [EDX] [EAX] [ECX]\
 	value [ebx];
@@ -252,7 +251,6 @@ unsigned long sse2_psrli3( object_ptr dest, object_ptr ptr1, unsigned char bl);
 	"packssdw xmm1, xmm1"\
 	"packsswb xmm1, xmm1"\
 	"movd ebx, xmm1"\
-	"EMMS"\
 	modify [ebx]\
 	parm [EDX] [EAX] [BL]\
 	value [ebx];
@@ -275,7 +273,6 @@ unsigned long sse2_psli3( object_ptr dest, object_ptr ptr1, object ecx);
 	"packssdw xmm1, xmm1"\
 	"packsswb xmm1, xmm1"\
 	"movd ebx, xmm1"\
-	"EMMS"\
 	modify [ebx]\
 	parm [EDX] [EAX] [ECX]\
 	value [ebx];
@@ -296,7 +293,6 @@ unsigned long sse2_cmpi3( object_ptr dest, object_ptr ptr1, object_ptr ptr2 );
 	/* write result to memory location */\
 	"movdqa [edx], xmm5"\
 	"xor ebx, ebx"\
-	"emms"\
 	modify [ebx]\
 	parm [edx] [eax] [ebx]\
 	value [ebx];
@@ -310,7 +306,6 @@ unsigned long sse2_eqi3( object_ptr dest, object_ptr eax, object_ptr ebx );
 	/* write result to memory location */\
 	"movdqa [edx], xmm1"\
 	"xor edx, edx"\
-	"emms"\
 	modify [edx]\
 	parm [edx] [eax] [ebx]\
 	value [edx];
@@ -318,11 +313,38 @@ unsigned long sse2_eqi3( object_ptr dest, object_ptr eax, object_ptr ebx );
 /* Sets all i=0..3 vector_ptr[i] to value. */
 /* Warning up tested code! */
 void sse2_set( object_ptr vector_ptr, object value );
-#pragma aux sse2_set = \
+#pragma aux memset4 = \
 	"mov ecx,4"\
 	"rep stosd"\
 	parm [edi] [eax];
 
+
+double* cvtsi2sd(double * dp, object i);
+#pragma aux cvtsi2sd = \
+	"cvtsi2sd xmm0, ebx"\
+	"movsd [eax], xmm0"\
+	parm [eax] [ebx]\
+	value [eax];
+
+/* careful.  This modifies *dp.. */
+double* saddDi(double * dp, object i);
+#pragma aux saddDi = \
+	"cvtsi2sd xmm0, ebx"\
+	"movsd xmm1, [eax]"\
+	"addsd xmm0, xmm1"\
+	"movsd [eax], xmm0"\
+	parm [eax] [ebx]\
+	value [eax];
+
+
+double * saddDD(double * da, double * db);
+#pragma aux saddDD = \
+	"movsd xmm0, [ebx]"\
+	"movsd xmm1, [eax]"\
+	"addsd xmm0, xmm1"\
+	"movsd [eax], xmm0"\
+	parm [eax] [ebx]\
+	value [eax];
 
 /* Compares 'dest' to 'b'.  Returns a fatal error if the differ.
  *
@@ -362,23 +384,24 @@ inline static int sse2_aligned(struct s1 * s) {
 // adds a sequence (and it should contain mostly integers), 'a', to the integer
 // atom top. 
 // Always allocates a new sequence
-object_ptr paddsi(object a, object top) {
+object paddsi(object a, object top) {
 	struct s1 * dest;
 	struct s1 * sa;
+	double td;
 	int sb;
 	int k, length;
-	object_ptr dp,ap,bp, tempb;
-	struct s1 * control;
-	object controlobj;
-	signed long int * ou;
-	signed long int * in;
-	signed long int j;
-	unsigned long which_int_a, which_int_b;
+	object_ptr dp,ap;
+	int OBJECTS_IN_VREG = sizeof(vreg)/sizeof(object);
+	#ifdef EXTRA_CHECK
+		struct s1 * control;
+		object controlobj;
+		signed long int j;
+	#endif
+	unsigned long which_int_a;
 	sa = SEQ_PTR(a);
 	sb = INT_VAL(top);
-	sse2_set(vreg_temp,sb);
+	memset4(vreg_temp,sb);
 	dest = NewS1(sa->length);
-	dest->base[sa->length+1] = NOVALUE;
 	ap = &sa->base[1];
 	dp = &dest->base[1];
 	k = 0;
@@ -394,61 +417,64 @@ object_ptr paddsi(object a, object top) {
 				*(unsigned long*)(overflows) = iof;
 				ofptr = &overflows[0];
 				do {
-					if (*(ofptr++)) { 
-						*dp = NewDouble(*dp);
+					if (*(ofptr++)) {
+						*dp = NewDouble(*cvtsi2sd(&td,*dp));
 					}
 					++dp;
 				} while (++k%4);
 			} else {
-				dp += sizeof(vreg)/sizeof(object);
-				k  += sizeof(vreg)/sizeof(object);
+				dp += OBJECTS_IN_VREG;
+				k  += OBJECTS_IN_VREG;
 			}
-			ap += sizeof(vreg)/sizeof(object);
+			ap += OBJECTS_IN_VREG;
 		} else {
 			do {
 				if (((char*)&which_int_a)[k%4]) { // is atom_int(*ap)?
 					*dp = INT_VAL(*ap) + sb;
-					if (*dp > MAXINT || *dp < MININT) {
-						*dp = NewDouble(*dp);
+					if (INT_VAL(*dp) + HIGH_BITS >= 0) {
+						*dp = NewDouble(*cvtsi2sd(&td,*dp));
 					}
 				} else if (*ap == NOVALUE) {
 					*dp = *ap;
-					break;	
+					break;
 				} else if (IS_ATOM(*ap)) {
-					*dp = NewDouble(DBL_PTR(*ap)->dbl + sb);
+					td = DBL_PTR(*ap)->dbl;
+					*dp = NewDouble(*saddDi(&td,sb));
 				} else if (sse2_aligned(SEQ_PTR(*ap))) {
 					*dp = paddsi(*ap,sb);
 				} else {
+					emms();
 					*dp = binary_op(PLUS,*ap,sb);
 				}
-				++ap, ++bp, ++dp, ++k;
+				++ap, ++dp, ++k;
 			} while (k % 4);
 		} // else 
 	} // while
-	dest->base[length+1] = NOVALUE;
 	compare_check(dest,binary_op(PLUS,a,top));
 	return top = MAKE_SEQ(dest);
 }
 
 // adds an integer, 'a', to a sequence, 'top', and returns the result.
 // Always allocates a new sequence
-object_ptr paddis(object a, object top) {
+object paddis(object a, object top) {
 	return paddsi(top,a);
 }
 
 // adds a sequence, 'a', to a sequence, 'top', and returns the result.
 // Always allocates a new sequence
-object_ptr padds2(object a, object top) {
+object padds2(object a, object top) {
 	struct s1 * dest;
 	struct s1 * sa, * sb;
 	int k, length;
 	object_ptr dp,ap,bp, tempb;
-	struct s1 * control;
-	object controlobj;
-	signed long int * ou;
-	signed long int * in;
-	signed long int j;
+    #ifdef EXTRA_CHECK
+		struct s1 * control;
+		object controlobj;
+		signed long int j;
+	#endif
 	unsigned long which_int_a, which_int_b;
+	int OBJECTS_IN_VREG = sizeof(vreg)/sizeof(object);
+	double td;
 	sa = SEQ_PTR(a);
 	sb = SEQ_PTR(top);
 	if (sa->length != sb->length) {
@@ -474,47 +500,56 @@ object_ptr padds2(object a, object top) {
 				unsigned char * ofptr;
 				*(unsigned long*)(overflows) = iof;
 				ofptr = &overflows[0];
+				
 				do {
 					if (*(ofptr++)) { 
-						*dp = NewDouble(*dp);
+						*dp = NewDouble(*cvtsi2sd(&td,*dp));
 					}
 					++dp;
 				} while (++k%4);
 			} else {
-				dp += sizeof(vreg)/sizeof(object);
-				k  += sizeof(vreg)/sizeof(object);
+				dp += OBJECTS_IN_VREG;
+				k  += OBJECTS_IN_VREG;
 			}
-			ap += sizeof(vreg)/sizeof(object);
-			bp += sizeof(vreg)/sizeof(object);
+			ap += OBJECTS_IN_VREG;
+			bp += OBJECTS_IN_VREG;
 		} else {
 			do {
 				if (((char*)&which_int_a)[k%4]) { // is atom_int(*ap)?
 					if (IS_ATOM_INT(*bp)) {
 						*dp = INT_VAL(*ap) + INT_VAL(*bp);
 						if (*dp > MAXINT || *dp < MININT) {
-							*dp = NewDouble(*dp);
+							*dp = NewDouble(*cvtsi2sd(&td,*dp));
 						}				
 					} else if (IS_ATOM(*bp)) {
-						*dp = NewDouble(INT_VAL(*ap) + DBL_PTR(*bp)->dbl);
+						(td = DBL_PTR(*bp)->dbl);
+						*dp = NewDouble(*saddDi(&td,INT_VAL(*ap)));
 					} else {
+						emms();
 						*dp = binary_op(PLUS,*ap,*bp);
 					}
 				} else if (*ap == NOVALUE) {
 					*dp = *ap;
 					break;	
 				} else if (IS_ATOM(*ap)) {
-					if (IS_ATOM_INT(*bp))
-						*dp = NewDouble(DBL_PTR(*ap)->dbl + INT_VAL(*bp));
-					else if (IS_ATOM(*bp))
-						*dp = NewDouble(DBL_PTR(*ap)->dbl + DBL_PTR(*bp)->dbl);
-					else
+					if (IS_ATOM_INT(*bp)) {
+						td = DBL_PTR(*ap)->dbl;
+						*dp = NewDouble(*saddDi(&td, INT_VAL(*bp)));
+					} else if (IS_ATOM(*bp)) {
+						td = DBL_PTR(*ap)->dbl;
+						*dp = NewDouble(*saddDD(&td, &DBL_PTR(*bp)->dbl));
+					} else {
+						emms();
 						*dp = binary_op(PLUS,*ap,*bp);
+					}
 				} else {
 					if (IS_SEQUENCE(*bp) && (((unsigned int)SEQ_PTR(*bp)->base) % 16 == 12)
 						&& (((unsigned int)SEQ_PTR(*ap)->base) % 16 == 12)) 
 							*dp = padds2(*ap,*bp);
-					else
-							*dp = binary_op(PLUS,*ap,*bp);
+					else {
+								emms();
+								*dp = binary_op(PLUS,*ap,*bp);
+					}
 				}
 				++ap, ++bp, ++dp, ++k;
 			} while (k % 4);
@@ -522,7 +557,7 @@ object_ptr padds2(object a, object top) {
 	} // while
 	dest->base[length+1] = NOVALUE;
 	compare_check(dest,binary_op(PLUS,a,top));
-	return top = MAKE_SEQ(dest);
+	return MAKE_SEQ(dest);
 }
 
 

@@ -20,11 +20,6 @@ typedef union {
 	object obj[4];
 	double dbl[2];
 } vreg;
-#if defined( ESIMPLE_MALLOC )
-#	define EMalloc(size) malloc_aligned(size,16)
-#	define ERealloc(orig,newsize) realloc_aligned(orig,newsize,16)
-#	define free(ptr) free_aligned(ptr)
-#endif
 void sse2_variable_init();
 /* The following are pointers to aligned register sized values */
 extern object_ptr NOVALUE_128bit, MINUSONES_128bit, ZEROS_128bit;

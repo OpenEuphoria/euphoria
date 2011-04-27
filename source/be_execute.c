@@ -80,6 +80,7 @@
 #endif
 
 #define SYMTAB_INDEX(X) ((symtab_ptr)X) - fe.st
+#include "be_packed.h"
 
 /* To eliminate type casts for pc[*] you
  would need a union like this:
@@ -1969,7 +1970,9 @@ void do_exec(int *start_pc)
 					tpc = pc;
 #					if SSE2
 						if (sse2_base_aligned_object(top)) {
-							top = paddsi(top, ATOM_1);
+							start_packed_ops();
+								top = paddsi(top, ATOM_1);
+							end_packed_ops();
 						} else {
 							top = binary_op(PLUS, ATOM_1, top);
 						}
@@ -2685,24 +2688,33 @@ void do_exec(int *start_pc)
 						} 
 						// top is a sequence
 #						if SSE2
-							if (IS_ATOM_INT(a) && sse2_base_aligned_object(top)) {
-								top = paddis(a,top);
-								goto aresult;
+							if (IS_ATOM_INT(a)) {
+								start_packed_ops();
+								if (sse2_base_aligned_object(top)) {
+									top = paddis(a,top);
+									end_packed_ops();
+									goto aresult;
+								}
+								end_packed_ops();
 							}
 #						endif
 					} else {
 						// a is a sequence.
 #						if SSE2 
+							start_packed_ops();
 							if (sse2_base_aligned_object(a)) {
 								if (IS_ATOM_INT(top)) {
 									top = paddis(top,a);
+									end_packed_ops();
 									goto aresult;
 								} else if (IS_SEQUENCE(top) && sse2_base_aligned_object(top)) {
 									top = padds2(a,top);
+									end_packed_ops();
 									goto aresult;
 								}
 							}
-#						endif // SSE2	
+							end_packed_ops();
+#						endif // SSE2
 					}
 					top = binary_op(PLUS, a, top);
 
