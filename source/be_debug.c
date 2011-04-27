@@ -72,6 +72,10 @@ void skip_trace(){
 	TraceStack = current_stack_depth;
 }
 
+void abort_program(){
+	RTFatal("program aborted");
+}
+
 enum INIT_ACCESSORS {
 	IA_SYMTAB = 1,
 	IA_SLIST,
@@ -81,6 +85,7 @@ enum INIT_ACCESSORS {
 	IA_TRACE_OFF,
 	IA_DISABLE_TRACE,
 	IA_SKIP_TRACE,
+	IA_ABORT_PROGRAM,
 	IA_SIZE
 };
 
@@ -116,6 +121,7 @@ object init_debug( object params ){
 	ptrs->base[IA_TRACE_OFF]     = box_ptr( (uintptr_t) &trace_off );
 	ptrs->base[IA_DISABLE_TRACE] = box_ptr( (uintptr_t) &disable_trace );
 	ptrs->base[IA_SKIP_TRACE]    = box_ptr( (uintptr_t) &skip_trace );
+	ptrs->base[IA_ABORT_PROGRAM]    = box_ptr( (uintptr_t) &abort_program );
 	
 	return MAKE_SEQ( ptrs );
 }

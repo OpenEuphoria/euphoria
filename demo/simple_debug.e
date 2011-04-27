@@ -52,12 +52,22 @@ procedure debug_screen()
 			skip_trace()
 		
 		case "q" then
-			trace_off()
-		
-		case "Q" then
 			disable_trace()
 		
+		case "!" then
+			abort_program()
+		
+		case "help", "h", "?" then
+			puts(1, `
+	n : execute the current line
+	c : continue execution without trace
+	s : resume executing, and begin tracing again when execution reaches the next line
+	q : stop tracing for the remainder of the program
+	! : abort the program immediately
+`)
 		case else
+			puts(1, `Unknown command.  Use "help", "h" or "?" for a list of valid commands` & "\n" )
+			
 	end switch
 	
 end procedure

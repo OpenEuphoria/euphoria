@@ -80,7 +80,6 @@ atom
 	op_table        = 0,
 	data_buffer     = 0,
 	file_name_ptr   = 0,
-	
 	$
 
 -- C routines for interfacing with the interpreter
@@ -88,7 +87,8 @@ integer
 	read_object_cid   = -1,
 	trace_off_cid     = -1,
 	disable_trace_cid = -1,
-	skip_trace_cid,
+	skip_trace_cid    = -1,
+	abort_program_cid = -1,
 	$
 
 integer
@@ -138,6 +138,7 @@ enum type INIT_ACCESSORS
 	IA_TRACE_OFF,
 	IA_DISABLE_TRACE,
 	IA_SKIP_TRACE,
+	IA_ABORT_PROGRAM,
 	$
 end type
 
@@ -179,6 +180,7 @@ public procedure initialize_debugger( atom init_ptr )
 	trace_off_cid      = define_c_proc( "", { '+', init_data[IA_TRACE_OFF] }, {} )
 	disable_trace_cid  = define_c_proc( "", { '+', init_data[IA_DISABLE_TRACE] }, {} )
 	skip_trace_cid     = define_c_proc( "", { '+', init_data[IA_SKIP_TRACE] }, {} )
+	abort_program_cid  = define_c_proc( "", { '+', init_data[IA_ABORT_PROGRAM] }, {} )
 	
 end procedure
 
@@ -217,6 +219,10 @@ end procedure
 
 public procedure skip_trace()
 	c_proc( skip_trace_cid, {} )
+end procedure
+
+public procedure abort_program()
+	c_proc( abort_program_cid, {} )
 end procedure
 
 public function get_name( atom sym )
