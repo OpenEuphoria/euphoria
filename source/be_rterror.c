@@ -874,6 +874,7 @@ void DebugScreen()
 /* Display the debug screen, if it is not already there */
 {
 	if( external_debugger ){
+		ExternalShowDebug();
 		ExternalDebugScreen();
 		return;
 	}

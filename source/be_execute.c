@@ -67,6 +67,7 @@
 #include "be_callc.h"
 #include "be_coverage.h"
 #include "be_execute.h"
+#include "be_debug.h"
 
 /******************/
 /* Local defines  */

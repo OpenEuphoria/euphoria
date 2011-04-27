@@ -4,6 +4,7 @@
 #include "object.h"
 
 extern int external_debugger;
+extern int in_external_debugger;
 
 void ExternalShowDebug();
 void ExternalDisplayVar( symtab_ptr s_ptr, int user_requested );

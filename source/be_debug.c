@@ -9,8 +9,12 @@
 #include "be_debug.h"
 #include "be_execute.h"
 #include "be_machine.h"
+#include "be_rterror.h"
+#include "be_runtime.h"
 
-int        external_debugger = 0;
+int external_debugger = 0;
+int current_stack_depth = 0;
+
 object_ptr external_buffer = 0;
 
 uintptr_t UserShowDebug;
@@ -27,6 +31,7 @@ object box_ptr( uintptr_t ptr ){
 	}
 }
 
+// functions to call the external debugger
 void ExternalShowDebug(){
 	*external_buffer = (object) start_line;
 	((void (*)())UserShowDebug)();
@@ -43,11 +48,28 @@ void ExternalUpdateGlobals(){
 }
 
 void ExternalDebugScreen(){
+	current_stack_depth = expr_top - expr_stack;
 	((void (*)())UserDebugScreen)();
 }
 
+// debugger interface
 object read_object( object_ptr ptr ){
 	return *ptr;
+}
+
+void trace_off(){
+	TraceOn = FALSE;
+}
+
+void disable_trace(){
+	trace_off();
+	trace_enabled = FALSE;
+}
+
+void skip_trace(){
+	TraceOn = FALSE;
+	TraceBeyond = start_line;
+	TraceStack = current_stack_depth;
 }
 
 enum INIT_ACCESSORS {
@@ -55,7 +77,11 @@ enum INIT_ACCESSORS {
 	IA_SLIST,
 	IA_OPS,
 	IA_READ_OBJECT,
-	IA_FILE_NAME
+	IA_FILE_NAME,
+	IA_TRACE_OFF,
+	IA_DISABLE_TRACE,
+	IA_SKIP_TRACE,
+	IA_SIZE
 };
 
 enum INIT_PARAMS {
@@ -80,13 +106,16 @@ object init_debug( object params ){
 	UserUpdateGlobals = get_pos_int( "user update globals callback", params_s1->base[IP_UPDATE_GLOBALS] );
 	UserDebugScreen   = get_pos_int( "user debug screen callback", params_s1->base[IP_DEBUG_SCREEN] );
 	
-	ptrs = NewS1( 5 );
+	ptrs = NewS1( IA_SIZE - 1 );
 	
-	ptrs->base[IA_SYMTAB]      = box_ptr( (uintptr_t) fe.st );
-	ptrs->base[IA_SLIST]       = box_ptr( (uintptr_t) fe.sl );
-	ptrs->base[IA_OPS]         = box_ptr( (uintptr_t) jumptab );
-	ptrs->base[IA_READ_OBJECT] = box_ptr( (uintptr_t) &read_object );
-	ptrs->base[IA_FILE_NAME]   = box_ptr( (uintptr_t) file_name );
+	ptrs->base[IA_SYMTAB]        = box_ptr( (uintptr_t) fe.st );
+	ptrs->base[IA_SLIST]         = box_ptr( (uintptr_t) fe.sl );
+	ptrs->base[IA_OPS]           = box_ptr( (uintptr_t) jumptab );
+	ptrs->base[IA_READ_OBJECT]   = box_ptr( (uintptr_t) &read_object );
+	ptrs->base[IA_FILE_NAME]     = box_ptr( (uintptr_t) file_name );
+	ptrs->base[IA_TRACE_OFF]     = box_ptr( (uintptr_t) &trace_off );
+	ptrs->base[IA_DISABLE_TRACE] = box_ptr( (uintptr_t) &disable_trace );
+	ptrs->base[IA_SKIP_TRACE]    = box_ptr( (uintptr_t) &skip_trace );
 	
 	return MAKE_SEQ( ptrs );
 }

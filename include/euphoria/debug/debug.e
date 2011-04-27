@@ -79,8 +79,16 @@ atom
 	slist           = 0,
 	op_table        = 0,
 	data_buffer     = 0,
-	read_object_cid = -1,
 	file_name_ptr   = 0,
+	
+	$
+
+-- C routines for interfacing with the interpreter
+integer
+	read_object_cid   = -1,
+	trace_off_cid     = -1,
+	disable_trace_cid = -1,
+	skip_trace_cid,
 	$
 
 integer
@@ -127,6 +135,9 @@ enum type INIT_ACCESSORS
 	IA_OPS,
 	IA_READ_OBJECT,
 	IA_FILE_NAME,
+	IA_TRACE_OFF,
+	IA_DISABLE_TRACE,
+	IA_SKIP_TRACE,
 	$
 end type
 
@@ -160,11 +171,14 @@ public procedure initialize_debugger( atom init_ptr )
 	
 	
 	sequence init_data = c_func( define_c_func( "", { '+', init_ptr}, { E_SEQUENCE }, E_SEQUENCE ), { init_params } )
-	symbol_table     = init_data[IA_SYMTAB]
-	slist            = init_data[IA_SLIST]
-	op_table         = init_data[IA_OPS]
-	read_object_cid  = define_c_func( "", { '+', init_data[IA_READ_OBJECT] }, { C_POINTER }, E_OBJECT )
-	file_name_ptr    = init_data[IA_FILE_NAME]
+	symbol_table       = init_data[IA_SYMTAB]
+	slist              = init_data[IA_SLIST]
+	op_table           = init_data[IA_OPS]
+	read_object_cid    = define_c_func( "", { '+', init_data[IA_READ_OBJECT] }, { C_POINTER }, E_OBJECT )
+	file_name_ptr      = init_data[IA_FILE_NAME]
+	trace_off_cid      = define_c_proc( "", { '+', init_data[IA_TRACE_OFF] }, {} )
+	disable_trace_cid  = define_c_proc( "", { '+', init_data[IA_DISABLE_TRACE] }, {} )
+	skip_trace_cid     = define_c_proc( "", { '+', init_data[IA_SKIP_TRACE] }, {} )
 	
 end procedure
 
@@ -192,6 +206,18 @@ end procedure
 public function read_object( atom sym )
 	return c_func( read_object_cid, { sym } )
 end function
+
+public procedure trace_off()
+	c_proc( trace_off_cid, {} )
+end procedure
+
+public procedure disable_trace()
+	c_proc( disable_trace_cid, {} )
+end procedure
+
+public procedure skip_trace()
+	c_proc( skip_trace_cid, {} )
+end procedure
 
 public function get_name( atom sym )
 	return peek_string( peek_pointer( sym + ST_NAME ) )
