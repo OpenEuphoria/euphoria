@@ -1,0 +1,17 @@
+t_c_udt_type.e:8
+<0025>:: found ... reserved word ... but was expecting an identifier name
+blah type foo
+         ^
+
+
+--- Defined Words ---
+EU4
+EU400
+EU40000
+WINDOWS
+WIN32
+WIN32_CONSOLE
+UNITTEST
+CRASH
+EUI
+-------------------

@@ -1,0 +1,17 @@
+C:\Users\Shawn\Documents\development\hg\sse2\tests\t_c_type_check_atom_compile.e:9
+<0346>:: Type check error:  assigning a sequence to an atom
+atom aAtom = aSequence
+           ^
+
+
+--- Defined Words ---
+EU4
+EU4_0
+EU4_0_3
+WINDOWS
+WIN32
+CONSOLE
+UNITTEST
+CRASH
+EUI
+-------------------

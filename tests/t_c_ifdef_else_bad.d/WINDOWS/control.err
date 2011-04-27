@@ -1,0 +1,18 @@
+C:\Users\Shawn\Documents\development\hg\sse2\tests\t_c_ifdef_else_bad.e:6
+<0075>:: Expecting 'end ifdef' to match 'ifdef' on line 4
+	end for
+	      ^
+
+
+--- Defined Words ---
+EU4
+EU4_0
+EU4_0_3
+WINDOWS
+WIN32
+CONSOLE
+UNITTEST
+CRASH
+EUI
+DEFINED
+-------------------

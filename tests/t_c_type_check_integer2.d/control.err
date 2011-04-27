@@ -1,0 +1,5 @@
+t_c_type_check_integer2.e:10
+type_check failure, aInteger is 30.5 
+
+
+Global & Local Variables

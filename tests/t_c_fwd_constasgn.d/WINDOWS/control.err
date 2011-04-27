@@ -1,0 +1,17 @@
+C:\Users\Shawn\Documents\development\hg\sse2\tests\fwd_constasgn.e:3
+<0110>:: may not change the value of a constant
+foo = 2
+    ^
+
+
+--- Defined Words ---
+EU4
+EU4_0
+EU4_0_3
+WINDOWS
+WIN32
+CONSOLE
+UNITTEST
+CRASH
+EUI
+-------------------

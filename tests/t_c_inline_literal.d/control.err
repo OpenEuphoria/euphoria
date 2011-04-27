@@ -1,0 +1,7 @@
+t_c_inline_literal.e:8
+<0146>:: Type Check Error when inlining literal
+short( 0 )
+         ^
+
+
+

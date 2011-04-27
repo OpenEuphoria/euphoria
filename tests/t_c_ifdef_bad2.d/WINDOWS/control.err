@@ -1,0 +1,17 @@
+C:\Users\Shawn\Documents\development\hg\sse2\tests\t_c_ifdef_bad2.e:4
+<0111>:: Mismatched 'end if'. Should this be an 'end ifdef' to match 'ifdef' on line 3
+	end if
+	     ^
+
+
+--- Defined Words ---
+EU4
+EU4_0
+EU4_0_3
+WINDOWS
+WIN32
+CONSOLE
+UNITTEST
+CRASH
+EUI
+-------------------

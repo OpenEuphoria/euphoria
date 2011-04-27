@@ -1,0 +1,17 @@
+C:\Users\Shawn\Documents\development\hg\sse2\tests\t_c_ifdef_no_then.e:3
+<0082>:: expecting possibly 'then' not end of line
+ifdef NOT_DEFINED
+                ^
+
+
+--- Defined Words ---
+EU4
+EU4_0
+EU4_0_3
+WINDOWS
+WIN32
+CONSOLE
+UNITTEST
+CRASH
+EUI
+-------------------

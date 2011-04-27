@@ -1,0 +1,224 @@
+C:\Users\Shawn\Documents\development\hg\sse2\include\std\safe.e:304 in procedure die() 
+ATTEMPT TO FREE WITH free() A BLOCK THAT WAS ALLOCATED BY allocate_protect()! 
+    msg = {65'A',84'T',84'T',69'E',77'M',80'P',84'T',32' ',84'T',79'O',32' ',
+70'F',82'R',69'E',69'E',32' ',87'W',73'I',84'T',72'H',32' ',102'f',114'r',
+101'e',101'e',40'(',41')',32' ',65'A',32' ',66'B',76'L',79'O',67'C',75'K',
+32' ',84'T',72'H',65'A',84'T',32' ',87'W',65'A',83'S',32' ',65'A',76'L',
+76'L',79'O',67'C',65'A',84'T',69'E',68'D',32' ',66'B',89'Y',32' ',97'a',
+108'l',108'l',111'o',99'c',97'a',116't',101'e',95'_',112'p',114'r',111'o',
+116't',101'e',99'c',116't',40'(',41')',33'!'}
+    i = 3
+    msg (from inlined routine 'crash' at 29) = {65'A',84'T',84'T',69'E',77'M',
+80'P',84'T',32' ',84'T',79'O',32' ',70'F',82'R',69'E',69'E',32' ',87'W',
+73'I',84'T',72'H',32' ',102'f',114'r',101'e',101'e',40'(',41')',32' ',65'A',
+32' ',66'B',76'L',79'O',67'C',75'K',32' ',84'T',72'H',65'A',84'T',32' ',
+87'W',65'A',83'S',32' ',65'A',76'L',76'L',79'O',67'C',65'A',84'T',69'E',
+68'D',32' ',66'B',89'Y',32' ',97'a',108'l',108'l',111'o',99'c',97'a',116't',
+101'e',95'_',112'p',114'r',111'o',116't',101'e',99'c',116't',40'(',41')',
+33'!'}
+
+... called from C:\Users\Shawn\Documents\development\hg\sse2\include\std\safe.e:755 in procedure deallocate()  
+    a = 2424872
+    ia = 2424832
+    i = 1
+    n = 4
+
+... called from C:\Users\Shawn\Documents\development\hg\sse2\include\std\machine.e:1036 in procedure free()  
+    addr = 2424872
+    msg (from inlined routine 'crash' at 21) = <no value>
+    data (from inlined routine 'crash' at 18) = <no value>
+    i = <no value>
+    msg (from inlined routine 'crash' at 75) = <no value>
+
+... called from C:\Users\Shawn\Documents\development\hg\sse2\tests\t_c_safe_free_allocate_protect.e:7 
+
+
+Global & Local Variables
+
+ C:\Users\Shawn\Documents\development\hg\sse2\include\std\safe.e:
+    allocation_num = 6
+
+ C:\Users\Shawn\Documents\development\hg\sse2\include\std\types.e:
+    Defined_Sets = {
+                     {98'b',99'c',100'd',102'f',103'g',104'h',106'j',107'k',
+108'l',109'm',110'n',112'p',113'q',114'r',115's',116't',118'v',119'w',120'x',
+121'y',122'z',66'B',67'C',68'D',70'F',71'G',72'H',74'J',75'K',76'L',77'M',
+78'N',80'P',81'Q',82'R',83'S',84'T',86'V',87'W',88'X',89'Y',90'Z'},
+                     {97'a',101'e',105'i',111'o',117'u',65'A',69'E',73'I',
+79'O',85'U'},
+                     {
+                       {48'0',57'9'},
+                       {65'A',70'F'},
+                       {97'a',102'f'}
+                     },
+                     {32' ',9,10,13,11,160},
+                     {
+                       {32' ',47'/'},
+                       {58':',63'?'},
+                       {91'[',96'`'},
+                       {123'{',126'~'}
+                     },
+                     {
+                       {32' ',126'~'}
+                     },
+                     {
+                       {32' ',126'~'},
+                       {32' ',32' '},
+                       {9,9},
+                       {10,10},
+                       {13,13},
+                       {8,8},
+                       {7,7}
+                     },
+                     {
+                       {97'a',122'z'}
+                     },
+                     {
+                       {65'A',90'Z'}
+                     },
+                     {
+                       {48'0',57'9'},
+                       {97'a',122'z'},
+                       {65'A',90'Z'}
+                     },
+                     {
+                       {48'0',57'9'},
+                       {97'a',122'z'},
+                       {65'A',90'Z'},
+                       {95'_',95'_'}
+                     },
+                     {
+                       {97'a',122'z'},
+                       {65'A',90'Z'}
+                     },
+                     {
+                       {0,127''}
+                     },
+                     {
+                       {0,31},
+                       {127'',127''}
+                     },
+                     {
+                       {48'0',57'9'}
+                     },
+                     {
+                       {33'!',126'~'}
+                     },
+                     {
+                       {0,255}
+                     },
+                     {95'_'},
+                     {1,0}
+                   }
+
+ C:\Users\Shawn\Documents\development\hg\sse2\include\std\win32\sounds.e:
+    xMessageBeep = 39'''
+    xUser32 = 1991573504
+
+ C:\Users\Shawn\Documents\development\hg\sse2\include\std\machine.e:
+    FREE_ARRAY_RID = 1
+    page_size = 4096
+    kernel_dll = 1994457088
+    memDLL_id = 1994457088
+    VirtualAlloc_rid = 23
+    VirtualProtect_rid = 24
+    GetLastError_rid = 26
+    GetSystemInfo_rid = 27
+    vaa = <no value>
+    system_info_ptr = <no value>
+    s (from inlined routine 'c_proc' at 310) = <no value>
+    oldprotptr = 37862760
+
+ C:\Users\Shawn\Documents\development\hg\sse2\include\std\convert.e:
+    mem = 38565984
+    decimal_mark = 46'.'
+
+ C:\Users\Shawn\Documents\development\hg\sse2\include\std\filesys.e:
+    InitCurDir = {67'C',58':',92'\',85'U',115's',101'e',114'r',115's',92'\',
+83'S',104'h',97'a',119'w',110'n',92'\',68'D',111'o',99'c',117'u',109'm',
+101'e',110'n',116't',115's',92'\',100'd',101'e',118'v',101'e',108'l',111'o',
+112'p',109'm',101'e',110'n',116't',92'\',104'h',103'g',92'\',115's',115's',
+101'e',50'2',92'\',116't',101'e',115's',116't',115's',92'\'}
+    file_counters = {}
+
+ C:\Users\Shawn\Documents\development\hg\sse2\include\std\pretty.e:
+    pretty_end_col = <no value>
+    pretty_chars = <no value>
+    pretty_start_col = <no value>
+    pretty_level = <no value>
+    pretty_file = <no value>
+    pretty_ascii = <no value>
+    pretty_indent = <no value>
+    pretty_ascii_min = <no value>
+    pretty_ascii_max = <no value>
+    pretty_line_count = <no value>
+    pretty_line_max = <no value>
+    pretty_dots = <no value>
+    pretty_line_breaks = <no value>
+    pretty_printing = <no value>
+    pretty_fp_format = <no value>
+    pretty_int_format = <no value>
+    pretty_line = <no value>
+
+ C:\Users\Shawn\Documents\development\hg\sse2\include\std\serialize.e:
+    mem0 = 37860072
+    mem1 = 37860073
+    mem2 = 37860074
+    mem3 = 37860075
+
+ C:\Users\Shawn\Documents\development\hg\sse2\include\std\text.e:
+    lower_case_SET = {}
+    upper_case_SET = {}
+    encoding_NAME = {65'A',83'S',67'C',73'I',73'I'}
+    user32 = 1991573504
+    api_CharLowerBuff = 37'%'
+    api_CharUpperBuff = 38'&'
+    tm_size = 1024
+    temp_mem = 37902160
+
+ C:\Users\Shawn\Documents\development\hg\sse2\include\std\io.e:
+    mem0 = 37818896
+    mem1 = 37818897
+    mem2 = 37818898
+    mem3 = 37818899
+
+ C:\Users\Shawn\Documents\development\hg\sse2\include\std\get.e:
+    input_file = <no value>
+    input_string = <no value>
+    string_next = <no value>
+    ch = <no value>
+    leading_whitespace = <no value>
+
+ C:\Users\Shawn\Documents\development\hg\sse2\include\std\unittest.e:
+    time_start = 0.858
+    time_test = 0.858
+    test_count = 0
+    tests_passed = 0
+    tests_failed = 0
+    filename = {116't',95'_',99'c',95'_',115's',97'a',102'f',101'e',95'_',
+102'f',114'r',101'e',101'e',95'_',97'a',108'l',108'l',111'o',99'c',97'a',
+116't',101'e',95'_',112'p',114'r',111'o',116't',101'e',99'c',116't',46'.',
+101'e'}
+    verbose = 1
+    abort_on_fail = 0
+    wait_on_summary = 0
+    accumulate_on_summary = 0
+    log_fh = 0
+    cmd = {
+            {67'C',58':',92'\',85'U',115's',101'e',114'r',115's',92'\',83'S',
+104'h',97'a',119'w',110'n',92'\',68'D',111'o',99'c',117'u',109'm',101'e',
+110'n',116't',115's',92'\',100'd',101'e',118'v',101'e',108'l',111'o',112'p',
+109'm',101'e',110'n',116't',92'\',104'h',103'g',92'\',115's',115's',101'e',
+50'2',92'\',115's',111'o',117'u',114'r',99'c',101'e',92'\',98'b',117'u',
+105'i',108'l',100'd',92'\',120'x',56'8',54'6',92'\',101'e',117'u',105'i',
+46'.',101'e',120'x',101'e'},
+            {116't',95'_',99'c',95'_',115's',97'a',102'f',101'e',95'_',102'f',
+114'r',101'e',101'e',95'_',97'a',108'l',108'l',111'o',99'c',97'a',116't',
+101'e',95'_',112'p',114'r',111'o',116't',101'e',99'c',116't',46'.',101'e'}
+          }
+    i = 3
+
+ C:\Users\Shawn\Documents\development\hg\sse2\tests\t_c_safe_free_allocate_protect.e:
+    addr = 2424872
+
+

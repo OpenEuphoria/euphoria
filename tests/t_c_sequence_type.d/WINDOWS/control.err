@@ -1,0 +1,17 @@
+C:\Users\Shawn\Documents\development\hg\sse2\tests\t_c_sequence_type.e:4
+<0025>:: found ... reserved word ... but was expecting an identifier name
+sequence type foo
+             ^
+
+
+--- Defined Words ---
+EU4
+EU4_0
+EU4_0_3
+WINDOWS
+WIN32
+CONSOLE
+UNITTEST
+CRASH
+EUI
+-------------------

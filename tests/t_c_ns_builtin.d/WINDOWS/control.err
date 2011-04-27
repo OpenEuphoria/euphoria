@@ -1,0 +1,19 @@
+C:\Users\Shawn\Documents\development\hg\sse2\tests\t_c_ns_builtin.e:3
+<0074>:: Errors resolving the following references:
+	t_c_ns_builtin.e (3): puts
+
+ut:puts( 1, "This should crash\n" )
+      ^
+
+
+--- Defined Words ---
+EU4
+EU4_0
+EU4_0_3
+WINDOWS
+WIN32
+CONSOLE
+UNITTEST
+CRASH
+EUI
+-------------------

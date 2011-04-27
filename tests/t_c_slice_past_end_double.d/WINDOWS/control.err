@@ -1,0 +1,10 @@
+C:\Users\Shawn\Documents\development\hg\sse2\tests\t_c_slice_past_end_double.e:4
+slice upper index is less than 0 (-2147483648) 
+
+
+Global & Local Variables
+
+ C:\Users\Shawn\Documents\development\hg\sse2\tests\t_c_slice_past_end_double.e:
+    s = {12,23,34'"'}
+
+
