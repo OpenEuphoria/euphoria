@@ -49,7 +49,7 @@ procedure debug_screen()
 			trace_off()
 		
 		case "s" then
-			skip_trace()
+			step_over()
 		
 		case "q" then
 			disable_trace()

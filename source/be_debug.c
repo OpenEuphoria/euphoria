@@ -66,7 +66,7 @@ void disable_trace(){
 	trace_enabled = FALSE;
 }
 
-void skip_trace(){
+void step_over(){
 	TraceOn = FALSE;
 	TraceBeyond = start_line;
 	TraceStack = current_stack_depth;
@@ -84,7 +84,7 @@ enum INIT_ACCESSORS {
 	IA_FILE_NAME,
 	IA_TRACE_OFF,
 	IA_DISABLE_TRACE,
-	IA_SKIP_TRACE,
+	IA_STEP_OVER,
 	IA_ABORT_PROGRAM,
 	IA_SIZE
 };
@@ -120,8 +120,8 @@ object init_debug( object params ){
 	ptrs->base[IA_FILE_NAME]     = box_ptr( (uintptr_t) file_name );
 	ptrs->base[IA_TRACE_OFF]     = box_ptr( (uintptr_t) &trace_off );
 	ptrs->base[IA_DISABLE_TRACE] = box_ptr( (uintptr_t) &disable_trace );
-	ptrs->base[IA_SKIP_TRACE]    = box_ptr( (uintptr_t) &skip_trace );
-	ptrs->base[IA_ABORT_PROGRAM]    = box_ptr( (uintptr_t) &abort_program );
+	ptrs->base[IA_STEP_OVER]     = box_ptr( (uintptr_t) &step_over );
+	ptrs->base[IA_ABORT_PROGRAM] = box_ptr( (uintptr_t) &abort_program );
 	
 	return MAKE_SEQ( ptrs );
 }

@@ -87,7 +87,7 @@ integer
 	read_object_cid   = -1,
 	trace_off_cid     = -1,
 	disable_trace_cid = -1,
-	skip_trace_cid    = -1,
+	step_over_cid    = -1,
 	abort_program_cid = -1,
 	$
 
@@ -137,7 +137,7 @@ enum type INIT_ACCESSORS
 	IA_FILE_NAME,
 	IA_TRACE_OFF,
 	IA_DISABLE_TRACE,
-	IA_SKIP_TRACE,
+	IA_STEP_OVER,
 	IA_ABORT_PROGRAM,
 	$
 end type
@@ -179,7 +179,7 @@ public procedure initialize_debugger( atom init_ptr )
 	file_name_ptr      = init_data[IA_FILE_NAME]
 	trace_off_cid      = define_c_proc( "", { '+', init_data[IA_TRACE_OFF] }, {} )
 	disable_trace_cid  = define_c_proc( "", { '+', init_data[IA_DISABLE_TRACE] }, {} )
-	skip_trace_cid     = define_c_proc( "", { '+', init_data[IA_SKIP_TRACE] }, {} )
+	step_over_cid     = define_c_proc( "", { '+', init_data[IA_STEP_OVER] }, {} )
 	abort_program_cid  = define_c_proc( "", { '+', init_data[IA_ABORT_PROGRAM] }, {} )
 	
 end procedure
@@ -217,8 +217,8 @@ public procedure disable_trace()
 	c_proc( disable_trace_cid, {} )
 end procedure
 
-public procedure skip_trace()
-	c_proc( skip_trace_cid, {} )
+public procedure step_over()
+	c_proc( step_over_cid, {} )
 end procedure
 
 public procedure abort_program()
