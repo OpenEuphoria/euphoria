@@ -277,3 +277,11 @@ end function
 public function get_file_line( integer line )
 	return peek2u( slist + line * SL_SIZE + SL_LINE )
 end function
+
+public function is_variable( atom sym_ptr )
+	if sym_ptr = 0 then
+		return 0
+	end if
+	
+	return -100 = peek4s( sym_ptr + ST_TOKEN )
+end function

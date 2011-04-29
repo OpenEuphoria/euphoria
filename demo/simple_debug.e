@@ -33,11 +33,12 @@ procedure lookup_var( sequence command )
 	atom sym = symbol_lookup( name )
 	if sym = 0 then
 		printf( 1, "(sdb) Could not find symbol named '%s'\n", { name } )
-		return
+	elsif not is_variable( sym ) then
+		printf( 1, "(sdb) %s - not defined here\n", { name } )
 	
 	elsif is_novalue( sym ) then
 		printf( 1, "(sdb) %s <no value assigned>\n", { name } )
-		return
+		
 	else
 		display_var( sym, 1 )
 	end if
