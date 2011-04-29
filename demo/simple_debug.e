@@ -45,6 +45,31 @@ procedure lookup_var( sequence command )
 	
 end procedure
 
+procedure back_trace()
+	sequence bt = debugger_call_stack()
+	for i = 1 to length( bt ) do
+		printf(1, "(sdb %d) [%s:%d] %s", {
+			i,
+			bt[i][CS_FILE_NAME],
+			bt[i][CS_LINE_NO],
+			bt[i][CS_ROUTINE_NAME]
+			} )
+		
+		if i != length( bt ) then
+			sequence params = get_parameter_syms( bt[i][CS_ROUTINE_SYM] )
+			puts( 1, "(")
+			for j = 1 to length( params ) do
+				if j > 1 then
+					puts( 1, "," )
+				end if
+				printf( 1, " %s", { get_name( params[j] ) } )
+			end for
+			puts( 1, " )")
+		end if
+		puts( 1, "\n" )
+	end for
+end procedure
+
 sequence last_command = ""
 procedure debug_screen()
 	-- wait for user input before continuing
@@ -77,6 +102,9 @@ procedure debug_screen()
 			
 		case "!" then
 			abort_program()
+		
+		case "bt" then
+			back_trace()
 		
 		case "help", "h", "?" then
 			puts(1, `

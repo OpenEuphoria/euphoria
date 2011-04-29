@@ -82,7 +82,7 @@ void abort_program(){
 }
 
 object get_pc(){
-	return box_ptr( tpc );
+	return box_ptr( (uintptr_t) tpc );
 }
 
 enum INIT_ACCESSORS {
@@ -98,6 +98,7 @@ enum INIT_ACCESSORS {
 	IA_RTLOOKUP,
 	IA_GET_PC,
 	IA_IS_NOVALUE,
+	IA_CALL_STACK,
 	IA_SIZE
 };
 
@@ -137,7 +138,7 @@ object init_debug( object params ){
 	ptrs->base[IA_RTLOOKUP]      = box_ptr( (uintptr_t) &RTLookup );
 	ptrs->base[IA_GET_PC]        = box_ptr( (uintptr_t) &get_pc );
 	ptrs->base[IA_IS_NOVALUE]    = box_ptr( (uintptr_t) &is_novalue );
-	
+	ptrs->base[IA_CALL_STACK]    = box_ptr( (uintptr_t) &eu_call_stack );
 	return MAKE_SEQ( ptrs );
 }
 
@@ -145,3 +146,94 @@ object init_debug_addr(){
 	return box_ptr( (uintptr_t) &init_debug );
 }
 
+int add_to_call_stack( object_ptr stack_seq_ptr, intptr_t *pc, int debugger ){
+	symtab_ptr current_proc;
+	s1_ptr cs;
+	long gline;
+	
+	current_proc = Locate( pc );
+	if( current_proc == NULL ){
+		return 0;
+	}
+	
+	if( debugger ){
+		cs = NewS1( 5 );
+		cs->base[4] = box_ptr( (uintptr_t) current_proc );
+		cs->base[5] = box_ptr( (uintptr_t) pc );
+	}
+	else{
+		cs = NewS1( 3 );
+	}
+	cs->base[1] = NewString( current_proc->name );
+	
+	gline = FindLine(pc, current_proc );
+	if (gline == 0) {
+		cs->base[2] = MAKE_SEQ( NewS1( 0 ) );
+		cs->base[3] = -1;
+	}
+	else{
+		cs->base[2] = NewString( file_name[ slist[gline].file_no ] );
+		cs->base[3] = slist[gline].line;
+	}
+	
+	Append( stack_seq_ptr, *stack_seq_ptr, MAKE_SEQ( cs ) );
+	
+	return 1;
+}
+
+
+// Return the current call stack
+object eu_call_stack( int debugger ){
+	object_ptr stack_top, stack;
+	intptr_t *new_pc;
+	s1_ptr stack_s1;
+	object stack_seq;
+	
+	stack_top = expr_top;
+	stack     = expr_stack;
+	
+	stack_s1 = NewS1(0);
+	stack_seq = MAKE_SEQ( stack_s1 );
+	
+	new_pc = (intptr_t*)*stack_top;
+	if( 0 == add_to_call_stack( &stack_seq, tpc, debugger ) ){
+		return stack_seq;
+	}
+	
+	stack_top -= 2;
+	while (stack_top > stack) {
+		// unwind the stack for this task
+		
+		new_pc = (intptr_t *)*stack_top;
+		stack_top -= 2;
+		
+		if (*new_pc == (intptr_t)opcode(CALL_BACK_RETURN)) {
+			// we're in a callback routine
+			
+#ifdef EWINDOWS         
+			copy_string(TempBuff, "\n^^^ call-back from Windows\n", TEMP_SIZE);
+#else           
+			copy_string(TempBuff, "\n^^^ call-back from external source\n", TEMP_SIZE);
+#endif          
+			if( debugger ){
+				stack_s1 = NewS1( 4 );
+			}
+			else{
+				stack_s1 = NewS1( 2 );
+			}
+			stack_s1->base[1] = NewString( TempBuff );
+			stack_s1->base[2] = MAKE_SEQ( NewS1( 0 ) );
+			
+			Append( &stack_seq, stack_seq, MAKE_SEQ( stack_s1 ) );
+			
+			if (stack_top <= stack+3)
+				break;
+		}
+		else if( 0 == add_to_call_stack( &stack_seq, new_pc, debugger ) ){
+			return stack_seq;
+		}
+		
+	} // end while
+	
+	return stack_seq;
+}

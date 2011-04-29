@@ -3170,7 +3170,7 @@ object machine(object opcode, object x)
 				
 			case M_CALL_STACK:
 #ifndef ERUNTIME
-				return eu_call_stack();
+				return eu_call_stack( 0 );
 #else
 				// translated code returns empty call stack
 				return MAKE_SEQ( NewS1( 0 ) );

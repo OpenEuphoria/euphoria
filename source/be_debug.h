@@ -13,4 +13,6 @@ void ExternalDebugScreen();
 
 object init_debug_addr();
 
+object eu_call_stack();
+
 #endif

@@ -23,6 +23,10 @@ public enum
 	CS_FILE_NAME,
 --** CS_LINE_NO: index of the line number in the sequence returned by [[:call_stack]]
 	CS_LINE_NO,
+--** CS_ROUTINE_SYM: (debugger only) Pointer to the routine symbol
+	CS_ROUTINE_SYM,
+--** CS_PC: (debugger only) The program counter pointer for this routine
+	CS_PC,
 	$
 
 --****
@@ -92,6 +96,8 @@ integer
 	RTLookup_cid      = -1,
 	get_pc_cid        = -1,
 	is_novalue_cid    = -1,
+	back_trace_cid    = -1,
+	call_stack_cid    = -1,
 	$
 
 integer
@@ -148,6 +154,7 @@ enum type INIT_ACCESSORS
 	IA_RTLOOKUP,
 	IA_GET_PC,
 	IA_IS_NOVALUE,
+	IA_CALL_STACK,
 	$
 end type
 
@@ -194,6 +201,7 @@ public procedure initialize_debugger( atom init_ptr )
 			{ C_POINTER, C_INT, C_POINTER, C_POINTER, C_INT, C_ULONG }, C_POINTER )
 	get_pc_cid         = define_c_func( "", { '+', init_data[IA_GET_PC] }, {}, C_POINTER )
 	is_novalue_cid     = define_c_func( "", { '+', init_data[IA_IS_NOVALUE] }, { C_POINTER }, C_INT )
+	call_stack_cid     = define_c_func( "", { '+', init_data[IA_CALL_STACK] }, { C_INT }, E_OBJECT )
 	
 end procedure
 
@@ -258,6 +266,21 @@ public function is_novalue( atom sym_ptr )
 	return c_func( is_novalue_cid, { sym_ptr } )
 end function
 
+public function debugger_call_stack()
+	sequence stack = c_func( call_stack_cid, { 1 } )
+	ifdef EUI then
+		-- if using an interpreted debugger, strip off debugger junk
+		-- from the top of the stack:
+		for i = 1 to length( stack ) do
+			if length( stack[i][2] ) = 0 then
+				stack = remove( stack, 1, i )
+				exit
+			end if
+		end for
+	end ifdef
+	return stack
+end function
+
 public function get_name( atom sym )
 	return peek_string( peek_pointer( sym + ST_NAME ) )
 end function
@@ -284,4 +307,17 @@ public function is_variable( atom sym_ptr )
 	end if
 	
 	return -100 = peek4s( sym_ptr + ST_TOKEN )
+end function
+
+public function get_parameter_syms( atom rtn_sym )
+	integer param_count = peek4u( rtn_sym + ST_NUM_ARGS )
+	sequence syms = repeat( 0, param_count )
+	atom next_sym = peek_pointer( rtn_sym + ST_NEXT )
+	for i = 1 to param_count do
+		while peek( next_sym + ST_SCOPE ) != 3 do -- SC_PRIVATE = 3
+			next_sym = peek_pointer( next_sym + ST_NEXT )
+		end while
+		syms[i] = next_sym
+	end for
+	return syms
 end function
