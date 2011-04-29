@@ -23,10 +23,26 @@ set_debug_rid( SHOW_DEBUG, routine_id("show_debug") )
 
 procedure display_var( atom sym, integer user_requested )
 	-- when a variable value changes, we'll show the new value
-	printf(1, "(sdb) variable: [%s] = ", { debug:get_name( sym ) } )
+	printf(1, "(sdb) [%s] = ", { debug:get_name( sym ) } )
 	display( read_object( sym ) )
 end procedure
 set_debug_rid( DISPLAY_VAR, routine_id("display_var") )
+
+procedure lookup_var( sequence command )
+	sequence name = command[7..$]
+	atom sym = symbol_lookup( name )
+	if sym = 0 then
+		printf( 1, "(sdb) Could not find symbol named '%s'\n", { name } )
+		return
+	
+	elsif is_novalue( sym ) then
+		printf( 1, "(sdb) %s <no value assigned>\n", { name } )
+		return
+	else
+		display_var( sym, 1 )
+	end if
+	
+end procedure
 
 sequence last_command = ""
 procedure debug_screen()
@@ -44,16 +60,20 @@ procedure debug_screen()
 	last_command = command
 	switch command do
 		case "n" then
+			return
 			
 		case "c" then
 			trace_off()
-		
+			return
+			
 		case "s" then
 			step_over()
-		
+			return
+			
 		case "q" then
 			disable_trace()
-		
+			return
+			
 		case "!" then
 			abort_program()
 		
@@ -66,10 +86,15 @@ procedure debug_screen()
 	! : abort the program immediately
 `)
 		case else
-			puts(1, `Unknown command.  Use "help", "h" or "?" for a list of valid commands` & "\n" )
+			if match( "print ", command ) = 1 then
+				lookup_var( command )
+			else
+				puts(1, `Unknown command.  Use "help", "h" or "?" for a list of valid commands` & "\n" )
+			end if
+			
 			
 	end switch
-	
+	debug_screen()
 end procedure
 set_debug_rid( DEBUG_SCREEN, routine_id("debug_screen") )
 

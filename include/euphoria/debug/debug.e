@@ -87,8 +87,11 @@ integer
 	read_object_cid   = -1,
 	trace_off_cid     = -1,
 	disable_trace_cid = -1,
-	step_over_cid    = -1,
+	step_over_cid     = -1,
 	abort_program_cid = -1,
+	RTLookup_cid      = -1,
+	get_pc_cid        = -1,
+	is_novalue_cid    = -1,
 	$
 
 integer
@@ -98,9 +101,12 @@ integer
 	debug_screen_rid   = -1,
 	$
 
+atom showing_line = -1
+
 function show_debug()
 	if show_debug_rid != -1 then
-		call_proc( show_debug_rid, { peek_pointer( data_buffer ) } )
+		showing_line = peek_pointer( data_buffer )
+		call_proc( show_debug_rid, { showing_line } )
 	end if
 	return 0
 end function
@@ -139,6 +145,9 @@ enum type INIT_ACCESSORS
 	IA_DISABLE_TRACE,
 	IA_STEP_OVER,
 	IA_ABORT_PROGRAM,
+	IA_RTLOOKUP,
+	IA_GET_PC,
+	IA_IS_NOVALUE,
 	$
 end type
 
@@ -179,8 +188,12 @@ public procedure initialize_debugger( atom init_ptr )
 	file_name_ptr      = init_data[IA_FILE_NAME]
 	trace_off_cid      = define_c_proc( "", { '+', init_data[IA_TRACE_OFF] }, {} )
 	disable_trace_cid  = define_c_proc( "", { '+', init_data[IA_DISABLE_TRACE] }, {} )
-	step_over_cid     = define_c_proc( "", { '+', init_data[IA_STEP_OVER] }, {} )
+	step_over_cid      = define_c_proc( "", { '+', init_data[IA_STEP_OVER] }, {} )
 	abort_program_cid  = define_c_proc( "", { '+', init_data[IA_ABORT_PROGRAM] }, {} )
+	RTLookup_cid       = define_c_func( "", { '+', init_data[IA_RTLOOKUP] }, 
+			{ C_POINTER, C_INT, C_POINTER, C_POINTER, C_INT, C_ULONG }, C_POINTER )
+	get_pc_cid         = define_c_func( "", { '+', init_data[IA_GET_PC] }, {}, C_POINTER )
+	is_novalue_cid     = define_c_func( "", { '+', init_data[IA_IS_NOVALUE] }, { C_POINTER }, C_INT )
 	
 end procedure
 
@@ -224,6 +237,26 @@ end procedure
 public procedure abort_program()
 	c_proc( abort_program_cid, {} )
 end procedure
+
+public function get_current_line()
+	return showing_line
+end function
+
+public function symbol_lookup( sequence name, integer line = get_current_line(), atom pc = get_pc() )
+	atom name_ptr = allocate_string( name, 1 )
+	
+-- 	symtab_ptr RTLookup(char *name, int file, intptr_t *pc, symtab_ptr routine, int stlen, unsigned long current_line )
+	
+	return c_func( RTLookup_cid, { name_ptr, get_file_no( line ), pc, 0, peek_pointer( symbol_table) , line } )
+end function
+
+public function get_pc()
+	return c_func( get_pc_cid, {} )
+end function
+
+public function is_novalue( atom sym_ptr )
+	return c_func( is_novalue_cid, { sym_ptr } )
+end function
 
 public function get_name( atom sym )
 	return peek_string( peek_pointer( sym + ST_NAME ) )

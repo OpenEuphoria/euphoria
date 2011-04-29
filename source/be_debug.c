@@ -11,6 +11,7 @@
 #include "be_machine.h"
 #include "be_rterror.h"
 #include "be_runtime.h"
+#include "be_symtab.h"
 
 int external_debugger = 0;
 int current_stack_depth = 0;
@@ -72,8 +73,16 @@ void step_over(){
 	TraceStack = current_stack_depth;
 }
 
+int is_novalue( object_ptr obj ){
+	return *obj == NOVALUE;
+}
+
 void abort_program(){
 	RTFatal("program aborted");
+}
+
+object get_pc(){
+	return box_ptr( tpc );
 }
 
 enum INIT_ACCESSORS {
@@ -86,6 +95,9 @@ enum INIT_ACCESSORS {
 	IA_DISABLE_TRACE,
 	IA_STEP_OVER,
 	IA_ABORT_PROGRAM,
+	IA_RTLOOKUP,
+	IA_GET_PC,
+	IA_IS_NOVALUE,
 	IA_SIZE
 };
 
@@ -122,6 +134,9 @@ object init_debug( object params ){
 	ptrs->base[IA_DISABLE_TRACE] = box_ptr( (uintptr_t) &disable_trace );
 	ptrs->base[IA_STEP_OVER]     = box_ptr( (uintptr_t) &step_over );
 	ptrs->base[IA_ABORT_PROGRAM] = box_ptr( (uintptr_t) &abort_program );
+	ptrs->base[IA_RTLOOKUP]      = box_ptr( (uintptr_t) &RTLookup );
+	ptrs->base[IA_GET_PC]        = box_ptr( (uintptr_t) &get_pc );
+	ptrs->base[IA_IS_NOVALUE]    = box_ptr( (uintptr_t) &is_novalue );
 	
 	return MAKE_SEQ( ptrs );
 }
