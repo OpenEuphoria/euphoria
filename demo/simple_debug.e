@@ -2,6 +2,7 @@
 public include euphoria/debug/debug.e
 
 include std/console.e
+include std/convert.e
 include std/text.e
 
 integer last_line = -1
@@ -9,6 +10,7 @@ procedure show_debug( integer start_line )
 	if start_line = last_line then
 		return
 	end if
+	debug_level = 1
 	last_line = start_line
 	-- display the source file, line number and source code:
 	printf(1, "(sdb) [%s:%d] %s\n", 
@@ -20,7 +22,6 @@ end procedure
 -- register the event
 set_debug_rid( SHOW_DEBUG, routine_id("show_debug") )
 
-
 procedure display_var( atom sym, integer user_requested )
 	-- when a variable value changes, we'll show the new value
 	printf(1, "(sdb) [%s] = ", { debug:get_name( sym ) } )
@@ -30,7 +31,10 @@ set_debug_rid( DISPLAY_VAR, routine_id("display_var") )
 
 procedure lookup_var( sequence command )
 	sequence name = command[7..$]
-	atom sym = symbol_lookup( name )
+	atom sym
+	check_stack()
+	sym = symbol_lookup( name, debug_stack[debug_level][CS_GLINE], debug_stack[debug_level][CS_PC] )
+	
 	if sym = 0 then
 		printf( 1, "(sdb) Could not find symbol named '%s'\n", { name } )
 	elsif not is_variable( sym ) then
@@ -45,28 +49,67 @@ procedure lookup_var( sequence command )
 	
 end procedure
 
+sequence debug_stack = {}
+integer  debug_level = 0
+
+procedure check_stack()
+	debug_stack = debugger_call_stack()
+	if debug_level > length( debug_stack ) then
+		debug_level = 1
+	end if
+end procedure
+
+procedure navigate_up( integer amount )
+	debug_stack = debugger_call_stack()
+	debug_level += amount
+	if debug_level > length( debug_stack ) then
+		debug_level = length( debug_stack )
+	end if
+	display_stack_level( debug_level )
+end procedure
+
+procedure navigate_down( integer amount )
+	debug_stack = debugger_call_stack()
+	debug_level -= amount
+	if debug_level < 1 then
+		debug_level = 1
+	end if
+	display_stack_level( debug_level )
+end procedure
+
+procedure clear_stack()
+	debug_stack = {}
+	debug_level = 0
+end procedure
+
+procedure display_stack_level( integer level )
+	printf(1, "(sdb %d) [%s:%d] %s", {
+		level,
+		debug_stack[level][CS_FILE_NAME],
+		debug_stack[level][CS_LINE_NO],
+		debug_stack[level][CS_ROUTINE_NAME]
+		} )
+	
+	if level != length( debug_stack ) then
+		sequence params = get_parameter_syms( debug_stack[level][CS_ROUTINE_SYM] )
+		puts( 1, "(")
+		for j = 1 to length( params ) do
+			if j > 1 then
+				puts( 1, "," )
+			end if
+			printf( 1, " %s", { get_name( params[j] ) } )
+		end for
+		puts( 1, " )")
+	end if
+	puts( 1, "\n" )
+end procedure
+
 procedure back_trace()
-	sequence bt = debugger_call_stack()
-	for i = 1 to length( bt ) do
-		printf(1, "(sdb %d) [%s:%d] %s", {
-			i,
-			bt[i][CS_FILE_NAME],
-			bt[i][CS_LINE_NO],
-			bt[i][CS_ROUTINE_NAME]
-			} )
+	debug_stack = debugger_call_stack()
+	debug_level = 1
+	for i = 1 to length( debug_stack ) do
+		display_stack_level( i )
 		
-		if i != length( bt ) then
-			sequence params = get_parameter_syms( bt[i][CS_ROUTINE_SYM] )
-			puts( 1, "(")
-			for j = 1 to length( params ) do
-				if j > 1 then
-					puts( 1, "," )
-				end if
-				printf( 1, " %s", { get_name( params[j] ) } )
-			end for
-			puts( 1, " )")
-		end if
-		puts( 1, "\n" )
 	end for
 end procedure
 
@@ -85,16 +128,24 @@ procedure debug_screen()
 	end if
 	last_command = command
 	switch command do
+		case "s" then
+			step_over()
+			fallthru
+		
 		case "n" then
+			clear_stack()
 			return
 			
 		case "c" then
+			clear_stack()
 			trace_off()
 			return
 			
-		case "s" then
-			step_over()
-			return
+		case "u" then
+			navigate_up( 1 )
+			
+		case "d" then
+			navigate_down( 1 )
 			
 		case "q" then
 			disable_trace()
@@ -108,15 +159,24 @@ procedure debug_screen()
 		
 		case "help", "h", "?" then
 			puts(1, `
-	n : execute the current line
+	bt: show the call stack
+	u : go up one level in the call stack
+	d : go down one level in the call stack
 	c : continue execution without trace
+	n : execute the current line
 	s : resume executing, and begin tracing again when execution reaches the next line
 	q : stop tracing for the remainder of the program
+	
 	! : abort the program immediately
 `)
 		case else
 			if match( "print ", command ) = 1 then
 				lookup_var( command )
+			
+			elsif match( "u ", command ) = 1 then
+				navigate_up( to_number( command[3..$] ) )
+			elsif match( "d ", command ) = 1 then
+				navigate_down( to_number( command[3..$] ) )
 			else
 				puts(1, `Unknown command.  Use "help", "h" or "?" for a list of valid commands` & "\n" )
 			end if

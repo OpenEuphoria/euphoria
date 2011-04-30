@@ -156,17 +156,20 @@ int add_to_call_stack( object_ptr stack_seq_ptr, intptr_t *pc, int debugger ){
 		return 0;
 	}
 	
+	gline = FindLine(pc, current_proc );
+	
 	if( debugger ){
-		cs = NewS1( 5 );
+		cs = NewS1( 6 );
 		cs->base[4] = box_ptr( (uintptr_t) current_proc );
 		cs->base[5] = box_ptr( (uintptr_t) pc );
+		cs->base[6] = gline;
 	}
 	else{
 		cs = NewS1( 3 );
 	}
 	cs->base[1] = NewString( current_proc->name );
 	
-	gline = FindLine(pc, current_proc );
+	
 	if (gline == 0) {
 		cs->base[2] = MAKE_SEQ( NewS1( 0 ) );
 		cs->base[3] = -1;
@@ -174,6 +177,7 @@ int add_to_call_stack( object_ptr stack_seq_ptr, intptr_t *pc, int debugger ){
 	else{
 		cs->base[2] = NewString( file_name[ slist[gline].file_no ] );
 		cs->base[3] = slist[gline].line;
+		
 	}
 	
 	Append( stack_seq_ptr, *stack_seq_ptr, MAKE_SEQ( cs ) );

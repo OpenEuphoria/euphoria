@@ -27,6 +27,8 @@ public enum
 	CS_ROUTINE_SYM,
 --** CS_PC: (debugger only) The program counter pointer for this routine
 	CS_PC,
+--** CS_GLINE: (debugger only) The index into the global line array
+	CS_GLINE,
 	$
 
 --****
@@ -198,7 +200,7 @@ public procedure initialize_debugger( atom init_ptr )
 	step_over_cid      = define_c_proc( "", { '+', init_data[IA_STEP_OVER] }, {} )
 	abort_program_cid  = define_c_proc( "", { '+', init_data[IA_ABORT_PROGRAM] }, {} )
 	RTLookup_cid       = define_c_func( "", { '+', init_data[IA_RTLOOKUP] }, 
-			{ C_POINTER, C_INT, C_POINTER, C_POINTER, C_INT, C_ULONG }, C_POINTER )
+			{ C_POINTER, C_INT, C_POINTER, C_POINTER, C_INT, C_ULONG}, C_POINTER )
 	get_pc_cid         = define_c_func( "", { '+', init_data[IA_GET_PC] }, {}, C_POINTER )
 	is_novalue_cid     = define_c_func( "", { '+', init_data[IA_IS_NOVALUE] }, { C_POINTER }, C_INT )
 	call_stack_cid     = define_c_func( "", { '+', init_data[IA_CALL_STACK] }, { C_INT }, E_OBJECT )
@@ -254,7 +256,6 @@ public function symbol_lookup( sequence name, integer line = get_current_line(),
 	atom name_ptr = allocate_string( name, 1 )
 	
 -- 	symtab_ptr RTLookup(char *name, int file, intptr_t *pc, symtab_ptr routine, int stlen, unsigned long current_line )
-	
 	return c_func( RTLookup_cid, { name_ptr, get_file_no( line ), pc, 0, peek_pointer( symbol_table) , line } )
 end function
 
