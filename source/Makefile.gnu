@@ -332,14 +332,14 @@ EU_STD_INC = \
 	$(wildcard $(INCDIR)/std/unix/*.e) \
 	$(wildcard $(INCDIR)/std/net/*.e) \
 	$(wildcard $(INCDIR)/std/win32/*.e) \
-	$(wildcard $(INCDIR)/euphoria/*.e) \
-	$(wildcard $(INCDIR)/euphoria/debug/*.e)
+	$(wildcard $(INCDIR)/euphoria/*.e)
 
 DOCDIR = $(TRUNKDIR)/docs
 EU_DOC_SOURCE = \
 	$(EU_STD_INC) \
 	$(DOCDIR)/manual.af \
-	$(wildcard $(DOCDIR)/*.txt)
+	$(wildcard $(DOCDIR)/*.txt) \
+	$(wildcard $(INCDIR)/euphoria/debug/*.e)
 
 EU_TRANSLATOR_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/transobj/*.c))
 EU_BACKEND_RUNNER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/backobj/*.c))
