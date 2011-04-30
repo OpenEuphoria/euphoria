@@ -113,6 +113,31 @@ procedure back_trace()
 	end for
 end procedure
 
+function find_routine( sequence name )
+	sequence stack = debugger_call_stack()
+	atom sym = stack[$][CS_ROUTINE_SYM]  -- TopLevel
+	
+	while sym and compare( name, get_name( sym ) ) do
+		sym = get_next( sym )
+	end while
+	
+	return sym
+	
+end function
+
+procedure routine_breakpoint( sequence command )
+	sequence name = command[3..$]
+	atom routine_sym = find_routine( name )
+	
+	if routine_sym then
+		break_routine( routine_sym, 1 )
+	else
+		printf(1, "Could not find routine [%s].  Break point not set.\n", { name } )
+	end if
+	
+end procedure
+
+
 sequence last_command = ""
 procedure debug_screen()
 	-- wait for user input before continuing
@@ -168,6 +193,9 @@ procedure debug_screen()
 	q : stop tracing for the remainder of the program
 	
 	! : abort the program immediately
+	
+	print <x> : print the value of variable <x>
+	b <x>     : set a break point in routine <x>
 `)
 		case else
 			if match( "print ", command ) = 1 then
@@ -177,6 +205,8 @@ procedure debug_screen()
 				navigate_up( to_number( command[3..$] ) )
 			elsif match( "d ", command ) = 1 then
 				navigate_down( to_number( command[3..$] ) )
+			elsif match( "b ", command ) = 1 then
+				routine_breakpoint( command )
 			else
 				puts(1, `Unknown command.  Use "help", "h" or "?" for a list of valid commands` & "\n" )
 			end if

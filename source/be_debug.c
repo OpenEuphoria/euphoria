@@ -3,7 +3,10 @@
 #include <stdint.h>
 
 #include "execute.h"
+#include "global.h"
 #include "object.h"
+#include "redef.h"
+#include "reswords.h"
 
 #include "be_alloc.h"
 #include "be_debug.h"
@@ -85,6 +88,27 @@ object get_pc(){
 	return box_ptr( (uintptr_t) tpc );
 }
 
+int break_at_routine( symtab_ptr proc, int enable ){
+	intptr_t *pc;
+	intptr_t len;
+	intptr_t i;
+	pc = proc->u.subp.code;
+	len = *pc++;
+	for( i = 1; i <= len; ++pc, ++i ){
+		if( *pc == (intptr_t)opcode( L_STARTLINE ) || *pc == (intptr_t) opcode( L_STARTLINE_BREAK ) ) {
+			if( enable ){
+				*pc = (intptr_t) opcode( L_STARTLINE_BREAK );
+			}
+			else{
+				*pc = (intptr_t) opcode( L_STARTLINE );
+			}
+			return 1;
+		}
+	}
+	return 0;
+}
+
+// Used in the sequence returned from init_debug()
 enum INIT_ACCESSORS {
 	IA_SYMTAB = 1,
 	IA_SLIST,
@@ -99,9 +123,11 @@ enum INIT_ACCESSORS {
 	IA_GET_PC,
 	IA_IS_NOVALUE,
 	IA_CALL_STACK,
+	IA_BREAK_ROUTINE,
 	IA_SIZE
 };
 
+// Used in the sequence passed to init_debug()
 enum INIT_PARAMS {
 	IP_BUFFER = 1,
 	IP_SHOW_DEBUG,
@@ -139,6 +165,8 @@ object init_debug( object params ){
 	ptrs->base[IA_GET_PC]        = box_ptr( (uintptr_t) &get_pc );
 	ptrs->base[IA_IS_NOVALUE]    = box_ptr( (uintptr_t) &is_novalue );
 	ptrs->base[IA_CALL_STACK]    = box_ptr( (uintptr_t) &eu_call_stack );
+	ptrs->base[IA_BREAK_ROUTINE] = box_ptr( (uintptr_t) &break_at_routine );
+	
 	return MAKE_SEQ( ptrs );
 }
 
@@ -155,7 +183,7 @@ int add_to_call_stack( object_ptr stack_seq_ptr, intptr_t *pc, int debugger ){
 	if( current_proc == NULL ){
 		return 0;
 	}
-	
+	puts( current_proc->name );
 	gline = FindLine(pc, current_proc );
 	
 	if( debugger ){
@@ -205,9 +233,8 @@ object eu_call_stack( int debugger ){
 	}
 	
 	stack_top -= 2;
-	while (stack_top > stack) {
+	while (stack_top >= stack) {
 		// unwind the stack for this task
-		
 		new_pc = (intptr_t *)*stack_top;
 		stack_top -= 2;
 		
@@ -230,8 +257,6 @@ object eu_call_stack( int debugger ){
 			
 			Append( &stack_seq, stack_seq, MAKE_SEQ( stack_s1 ) );
 			
-			if (stack_top <= stack+3)
-				break;
 		}
 		else if( 0 == add_to_call_stack( &stack_seq, new_pc, debugger ) ){
 			return stack_seq;

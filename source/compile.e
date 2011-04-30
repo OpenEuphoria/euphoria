@@ -6758,7 +6758,7 @@ export procedure init_opcodes()
 			case "SQRT" then
 				operation[i] = routine_id("opSQRT")
 
-			case "STARTLINE" then
+			case "STARTLINE", "STARTLINE_BREAK" then
 				operation[i] = routine_id("opSTARTLINE")
 
 			case "SWITCH_RT" then

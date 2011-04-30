@@ -226,7 +226,8 @@ export constant
 	POKE_POINTER        = 215,
 	PEEK_POINTER        = 216,
 	SIZEOF              = 217,
-	MAX_OPCODE          = 217
+	STARTLINE_BREAK     = 218,
+	MAX_OPCODE          = 218
 
 
 -- adding new opcodes possibly affects reswords.h (C-coded backend),

@@ -100,6 +100,7 @@ integer
 	is_novalue_cid    = -1,
 	back_trace_cid    = -1,
 	call_stack_cid    = -1,
+	break_routine_cid = -1,
 	$
 
 integer
@@ -157,6 +158,7 @@ enum type INIT_ACCESSORS
 	IA_GET_PC,
 	IA_IS_NOVALUE,
 	IA_CALL_STACK,
+	IA_BREAK_ROUTINE,
 	$
 end type
 
@@ -204,6 +206,7 @@ public procedure initialize_debugger( atom init_ptr )
 	get_pc_cid         = define_c_func( "", { '+', init_data[IA_GET_PC] }, {}, C_POINTER )
 	is_novalue_cid     = define_c_func( "", { '+', init_data[IA_IS_NOVALUE] }, { C_POINTER }, C_INT )
 	call_stack_cid     = define_c_func( "", { '+', init_data[IA_CALL_STACK] }, { C_INT }, E_OBJECT )
+	break_routine_cid  = define_c_func( "", { '+', init_data[IA_BREAK_ROUTINE] }, { C_POINTER, C_INT }, C_INT )
 	
 end procedure
 
@@ -282,6 +285,10 @@ public function debugger_call_stack()
 	return stack
 end function
 
+public function break_routine( atom routine_sym, integer enable )
+	return c_func( break_routine_cid, { routine_sym, enable } )
+end function
+
 public function get_name( atom sym )
 	return peek_string( peek_pointer( sym + ST_NAME ) )
 end function
@@ -300,6 +307,10 @@ end function
 
 public function get_file_line( integer line )
 	return peek2u( slist + line * SL_SIZE + SL_LINE )
+end function
+
+public function get_next( atom sym )
+	return peek_pointer( sym + ST_NEXT )
 end function
 
 public function is_variable( atom sym_ptr )
@@ -321,4 +332,8 @@ public function get_parameter_syms( atom rtn_sym )
 		syms[i] = next_sym
 	end for
 	return syms
+end function
+
+public function get_symbol_table()
+	return symbol_table
 end function
