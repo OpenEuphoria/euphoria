@@ -2,6 +2,14 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+#ifdef EWINDOWS
+
+#else
+
+#include <dlfcn.h>
+
+#endif
+
 #include "execute.h"
 #include "global.h"
 #include "object.h"
@@ -18,6 +26,8 @@
 
 int external_debugger = 0;
 int current_stack_depth = 0;
+
+char *external_debugger_name = 0;
 
 object_ptr external_buffer = 0;
 
@@ -172,6 +182,48 @@ object init_debug( object params ){
 
 object init_debug_addr(){
 	return box_ptr( (uintptr_t) &init_debug );
+}
+
+void set_debugger( char *debugger_name ){
+	if( debugger_name ){
+		external_debugger = 2;
+		external_debugger_name = debugger_name;
+	}
+}
+
+int load_debugger(){
+#ifdef EWINDOWS
+	HANDLE lib;
+	FARPROC sym;
+#else
+	void *lib;
+	void *sym;
+#endif
+
+	external_debugger = 0;
+#ifdef EWINDOWS
+	lib = LoadLibrary( external_debugger_name );
+#else
+	lib = dlopen( external_debugger_name, RTLD_LAZY );
+#endif
+	
+	if( !lib ){
+		return 0;
+	}
+	
+#ifdef EWINDOWS
+	sym = GetProcAddress( lib, "initialize_debugger" );
+#else
+	sym = dlsym( lib, "initialize_debugger" );
+#endif
+	
+	if( !sym ){
+		return 0;
+	}
+	
+	((void(*)(object)) sym)( box_ptr( (uintptr_t) &init_debug ) );
+	external_debugger = 1;
+	return 1;
 }
 
 int add_to_call_stack( object_ptr stack_seq_ptr, intptr_t *pc, int debugger ){

@@ -26,6 +26,7 @@ sequence interpreter_opt_def = {
 	{ "coverage-db",      0, GetMsgText(333,0), { NO_CASE, ONCE, HAS_PARAMETER, "file" } },
 	{ "coverage-erase",   0, GetMsgText(334,0), { NO_CASE, ONCE } },
 	{ "coverage-exclude", 0, GetMsgText(338,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "pattern"} },
+	{ 0, "debugger", GetMsgText( 351, 0), {NO_CASE, ONCE, HAS_PARAMETER, "debugger"} },
 	$
 }
 
@@ -34,6 +35,8 @@ add_options( interpreter_opt_def )
 include std/pretty.e
 sequence pretty_opt = PRETTY_DEFAULT
 pretty_opt[DISPLAY_ASCII] = 2
+
+export object external_debugger = 0
 
 export procedure intoptions()
 	sequence pause_msg = GetMsgText(278, 0)
@@ -76,6 +79,10 @@ export procedure intoptions()
 			
 			case "coverage-exclude" then
 				coverage_exclude( val )
+			
+			case "debugger" then
+				external_debugger = val
+			
 		end switch
 	end for
 	

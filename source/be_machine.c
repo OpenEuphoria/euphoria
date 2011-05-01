@@ -2659,8 +2659,8 @@ object start_backend(object x)
 
 	x_ptr = SEQ_PTR(x);
 
-	if (IS_ATOM(x) || x_ptr->length != 11)
-		RTFatal("BACKEND requires a sequence of length 11");
+	if (IS_ATOM(x) || x_ptr->length != 12)
+		RTFatal("BACKEND requires a sequence of length 12");
 
 	fe.st = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
 	fe.sl = (struct sline *) get_pos_int(w, *(x_ptr->base+2));
@@ -2675,6 +2675,8 @@ object start_backend(object x)
 	cover_routine     = get_pos_int(w, *(x_ptr->base+9));
 	write_coverage_db = get_pos_int(w, *(x_ptr->base+10));
 	syncolor          = get_pos_int(w, *(x_ptr->base+11));
+	
+	set_debugger( (char*) get_pos_int(w, *(x_ptr->base+12)) );
 	
 	// This is checked when we try to write coverage to make sure
 	// we need to output an error message.

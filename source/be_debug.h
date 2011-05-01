@@ -12,7 +12,8 @@ void ExternalUpdateGlobals();
 void ExternalDebugScreen();
 
 object init_debug_addr();
-
+void set_debugger( char *name );
+int load_debugger();
 object eu_call_stack();
 
 #endif

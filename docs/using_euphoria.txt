@@ -493,6 +493,10 @@ indicates that the referenced switch applies only to that execution mode.
 ; ##-DEBUG## (translator)
 : Enable debug mode for the generated code. 
 
+; ##--DEBUGGER external-debugger## (interpreter)
+: An external debugger translated into a .DLL or .so library to be used instead
+  of the built-in debugger.
+
 ; ##-DLL, -SO## (translator)
 : Compiles and links the translated euphoria code into a DLL, SO or DYLIB 
 (depending on the platform).

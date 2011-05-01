@@ -719,7 +719,10 @@ void ShowDebug()
 	int i;
 	
 	struct EuViewPort vp;
-
+	
+	if( external_debugger == 2 ){
+		load_debugger();
+	}
 	if( external_debugger ){
 		ExternalShowDebug();
 		return;
@@ -873,6 +876,9 @@ static void DebugCommand()
 void DebugScreen()
 /* Display the debug screen, if it is not already there */
 {
+	if( external_debugger == 2 ){
+		load_debugger();
+	}
 	if( external_debugger ){
 		ExternalShowDebug();
 		ExternalDebugScreen();

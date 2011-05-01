@@ -267,6 +267,11 @@ procedure BackEnd(integer il_file)
 		Argv = {Argv[1]} & Argv[3 .. Argc]
 	end if
 
+	atom external_debugger_ptr = 0
+	if sequence( external_debugger ) then
+		external_debugger_ptr = allocate_string( external_debugger )
+	end if
+
 	-- M_BACKEND:
 	machine_proc(65, 
 		{
@@ -281,6 +286,7 @@ procedure BackEnd(integer il_file)
 			routine_id( "cover_routine" ),
 			routine_id( "write_coverage_db" ),
 			routine_id( "DisplayColorLine" ),
+			external_debugger_ptr,
 			$
 		})
 end procedure
