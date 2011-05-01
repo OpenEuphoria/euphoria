@@ -528,3 +528,20 @@ constant M_CALL_BACK = 52
 public function call_back(object id)
 		return machine_func(M_CALL_BACK, id)
 end function
+
+ifdef EU4_0 then
+	include std/math.e
+	public function sizeof(integer x)
+		switch x do
+			case C_CHAR,C_UCHAR then
+				return 1
+			case C_SHORT, C_USHORT then
+				return 2
+			case C_DOUBLE, C_DWORDLONG then
+				return 8
+			case else
+				return 4
+		end switch
+		return 0
+	end function
+end ifdef
