@@ -351,7 +351,7 @@ function interpret_fail( sequence cmd, sequence filename,  sequence fail_list )
 end function
 
 function translate( sequence filename, sequence fail_list )
-	printf(1, " translating %s:", {filename})
+	printf(1, "\ntranslating %s:", {filename})
 	total += 1
 	sequence cmd = sprintf("%s %s %s %s -d UNITTEST -d EC -batch %s",
 		{ translator, library, compiler, translator_options, filename })
@@ -402,6 +402,7 @@ function translate( sequence filename, sequence fail_list )
 end function
 
 function bind( sequence filename, sequence fail_list )
+	printf(1, "\nbinding %s:\n", {filename})
 	sequence cmd = sprintf("\"%s\" %s %s -batch -d UNITTEST %s",
 		{ binder, eub_path, interpreter_options, filename } )
 	
@@ -460,7 +461,7 @@ function test_file( sequence filename, sequence fail_list )
 		crash_option = " -d CRASH "
 	end if
 	
-	printf(1, "interpreting %s:\n", {filename})
+	printf(1, "\ninterpreting %s:\n", {filename})
 	sequence cmd = sprintf("%s %s %s -d UNITTEST -batch %s%s %s",
 		{ executable, interpreter_options, coverage_erase, crash_option, filename, test_options })
 
