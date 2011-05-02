@@ -321,6 +321,9 @@ function find_error_file( sequence filename )
 	return -1
 end function
 
+-- execute cmd and using the control file that corresponds to the test file //filename//, 
+-- check that the results match the newly generated ex.err and that there is one generated.
+-- Unless both of these conditions are met, an error is recorded.
 function interpret_fail( sequence cmd, sequence filename,  sequence fail_list )
 	integer status = system_exec(cmd, 2)
 	integer old_length
@@ -467,7 +470,20 @@ function test_file( sequence filename, sequence fail_list )
 	if match("t_c_", filename) = 1 then
 		-- We expect this test to fail
 		expected_status = 1
+		sequence old_fail_list = fail_list
 		fail_list = interpret_fail( cmd, filename, fail_list )
+		
+		ifdef REC then
+			if compare(old_fail_list, fail_list) then
+				sequence directory = filename[1..find('.',filename&'.')] & "d" & SLASH & interpreter_os_name
+				
+				create_directory(directory)
+				
+				if not move_file("ex.err", directory & SLASH & "control.err") then
+						e:crash("Could not move 'ex.err' to %s", { directory & SLASH & "control.err" })
+				end if
+			end if
+		end ifdef
 		
 	else -- not match(t_c_*.e)
 		-- in this branch error() is called once and only once in all sub-branches
@@ -497,23 +513,6 @@ function test_file( sequence filename, sequence fail_list )
 		end if
 	end if
 
-	ifdef REC then
-		if status then
-			if match("t_c_", filename) != 1 then
-				directory = filename[1..find('.',filename&'.')] & "d" & SLASH & interpreter_os_name
-			else
-				directory = filename[1..find('.',filename&'.')] & "d"
-			end if
-
-			create_directory(filename[1..find('.',filename&'.')] & "d")
-			create_directory(directory)
-
-			if not move_file("ex.err", directory & SLASH & "control.err") then
-				e:crash("Could not move 'ex.err' to %s", { directory & SLASH & "control.err" })
-			end if
-		end if
-	end ifdef
-	
 	report_last_error(filename)
 	
 	if length(binder) and expected_status = 0 then

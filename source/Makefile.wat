@@ -365,13 +365,13 @@ clean : .SYMBOLIC mostlyclean docsclean
 	-$(RM) $(BUILDDIR)\ver.cache
 	
 docsclean : .SYMBOLIC
-	-@for %i in ($(BUILD_DIR)\html\*.*) do -$(RM) %i
+	-@for %i in ($(BUILDDIR)\html\*.*) do -$(RM) %i
 	-$(RM) $(BUILDDIR)\html\js\*.js
 	-$(RM) $(BUILDDIR)\html\images\*.*
 	-$(RMDIR) $(BUILDDIR)\html\js
 	-$(RMDIR) $(BUILDDIR)\html\png
 	-$(RMDIR) $(BUILDDIR)\html
-	-@for %i in ($(BUILD_DIR)\docs\*.*) do -$(RM) %i
+	-@for %i in ($(BUILDDIR)\docs\*.*) do -$(RM) %i
 	-$(RM) $(BUILDDIR)\docs\js\*.js
 	-$(RM) $(BUILDDIR)\docs\images\*.*
 	-$(RMDIR) $(BUILDDIR)\docs\js
@@ -422,23 +422,17 @@ OSFLAG=EWINDOWS
 LIBTARGET=$(BUILDDIR)\$(LIBRARY_NAME).lib
 CC = wcc386
 .ERASE
-FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s $(MEMFLAG) $(DEBUGFLAG) $(SETALIGN4) $(NOASSERT) $(HEAPCHECKFLAG) /I..\ $(EREL_TYPE)
-BE_FLAGS = /ol /zp4 /d$(OSFLAG) /5r /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG) $(SETALIGN4) $(NOASSERT) $(HEAPCHECKFLAG) $(EXTRACHECKFLAG) $(EXTRASTATSFLAG) $(EREL_TYPE)
+COMMON_FLAGS = $(DEBUGFLAG) 
+FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s  /I..\ $(EREL_TYPE)
+BE_FLAGS = /ol /zp4 /d$(OSFLAG) /5r /dEWATCOM  /dEOW $(SETALIGN4) $(NOASSERT) $(HEAPCHECKFLAG) $(%ERUNTIME) $(EXTRACHECKFLAG) $(EXTRASTATSFLAG)  $(MEMFLAG) $(EREL_TYPE)
 	
-library : .SYMBOLIC runtime
+library : .SYMBOLIC
     @echo ------- LIBRARY -----------
 	wmake -h $(LIBTARGET) OS=$(OS) OBJDIR=$(OS)libobj$(DEBUG) $(VARS) MANAGED_MEM=$(MANAGED_MEM)
 
 winlibrary : .SYMBOLIC
     @echo ------- WINDOWS LIBRARY -----------
 	wmake -h OS=WIN library  $(VARS)
-
-runtime: .SYMBOLIC 
-    @echo ------- RUNTIME -----------
-	set ERUNTIME=/dERUNTIME
-
-backendflag: .SYMBOLIC
-	set EBACKEND=/dBACKEND
 
 !ifdef OBJDIR
 
@@ -715,7 +709,7 @@ $(BUILDDIR)\eubw.exe :  $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_BACKEND_RUNNER_OBJECT
 
 !endif
 
-backend : .SYMBOLIC backendflag
+backend : .SYMBOLIC
     @echo ------- BACKEND -----------
 	wmake -h $(BUILDDIR)\backobj\main-.c EX=$(EUBIN)\eui.exe EU_TARGET=backend. OBJDIR=backobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 	wmake -h objlist OBJDIR=backobj EU_NAME_OBJECT=EU_BACKEND_RUNNER_OBJECTS $(VARS)
@@ -769,12 +763,21 @@ $(BUILDDIR)\$(OBJDIR)\main-.c $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : .EXISTSONLY
 !endif
 
 !ifdef OBJDIR
+!ifeq OBJDIR backobj
+# this is the .i runner target
+BE_FLAGS = $(BE_FLAGS) /DBACKEND
+!endif
+!ifeq OBJDIR WINlibobj$(DEBUG)
+# this is the library target
+BE_FLAGS = $(BE_FLAGS) /dERUNTIME
+!endif
+
 .c: $(BUILDDIR)\$(OBJDIR);$(BUILDDIR)\$(OBJDIR)\back
 .c.obj: 
-	$(CC) $(FE_FLAGS) $(BE_FLAGS) -fr=$^@.err /I$(BUILDDIR)\$(OBJDIR)\back /I$(INCLUDE_DIR) $[@ -fo=$^@
+	$(CC) $(FE_FLAGS) $(BE_FLAGS) $(COMMON_FLAGS) -fr=$^@.err /I$(BUILDDIR)\$(OBJDIR)\back /I$(INCLUDE_DIR) $[@ -fo=$^@
 	
-$(BUILDDIR)\$(OBJDIR)\back\be_inline.obj : ./be_inline.c $(BUILDDIR)\$(OBJDIR)\back
-	$(CC) /oe=40 $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
+$(BUILDDIR)\$(OBJDIR)\back\be_inline.obj : .\be_inline.c $(BUILDDIR)\$(OBJDIR)\back
+	$(CC) /oe=40 $(BE_FLAGS) $(FE_FLAGS) $(COMMON_FLAGS) $^&.c -fo=$^@
 
 !ifneq INT_CODES 1
 $(BUILDDIR)\$(OBJDIR)\back\be_magic.c :  $(BUILDDIR)\$(OBJDIR)\back\be_execute.obj $(TRUNKDIR)\source\findjmp.ex
@@ -783,7 +786,7 @@ $(BUILDDIR)\$(OBJDIR)\back\be_magic.c :  $(BUILDDIR)\$(OBJDIR)\back\be_execute.o
 	cd $(TRUNKDIR)\source
 
 $(BUILDDIR)\$(OBJDIR)\back\be_magic.obj : $(BUILDDIR)\$(OBJDIR)\back\be_magic.c
-	$(CC) $(FE_FLAGS) $(BE_FLAGS) $[@ -fo=$^@
+	$(CC) $(FE_FLAGS) $(BE_FLAGS) $(COMMON_FLAGS) $[@ -fo=$^@
 !endif
 
 $(BUILDDIR)\$(OBJDIR)\back\be_execute.obj : be_execute.c *.h $(CONFIG)
