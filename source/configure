@@ -64,7 +64,7 @@ else
 		EHOST=EBSD
 	fi
 fi
-ETARGET=$EHOST
+TARGET=$EHOST
 echo EHOST=$EHOST >>  "$PREFIX"${CONFIG_FILE}
 
 # default use source
@@ -332,7 +332,7 @@ elif [ "$TARGET" = "EOSX" ]; then
 	EOSX=1
 elif [ "$TARGET" = "LINUX" ]; then
 	ELINUX=1
-elif [ "$TARGET" = "EWIN" ]; then
+elif [ "$TARGET" = "EWINDOWS" ]; then
 	EMINGW=1
 fi
 
@@ -363,7 +363,7 @@ else
 	echo EUPHORIA=0 >> "$PREFIX"${CONFIG_FILE}
 fi
 
-if [ "$TARGET" = "EWIN" ]; then
+if [ "$TARGET" = "EWINDOWS" ]; then
 	# MANAGED_MEM and ALIGN4 are on by default for Windows
 	# and only Windows
 	if [ "x$MANAGED_MEM" = "x" ]; then
