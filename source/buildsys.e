@@ -435,7 +435,7 @@ function setup_build()
 			elsif TOSX then
 				l_flags &= " -lresolv"
 			elsif TWINDOWS then
-				l_flags &= " -mno-cygwin -lws2_32 -lcomdlg32"				
+				l_flags &= " -mno-cygwin -lws2_32 -lcomctl32"				
 			end if
 			
 			-- input/output
@@ -468,7 +468,7 @@ function setup_build()
 				end if
 			end if
 
-			l_flags &= sprintf(" FILE %s LIBRARY ws2_32 LIBRARY comdlg32", { user_library })
+			l_flags &= sprintf(" FILE %s LIBRARY ws2_32 LIBRARY comctl32", { user_library })
 			
 			
 			-- resource file, executable file
