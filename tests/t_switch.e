@@ -383,9 +383,9 @@ test_equal( "unqualified case labels from other files at top level (ticket:617)"
 
 procedure ticket_662()
 	switch 1 do
-		case 1 do
+		case 1 then
 			test_pass("SWITCH_I goes to correct case (ticket 662)")
-		case 5000 do
+		case 5000 then
 			test_fail("SWITCH_I goes to correct case (ticket 662)")
 	end switch
 end procedure
