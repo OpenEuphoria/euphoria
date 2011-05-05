@@ -5,6 +5,8 @@
 * [[ticket:655]] Integer values stored as doubles weren't being correctly
   coerced back to euphoria integers in translated code.
 * [[ticket:656]] Translated ##[[:not_bits]]## made incorrect type assumptions
+* [[tickete:662]] Switches with all integer cases, but with a range of greater than
+  1024 between the biggest and smallest were interpreted incorrectly.
 
 === Enhancements
 
