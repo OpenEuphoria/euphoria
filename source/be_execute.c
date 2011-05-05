@@ -2087,8 +2087,8 @@ void do_exec(int *start_pc)
 				top = SEQ_PTR( *(object_ptr)pc[2])->length;
 				obj_ptr = SEQ_PTR( *(object_ptr)pc[2])->base;
 				for( b = 1; b <= top; ++b ){
-					if( a == *obj_ptr++ ){
-						pc += SEQ_PTR(*(object_ptr)pc[3])->base[top];
+					if( a == *++obj_ptr ){
+						pc += SEQ_PTR(*(object_ptr)pc[3])->base[b];
 						thread();
 						BREAK;
 					}
