@@ -5,6 +5,8 @@ elsedef
 end ifdef
 
 include std/datetime.e
+include std/machine.e
+include std/dll.e
 include std/filesys.e as filesys
 include std/io.e
 include std/regex.e as regex
@@ -371,6 +373,7 @@ function setup_build()
 	end if -- user_library = 0
 
 	if TWINDOWS then
+		c_flags &= " /dEWINDOWS"
 		if dll_option then
 			exe_ext = ".dll"
 		else
@@ -408,8 +411,8 @@ function setup_build()
 				c_flags &= " -fPIC"
 			end if
 
-			c_flags &= sprintf(" -c -w -fsigned-char -O2 -m32 -I%s -ffast-math",
-				{ compile_dir })
+			c_flags &= sprintf(" -c -w -fsigned-char -O2 -m%d -I%s -ffast-math",
+				{ sizeof( C_POINTER ) * 8, get_eucompiledir() })
 
 			if TWINDOWS then
 				c_flags &= " -mno-cygwin"
@@ -419,7 +422,7 @@ function setup_build()
 				end if
 			end if
 
-			l_flags = user_library & " -m32 "
+			l_flags = sprintf( "%s -m%d", { user_library, sizeof( C_POINTER ) * 8 })
 
 			if dll_option then
 				l_flags &= " -shared "
@@ -432,7 +435,7 @@ function setup_build()
 			elsif TOSX then
 				l_flags &= " -lresolv"
 			elsif TWINDOWS then
-				l_flags &= " -mno-cygwin -lws2_32 -lcomdlg32"				
+				l_flags &= " -mno-cygwin -lws2_32 -lcomctl32"				
 			end if
 			
 			-- input/output
@@ -465,7 +468,7 @@ function setup_build()
 				end if
 			end if
 
-			l_flags &= sprintf(" FILE %s LIBRARY ws2_32 LIBRARY comdlg32", { user_library })
+			l_flags &= sprintf(" FILE %s LIBRARY ws2_32 LIBRARY comctl32", { user_library })
 			
 			
 			-- resource file, executable file
