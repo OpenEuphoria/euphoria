@@ -8,6 +8,7 @@
 * [[ticket:662]] Switches with all integer cases, but with a range of greater than
   1024 between the biggest and smallest were interpreted incorrectly.
 * [[ticket:661]] fixed translator linking to use comctl32 library on windows
+* [[ticket:663]] Translator ##-plat## switch now uses ##WINDOWS## instead of ##WIN##.
 
 === Enhancements
 

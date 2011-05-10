@@ -222,10 +222,6 @@ while [ "$1" != "" ]; do
 		echo ROOTDIR=$VAL >> ${CONFIG_FILE}
 		;;
 
-	--wkhtmltopdf )
-		echo WKHTMLTOPDF=1 >> ${CONFIG_FILE}
-		;;
-
 	--oe-username*)
 		VAL=`echo $1 | cut -d = -f 2`
 		if [ "$VAL" = "$1" ]; then
@@ -277,7 +273,7 @@ while [ "$1" != "" ]; do
 		echo "   --debug             turn debugging on"
 		echo "   --prefix value      set the install directory (default /usr/local)"
 		echo "   --plat value        set the OS that we will translate to."
-		echo "                       values can be: WIN, OSX, LINUX, FREEBSD, OPENBSD or NETBSD."
+		echo "                       values can be: WINDOWS, OSX, LINUX, FREEBSD, OPENBSD or NETBSD."
 		echo "   --watcom            set this so the translator will create C code for"
 		echo "                       Watcom C."
 		echo "   --no-managed-mem    disable managed memory"
@@ -297,8 +293,6 @@ while [ "$1" != "" ]; do
 		echo "                       (default)"
 		echo "   --verbose-tests     cause the 'test' target to use the verbose flag"
 		echo "                       with eutest"
-		echo "   --wkhtmltopdf       build pdf documentation with wkhtmltopdf"
-		echo "                       instead of the default htmldoc"
 		echo "   --oe-username value Developer user name on openeuphoria.org for various scp"
 		echo "                       operations such as manual upload"
 		echo "   --scp-client value  SCP program to use for scp uploads (default scp -C)"
