@@ -170,7 +170,7 @@ export procedure transoptions()
 					-- please update comments in Makefile.gnu, Makefile.wat, configure and
 					-- configure.bat; and the help section in configure and configure.bat; and
 					-- the message 201 in msgtext.e if you add another platform.
-					case "WIN" then
+					case "WINDOWS" then
 						set_host_platform( WIN32 )
 
 					case "LINUX" then
@@ -189,7 +189,7 @@ export procedure transoptions()
 						set_host_platform( UNETBSD )
 
 					case else
-						ShowMsg(2, 201, { val, "WIN, LINUX, FREEBSD, OSX, OPENBSD, NETBSD" })
+						ShowMsg(2, 201, { val, "WINDOWS, LINUX, FREEBSD, OSX, OPENBSD, NETBSD" })
 						abort(1)
 				end switch
 

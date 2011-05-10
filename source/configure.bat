@@ -139,12 +139,6 @@ IF "%1" == "--ssh-client" (
 	GOTO EndLoop
 )
 
-IF "%1" == "--wkhtmltopdf" (
-	echo WKHTMLTOPDF=1 >> config.wat
-	SHIFT
-	GOTO EndLoop
-)
-
 IF "%1" == "--hg" (
 	SET HG=%2
         SHIFT
@@ -337,7 +331,7 @@ echo     --final             Use this option to so EUPHORIA doesn't report itsel
 echo                         as a development version.
 echo     --noassert          Use this to remove 'assert()' processing in the C code.
 echo     --plat value        set the OS that we will translate to.
-echo                         values can be: WIN, OSX, LINUX, FREEBSD, OPENBSD or NETBSD.
+echo                         values can be: WINDOWS, OSX, LINUX, FREEBSD, OPENBSD or NETBSD.
 echo     --use-binary-translator
 echo                         Use the already built translator rather than
 echo                         interpreting its source
