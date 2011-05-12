@@ -346,8 +346,8 @@ $(BUILDDIR)\ecp.dat : $(TRUNKDIR)\bin\buildcpdb.ex $(TRUNKDIR)\source\codepage
 BUILD_DIRS= &
 	$(BUILDDIR)\intobj &
 	$(BUILDDIR)\transobj &
-	$(BUILDDIR)\WINlibobj &
-	$(BUILDDIR)\WINlibobj1 &
+	$(BUILDDIR)\WINDOWSlibobj &
+	$(BUILDDIR)\WINDOWSlibobj1 &
 	$(BUILDDIR)\backobj &
 	$(BUILDDIR)\eutestdr
 
@@ -755,7 +755,7 @@ $(BUILDDIR)\$(OBJDIR)\main-.c $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : .EXISTSONLY
 # this is the .i runner target
 BE_FLAGS = $(BE_FLAGS) /DBACKEND
 !endif
-!ifeq OBJDIR WINlibobj$(DEBUG)
+!ifeq OBJDIR WINDOWSlibobj$(DEBUG)
 # this is the library target
 BE_FLAGS = $(BE_FLAGS) /dERUNTIME
 !endif
