@@ -409,7 +409,7 @@ function setup_build()
 				c_flags &= " -fPIC"
 			end if
 
-			c_flags &= sprintf(" -c -w -fsigned-char -O2 -m%d -I%s -ffast-math",
+			c_flags &= sprintf(" -c -w -fsigned-char -O2 -m32 -I%s -ffast-math",
 				{ get_eucompiledir() })
 
 			if TWINDOWS then
