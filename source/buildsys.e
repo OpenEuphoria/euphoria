@@ -410,7 +410,7 @@ function setup_build()
 			end if
 
 			c_flags &= sprintf(" -c -w -fsigned-char -O2 -m%d -I%s -ffast-math",
-				{ get_eucompiledir() })
+				{ sizeof( C_POINTER ) * 8, get_eucompiledir() })
 
 			if TWINDOWS then
 				c_flags &= " -mno-cygwin"
