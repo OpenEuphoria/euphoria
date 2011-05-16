@@ -45,9 +45,9 @@ public constant
 	--** size_t 32-bits
 	C_SIZE_T  = C_UINT,
 	--** long 32-bits
-	C_LONG    = #02000008,
+	C_LONG    = #01000008,
 	--** unsigned long 32-bits
-	C_ULONG   = #03000008,
+	C_ULONG   = #02000008,
 	--** any valid pointer 32-bits
 	C_POINTER = #03000001,
 	--** handle 32-bits
