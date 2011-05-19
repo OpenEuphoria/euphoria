@@ -497,7 +497,10 @@ void ErasePrivates(symtab_ptr proc_ptr)
    that match any privates of this proc/fn */
 {
 	register symtab_ptr sym;
-
+	
+	if( external_debugger ){
+		ExternalErasePrivates( proc_ptr );
+	}
 	sym = proc_ptr->next;
 	while (sym && (sym->scope == S_PRIVATE || sym->scope == S_LOOP_VAR)) {
 		EraseSymbol(sym);
@@ -900,6 +903,11 @@ void EraseSymbol(symtab_ptr sym)
 	symtab_ptr dsym;
 	int prev;
 	struct EuViewPort vp;
+	
+	if( external_debugger ){
+		ExternalEraseSymbol( sym );
+		return;
+	}
 	
 	GetViewPort( &vp );
 	prev = -1;

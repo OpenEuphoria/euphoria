@@ -35,6 +35,8 @@ uintptr_t UserShowDebug;
 uintptr_t UserDisplayVar;
 uintptr_t UserUpdateGlobals;
 uintptr_t UserDebugScreen;
+uintptr_t UserEraseSymbol;
+uintptr_t UserErasePrivates;
 
 object box_ptr( uintptr_t ptr ){
 	if( ptr > (uintptr_t) MAXINT ){
@@ -64,6 +66,14 @@ void ExternalUpdateGlobals(){
 void ExternalDebugScreen(){
 	current_stack_depth = expr_top - expr_stack;
 	((void (*)())UserDebugScreen)();
+}
+
+void ExternalEraseSymbol( symtab_ptr sym ){
+	((void (*)())UserEraseSymbol)( box_ptr( sym ) );
+}
+
+void ExternalErasePrivates( symtab_ptr proc_sym ){
+	((void (*)())UserErasePrivates)( box_ptr( proc_sym ) );
 }
 
 // debugger interface
@@ -143,7 +153,9 @@ enum INIT_PARAMS {
 	IP_SHOW_DEBUG,
 	IP_DISPLAY_VAR,
 	IP_UPDATE_GLOBALS,
-	IP_DEBUG_SCREEN
+	IP_DEBUG_SCREEN,
+	IP_ERASE_PRIVATE_NAMES,
+	IP_ERASE_SYMBOL
 };
 
 // an external debugger calls this to get the data and to let us know how to call it
@@ -159,6 +171,9 @@ object init_debug( object params ){
 	UserDisplayVar    = get_pos_int( "user display var callback", params_s1->base[IP_DISPLAY_VAR] );
 	UserUpdateGlobals = get_pos_int( "user update globals callback", params_s1->base[IP_UPDATE_GLOBALS] );
 	UserDebugScreen   = get_pos_int( "user debug screen callback", params_s1->base[IP_DEBUG_SCREEN] );
+	UserErasePrivates = get_pos_int( "user debug erase private names", params_s1->base[IP_ERASE_PRIVATE_NAMES] );
+	UserEraseSymbol   = get_pos_int( "user debug erase symbol", params_s1->base[IP_ERASE_SYMBOL] );
+	
 	
 	ptrs = NewS1( IA_SIZE - 1 );
 	

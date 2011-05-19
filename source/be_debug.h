@@ -10,6 +10,8 @@ void ExternalShowDebug();
 void ExternalDisplayVar( symtab_ptr s_ptr, int user_requested );
 void ExternalUpdateGlobals();
 void ExternalDebugScreen();
+void ExternalEraseSymbol( symtab_ptr sym );
+void ExternalErasePrivates( symtab_ptr proc_sym );
 
 object init_debug_addr();
 void set_debugger( char *name );

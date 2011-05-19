@@ -58,7 +58,11 @@ public enum type DEBUG_ROUTINE
 -- variables
 	UPDATE_GLOBALS,
 --** DEBUG_SCREEN: called when the debugger should finish displaying and wait for user input before continuing
-	DEBUG_SCREEN
+	DEBUG_SCREEN,
+--** ERASE_PRIVATES: A procedure that takes a pointer to the routine  that has gone out of scope, and whose symbols should be removed from the display.
+	ERASE_PRIVATES,
+--** ERASE_SYMBOL: A procedure that takes a pointer to the symbol that should be removed from the display
+	ERASE_SYMBOL
 end type
 
 --****
@@ -108,6 +112,8 @@ integer
 	display_var_rid    = -1,
 	update_globals_rid = -1,
 	debug_screen_rid   = -1,
+	erase_privates_rid = -1,
+	erase_symbol_rid   = -1,
 	$
 
 atom showing_line = -1
@@ -142,6 +148,20 @@ function debug_screen()
 	return 0
 end function
 
+function erase_privates( atom proc_sym )
+	if erase_privates_rid != -1 then
+		call_proc( erase_privates_rid, { proc_sym } )
+	end if
+	return 0
+end function
+
+function erase_symbol( atom sym )
+	if erase_symbol_rid != -1 then
+		call_proc( erase_symbol_rid, { sym } )
+	end if
+	return 0
+end function
+
 public constant M_INIT_DEBUGGER  = 104
 
 enum type INIT_ACCESSORS 
@@ -168,6 +188,8 @@ enum type INIT_PARAMS
 	IP_DISPLAY_VAR,
 	IP_UPDATE_GLOBALS,
 	IP_DEBUG_SCREEN,
+	IP_ERASE_PRIVATE_NAMES,
+	IP_ERASE_SYMBOL,
 	IP_SIZE,
 	$
 end type
@@ -185,10 +207,12 @@ public procedure initialize_debugger( atom init_ptr )
 	
 	sequence init_params = repeat( 0, IP_SIZE - 1 )
 	init_params[IP_BUFFER] = data_buffer
-	init_params[IP_SHOW_DEBUG]     = call_back( '+' & routine_id("show_debug") )
-	init_params[IP_DISPLAY_VAR]    = call_back( '+' & routine_id("display_var") )
-	init_params[IP_UPDATE_GLOBALS] = call_back( '+' & routine_id("update_globals") )
-	init_params[IP_DEBUG_SCREEN]   = call_back( '+' & routine_id("debug_screen") )
+	init_params[IP_SHOW_DEBUG]          = call_back( '+' & routine_id("show_debug") )
+	init_params[IP_DISPLAY_VAR]         = call_back( '+' & routine_id("display_var") )
+	init_params[IP_UPDATE_GLOBALS]      = call_back( '+' & routine_id("update_globals") )
+	init_params[IP_DEBUG_SCREEN]        = call_back( '+' & routine_id("debug_screen") )
+	init_params[IP_ERASE_PRIVATE_NAMES] = call_back( '+' & routine_id("erase_privates") )
+	init_params[IP_ERASE_SYMBOL]        = call_back( '+' & routine_id("erase_symbol") )
 	
 	
 	sequence init_data = c_func( define_c_func( "", { '+', init_ptr}, { E_SEQUENCE }, E_SEQUENCE ), { init_params } )
@@ -228,6 +252,10 @@ public procedure set_debug_rid( DEBUG_ROUTINE rtn, integer rid )
 			update_globals_rid = rid
 		case DEBUG_SCREEN then
 			debug_screen_rid = rid
+		case ERASE_PRIVATES then
+			erase_privates_rid = rid
+		case ERASE_SYMBOL then
+			erase_symbol_rid = rid
 	end switch
 end procedure
 
