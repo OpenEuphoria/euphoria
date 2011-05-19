@@ -193,7 +193,7 @@ one parameter, the platform code:
 * FREEBSD
 * LINUX
 * OSX
-* WIN
+* WINDOWS
 * NETBSD
 * OPENBSD
 

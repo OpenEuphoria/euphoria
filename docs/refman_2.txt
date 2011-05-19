@@ -2910,7 +2910,7 @@ Do be careful to put the numbers after the platform names for //Windows//:
 <eucode>
 -- This puts() routine will never be called
 -- even when run by the Windows interpreter!
-ifdef WIN then
+ifdef WINDOWS then
      puts(1,"I am on Windows\n")
 end ifdef
 </eucode>

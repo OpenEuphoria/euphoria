@@ -5,7 +5,6 @@ elsedef
 end ifdef
 
 include std/datetime.e
-include std/machine.e
 include std/dll.e
 include std/filesys.e as filesys
 include std/io.e
@@ -422,7 +421,7 @@ function setup_build()
 				end if
 			end if
 
-			l_flags = sprintf( "%s -m%d", { user_library, sizeof( C_POINTER ) * 8 })
+			l_flags = sprintf( "%s -m%d ", {  user_library, sizeof( C_POINTER ) * 8 })
 
 			if dll_option then
 				l_flags &= " -shared "

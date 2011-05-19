@@ -348,8 +348,8 @@ $(BUILDDIR)\ecp.dat : $(TRUNKDIR)\bin\buildcpdb.ex $(TRUNKDIR)\source\codepage
 BUILD_DIRS= &
 	$(BUILDDIR)\intobj &
 	$(BUILDDIR)\transobj &
-	$(BUILDDIR)\WINlibobj &
-	$(BUILDDIR)\WINlibobj1 &
+	$(BUILDDIR)\WINDOWSlibobj &
+	$(BUILDDIR)\WINDOWSlibobj1 &
 	$(BUILDDIR)\backobj &
 	$(BUILDDIR)\eutestdr
 
@@ -405,18 +405,18 @@ $(BUILD_DIRS) : .EXISTSONLY
 	mkdir $@\back
 	
 !ifdef PLAT
-!ifeq PLAT WIN
-OS=WIN
+!ifeq PLAT WINDOWS
+OS=WINDOWS
 !else
 OS=$(PLAT)
 !endif
 !else
-OS=WIN
+OS=WINDOWS
 !endif
 
 
 # To tell the translator which compiler it should use.
-!ifeq OS WIN
+!ifeq OS WINDOWS
 TRANS_CC_FLAG=-wat
 !else
 TRANS_CC_FLAG=-gcc
@@ -436,7 +436,7 @@ library : .SYMBOLIC
 
 winlibrary : .SYMBOLIC
     @echo ------- WINDOWS LIBRARY -----------
-	wmake -h OS=WIN library  $(VARS)
+	wmake -h OS=WINDOWS library  $(VARS)
 
 !ifdef OBJDIR
 
@@ -482,7 +482,7 @@ exsource : .SYMBOLIC $(BUILDDIR)\$(OBJDIR)\main-.c
 
 !ifeq EUPHORIA 1
 translate source : .SYMBOLIC  
-    @echo ------- TRANSLATE WIN -----------
+    @echo ------- TRANSLATE WINDOWS -----------
 	wmake -h exwsource EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
 	wmake -h ecwsource EX=$(EUBIN)\eui.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
 	wmake -h backendsource EX=$(EUBIN)\eui.exe EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
@@ -686,7 +686,7 @@ translator : .SYMBOLIC $(BUILDDIR)\euc.exe
 
 !ifdef OBJDIR
 $(BUILDDIR)\eubw.exe :  $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
-    @echo ------- BACKEND WIN -----------
+    @echo ------- BACKEND WINDOWS -----------
 	@%create $(BUILDDIR)\$(OBJDIR)\eub.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\eub.lbc option quiet
 	@%append $(BUILDDIR)\$(OBJDIR)\eub.lbc option caseexact
@@ -757,7 +757,7 @@ $(BUILDDIR)\$(OBJDIR)\main-.c $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : .EXISTSONLY
 # this is the .i runner target
 BE_FLAGS = $(BE_FLAGS) /DBACKEND
 !endif
-!ifeq OBJDIR WINlibobj$(DEBUG)
+!ifeq OBJDIR WINDOWSlibobj$(DEBUG)
 # this is the library target
 BE_FLAGS = $(BE_FLAGS) /dERUNTIME
 !endif
