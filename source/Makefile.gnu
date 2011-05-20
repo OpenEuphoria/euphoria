@@ -99,12 +99,22 @@ ifeq "$(EMINGW)" "1"
 	EOSPCREFLAGS=-mno-cygwin
 	EECUA=eu.a
 	EECUDBGA=eudbg.a
+	EECUSOA=euso.a
+	EECUSODBGA=eusodbg.a
 	ifdef EDEBUG
 		EOSMING=
-		LIBRARY_NAME=eudbg.a
+		ifdef FPIC
+			LIBRARY_NAME=eusodbg.a
+		else
+			LIBRARY_NAME=eudbg.a
+		endif
 	else
 		EOSMING=-ffast-math -O3 -Os
-		LIBRARY_NAME=eu.a
+		ifdef FPIC
+			LIBRARY_NAME=euso.a
+		else
+			LIBRARY_NAME=eu.a
+		endif
 	endif
 	EUBW_RES=$(BUILDDIR)/eubw.res
 	EUB_RES=$(BUILDDIR)/eub.res
@@ -133,10 +143,20 @@ else
 	EOSPCREFLAGS=
 	EECUA=eu.a
 	EECUDBGA=eudbg.a
+	EECUSOA=euso.a
+	EECUSODBGA=eusodbg.a
 	ifdef EDEBUG
-		LIBRARY_NAME=eudbg.a
+		ifdef FPIC
+			LIBRARY_NAME=eusodbg.a
+		else
+			LIBRARY_NAME=eudbg.a
+		endif
 	else
-		LIBRARY_NAME=eu.a
+		ifdef FPIC
+			LIBRARY_NAME=euso.a
+		else
+			LIBRARY_NAME=eu.a
+		endif
 	endif
 	MEM_FLAGS=-DESIMPLE_MALLOC
 endif
@@ -232,7 +252,7 @@ FE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) $(EPTRHEAD) -c -fsigned-char $(EOSTYPE) $(E
 else
 FE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) $(EPTRHEAD) -c -fsigned-char $(EOSTYPE) $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I$(CYPTRUNKDIR)/source -I$(CYPTRUNKDIR) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE)
 endif
-BE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) $(EPTRHEAD) -c -Wall $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE)
+BE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) $(EPTRHEAD) -c -Wall $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE) $(FPIC)
 
 EU_CORE_FILES = \
 	block.e \
@@ -289,8 +309,8 @@ EU_BACKEND_RUNNER_FILES = \
 	common.e \
 	backend.ex
 	
-PREFIXED_PCRE_OBJECTS = $(addprefix $(BUILDDIR)/pcre/,$(PCRE_OBJECTS))
-	
+PREFIXED_PCRE_OBJECTS = $(addprefix $(BUILDDIR)/pcre$(FPIC)/,$(PCRE_OBJECTS))
+
 EU_BACKEND_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_decompress.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_debug.o \
@@ -346,7 +366,7 @@ EU_BACKEND_RUNNER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/backobj/*.
 EU_INTERPRETER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/intobj/*.c))
 
 all : 
-	$(MAKE) interpreter translator library debug-library backend
+	$(MAKE) interpreter translator library debug-library backend shared-library debug-shared-library
 	$(MAKE) tools
 
 
@@ -361,7 +381,11 @@ BUILD_DIRS=\
 	$(BUILDDIR)/transobj/ \
 	$(BUILDDIR)/libobj/ \
 	$(BUILDDIR)/backobj/ \
-	$(BUILDDIR)/include/
+	$(BUILDDIR)/include/ \
+	$(BUILDDIR)/libobj-fPIC/ \
+	$(BUILDDIR)/libobj-fPIC/back \
+	$(BUILDDIR)/libobjdbg-fPIC \
+	$(BUILDDIR)/libobjdbg-fPIC/back
 
 
 clean : 	
@@ -369,6 +393,7 @@ clean :
 		rm -r $${f} ; \
 	done ;
 	-rm -r $(BUILDDIR)/pcre
+	-rm -r $(BUILDDIR)/pcre_fpic
 	-rm $(BUILDDIR)/*pdf
 	-rm $(BUILDDIR)/*txt
 	-rm -r $(BUILDDIR)/*-build
@@ -377,6 +402,7 @@ clean :
 	-rm $(BUILDDIR)/eub
 	-rm $(BUILDDIR)/eu.a
 	-rm $(BUILDDIR)/eudbg.a
+	-rm $(BUILDDIR)/euso.a
 	-for f in $(EU_TOOLS) ; do \
 		rm $${f} ; \
 	done ;
@@ -397,6 +423,7 @@ ifeq "$(MINGW)" "1"
 	-rm -f $(BUILDDIR)/{$(EBACKENDC),$(EEXUW)}
 endif
 	$(MAKE) -C pcre CONFIG=../$(CONFIG) clean
+	$(MAKE) -C pcre CONFIG=../$(CONFIG) FPIC=-fPIC clean
 	
 
 .PHONY : clean distclean clobber all htmldoc manual
@@ -406,6 +433,12 @@ debug-library : builddirs
 
 library : builddirs
 	$(MAKE) $(BUILDDIR)/$(LIBRARY_NAME) OBJDIR=libobj ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+
+shared-library :
+	$(MAKE) $(BUILDDIR)/$(EECUSOA) OBJDIR=libobj-fPIC ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE) FPIC=-fPIC
+
+debug-shared-library : builddirs
+	$(MAKE) $(BUILDDIR)/$(EECUSODBGA) OBJDIR=libobjdbg-fPIC ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE) FPIC=-fPIC
 
 $(BUILDDIR)/$(LIBRARY_NAME) : $(EU_LIB_OBJECTS)
 	ar -rc $(BUILDDIR)/$(LIBRARY_NAME) $(EU_LIB_OBJECTS)
@@ -737,6 +770,8 @@ install :
 	mkdir -p $(DESTDIR)$(PREFIX)/lib
 	install $(BUILDDIR)/$(EECUA) $(DESTDIR)$(PREFIX)/lib
 	install $(BUILDDIR)/$(EECUDBGA) $(DESTDIR)$(PREFIX)/lib
+	install $(BUILDDIR)/$(EECUSOA) $(DESTDIR)$(PREFIX)/lib
+	install $(BUILDDIR)/$(EECUSODBGA) $(DESTDIR)$(PREFIX)/lib
 	install $(BUILDDIR)/$(EEXU) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EECU) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EBACKENDU) $(DESTDIR)$(PREFIX)/bin
@@ -934,15 +969,14 @@ $(BUILDDIR)/$(OBJDIR)/back/%.o : %.c $(CONFIG_FILE)
 	$(CC) $(BE_FLAGS) $(EBSDFLAG) -I $(BUILDDIR)/$(OBJDIR)/back -I $(BUILDDIR)/include $*.c -o$(BUILDDIR)/$(OBJDIR)/back/$*.o
 
 $(BUILDDIR)/$(OBJDIR)/back/be_callc.o : ./$(BE_CALLC).c $(CONFIG_FILE)
-	$(CC) -c -Wall $(EOSTYPE) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -fsigned-char -Os -O3 -ffast-math -fno-defer-pop $(CALLC_DEBUG) $(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.o
-	$(CC) -S -Wall $(EOSTYPE) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -fsigned-char -Os -O3 -ffast-math -fno-defer-pop $(CALLC_DEBUG) $(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.s
+	$(CC) -c -Wall $(FPIC) $(EOSTYPE) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -fsigned-char -Os -O3 -ffast-math -fno-defer-pop $(CALLC_DEBUG) $(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.o
 
 $(BUILDDIR)/$(OBJDIR)/back/be_inline.o : ./be_inline.c $(CONFIG_FILE) 
 	$(CC) -finline-functions $(BE_FLAGS) $(EBSDFLAG) $(RUNTIME_FLAGS) be_inline.c -o$(BUILDDIR)/$(OBJDIR)/back/be_inline.o
 endif
 ifdef PCRE_OBJECTS	
 $(PREFIXED_PCRE_OBJECTS) : $(patsubst %.o,pcre/%.c,$(PCRE_OBJECTS)) pcre/config.h.unix pcre/pcre.h.unix
-	$(MAKE) -C pcre all CC="$(PCRE_CC)" PCRE_CC="$(PCRE_CC)" EOSTYPE="$(EOSTYPE)" EOSFLAGS="$(EOSPCREFLAGS)" CONFIG=../$(CONFIG)
+	$(MAKE) -C pcre all CC="$(PCRE_CC)" PCRE_CC="$(PCRE_CC)" EOSTYPE="$(EOSTYPE)" EOSFLAGS="$(EOSPCREFLAGS)" CONFIG=../$(CONFIG) FPIC=$(FPIC)
 endif
 
 depend :

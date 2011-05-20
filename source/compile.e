@@ -7214,6 +7214,8 @@ procedure BackEnd(atom ignore)
 
 	c_puts("char *stack_base;\n")
 	c_hputs("extern char *stack_base;\n")
+	
+	c_puts("void init_literal();\n")
 
 	if TWINDOWS and not dll_option then
 			c_puts("extern long __stdcall Win_Machine_Handler(LPEXCEPTION_POINTERS p);\n")
