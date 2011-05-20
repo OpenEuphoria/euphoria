@@ -111,6 +111,7 @@ extern eudouble eustart_time; /* from be_runtime.c */
 /*****************/
 /* 30-bit magic #s for old Complete & PD Edition binds */
 #define COMPLETE_MAGIC ('1' + ('2'<< 8) + ('3' << 16) + ('O' << 24))
+unsigned char * new_page();
 
 /**********************/
 /* Exported variables */
@@ -1772,9 +1773,9 @@ object tick_rate(object x)
 }
 
 #ifdef EWATCOM
-void ( __cdecl *convert_80_to_64)(void*,void*);
-void ( __cdecl *convert_64_to_80)(void*,void*);
-
+typedef void ( __cdecl *convert_ptr)(void*,void*);
+convert_ptr convert_80_to_64;
+convert_ptr convert_64_to_80;
 char *code_64_to_80 = "\x55\x89\xe5\x8b\x45\x0c\x8b\x55\x08\xdd\x02\xdb\x38\x5d\xc3\x00";
 char *code_80_to_64 = "\x55\x89\xe5\x83\xec\x08\x8b\x45\x0c\x8b\x55\x08\xdb\x2a\xdd\x5d\xf8\xdd\x45\xf8\xdd\x18\xc9\xc3\x00";
 
@@ -1793,10 +1794,12 @@ char *code_80_to_64 = "\x55\x89\xe5\x83\xec\x08\x8b\x45\x0c\x8b\x55\x08\xdb\x2a\
 
 void init_fp_conversions(){
 	unsigned char *page = new_page();
-	convert_80_to_64 = page;
-	convert_64_to_80 = page + 0x20;
+	set_page_to_read_write_execute(page);
+	convert_80_to_64 = (convert_ptr) page;
+	convert_64_to_80 = (convert_ptr) (page + 0x100);
 	memcopy( convert_80_to_64, 24, code_80_to_64, 24 );
-	memcopy( convert_64_to_80, 15, code_80_to_64, 15 );
+	memcopy( convert_64_to_80, 15, code_64_to_80, 15 );
+	set_page_to_read_execute_only( page );
 }
 #endif
 
