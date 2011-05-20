@@ -338,6 +338,12 @@ function setup_build()
 		if TUNIX or compiler_type = COMPILER_GCC then
 			l_ext = "a"
 			t_slash = "/"
+			if dll_option then
+				for i = 1 to length( l_names ) do
+					-- use the -fPIC compiled library
+					l_names[i] = splice( l_names[i], "so", 2 )
+				end for
+			end if
 		elsif TWINDOWS then
 			l_ext = "lib"
 			t_slash = "\\"
