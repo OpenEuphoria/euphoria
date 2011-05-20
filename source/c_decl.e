@@ -109,6 +109,12 @@ export boolean debug_option = FALSE
 export sequence user_library = ""
 
 --**
+-- If not-empty, then the build file should link against user_pic_library
+-- when building a shared object.  Used for gcc.
+
+export sequence user_pic_library = ""
+
+--**
 -- Write all generated files to this directory.
 
 export sequence output_dir = ""

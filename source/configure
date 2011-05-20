@@ -427,6 +427,7 @@ echo -eudir $TRUNKDIR >> $BUILDDIR/eu.cfg
 echo "[translate]" >> $BUILDDIR/eu.cfg
 echo "-com" $TRUNKDIR >> $BUILDDIR/eu.cfg
 echo "-lib" $BUILDDIR/eu.a >> $BUILDDIR/eu.cfg
+echo "-lib-pic" $BUILDDIR/euso.a >> $BUILDDIR/eu.cfg
 echo "[bind]"  >> $BUILDDIR/eu.cfg
 echo "-eub" $BUILDDIR/eub >> $BUILDDIR/eu.cfg
 

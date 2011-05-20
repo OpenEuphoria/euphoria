@@ -85,6 +85,7 @@ sequence trans_opt_def = {
 	{ "cflags", 	      0, GetMsgText(323,0), { HAS_PARAMETER, "flags" } },
 	{ "lflags", 	      0, GetMsgText(324,0), { HAS_PARAMETER, "flags" } },
 	{ "lib",              0, GetMsgText(186,0), { HAS_PARAMETER, "filename" } },
+	{ "lib-pic",          0, GetMsgText(351,0), { HAS_PARAMETER, "filename" } },
 	{ "stack",            0, GetMsgText(188,0), { HAS_PARAMETER, "size" } },
 	{ "maxsize",          0, GetMsgText(190,0), { HAS_PARAMETER, "size" } },
 	{ "keep",             0, GetMsgText(191,0), { } },
@@ -196,6 +197,13 @@ export procedure transoptions()
 			case "lib" then
 				user_library = canonical_path(val)
 				if not file_exists(user_library) then
+					ShowMsg(2, 348, { val })
+					abort(1)
+				end if
+			
+			case "lib-pic" then
+				user_pic_library = canonical_path( val )
+				if not file_exists( user_pic_library ) then
 					ShowMsg(2, 348, { val })
 					abort(1)
 				end if

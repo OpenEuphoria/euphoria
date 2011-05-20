@@ -366,7 +366,8 @@ constant StdErrMsgs = {
 	{348, "User supplied library does not exist:\n    [1]"},
 	{349, "Resource file does not exist:\n    [1]"},
 	{350, "Unable to compile resource file: [1]"},
-	{351, "External debugger"},
+	{351, "Use a non-standard library when building a shared object"},
+	{352, "External debugger"},
 	$
 }
 

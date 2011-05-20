@@ -513,6 +513,12 @@ indicates that the referenced switch applies only to that execution mode.
 ; ##-LIB file## (translator)
 : Specifies the run-time library to use when translating euphoria programs.
 
+; ##-LIB-PIC file## (translator)
+: Specifies the run-time library to use when translating euphoria programs as
+  shared objects.  The library should be built using the -fPIC (position independent
+  code) flag.  This is meant to be used in a eu.cfg file to be able to specify both
+  a non-PIC (using the -lib option) and a PIC option in the same eu.cfg file.
+
 ; ##-PLAT word## (translator)
 : Specify the target platform for translation.  This allows euphoria code to
   be translated for any supported platform from any other supported platform.
