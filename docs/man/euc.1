@@ -59,6 +59,8 @@ euc \- Euphoria to C Translator \- Translates Euphoria programs to C.
 .IR platform]
 .RB [\| \-lib
 .IR filename]
+.RB [\| \-lib-pic
+.IR filename]
 .RB [\| \-debug]
 .RB [\| \-maxsize
 .IR size]
@@ -194,11 +196,18 @@ after it completes.
 .B \-lflags flags
 Flags to pass to the linker (overrides internal linker flags)
 .Tp
-.B \force-build
+.B \-force-build
 Force building, even if file is up-to-date.
 .TP
 .B \-lib filename
 Specify the euphoria runtime library to use for linking.
+.TP
+.B \-lib-pic filename
+Specify the euphoria runtime library to use for linking shared objects.  This library should
+have been built using the -fPIC (position independent code) flag.  This option is
+meant to be used in configuration files along with -lib to be able to specify a non PIC
+and a PIC flag for the translator to use depending on the type of output requested.  This
+option overrides any value passed in the -lib option when building a shared object.
 .TP
 .B \-makefile
 Generate a project Makefile that can be integrated into a larger project.
