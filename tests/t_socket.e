@@ -5,6 +5,12 @@ include std/socket.e as sock
 include std/pipeio.e as pipe
 include std/filesys.e as fs
 include std/cmdline.e
+ifdef WINDOWS then
+	constant MAYBE_MSG_NOSIGNAL = 0
+elsedef
+	constant MAYBE_MSG_NOSIGNAL = MSG_NOSIGNAL
+end ifdef
+	
 object _ = 0
 
 test_equal("service_by_name echo", { "echo", "tcp", 7 }, service_by_name("echo", "tcp"))
@@ -22,17 +28,14 @@ ifdef WINDOWS then
 	test_equal("set_option #1", 1, set_option(socket, SOL_SOCKET, SO_DEBUG, 1))
 	test_equal("get_option #2", 1, get_option(socket, SOL_SOCKET, SO_DEBUG))
 end ifdef
-ifdef LINUX or WINDOWS then
-	-- these constants may be specific to Linux
-	-- if not, change the ifdef from LINUX to UNIX
-	test_equal("get_option #1", SOCK_STREAM, get_option(socket, SOL_SOCKET, SO_TYPE))
-	test_equal("get_option #2", 0, get_option(socket, SOL_SOCKET, SO_REUSEADDR))
-	test_equal("set_option #1", 1, set_option(socket, SOL_SOCKET, SO_REUSEADDR, 1))
-	test_equal("get_option #3", 1, get_option(socket, SOL_SOCKET, SO_REUSEADDR))
-	test_equal("get_option #4", 0, get_option(socket, SOL_SOCKET, SO_KEEPALIVE))
-	test_equal("set_option #2", 1, set_option(socket, SOL_SOCKET, SO_KEEPALIVE, 1))
-	test_equal("get_option #5", 1, get_option(socket, SOL_SOCKET, SO_KEEPALIVE))
-end ifdef
+-- these constants are converted in the backend should work in WINDOWS and all UNIX flavors.
+test_equal("get_option #1", SOCK_STREAM, get_option(socket, SOL_SOCKET, SO_TYPE))
+test_equal("get_option #2", 0, get_option(socket, SOL_SOCKET+5/5-1, SO_REUSEADDR))
+test_equal("set_option #1", 1, set_option(socket, SOL_SOCKET, SO_REUSEADDR, 1))
+test_equal("get_option #3", 1, get_option(socket, SOL_SOCKET+0.0, SO_REUSEADDR))
+test_equal("get_option #4", 0, get_option(socket, SOL_SOCKET+0.0, SO_KEEPALIVE))
+test_equal("set_option #2", 1, set_option(socket, SOL_SOCKET, SO_KEEPALIVE*3.1/3.1, 1))
+test_equal("get_option #5", 1, get_option(socket, SOL_SOCKET, SO_KEEPALIVE*3.1/3.1))
 
 --
 -- testing both client and server in this case as the sever
@@ -86,18 +89,18 @@ else
 	
 	if _ = 0 then
 		sequence send_data = "Hello, "
-		test_equal("send w/o newline", length(send_data), sock:send(socket, send_data, MSG_NOSIGNAL))
-		test_equal("receive w/o newline", send_data, sock:receive(socket, MSG_NOSIGNAL))
+		test_equal("send w/o newline", length(send_data), sock:send(socket, send_data, MAYBE_MSG_NOSIGNAL))
+		test_equal("receive w/o newline", send_data, sock:receive(socket, MAYBE_MSG_NOSIGNAL))
 		
 		send_data = "world\n"
-		test_equal("send with newline", length(send_data), sock:send(socket, send_data, MSG_NOSIGNAL))
-		test_equal("receive with newline", send_data, sock:receive(socket, MSG_NOSIGNAL))
+		test_equal("send with newline", length(send_data), sock:send(socket, send_data, MAYBE_MSG_NOSIGNAL))
+		test_equal("receive with newline", send_data, sock:receive(socket, MAYBE_MSG_NOSIGNAL))
 		
 		send_data = repeat('a', 511) & "\n"
-		test_equal("send large", length(send_data), sock:send(socket, send_data, MSG_NOSIGNAL))
-		test_equal("receive large", send_data, sock:receive(socket, MSG_NOSIGNAL))
+		test_equal("send large", length(send_data), sock:send(socket, send_data, MAYBE_MSG_NOSIGNAL))
+		test_equal("receive large", send_data, sock:receive(socket, MAYBE_MSG_NOSIGNAL))
 		
-		_ = send(socket, "quit\n", MSG_NOSIGNAL)
+		_ = send(socket, "quit\n", MAYBE_MSG_NOSIGNAL)
 	end if
 
 	pipe:kill(p)

@@ -9,6 +9,7 @@
   1024 between the biggest and smallest were interpreted incorrectly.
 * [[ticket:661]] fixed translator linking to use comctl32 library on windows
 * [[ticket:663]] Translator ##-plat## switch now uses ##WINDOWS## instead of ##WIN##.
+* [[ticket:666]] fixed to allow integers stored as doubles in be_sockets.c.
 
 === Enhancements
 
