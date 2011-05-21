@@ -781,11 +781,11 @@ object call_c(int func, object proc_ad, object arg_list)
 			}
 		}
 		else {
-			/* push 4-byte longeger */
+			/* push 4-byte integer */
 			if (size >= E_INTEGER) {
 				if (IS_ATOM_INT(next_arg)) {
 					if (size == E_SEQUENCE)
-						RTFatal("passing an longeger where a sequence is required");
+						RTFatal("passing an integer where a sequence is required");
 				}
 				else {
 					if (IS_SEQUENCE(next_arg)) {
@@ -806,7 +806,7 @@ object call_c(int func, object proc_ad, object arg_list)
 				arg_op[arg_i++] = arg;
 			}
 			else if (IS_ATOM(next_arg)) {
-				// atoms are rounded to longegers
+				// atoms are rounded to integers
 				
 				arg = (unsigned long)DBL_PTR(next_arg)->dbl; //correct
 				// if it's a -ve f.p. number, Watcom converts it to long and
@@ -860,12 +860,12 @@ object call_c(int func, object proc_ad, object arg_list)
 	}
 	
 	else {
-		// expect longeger to be returned
+		// expect integer to be returned
 		if ((return_type & 0x000000FF) == 04) {
-			/* 4-byte longeger - usual case */
+			/* 4-byte integer - usual case */
 			// check if unsigned result is required 
 			if ((return_type & C_TYPE) == 0x02000000) {
-				// unsigned longeger result
+				// unsigned integer result
 				if ((unsigned)iresult <= (unsigned)MAXINT) {
 					return iresult;
 				}
@@ -873,7 +873,7 @@ object call_c(int func, object proc_ad, object arg_list)
 					return NewDouble((double)(unsigned)iresult);
 			}
 			else {
-				// signed longeger result
+				// signed integer result
 				if (return_type >= E_INTEGER ||
 					(iresult >= MININT && iresult <= MAXINT)) {
 					return iresult;
