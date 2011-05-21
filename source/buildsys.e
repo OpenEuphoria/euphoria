@@ -420,8 +420,13 @@ function setup_build()
 				c_flags &= " -fPIC"
 			end if
 
-			c_flags &= sprintf(" -c -w -fsigned-char -O2 -m%d -I%s -ffast-math",
+			ifdef EU4_0 then 
+				c_flags &= sprintf(" -c -w -fsigned-char -O2 -m%d -I%s -ffast-math",
+				{ 4 * 8, get_eucompiledir() })
+			elsedef
+				c_flags &= sprintf(" -c -w -fsigned-char -O2 -m%d -I%s -ffast-math",
 				{ sizeof( C_POINTER ) * 8, get_eucompiledir() })
+			end ifdef
 
 			if TWINDOWS then
 				c_flags &= " -mno-cygwin"
@@ -431,8 +436,12 @@ function setup_build()
 				end if
 			end if
 
-			l_flags = sprintf( "%s -m%d ", {  user_library, sizeof( C_POINTER ) * 8 })
-
+			ifdef EU4_0 then
+				l_flags = sprintf( " %s -m%d", { user_library, 4 * 8 })
+			elsedef			
+				l_flags = sprintf( " %s -m%d", { user_library, sizeof( C_POINTER ) * 8 })
+			end ifdef
+				
 			if dll_option then
 				l_flags &= " -shared "
 			end if

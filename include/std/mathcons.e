@@ -72,13 +72,25 @@ public constant
 	--**
 	-- sqrt(e)
 	SQRTE        = 1.64872_12707_00128_14684,
-	--**
-	-- Positive Infinity
-	PINF     = machine_func( M_INFINITY, {}),
-	--**
-	-- Negative Infinity
-	MINF     = - PINF,
-	--**
-	-- sqrt(5)
-	SQRT5 = 2.23606_79774_99789_69641
+	$
+	
+ifdef EU4 then
+	public constant
+		--**
+		-- Positive Infinity
+		PINF     = 1E308 * 1000
+elsedef
+	public constant
+		--**
+		-- Positive Infinity
+		PINF     = machine_func( M_INFINITY, {})
+end ifdef
+
+public constant
+		--**
+		-- Negative Infinity
+		MINF     = - PINF,
+		--**
+		-- sqrt(5)
+		SQRT5 = 2.23606_79774_99789_69641
 

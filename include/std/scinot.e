@@ -60,11 +60,16 @@ public enum type floating_point
 end type
 
 integer NATIVE_FORMAT
-if sizeof( C_POINTER ) = 32 then
+
+ifdef EU4_0 then
 	NATIVE_FORMAT = DOUBLE
-else
-	NATIVE_FORMAT = EXTENDED
-end if
+elsedef
+	if sizeof( C_POINTER ) = 32 then
+		NATIVE_FORMAT = DOUBLE
+	else
+		NATIVE_FORMAT = EXTENDED
+	end if
+end ifdef
 
 -- taken from misc.e to avoid including
 function reverse(sequence s)
