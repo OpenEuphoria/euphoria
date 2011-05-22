@@ -262,12 +262,6 @@ echo TRUNKDIR=%TRUNKDIR% >> config.wat
 echo BUILDDIR=%FULL_BUILDDIR% >> config.wat
 
 rem ============================================================
-rem Copy 32-bit manifest file
-rem ============================================================
-
-copy eu.manifest32 eu.manifest
-
-rem ============================================================
 rem Copy temporary .wat includes
 rem ============================================================
 

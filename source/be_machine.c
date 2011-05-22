@@ -38,6 +38,7 @@
 #include "be_socket.h"
 #include "be_coverage.h"
 #include "be_syncolor.h"
+#include "be_debug.h"
 
 #ifdef ELINUX
 #include <malloc.h>
@@ -110,6 +111,7 @@ extern eudouble eustart_time; /* from be_runtime.c */
 /*****************/
 /* 30-bit magic #s for old Complete & PD Edition binds */
 #define COMPLETE_MAGIC ('1' + ('2'<< 8) + ('3' << 16) + ('O' << 24))
+unsigned char * new_page();
 
 /**********************/
 /* Exported variables */
@@ -1770,6 +1772,37 @@ object tick_rate(object x)
 	return ATOM_1;
 }
 
+#ifdef EWATCOM
+typedef void ( __cdecl *convert_ptr)(void*,void*);
+convert_ptr convert_80_to_64;
+convert_ptr convert_64_to_80;
+char *code_64_to_80 = "\x55\x89\xe5\x8b\x45\x0c\x8b\x55\x08\xdd\x02\xdb\x38\x5d\xc3\x00";
+char *code_80_to_64 = "\x55\x89\xe5\x83\xec\x08\x8b\x45\x0c\x8b\x55\x08\xdb\x2a\xdd\x5d\xf8\xdd\x45\xf8\xdd\x18\xc9\xc3\x00";
+
+/*
+ * The machine code represented in the above strings is equivalent to the following functions
+ * (with a compiler where long doubles are 80-bit floating point numbers):
+ * 
+		void convert_64_to_80( void *f64, void *f80 ){
+			*(long double*)f80 = (long double) *(double*)f64;
+		}
+
+		void convert_80_to_64( void *f80, void *f64 ){
+			*(double*)f64 = (double) *(long double*)f80;
+		}
+*/
+
+void init_fp_conversions(){
+	unsigned char *page = new_page();
+	set_page_to_read_write_execute(page);
+	convert_80_to_64 = (convert_ptr) page;
+	convert_64_to_80 = (convert_ptr) (page + 0x100);
+	memcopy( convert_80_to_64, 24, code_80_to_64, 24 );
+	memcopy( convert_64_to_80, 15, code_64_to_80, 15 );
+	set_page_to_read_execute_only( page );
+}
+#endif
+
 static object float_to_atom(object x, int flen)
 /* convert a sequence of 4, 8 or 10 bytes in IEEE format to an atom */
 {
@@ -1781,7 +1814,7 @@ static object float_to_atom(object x, int flen)
 		double fdouble;
 		float  ffloat;
 	} convert;
-	
+
 	eudouble d;
 	s1_ptr s;
 
@@ -1799,7 +1832,12 @@ static object float_to_atom(object x, int flen)
 		d = (eudouble)convert.fdouble;
 	}
 	else{
-		d = (eudouble)convert.ldouble;
+		#ifdef EWATCOM
+			(*convert_80_to_64)( &convert, &d );
+		#else
+			d = (eudouble)convert.ldouble;
+		#endif
+		
 	}
 	return NewDouble(d);
 }
@@ -1827,8 +1865,11 @@ static object atom_to_float80(object x)
 {
 	long double d;
 	int len;
-
+#ifdef EWATCOM
+	uchar buff[10];
+#endif
 	len = 10;
+
 	if (IS_ATOM_INT(x)) {
 		d = (long double)INT_VAL(x);
 	}
@@ -1837,7 +1878,12 @@ static object atom_to_float80(object x)
 	}
 	else
 		len = 0;
+#ifdef EWATCOM
+	convert_64_to_80( &d, &buff );
+	return fpsequence( &buff, len );
+#else
 	return fpsequence((uchar *)&d, len);
+#endif
 }
 
 
@@ -2658,8 +2704,8 @@ object start_backend(object x)
 
 	x_ptr = SEQ_PTR(x);
 
-	if (IS_ATOM(x) || x_ptr->length != 11)
-		RTFatal("BACKEND requires a sequence of length 11");
+	if (IS_ATOM(x) || x_ptr->length != 12)
+		RTFatal("BACKEND requires a sequence of length 12");
 
 	fe.st = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
 	fe.sl = (struct sline *) get_pos_int(w, *(x_ptr->base+2));
@@ -2674,6 +2720,8 @@ object start_backend(object x)
 	cover_routine     = get_pos_int(w, *(x_ptr->base+9));
 	write_coverage_db = get_pos_int(w, *(x_ptr->base+10));
 	syncolor          = get_pos_int(w, *(x_ptr->base+11));
+	
+	set_debugger( (char*) get_pos_int(w, *(x_ptr->base+12)) );
 	
 	// This is checked when we try to write coverage to make sure
 	// we need to output an error message.
@@ -2702,6 +2750,10 @@ object start_backend(object x)
 	}
 
 	be_init(); //earlier for DJGPP
+	
+#ifdef EWATCOM
+	init_fp_conversions();
+#endif
 
 	Execute(TopLevelSub->u.subp.code);
 
@@ -3166,7 +3218,23 @@ object machine(object opcode, object x)
 				
 			case M_INFINITY:
 				return NewDouble( (eudouble) INFINITY );
-
+				
+			case M_CALL_STACK:
+#ifndef ERUNTIME
+				return eu_call_stack( 0 );
+#else
+				// translated code returns empty call stack
+				return MAKE_SEQ( NewS1( 0 ) );
+#endif
+			case M_INIT_DEBUGGER:
+#ifndef ERUNTIME
+				{
+					return init_debug_addr();
+				}
+#else
+				// translated code doesn't do anything
+				return 0;
+#endif
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:
 				/* could be out-of-range int, or double, or sequence */

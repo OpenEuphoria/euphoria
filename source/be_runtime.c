@@ -6343,3 +6343,4 @@ object eu_sizeof( object data_type ){
 			return 0;
 	}
 }
+

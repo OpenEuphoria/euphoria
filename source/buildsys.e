@@ -326,7 +326,7 @@ function setup_build()
 	sequence c_exe   = "", c_flags = "", l_exe   = "", l_flags = "", obj_ext = "",
 		exe_ext = "", l_flags_begin = "", rc_comp = "", l_names, l_ext, t_slash
 
-	if dll_option and length( user_pic_library ) then
+	if dll_option and length( user_pic_library ) > 0 then
 		user_library = user_pic_library
 	end if
 	

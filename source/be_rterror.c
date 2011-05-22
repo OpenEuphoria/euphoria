@@ -46,6 +46,7 @@
 #include "be_alloc.h"
 #include "be_syncolor.h"
 #include "be_task.h"
+#include "be_debug.h"
 
 /******************/
 /* Local defines  */
@@ -496,7 +497,10 @@ void ErasePrivates(symtab_ptr proc_ptr)
    that match any privates of this proc/fn */
 {
 	register symtab_ptr sym;
-
+	
+	if( external_debugger ){
+		ExternalErasePrivates( proc_ptr );
+	}
 	sym = proc_ptr->next;
 	while (sym && (sym->scope == S_PRIVATE || sym->scope == S_LOOP_VAR)) {
 		EraseSymbol(sym);
@@ -515,7 +519,11 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 #define DV_len (40)
 	char val_string[DV_len];
 	int add_char, iv;
-		
+	
+	if( external_debugger ){
+		ExternalDisplayVar( s_ptr, user_requested );
+		return;
+	}
 	GetViewPort( &vp );
 	add_char = 0;
 	if (TEXT_MODE)
@@ -672,6 +680,10 @@ void UpdateGlobals()
 	int i;
 	struct EuViewPort vp;
 	
+	if( external_debugger ){
+		ExternalUpdateGlobals();
+		return;
+	}
 	GetViewPort( &vp );
 	
 	if (TEXT_MODE)
@@ -710,7 +722,15 @@ void ShowDebug()
 	int i;
 	
 	struct EuViewPort vp;
-
+	
+	if( external_debugger == 2 ){
+		load_debugger();
+	}
+	if( external_debugger ){
+		ExternalShowDebug();
+		return;
+	}
+	
 	if (current_screen == DEBUG_SCREEN)
 		return;
 	
@@ -859,6 +879,14 @@ static void DebugCommand()
 void DebugScreen()
 /* Display the debug screen, if it is not already there */
 {
+	if( external_debugger == 2 ){
+		load_debugger();
+	}
+	if( external_debugger ){
+		ExternalShowDebug();
+		ExternalDebugScreen();
+		return;
+	}
 	/* set up the debug screen */
 	if (current_screen == DEBUG_SCREEN)
 		ShowTraceLine(start_line);
@@ -875,6 +903,11 @@ void EraseSymbol(symtab_ptr sym)
 	symtab_ptr dsym;
 	int prev;
 	struct EuViewPort vp;
+	
+	if( external_debugger ){
+		ExternalEraseSymbol( sym );
+		return;
+	}
 	
 	GetViewPort( &vp );
 	prev = -1;

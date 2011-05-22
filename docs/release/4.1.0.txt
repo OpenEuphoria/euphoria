@@ -14,6 +14,7 @@
 * [[ticket:631]] Scientific parsing code moved from the euphoria source directory and into the
   standard library.  Routines in ##std/get.e## now return the proper precision data
   based on the native platform (32 or 64 bits).
+* Users can write their own debuggers and use them instead of the built in trace debugger.
 * gcc builds now include -fPIC (position independent code) runtime libraries for translating
   euphoria code into shared objects.
 * -lib-pic switch for translator to specify the PIC runtime library to be used

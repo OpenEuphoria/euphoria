@@ -67,6 +67,7 @@
 #include "be_callc.h"
 #include "be_coverage.h"
 #include "be_execute.h"
+#include "be_debug.h"
 
 /******************/
 /* Local defines  */
@@ -1810,7 +1811,7 @@ void do_exec(intptr_t *start_pc)
 /* 214 (previous) */
   &&L_POKE_POINTER, &&L_PEEK_POINTER,
 /* 215 (previous) */
-  &&L_SIZEOF
+  &&L_SIZEOF, &&L_STARTLINE_BREAK
   };
 #endif
 #endif
@@ -5093,7 +5094,9 @@ void do_exec(intptr_t *start_pc)
 
 
 			/* tracing/profiling ops */
-
+			case L_STARTLINE_BREAK:
+				TraceOn = trace_enabled;
+				
 			case L_STARTLINE:
 			deprintf("case L_STARTLINE:");
 				top = pc[1];
