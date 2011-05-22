@@ -11,38 +11,59 @@ include std/machine.e
 -- Serialized format of Euphoria objects
 --
 -- First byte:
---          0..248    -- immediate small integer, -9 to 239
+--          0..246    -- immediate small integer, -9 to 237
 					  -- since small negative integers -9..-1 might be common
-constant I2B = 249,   -- 2-byte signed integer follows
-		 I3B = 250,   -- 3-byte signed integer follows
-		 I4B = 251,   -- 4-byte signed integer follows
-		 F4B = 252,   -- 4-byte f.p. number follows
-		 F8B = 253,   -- 8-byte f.p. number follows
-		 S1B = 254,   -- sequence, 1-byte length follows, then elements
-		 S4B = 255    -- sequence, 4-byte length follows, then elements
+constant I2B  = 247,   -- 2-byte signed integer follows
+		 I3B  = 248,   -- 3-byte signed integer follows
+		 I4B  = 249,   -- 4-byte signed integer follows
+		 I8B  = 250,   -- 4-byte signed integer follows
+		 F4B  = 251,   -- 4-byte f.p. number follows
+		 F8B  = 252,   -- 8-byte f.p. number follows
+		 F10B = 253,   -- 10-byte fp number bollows
+		 S1B  = 255,   -- sequence, 1-byte length follows, then elements
+		 S4B  = 255    -- sequence, 4-byte length follows, then elements
 
 constant MIN1B = -9,
-		 MAX1B = 239,
+		 MAX1B = 237,
 		 MIN2B = -power(2, 15),
 		 MAX2B =  power(2, 15)-1,
 		 MIN3B = -power(2, 23),
 		 MAX3B =  power(2, 23)-1,
 		 MIN4B = -power(2, 31),
-		 MAX4B =  power(2, 31)-1
+		 MAX4B =  power(2, 31)-1,
+		 MIN8B = -power(2, 63),
+		 MAX8B =  power(2, 63)-1
 
-atom mem0, mem1, mem2, mem3
-mem0 = machine:allocate(4)
+atom mem0, mem1, mem2, mem3, mem4, mem5, mem6, mem7
+mem0 = machine:allocate(8)
 mem1 = mem0 + 1
 mem2 = mem0 + 2
 mem3 = mem0 + 3
+mem4 = mem0 + 4
+mem5 = mem0 + 5
+mem6 = mem0 + 6
+mem7 = mem0 + 7
 
 function get4(integer fh)
--- read 4-byte value at current position in database file
+-- read 4-byte value at current position in file
 	poke(mem0, getc(fh))
 	poke(mem1, getc(fh))
 	poke(mem2, getc(fh))
 	poke(mem3, getc(fh))
 	return peek4u(mem0)
+end function
+
+function get8( integer fh )
+-- read 4-byte value at current position in file
+	poke(mem0, getc(fh))
+	poke(mem1, getc(fh))
+	poke(mem2, getc(fh))
+	poke(mem3, getc(fh))
+	poke(mem4, getc(fh))
+	poke(mem5, getc(fh))
+	poke(mem6, getc(fh))
+	poke(mem7, getc(fh))
+	return peek8s( mem0 )
 end function
 
 function deserialize_file(integer fh, integer c)
@@ -72,6 +93,9 @@ function deserialize_file(integer fh, integer c)
 
 		case I4B then
 			return get4(fh) + MIN4B
+		
+		case I8B then
+			return get8(fh)
 
 		case F4B then
 			return convert:float32_to_atom({getc(fh), getc(fh),
@@ -79,6 +103,13 @@ function deserialize_file(integer fh, integer c)
 
 		case F8B then
 			return convert:float64_to_atom({getc(fh), getc(fh),
+				getc(fh), getc(fh),
+				getc(fh), getc(fh),
+				getc(fh), getc(fh)})
+		
+		case F10B then
+			return convert:float80_to_atom({getc(fh), getc(fh),
+				getc(fh), getc(fh),
 				getc(fh), getc(fh),
 				getc(fh), getc(fh),
 				getc(fh), getc(fh)})
@@ -115,6 +146,11 @@ function getp4(sequence sdata, integer pos)
 	return peek4u(mem0)
 end function
 
+function getp8( sequence sdata, integer pos)
+	poke(mem0, sdata[pos..pos+7])
+	return peek8s(mem0)
+end function
+
 function deserialize_object(sequence sdata, integer pos, integer c)
 -- read a serialized Euphoria object from a sequence
 
@@ -143,6 +179,9 @@ function deserialize_object(sequence sdata, integer pos, integer c)
 
 		case I4B then
 			return {getp4(sdata, pos) + MIN4B, pos + 4}
+		
+		case I8B then
+			return { getp8(sdata, pos), pos + 8 }
 
 		case F4B then
 			return {convert:float32_to_atom({sdata[pos], sdata[pos+1],
@@ -154,6 +193,13 @@ function deserialize_object(sequence sdata, integer pos, integer c)
 				sdata[pos+4], sdata[pos+5],
 				sdata[pos+6], sdata[pos+7]}), pos + 8}
 
+		case F10B then
+			return {convert:float80_to_atom({sdata[pos], sdata[pos+1],
+				sdata[pos+2], sdata[pos+3],
+				sdata[pos+4], sdata[pos+5],
+				sdata[pos+6], sdata[pos+7],
+				sdata[pos+8], sdata[pos+9]}), pos + 10}
+		
 		case else
 			-- sequence
 			if c = S1B then
@@ -356,7 +402,7 @@ public function serialize(object x)
 -- as a sequence of bytes
 	sequence x4, s
 
-	if integer(x) and x >= MIN4B and x <= MAX4B then
+	if integer(x) then -- and x >= MIN4B and x <= MAX4B then
 		if x >= MIN1B and x <= MAX1B then
 			return {x - MIN1B}
 
@@ -368,9 +414,11 @@ public function serialize(object x)
 			x -= MIN3B
 			return {I3B, and_bits(x, #FF), and_bits(floor(x / #100), #FF), floor(x / #10000)}
 
-		else
+		elsif x >= MIN4B and x <= MAX4B then
 			return I4B & convert:int_to_bytes(x-MIN4B)
-
+		
+		else
+			return I8B & int_to_bytes(x, 8)
 		end if
 
 	elsif atom(x) then
@@ -380,7 +428,12 @@ public function serialize(object x)
 			-- can represent as 4-byte float
 			return F4B & x4
 		else
-			return F8B & convert:atom_to_float64(x)
+			x4 = convert:atom_to_float64( x )
+			if x = convert:float64_to_atom( x4 ) then
+				return F8B & convert:atom_to_float64(x)
+			else
+				return F10B & convert:atom_to_float80( x )
+			end if
 		end if
 
 	else
