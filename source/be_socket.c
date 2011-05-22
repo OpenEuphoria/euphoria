@@ -17,7 +17,6 @@
 #include "be_runtime.h"
 #include "be_socket.h"
 
-extern long get_pos_int(char *, object); /* from be_machine.c */
 
 /* Converts any atom to an integer object if the atom's value can be expressed as such, otherwise return unchanged. */
 object ATOM_TO_ATOM_INT( object X ) {
