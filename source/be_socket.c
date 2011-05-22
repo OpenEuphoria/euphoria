@@ -41,7 +41,7 @@ object ATOM_TO_ATOM_INT( object X ) {
 /* Return 0 iff this ATOM, x, has a fraction part */
 #define DOESNT_HAVE_FRACTION_PART(x) (((((unsigned long)x) | 0xE0000000) == 0xA0000000) ? (DBL_PTR(x)->dbl == (double)(int)DBL_PTR(x)->dbl) : 1)
 
-inline boolean NOT_USHORT_VALUE(object x) {
+inline int NOT_USHORT_VALUE(object x) {
 	if IS_ATOM_INT(x) {
 		return !((0 <= x) && (x <= 0xFFFF));
 	} else if IS_ATOM(x) {
@@ -60,7 +60,7 @@ inline boolean NOT_USHORT_VALUE(object x) {
 #define SOCK_SOCKET   1
 #define SOCK_SOCKADDR 2
 
-inline boolean IS_SOCKET(object sock_obj) {
+inline int IS_SOCKET(object sock_obj) {
 	struct s1 * socket_s;
 	object_ptr base;
 	object xsock_socket, xsock_address;
