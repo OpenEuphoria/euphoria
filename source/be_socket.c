@@ -17,16 +17,67 @@
 #include "be_runtime.h"
 #include "be_socket.h"
 
+extern long get_pos_int(char *, object); /* from be_machine.c */
+
+/* Converts any atom to an integer object if the atom's value can be expressed as such, otherwise return unchanged. */
+object ATOM_TO_ATOM_INT( object X ) {
+	if ( IS_ATOM( X ) && !IS_ATOM_INT( X ) ) { 
+		double TMP_dbl = DBL_PTR( X )->dbl;
+		int TMP_x = (object)TMP_dbl;
+		if( (TMP_x + HIGH_BITS < 0) && (TMP_dbl == (double)TMP_x) ){
+			X = MAKE_INT((object)TMP_dbl);
+		}
+	}
+	return X;
+}
+
+
+/* return value as a C int irregardless whether it is a double pointed to by this as an encoded pointer, or if it in itself is an
+  ATOM_INT.   This may return a bad result if x is an encoded double of an extreme value. */
+#define ATOM_INT_VAL(x) (int)(((((unsigned long)x) | 0xE0000000) == 0xA0000000) ? DBL_PTR(x)->dbl : x)
+
+/* Return 1 iff this ATOM, x, has a fraction part. */
+#define HAS_FRACTION_PART(x)  (((((unsigned long)x) | 0xE0000000) == 0xA0000000) ? (DBL_PTR(x)->dbl != (double)(int)DBL_PTR(x)->dbl) : 0)
+
+/* Return 0 iff this ATOM, x, has a fraction part */
+#define DOESNT_HAVE_FRACTION_PART(x) (((((unsigned long)x) | 0xE0000000) == 0xA0000000) ? (DBL_PTR(x)->dbl == (double)(int)DBL_PTR(x)->dbl) : 1)
+
+inline int NOT_USHORT_VALUE(object x) {
+	if IS_ATOM_INT(x) {
+		return !((0 <= x) && (x <= 0xFFFF));
+	} else if IS_ATOM(x) {
+		double TMP_d;
+		TMP_d = DBL_PTR(x)->dbl;
+		return !((0.0 <= TMP_d) && (TMP_d <= 65335.0));
+	} else {
+		/* sequence? */
+		return 1;
+	}
+}
+
+#define HAS_ULONG_VALUE(x) (IS_ATOM_INT(x) || 0.0 <= DBL_PTR(xsock_socket)->dbl || DBL_PTR(xsock_socket)->dbl <= (double)0xFFFFFFFF)
+
 // Accessors for the socket sequence given to many functions
 #define SOCK_SOCKET   1
 #define SOCK_SOCKADDR 2
 
-#define BUFF_SIZE 1024
+inline int IS_SOCKET(object sock_obj) {
+	struct s1 * socket_s;
+	object_ptr base;
+	object xsock_socket, xsock_address;
+	if (IS_SEQUENCE(sock_obj) &&
+	   ((socket_s = SEQ_PTR(sock_obj))->length == 2) &&
+	   IS_ATOM(xsock_socket = (base = socket_s->base)[SOCK_SOCKET]) &&
+	   IS_ATOM(xsock_address = base[SOCK_SOCKADDR])
+	   ) {
+		return  (IS_ATOM_INT(xsock_socket) || HAS_ULONG_VALUE(xsock_socket))  &&
+				(IS_ATOM_INT(xsock_address) || HAS_ULONG_VALUE(xsock_address));
+	   }
+	   
+	return 0;
+}
 
-#define IS_SOCKET(sock) \
-	(IS_SEQUENCE(sock) && SEQ_PTR(sock)->length == 2 && \
-	IS_ATOM_INT(SEQ_PTR(sock)->base[SOCK_SOCKET]) && \
-	IS_ATOM(SEQ_PTR(sock)->base[SOCK_SOCKADDR]))
+#define BUFF_SIZE 1024
 
 #define ERR_OK                     0
 #define ERR_ACCESS                -1
@@ -903,23 +954,23 @@ object eusock_getservbyname(object x)
 {
 	char *name, *proto;
 	s1_ptr name_s, proto_s, result_s;
-
+	object_ptr base;
 	struct servent *ent;
 
 	eusock_ensure_init();
 
-	if (!IS_SEQUENCE(SEQ_PTR(x)->base[1]))
+	if (!IS_SEQUENCE((base = SEQ_PTR(x)->base)[1]))
 		RTFatal("first argument to service_by_name must be a sequence");
 
-	name_s = SEQ_PTR(SEQ_PTR(x)->base[1]);
+	name_s = SEQ_PTR(base[1]);
 	name   = EMalloc(name_s->length+1);
-	MakeCString(name, SEQ_PTR(x)->base[1], name_s->length+1 );
+	MakeCString(name, base[1], name_s->length+1 );
 
-	if (IS_SEQUENCE(SEQ_PTR(x)->base[2]))
+	if (IS_SEQUENCE(base[2]))
 	{
-		proto_s = SEQ_PTR(SEQ_PTR(x)->base[2]);
+		proto_s = SEQ_PTR(base[2]);
 		proto = EMalloc(proto_s->length+1);
-		MakeCString(proto, SEQ_PTR(x)->base[2], proto_s->length+1);
+		MakeCString(proto, base[2], proto_s->length+1);
 	}
 	else
 	{
@@ -943,7 +994,7 @@ object eusock_getservbyname(object x)
 	result_s = NewS1(3); // official name, port
 	result_s->base[1] = NewString(ent->s_name);
 	result_s->base[2] = NewString(ent->s_proto);
-	result_s->base[3] = htons(ent->s_port);
+	result_s->base[3] = MAKE_INT(ntohs(ent->s_port));
 
 	return MAKE_SEQ(result_s);
 }
@@ -955,23 +1006,23 @@ object eusock_getservbyname(object x)
 object eusock_getservbyport(object x)
 {
 	char *proto;
-	int port;
+	object port;
+	object_ptr base;
 	s1_ptr proto_s, result_s;
 
 	struct servent *ent;
 
 	eusock_ensure_init();
+	
+	port = ATOM_TO_ATOM_INT((base = SEQ_PTR(x)->base)[1]);
+	if (NOT_USHORT_VALUE(port))
+		RTFatal("first argument to service_by_port must be an integer from 0 to 65335.");
 
-	if (!IS_ATOM_INT(SEQ_PTR(x)->base[1]))
-		RTFatal("first argument to service_by_port must be an integer");
-
-	port = SEQ_PTR(x)->base[1];
-
-	if (IS_SEQUENCE(SEQ_PTR(SEQ_PTR(x)->base[2])))
+	if (IS_SEQUENCE(base[2]))
 	{
-		proto_s = SEQ_PTR(SEQ_PTR(x)->base[2]);
+		proto_s = SEQ_PTR(base[2]);
 		proto = EMalloc(proto_s->length+1);
-		MakeCString(proto, SEQ_PTR(x)->base[2], proto_s->length+1);
+		MakeCString(proto, base[2], proto_s->length+1);
 	}
 	else
 	{
@@ -979,7 +1030,7 @@ object eusock_getservbyport(object x)
 	}
 
 	// ent is static data, do not release
-	ent = getservbyport(ntohs(port), proto);
+	ent = getservbyport(htons(INT_VAL(port)), proto);
 
 	if (proto != 0)
 	{
@@ -994,7 +1045,7 @@ object eusock_getservbyport(object x)
 	result_s = NewS1(3); // official name, port
 	result_s->base[1] = NewString(ent->s_name);
 	result_s->base[2] = NewString(ent->s_proto);
-	result_s->base[3] = htons(ent->s_port);
+	result_s->base[3] = MAKE_INT(ntohs(ent->s_port));
 
 	return MAKE_SEQ(result_s);
 }
@@ -1047,7 +1098,7 @@ object eusock_build_hostent(struct hostent *ent)
 	result_s->base[1] = NewString(ent->h_name);
 	result_s->base[2] = MAKE_SEQ(aliases_s);
 	result_s->base[3] = MAKE_SEQ(ips_s);
-	result_s->base[4] = ent->h_addrtype;
+	result_s->base[4] = MAKE_INT(ent->h_addrtype);
 
 	return MAKE_SEQ(result_s);
 }
@@ -1061,17 +1112,17 @@ object eusock_gethostbyname(object x)
 	char *name;
 
 	s1_ptr name_s;
-
+	object_ptr base;
 	struct hostent *ent;
 
 	eusock_ensure_init();
 
-	if (!IS_SEQUENCE(SEQ_PTR(x)->base[1]))
+	if (!IS_SEQUENCE((base = SEQ_PTR(x)->base)[1]))
 		RTFatal("first argument to host_by_name must be a sequence");
 
-	name_s = SEQ_PTR(SEQ_PTR(x)->base[1]);
+	name_s = SEQ_PTR(base[1]);
 	name   = EMalloc(name_s->length+1);
-	MakeCString(name, SEQ_PTR(x)->base[1], name_s->length+1 );
+	MakeCString(name, base[1], name_s->length+1 );
 
 	// ent is static data, do not release
 	ent = gethostbyname(name);
@@ -1141,7 +1192,7 @@ object eusock_error_code()
 
 object eusock_socket(object x)
 {
-	int af, type, protocol;
+	object af, type, protocol;
 	SOCKET sock;
 	struct sockaddr_in *addr;
 
@@ -1149,18 +1200,20 @@ object eusock_socket(object x)
 
 	eusock_ensure_init();
 
-	if (!IS_ATOM_INT(SEQ_PTR(x)->base[1]))
+    /* only allow 30-bit integers. */
+	af       = ATOM_TO_ATOM_INT(SEQ_PTR(x)->base[1]);
+	type     = ATOM_TO_ATOM_INT(SEQ_PTR(x)->base[2]);
+	protocol = ATOM_TO_ATOM_INT(SEQ_PTR(x)->base[3]);
+	
+	if (!IS_ATOM_INT(af))
 		RTFatal("first argument to socket must be an integer");
-	if (!IS_ATOM_INT(SEQ_PTR(x)->base[2]))
+	if (!IS_ATOM_INT(type))
 		RTFatal("second argument to socket must be an integer");
-	if (!IS_ATOM_INT(SEQ_PTR(x)->base[3]))
+	if (!IS_ATOM_INT(protocol))
 		RTFatal("third argument to socket must be an integer");
 
-	af       = SEQ_PTR(x)->base[1];
-	type     = SEQ_PTR(x)->base[2];
-	protocol = SEQ_PTR(x)->base[3];
 
-	sock = socket(af, type, protocol);
+	sock = socket(INT_VAL(af), INT_VAL(type), INT_VAL(protocol));
 	if (sock == INVALID_SOCKET)
 	{
 		return eusock_geterror();
@@ -1171,13 +1224,9 @@ object eusock_socket(object x)
 	addr->sin_port   = 0;
 
 	result_p = NewS1(2);
-	result_p->base[1] = sock;
-
-	if ((uintptr_t) addr > (uintptr_t)MAXINT)
-		result_p->base[2] = NewDouble((double)(uintptr_t) addr);
-	else
-		result_p->base[2] = (object)addr;
-
+	result_p->base[1] = MAKE_UINT((unsigned long)sock);
+	result_p->base[2] = MAKE_UINT((unsigned long)addr);
+	
 	return MAKE_SEQ(result_p);
 }
 
@@ -1188,11 +1237,12 @@ object eusock_socket(object x)
 object eusock_close(object x)
 {
 	SOCKET s;
+	object sx;
 
-	if (!IS_SOCKET(SEQ_PTR(x)->base[1]))
+	if (!IS_SOCKET(sx = SEQ_PTR(x)->base[1]))
 		RTFatal("first argument to close must be a socket");
 
-	s = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
+	s = ATOM_INT_VAL(SEQ_PTR(sx)->base[SOCK_SOCKET]);
 
 	if (closesocket(s) == SOCKET_ERROR)
 	{
@@ -1210,13 +1260,18 @@ object eusock_shutdown(object x)
 {
 	SOCKET s;
 	int how;
+	object socket_object;
+	object_ptr base;
 
-	if (!IS_SOCKET(SEQ_PTR(x)->base[1]))
+	if (!IS_SOCKET(socket_object = (base = SEQ_PTR(x)->base)[1]))
 		RTFatal("first argument to shutdown must be a socket");
+	
+	s = ATOM_INT_VAL(SEQ_PTR(socket_object)->base[SOCK_SOCKET]);
+	how = ATOM_INT_VAL(base[2]);
 
-	s = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
-	how = SEQ_PTR(x)->base[2];
-
+	if (how > 2 || how < 0)
+		RTFatal("second argument to shutdown should be one of SD_RECEIVE, SD_SEND or SD_BOTH");
+	
 	if (shutdown(s, how) == SOCKET_ERROR)
 	{
 		return eusock_geterror();
@@ -1227,6 +1282,8 @@ object eusock_shutdown(object x)
 
 /*
  * connect(sock, address, port)
+ *
+ 
  */
 
 object eusock_connect(object x)
@@ -1236,21 +1293,26 @@ object eusock_connect(object x)
 	int result;
 
 	s1_ptr address_s;
+	object he_port;
 	char *address;
 
 	eusock_ensure_init();
 
+	
+	
 	if (!IS_SOCKET(SEQ_PTR(x)->base[1]))
 		RTFatal("first argument to connect must be a socket");
 	if (!IS_SEQUENCE(SEQ_PTR(x)->base[2]))
 		RTFatal("second argument to connect must be a sequence");
-	if (!IS_ATOM_INT(SEQ_PTR(x)->base[3]))
-		RTFatal("third argument to connect must be an integer");
+	he_port = ATOM_TO_ATOM_INT(SEQ_PTR(x)->base[3]);
+	if (!IS_ATOM_INT(he_port) ||
+		he_port >= 0x10000 || he_port < 0)
+		RTFatal("third argument to connect must be an integer between 0 and 65335");
 
-	s    = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
+	s    = ATOM_INT_VAL(SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET]);
 	addr = (struct sockaddr_in *)get_pos_int("connect", SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKADDR]);
 
-	addr->sin_port = htons(SEQ_PTR(x)->base[3]);
+	addr->sin_port = htons(INT_VAL(he_port));
 
 	address_s = SEQ_PTR(SEQ_PTR(x)->base[2]);
 	address   = EMalloc(address_s->length+1);
@@ -1284,30 +1346,30 @@ object eusock_select(object x)
 	int i, timeout_microsecs, timeout_sec, result, max_sock;
 	fd_set readable, writable, errd;
 	struct timeval tv_timeout;
+	object_ptr base;
 
 	s1_ptr socks_pread, socks_pwrite, socks_perr, socks_pall,
 	result_p, tmp_sp;
 
-	if (!IS_SEQUENCE(SEQ_PTR(x)->base[1]))
+	if (!IS_SEQUENCE((base = SEQ_PTR(x)->base)[1]))
 		RTFatal("first argument to select must be a sequence of sockets");
-	if (!IS_SEQUENCE(SEQ_PTR(x)->base[2]))
+	if (!IS_SEQUENCE(base[2]))
 		RTFatal("second argument to select must be a sequence of sockets");
-	if (!IS_SEQUENCE(SEQ_PTR(x)->base[3]))
+	if (!IS_SEQUENCE(base[3]))
 		RTFatal("third argument to select must be a sequence of sockets");
-	if (!IS_SEQUENCE(SEQ_PTR(x)->base[4]))
+	if (!IS_SEQUENCE(base[4]))
 		RTFatal("fourth argument to select must be a sequence of sockets");
-	if (!IS_ATOM_INT(SEQ_PTR(x)->base[5]))
-		RTFatal("fiftth argument to select must be an integer");
-
-	if (!IS_ATOM_INT(SEQ_PTR(x)->base[6]))
+	if (!IS_ATOM_INT(base[5] = ATOM_TO_ATOM_INT(base[5])))
+		RTFatal("fifth argument to select must be an integer");
+	if (!IS_ATOM_INT(base[6] = ATOM_TO_ATOM_INT(base[6])))
 		RTFatal("sixth argument to select must be an integer");
 
-	socks_pread = SEQ_PTR(SEQ_PTR(x)->base[1]);
-	socks_pwrite = SEQ_PTR(SEQ_PTR(x)->base[2]);
-	socks_perr = SEQ_PTR(SEQ_PTR(x)->base[3]);
-	socks_pall = SEQ_PTR(SEQ_PTR(x)->base[4]);
-	timeout_microsecs = SEQ_PTR(x)->base[5];
-	timeout_sec = SEQ_PTR(x)->base[6];
+	socks_pread = SEQ_PTR(base[1]);
+	socks_pwrite = SEQ_PTR(base[2]);
+	socks_perr = SEQ_PTR(base[3]);
+	socks_pall = SEQ_PTR(base[4]);
+	timeout_microsecs = INT_VAL(base[5]);
+	timeout_sec = INT_VAL(base[6]);
 	max_sock = 0;
 
 	// prepare our fd_set
@@ -1318,7 +1380,7 @@ object eusock_select(object x)
 	for (i=1; i <= socks_pread->length; i++) {
 		if (!IS_SOCKET(socks_pread->base[i]))
 			RTFatal("first argument to select must be a sequence of sockets");
-		tmp_socket = SEQ_PTR(socks_pread->base[i])->base[SOCK_SOCKET];
+		tmp_socket = ATOM_INT_VAL(SEQ_PTR(socks_pread->base[i])->base[SOCK_SOCKET]);
 
 		FD_SET(tmp_socket, &readable);
 
@@ -1327,8 +1389,8 @@ object eusock_select(object x)
 
 	for (i=1; i <= socks_pwrite->length; i++) {
 		if (!IS_SOCKET(socks_pwrite->base[i]))
-			RTFatal("first argument to select must be a sequence of sockets");
-		tmp_socket = SEQ_PTR(socks_pwrite->base[i])->base[SOCK_SOCKET];
+			RTFatal("second argument to select must be a sequence of sockets");
+		tmp_socket = ATOM_INT_VAL(SEQ_PTR(socks_pwrite->base[i])->base[SOCK_SOCKET]);
 
 		FD_SET(tmp_socket, &writable);
 
@@ -1337,8 +1399,8 @@ object eusock_select(object x)
 
 	for (i=1; i <= socks_perr->length; i++) {
 		if (!IS_SOCKET(socks_perr->base[i]))
-			RTFatal("first argument to select must be a sequence of sockets");
-		tmp_socket = SEQ_PTR(socks_perr->base[i])->base[SOCK_SOCKET];
+			RTFatal("third argument to select must be a sequence of sockets");
+		tmp_socket = ATOM_INT_VAL(SEQ_PTR(socks_perr->base[i])->base[SOCK_SOCKET]);
 
 		FD_SET(tmp_socket, &errd);
 
@@ -1356,7 +1418,9 @@ object eusock_select(object x)
 
 	result_p = NewS1(socks_pall->length);
 	for (i=1; i <= socks_pall->length; i++) {
-		tmp_socket = SEQ_PTR(socks_pall->base[i])->base[SOCK_SOCKET];
+		if (!IS_SOCKET(socks_pall->base[i]))
+			RTFatal("fourth argument to select must be a sequence of sockets");
+		tmp_socket = ATOM_INT_VAL(SEQ_PTR(socks_pall->base[i])->base[SOCK_SOCKET]);
 
 		RefDS(socks_pall->base[i]);
 
@@ -1380,7 +1444,8 @@ object eusock_select(object x)
 object eusock_send(object x)
 {
 	SOCKET s;
-	int flags, result;
+	object flags;
+	int result;
 	char *buf;
 
 	s1_ptr buf_s;
@@ -1389,16 +1454,15 @@ object eusock_send(object x)
 		RTFatal("first argument to send must be a socket");
 	if (!IS_SEQUENCE(SEQ_PTR(x)->base[2]))
 		RTFatal("second argument to send must be a sequence");
-	if (!IS_ATOM_INT(SEQ_PTR(x)->base[3]))
+	if (!IS_ATOM_INT(flags = ATOM_TO_ATOM_INT(SEQ_PTR(x)->base[3])))
 		RTFatal("third argument to send must be an integer");
 
-	s     = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
+	s     = ATOM_INT_VAL(SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET]);
 	buf_s = SEQ_PTR(SEQ_PTR(x)->base[2]);
 	buf   = EMalloc(buf_s->length+1);
 	MakeCString(buf, SEQ_PTR(x)->base[2], buf_s->length + 1);
-	flags = SEQ_PTR(x)->base[3];
 
-	result = send(s, buf, buf_s->length, flags);
+	result = send(s, buf, buf_s->length, INT_VAL(flags));
 
 	EFree(buf);
 
@@ -1407,7 +1471,7 @@ object eusock_send(object x)
 		return eusock_geterror();
 	}
 
-	return result;
+	return MAKE_UINT(result);
 }
 
 /*
@@ -1417,18 +1481,17 @@ object eusock_send(object x)
 object eusock_recv(object x)
 {
 	SOCKET s;
-	int flags, result;
+	object flags, base1;
+	int result;
 	char buf[BUFF_SIZE];
 
-	if (!IS_SOCKET(SEQ_PTR(x)->base[1]))
+	if (!IS_SOCKET(base1 = SEQ_PTR(x)->base[1]))
 		RTFatal("first argument to recv must be a socket");
-	if (!IS_ATOM_INT(SEQ_PTR(x)->base[2]))
+	if (!IS_ATOM_INT(flags = ATOM_TO_ATOM_INT(SEQ_PTR(x)->base[2])))
 		RTFatal("second argument to recv must be an integer");
 
-	s     = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
-	flags = SEQ_PTR(x)->base[2];
-
-	result = recv(s, buf, BUFF_SIZE - 1, flags);
+	s     = ATOM_INT_VAL(SEQ_PTR(base1)->base[SOCK_SOCKET]);
+	result = recv(s, buf, BUFF_SIZE - 1, INT_VAL(flags));
 
 	if (result > 0) {
 		return NewSequence(buf, result);
@@ -1450,26 +1513,30 @@ object eusock_sendto(object x)
 	SOCKET s;
 	struct sockaddr_in addr;
 	int flags, port, result;
+	object xflags, xport;
 
+	
 	s1_ptr buf_s;
     s1_ptr ip_s;
 	char *buf, *ip;
 
+	xflags = ATOM_TO_ATOM_INT(SEQ_PTR(x)->base[3]);
+	xport = ATOM_TO_ATOM_INT(SEQ_PTR(x)->base[5]);
 	if (!IS_SOCKET(SEQ_PTR(x)->base[1]))
 		RTFatal("first argument to sendto must be a socket");
 	if (!IS_SEQUENCE(SEQ_PTR(x)->base[2]))
 		RTFatal("second argument to sendto must be a sequence");
-	if (!IS_ATOM_INT(SEQ_PTR(x)->base[3]))
+	if (!IS_ATOM_INT(xflags))
 		RTFatal("third argument to sendto must be an integer");
 	if (!IS_SEQUENCE(SEQ_PTR(x)->base[4]))
 		RTFatal("fourth argument to sendto must be a sequence");
-	if (!IS_ATOM_INT(SEQ_PTR(x)->base[5]))
+	if (!IS_ATOM_INT(xport))
 		RTFatal("fifth argument to sendto must be an integer");
 
-	s     = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
-	flags = SEQ_PTR(x)->base[3];
+	s     = ATOM_INT_VAL(SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET]);
+	flags = INT_VAL(xflags);
     ip_s  = SEQ_PTR(SEQ_PTR(x)->base[4]);
-    port  = SEQ_PTR(x)->base[5];
+    port  = INT_VAL(xport);
 
 	buf_s = SEQ_PTR(SEQ_PTR(x)->base[2]);
 	buf   = EMalloc(buf_s->length+1);
@@ -1504,11 +1571,11 @@ object eusock_recvfrom(object x)
 
 	if (!IS_SOCKET(SEQ_PTR(x)->base[1]))
 		RTFatal("first argument to recvfrom must be a socket");
-	if (!IS_ATOM_INT(SEQ_PTR(x)->base[2]))
+	flags = ATOM_TO_ATOM_INT(SEQ_PTR(x)->base[2]);
+	if (!IS_ATOM_INT(flags))
 		RTFatal("second argument to recvfrom must be an integer");
 
-	s     = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
-	flags = SEQ_PTR(x)->base[2];
+	s     = ATOM_INT_VAL(SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET]);
     addr_size = sizeof(addr);
 
 	result = recvfrom(s, buf, BUFF_SIZE - 1, flags, (struct sockaddr *) &addr, &addr_size);
@@ -1551,16 +1618,16 @@ object eusock_bind(object x)
 
 	eusock_ensure_init();
 
+	port    = ATOM_TO_ATOM_INT(SEQ_PTR(x)->base[3]);
 	if (!IS_SOCKET(SEQ_PTR(x)->base[1]))
 		RTFatal("first argument to bind must be a socket");
 	if (!IS_SEQUENCE(SEQ_PTR(x)->base[2]))
 		RTFatal("second argument to bind must be a sequence");
-	if (!IS_ATOM_INT(SEQ_PTR(x)->base[3]))
+	if (!IS_ATOM_INT(port))
 		RTFatal("third argument to bind must be an integer");
 
-	s       = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
+	s       = ATOM_INT_VAL(SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET]);
 	service = (struct sockaddr_in *)get_pos_int("bind", SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKADDR]);
-	port    = SEQ_PTR(x)->base[3];
 
 	address_s = SEQ_PTR(SEQ_PTR(x)->base[2]);
 	address   = EMalloc(address_s->length+1);
@@ -1588,17 +1655,16 @@ object eusock_bind(object x)
 object eusock_listen(object x)
 {
 	SOCKET s;
-	int backlog;
+	object backlog;
 
 	if (!IS_SOCKET(SEQ_PTR(x)->base[1]))
 		RTFatal("first argument to listen must be a socket");
-	if (!IS_ATOM_INT(SEQ_PTR(x)->base[2]))
+	if (!IS_ATOM_INT(backlog = ATOM_TO_ATOM_INT(SEQ_PTR(x)->base[2])))
 		RTFatal("second argument to listen must be an integer");
 
-	s       = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
-	backlog = SEQ_PTR(x)->base[2];
+	s       = ATOM_INT_VAL(SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET]);
 
-	if (listen(s, backlog) == SOCKET_ERROR)
+	if (listen(s, INT_VAL(backlog)) == SOCKET_ERROR)
 	{
 		return eusock_geterror();
 	}
@@ -1621,7 +1687,7 @@ object eusock_accept(object x)
 	if (!IS_SOCKET(SEQ_PTR(x)->base[1]))
 		RTFatal("first argument to accept must be a socket");
 
-	server = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
+	server = ATOM_INT_VAL(SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET]);
 
 	addr_len = sizeof(addr);
 	client   = accept(server, (struct sockaddr *)&addr, &addr_len);
@@ -1632,7 +1698,7 @@ object eusock_accept(object x)
 	}
 
 	client_sock_p = NewS1(2);
-	client_sock_p->base[1] = client;
+	client_sock_p->base[1] = MAKE_UINT(client);
 	client_sock_p->base[2] = 0;
 
 	client_seq = NewS1(2);
@@ -1649,27 +1715,37 @@ object eusock_accept(object x)
 object eusock_getsockopt(object x)
 {
 	SOCKET s;
-	int level, optname, optval;
-	socklen_t optlen;
-
+	object level, optname;
+	int optval;
+	size_t optlen;
+	object_ptr base;
+	
+	base = SEQ_PTR(x)->base;
 	if (!IS_SOCKET(SEQ_PTR(x)->base[1]))
 		RTFatal("first argument to get_option must be a socket");
-	if (!IS_ATOM_INT(SEQ_PTR(x)->base[2]))
+	if (!IS_ATOM_INT(level = ATOM_TO_ATOM_INT(SEQ_PTR(x)->base[2])))
 		RTFatal("second argument to get_option must be an integer");
-	if (!IS_ATOM_INT(SEQ_PTR(x)->base[3]))
+	if (!IS_ATOM_INT(optname = ATOM_TO_ATOM_INT(SEQ_PTR(x)->base[3])))
 		RTFatal("third argument to get_option must be an integer");
 
 	optlen  = sizeof(int);
-	s       = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
-	level   = SEQ_PTR(x)->base[2];
-	optname = SEQ_PTR(x)->base[3];
+	s       = ATOM_INT_VAL(SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET]);
 
 	if (getsockopt(s, level, optname, (char *) &optval, &optlen) == SOCKET_ERROR)
 	{
 		return eusock_geterror();
 	}
+	
+	switch (optlen) {
+	case 1:
+		optval = optval & 0xFF;
+		break;
+	case 2:
+		optval = optval & 0xFFFF;
+		break;
+	}
 
-	return optval;
+	return MAKE_UINT(optval);
 }
 
 /*
@@ -1679,28 +1755,28 @@ object eusock_getsockopt(object x)
 object eusock_setsockopt(object x)
 {
 	SOCKET s;
-	int level, optname, optlen, optval;
+	object base1;
+	object_ptr base;
+	object level, optname, optval;
+	size_t optlen;
 
-	if (!IS_SOCKET(SEQ_PTR(x)->base[1]))
+	if (!IS_SOCKET(base1 = (base = SEQ_PTR(x)->base)[1]))
 		RTFatal("first argument to set_option must be a socket");
-	if (!IS_ATOM_INT(SEQ_PTR(x)->base[2]))
+	s       = ATOM_INT_VAL(SEQ_PTR(base1)->base[SOCK_SOCKET]);
+	if (!IS_ATOM_INT(ATOM_TO_ATOM_INT(level = base[2])))
 		RTFatal("second argument to set_option must be an integer");
-	if (!IS_ATOM_INT(SEQ_PTR(x)->base[3]))
+	if (!IS_ATOM_INT(optname = ATOM_TO_ATOM_INT(base[3])))
 		RTFatal("third argument to set_option must be an integer");
-	if (!IS_ATOM_INT(SEQ_PTR(x)->base[4]))
+	if (!IS_ATOM_INT(optval = ATOM_TO_ATOM_INT(base[4])))
 		RTFatal("forth argument to set_option must be an integer");
 
 	optlen  = sizeof(int);
-	s       = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
-	level   = SEQ_PTR(x)->base[2];
-	optname = SEQ_PTR(x)->base[3];
-	optval  = SEQ_PTR(x)->base[4];
 
 	if (setsockopt(s, level, optname, (char *) &optval, optlen) == SOCKET_ERROR)
 	{
 		return eusock_geterror();
 	}
 
-	return optval;
+	return MAKE_INT(optval);
 }
 
