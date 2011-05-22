@@ -74,7 +74,7 @@ public constant
 	SQRTE        = 1.64872_12707_00128_14684,
 	$
 	
-ifdef EU40 then
+ifdef EU4_0 then
 	public constant
 		--**
 		-- Positive Infinity
