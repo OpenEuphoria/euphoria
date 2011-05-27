@@ -2770,19 +2770,21 @@ procedure opIF()
 
 	elsif ObjValue(Code[pc+1]) = NOVALUE or
 		  forward_branch_into(pc+3, Code[pc+2]-1) then
-		if ObjValue(Code[pc+1]) != 0 then  -- non-zero handled above
+		object obj_value =  ObjValue(Code[pc+1])
+		if obj_value != 0 then  -- non-zero handled above
 			c_stmt("if (@ == 0)\n", Code[pc+1])
+			c_stmt0( "{\n" )
 		end if
-		c_stmt0( "{\n" )
-			dispose_temp( Code[pc+1], 0, 0 )
-			Goto(Code[pc+2])
-		c_stmt0( "}\n" )
-		if ObjValue(Code[pc+1]) != 0 then  -- non-zero handled above
-			c_stmt0( "else\n" )
-		end if
-		c_stmt0( "{\n" )
+		
+		dispose_temp( Code[pc+1], 0, 0 )
+		Goto(Code[pc+2])
+		
+		if obj_value != 0 then  -- non-zero handled above
+			c_stmt0( "}\n" )
+			c_stmt0( "else{\n" )
 			dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
-		c_stmt0( "}\n" )
+			c_stmt0( "}\n" )
+		end if
 		pc += 3
 
 	elsif pc < Code[pc+2] then  -- it's 0, and this is a forward IF
