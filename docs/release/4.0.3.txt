@@ -10,6 +10,9 @@
 * [[ticket:661]] fixed translator linking to use comctl32 library on windows
 * [[ticket:663]] Translator ##-plat## switch now uses ##WINDOWS## instead of ##WIN##.
 * [[ticket:666]] fixed to allow integers stored as doubles in be_sockets.c.
+* [[ticket:654]] removed internal use-only standard library routines and constants from the user documentation.
+
+
 
 === Enhancements
 
