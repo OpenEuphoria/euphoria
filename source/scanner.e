@@ -8,6 +8,10 @@ elsedef
 	without type_check
 end ifdef
 
+ifdef EU4_0 and not E64 then
+	with define E32
+end ifdef
+
 include std/error.e
 include std/filesys.e
 include std/get.e
