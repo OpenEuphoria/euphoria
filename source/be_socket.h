@@ -10,7 +10,7 @@
         #include <ws2tcpip.h>
     #endif // AF_INET
 	typedef int socklen_t;
-#else // ifdef EWINDOWS
+#else // ifdef EWINDOWS else
     #include <sys/types.h>
     #include <sys/socket.h>
     #include <netdb.h>

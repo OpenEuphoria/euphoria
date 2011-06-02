@@ -17,7 +17,6 @@
 #include "be_runtime.h"
 #include "be_socket.h"
 
-
 /* Converts any atom to an integer object if the atom's value can be expressed as such, otherwise return unchanged. */
 object ATOM_TO_ATOM_INT( object X ) {
 	if ( IS_ATOM( X ) && !IS_ATOM_INT( X ) ) { 
@@ -653,8 +652,186 @@ int eusock_getsock_option(int x)
 }
 
 #ifdef EWINDOWS
-    int eusock_wsastarted = 0;
 
+ 	#ifndef WSAAPI
+		#define WSAAPI PASCAL
+	#endif
+    HMODULE eusock_wsastarted = NULL;
+    
+    typedef int WINAPI (*WSAStartup_fntype)(WORD,LPWSADATA);
+    WSAStartup_fntype WSAStartupPtr;
+    
+    typedef struct servent* FAR WINAPI (*getservbyname_fntype)(
+	 const char *, const char *);
+	getservbyname_fntype getservbynamePtr;
+	
+	typedef struct servent* FAR WINAPI (*getservbyport_fntype)(int,const char *);
+	getservbyport_fntype getservbyportPtr;
+	
+	typedef struct hostent* FAR WINAPI (*gethostbyname_fntype)(const char *);
+	gethostbyname_fntype gethostbynamePtr;
+	
+	typedef struct hostent* FAR WINAPI (*gethostbyaddr_fntype)(
+	  __in  const char *addr,
+	  __in  int len,
+	  __in  int type
+	);
+	gethostbyaddr_fntype gethostbyaddrPtr;
+	
+	typedef SOCKET WSAAPI (*socket_fntype)(
+	  __in  int af,
+	  __in  int type,
+	  __in  int protocol
+	);
+	socket_fntype socketPtr;
+	
+	typedef int WSAAPI (*closesocket_fntype)(
+	  __in  SOCKET s
+	);	
+	closesocket_fntype closesocketPtr;
+	
+	typedef int WSAAPI (*shutdown_fntype)(
+	  SOCKET s,
+	  int how
+	);
+	shutdown_fntype shutdownPtr;
+	
+	typedef int WSAAPI (*connect_fntype)(
+	  SOCKET s,
+	  const struct sockaddr FAR* name,
+	  int namelen
+	);
+	connect_fntype connectPtr;
+	
+	typedef int WSAAPI (*select_fntype)(int nfds,
+	  fd_set FAR* readfds,
+	  fd_set FAR* writefds,
+	  fd_set FAR* exceptfds,
+	  const struct timeval FAR* timeout
+	);	
+	select_fntype selectPtr;
+	
+    typedef int WSAAPI (*recvfrom_fntype)(
+	  SOCKET s,
+	  char FAR* buf,
+	  int len,
+	  int flags,
+	  struct sockaddr FAR* from,
+	  int FAR* fromlen
+	  );
+	recvfrom_fntype recvfromPtr;
+	
+	typedef int WSAAPI (*bind_fntype)(
+	  SOCKET s,
+	  const struct sockaddr FAR* name,
+	  int namelen
+	);
+	bind_fntype bindPtr;
+	
+	typedef int WSAAPI (*listen_fntype)(
+	  SOCKET s,
+	  int backlog
+	);
+	listen_fntype listenPtr;
+	
+	typedef SOCKET WSAAPI (*accept_fntype)(
+	  SOCKET s,
+	  struct sockaddr FAR* addr,
+	  int FAR* addrlen
+	);	
+	accept_fntype acceptPtr;
+	
+	typedef int WSAAPI (*setsockopt_fntype)(
+	  SOCKET s,
+	  int level,
+	  int optname,
+	  const char FAR* optval,
+	  int optlen
+	);
+	setsockopt_fntype setsockoptPtr;
+	
+	typedef int WSAAPI (*getsockopt_fntype)(
+	  SOCKET s,
+	  int level,
+	  int optname,
+	  char FAR* optval,
+	  int FAR* optlen
+	);
+	getsockopt_fntype getsockoptPtr;
+
+	typedef int  WSAAPI (*WSACleanup_fntype) (void); 
+	WSACleanup_fntype WSACleanupPtr;
+	
+	typedef int WSAAPI (*sendto_fntype)(
+	  SOCKET s,
+	  const char FAR* buf, 
+	  int len,
+	  int flags,
+	  const struct sockaddr FAR* to,
+	  int tolen
+	);
+	sendto_fntype sendtoPtr;
+	WSACleanup_fntype  WSAGetLastErrorPtr;
+	
+	#ifndef __WATCOMC__
+		typedef int (*WSAFDIsSet_fntype)(
+			SOCKET fd,
+			fd_set *set
+		);
+		WSAFDIsSet_fntype WSAFDIsSetPtr;
+	#endif
+	
+	typedef u_short WSAAPI (*htons_fntype)(
+		__in  u_short hostshort
+	);
+	htons_fntype htonsPtr;
+	
+	typedef 	u_short WSAAPI (*ntohs_fntype)(
+	  __in  u_short netshort
+	);	
+	ntohs_fntype ntohsPtr;
+	
+	typedef char* FAR WSAAPI (*inet_ntoa_fntype)(
+	  __in  struct   in_addr in
+	);
+	inet_ntoa_fntype inet_ntoaPtr;
+	
+	typedef unsigned long WSAAPI (*inet_addr_fntype)(
+	  __in  const char *cp
+	);
+	inet_addr_fntype inet_addrPtr;
+	
+	typedef int WSAAPI (*send_fntype)(
+	  __in  SOCKET s,
+	  __in  const char *buf,
+	  __in  int len,
+	  __in  int flags
+	);
+	send_fntype sendPtr;
+	
+	typedef int WSAAPI (*recv_fntype)(
+	  __in   SOCKET s,
+	  __out  char *buf,
+	  __in   int len,
+	  __in   int flags
+	);
+	recv_fntype recvPtr;	
+
+	#if defined(__WATCOMC__)
+		/* must be inlined in the header file,
+		  for this always tries to get linked in.*/
+		int __WSAFDIsSet(
+				SOCKET fd,
+				fd_set *set) {
+			int ecx = set->fd_count;
+			int eax = 0;
+			while (ecx--) {
+				eax += (fd == set->fd_array[ecx]);
+			}
+			return eax;
+		}
+	#endif
+	
     void eusock_wsastart()
     {
     	WORD wVersionRequested;
@@ -662,26 +839,177 @@ int eusock_getsock_option(int x)
     	int err;
 
     	wVersionRequested = MAKEWORD(2,2);
-    	err = WSAStartup(wVersionRequested, &wsaData);
+    	eusock_wsastarted = LoadLibrary("ws2_32.dll");
+    	if (eusock_wsastarted == NULL) {
+    		RTFatal("Could not load library ws2_32.dll");
+    		return;
+    	}
+    	
+		WSAStartupPtr = (WSAStartup_fntype)GetProcAddress(eusock_wsastarted, "WSAStartup");
+		if (WSAStartupPtr == NULL) {
+			RTFatal("Could not load routine WSAStartup.");
+		}
+		
+		WSACleanupPtr = (WSACleanup_fntype)GetProcAddress(eusock_wsastarted, "WSACleanup");
+		if (WSACleanupPtr == NULL) {
+			RTFatal("Could not load routine WSACleanup.");
+		}
+
+		WSAGetLastErrorPtr = (WSACleanup_fntype)GetProcAddress(eusock_wsastarted, "WSAGetLastError");
+		if (WSAGetLastErrorPtr == NULL) {
+			RTFatal("Could not load routine WSAGetLastError.");
+		}
+		
+#if !defined(__WATCOMC__)	
+		WSAFDIsSetPtr = (WSAFDIsSet_fntype)GetProcAddress(eusock_wsastarted, "WSAFDIsSet");
+		if (WSAFDIsSetPtr == NULL) {
+			RTFatal("Could not load routine WSAFDIsSet.");
+		}
+#endif
+		
+		socketPtr = (socket_fntype)GetProcAddress(eusock_wsastarted, "socket");
+		if (socketPtr == NULL) {
+			RTFatal("Could not load routine socket.");
+		}
+		shutdownPtr = (shutdown_fntype)GetProcAddress(eusock_wsastarted, "shutdown");
+		if (shutdownPtr == NULL) {
+			RTFatal("Could not load routine shutdown.");
+		}
+		selectPtr = (select_fntype)GetProcAddress(eusock_wsastarted, "select");
+		if (selectPtr == NULL) {
+			RTFatal("Could not load routine select.");
+		}
+		setsockoptPtr = (setsockopt_fntype)GetProcAddress(eusock_wsastarted, "setsockopt");
+		if (setsockoptPtr == NULL) {
+			RTFatal("Could not load routine setsockopt.");
+		}
+		sendtoPtr = (sendto_fntype)GetProcAddress(eusock_wsastarted, "sendto");
+		if (sendtoPtr == NULL) {
+			RTFatal("Could not load routine sendto.");
+		}	
+		sendPtr = (send_fntype)GetProcAddress(eusock_wsastarted, "send");
+		if (sendPtr == NULL) {
+			RTFatal("Could not load routine send.");
+		}
+		recvfromPtr = (recvfrom_fntype)GetProcAddress(eusock_wsastarted, "recvfrom");
+		if (recvfromPtr == NULL) {
+			RTFatal("Could not load routine recvfrom.");
+		}
+		recvPtr = (recv_fntype)GetProcAddress(eusock_wsastarted, "recv");
+		if (recvPtr == NULL) {
+			RTFatal("Could not load routine recv.");
+		}
+		ntohsPtr = (htons_fntype)GetProcAddress(eusock_wsastarted, "ntohs");
+		if (ntohsPtr == NULL) {
+			RTFatal("Could not load routine ntohs.");
+		}		
+		listenPtr = (listen_fntype)GetProcAddress(eusock_wsastarted, "listen");
+		if (listenPtr == NULL) {
+			RTFatal("Could not load routine listen.");
+		}		
+		inet_addrPtr = (inet_addr_fntype)GetProcAddress(eusock_wsastarted, "inet_addr");
+		if (inet_addrPtr == NULL) {
+			RTFatal("Could not load routine inet_addr.");
+		}
+		inet_ntoaPtr = (inet_ntoa_fntype)GetProcAddress(eusock_wsastarted, "inet_ntoa");
+		if (inet_ntoaPtr == NULL) {
+			RTFatal("Could not load routine inet_ntoa.");
+		}
+		htonsPtr = (ntohs_fntype)GetProcAddress(eusock_wsastarted, "htons");
+		if (htonsPtr == NULL) {
+			RTFatal("Could not load routine ntohs.");
+		}
+		getsockoptPtr = (getsockopt_fntype)GetProcAddress(eusock_wsastarted, "getsockopt");
+		if (getsockoptPtr == NULL) {
+			RTFatal("Could not load routine getsockopt.");
+		}
+		getservbynamePtr = (getservbyname_fntype)GetProcAddress(eusock_wsastarted, "getservbyname");
+		if (getservbynamePtr == NULL) {
+			RTFatal("Could not load routine getservbyname.");
+		}                                 
+		getservbyportPtr = (getservbyport_fntype)GetProcAddress(eusock_wsastarted, "getservbyport");
+		if (getservbyportPtr == NULL) {
+			RTFatal("Could not load routine getservbyport.");
+		}
+		gethostbynamePtr = (gethostbyname_fntype)GetProcAddress(eusock_wsastarted, "gethostbyname");
+		if (gethostbynamePtr == NULL) {
+			RTFatal("Could not load routine gethostbyname.");
+		}
+		gethostbyaddrPtr = (gethostbyaddr_fntype)GetProcAddress(eusock_wsastarted, "gethostbyaddr");
+		if (gethostbyaddrPtr == NULL) {
+			RTFatal("Could not load routine gethostbyaddr.");
+		}
+		closesocketPtr = (closesocket_fntype)GetProcAddress(eusock_wsastarted, "closesocket");
+		if (closesocketPtr == NULL) {
+			RTFatal("Could not load routine closesocket.");
+		}
+		connectPtr = (connect_fntype)GetProcAddress(eusock_wsastarted, "connect");
+		if (connectPtr == NULL) {
+			RTFatal("Could not load routine connect.");
+		}
+		bindPtr = (bind_fntype)GetProcAddress(eusock_wsastarted, "bind");
+		if (bindPtr == NULL) {
+			RTFatal("Could not load routine bind.");
+		}
+		acceptPtr = (accept_fntype)GetProcAddress(eusock_wsastarted, "accept");
+		if (acceptPtr == NULL) {
+			RTFatal("Could not load routine accept.");
+		}
+		
+    	err = (*WSAStartupPtr)(wVersionRequested, &wsaData);
     	if (err != 0)
     	{
     		RTFatal("WSAStartup failed with error: %d", err);
     		return;
     	}
 
-    	eusock_wsastarted = 1;
     }
+
+// override functions with Ptr equivalents    
+    
+#define WSAStartup (*WSAStartupPtr)
+#define WSACleanup (*WSACleanupPtr)
+#define WSAGetLastError (*WSAGetLastErrorPtr)
+#define getservbyname (*getservbynamePtr)
+#define getservbyport (*getservbyportPtr)
+#define gethostbyname (*gethostbynamePtr)
+#define gethostbyaddr (*gethostbyaddrPtr)
+#define socket (*socketPtr)
+#define closesocket (*closesocketPtr)
+#define shutdown (*shutdownPtr)
+#define connect (*connectPtr)
+#define select (*selectPtr)
+#define sendto (*sendtoPtr)
+#define recvfrom (*recvfromPtr)
+#define bind (*bindPtr)
+#define listen (*listenPtr)
+#define accept (*acceptPtr)
+#define getsockopt (*getsockoptPtr)
+#define setsockopt (*setsockoptPtr)
+#define htons (*htonsPtr)
+#define ntohs (*ntohsPtr)
+#define inet_ntoa (*inet_ntoaPtr)
+#define inet_addr (*inet_addrPtr)
+#define send (*sendPtr)
+#define recv (*recvPtr)
+#if !defined(__WATCOMC__)
+#define WSAFDIsSet (*WSAFDIsSetPtr)
+#endif
 
     void eusock_wsacleanup()
     {
     	WSACleanup();
+    	FreeLibrary(eusock_wsastarted);
+    	eusock_wsastarted = NULL;
     }
 
     int eusock_geterror()
     {
-		int code = WSAGetLastError();
-
-		switch (WSAGetLastError()) {
+		int code;
+		if (eusock_wsastarted == NULL) 
+			eusock_wsastart();
+		code = WSAGetLastError();
+		switch (code) {
 			case WSANOTINITIALISED:
 				return ERR_NOTINITIALISED;
 			case WSAENETDOWN:
@@ -749,9 +1077,9 @@ int eusock_getsock_option(int x)
 		};
     }
 
-    #define eusock_ensure_init() if (eusock_wsastarted == 0) eusock_wsastart();
+    #define eusock_ensure_init() if (eusock_wsastarted == NULL) eusock_wsastart();
 
-#else // ifdef EWINDOWS
+#else // ifdef EWINDOWS else
     #include <errno.h>
     int eusock_geterror()
     {
@@ -993,7 +1321,7 @@ object eusock_getservbyname(object x)
 	result_s = NewS1(3); // official name, port
 	result_s->base[1] = NewString(ent->s_name);
 	result_s->base[2] = NewString(ent->s_proto);
-	result_s->base[3] = MAKE_INT(ntohs(ent->s_port));
+	result_s->base[3] = INT_VAL(ntohs(ent->s_port));
 
 	return MAKE_SEQ(result_s);
 }
@@ -1056,7 +1384,9 @@ object eusock_build_hostent(struct hostent *ent)
 	s1_ptr aliases_s, ips_s, result_s;
 
 	struct in_addr addr;
-
+	
+	eusock_ensure_init();
+	
 	if (ent == NULL)
 	{
 		return eusock_geterror();
@@ -1243,6 +1573,7 @@ object eusock_close(object x)
 
 	s = ATOM_INT_VAL(SEQ_PTR(sx)->base[SOCK_SOCKET]);
 
+	eusock_ensure_init();
 	if (closesocket(s) == SOCKET_ERROR)
 	{
 		return eusock_geterror();
@@ -1409,6 +1740,7 @@ object eusock_select(object x)
 	tv_timeout.tv_sec = timeout_sec;
 	tv_timeout.tv_usec = timeout_microsecs;
 
+	eusock_ensure_init();
 	result = select(max_sock + 1, &readable, &writable, &errd, &tv_timeout);
 
 	if (result == -1) {
@@ -1547,6 +1879,7 @@ object eusock_sendto(object x)
 	addr.sin_port   = htons(port);
     addr.sin_addr.s_addr = inet_addr(ip);
 
+	eusock_ensure_init();
 	result = sendto(s, buf, buf_s->length, flags, (struct sockaddr*) &addr, sizeof(addr));
 
 	EFree(buf);
@@ -1577,6 +1910,7 @@ object eusock_recvfrom(object x)
 	s     = ATOM_INT_VAL(SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET]);
     addr_size = sizeof(addr);
 
+	eusock_ensure_init();
 	result = recvfrom(s, buf, BUFF_SIZE - 1, flags, (struct sockaddr *) &addr, &addr_size);
 
 	if (result > 0) {
@@ -1689,6 +2023,7 @@ object eusock_accept(object x)
 	server = ATOM_INT_VAL(SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET]);
 
 	addr_len = sizeof(addr);
+	eusock_ensure_init();
 	client   = accept(server, (struct sockaddr *)&addr, &addr_len);
 
 	if (client == INVALID_SOCKET)
@@ -1730,6 +2065,7 @@ object eusock_getsockopt(object x)
 	optlen  = sizeof(int);
 	s       = ATOM_INT_VAL(SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET]);
 
+	eusock_ensure_init();
 	if (getsockopt(s, level, optname, (char *) &optval, &optlen) == SOCKET_ERROR)
 	{
 		return eusock_geterror();
@@ -1771,6 +2107,7 @@ object eusock_setsockopt(object x)
 
 	optlen  = sizeof(int);
 
+	eusock_ensure_init();
 	if (setsockopt(s, level, optname, (char *) &optval, optlen) == SOCKET_ERROR)
 	{
 		return eusock_geterror();
