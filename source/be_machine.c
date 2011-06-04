@@ -52,6 +52,15 @@
 #define NAME_MAX 255
 #endif
 
+// This is a workaround for ARM not recognizing INFINITY, which is included math.h
+// but is not recognized. This seems to be a bug/issue with Scratchbox and Maemo SDK
+#if ARCH == ARM
+#ifndef INFINITY
+#define INFINITY (1.0/0.0)
+#endif 
+#endif
+
+
 #include <sys/mman.h>
 
 #include <dirent.h>
@@ -2160,6 +2169,10 @@ object DefineC(object x)
 	return c_routine_next++;
 }
 
+#if ARCH == ARM
+        #define CALLBACK_SIZE (129)
+#else
+
 #ifdef EOSX
 	#define CALLBACK_SIZE (108)
 #else
@@ -2176,6 +2189,7 @@ object DefineC(object x)
 	#else
 		#define CALLBACK_SIZE (80)
 	#endif
+#endif
 #endif
 
 #define EXECUTABLE_ALIGNMENT (4)
@@ -3163,8 +3177,8 @@ object machine(object opcode, object x)
 				
 			case M_F80_TO_A:
 				return float_to_atom( x, 10 );
-				
-			case M_INFINITY:
+			
+			case M_INFINITY: 
 				return NewDouble( (eudouble) INFINITY );
 
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */

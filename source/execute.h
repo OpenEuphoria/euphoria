@@ -5,6 +5,9 @@
 /*****************************************************************************/
 #ifndef EXECUTE_H_
 #define EXECUTE_H_
+#define ARM 0xA 
+#define ix86 86 
+#define ix86_64 8664
 #include <stdint.h>
 
 		  /* Euphoria object format v1.2 and later */

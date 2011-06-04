@@ -244,27 +244,31 @@ function get_number()
 		-- get exponent sign
 		get_ch()
 		number_string &= ch
+		sign = 1
 		if ch = '-' then
 			get_ch()
+			sign = -1
 			number_string &= ch
 		elsif ch = '+' then
 			get_ch()
 			number_string &= ch
 		end if
 		
+		e_mag = 0
 		-- get exponent magnitude
 		if ch >= '0' and ch <= '9' then
-			
 			while ch >= '0' and ch <= '9' with entry do
+				e_mag *= 10
+				e_mag = e_mag + (ch - '0') 
 				number_string &= ch
-			entry
 				get_ch()
 			end while
 		else
 			return {GET_FAIL, 0} -- no exponent
 		end if
 		
-		mantissa = scientific_to_atom( number_string )
+		-- K.I.S.S.
+		mantissa *= power(10,sign * e_mag)
 	end if
 
 	return {GET_SUCCESS, mantissa}
@@ -296,7 +300,6 @@ function Get()
 			if ch=-1 or ch='}' then -- '}' is expected only in the "{--\n}" case
 				return {GET_NOTHING, 0} -- just a comment
 			end if
-
 		elsif ch = '{' then
 			-- process a sequence
 			s = {}

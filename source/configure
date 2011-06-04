@@ -40,6 +40,10 @@ MFLAG=-m32
 EFLAG=E32
 if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
 	echo ARCH=ix86
+	ARCH=ix86
+	# gcc doesn't seem to like -m32 on 32-bit machines when there are no 64-bit machines 
+	# with an instruction super set of the 32-bit machine.
+	MFLAG=
 elif echo "$UNAME_MACHINE" | grep "x86_64" > /dev/null; then
 	ARCH=ix86_64
 	MFLAG=-m64
@@ -252,11 +256,17 @@ while [ "$1" != "" ]; do
 				MFLAG=-m32
 				EFLAG=E32
 			;;
+			ARM)
+				ARCH=ARM
+				MFLAG=
+				EFLAG=E32
+			;;
 			*)
 				echo "Unknown Architecture '$VAL'"
 				echo "Supported Architectures:"
 				echo "   x86"
 				echo "   x86_64"
+				echo "   ARM"
 				exit
 		esac
 		;;
