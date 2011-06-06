@@ -12,7 +12,11 @@
 * [[ticket:666]] fixed to allow integers stored as doubles in be_sockets.c.
 * [[ticket:667]] Fixed optimization of translated IF when the conditions were known
   to be false.
+* [[ticket:665]] Fixed to load socket routines from its DLL only when needed.  Created programs 
+ will not need sockets installed except for programs created with GNU-C.
 
 === Enhancements
 
 * Minor changes to eutest output to read its console output
+* The interpreter and programs created with the translator (for WATCOM only) will now run on older versions of Windows that don't support
+  sockets unless this program //uses// sockets.
