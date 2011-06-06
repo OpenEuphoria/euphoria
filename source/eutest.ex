@@ -5,7 +5,9 @@
 -- TODO: Use templates (with defaults supplied) for HTML reports, thus
 --       users will be able to theme the unit test reports to fit into
 --       their own project pages. Further, it will simplify the output
---       code quite a bit
+--       code quite a bit.
+--
+--       Why not use style sheets instead?
 
 -- Increment version number with each release, not really with each change
 -- in the SCM

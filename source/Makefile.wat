@@ -276,6 +276,8 @@ DEBUGLINK = debug all
 TRANSDEBUG= -debug
 EUDEBUG=-D DEBUG
 LIBRARY_NAME=eudbg
+
+
 !else
 LIBRARY_NAME=eu
 !endif
@@ -429,14 +431,19 @@ CC = wcc386
 COMMON_FLAGS = $(DEBUGFLAG) 
 FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s  /I..\ $(EREL_TYPE)
 BE_FLAGS = /ol /zp4 /d$(OSFLAG) /5r /dEWATCOM  /dEOW $(SETALIGN4) $(NOASSERT) $(HEAPCHECKFLAG) $(%ERUNTIME) $(EXTRACHECKFLAG) $(EXTRASTATSFLAG)  $(MEMFLAG) $(EREL_TYPE)
-	
-library : .SYMBOLIC
+
+!ifndef OBJDIR
+$(LIBTARGET) : .always .recheck
     @echo ------- LIBRARY -----------
 	wmake -h $(LIBTARGET) OS=$(OS) OBJDIR=$(OS)libobj$(DEBUG) $(VARS) MANAGED_MEM=$(MANAGED_MEM)
 
-winlibrary : .SYMBOLIC
-    @echo ------- WINDOWS LIBRARY -----------
-	wmake -h OS=WINDOWS library  $(VARS)
+!ifeq DEBUG 1
+$(BUILDDIR)\eu.lib : $(LIBTARGET)
+	copy $(BUILDDIR)\eudbg.lib $(BUILDDIR)\eu.lib
+!endif
+
+library : $(LIBTARGET) .SYMBOLIC
+!endif
 
 !ifdef OBJDIR
 
@@ -499,7 +506,7 @@ testeu : .SYMBOLIC  $(TRUNKDIR)\tests\ecp.dat
 
 !endif #EUPHORIA
 
-test : .SYMBOLIC $(TRUNKDIR)\tests\ecp.dat
+test : .SYMBOLIC $(TRUNKDIR)\tests\ecp.dat $(BUILDDIR)\eubind.exe $(FULLBUILDDIR)\eu.$(LIBEXT) $(BUILDDIR)\eub.exe
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR) 
 	$(EUTEST) $(TEST_EXTRA) $(VERBOSE_TESTS) -i ..\include -cc wat -eui $(FULLBUILDDIR)\eui.exe -euc $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -bind $(FULLBUILDDIR)\eubind.exe -eub $(BUILDDIR)\eub.exe $(LIST) $(TESTFILE)
@@ -599,11 +606,10 @@ $(INCLUDE_DIR)\be_ver.h $(BUILDDIR)\ver.cache : $(INCLUDE_DIR) $(BUILDDIR)\mkver
 
 !ifdef OBJDIR
 
-$(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(CONFIG) eui.rc version_info.rc
+$(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(CONFIG) eui.rc version_info.rc
 	@%create $(BUILDDIR)\$(OBJDIR)\euiw.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc option quiet
 	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc option caseexact
-	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc library ws2_32
 	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc library comctl32
 	@for %i in ($(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc file %i
 	wlink  $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\euiw.lbc name $(BUILDDIR)\eui.exe
@@ -667,7 +673,6 @@ $(BUILDDIR)\euc.exe : $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_TRAN
 	@%create $(BUILDDIR)\$(OBJDIR)\euc.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\euc.lbc option quiet
 	@%append $(BUILDDIR)\$(OBJDIR)\euc.lbc option caseexact
-	@%append $(BUILDDIR)\$(OBJDIR)\euc.lbc library ws2_32
 	@for %i in ($(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\euc.lbc file %i
 	wlink $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\euc.lbc name $(BUILDDIR)\euc.exe
 	wrc -q -ad euc.rc $(BUILDDIR)\euc.exe
@@ -690,7 +695,6 @@ $(BUILDDIR)\eubw.exe :  $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_BACKEND_RUNNER_OBJECT
 	@%create $(BUILDDIR)\$(OBJDIR)\eub.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\eub.lbc option quiet
 	@%append $(BUILDDIR)\$(OBJDIR)\eub.lbc option caseexact
-	@%append $(BUILDDIR)\$(OBJDIR)\eub.lbc library ws2_32
 	@for %i in ($(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\eub.lbc file %i
 	wlink $(DEBUGLINK) SYS nt op maxe=2 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\eub.lbc name $(BUILDDIR)\eub.exe
 	wrc -q -ad eub.rc $(BUILDDIR)\eub.exe
@@ -717,20 +721,20 @@ be_rev.c : .recheck .always
 
 !ifdef EU_TARGET
 !ifdef OBJDIR
-$(BUILDDIR)\$(OBJDIR)\main-.c : $(EU_TARGET)ex $(BUILDDIR)\$(OBJDIR)\back $(EU_TRANSLATOR_FILES)
+$(BUILDDIR)\$(OBJDIR)\main-.c : $(EU_TARGET)ex $(EU_TRANSLATOR_FILES) $(BUILDDIR)\$(OBJDIR)
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\*.*
 	-$(RM) $(TRUNKDIR)\source\main-.h
 	-$(RM) $(TRUNKDIR)\source\init-.c
 	-$(RM) $(TRUNKDIR)\source\main-.c
 	cd  $(BUILDDIR)\$(OBJDIR)
-	$(EC) $(TRANSDEBUG) -nobuild $(TRANS_CC_FLAG) -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) -c $(TRUNKDIR)\source\eu.cfg $(TRUNKDIR)\source\$(EU_TARGET)ex
+	$(EC) $(TRANSDEBUG) -nobuild $(TRANS_CC_FLAG) -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) -c $(BUILDDIR)\eu.cfg $(TRUNKDIR)\source\$(EU_TARGET)ex $(LIBTARGET)
 	cd $(TRUNKDIR)\source
 
-$(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex  $(BUILDDIR)\$(OBJDIR)\back $(EU_TRANSLATOR_FILES)
+$(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex  $(BUILDDIR)\$(OBJDIR) $(EU_TRANSLATOR_FILES)
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\back\*.*
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\*.*
 	cd $(BUILDDIR)\$(OBJDIR)
-	$(EC)  $(TRANSDEBUG) -nobuild $(TRANS_CC_FLAG) -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) -c $(TRUNKDIR)\source\eu.cfg $(TRUNKDIR)\source\$(EU_TARGET)ex
+	$(EC)  $(TRANSDEBUG) -nobuild $(TRANS_CC_FLAG) -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) -c $(BUILDDIR)\eu.cfg $(TRUNKDIR)\source\$(EU_TARGET)ex
 	cd $(TRUNKDIR)\source
 !else
 # OBJDIR doesn't exist

@@ -453,6 +453,7 @@ function setup_build()
 			elsif TOSX then
 				l_flags &= " -lresolv"
 			elsif TWINDOWS then
+				/* We may be able to remove '-lws2_32' here now. */
 				l_flags &= " -mno-cygwin -lws2_32 -lcomctl32"				
 			end if
 			
@@ -486,7 +487,7 @@ function setup_build()
 				end if
 			end if
 
-			l_flags &= sprintf(" FILE %s LIBRARY ws2_32 LIBRARY comctl32", { user_library })
+			l_flags &= sprintf(" FILE %s LIBRARY comctl32", { user_library })
 			
 			
 			-- resource file, executable file
