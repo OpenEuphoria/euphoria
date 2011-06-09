@@ -75,6 +75,7 @@ IF "%1" =="--plat" (
 	GOTO EndLoop
 )
 IF "%1" =="--debug" (
+	set DEBUG=1
 	echo DEBUG=1 >> config.wat
 	GOTO EndLoop
 )
@@ -262,12 +263,6 @@ echo TRUNKDIR=%TRUNKDIR% >> config.wat
 echo BUILDDIR=%FULL_BUILDDIR% >> config.wat
 
 rem ============================================================
-rem Copy 32-bit manifest file
-rem ============================================================
-
-copy eu.manifest32 eu.manifest
-
-rem ============================================================
 rem Copy temporary .wat includes
 rem ============================================================
 
@@ -290,9 +285,13 @@ echo -eudir %TRUNKDIR% >> %BUILDDIR%\eu.cfg
 echo -d E32 >> %BUILDDIR%\eu.cfg
 echo [translate] >> %BUILDDIR%\eu.cfg
 echo -com %TRUNKDIR% >> %BUILDDIR%\eu.cfg
-echo -lib %BUILDDIR%\eu.lib >> %BUILDDIR%\eu.cfg
+if "%DEBUG%" =="1" (
+	echo -lib %FULL_BUILDDIR%\eudbg.lib >> %BUILDDIR%\eu.cfg
+) else (
+	echo -lib %FULL_BUILDDIR%\eu.lib >> %BUILDDIR%\eu.cfg
+)
 echo [bind]  >> %BUILDDIR%\eu.cfg
-echo -eub %BUILDDIR%\eub >> %BUILDDIR%\eu.cfg
+echo -eub %FULL_BUILDDIR%\eub >> %BUILDDIR%\eu.cfg
 
 copy %BUILDDIR%\eu.cfg %TRUNKDIR%\source\eu.cfg
 

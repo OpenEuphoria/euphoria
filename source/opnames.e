@@ -226,5 +226,6 @@ export constant opnames = {
 	"POKE_POINTER",
 	"PEEK_POINTER",
 	"SIZEOF",
+	"STARTLINE_BREAK",
 	$
 }

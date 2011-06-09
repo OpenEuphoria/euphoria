@@ -243,6 +243,7 @@ end ifdef
 ../include/euphoria/syncolor.e
 ../include/euphoria/tokenize.e
 ../include/std/unittest.e
+../include/euphoria/debug/debug.e
 
 # Windows Routines
 ../include/std/win32/msgbox.e

@@ -5,10 +5,13 @@
 /*****************************************************************************/
 #ifndef EXECUTE_H_
 #define EXECUTE_H_
+
 #define ARM 0xA 
 #define ix86 86 
 #define ix86_64 8664
 #include <stdint.h>
+
+#include "global.h"
 
 		  /* Euphoria object format v1.2 and later */
 
@@ -439,6 +442,8 @@ struct char_cell {
 #define M_A_TO_F80           100
 #define M_F80_TO_A           101
 #define M_INFINITY           102
+#define M_CALL_STACK         103
+#define M_INIT_DEBUGGER      104
 
 enum CLEANUP_TYPES {
 	CLEAN_UDT,

@@ -326,7 +326,7 @@ function setup_build()
 	sequence c_exe   = "", c_flags = "", l_exe   = "", l_flags = "", obj_ext = "",
 		exe_ext = "", l_flags_begin = "", rc_comp = "", l_names, l_ext, t_slash
 
-	if dll_option and length( user_pic_library ) then
+	if dll_option and length( user_pic_library ) > 0 then
 		user_library = user_pic_library
 	end if
 	
@@ -453,6 +453,7 @@ function setup_build()
 			elsif TOSX then
 				l_flags &= " -lresolv"
 			elsif TWINDOWS then
+				/* We may be able to remove '-lws2_32' here now. */
 				l_flags &= " -mno-cygwin -lws2_32 -lcomctl32"				
 			end if
 			
@@ -486,7 +487,7 @@ function setup_build()
 				end if
 			end if
 
-			l_flags &= sprintf(" FILE %s LIBRARY ws2_32 LIBRARY comctl32", { user_library })
+			l_flags &= sprintf(" FILE %s LIBRARY comctl32", { user_library })
 			
 			
 			-- resource file, executable file
