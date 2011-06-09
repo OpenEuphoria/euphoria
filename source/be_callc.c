@@ -37,7 +37,6 @@
  * if it neglects to increment the stack pointer. This means that
  * Watcom can call __cdecl (of other compilers but not it's own!)
  * and __stdcall routines, using the *same* __stdcall convention.
- */           
  */
  
 
