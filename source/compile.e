@@ -7244,14 +7244,14 @@ procedure BackEnd(atom ignore)
 				c_stmt0("\nint __stdcall _CRT_INIT (int, int, void *);\n")
 				c_stmt0("\n")
 			end if
-			c_stmt0("\nvoid EuInit()\n")  -- __declspec(dllexport) __stdcall
+			c_stmt0("\nint EuInit()\n")  -- __declspec(dllexport) __stdcall
 		else
 			c_stmt0("\nint __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine, int iCmdShow)\n")
 		end if
 
 	else -- TUNIX
 		if dll_option then
-			c_stmt0("\nvoid __attribute__ ((constructor)) eu_init()\n")
+			c_stmt0("\nint __attribute__ ((constructor)) eu_init()\n")
 		else
 			c_stmt0("\nint main(int argc, char *argv[])\n")
 		end if
