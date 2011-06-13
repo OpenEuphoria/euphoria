@@ -14,7 +14,8 @@
 * [[ticket:667]] Fixed optimization of translated IF when the conditions were known
   to be false.
 * [[ticket:676]] Changed search order for [[:locate_file]]
-
+* [[ticket:675]] Fixed machine crash in [[:splice]] when splicing an atom before beginning
+  of sequence or after end
 
 === Enhancements
 

@@ -4069,7 +4069,7 @@ void do_exec(int *start_pc)
 
 			case L_SPLICE:
 			deprintf("case L_SPLICE:");
-				splins = 1;
+				splins = !IS_ATOM( *(object_ptr) pc[2] );
 				goto spin;
 			case L_INSERT:
 			deprintf("case L_INSERT:");
