@@ -118,6 +118,7 @@ test_equal("insert() string", {'J','o',"h",'n'}, insert("Jon", "h", 3))
 test_equal("splice() integer sequence", {1,2,3}, splice({1,3}, 2, 2))
 test_equal("splice() string", "John", splice("Jon", "h", 3))
 test_equal("splice() string", "Johhhhhhhhhhn", splice("Jon", "hhhhhhhhhh", 3))
+test_equal("splice() integer after length", "abc ", splice("abc", 32, 4 ) )
 
 test_equal("patch() beyond target","John Doe  abc",patch("John Doe", "abc",11))
 test_equal("patch() overlap target right","John Doabc",patch("John Doe", "abc",8))
