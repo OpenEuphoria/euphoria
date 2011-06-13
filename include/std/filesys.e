@@ -2420,14 +2420,6 @@ public function locate_file(sequence filename, sequence search_list = {}, sequen
 				
 		search_list = append(search_list, ".." & SLASH)
 		
-		ifdef UNIX then
-			-- typical install directories:
-			search_list = append( search_list, "/usr/local/share/euphoria/bin/" )
-			search_list = append( search_list, "/usr/share/euphoria/bin/" )
-		end ifdef
-		
-		search_list &= include_paths(1)
-		
 		extra_paths = getenv("EUDIR")
 		if sequence(extra_paths) then
 			search_list = append(search_list, extra_paths & SLASH & "bin" & SLASH)
@@ -2440,6 +2432,15 @@ public function locate_file(sequence filename, sequence search_list = {}, sequen
 			search_list = append(search_list, extra_paths & SLASH & "etc" & SLASH)
 			search_list = append(search_list, extra_paths & SLASH & "data" & SLASH)
 		end if
+		
+		ifdef UNIX then
+			-- typical install directories:
+			search_list = append( search_list, "/usr/local/share/euphoria/bin/" )
+			search_list = append( search_list, "/usr/share/euphoria/bin/" )
+		end ifdef
+		
+		search_list &= include_paths(1)
+		
 		
 		extra_paths = getenv("USERPATH")
 		if sequence(extra_paths) then
