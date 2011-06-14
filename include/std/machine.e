@@ -1402,10 +1402,10 @@ end function
 -- See Also:
 --              [[:Executable Memory]], [[:allocate_code]], [[:free_code]], [[:c_proc]], [[:define_c_proc]]
 
-
 integer page_size = 0
 ifdef WINDOWS then
 
+	atom oldprotptr = machine_func(M_ALLOC, ADDRESS_LENGTH)
 	atom kernel_dll, memDLL_id, 
 		VirtualAlloc_rid, 
 		-- VirtualLock_rid, VirtualUnlock_rid,
@@ -1725,12 +1725,8 @@ public function allocate_protect( object data, memconst:valid_wordsize wordsize 
 	return eaddr
 end function
 
-ifdef WINDOWS then
-std_library_address oldprotptr = allocate_data(ADDRESS_LENGTH)
-end ifdef
-
 function local_allocate_protected_memory( integer s, integer first_protection )
-	ifdef WINDOWS then
+	ifdef WINDOWS then     
 		if dep_works() then
 			return eu:c_func(VirtualAlloc_rid, 
 				{ 0, s, or_bits( MEM_RESERVE, MEM_COMMIT ), first_protection })
@@ -1918,13 +1914,16 @@ public type std_library_address( object addr )
 	end ifdef
 end type
 
---**
+--****
+-- ==== valid_memory_protection_constant
+-- <eucode>
+-- include std/machine.e
+-- public type valid_memory_protection_constant(object a)
+-- </eucode>
 -- protection constants type
-public type valid_memory_protection_constant( object x )
-	return find( x, memconst:MEMORY_PROTECTION )
-end type
 
-                                              
+
+                                  
 --****
 -- ==== machine_addr
 -- <eucode>

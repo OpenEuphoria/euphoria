@@ -130,7 +130,7 @@ export constant MEMORY_PROTECTION = {
 
 --**
 -- @nodoc@
-export type valid_memory_protection_constant( object x )
+public type valid_memory_protection_constant( object x )
 	return find( x, MEMORY_PROTECTION )
 end type
 
