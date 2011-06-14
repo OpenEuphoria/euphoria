@@ -46,7 +46,7 @@ ifdef EU4_0 then
 	-- @nodoc@
 	public constant ADDRESS_LENGTH = 4
 elsedef
-	--
+	--**
 	-- @nodoc@
 	public constant ADDRESS_LENGTH = sizeof( dll:C_POINTER )
 end ifdef
