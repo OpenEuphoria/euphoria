@@ -783,6 +783,8 @@ int eusock_getsock_option(int x)
 			fd_set *set
 		);
 		WSAFDIsSet_fntype WSAFDIsSetPtr;
+		#undef FD_ISSET
+		#define FD_ISSET( p1, p2 )  (*WSAFDIsSetPtr)( (SOCKET)(p1), (fd_set *)(p2) )
 	#endif
 	
 	typedef u_short WSAAPI (*htons_fntype)(
@@ -865,7 +867,7 @@ int eusock_getsock_option(int x)
 		}
 		
 #if !defined(__WATCOMC__)	
-		WSAFDIsSetPtr = (WSAFDIsSet_fntype)GetProcAddress(eusock_wsastarted, "WSAFDIsSet");
+		WSAFDIsSetPtr = (WSAFDIsSet_fntype)GetProcAddress(eusock_wsastarted, "__WSAFDIsSet");
 		if (WSAFDIsSetPtr == NULL) {
 			RTFatal("Could not load routine WSAFDIsSet.");
 		}
