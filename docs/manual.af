@@ -228,8 +228,6 @@ end ifdef
 ../include/std/error.e
 ../include/std/eumem.e
 ../include/std/machine.e
-../include/std/memory.e
-../include/std/safe.e
 ../include/std/memconst.e
 
 # Graphic Routines
