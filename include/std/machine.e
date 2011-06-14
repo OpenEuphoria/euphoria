@@ -1734,8 +1734,9 @@ function local_allocate_protected_memory( integer s, integer first_protection )
 			return machine_func(M_ALLOC, PAGE_SIZE)
 		end if
 	elsifdef UNIX then
-		return machine_func( memconst:M_ALLOC, PAGE_SIZE)
---		return mmap( 0, PAGE_SIZE, protection, or_bits(MAP_PRIVATE,MAP_ANONYMOUS), -1, 0 )
+		atom ptr = c_func( MMAP, { 0, s, first_protection, or_bits( MAP_ANONYMOUS, MAP_PRIVATE ), -1, 0 })
+		integer fail = local_change_protection_on_protected_memory( ptr, s, first_protection )
+		return ptr
 	end ifdef
 end function
 
@@ -1750,8 +1751,11 @@ function local_change_protection_on_protected_memory( atom p, integer s, integer
 		end if
 		return 0
 	elsifdef UNIX then
-		return 0
---		return mprotect(p, s, new_protection)
+		integer fail = c_func( MPROTECT, { p, s, new_protection } )
+		if fail then
+				error:crash( "Could not change memory protection at 0x%x (%d bytes) to %d", { p, s, new_protection } )
+		end if
+		return fail
 	end ifdef
 end function
 

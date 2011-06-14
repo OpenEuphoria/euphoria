@@ -14,7 +14,7 @@ public include std/memconst.e
 -- biggest address on a 32-bit machine
 constant MAX_ADDR = power(2, 32)-1
 
-ifdef DATA_EXECUTE then
+ifdef DATA_EXECUTE or not WINDOWS  then
 	include std/machine.e
 end ifdef
 
@@ -63,12 +63,16 @@ end type
 --**
 -- @nodoc@
 export procedure deallocate(atom addr)
-
-	ifdef DATA_EXECUTE and WINDOWS then
-		if dep_works() then
-			c_func( VirtualFree_rid, { addr, 1, MEM_RELEASE } )
+	ifdef DATA_EXECUTE then
+		ifdef WINDOWS then
+			if dep_works() then
+				c_func( VirtualFree_rid, { addr, 1, MEM_RELEASE } )
+				return
+			end if
+		elsedef
+			c_func( MUNMAP, { addr, 1 } )
 			return
-		end if
+		end ifdef
 	end ifdef
    	machine_proc( memconst:M_FREE, addr)
 end procedure
@@ -180,6 +184,6 @@ public procedure free_code( atom addr, integer size, valid_wordsize wordsize = 1
 			machine_proc( memconst:M_FREE, addr)
 		end if
 	elsedef
-		machine_proc( memconst:M_FREE, addr)
+		c_func( MUNMAP, { addr, size * wordsize } )
 	end ifdef
 end procedure
