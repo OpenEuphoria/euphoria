@@ -656,6 +656,10 @@ int eusock_getsock_option(int x)
  	#ifndef WSAAPI
 		#define WSAAPI PASCAL
 	#endif
+	#ifdef __GNUC__
+		#define __in
+		#define __out
+	#endif
     HMODULE eusock_wsastarted = NULL;
     
     typedef int WINAPI (*WSAStartup_fntype)(WORD,LPWSADATA);
