@@ -68,15 +68,15 @@ object p = pipe:exec(interpreter & " " & build_commandline( option_switches() ) 
 if atom(p) then
 	test_fail("could not launch temporary server")
 else
-	-- Give the sever a second to actually launch
+	-- Give the server a second to actually launch
 	sleep(1)
-
-	for i = 1 to 4 do
+	integer maxwait = 10
+	for i = 1 to maxwait do
 		_ = sock:connect(socket, "127.0.0.1:"&port)
 		if _ = 0 then
 			exit
 		end if
-		if i = 4 then
+		if i = maxwait then
 			test_fail("connect to server")
 		else
 			if i = 1 then

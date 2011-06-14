@@ -2,6 +2,8 @@
 
 == Bug Fixes
 
+* [[ticket:665]] Fixed to load socket routines from its DLL only when needed.
+
 
 == Enhancements
 
