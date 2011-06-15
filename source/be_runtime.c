@@ -3518,7 +3518,12 @@ object Date()
 }
 
 void MakeCString(char *s, object pobj, int slen)
-/* make an atom or sequence into a C string */
+/** make an atom or sequence into a C string.  The length
+  * of the string will never write more than slen bytes as long as
+  * slen is positive.  At least one byte is written to s and
+  * s always becomes a valid string.
+  */
+
 /* N.B. caller must allow one extra for the null terminator */
 {
 	object_ptr elem;
