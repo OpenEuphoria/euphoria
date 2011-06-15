@@ -185,6 +185,10 @@ export integer force_build = 0
 
 export integer remove_output_dir = 0
 
+--**
+-- Use the -mno-cygwin flag with MinGW.
+export integer mno_cygwin = 0
+
 enum SETUP_CEXE, SETUP_CFLAGS, SETUP_LEXE, SETUP_LFLAGS, SETUP_OBJ_EXT, SETUP_EXE_EXT,
 	SETUP_LFLAGS_BEGIN, SETUP_RC_COMPILER
 
@@ -371,7 +375,12 @@ function setup_build()
 	end if -- user_library = 0
 
 	if TWINDOWS then
-		c_flags &= " /dEWINDOWS"
+		if compiler_type = COMPILER_WATCOM then
+			c_flags &= " /dEWINDOWS"
+		else
+			c_flags &= " -DEWINDOWS"
+		end if
+		
 		if dll_option then
 			exe_ext = ".dll"
 		else
@@ -413,7 +422,9 @@ function setup_build()
 				{ get_eucompiledir() })
 
 			if TWINDOWS then
-				c_flags &= " -mno-cygwin"
+				if mno_cygwin then
+					c_flags &= " -mno-cygwin"
+				end if
 
 				if not con_option then
 					c_flags &= " -mwindows"
@@ -433,7 +444,10 @@ function setup_build()
 			elsif TOSX then
 				l_flags &= " -lresolv"
 			elsif TWINDOWS then
-				l_flags &= " -mno-cygwin -lws2_32 -lcomctl32"				
+				if mno_cygwin then
+					l_flags &= " -mno-cygwin"
+				end if
+				l_flags &= " -lcomctl32"
 			end if
 			
 			-- input/output
