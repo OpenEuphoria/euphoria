@@ -368,6 +368,7 @@ constant StdErrMsgs = {
 	{350, "Unable to compile resource file: [1]"},
 	{351, "Use a non-standard library when building a shared object"},
 	{352, "External debugger"},
+	{353, "Use the -mno-cygwin flag with MinGW"},
 	$
 }
 

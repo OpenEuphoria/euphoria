@@ -95,6 +95,7 @@ sequence trans_opt_def = {
 	{ "makefile-partial", 0, GetMsgText(192,0), { } },
 	{ "silent",           0, GetMsgText(177,0), { } },
 	{ "verbose",	      0, GetMsgText(319,0), { } },
+	{ "no-cygwin",        0, GetMsgText(353,0), { } },
 	$
 }
 
@@ -252,6 +253,10 @@ export procedure transoptions()
 
 			case "o" then
 				exe_name[D_NAME] = val
+			
+			case "no-cygwin" then
+				mno_cygwin = 1
+			
 		end switch
 	end for
 

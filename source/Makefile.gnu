@@ -94,9 +94,9 @@ ifeq "$(EMINGW)" "1"
 	EBSDFLAG=-DEMINGW
 	LDLFLAG=-lcomctl32
 	SEDFLAG=-ri
-	EOSFLAGS=-mno-cygwin -mwindows
-	EOSFLAGSCONSOLE=-mno-cygwin
-	EOSPCREFLAGS=-mno-cygwin
+	EOSFLAGS=$(NO_CYGWIN) -mwindows
+	EOSFLAGSCONSOLE=$(NO_CYGWIN)
+	EOSPCREFLAGS=$(NO_CYGWIN)
 	EECUA=eu.a
 	EECUDBGA=eudbg.a
 	EECUSOA=euso.a
