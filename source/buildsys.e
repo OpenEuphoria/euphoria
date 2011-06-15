@@ -409,9 +409,9 @@ function setup_build()
 			obj_ext = "o"
 
 			if debug_option then
-				c_flags = " -g3"
+				c_flags &= " -g3"
 			else
-				c_flags = " -fomit-frame-pointer"
+				c_flags &= " -fomit-frame-pointer"
 			end if
 
 			if dll_option then
@@ -490,6 +490,7 @@ function setup_build()
 	end switch
 
 	if length(cflags) then
+		-- if the user supplied flags, use those instead
 		c_flags = cflags
 	end if
 
