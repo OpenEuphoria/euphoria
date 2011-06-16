@@ -7,9 +7,8 @@ operating system.
 
 === Windows
 
-
-*Be careful*, Windows 95 is no longer supported with EUPHORIA.  If Windows 95 has
-been patched with winsock it will work but Microsoft is no longer supplying this.
+All versions other than Windows 95 work without problems.  To use Windows 95, it must have Internet Explorer version 4 or higher
+installed (included in service pack 2.5).  To use the new socket functions you will also need fully patched versions of Windows.
 
 EUPHORIA is frequently tested on versions Windows XP, Vista, 7.
 
