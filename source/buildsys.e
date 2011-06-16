@@ -447,7 +447,6 @@ function setup_build()
 				if mno_cygwin then
 					l_flags &= " -mno-cygwin"
 				end if
-				l_flags &= " -lcomctl32"
 			end if
 			
 			-- input/output
@@ -480,7 +479,7 @@ function setup_build()
 				end if
 			end if
 
-			l_flags &= sprintf(" FILE %s LIBRARY ws2_32 LIBRARY comctl32", { user_library })
+			l_flags &= sprintf(" FILE %s LIBRARY ws2_32", { user_library })
 			
 			
 			-- resource file, executable file

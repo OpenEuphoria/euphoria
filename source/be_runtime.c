@@ -4782,11 +4782,19 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 	}
 }
 
+#ifdef EWINDOWS
+	typedef void WINAPI (*VfP_t)(void *);
+	typedef void WINAPI (*Vf_t)(void);	
+#endif
 void eu_startup(struct routine_list *rl, struct ns_list *nl, unsigned char **ip,
 				int cps, int clk)
 /* Initialize run-time data structures for the compiled user program. */
 {
-
+	#ifdef EWINDOWS
+		HMODULE Comctl32;
+		VfP_t initCommonControlsPtr;
+		Vf_t initCommonControls95Ptr;
+	#endif
 	rt00 = rl;
 	rt01 = nl;
 	rt02 = ip;
@@ -4810,9 +4818,19 @@ void eu_startup(struct routine_list *rl, struct ns_list *nl, unsigned char **ip,
 		 * comdlg32.dll is loaded, or GUI stuff won't work.
 		 */
 		INITCOMMONCONTROLSEX initcc;
-		initcc.dwSize = sizeof( INITCOMMONCONTROLSEX );
-		initcc.dwICC  = 0;
-		InitCommonControlsEx( &initcc );
+		Comctl32 = LoadLibrary("Comctl32.dll");
+		if (Comctl32 == NULL) {
+			RTFatal("Unable to initialize Common Windows Controls.");
+		}		
+		if (initCommonControlsPtr = (VfP_t)GetProcAddress(Comctl32, "InitCommonControlsEx")) {
+			initcc.dwSize = sizeof( INITCOMMONCONTROLSEX );
+			initcc.dwICC  = 0;
+			(*initCommonControlsPtr)( (void*)&initcc );
+		} else if (initCommonControls95Ptr = (VfP_t)GetProcAddress(Comctl32, "InitCommonControls")) {
+			(*initCommonControls95Ptr)();
+		} else {
+			RTFatal("Unable to initialize Common Windows Controls.");
+		}
 	}
 #endif
 	if (Argc)
