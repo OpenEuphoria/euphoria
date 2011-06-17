@@ -278,4 +278,16 @@ test_equal("not_bits int #1", repeat(1,32), int_to_bits(not_bits(0),32))
 
 test_equal("not_bits dbl #1", repeat(1,32), int_to_bits(not_bits(0.1),32))
 
+test_equal("larger_of #1", 15.4,    larger_of(10, 15.4))
+test_equal("larger_of #2", "dog",   larger_of("cat", "dog"))
+test_equal("larger_of #3", "cat",   larger_of("cat", 6))
+test_equal("larger_of #4", "apple", larger_of("apple", "apes"))
+test_equal("larger_of #5", 10,      larger_of(10, 10))
+
+test_equal("smaller_of #1", 10,     smaller_of(10, 15.4))
+test_equal("smaller_of #2", "cat",  smaller_of("cat", "dog"))
+test_equal("smaller_of #3", 6,      smaller_of("cat", 6))
+test_equal("smaller_of #4", "apes", smaller_of("apple", "apes"))
+test_equal("smaller_of #5", 10,     smaller_of(10, 10))
+
 test_report()
