@@ -420,9 +420,9 @@ function setup_build()
 			obj_ext = "o"
 
 			if debug_option then
-				c_flags = " -g3"
+				c_flags &= " -g3"
 			else
-				c_flags = " -fomit-frame-pointer"
+				c_flags &= " -fomit-frame-pointer"
 			end if
 
 			if dll_option then
@@ -467,7 +467,6 @@ function setup_build()
 				if mno_cygwin then
 					l_flags &= " -mno-cygwin"
 				end if
-				l_flags &= " -lcomctl32"
 			end if
 			
 			-- input/output
@@ -500,7 +499,7 @@ function setup_build()
 				end if
 			end if
 
-			l_flags &= sprintf(" FILE %s LIBRARY comctl32", { user_library })
+			l_flags &= sprintf(" FILE %s", { user_library })
 			
 			
 			-- resource file, executable file
@@ -510,6 +509,7 @@ function setup_build()
 	end switch
 
 	if length(cflags) then
+		-- if the user supplied flags, use those instead
 		c_flags = cflags
 	end if
 

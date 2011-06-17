@@ -1002,6 +1002,7 @@ int eusock_getsock_option(int x)
 #define WSAFDIsSet (*WSAFDIsSetPtr)
 #endif
 
+
     void eusock_wsacleanup()
     {
     	WSACleanup();
@@ -1327,7 +1328,7 @@ object eusock_getservbyname(object x)
 	result_s = NewS1(3); // official name, port
 	result_s->base[1] = NewString(ent->s_name);
 	result_s->base[2] = NewString(ent->s_proto);
-	result_s->base[3] = INT_VAL(ntohs(ent->s_port));
+	result_s->base[3] = MAKE_INT(ntohs(ent->s_port));
 
 	return MAKE_SEQ(result_s);
 }
@@ -1393,6 +1394,8 @@ object eusock_build_hostent(struct hostent *ent)
 	
 	eusock_ensure_init();
 	
+	eusock_ensure_init();
+
 	if (ent == NULL)
 	{
 		return eusock_geterror();
@@ -1580,6 +1583,7 @@ object eusock_close(object x)
 	s = ATOM_INT_VAL(SEQ_PTR(sx)->base[SOCK_SOCKET]);
 
 	eusock_ensure_init();
+
 	if (closesocket(s) == SOCKET_ERROR)
 	{
 		return eusock_geterror();
@@ -1587,6 +1591,7 @@ object eusock_close(object x)
 
 	return ERR_OK;
 }
+
 
 /*
  * shutdown(sock, how)
@@ -1608,6 +1613,7 @@ object eusock_shutdown(object x)
 	if (how > 2 || how < 0)
 		RTFatal("second argument to shutdown should be one of SD_RECEIVE, SD_SEND or SD_BOTH");
 	
+	eusock_ensure_init();
 	if (shutdown(s, how) == SOCKET_ERROR)
 	{
 		return eusock_geterror();
@@ -1632,10 +1638,6 @@ object eusock_connect(object x)
 	object he_port;
 	char *address;
 
-	eusock_ensure_init();
-
-	
-	
 	if (!IS_SOCKET(SEQ_PTR(x)->base[1]))
 		RTFatal("first argument to connect must be a socket");
 	if (!IS_SEQUENCE(SEQ_PTR(x)->base[2]))
@@ -1645,6 +1647,8 @@ object eusock_connect(object x)
 		he_port >= 0x10000 || he_port < 0)
 		RTFatal("third argument to connect must be an integer between 0 and 65335");
 
+	eusock_ensure_init();
+	
 	s    = ATOM_INT_VAL(SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET]);
 	addr = (struct sockaddr_in *)get_pos_int("connect", SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKADDR]);
 
@@ -1799,6 +1803,7 @@ object eusock_send(object x)
 	buf   = EMalloc(buf_s->length+1);
 	MakeCString(buf, SEQ_PTR(x)->base[2], buf_s->length + 1);
 
+	eusock_ensure_init();
 	result = send(s, buf, buf_s->length, INT_VAL(flags));
 
 	EFree(buf);
@@ -1828,6 +1833,8 @@ object eusock_recv(object x)
 		RTFatal("second argument to recv must be an integer");
 
 	s     = ATOM_INT_VAL(SEQ_PTR(base1)->base[SOCK_SOCKET]);
+	
+	eusock_ensure_init();
 	result = recv(s, buf, BUFF_SIZE - 1, INT_VAL(flags));
 
 	if (result > 0) {
@@ -1975,6 +1982,7 @@ object eusock_bind(object x)
 	service->sin_addr.s_addr = inet_addr(address);
 	service->sin_port        = htons(port);
 
+	eusock_ensure_init();
 	result = bind(s, (struct sockaddr const *)service, sizeof(SOCKADDR));
 
 	EFree(address);
@@ -2003,6 +2011,7 @@ object eusock_listen(object x)
 
 	s       = ATOM_INT_VAL(SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET]);
 
+	eusock_ensure_init();
 	if (listen(s, INT_VAL(backlog)) == SOCKET_ERROR)
 	{
 		return eusock_geterror();
@@ -2029,7 +2038,9 @@ object eusock_accept(object x)
 	server = ATOM_INT_VAL(SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET]);
 
 	addr_len = sizeof(addr);
+	
 	eusock_ensure_init();
+	
 	client   = accept(server, (struct sockaddr *)&addr, &addr_len);
 
 	if (client == INVALID_SOCKET)
