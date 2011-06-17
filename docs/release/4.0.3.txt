@@ -17,7 +17,8 @@
 * [[ticket:676]] Changed search order for [[:locate_file]]
 * [[ticket:675]] Fixed machine crash in [[:splice]] when splicing an atom before beginning
   of sequence or after end
-* [[ticket:665]] fixing... Windows 95 and above with sockets 2.2 and higher is supported.
+* [[ticket:665]] Windows 95 and above is supported.  For using sockets you must have Windows Sockets 2.2
+
 === Enhancements
 
 * Minor changes to eutest output to read its console output
