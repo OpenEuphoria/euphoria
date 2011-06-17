@@ -613,7 +613,6 @@ $(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_COR
 	@%create $(BUILDDIR)\$(OBJDIR)\euiw.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc option quiet
 	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc option caseexact
-	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc library ws2_32
 	@for %i in ($(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc file %i
 	wlink  $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\euiw.lbc name $(BUILDDIR)\eui.exe
 	wrc -q -ad eui.rc $(BUILDDIR)\eui.exe
@@ -676,7 +675,6 @@ $(BUILDDIR)\euc.exe : $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_TRAN
 	@%create $(BUILDDIR)\$(OBJDIR)\euc.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\euc.lbc option quiet
 	@%append $(BUILDDIR)\$(OBJDIR)\euc.lbc option caseexact
-	@%append $(BUILDDIR)\$(OBJDIR)\euc.lbc library ws2_32
 	@for %i in ($(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\euc.lbc file %i
 	wlink $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\euc.lbc name $(BUILDDIR)\euc.exe
 	wrc -q -ad euc.rc $(BUILDDIR)\euc.exe
@@ -699,7 +697,6 @@ $(BUILDDIR)\eubw.exe :  $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_BACKEND_RUNNER_OBJECT
 	@%create $(BUILDDIR)\$(OBJDIR)\eub.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\eub.lbc option quiet
 	@%append $(BUILDDIR)\$(OBJDIR)\eub.lbc option caseexact
-	@%append $(BUILDDIR)\$(OBJDIR)\eub.lbc library ws2_32
 	@for %i in ($(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\eub.lbc file %i
 	wlink $(DEBUGLINK) SYS nt op maxe=2 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\eub.lbc name $(BUILDDIR)\eub.exe
 	wrc -q -ad eub.rc $(BUILDDIR)\eub.exe

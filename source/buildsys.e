@@ -479,7 +479,7 @@ function setup_build()
 				end if
 			end if
 
-			l_flags &= sprintf(" FILE %s LIBRARY ws2_32", { user_library })
+			l_flags &= sprintf(" FILE %s", { user_library })
 			
 			
 			-- resource file, executable file
