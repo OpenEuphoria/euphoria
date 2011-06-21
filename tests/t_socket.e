@@ -108,4 +108,15 @@ end if
 
 test_equal("close", sock:OK, sock:close(socket))
 
+procedure ticket680()
+	test_false("atom not a valid socket", sock:socket( 0 ) )
+	test_false("empty sequence not a valid socket", sock:socket( {} ) )
+	test_false("one element sequence not a valid socket", sock:socket( {0} ) )
+	test_false("three element sequence not a valid socket", sock:socket( {0,0,0} ) )
+	test_false("first element sequence not a valid socket", sock:socket( {"", 0}) )
+	test_false("second element sequence not a valid socket", sock:socket( {0, ""}) )
+	test_true("two elements, both atoms, valid socket", sock:socket( {0,0} ) )
+end procedure
+ticket680()
+
 test_report()
