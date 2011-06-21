@@ -18,6 +18,7 @@
 * [[ticket:675]] Fixed machine crash in [[:splice]] when splicing an atom before beginning
   of sequence or after end
 * [[ticket:665]] Windows 95 and above is supported.  For using sockets you must have Windows Sockets 2.2
+* [[ticket:680]] Fixed ##[[:socket]]## type checking.
 
 === Enhancements
 

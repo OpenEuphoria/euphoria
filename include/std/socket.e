@@ -719,7 +719,7 @@ public type socket(object o)
         return 0 
     end if
 	
-    if not length(o) = 2 then 
+    if length(o) != 2 then 
         return 0 
     end if
 	
