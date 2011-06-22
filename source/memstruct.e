@@ -1,6 +1,7 @@
 include common.e
 include emit.e
 include error.e
+include fwdref.e
 include global.e
 include msgtext.e
 include parser.e
@@ -70,7 +71,9 @@ export procedure MemStruct_declaration( integer scope )
 			case VARIABLE, QUALIFIED_VARIABLE then
 				if SC_UNDEFINED = SymTab[tok[T_SYM]][S_SCOPE] then
 					-- forward reference
-					CompileErr( "Forward memstruct references not implemented" )
+					
+					MemStruct_member( tok, pointer, 1 )
+					
 				else
 					CompileErr( 354 )
 				end if
@@ -182,9 +185,13 @@ export procedure MemStruct_declaration( integer scope )
 	entry
 		tok = next_token()
 	end while
-	calculate_size()
+	if -1 = calculate_size() then
+		-- need to get back to this later...
+-- 		new_forward_reference( MEMSTRUCT, mem_struct, MEMSTRUCT_DECL )
+	end if
 	leave_memstruct()
 end procedure
+
 
 --*
 -- Returns the size and offsets, or -1 if all
@@ -206,7 +213,16 @@ function calculate_size()
 	while member_sym with entry do
 		integer mem_size = SymTab[member_sym][S_MEM_SIZE]
 		if not mem_size then
-			return -1
+			-- might be a struct that's been recalculated
+			symtab_pointer struct_type = SymTab[member_sym][S_MEM_STRUCT]
+			if struct_type then
+				mem_size = SymTab[struct_type][S_MEM_SIZE]
+				if not mem_size then
+					return -1
+				end if
+			else
+				return -1
+			end if
 		end if
 		
 		if not is_union then
@@ -267,6 +283,7 @@ procedure add_member( token tok, object mem_type, integer size, integer pointer,
 	SymTab[sym][S_MEM_SIZE]    = size
 	SymTab[sym][S_MEM_POINTER] = pointer
 	SymTab[sym][S_MEM_SIGNED]  = signed
+	SymTab[sym][S_MEM_PARENT]  = mem_struct
 	
 	last_sym = sym
 end procedure
@@ -320,7 +337,18 @@ procedure Object( integer pointer, integer signed )
 	add_member( name_tok, MS_OBJECT, sizeof( E_OBJECT ), pointer, signed )
 end procedure
 
-procedure MemStruct_member( token memstruct_tok, integer pointer )
+procedure MemStruct_member( token memstruct_tok, integer pointer, integer fwd = 0 )
 	token name_tok = read_name()
-	add_member( name_tok, memstruct_tok, SymTab[memstruct_tok[T_SYM]][S_MEM_SIZE], pointer )
+	integer size = 0
+	
+	if fwd then
+		integer ref = new_forward_reference( MS_MEMBER, memstruct_tok[T_SYM], MEMSTRUCT_DECL )
+		set_data( ref, name_tok[T_SYM] )
+	end if
+	if sym_token( memstruct_tok[T_SYM] ) = MEMSTRUCT_DECL then
+		size = SymTab[memstruct_tok[T_SYM]][S_MEM_SIZE]
+	end if
+	add_member( name_tok, memstruct_tok, size, pointer )
+	
+	
 end procedure

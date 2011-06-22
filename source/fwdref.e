@@ -21,7 +21,7 @@ include shift.e
 include reswords.e
 include block.e
 include emit.e
-
+include memstruct.e
 
 -- Tracking forward references
 sequence 
@@ -378,6 +378,41 @@ procedure set_error_info( integer ref )
 	current_file_no = fr[FR_FILE]
 end procedure
 
+
+procedure patch_forward_msmember( token tok, integer ref )
+	sequence fr = forward_references[ref]
+	symtab_index sym = tok[T_SYM]
+	
+	if fr[FR_OP] = MEMSTRUCT_DECL then
+		-- a forward reference inside a declaration
+		symtab_index member = fr[FR_DATA]
+		SymTab[member][S_MEM_STRUCT] = sym
+		if not SymTab[member][S_MEM_POINTER] then
+			symtab_index parent_sym = SymTab[member][S_MEM_PARENT]
+			recalculate_size( parent_sym )
+		end if
+		resolved_reference( ref )
+	else
+		-- TODO: using a memstruct
+	end if
+	
+end procedure
+
+procedure patch_forward_memstruct( token tok, integer ref )
+	sequence fr = forward_references[ref]
+	symtab_index sym = tok[T_SYM]
+	
+	if fr[FR_OP] = MEMSTRUCT_DECL then
+		-- need to check the size
+		if recalculate_size( sym ) != -1 then
+			resolved_reference( ref )
+		end if
+	else
+		-- TODO: using a memstruct
+	end if
+	
+end procedure
+
 procedure patch_forward_variable( token tok, integer ref )
 -- forward reference for a variable
 	sequence fr = forward_references[ref]
@@ -688,6 +723,7 @@ export type forward_reference( integer ref )
 	end if
 end type
 
+
 export function new_forward_reference( integer fwd_op, symtab_index sym, integer op = fwd_op  )
 	integer 
 		ref, 
@@ -731,9 +767,10 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 	forward_references[ref][FR_QUALIFIED] = get_qualified_fwd()
 	forward_references[ref][FR_OP]        = op
 	
-	if op = GOTO then
-		forward_references[ref][FR_DATA] = { sym }
-	end if
+	switch op do
+		case GOTO then
+			forward_references[ref][FR_DATA] = { sym }
+	end switch
 	
 	-- If we're recording tokens (for a default parameter), this ref will never 
 	-- get resolved.  So ignore it for now, and when someone actually calls
@@ -835,7 +872,12 @@ function resolve_file( sequence refs, integer report_errors, integer unincluded_
 			
 			case GOTO then
 				patch_forward_goto( tok, ref )
-				
+			
+			case MS_MEMBER then
+				patch_forward_msmember( tok, ref )
+			
+			case MEMSTRUCT then
+				patch_forward_memstruct( tok, ref )
 			case else
 				-- ?? what is it?
 				InternalErr( 263, {fr[FR_TYPE], fr[FR_NAME]})

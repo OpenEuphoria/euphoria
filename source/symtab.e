@@ -828,6 +828,7 @@ end ifdef
 					break
 				
 				case SC_MEMSTRUCT then
+				
 					if inside_memstruct then
 						return tok
 					end if
