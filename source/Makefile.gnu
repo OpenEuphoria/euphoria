@@ -264,6 +264,7 @@ EU_CORE_FILES = \
 	inline.e \
 	keylist.e \
 	main.e \
+	memstruct.e \
 	msgtext.e \
 	mode.e \
 	opnames.e \

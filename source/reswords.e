@@ -307,7 +307,9 @@ export enum
 	OVERRIDE,
 	PUBLIC,
 	FALLTHRU,
-	ROUTINE
+	ROUTINE,
+	MEMSTRUCT,
+	$
 
 export enum
 	FUNC = 501,

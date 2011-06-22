@@ -30,6 +30,7 @@ include c_out.e
 include block.e
 include keylist.e
 include coverage.e
+include memstruct.e
 
 constant UNDEFINED = -999
 constant DEFAULT_SAMPLE_SIZE = 25000  -- for time profile
@@ -630,7 +631,7 @@ function read_recorded_token(integer n)
   	return t
 end function
 
-function next_token()
+export function next_token()
 -- read next scanner token
 	token t
 	sequence s
@@ -701,7 +702,7 @@ function Expr_list()
 	return n
 end function
 
-procedure tok_match(integer tok, integer prevtok = 0)
+export procedure tok_match(integer tok, integer prevtok = 0)
 -- match token or else syntax error
 	token t
 	sequence expected, actual, prevname
@@ -4499,6 +4500,9 @@ export procedure real_parser(integer nested)
 
 		elsif id = PROCEDURE or id = FUNCTION or id = TYPE_DECL then
 			SubProg(tok[T_ID], SC_LOCAL)
+		
+		elsif id = MEMSTRUCT then
+			MemStruct( SC_LOCAL )
 
 		elsif id = GLOBAL or id = EXPORT or id = OVERRIDE or id = PUBLIC then
 			if id = GLOBAL then
@@ -4529,6 +4533,9 @@ export procedure real_parser(integer nested)
 				SubProg(id, scope )
 				
 
+			elsif id = MEMSTRUCT then
+				MemStruct( scope )
+				
 			elsif (scope = SC_PUBLIC) and id = INCLUDE then
 				IncludeScan( 1 )
 				PushGoto()
