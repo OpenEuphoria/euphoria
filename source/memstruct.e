@@ -41,9 +41,9 @@ export procedure MemStruct_declaration( integer scope )
 	last_sym = mem_struct
 	SymTab[mem_struct] &= repeat( 0, SIZEOF_MEMSTRUCT_ENTRY - length( SymTab[mem_struct] ) )
 	if is_union then
-		SymTab[mem_struct][S_TOKEN] = MEMUNION_DECL
+		SymTab[mem_struct][S_TOKEN] = MEMUNION
 	else
-		SymTab[mem_struct][S_TOKEN] = MEMSTRUCT_DECL
+		SymTab[mem_struct][S_TOKEN] = MEMSTRUCT
 	end if
 	SymTab[mem_struct][S_SCOPE] = scope
 	
@@ -104,7 +104,6 @@ export procedure MemStruct_declaration( integer scope )
 					case MS_LONG then
 						token int_tok = next_token()
 						
-						printf(1, "MS_LONG: %d %s\n", { long, sym_name( int_tok[T_SYM] ) } )
 						if long then
 							-- this is the second long...
 							if int_tok[T_ID] = MS_INT then

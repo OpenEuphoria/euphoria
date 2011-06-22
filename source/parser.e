@@ -1191,6 +1191,12 @@ procedure Factor()
 		id = tok[T_ID]
 	end if
 	switch id label "factor" do
+		case MEMSTRUCT, QUALIFIED_MEMSTRUCT, MEMUNION, QUALIFIED_MEMUNION then
+			-- probably needs error checking or something to make sure 
+			-- the struct makes sense
+			-- So far, only sizeof() can use this
+			emit_opnd( tok[T_SYM] )
+			
 		case VARIABLE, QUALIFIED_VARIABLE then
 			sym = tok[T_SYM]
 			if sym < 0 or SymTab[sym][S_SCOPE] = SC_UNDEFINED then
