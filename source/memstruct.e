@@ -12,7 +12,7 @@ integer is_union = 0
 
 export procedure MemUnion_declaration( integer scope )
 	is_union = 1
-	MemStruct( scope )
+	MemStruct_declaration( scope )
 	is_union = 0
 end procedure
 
