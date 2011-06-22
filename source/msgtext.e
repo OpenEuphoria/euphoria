@@ -369,6 +369,7 @@ constant StdErrMsgs = {
 	{351, "Use a non-standard library when building a shared object"},
 	{352, "External debugger"},
 	{353, "Use the -mno-cygwin flag with MinGW"},
+	{354, "Expected to see integer, float or some other valid memory structure type" },
 	$
 }
 
