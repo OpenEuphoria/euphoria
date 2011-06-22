@@ -4501,7 +4501,7 @@ export procedure real_parser(integer nested)
 		elsif id = PROCEDURE or id = FUNCTION or id = TYPE_DECL then
 			SubProg(tok[T_ID], SC_LOCAL)
 		
-		elsif id = MEMSTRUCT then
+		elsif id = MEMSTRUCT_DECL then
 			MemStruct( SC_LOCAL )
 
 		elsif id = GLOBAL or id = EXPORT or id = OVERRIDE or id = PUBLIC then
@@ -4533,7 +4533,7 @@ export procedure real_parser(integer nested)
 				SubProg(id, scope )
 				
 
-			elsif id = MEMSTRUCT then
+			elsif id = MEMSTRUCT_DECL then
 				MemStruct( scope )
 				
 			elsif (scope = SC_PUBLIC) and id = INCLUDE then

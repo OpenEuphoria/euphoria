@@ -18,7 +18,7 @@ export procedure MemStruct( integer scope )
 			case END then
 				-- eventually, we probably need to handle ifdefs,
 				-- which may be best handled by refactoring Ifdef_Statement in parser.e
-				tok_match( MEMSTRUCT, END )
+				tok_match( MEMSTRUCT_DECL, END )
 				exit
 			
 			case TYPE then

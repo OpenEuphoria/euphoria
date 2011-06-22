@@ -172,7 +172,7 @@ export sequence keylist = {
 	{"poke_pointer",     SC_PREDEF, PROC, POKE_POINTER,     2, E_OTHER_EFFECT},
 	{"peek_pointer",     SC_PREDEF, FUNC, PEEK_POINTER,     1, E_PURE},
 	{"sizeof",           SC_PREDEF, FUNC, SIZEOF,           1, E_PURE},
-	{"memstruct",        SC_KEYWORD, MEMSTRUCT,          0, 0, 0 },
+	{"memstruct",        SC_KEYWORD, MEMSTRUCT_DECL,        0, 0, 0 },
 	$
 
 }

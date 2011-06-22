@@ -309,6 +309,7 @@ export enum
 	FALLTHRU,
 	ROUTINE,
 	MEMSTRUCT,
+	MEMSTRUCT_DECL,
 	$
 
 export enum
