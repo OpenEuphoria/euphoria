@@ -63,6 +63,18 @@ export procedure MemStruct_declaration( integer scope )
 				end if
 				exit
 			
+			case MEMSTRUCT, MEMUNION, QUALIFIED_MEMSTRUCT, QUALIFIED_MEMUNION then
+				-- embedding
+				MemStruct_member( tok, pointer )
+			
+			case VARIABLE, QUALIFIED_VARIABLE then
+				if SC_UNDEFINED = SymTab[tok[T_SYM]][S_SCOPE] then
+					-- forward reference
+					CompileErr( "Forward memstruct references not implemented" )
+				else
+					CompileErr( 354 )
+				end if
+				
 			case MS_SIGNED then
 				if signed != -1 then
 					-- error...multiple signed modifiers
@@ -125,6 +137,7 @@ export procedure MemStruct_declaration( integer scope )
 						elsif int_tok[T_ID] = MS_DOUBLE then
 							long = 1
 							putback( int_tok )
+							-- need to skip the part where the flags get reset
 							break "token"
 						else
 							putback( int_tok )
@@ -230,24 +243,29 @@ function read_name()
 	end switch
 end function
 
-procedure add_member( token tok, integer mem_type, integer size, integer pointer, integer signed = 0 )
+procedure add_member( token tok, object mem_type, integer size, integer pointer, integer signed = 0 )
 	symtab_index sym = tok[T_SYM]
 	
 	SymTab[last_sym][S_MEM_NEXT] = sym
 	
 	SymTab[sym] &= repeat( 0, SIZEOF_MEMSTRUCT_ENTRY - length( SymTab[sym] ) )
 	
-	SymTab[sym][S_TOKEN]       = mem_type
+	if token( mem_type ) then
+		SymTab[sym][S_MEM_STRUCT] = mem_type[T_SYM]
+		mem_type = MS_MEMBER
+	end if
 	
 	if pointer then
 		size = sizeof( C_POINTER )
 	end if
-	SymTab[sym][S_MEM_SIZE]    = size
-	SymTab[sym][S_MEM_POINTER] = pointer
 	
 	if signed = -1 then
 		signed = 1
 	end if
+	
+	SymTab[sym][S_TOKEN]       = mem_type
+	SymTab[sym][S_MEM_SIZE]    = size
+	SymTab[sym][S_MEM_POINTER] = pointer
 	SymTab[sym][S_MEM_SIGNED]  = signed
 	
 	last_sym = sym
@@ -302,3 +320,7 @@ procedure Object( integer pointer, integer signed )
 	add_member( name_tok, MS_OBJECT, sizeof( E_OBJECT ), pointer, signed )
 end procedure
 
+procedure MemStruct_member( token memstruct_tok, integer pointer )
+	token name_tok = read_name()
+	add_member( name_tok, memstruct_tok, SymTab[memstruct_tok[T_SYM]][S_MEM_SIZE], pointer )
+end procedure

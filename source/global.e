@@ -161,6 +161,8 @@ export enum
 	S_MEM_SIGNED,
 	S_MEM_NEXT,
 	S_MEM_POINTER,
+	S_MEM_STRUCT,  -- for embedded structs
+	S_MEM_ARRAY,
 	$
 
 export procedure print_sym(integer s)
@@ -192,7 +194,7 @@ export constant
 	SIZEOF_VAR_ENTRY       = 17 + 37 * TRANSLATE,
 	SIZEOF_BLOCK_ENTRY     = 19 + 35 * TRANSLATE,
 	SIZEOF_TEMP_ENTRY      =  6 + 32 * TRANSLATE,
-	SIZEOF_MEMSTRUCT_ENTRY = 18 + 36 * TRANSLATE,
+	SIZEOF_MEMSTRUCT_ENTRY = 20 + 34 * TRANSLATE,
 	$
 
 -- Permitted values for various symbol table fields
@@ -376,7 +378,7 @@ export type token(object t)
 		end if
 		return TRUE
 	end if
-	if FUNC <= t[T_ID] and t[T_ID] <= NAMESPACE then
+	if FUNC <= t[T_ID] and t[T_ID] < LAST_TOKEN then
 		return TRUE
 	end if
 	return FALSE

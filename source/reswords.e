@@ -353,7 +353,11 @@ export enum
 	MS_LONGDOUBLE,
 	MS_EUDOUBLE,
 	MS_OBJECT,
+	MS_MEMBER,
+	
+	LAST_TOKEN,
 	$
+
 
 enum -- token category name id
 	TC_ILLCHAR,

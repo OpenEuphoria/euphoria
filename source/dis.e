@@ -1843,8 +1843,8 @@ function mem_name( symtab_index member_sym )
 			return "long double"
 		case MS_EUDOUBLE then
 			return "eudouble"
-		case else
-			return "[UDT-not supported yet]"
+		case MS_MEMBER then
+			return sym_name( SymTab[member_sym][S_MEM_STRUCT] )
 	end switch
 end function
 
@@ -1857,7 +1857,7 @@ procedure dis_memstruct( integer ms )
 	
 	printf( out, " [%s-%s:%05d]\n",
 		{known_files[SymTab[ms][S_FILE_NO]], SymTab[ms][S_NAME], ms })
-	printf( out, "SIZE: %d\n", SymTab[ms][S_MEM_SIZE] )
+	printf( out, "    SIZE: %d\n", SymTab[ms][S_MEM_SIZE] )
 	symtab_pointer member_sym = ms
 	while member_sym with entry do
 		printf( out, "    %06d: %-20s  %-15s pointer[%d] signed[%d] offset[%3d] size[%d]\n", 
@@ -1989,7 +1989,7 @@ export procedure BackEnd( object ignore )
 			dis( i )
 		
 		elsif length(SymTab[i])  = SIZEOF_MEMSTRUCT_ENTRY
-		and (SymTab[i][S_TOKEN] = MEMSTRUCT_DECL or SymTab[i][S_TOKEN] = MEMUNION_DECL) then
+		and (SymTab[i][S_TOKEN] = MEMSTRUCT or SymTab[i][S_TOKEN] = MEMUNION) then
 			dis_memstruct( i )
 		else
 			-- other symbols?
