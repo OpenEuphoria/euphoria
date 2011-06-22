@@ -1,4 +1,4 @@
-== Version 4.0.3 Release Date TBD
+== Version 4.0.3 June 23, 2011
 
 === Bug Fixes
 
@@ -23,3 +23,4 @@
 === Enhancements
 
 * Minor changes to eutest output to read its console output
+* New math functions ##[[:larger_of]]## and ##[[:smaller_of]]##
