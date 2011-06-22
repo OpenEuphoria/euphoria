@@ -8,7 +8,11 @@ include reswords.e
 include scanner.e
 include symtab.e
 
+include std/dll.e
+
 integer is_union = 0
+symtab_pointer last_sym = 0
+symtab_index mem_struct
 
 export procedure MemUnion_declaration( integer scope )
 	is_union = 1
@@ -16,17 +20,39 @@ export procedure MemUnion_declaration( integer scope )
 	is_union = 0
 end procedure
 
+procedure DefinedYet( symtab_index sym )
+	sequence name = sym_name( sym )
+	symtab_pointer mem_entry = mem_struct
+	
+	while mem_entry with entry do
+		if equal( sym_name( mem_entry ), name ) then
+			CompileErr(31, {name})
+		end if
+	entry
+		mem_entry = SymTab[mem_entry][S_MEM_NEXT]
+	end while
+end procedure
+
 export procedure MemStruct_declaration( integer scope )
 	token tok = next_token() -- name
-	symtab_index mem_struct = tok[T_SYM]
-	DefinedYet( mem_struct )
-	enter_memstruct()
+	mem_struct = tok[T_SYM]
+	symtab:DefinedYet( mem_struct )
+	enter_memstruct( mem_struct )
+	last_sym = mem_struct
+	SymTab[mem_struct] &= repeat( 0, SIZEOF_MEMSTRUCT_ENTRY - length( SymTab[mem_struct] ) )
+	if is_union then
+		SymTab[mem_struct][S_TOKEN] = MEMUNION_DECL
+	else
+		SymTab[mem_struct][S_TOKEN] = MEMSTRUCT_DECL
+	end if
+	SymTab[mem_struct][S_SCOPE] = scope
+	
 	integer pointer = 0
 	integer signed = -1
 	integer long = 0
 	while 1 with entry do
 		integer tid = tok[T_ID]
-		switch tid do
+		switch tid label "token" do
 			case END then
 				-- eventually, we probably need to handle ifdefs,
 				-- which may be best handled by refactoring Ifdef_Statement in parser.e
@@ -66,21 +92,46 @@ export procedure MemStruct_declaration( integer scope )
 				
 				switch tid do
 					case MS_CHAR then
-						Char( mem_struct, pointer, signed )
+						Char( pointer, signed )
 					case MS_SHORT then
-						Short( mem_struct, pointer, signed )
+						Short( pointer, signed )
 					case MS_INT then
 						if long then
-							Long( mem_struct, pointer, signed )
+							Long( pointer, signed )
 						else
-							Int( mem_struct, pointer, signed )
+							Int( pointer, signed )
 						end if
 					case MS_LONG then
+						token int_tok = next_token()
+						
+						printf(1, "MS_LONG: %d %s\n", { long, sym_name( int_tok[T_SYM] ) } )
 						if long then
-							LongLong( mem_struct, pointer, signed )
+							-- this is the second long...
+							if int_tok[T_ID] = MS_INT then
+								-- long long int
+								LongLong( pointer, signed )
+							
+							elsif int_tok[T_ID] = VARIABLE
+							or int_tok[T_ID] = PROCEDURE
+							or int_tok[T_ID] = FUNCTION
+							or int_tok[T_ID] = TYPE
+							or int_tok[T_ID] = NAMESPACE
+							then
+								-- long long
+								putback( int_tok )
+								LongLong( pointer, signed )
+							else
+								CompileErr( 25, { sym_name( int_tok[T_SYM] ) } )
+							end if
+						elsif int_tok[T_ID] = MS_DOUBLE then
+							long = 1
+							putback( int_tok )
+							break "token"
 						else
-							Long( mem_struct, pointer, signed )
+							putback( int_tok )
+							Long( pointer, signed )
 						end if
+						
 					case MS_FLOAT, MS_DOUBLE, MS_EUDOUBLE then
 						if signed != - 1 then
 							-- can't have signed modifiers here
@@ -90,12 +141,14 @@ export procedure MemStruct_declaration( integer scope )
 						if long and tid != MS_DOUBLE then
 							-- long modifier only for doubles
 							CompileErr( 356 )
+						elsif long then
+							tid = MS_LONGDOUBLE
 						end if
 						
-						FloatingPoint( tid, mem_struct, pointer )
+						FloatingPoint( tid, pointer )
 					
 					case MS_OBJECT then
-						Object( mem_struct, pointer, signed )
+						Object( pointer, signed )
 					
 					case else
 						
@@ -117,46 +170,136 @@ export procedure MemStruct_declaration( integer scope )
 	entry
 		tok = next_token()
 	end while
+	calculate_size()
 	leave_memstruct()
 end procedure
+
+--*
+-- Returns the size and offsets, or -1 if all
+-- sizes have not been determined yet.
+export function recalculate_size( symtab_index sym )
+	mem_struct = sym
+	is_union   = sym_token( sym ) = MEMUNION_DECL
+	return calculate_size()
+end function
+
+--**
+-- Returns the size and offsets for the memstruct, or -1 if all
+-- sizes have not been determined yet.
+function calculate_size()
+	
+	symtab_pointer member_sym = mem_struct
+	
+	integer size = 0
+	while member_sym with entry do
+		integer mem_size = SymTab[member_sym][S_MEM_SIZE]
+		if not mem_size then
+			return -1
+		end if
+		
+		if not is_union then
+			-- make sure we're properly aligned
+			integer padding = remainder( size, mem_size )
+			if padding then
+				size += mem_size - padding
+			end if
+			SymTab[member_sym][S_MEM_OFFSET] = size
+			size += mem_size
+		else
+			if mem_size > size then
+				size = mem_size
+			end if
+		end if
+		
+	entry
+		member_sym = SymTab[member_sym][S_MEM_NEXT]
+	end while
+	
+	SymTab[mem_struct][S_MEM_SIZE] = size
+	return size
+end function
 
 
 function read_name()
 	token tok = next_token()
 	switch tok[T_ID] do
 		case VARIABLE, PROC, FUNC, TYPE then
+			DefinedYet( tok[T_SYM] )
 			return tok
 		case else
-		? tok
 			CompileErr( 32 )
 	end switch
 end function
 
-procedure Char( symtab_index mem_struct, integer pointer, integer signed )
-	token name_tok = read_name()
+procedure add_member( token tok, integer mem_type, integer size, integer pointer, integer signed = 0 )
+	symtab_index sym = tok[T_SYM]
+	
+	SymTab[last_sym][S_MEM_NEXT] = sym
+	
+	SymTab[sym] &= repeat( 0, SIZEOF_MEMSTRUCT_ENTRY - length( SymTab[sym] ) )
+	
+	SymTab[sym][S_TOKEN]       = mem_type
+	
+	if pointer then
+		size = sizeof( C_POINTER )
+	end if
+	SymTab[sym][S_MEM_SIZE]    = size
+	SymTab[sym][S_MEM_POINTER] = pointer
+	
+	if signed = -1 then
+		signed = 1
+	end if
+	SymTab[sym][S_MEM_SIGNED]  = signed
+	
+	last_sym = sym
 end procedure
 
-procedure Short( symtab_index mem_struct, integer pointer, integer signed )
-	token name_tok = read_name()
+procedure Char( integer pointer, integer signed )
+	add_member( read_name(), MS_CHAR, 1, pointer, signed )
 end procedure
 
-procedure Int( symtab_index mem_struct, integer pointer, integer signed )
-	token name_tok = read_name()
+procedure Short( integer pointer, integer signed )
+	add_member( read_name(), MS_SHORT, 2, pointer, signed )
 end procedure
 
-procedure Long( symtab_index mem_struct, integer pointer, integer signed )
-	token name_tok = read_name()
+procedure Int( integer pointer, integer signed )
+	add_member( read_name(), MS_INT, sizeof( C_INT ), pointer, signed )
 end procedure
 
-procedure LongLong( symtab_index mem_struct, integer pointer, integer signed )
-	token name_tok = read_name()
+procedure Long( integer pointer, integer signed )
+	add_member( read_name(), MS_LONG, sizeof( C_LONG ), pointer, signed )
 end procedure
 
-procedure FloatingPoint( integer fp_type, symtab_index mem_struct, integer pointer )
-	token name_tok = read_name()
+procedure LongLong( integer pointer, integer signed )
+	add_member( read_name(), MS_LONGLONG, sizeof( C_LONGLONG ), pointer, signed )
 end procedure
 
-procedure Object( symtab_index mem_struct, integer pointer, integer signed )
+procedure FloatingPoint( integer fp_type, integer pointer )
 	token name_tok = read_name()
+	integer size
+	switch fp_type do
+		case MS_FLOAT then
+			size = 4
+		case MS_DOUBLE then
+			size = 8
+		case MS_LONGDOUBLE then
+			-- these get padded out in structs to a full 16 bytes
+			-- the data is actually only 10 bytes in size
+			size = 16
+		case MS_EUDOUBLE then
+			ifdef E32 then
+				size = 8
+			elsifdef E64 then
+				-- same as long double
+				size = 16
+			end ifdef
+	end switch
+	add_member( name_tok, fp_type, size, pointer )
+end procedure
+
+procedure Object( integer pointer, integer signed )
+	token name_tok = read_name()
+	
+	add_member( name_tok, MS_OBJECT, sizeof( E_OBJECT ), pointer, signed )
 end procedure
 

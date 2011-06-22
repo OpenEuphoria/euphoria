@@ -1471,7 +1471,7 @@ end procedure
 
 constant MODES = {"M_NORMAL", "M_CONSTANT", "M_TEMP", "M_SCOPE" }
 constant SCOPES = {
-	"SC_?",
+	"SC_MEMSTRUCT",
 	"SC_LOOP_VAR",    -- "private" loop vars known within a single loop
 	"SC_PRIVATE",    -- private within subprogram
 	"SC_GLOOP_VAR",   -- "global" loop var
@@ -1793,6 +1793,8 @@ procedure InitBackEnd( object ignore )
 			name = "SWITCH"
 		elsif equal( name, "PROC_TAIL" ) then
 			name = "PROC"
+		elsif equal( name, "STARTLINE_BREAK" ) then
+			name = "STARTLINE"
 		end if
 
 		operation[i] = routine_id("op" & name)
@@ -1818,6 +1820,68 @@ function max( integer a, integer b )
 	return b
 end function
 
+function mem_name( symtab_index member_sym )
+	integer tid = sym_token( member_sym )
+	switch tid do
+		case MS_CHAR then
+			return "char"
+		case MS_SHORT then
+			return "short"
+		case MS_INT then
+			return "int"
+		case MS_LONG then
+			return "long"
+		case MS_OBJECT then
+			return "object"
+		case MS_LONGLONG then
+			return "long long int"
+		case MS_FLOAT then
+			return "float"
+		case MS_DOUBLE then
+			return "double"
+		case MS_LONGDOUBLE then
+			return "long double"
+		case MS_EUDOUBLE then
+			return "eudouble"
+		case else
+			return "[UDT-not supported yet]"
+	end switch
+end function
+
+procedure dis_memstruct( integer ms )
+	if sym_token( ms ) = MEMSTRUCT_DECL then
+		puts( out, "\nMemStruct" )
+	else
+		puts( out, "\nMemUnion" )
+	end if
+	
+	printf( out, " [%s-%s:%05d]\n",
+		{known_files[SymTab[ms][S_FILE_NO]], SymTab[ms][S_NAME], ms })
+	printf( out, "SIZE: %d\n", SymTab[ms][S_MEM_SIZE] )
+	symtab_pointer member_sym = ms
+	while member_sym with entry do
+		printf( out, "    %06d: %-20s  %-15s pointer[%d] signed[%d] offset[%3d] size[%d]\n", 
+			{ 
+				member_sym, 
+				sym_name( member_sym ), 
+				mem_name( member_sym ),
+				SymTab[member_sym][S_MEM_POINTER],
+				SymTab[member_sym][S_MEM_SIGNED],
+				SymTab[member_sym][S_MEM_OFFSET],
+				SymTab[member_sym][S_MEM_SIZE],
+				$
+				} )
+		
+	entry
+		member_sym = SymTab[member_sym][S_MEM_NEXT]
+	end while
+	if sym_token( ms ) = MEMSTRUCT_DECL then
+		puts( out, "End MemStruct" )
+	else
+		puts( out, "End MemUnion" )
+	end if
+	printf( out, " [%s:%05d]\n", {sym_name( ms ), ms} )
+end procedure
 
 procedure dis( integer sub )
 	integer op, ix
@@ -1923,6 +1987,10 @@ export procedure BackEnd( object ignore )
 		and sequence(SymTab[i][S_CODE])
 		and SymTab[i][S_SCOPE] != SC_PRIVATE then
 			dis( i )
+		
+		elsif length(SymTab[i])  = SIZEOF_MEMSTRUCT_ENTRY
+		and (SymTab[i][S_TOKEN] = MEMSTRUCT_DECL or SymTab[i][S_TOKEN] = MEMUNION_DECL) then
+			dis_memstruct( i )
 		else
 			-- other symbols?
 		end if

@@ -154,6 +154,15 @@ export constant
 	                         -- external call, e.g. call to a DLL
 	S_HAS_DELETE = 54
 
+-- for memstructs / memunions only
+export enum
+	S_MEM_SIZE = 14,
+	S_MEM_OFFSET,
+	S_MEM_SIGNED,
+	S_MEM_NEXT,
+	S_MEM_POINTER,
+	$
+
 export procedure print_sym(integer s)
 	printf(1,"[%d]:\n", {s} )
 	object s_obj = SymTab[s][S_OBJ]
@@ -179,10 +188,12 @@ end procedure
 	
 		
 export constant
-	SIZEOF_ROUTINE_ENTRY = 29 + 25 * TRANSLATE,
-	SIZEOF_VAR_ENTRY     = 17 + 37 * TRANSLATE,
-	SIZEOF_BLOCK_ENTRY   = 19 + 35 * TRANSLATE,
-	SIZEOF_TEMP_ENTRY    =  6 + 32 * TRANSLATE
+	SIZEOF_ROUTINE_ENTRY   = 29 + 25 * TRANSLATE,
+	SIZEOF_VAR_ENTRY       = 17 + 37 * TRANSLATE,
+	SIZEOF_BLOCK_ENTRY     = 19 + 35 * TRANSLATE,
+	SIZEOF_TEMP_ENTRY      =  6 + 32 * TRANSLATE,
+	SIZEOF_MEMSTRUCT_ENTRY = 18 + 36 * TRANSLATE,
+	$
 
 -- Permitted values for various symbol table fields
 

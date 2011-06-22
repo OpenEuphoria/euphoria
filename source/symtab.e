@@ -1,6 +1,7 @@
 -- (c) Copyright - See License.txt
 --
 -- Symbol Table Routines
+namespace symtab
 
 ifdef ETYPE_CHECK then
 	with type_check
@@ -690,8 +691,8 @@ end function
 export integer No_new_entry = 0
 
 integer inside_memstruct = 0
-export procedure enter_memstruct()
-	inside_memstruct = 1
+export procedure enter_memstruct( symtab_index mem_struct )
+	inside_memstruct = mem_struct
 end procedure
 
 export procedure leave_memstruct()
