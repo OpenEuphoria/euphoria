@@ -4531,10 +4531,10 @@ export procedure real_parser(integer nested)
 				
 
 			elsif id = MEMSTRUCT_DECL then
-				MemStruct( scope )
+				MemStruct_declaration( scope )
 			
 			elsif id = MEMUNION_DECL then
-				MemUnion( scope )
+				MemUnion_declaration( scope )
 				
 			elsif (scope = SC_PUBLIC) and id = INCLUDE then
 				IncludeScan( 1 )
@@ -4706,10 +4706,10 @@ export procedure real_parser(integer nested)
 
 
 		elsif id = MEMSTRUCT_DECL then
-			MemStruct( SC_LOCAL )
+			MemStruct_declaration( SC_LOCAL )
 		
 		elsif id = MEMUNION_DECL then
-			MemUnion( SC_LOCAL )
+			MemUnion_declaration( SC_LOCAL )
 		
 		elsif id = ILLEGAL_CHAR then
 			CompileErr(102)

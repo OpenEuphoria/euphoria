@@ -10,13 +10,13 @@ include symtab.e
 
 integer is_union = 0
 
-export procedure MemUnion( integer scope )
+export procedure MemUnion_declaration( integer scope )
 	is_union = 1
 	MemStruct( scope )
 	is_union = 0
 end procedure
 
-export procedure MemStruct( integer scope )
+export procedure MemStruct_declaration( integer scope )
 	token tok = next_token() -- name
 	symtab_index mem_struct = tok[T_SYM]
 	DefinedYet( mem_struct )
