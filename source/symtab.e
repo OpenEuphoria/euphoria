@@ -688,6 +688,16 @@ export function get_resolve_unincluded_globals()
 end function
 
 export integer No_new_entry = 0
+
+integer inside_memstruct = 0
+export procedure enter_memstruct()
+	inside_memstruct = 1
+end procedure
+
+export procedure leave_memstruct()
+	inside_memstruct = 0
+end procedure
+
 export function keyfind(sequence word, integer file_no, integer scanning_file = current_file_no, integer namespace_ok = 0, 
 						integer hashval = hashfn( word ) )
 -- Uses hashing algorithm to try to match 'word' in the symbol
@@ -812,6 +822,12 @@ end ifdef
 							add_ref(tok)
 						end if
 
+						return tok
+					end if
+					break
+				
+				case SC_MEMSTRUCT then
+					if inside_memstruct then
 						return tok
 					end if
 					break

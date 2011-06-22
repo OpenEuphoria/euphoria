@@ -466,7 +466,7 @@ procedure PatchXList(integer base)
 	exit_list = exit_list [1..exit_top]
 end procedure
 
-procedure putback(token t)
+export procedure putback(token t)
 -- push a scanner token back onto the input stream
 	backed_up_tok = append(backed_up_tok, t)
 end procedure
@@ -4500,9 +4500,6 @@ export procedure real_parser(integer nested)
 
 		elsif id = PROCEDURE or id = FUNCTION or id = TYPE_DECL then
 			SubProg(tok[T_ID], SC_LOCAL)
-		
-		elsif id = MEMSTRUCT_DECL then
-			MemStruct( SC_LOCAL )
 
 		elsif id = GLOBAL or id = EXPORT or id = OVERRIDE or id = PUBLIC then
 			if id = GLOBAL then
@@ -4535,6 +4532,9 @@ export procedure real_parser(integer nested)
 
 			elsif id = MEMSTRUCT_DECL then
 				MemStruct( scope )
+			
+			elsif id = MEMUNION_DECL then
+				MemUnion( scope )
 				
 			elsif (scope = SC_PUBLIC) and id = INCLUDE then
 				IncludeScan( 1 )
@@ -4704,6 +4704,13 @@ export procedure real_parser(integer nested)
 			StartSourceLine(TRUE)
 			Switch_statement()
 
+
+		elsif id = MEMSTRUCT_DECL then
+			MemStruct( SC_LOCAL )
+		
+		elsif id = MEMUNION_DECL then
+			MemUnion( SC_LOCAL )
+		
 		elsif id = ILLEGAL_CHAR then
 			CompileErr(102)
 

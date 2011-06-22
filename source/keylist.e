@@ -173,6 +173,19 @@ export sequence keylist = {
 	{"peek_pointer",     SC_PREDEF, FUNC, PEEK_POINTER,     1, E_PURE},
 	{"sizeof",           SC_PREDEF, FUNC, SIZEOF,           1, E_PURE},
 	{"memstruct",        SC_KEYWORD, MEMSTRUCT_DECL,        0, 0, 0 },
+	{"memunion",         SC_KEYWORD, MEMUNION_DECL,         0, 0, 0 },
+	{"pointer",          SC_MEMSTRUCT, MS_POINTER,          0, 0, 0 },
+	{"unsigned",         SC_MEMSTRUCT, MS_UNSIGNED,         0, 0, 0 },
+	{"signed",           SC_MEMSTRUCT, MS_SIGNED,           0, 0, 0 },
+	{"char",             SC_MEMSTRUCT, MS_CHAR,             0, 0, 0 },
+	{"short",            SC_MEMSTRUCT, MS_SHORT,            0, 0, 0 },
+	{"int",              SC_MEMSTRUCT, MS_INT,              0, 0, 0 },
+	{"long",             SC_MEMSTRUCT, MS_LONG,             0, 0, 0 },
+	{"float",            SC_MEMSTRUCT, MS_FLOAT,            0, 0, 0 },
+	{"double",           SC_MEMSTRUCT, MS_DOUBLE,           0, 0, 0 },
+	{"eudouble",         SC_MEMSTRUCT, MS_EUDOUBLE,         0, 0, 0 },
+	{"object",           SC_MEMSTRUCT, MS_OBJECT,           0, 0, 0 },
+	
 	$
 
 }

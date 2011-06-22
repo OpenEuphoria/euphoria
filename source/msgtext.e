@@ -369,7 +369,10 @@ constant StdErrMsgs = {
 	{351, "Use a non-standard library when building a shared object"},
 	{352, "External debugger"},
 	{353, "Use the -mno-cygwin flag with MinGW"},
-	{354, "Expected to see integer, float or some other valid memory structure type" },
+	{354, "Expected to see a valid memory structure type" },
+	{355, "Floating point data cannot have signed or unsigned modifiers"},
+	{356, "Only 'double' floating point type can have the 'long' modifier"},
+	{357, "Only 'int' or 'long' integers can have the 'long' modifier"},
 	$
 }
 

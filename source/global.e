@@ -197,7 +197,8 @@ export constant M_VARS = {M_TEMP, M_NORMAL}
 	
 -- SCOPE values:
 export enum
-	SC_LOOP_VAR=2,    -- "private" loop vars known within a single loop
+	SC_MEMSTRUCT,
+	SC_LOOP_VAR,    -- "private" loop vars known within a single loop
 	SC_PRIVATE,    -- private within subprogram
 	SC_GLOOP_VAR,   -- "global" loop var
 	SC_LOCAL,    -- local to the file
