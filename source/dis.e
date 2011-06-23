@@ -64,7 +64,10 @@ function name_or_literal( integer sym )
 	end if
 end function
 
-function names( sequence n )
+function names( object n )
+	if atom( n ) then
+		n = { n }
+	end if
 	sequence nl
 	nl = {}
 	for i = 1 to length(n) do
@@ -1362,6 +1365,30 @@ procedure opEXIT_BLOCK()
 	punary()
 end procedure
 
+procedure opMEMSTRUCT_ACCESS()
+	-- pc+1 number of accesses
+	-- pc+2 pointer to memstruct
+	-- pc+3 .. pc+n+1 member syms for access
+	-- pc+n+2 target for pointer
+	integer members = Code[pc+1]
+	
+	sequence text = sprintf("MEMSTRUCT_ACCESS %s %s", names( {Code[pc+2], SymTab[Code[pc+3]][S_MEM_PARENT]} ) )
+	for i = pc+3 to pc+2+members do
+		text &= sprintf(".%s", names( Code[i] ) )
+	end for
+	text &= sprintf(" => %s", names( Code[pc+members+3] ) )
+	il( text, members + 3 )
+	pc += members + 4
+end procedure
+
+procedure opMEMSTRUCT_ARRAY()
+	trinary()
+end procedure
+
+procedure opPEEK_MEMBER()
+	binary()
+end procedure
+
 function strip_path( sequence file )
 	for i = length( file ) to 1 by -1 do
 		if find( file[i], "/\\" ) then
@@ -1783,7 +1810,7 @@ procedure InitBackEnd( object ignore )
 			name = "GREATEREQ_IFW"
 		elsif equal(name, "LESSEQ_IFW_I") then
 			name = "LESSEQ_IFW"
-		elsif match( "PEEK", name ) then
+		elsif match( "PEEK", name ) and not match( "_MEMBER", name ) then
 			name = "PEEK"
 		elsif match( "POKE", name ) then
 			name = "POKE"

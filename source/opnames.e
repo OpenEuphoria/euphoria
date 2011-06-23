@@ -227,5 +227,8 @@ export constant opnames = {
 	"PEEK_POINTER",
 	"SIZEOF",
 	"STARTLINE_BREAK",
+	"MEMSTRUCT_ACCESS",
+	"MEMSTRUCT_ARRAY",
+	"PEEK_MEMBER",
 	$
 }

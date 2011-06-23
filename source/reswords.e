@@ -227,7 +227,10 @@ export constant
 	PEEK_POINTER        = 216,
 	SIZEOF              = 217,
 	STARTLINE_BREAK     = 218,
-	MAX_OPCODE          = 218
+	MEMSTRUCT_ACCESS    = 219,
+	MEMSTRUCT_ARRAY     = 220,
+	PEEK_MEMBER         = 221,
+	MAX_OPCODE          = 221
 
 
 -- adding new opcodes possibly affects reswords.h (C-coded backend),

@@ -373,6 +373,8 @@ constant StdErrMsgs = {
 	{355, "Floating point data cannot have signed or unsigned modifiers"},
 	{356, "Only 'double' floating point type can have the 'long' modifier"},
 	{357, "Only 'int' or 'long' integers can have the 'long' modifier"},
+	{358, "[1] is not a member of memstruct or memunion [2]"},
+	{359, "Member is not a pointer or an embedded memstruct"},
 	$
 }
 

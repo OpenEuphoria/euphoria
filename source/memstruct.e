@@ -381,3 +381,107 @@ procedure MemStruct_member( token memstruct_tok, integer pointer, integer fwd = 
 	
 	
 end procedure
+
+export function resolve_member( sequence name, symtab_index struct_sym )
+	symtab_pointer member_sym = struct_sym
+	
+	while member_sym with entry do
+		if equal( name, sym_name( member_sym ) ) then
+			return member_sym
+		end if
+	entry
+		member_sym = SymTab[member_sym][S_MEM_NEXT]
+	end while
+	return 0
+end function
+
+--**
+-- Parse the dot notation of accessing a memstruct.
+export procedure MemStruct_access( symtab_index sym, integer lhs )
+	-- the sym is the pointer, and just before this, we found a DOT token
+	
+	-- First, figure out which memstruct we're using
+	token tok = next_token()
+	symtab_index struct_sym = tok[T_SYM]
+	integer ref = 0
+	if SymTab[struct_sym][S_SCOPE] = SC_UNDEFINED then
+		-- hopefully a forward reference
+		ref = new_forward_reference( MEMSTRUCT, sym, MEMSTRUCT_ACCESS )
+	elsif tok[T_ID] != MEMSTRUCT and tok[T_ID] != QUALIFIED_MEMSTRUCT then
+		-- something else
+		CompileErr( 354 )
+	end if
+	tok_match( DOT )
+	No_new_entry = 1
+	integer members = 0
+	symtab_pointer member = 0
+	while 1 with entry do
+		integer tid = tok[T_ID]
+		switch tid do
+			case VARIABLE, FUNC, PROC, TYPE, NAMESPACE then
+				-- make it look like the IGNORED token
+				tok= { IGNORED, SymTab[tok[T_SYM]][S_NAME] }
+				fallthru
+			case IGNORED then
+				-- just look at it within this memstruct's context...
+				if ref then
+					-- we don't know the memstruct yet!
+					? 1/0
+				else
+					member = resolve_member( tok[T_SYM], struct_sym )
+					if not member then
+						CompileErr( 358, { tok[T_SYM], sym_name( struct_sym ) } )
+					end if
+				end if
+				emit_opnd( member )
+				members += 1
+				
+			case DOT then
+				-- another layer...
+				if not member then
+					CompileErr( 68, {"a member name", LexName( tid )} )
+				end if
+				
+				if ref then
+					-- we don't know if this is a structure yet
+					
+				else
+					tid = sym_token( member )
+					if tid >= MS_SIGNED and tid <= MS_OBJECT then
+						-- must be a pointer
+						if SymTab[member][S_MEM_POINTER] then
+							tok_match( MULTIPLY )
+							peek_member( members, member, ref, lhs )
+							exit -- DONE!
+						else
+							CompileErr( 359 )
+						end if
+					end if
+				end if
+			case else
+				peek_member( members, member, ref, lhs )
+				putback( tok )
+				exit
+		end switch
+	entry
+		tok = next_token()
+	end while
+	No_new_entry = 0
+end procedure
+
+procedure peek_member( integer members, symtab_index member, integer ref, integer lhs )
+	emit_opnd( members )
+	emit_op( MEMSTRUCT_ACCESS )
+	if lhs then
+		-- going to do some sort of poking here...
+		? 1/0
+	else
+		-- geting the value...peek it
+		emit_opnd( member )
+		if ref then
+			-- this check might not be enough...
+			new_forward_reference( MS_MEMBER, member, PEEK_MEMBER )
+		end if
+		emit_op( PEEK_MEMBER )
+	end if
+end procedure

@@ -9,6 +9,10 @@ elsedef
 	without type_check
 end ifdef
 
+ifdef CRASH_ON_ERROR then
+	include std/error.e
+end ifdef
+
 include std/io.e
 include std/text.e
 
@@ -285,6 +289,9 @@ export procedure CompileErr(object msg, object args = {}, integer preproc = 0 )
 
 		close(TempErrFile)
 		TempErrFile = -2
+		ifdef CRASH_ON_ERROR then
+			crash("Crashing on compiler error for internal traceback")
+		end ifdef
 		Cleanup(1)
 	end if
 	

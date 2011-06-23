@@ -1697,7 +1697,9 @@ export function Scanner()
 					ch = getch()
 				end while
 			elsif char_class[ch] = LETTER then
-				CompileErr(127, {{ch}})
+				ungetch()
+				return { DOT, 0 }
+				--CompileErr(127, {{ch}})
 			end if
 
 			ungetch()

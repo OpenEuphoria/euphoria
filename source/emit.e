@@ -1295,7 +1295,7 @@ export procedure emit_op(integer op)
 
 	-- 2 inputs, 1 output
 	case EQUALS, LESS, GREATER, NOTEQ, LESSEQ, GREATEREQ,
-					AND, OR, XOR, REMAINDER, AND_BITS, OR_BITS, XOR_BITS then
+					AND, OR, XOR, REMAINDER, AND_BITS, OR_BITS, XOR_BITS, PEEK_MEMBER then
 		cont21ii(op, TRUE)  -- both integer args => integer result
 
 	case PLUS then -- elsif op = PLUS then
@@ -1777,7 +1777,24 @@ export procedure emit_op(integer op)
 			end if
 		end if
 		assignable = FALSE
-
+	
+	case MEMSTRUCT_ACCESS then
+		a = Pop() -- number of elements
+		sequence members = repeat( 0, a )
+		for i = a to 1 by -1 do
+			members[i] = Pop()
+		end for
+		emit_opcode( MEMSTRUCT_ACCESS )
+		emit_addr( a )
+		emit_addr( Pop() )
+		
+		for i = 1 to length( members ) do
+			emit_addr( members[i] )
+		end for
+		c = NewTempSym()
+		Push( c )
+		emit_addr( c )
+		assignable = FALSE
 	case else
 		InternalErr(259, {op})
 

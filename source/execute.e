@@ -20,11 +20,13 @@ elsedef
 	without type_check
 end ifdef
 
+include std/convert.e
+include std/dll.e
+include std/io.e
 include std/os.e
 include std/pretty.e
-include std/io.e
-include std/types.e
 include std/text.e
+include std/types.e
 
 include global.e
 include opnames.e
@@ -3070,6 +3072,14 @@ procedure opPEEK8S()
 	val[target] = peek8s(val[a])
 	pc += 3
 end procedure
+
+procedure opPEEK_POINTER()
+	a = Code[pc+1]
+	target = Code[pc+2]
+	val[target] = peek_pointer(val[a])
+	pc += 3
+end procedure
+
 procedure opPEEK_STRING()
 	a = Code[pc+1]
 	target = Code[pc+2]
@@ -3103,6 +3113,134 @@ procedure opSIZEOF()
 	pc += 3
 end procedure
 
+procedure opMEMSTRUCT_ACCESS()
+	-- pc+1 number of accesses
+	-- pc+2 pointer to memstruct
+	-- pc+2 .. pc+n+1 member syms for access
+	-- pc+n+2 target for pointer
+	
+	a = Code[pc + 1]
+	b = pc + 2 + a -- the last member
+	
+	atom ptr = val[Code[pc+2]]
+	for i = pc+3 to b do
+		ptr += SymTab[Code[i]][S_MEM_OFFSET]
+		if SymTab[Code[i]][S_MEM_POINTER] and i < b then
+			ptr = peek_pointer( ptr )
+		end if
+	end for
+	val[Code[b+1]] = ptr
+	pc = b + 2
+end procedure
+
+procedure opMEMSTRUCT_ARRAY()
+	-- pc+1 pointer
+	-- pc+2 member sym
+	-- pc+3 subscript
+	-- pc+4 target
+	atom    ptr  = Code[pc+1]
+	integer size = SymTab[pc+2][S_MEM_SIZE]
+	ptr += val[Code[pc+3]] * size
+	val[Code[pc+4]] = ptr
+	pc += 5
+end procedure
+
+procedure opPEEK_MEMBER()
+	-- pc+1 pointer
+	-- pc+2 member
+	-- pc+3 target
+	
+	atom pointer = val[Code[pc+1]]
+	a = Code[pc+2]
+	target = Code[pc+3]
+	integer data_type = SymTab[a][S_TOKEN]
+	integer signed    = SymTab[a][S_MEM_SIGNED]
+	
+	if SymTab[a][S_MEM_POINTER] then
+		data_type = MS_OBJECT
+		signed    = 0
+	end if
+	
+	switch data_type do
+		case MS_CHAR then
+			if signed then
+				val[target] = peeks( pointer )
+			else
+				val[target] = peek( pointer )
+			end if
+		case MS_SHORT then
+			if signed then
+				val[target] = peek2s( pointer )
+			else
+				val[target] = peek2u( pointer )
+			end if
+		case MS_INT then
+			if signed then
+				val[target] = peek4s( pointer )
+			else
+				val[target] = peek4u( pointer )
+			end if
+		case MS_LONG then
+			ifdef WINDOWS then
+				if signed then
+					val[target] = peek4s( pointer )
+				else
+					val[target] = peek4u( pointer )
+				end if
+			elsedef
+				if sizeof( C_LONG ) = 4 then
+					if signed then
+						val[target] = peek4s( pointer )
+					else
+						val[target] = peek4u( pointer )
+					end if
+				else
+					if signed then
+						val[target] = peek8s( pointer )
+					else
+						val[target] = peek8u( pointer )
+					end if
+				end if
+			end ifdef
+		case MS_LONGLONG then
+			if signed then
+				val[target] = peek8s( pointer )
+			else
+				val[target] = peek8u( pointer )
+			end if
+		case MS_OBJECT then
+			if sizeof( C_POINTER ) = 4 then
+				if signed then
+					val[target] = peek4s( pointer )
+				else
+					val[target] = peek4u( pointer )
+				end if
+			else
+				if signed then
+					val[target] = peek8s( pointer )
+				else
+					val[target] = peek8u( pointer )
+				end if
+			end if
+		case MS_FLOAT then
+			val[target] = float32_to_atom( peek( { pointer, 4 } ) )
+		case MS_DOUBLE then
+			val[target] = float64_to_atom( peek( { pointer, 8 } ) )
+		case MS_LONGDOUBLE then
+			val[target] = float80_to_atom( peek( { pointer, 10 } ) )
+		case MS_EUDOUBLE then
+			if sizeof( C_POINTER ) = 4 then
+				val[target] = float64_to_atom( peek( { pointer, 8 } ) )
+			else
+				val[target] = float80_to_atom( peek( { pointer, 10 } ) )
+			end if
+		case else
+			-- just return the struct in bytes
+			val[target] = peek( { pointer, SymTab[a][S_MEM_SIZE] } )
+	end switch
+	pc += 4
+end procedure
+
 procedure opPOKE()
 	a = Code[pc+1]
 	b = Code[pc+2]
@@ -3123,6 +3261,14 @@ procedure opPOKE8()
 	poke8(val[a], val[b])
 	pc += 3
 end procedure
+
+procedure opPOKE_POINTER()
+	a = Code[pc+1]
+	b = Code[pc+2]
+	poke_pointer(val[a], val[b])
+	pc += 3
+end procedure
+
 
 procedure opPOKE2()
 	a = Code[pc+1]
@@ -4216,10 +4362,10 @@ procedure do_exec()
 				opPOKE8()
 			
 			case POKE_POINTER then
-				opPOKE4()
+				opPOKE_POINTER()
 			
 			case PEEK_POINTER then
-				opPEEK4U()
+				opPEEK_POINTER()
 				
 			case POSITION then
 				opPOSITION()
@@ -4417,6 +4563,15 @@ procedure do_exec()
 				
 			case SIZEOF then
 				opSIZEOF()
+				
+			case MEMSTRUCT_ACCESS then
+				opMEMSTRUCT_ACCESS()
+			
+			case MEMSTRUCT_ARRAY then
+				opMEMSTRUCT_ARRAY()
+			
+			case PEEK_MEMBER then
+				opPEEK_MEMBER()
 
 			case else
 				RTFatal( sprintf("Unknown opcode: %d", op ) )

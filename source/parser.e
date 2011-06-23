@@ -1222,35 +1222,42 @@ procedure Factor()
 
 			short_circuit -= 1
 			tok = next_token()
-			current_sequence = append(current_sequence, sym)
-			while tok[T_ID] = LEFT_SQUARE do
-				subs_depth += 1
-				if lhs_subs_level >= 0 then
-					lhs_subs_level += 1
-				end if
-				save_factors = factors
-				save_lhs_subs_level = lhs_subs_level
-				call_proc(forward_expr, {})
-				tok = next_token()
-				if tok[T_ID] = SLICE then
+			
+			
+			if tok[T_ID] = DOT then
+				MemStruct_access( sym, FALSE )
+			else
+				current_sequence = append(current_sequence, sym)
+				while tok[T_ID] = LEFT_SQUARE do
+					subs_depth += 1
+					if lhs_subs_level >= 0 then
+						lhs_subs_level += 1
+					end if
+					save_factors = factors
+					save_lhs_subs_level = lhs_subs_level
 					call_proc(forward_expr, {})
-					emit_op(RHS_SLICE)
-					tok_match(RIGHT_SQUARE)
 					tok = next_token()
-					exit
-				else
-					putback(tok)
-					tok_match(RIGHT_SQUARE)
-					subs_depth -= 1
-					current_sequence = head( current_sequence, length( current_sequence ) - 1 )
-					emit_op(RHS_SUBS) -- current_sequence will be updated
-				end if
-				factors = save_factors
-				lhs_subs_level = save_lhs_subs_level
-				tok = next_token()
-			end while
-			current_sequence = head( current_sequence, length( current_sequence ) - 1 )
-			putback(tok)
+					if tok[T_ID] = SLICE then
+						call_proc(forward_expr, {})
+						emit_op(RHS_SLICE)
+						tok_match(RIGHT_SQUARE)
+						tok = next_token()
+						exit
+					else
+						putback(tok)
+						tok_match(RIGHT_SQUARE)
+						subs_depth -= 1
+						current_sequence = head( current_sequence, length( current_sequence ) - 1 )
+						emit_op(RHS_SUBS) -- current_sequence will be updated
+					end if
+					factors = save_factors
+					lhs_subs_level = save_lhs_subs_level
+					tok = next_token()
+				end while
+				current_sequence = head( current_sequence, length( current_sequence ) - 1 )
+				putback(tok)
+			end if
+			
 			short_circuit += 1
 
 		case DOLLAR then

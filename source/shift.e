@@ -151,6 +151,7 @@ procedure init_op_info()
 	op_info[PASSIGN_OP_SUBS     ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[PASSIGN_SLICE       ] = { FIXED_SIZE, 5, {}, {1}, {} }
 	op_info[PASSIGN_SUBS        ] = { FIXED_SIZE, 4, {}, {1}, {} }
+	op_info[PEEK_MEMBER         ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[PEEK_STRING         ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[PEEK8U              ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[PEEK8S              ] = { FIXED_SIZE, 3, {}, {2}, {} }
@@ -262,6 +263,8 @@ procedure init_op_info()
 	op_info[CONCAT_N            ] = { VARIABLE_SIZE, 0, {}, {}, {} } -- target: [pc+1] + 2
 	op_info[PROC                ] = { VARIABLE_SIZE, 0, {}, {}, {} }
 	op_info[PROC_TAIL           ] = op_info[PROC]
+	
+	op_info[MEMSTRUCT_ACCESS    ] = { VARIABLE_SIZE, 0, {}, {}, {} } -- TARGET: [pc+1] + 2
 end procedure
 
 init_op_info()
@@ -285,7 +288,7 @@ function op_size( integer pc, sequence code = Code )
 			case FUNC_FORWARD then
 				int = code[pc+2]
 				int += 4
-			case RIGHT_BRACE_N, CONCAT_N then
+			case RIGHT_BRACE_N, CONCAT_N, MEMSTRUCT_ACCESS then
 				int = code[pc+1]
 				int += 3
 			case else
@@ -506,7 +509,7 @@ export function get_target_sym( sequence opseq )
 			case FUNC_FORWARD then
 				return opseq[$]
 
-			case RIGHT_BRACE_N, CONCAT_N then
+			case RIGHT_BRACE_N, CONCAT_N, MEMSTRUCT_ACCESS then
 				return opseq[opseq[2]+2]
 
 		end switch
