@@ -9,7 +9,7 @@ include std/os.e
 -- 3. /packaging/win32/euphoria-ow.iss
 -- 4. /tests/t_condcmp.e
 -- 5. /source/version.h
---
+-- 6. /source/eu.manifest
 
 
 ifdef hello then
@@ -52,10 +52,10 @@ ifdef WINDOWS then
 	test_equal("WINDOWS test", 2, platform())
 end ifdef
 
-ifdef EU4_0_3 then
-    test_pass("EU4_0_3")
+ifdef EU4_0_4 then
+    test_pass("EU4_0_4")
 elsedef
-    test_fail("EU4_0_3")
+    test_fail("EU4_0_4")
 end ifdef
 
 ifdef EU4_0 then

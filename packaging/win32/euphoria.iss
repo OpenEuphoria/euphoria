@@ -9,11 +9,11 @@
 ; 3. /packaging/win32/euphoria-ow.iss
 ; 4. /tests/t_condcmp.e
 ; 5. /source/version.h
-;
+; 6. /source/eu.manifest
 [Setup]
 AppName=Euphoria
-AppVersion=4.0.3
-AppVerName=Euphoria v4.0.3
+AppVersion=4.0.4
+AppVerName=Euphoria v4.0.4
 AppPublisher=OpenEuphoria Group
 AppPublisherURL=http://openeuphoria.org
 AppSupportURL=http://openeuphoria.org
@@ -25,7 +25,7 @@ LicenseFile=..\..\license.txt
 DisableStartupPrompt=yes
 DisableReadyPage=yes
 OutputDir=.\
-OutputBaseFilename=euphoria-4.0.3
+OutputBaseFilename=euphoria-4.0.4
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes

@@ -8,11 +8,12 @@
  * 3. /packaging/win32/euphoria-ow.iss
  * 4. /tests/t_condcmp.e
  * 5. /source/version.h
+ * 6. /source/eu.manifest
 */
 
 #define MAJ_VER 4 
 #define MIN_VER 0 
-#define PAT_VER 3 
+#define PAT_VER 4 
 
 #ifndef EREL_TYPE
 #  define REL_TYPE "development"

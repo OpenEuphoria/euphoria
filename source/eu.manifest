@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- see source/version.h for a list of files to change when changing versions.  -->
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
 <assemblyIdentity
-    version="4.0.3"
+    version="4.0.4"
     processorArchitecture="x86"
     name="euphoria"
     type="win32"
