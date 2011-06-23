@@ -17,8 +17,11 @@
 * [[ticket:676]] Changed search order for [[:locate_file]]
 * [[ticket:675]] Fixed machine crash in [[:splice]] when splicing an atom before beginning
   of sequence or after end
-* [[ticket:665]] Windows 95 and above is supported.  For using sockets you must have Windows Sockets 2.2
-
+* [[ticket:665]] Windows 95 service pack 2.5 and above is supported.  For using sockets you must have Windows Sockets 2.2
+* [[ticket:664]] Symbol resolution errors now report whether you use a symbol is not declared or is declared more than once, 
+	or from not declared in the file you specify (via a namespace), or not a builtin.  When declared more than once, you are now
+	told where the symbols were declared.
+	
 === Enhancements
 
 * Minor changes to eutest output to read its console output
