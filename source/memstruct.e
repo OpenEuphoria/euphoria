@@ -413,7 +413,6 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 	
 	tok = next_token()
 	if tok[T_ID] = LEFT_SQUARE then
-	puts(1, ThisLine )
 		emit_opnd( struct_sym )
 		Expr()
 		tok_match( RIGHT_SQUARE )
