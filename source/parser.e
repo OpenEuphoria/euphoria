@@ -1389,7 +1389,7 @@ end function
 constant boolOps = {OR, AND, XOR}
 export sequence ExprLine
 export integer expr_bp
-procedure Expr()
+export procedure Expr()
 -- Parse a general expression
 -- Use either short circuit or full evaluation.
 	token tok

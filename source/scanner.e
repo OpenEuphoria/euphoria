@@ -1727,6 +1727,10 @@ export function Scanner()
 				CompileErr(125, nbasecode[basetype])
 			end if
 
+			if equal( ".", yytext ) then
+				return { DOT, 0 }
+			end if
+			
 			-- f.p. or large int
 			d = my_sscanf(yytext)
 			if sequence(d) then

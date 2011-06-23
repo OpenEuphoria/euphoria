@@ -3138,11 +3138,121 @@ procedure opMEMSTRUCT_ARRAY()
 	-- pc+2 member sym
 	-- pc+3 subscript
 	-- pc+4 target
-	atom    ptr  = Code[pc+1]
-	integer size = SymTab[pc+2][S_MEM_SIZE]
+	atom    ptr  = val[Code[pc+1]]
+	integer size = SymTab[Code[pc+2]][S_MEM_SIZE]
 	ptr += val[Code[pc+3]] * size
 	val[Code[pc+4]] = ptr
 	pc += 5
+end procedure
+
+function peek_member( atom pointer, integer sym )
+	integer data_type = SymTab[sym][S_TOKEN]
+	integer signed    = SymTab[sym][S_MEM_SIGNED]
+	
+	if SymTab[sym][S_MEM_POINTER] then
+		data_type = MS_OBJECT
+		signed    = 0
+	end if
+	
+	switch data_type do
+		case MS_CHAR then
+			if signed then
+				return peeks( pointer )
+			else
+				return peek( pointer )
+			end if
+		case MS_SHORT then
+			if signed then
+				return peek2s( pointer )
+			else
+				return peek2u( pointer )
+			end if
+		case MS_INT then
+			if signed then
+				return peek4s( pointer )
+			else
+				return peek4u( pointer )
+			end if
+		case MS_LONG then
+			ifdef WINDOWS then
+				if signed then
+					return peek4s( pointer )
+				else
+					return peek4u( pointer )
+				end if
+			elsedef
+				if sizeof( C_LONG ) = 4 then
+					if signed then
+						return peek4s( pointer )
+					else
+						return peek4u( pointer )
+					end if
+				else
+					if signed then
+						return peek8s( pointer )
+					else
+						return peek8u( pointer )
+					end if
+				end if
+			end ifdef
+		case MS_LONGLONG then
+			if signed then
+				return peek8s( pointer )
+			else
+				return peek8u( pointer )
+			end if
+		case MS_OBJECT then
+			if sizeof( C_POINTER ) = 4 then
+				if signed then
+					return peek4s( pointer )
+				else
+					return peek4u( pointer )
+				end if
+			else
+				if signed then
+					return peek8s( pointer )
+				else
+					return peek8u( pointer )
+				end if
+			end if
+		case MS_FLOAT then
+			return float32_to_atom( peek( { pointer, 4 } ) )
+		case MS_DOUBLE then
+			return float64_to_atom( peek( { pointer, 8 } ) )
+		case MS_LONGDOUBLE then
+			return float80_to_atom( peek( { pointer, 10 } ) )
+		case MS_EUDOUBLE then
+			if sizeof( C_POINTER ) = 4 then
+				return float64_to_atom( peek( { pointer, 8 } ) )
+			else
+				return float80_to_atom( peek( { pointer, 10 } ) )
+			end if
+		case else
+			-- just return the struct in bytes
+			return serialize_memstruct( pointer, sym )
+	end switch
+end function
+
+function serialize_memstruct( atom pointer, symtab_index sym )
+	symtab_pointer member_sym = sym
+	integer tid = sym_token( sym )
+	if tid >= MS_SIGNED and tid <= MS_OBJECT then
+		-- simple serialization of primitives...
+		return peek_member( pointer, sym )
+	end if
+	
+	sequence s = {}
+	while member_sym with entry do
+		s = append( s, peek_member( pointer + SymTab[member_sym][S_MEM_OFFSET], member_sym ) )
+	entry
+		member_sym = SymTab[member_sym][S_MEM_NEXT]
+	end while
+	return s
+end function
+
+procedure opMEMSTRUCT_SERIALIZE()
+	val[Code[pc+3]] = serialize_memstruct( val[Code[pc+1]], Code[pc+2] )
+	pc += 4
 end procedure
 
 procedure opPEEK_MEMBER()
@@ -3153,91 +3263,9 @@ procedure opPEEK_MEMBER()
 	atom pointer = val[Code[pc+1]]
 	a = Code[pc+2]
 	target = Code[pc+3]
-	integer data_type = SymTab[a][S_TOKEN]
-	integer signed    = SymTab[a][S_MEM_SIGNED]
 	
-	if SymTab[a][S_MEM_POINTER] then
-		data_type = MS_OBJECT
-		signed    = 0
-	end if
+	val[target] = peek_member( pointer, a )
 	
-	switch data_type do
-		case MS_CHAR then
-			if signed then
-				val[target] = peeks( pointer )
-			else
-				val[target] = peek( pointer )
-			end if
-		case MS_SHORT then
-			if signed then
-				val[target] = peek2s( pointer )
-			else
-				val[target] = peek2u( pointer )
-			end if
-		case MS_INT then
-			if signed then
-				val[target] = peek4s( pointer )
-			else
-				val[target] = peek4u( pointer )
-			end if
-		case MS_LONG then
-			ifdef WINDOWS then
-				if signed then
-					val[target] = peek4s( pointer )
-				else
-					val[target] = peek4u( pointer )
-				end if
-			elsedef
-				if sizeof( C_LONG ) = 4 then
-					if signed then
-						val[target] = peek4s( pointer )
-					else
-						val[target] = peek4u( pointer )
-					end if
-				else
-					if signed then
-						val[target] = peek8s( pointer )
-					else
-						val[target] = peek8u( pointer )
-					end if
-				end if
-			end ifdef
-		case MS_LONGLONG then
-			if signed then
-				val[target] = peek8s( pointer )
-			else
-				val[target] = peek8u( pointer )
-			end if
-		case MS_OBJECT then
-			if sizeof( C_POINTER ) = 4 then
-				if signed then
-					val[target] = peek4s( pointer )
-				else
-					val[target] = peek4u( pointer )
-				end if
-			else
-				if signed then
-					val[target] = peek8s( pointer )
-				else
-					val[target] = peek8u( pointer )
-				end if
-			end if
-		case MS_FLOAT then
-			val[target] = float32_to_atom( peek( { pointer, 4 } ) )
-		case MS_DOUBLE then
-			val[target] = float64_to_atom( peek( { pointer, 8 } ) )
-		case MS_LONGDOUBLE then
-			val[target] = float80_to_atom( peek( { pointer, 10 } ) )
-		case MS_EUDOUBLE then
-			if sizeof( C_POINTER ) = 4 then
-				val[target] = float64_to_atom( peek( { pointer, 8 } ) )
-			else
-				val[target] = float80_to_atom( peek( { pointer, 10 } ) )
-			end if
-		case else
-			-- just return the struct in bytes
-			val[target] = peek( { pointer, SymTab[a][S_MEM_SIZE] } )
-	end switch
 	pc += 4
 end procedure
 
@@ -4572,6 +4600,9 @@ procedure do_exec()
 			
 			case PEEK_MEMBER then
 				opPEEK_MEMBER()
+			
+			case MEMSTRUCT_SERIALIZE then
+				opMEMSTRUCT_SERIALIZE()
 
 			case else
 				RTFatal( sprintf("Unknown opcode: %d", op ) )

@@ -1385,6 +1385,10 @@ procedure opMEMSTRUCT_ARRAY()
 	trinary()
 end procedure
 
+procedure opMEMSTRUCT_SERIALIZE()
+	binary()
+end procedure
+
 procedure opPEEK_MEMBER()
 	binary()
 end procedure

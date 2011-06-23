@@ -35,8 +35,8 @@ export  boolean lhs_ptr = FALSE  -- are we parsing multiple LHS subscripts?
 -- temps needed for LHS subscripting
 export symtab_index lhs_subs1_copy_temp, lhs_target_temp
 -- Code generation Stack
-sequence cg_stack -- expression stack
-integer cgi -- expression stack top-of-stack index
+export sequence cg_stack -- expression stack
+export integer cgi -- expression stack top-of-stack index
 
 boolean assignable  = FALSE  -- did previous op have a re-assignable result?
 
@@ -1295,7 +1295,7 @@ export procedure emit_op(integer op)
 
 	-- 2 inputs, 1 output
 	case EQUALS, LESS, GREATER, NOTEQ, LESSEQ, GREATEREQ,
-					AND, OR, XOR, REMAINDER, AND_BITS, OR_BITS, XOR_BITS, PEEK_MEMBER then
+					AND, OR, XOR, REMAINDER, AND_BITS, OR_BITS, XOR_BITS then
 		cont21ii(op, TRUE)  -- both integer args => integer result
 
 	case PLUS then -- elsif op = PLUS then
@@ -1396,7 +1396,8 @@ export procedure emit_op(integer op)
 	-- 2 inputs, 1 output
 	case MINUS, rw:APPEND, PREPEND, COMPARE, EQUAL,
 					SYSTEM_EXEC, rw:CONCAT, REPEAT, MACHINE_FUNC, C_FUNC,
-					SPRINTF, TASK_CREATE, HASH, HEAD, TAIL, DELETE_ROUTINE then
+					SPRINTF, TASK_CREATE, HASH, HEAD, TAIL, DELETE_ROUTINE,
+					PEEK_MEMBER, MEMSTRUCT_SERIALIZE  then
 		cont21ii(op, FALSE)
 
 	case SC2_NULL then  -- correct the stack - we aren't emitting anything
@@ -1430,7 +1431,7 @@ export procedure emit_op(integer op)
 		assignable = FALSE
 
 	-- 3 inputs, 1 output
-	case RHS_SLICE, FIND, MATCH, FIND_FROM, MATCH_FROM, SPLICE, INSERT, REMOVE, OPEN then
+	case RHS_SLICE, FIND, MATCH, FIND_FROM, MATCH_FROM, SPLICE, INSERT, REMOVE, OPEN, MEMSTRUCT_ARRAY then
 		emit_opcode(op)
 		c = Pop()
 		b = Pop()
@@ -1795,6 +1796,7 @@ export procedure emit_op(integer op)
 		Push( c )
 		emit_addr( c )
 		assignable = FALSE
+		
 	case else
 		InternalErr(259, {op})
 

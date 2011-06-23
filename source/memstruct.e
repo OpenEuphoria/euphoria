@@ -399,7 +399,6 @@ end function
 -- Parse the dot notation of accessing a memstruct.
 export procedure MemStruct_access( symtab_index sym, integer lhs )
 	-- the sym is the pointer, and just before this, we found a DOT token
-	
 	-- First, figure out which memstruct we're using
 	token tok = next_token()
 	symtab_index struct_sym = tok[T_SYM]
@@ -411,7 +410,25 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 		-- something else
 		CompileErr( 354 )
 	end if
-	tok_match( DOT )
+	
+	tok = next_token()
+	if tok[T_ID] = LEFT_SQUARE then
+	puts(1, ThisLine )
+		emit_opnd( struct_sym )
+		Expr()
+		tok_match( RIGHT_SQUARE )
+		emit_op( MEMSTRUCT_ARRAY )
+		tok = next_token()
+		
+		if tok[T_ID] != DOT then
+			putback( tok )
+			return
+		end if
+	else
+		putback( tok )
+		tok_match( DOT )
+	end if
+	
 	No_new_entry = 1
 	integer members = 0
 	symtab_pointer member = 0
@@ -422,6 +439,34 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 				-- make it look like the IGNORED token
 				tok= { IGNORED, SymTab[tok[T_SYM]][S_NAME] }
 				fallthru
+			case MULTIPLY then
+				-- ptr.struct.*  serialize the whole thing
+				if lhs then
+					-- ??
+					CompileErr("LHS memstruct ops not implemented")
+				elsif member then
+					tid = sym_token( member )
+					if tid >= MS_SIGNED and tid <= MS_OBJECT then
+						if SymTab[member][S_MEM_POINTER] then
+							tok_match( MULTIPLY )
+							
+							
+						else
+							CompileErr( 359 )
+						end if
+					else
+						
+					end if
+					peek_member( members, member, ref, lhs )
+					emit_opnd( member )
+					emit_op( MEMSTRUCT_SERIALIZE )
+					
+					exit
+				else
+					emit_opnd( struct_sym )
+					emit_op( MEMSTRUCT_SERIALIZE )
+					exit
+				end if
 			case IGNORED then
 				-- just look at it within this memstruct's context...
 				if ref then
@@ -444,13 +489,15 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 				
 				if ref then
 					-- we don't know if this is a structure yet
-					
+					CompileErr("Forward referenced memstruct ops not implemented")
 				else
 					tid = sym_token( member )
 					if tid >= MS_SIGNED and tid <= MS_OBJECT then
 						-- must be a pointer
 						if SymTab[member][S_MEM_POINTER] then
 							tok_match( MULTIPLY )
+							emit_opnd( 0 )
+							members += 1
 							peek_member( members, member, ref, lhs )
 							exit -- DONE!
 						else
@@ -459,6 +506,7 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 					end if
 				end if
 			case else
+				
 				peek_member( members, member, ref, lhs )
 				putback( tok )
 				exit
@@ -470,11 +518,14 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 end procedure
 
 procedure peek_member( integer members, symtab_index member, integer ref, integer lhs )
+	
+	
 	emit_opnd( members )
 	emit_op( MEMSTRUCT_ACCESS )
+	
 	if lhs then
 		-- going to do some sort of poking here...
-		? 1/0
+		CompileErr("LHS memstruct ops not supported")
 	else
 		-- geting the value...peek it
 		emit_opnd( member )

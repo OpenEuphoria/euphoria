@@ -125,6 +125,8 @@ procedure init_op_info()
 	op_info[MATCH_FROM          ] = { FIXED_SIZE, 5, {}, {4}, {} }
 	op_info[MEM_COPY            ] = { FIXED_SIZE, 4, {}, {}, {} }
 	op_info[MEM_SET             ] = { FIXED_SIZE, 4, {}, {}, {} }
+	op_info[MEMSTRUCT_ARRAY     ] = { FIXED_SIZE, 4, {}, {3}, {} }
+	op_info[MEMSTRUCT_SERIALIZE ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[MINUS               ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[MINUS_I             ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[MULTIPLY            ] = { FIXED_SIZE, 4, {}, {3}, {} }
@@ -151,7 +153,7 @@ procedure init_op_info()
 	op_info[PASSIGN_OP_SUBS     ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[PASSIGN_SLICE       ] = { FIXED_SIZE, 5, {}, {1}, {} }
 	op_info[PASSIGN_SUBS        ] = { FIXED_SIZE, 4, {}, {1}, {} }
-	op_info[PEEK_MEMBER         ] = { FIXED_SIZE, 3, {}, {2}, {} }
+	op_info[PEEK_MEMBER         ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[PEEK_STRING         ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[PEEK8U              ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[PEEK8S              ] = { FIXED_SIZE, 3, {}, {2}, {} }

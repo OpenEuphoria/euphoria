@@ -230,5 +230,6 @@ export constant opnames = {
 	"MEMSTRUCT_ACCESS",
 	"MEMSTRUCT_ARRAY",
 	"PEEK_MEMBER",
+	"MEMSTRUCT_SERIALIZE",
 	$
 }

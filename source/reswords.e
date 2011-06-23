@@ -230,7 +230,8 @@ export constant
 	MEMSTRUCT_ACCESS    = 219,
 	MEMSTRUCT_ARRAY     = 220,
 	PEEK_MEMBER         = 221,
-	MAX_OPCODE          = 221
+	MEMSTRUCT_SERIALIZE = 222,
+	MAX_OPCODE          = 222
 
 
 -- adding new opcodes possibly affects reswords.h (C-coded backend),
