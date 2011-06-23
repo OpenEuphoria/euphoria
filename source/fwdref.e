@@ -402,14 +402,20 @@ procedure patch_forward_memstruct( token tok, integer ref )
 	sequence fr = forward_references[ref]
 	symtab_index sym = tok[T_SYM]
 	
-	if fr[FR_OP] = MEMSTRUCT_DECL then
-		-- need to check the size
-		if recalculate_size( sym ) != -1 then
-			resolved_reference( ref )
-		end if
-	else
-		-- TODO: using a memstruct
-	end if
+	switch fr[FR_OP] do
+		case MEMSTRUCT_DECL then
+			-- need to check the size
+			if recalculate_size( sym ) != -1 then
+				resolved_reference( ref )
+			end if
+		
+		case VARIABLE then
+			patch_var_use( ref, fr, sym, 1 )
+			
+		case else
+			-- TODO: ??
+		printf(1, "patching forward memstruct with op: %d\n", fr[FR_OP] )
+	end switch
 	
 end procedure
 
@@ -434,6 +440,20 @@ procedure patch_forward_variable( token tok, integer ref )
 		SymTab[sym][S_USAGE] = or_bits( U_READ, SymTab[sym][S_USAGE] )
 	end if
 	
+	patch_var_use( ref, fr, sym )
+	
+end procedure
+
+procedure patch_forward_init_check( token tok, integer ref )
+-- forward reference for a variable
+	sequence fr = forward_references[ref]
+	set_code( ref )
+	Code[fr[FR_PC]+1] = tok[T_SYM]
+	resolved_reference( ref )
+	reset_code()
+end procedure
+
+procedure patch_var_use( integer ref, sequence fr, integer sym, integer remove_init_check = 0 )
 	set_code( ref )
 	integer pc = fr[FR_PC]
 	if pc < 1 then
@@ -449,18 +469,15 @@ procedure patch_forward_variable( token tok, integer ref )
 		end while
 		resolved_reference( ref )
 	end if
+	
+	if remove_init_check then
+		if Code[pc] = GLOBAL_INIT_CHECK then
+			replace_code( {}, pc, pc+1, fr[FR_SUBPROG])
+		end if
+	end if
+		
 	reset_code()
 end procedure
-
-procedure patch_forward_init_check( token tok, integer ref )
--- forward reference for a variable
-	sequence fr = forward_references[ref]
-	set_code( ref )
-	Code[fr[FR_PC]+1] = tok[T_SYM]
-	resolved_reference( ref )
-	reset_code()
-end procedure
-
 
 function expected_name( integer id )
 	
@@ -853,6 +870,9 @@ function resolve_file( sequence refs, integer report_errors, integer unincluded_
 				switch sym_tok do
 					case CONSTANT, ENUM, VARIABLE then
 						patch_forward_variable( tok, ref )
+						break "fr_type"
+					case MEMSTRUCT, MEMUNION then
+						patch_forward_memstruct( tok, ref )
 						break "fr_type"
 					case else
 						forward_error( tok, ref )
