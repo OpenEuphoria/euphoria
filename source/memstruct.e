@@ -67,7 +67,10 @@ export procedure MemStruct_declaration( integer scope )
 			case MEMSTRUCT, MEMUNION, QUALIFIED_MEMSTRUCT, QUALIFIED_MEMUNION then
 				-- embedding
 				MemStruct_member( tok, pointer )
-			
+				-- reset the flags
+				pointer = 0
+				long    = 0
+				signed  = -1
 			case VARIABLE, QUALIFIED_VARIABLE then
 				if SC_UNDEFINED = SymTab[tok[T_SYM]][S_SCOPE] then
 					-- forward reference
@@ -77,6 +80,10 @@ export procedure MemStruct_declaration( integer scope )
 				else
 					CompileErr( 354 )
 				end if
+				-- reset the flags
+				pointer = 0
+				long    = 0
+				signed  = -1
 				
 			case MS_SIGNED then
 				if signed != -1 then
@@ -231,6 +238,7 @@ function calculate_size()
 			if padding then
 				size += mem_size - padding
 			end if
+			
 			SymTab[member_sym][S_MEM_OFFSET] = size
 			size += mem_size
 		else
@@ -259,12 +267,33 @@ function read_name()
 	end switch
 end function
 
+function member_array( symtab_index sym )
+	token tok = next_token()
+	if tok[T_ID] != LEFT_SQUARE then
+		putback( tok )
+		return 1
+	end if
+	
+	tok = next_token()
+	object size = sym_obj( tok[T_SYM] )
+	if not integer( size ) or size < 1 then
+		CompileErr( 68, {"positive integer", LexName( tok[T_ID] ) } )
+	end if
+	
+	SymTab[sym][S_MEM_ARRAY] = sym_obj( tok[T_SYM] )
+	tok_match( RIGHT_SQUARE )
+	return size
+end function
+
 procedure add_member( token tok, object mem_type, integer size, integer pointer, integer signed = 0 )
+	
 	symtab_index sym = tok[T_SYM]
 	
 	SymTab[last_sym][S_MEM_NEXT] = sym
 	
 	SymTab[sym] &= repeat( 0, SIZEOF_MEMSTRUCT_ENTRY - length( SymTab[sym] ) )
+	
+	size *= member_array( sym )
 	
 	if token( mem_type ) then
 		SymTab[sym][S_MEM_STRUCT] = mem_type[T_SYM]

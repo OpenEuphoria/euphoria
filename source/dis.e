@@ -1860,13 +1860,14 @@ procedure dis_memstruct( integer ms )
 	printf( out, "    SIZE: %d\n", SymTab[ms][S_MEM_SIZE] )
 	symtab_pointer member_sym = ms
 	while member_sym with entry do
-		printf( out, "    %06d: %-20s  %-15s pointer[%d] signed[%d] offset[%3d] size[%d]\n", 
+		printf( out, "    %06d: %-20s  %-15s pointer[%d] signed[%d] array[%d] offset[%3d] size[%d]\n", 
 			{ 
 				member_sym, 
 				sym_name( member_sym ), 
 				mem_name( member_sym ),
 				SymTab[member_sym][S_MEM_POINTER],
 				SymTab[member_sym][S_MEM_SIGNED],
+				SymTab[member_sym][S_MEM_ARRAY],
 				SymTab[member_sym][S_MEM_OFFSET],
 				SymTab[member_sym][S_MEM_SIZE],
 				$
