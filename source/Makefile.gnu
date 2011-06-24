@@ -511,8 +511,8 @@ $(BUILDDIR)/backobj/back/be_runtime.o : $(BUILDDIR)/backobj/back/coverage.h
 $(BUILDDIR)/$(OBJDIR)/back/be_machine.o : $(BUILDDIR)/include/be_ver.h
 
 ifeq "$(EMINGW)" "1"
-$(EUI_RES) : eui.rc version_info.rc
-$(EUIW_RES) : euiw.rc version_info.rc
+$(EUI_RES) : eui.rc version_info.rc eu.manifest
+$(EUIW_RES) : euiw.rc version_info.rc eu.manifest
 endif
 
 $(BUILDDIR)/$(EEXU) :  EU_TARGET = int.ex
@@ -529,7 +529,7 @@ else
 endif
 
 ifeq "$(EMINGW)" "1"
-$(EUC_RES) : euc.rc version_info.rc
+$(EUC_RES) : euc.rc version_info.rc eu.manifest
 endif
 
 $(BUILDDIR)/$(EECU) :  OBJDIR = transobj
@@ -538,7 +538,7 @@ $(BUILDDIR)/$(EECU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_ST
 $(BUILDDIR)/$(EECU) :  EU_OBJS = $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 $(BUILDDIR)/$(EECU) : $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) $(EUC_RES)
 	@$(ECHO) making $(EECU)
-	$(CC) $(EOSFLAGSCONSOLE) $(EUC_RES) $(EU_TRANSLATOR_OBJECTS) $(DEBUG_FLAGS) $(PROFILE_FLAGS) $(EU_BACKEND_OBJECTS) $(MSIZE) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EECU)
+	$(CC) $(EOSFLAGSCONSOLE) $(EUC_RES) $(EU_TRANSLATOR_OBJECTS) $(DEBUG_FLAGS) $(PROFILE_FLAGS) $(EU_BACKEND_OBJECTS) $(MSIZE) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EECU) 
 	
 backend : builddirs
 ifeq "$(EUPHORIA)" "1"
@@ -547,8 +547,8 @@ endif
 	$(MAKE) $(BUILDDIR)/$(EBACKENDU) EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 
 ifeq "$(EMINGW)" "1"
-$(EUB_RES) : eub.rc version_info.rc
-$(EUBW_RES) : eubw.rc version_info.rc
+$(EUB_RES) : eub.rc version_info.rc eu.manifest
+$(EUBW_RES) : eubw.rc version_info.rc eu.manifest
 endif
 
 $(BUILDDIR)/$(EBACKENDU) : OBJDIR = backobj
