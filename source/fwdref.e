@@ -169,6 +169,9 @@ export procedure set_data( integer ref, object data )
 end procedure
 
 export procedure add_data( integer ref, object data )
+	if atom( forward_references[ref][FR_DATA] ) then
+		forward_references[ref][FR_DATA] = { forward_references[ref][FR_DATA] }
+	end if
 	forward_references[ref][FR_DATA] = append( forward_references[ref][FR_DATA], data )
 end procedure
 
@@ -394,6 +397,8 @@ procedure patch_forward_msmember( token tok, integer ref )
 		resolved_reference( ref )
 	else
 		-- TODO: using a memstruct
+		CompileErr( "Unimplemented: patching forward member with op [1]", fr[FR_OP] )
+		
 	end if
 	
 end procedure
@@ -411,10 +416,33 @@ procedure patch_forward_memstruct( token tok, integer ref )
 		
 		case VARIABLE then
 			patch_var_use( ref, fr, sym, 1 )
-			
+		
+		case MEMSTRUCT_ACCESS then
+			integer pc = fr[FR_PC]
+			set_code( ref )
+			integer rx = find( -ref, Code, pc )
+			if rx then
+				-- these aren't always emitted
+				Code[rx] = sym
+			end if
+			resolved_reference( ref )
+			for i = 2 to length( fr[FR_DATA] ) do
+				-- clean up any members tied to this
+				integer m_ref = fr[FR_DATA][i]
+				rx = find( -m_ref, Code, pc )
+				if rx then
+					-- look it up
+					integer m_sym = resolve_members( forward_references[m_ref][FR_DATA], sym )
+					if m_sym then
+						Code[rx] = m_sym
+						resolved_reference( m_ref )
+					end if
+				end if
+			end for
+			reset_code()
 		case else
 			-- TODO: ??
-		printf(1, "patching forward memstruct with op: %d\n", fr[FR_OP] )
+			CompileErr( "Unimplemented: patching forward memstruct with op - %d\n", fr[FR_OP] )
 	end switch
 	
 end procedure
@@ -1017,6 +1045,8 @@ export procedure shift_fwd_refs( integer pc, integer amount )
 	else
 		integer file = SymTab[shifting_sub][S_FILE_NO]
 		integer sp   = find( shifting_sub, active_subprogs[file] )
-		shift_these( active_references[file][sp], pc, amount )
+		if sp then
+			shift_these( active_references[file][sp], pc, amount )
+		end if
 	end if
 end procedure

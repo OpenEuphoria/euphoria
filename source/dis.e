@@ -1371,12 +1371,11 @@ procedure opMEMSTRUCT_ACCESS()
 	-- pc+3 .. pc+n+1 member syms for access
 	-- pc+n+2 target for pointer
 	integer members = Code[pc+1]
-	
-	sequence text = sprintf("MEMSTRUCT_ACCESS %s %s", names( {Code[pc+2], SymTab[Code[pc+3]][S_MEM_PARENT]} ) )
+	sequence text = sprintf("MEMSTRUCT_ACCESS %s %s(", names( {Code[pc+2], SymTab[Code[pc+3]][S_MEM_PARENT]} ) )
 	for i = pc+3 to pc+2+members do
-		text &= sprintf(".%s", names( Code[i] ) )
+		text &= sprintf(" %s", names( Code[i] ) )
 	end for
-	text &= sprintf(" => %s", names( Code[pc+members+3] ) )
+	text &= sprintf(" ) => %s", names( Code[pc+members+3] ) )
 	il( text, members + 3 )
 	pc += members + 4
 end procedure

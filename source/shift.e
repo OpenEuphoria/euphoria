@@ -125,7 +125,7 @@ procedure init_op_info()
 	op_info[MATCH_FROM          ] = { FIXED_SIZE, 5, {}, {4}, {} }
 	op_info[MEM_COPY            ] = { FIXED_SIZE, 4, {}, {}, {} }
 	op_info[MEM_SET             ] = { FIXED_SIZE, 4, {}, {}, {} }
-	op_info[MEMSTRUCT_ARRAY     ] = { FIXED_SIZE, 4, {}, {3}, {} }
+	op_info[MEMSTRUCT_ARRAY     ] = { FIXED_SIZE, 5, {}, {4}, {} }
 	op_info[MEMSTRUCT_SERIALIZE ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[MINUS               ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[MINUS_I             ] = { FIXED_SIZE, 4, {}, {3}, {} }
@@ -290,9 +290,12 @@ function op_size( integer pc, sequence code = Code )
 			case FUNC_FORWARD then
 				int = code[pc+2]
 				int += 4
-			case RIGHT_BRACE_N, CONCAT_N, MEMSTRUCT_ACCESS then
+			case RIGHT_BRACE_N, CONCAT_N then
 				int = code[pc+1]
 				int += 3
+			case MEMSTRUCT_ACCESS then
+				int = code[pc+1]
+				int += 4
 			case else
 				InternalErr( 269, {op} )
 		end switch

@@ -395,17 +395,27 @@ export function resolve_member( sequence name, symtab_index struct_sym )
 	return 0
 end function
 
---**
--- Parse the dot notation of accessing a memstruct.
-export procedure MemStruct_access( symtab_index sym, integer lhs )
-	-- the sym is the pointer, and just before this, we found a DOT token
-	-- First, figure out which memstruct we're using
-	token tok = next_token()
+export function resolve_members( sequence names, symtab_index struct_sym )
+	symtab_pointer parent = struct_sym
+	symtab_pointer sym
+	for i = 1 to length( names ) do
+		sym = resolve_member( names[i], parent )
+		if not sym then
+			return 0
+		end if
+		parent = SymTab[sym][S_MEM_PARENT]
+	end for
+	return sym
+end function
+
+function parse_symstruct( token tok )
+		
 	symtab_index struct_sym = tok[T_SYM]
 	integer ref = 0
 	if SymTab[struct_sym][S_SCOPE] = SC_UNDEFINED then
-		-- hopefully a forward reference
-		ref = new_forward_reference( MEMSTRUCT, sym, MEMSTRUCT_ACCESS )
+		-- a forward reference
+		ref = new_forward_reference( MEMSTRUCT, struct_sym, MEMSTRUCT_ACCESS )
+		
 	elsif tok[T_ID] != MEMSTRUCT and tok[T_ID] != QUALIFIED_MEMSTRUCT then
 		-- something else
 		CompileErr( 354 )
@@ -413,7 +423,7 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 	
 	tok = next_token()
 	if tok[T_ID] = LEFT_SQUARE then
-		emit_opnd( struct_sym )
+		emit_symstruct( struct_sym, ref )
 		Expr()
 		tok_match( RIGHT_SQUARE )
 		emit_op( MEMSTRUCT_ARRAY )
@@ -421,13 +431,50 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 		
 		if tok[T_ID] != DOT then
 			putback( tok )
-			return
+			return 0
 		end if
 	else
 		putback( tok )
 		tok_match( DOT )
 	end if
+	return { struct_sym, ref }
+end function
+
+procedure emit_member( integer member, integer ref, integer op, sequence names )
+	if ref then
+		integer m_ref = new_forward_reference( MS_MEMBER, member, op )
+		add_data( ref, m_ref )
+		emit_opnd( -m_ref )
+		set_data( m_ref, names )
+	else
+		emit_opnd( member )
+	end if
+end procedure
+
+procedure emit_symstruct( integer symstruct, integer ref )
+	if ref then
+		emit_opnd( -ref )
+	else
+		emit_opnd( symstruct )
+	end if
+end procedure
+
+--**
+-- Parse the dot notation of accessing a memstruct.
+export procedure MemStruct_access( symtab_index sym, integer lhs )
+	-- the sym is the pointer, and just before this, we found a DOT token
+	-- First, figure out which memstruct we're using
+	token tok = next_token()
 	
+	object sym_ref = parse_symstruct( tok )
+	if atom( sym_ref ) then
+		-- simple array access, nothing more needed
+		return
+	end if
+	symtab_index struct_sym = sym_ref[1]
+	integer      ref        = sym_ref[2]
+	sequence names = {}
+
 	No_new_entry = 1
 	integer members = 0
 	symtab_pointer member = 0
@@ -448,36 +495,39 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 					if tid >= MS_SIGNED and tid <= MS_OBJECT then
 						if SymTab[member][S_MEM_POINTER] then
 							tok_match( MULTIPLY )
-							
-							
 						else
 							CompileErr( 359 )
 						end if
 					else
 						
 					end if
-					peek_member( members, member, ref, lhs )
-					emit_opnd( member )
+					peek_member( members, member, ref, lhs, names )
+					-- re-emit the last member for serialization
+					emit_member( member, ref, PEEK_MEMBER, names )
 					emit_op( MEMSTRUCT_SERIALIZE )
 					
 					exit
 				else
-					emit_opnd( struct_sym )
+					emit_symstruct( struct_sym, ref )
 					emit_op( MEMSTRUCT_SERIALIZE )
 					exit
 				end if
 			case IGNORED then
 				-- just look at it within this memstruct's context...
+				names = append( names, tok[T_SYM] )
 				if ref then
 					-- we don't know the memstruct yet!
-					? 1/0
+					member = NewBasicEntry( tok[T_SYM], 0, SC_MEMSTRUCT, MS_MEMBER, 0, 0, 00 )
+					SymTab[member] &= repeat( 0, SIZEOF_MEMSTRUCT_ENTRY - length( SymTab[member] ) )
+					emit_member( member, ref, MEMSTRUCT_ACCESS, names )
 				else
 					member = resolve_member( tok[T_SYM], struct_sym )
 					if not member then
 						CompileErr( 358, { tok[T_SYM], sym_name( struct_sym ) } )
 					end if
+					emit_opnd( member )
 				end if
-				emit_opnd( member )
+				
 				members += 1
 				
 			case DOT then
@@ -488,16 +538,17 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 				
 				if ref then
 					-- we don't know if this is a structure yet
-					CompileErr("Forward referenced memstruct ops not implemented")
+					
+-- 					CompileErr("Forward referenced memstruct ops not implemented")
 				else
 					tid = sym_token( member )
 					if tid >= MS_SIGNED and tid <= MS_OBJECT then
-						-- must be a pointer
+						-- must be a pointer, because we've found a primitive
 						if SymTab[member][S_MEM_POINTER] then
 							tok_match( MULTIPLY )
 							emit_opnd( 0 )
 							members += 1
-							peek_member( members, member, ref, lhs )
+							peek_member( members, member, ref, lhs, names )
 							exit -- DONE!
 						else
 							CompileErr( 359 )
@@ -506,7 +557,7 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 				end if
 			case else
 				
-				peek_member( members, member, ref, lhs )
+				peek_member( members, member, ref, lhs, names )
 				putback( tok )
 				exit
 		end switch
@@ -516,8 +567,7 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 	No_new_entry = 0
 end procedure
 
-procedure peek_member( integer members, symtab_index member, integer ref, integer lhs )
-	
+procedure peek_member( integer members, symtab_index member, integer ref, integer lhs, sequence names )
 	
 	emit_opnd( members )
 	emit_op( MEMSTRUCT_ACCESS )
@@ -527,11 +577,7 @@ procedure peek_member( integer members, symtab_index member, integer ref, intege
 		CompileErr("LHS memstruct ops not supported")
 	else
 		-- geting the value...peek it
-		emit_opnd( member )
-		if ref then
-			-- this check might not be enough...
-			new_forward_reference( MS_MEMBER, member, PEEK_MEMBER )
-		end if
+		emit_member( member, ref, PEEK_MEMBER, names )
 		emit_op( PEEK_MEMBER )
 	end if
 end procedure

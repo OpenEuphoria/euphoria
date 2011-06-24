@@ -3234,6 +3234,7 @@ function peek_member( atom pointer, integer sym )
 end function
 
 function serialize_memstruct( atom pointer, symtab_index sym )
+
 	symtab_pointer member_sym = sym
 	integer tid = sym_token( sym )
 	if tid >= MS_SIGNED and tid <= MS_OBJECT then
@@ -3251,7 +3252,8 @@ function serialize_memstruct( atom pointer, symtab_index sym )
 end function
 
 procedure opMEMSTRUCT_SERIALIZE()
-	val[Code[pc+3]] = serialize_memstruct( val[Code[pc+1]], Code[pc+2] )
+	atom pointer = val[Code[pc+1]]
+	val[Code[pc+3]] = serialize_memstruct( pointer, Code[pc+2] )
 	pc += 4
 end procedure
 
