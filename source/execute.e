@@ -3171,7 +3171,7 @@ procedure opMEMSTRUCT_ARRAY()
 end procedure
 
 procedure poke_member( atom pointer, integer sym, atom value )
-integer data_type = SymTab[sym][S_TOKEN]
+	integer data_type = SymTab[sym][S_TOKEN]
 	integer signed    = SymTab[sym][S_MEM_SIGNED]
 	
 	if SymTab[sym][S_MEM_POINTER] then

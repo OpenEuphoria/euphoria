@@ -29,14 +29,14 @@ public constant
 	ST_LAST_LINE      = offset( C_INT ), -- 28,
 	
 	-- memstruct:
-	ST_MEM_SIZE       = offset( C_SHORT, ST_DECLARED_IN ),
-	ST_MEM_OFFSET     = offset( C_SHORT ),
-	ST_MEM_SIGNED     = offset( C_SHORT ),
-	ST_MEM_POINTER    = offset( C_SHORT ),
-	ST_MEM_ARRAY      = offset( C_INT ),
-	ST_MEM_NEXT       = offset( C_POINTER ),
+	ST_MEM_NEXT       = offset( C_POINTER, ST_DECLARED_IN  ),
 	ST_MEM_STRUCT     = offset( C_POINTER ),
 	ST_MEM_PARENT     = offset( C_POINTER ),
+	ST_MEM_SIZE       = offset( C_INT ),
+	ST_MEM_OFFSET     = offset( C_INT ),
+	ST_MEM_ARRAY      = offset( C_INT ),
+	ST_MEM_SIGNED     = offset( C_CHAR ),
+	ST_MEM_POINTER    = offset( C_CHAR ),
 	
 	-- routine:
 	ST_CODE           = offset( C_POINTER, ST_DECLARED_IN ), -- 24,

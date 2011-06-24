@@ -229,7 +229,16 @@
 #define PEEK_POINTER        216
 #define SIZEOF              217
 #define STARTLINE_BREAK     218
-#define MAX_OPCODE          218
+#define MEMSTRUCT_ACCESS    219
+#define MEMSTRUCT_ARRAY     220
+#define PEEK_MEMBER         221
+#define MEMSTRUCT_SERIALIZE 222
+#define MEMSTRUCT_ASSIGN    223 
+#define MEMSTRUCT_PLUS      224
+#define MEMSTRUCT_MINUS     225
+#define MEMSTRUCT_MULTIPLY  226
+#define MEMSTRUCT_DIVIDE    227
+#define MAX_OPCODE          227
 
 /* remember to update reswords.e, opnames.e,
    opnames.h, optable[], localjumptab[]
@@ -242,6 +251,25 @@
 #define NAMESPACE         523
 #define FUNC              501
 #define TYPE              504
+
+#define MEMSTRUCT            524
+#define QUALIFIED_MEMSTRUCT  523
+#define MEMUNION             526
+#define QUALIFIED_MEMUNION   527
+#define MS_SIGNED            528
+#define MS_UNSIGNED          528
+#define MS_POINTER           530
+#define MS_CHAR              531
+#define MS_SHORT             532
+#define MS_INT               533
+#define MS_LONG              534
+#define MS_LONGLONG          535
+#define MS_FLOAT             536
+#define MS_DOUBLE            537
+#define MS_LONGDOUBLE        538
+#define MS_EUDOUBLE          539
+#define MS_OBJECT            540
+#define MS_MEMBER            541
 
 //struct key {
 //  char *name;

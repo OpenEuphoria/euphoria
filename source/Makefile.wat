@@ -177,6 +177,7 @@ EU_BACKEND_OBJECTS = &
 	$(BUILDDIR)\$(OBJDIR)\back\be_syncolor.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_task.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_w.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_memstruct.obj &
 	$(PCRE_OBJECTS)
 
 EU_LIB_OBJECTS = &
@@ -798,7 +799,8 @@ $(BUILDDIR)\$(OBJDIR)\back\be_runtime.obj : be_runtime.c *.h $(CONFIG)
 $(BUILDDIR)\$(OBJDIR)\back\be_symtab.obj : be_symtab.c *.h $(CONFIG) 
 $(BUILDDIR)\$(OBJDIR)\back\be_w.obj : be_w.c *.h $(CONFIG) 
 $(BUILDDIR)\$(OBJDIR)\back\be_socket.obj : be_socket.c *.h $(CONFIG)
-$(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj : be_pcre.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj : be_pcre.c *.h $(CONFIG)
+$(BUILDDIR)\$(OBJDIR)\back\be_memstruct.obj : be_memstruct.c *.h $(CONFIG) 
 
 # end of OBJDIR exists
 !endif

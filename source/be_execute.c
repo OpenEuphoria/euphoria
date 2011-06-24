@@ -68,6 +68,7 @@
 #include "be_coverage.h"
 #include "be_execute.h"
 #include "be_debug.h"
+#include "be_memstruct.h"
 
 /******************/
 /* Local defines  */
@@ -1160,6 +1161,13 @@ void code_set_pointers(intptr_t **code)
 			case TAIL:
 			case DELETE_ROUTINE:
 			case RETURNF:
+			case MEMSTRUCT_ASSIGN:
+			case MEMSTRUCT_PLUS:
+			case MEMSTRUCT_MINUS:
+			case MEMSTRUCT_DIVIDE:
+			case MEMSTRUCT_MULTIPLY:
+			case MEMSTRUCT_SERIALIZE:
+			case PEEK_MEMBER:
 				// 3 operands follow
 				code[i+1] = SET_OPERAND(code[i+1]);
 				code[i+2] = SET_OPERAND(code[i+2]);
@@ -1212,6 +1220,7 @@ void code_set_pointers(intptr_t **code)
 			case INSERT:
 			case REMOVE:
 			case OPEN:
+			case MEMSTRUCT_ARRAY:
 				// 4 operands follow
 				code[i+1] = SET_OPERAND(code[i+1]);
 				code[i+2] = SET_OPERAND(code[i+2]);
@@ -1323,7 +1332,17 @@ void code_set_pointers(intptr_t **code)
 
 				i += n + 3;
 				break;
+			case MEMSTRUCT_ACCESS:
+				n = (intptr_t)code[i+1] + 1;
+				for (j = 1; j <= n; j++) {
+					word = (intptr_t)code[i+1+j];
+					code[i+1+j] = SET_OPERAND(word);
+				}
+				word = (intptr_t)code[i+n+2];
+				code[i+n+2] = SET_OPERAND(word);
 
+				i += n + 3;
+				break;
 			default:
 				RTFatal("UNKNOWN IL OPCODE");
 		}
@@ -1368,6 +1387,15 @@ void symtab_set_pointers()
 					TopLevelSub = s;
 				}
 				s->u.subp.block = (symtab_ptr)SET_OPERAND( s->u.subp.block );
+			}
+			else if(s->token == MEMSTRUCT ||
+					s->token == MEMUNION  ||
+					s->token == MS_MEMBER ){
+				
+				s->u.memstruct.next        = (symtab_ptr)SET_OPERAND( s->u.memstruct.next );
+				s->u.memstruct.struct_type = (symtab_ptr)SET_OPERAND( s->u.memstruct.struct_type );
+				s->u.memstruct.parent      = (symtab_ptr)SET_OPERAND( s->u.memstruct.parent );
+				
 			}
 			else{
 				s->u.var.declared_in = (symtab_ptr)SET_OPERAND( s->u.var.declared_in );
@@ -1811,8 +1839,14 @@ void do_exec(intptr_t *start_pc)
 /* 214 (previous) */
   &&L_POKE_POINTER, &&L_PEEK_POINTER,
 /* 215 (previous) */
-  &&L_SIZEOF, &&L_STARTLINE_BREAK
-  };
+  &&L_SIZEOF, &&L_STARTLINE_BREAK,
+  
+  &&L_MEMSTRUCT_ACCESS, &&L_MEMSTRUCT_ARRAY, &&L_PEEK_MEMBER,
+  &&L_MEMSTRUCT_SERIALIZE, &&L_MEMSTRUCT_ASSIGN, &&L_MEMSTRUCT_PLUS,
+  &&L_MEMSTRUCT_MINUS, &&L_MEMSTRUCT_MULTIPLY, &&L_MEMSTRUCT_DIVIDE,
+/* 227 (previous) */
+
+	};
 #endif
 #endif
 	if (start_pc == NULL) {
@@ -4525,10 +4559,16 @@ void do_exec(intptr_t *start_pc)
 				BREAK;
 
 			case L_SIZEOF:
-				a = *(object_ptr)pc[1]; /* the data type */
-				top = *(object_ptr)pc[2];
 				tpc = pc;  // in case of machine exception
-				*(object_ptr)pc[2] = eu_sizeof( a );
+				top = *(object_ptr)pc[2];
+				if( ((symtab_ptr)pc[1])->mode == M_NORMAL ){
+					*(object_ptr)pc[2] = ((symtab_ptr)pc[1])->u.memstruct.size;
+				}
+				else{
+					
+					a = *(object_ptr)pc[1]; /* the data type */
+					*(object_ptr)pc[2] = eu_sizeof( a );
+				}
 				DeRef( top );
 				inc3pc();
 				thread();
@@ -5279,6 +5319,78 @@ void do_exec(intptr_t *start_pc)
 				thread2();
 				BREAK;
 
+			case L_MEMSTRUCT_ASSIGN:
+				deprintf("case L_MEMSTRUCT_ASSIGN");
+				tpc = pc;
+				poke_member( (object_ptr) pc[1], (symtab_ptr) pc[2], (object_ptr) pc[3] );
+				thread4();
+				BREAK;
+				
+			case L_MEMSTRUCT_PLUS:
+				deprintf("case LMEMSTRUCT_PLUS");
+				a = MEMSTRUCT_PLUS;
+				goto mem_assign_op;
+				
+			case L_MEMSTRUCT_MINUS:
+				deprintf("case LMEMSTRUCT_MINUS");
+				a = MEMSTRUCT_MINUS;
+				goto mem_assign_op;
+				
+			case L_MEMSTRUCT_DIVIDE:
+				deprintf("case LMEMSTRUCT_DIVIDE");
+				a = MEMSTRUCT_DIVIDE;
+				goto mem_assign_op;
+				
+			case L_MEMSTRUCT_MULTIPLY:
+				deprintf("case LMEMSTRUCT_MULTIPLY");
+				a = MEMSTRUCT_MULTIPLY;
+				
+				mem_assign_op:
+				tpc = pc;
+				memstruct_assignop( a, (object_ptr)pc[1], (symtab_ptr) pc[2], (object_ptr) pc[3] );
+				thread4();
+				BREAK;
+				
+			case L_MEMSTRUCT_SERIALIZE:
+				deprintf("case L_MEMSTRUCT_SERIALIZE");
+				tpc = pc;
+				a = serialize_memstruct( (object_ptr) pc[1], 0, (symtab_ptr) pc[2] );
+				obj_ptr = (object_ptr) pc[3];
+				DeRef( *obj_ptr );
+				*obj_ptr = a;
+				thread4();
+				BREAK;
+			case L_PEEK_MEMBER:
+				deprintf("case L_PEEK_MEMBER");
+				tpc = pc;
+				a = peek_member( (object_ptr) pc[1], (symtab_ptr) pc[2], -1, 0 );
+				obj_ptr = (object_ptr) pc[3];
+				DeRef( *obj_ptr );
+				*obj_ptr = a;
+				thread4();
+				BREAK;
+				
+			case L_MEMSTRUCT_ACCESS:
+				deprintf("case L_MEMSTRUCT_ACCESS");
+				tpc = pc;
+				b = pc[1];
+				a = memstruct_access( b, (object_ptr) pc[2], (symtab_ptr) pc[3] );
+				obj_ptr = (object_ptr) pc[b+3];
+				DeRef( *obj_ptr );
+				*obj_ptr = a;
+				pc += b + 4;
+				thread();
+				BREAK;
+				
+			case L_MEMSTRUCT_ARRAY:
+				deprintf("case L_MEMSTRUCT_ARRAY");
+				tpc = pc;
+				a = memstruct_array( (object_ptr)pc[1], (symtab_ptr)pc[2], (object_ptr)pc[3] );
+				obj_ptr = (object_ptr) pc[4];
+				DeRef( *obj_ptr );
+				*obj_ptr = a;
+				thread5();
+				BREAK;
 			default:
 				RTFatal("Unsupported Op Code ");
 

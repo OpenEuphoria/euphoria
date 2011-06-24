@@ -1803,7 +1803,7 @@ void init_fp_conversions(){
 }
 #endif
 
-static object float_to_atom(object x, int flen)
+object float_to_atom(object x, int flen)
 /* convert a sequence of 4, 8 or 10 bytes in IEEE format to an atom */
 {
 	int len, i;

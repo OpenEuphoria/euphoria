@@ -109,35 +109,52 @@ procedure BackEnd(integer il_file)
 			if eentry[S_MODE] = M_NORMAL then
 				-- vars and routines
 				
-				if find(eentry[S_TOKEN], RTN_TOKS) then
-					-- routines only
-					if sequence(eentry[S_CODE]) and (get_backend() or eentry[S_OPCODE]=0) then  
-						-- routines with code
-						e_addr = allocate( sizeof( C_POINTER ) * (length(eentry[S_CODE]) + 1 ) ) -- IL code
-						poke_pointer(e_addr, length(eentry[S_CODE]))
-						poke_pointer(e_addr + sizeof( C_POINTER ), eentry[S_CODE])
-						poke_pointer(addr + ST_CODE, e_addr)
-					
-						if sequence(eentry[S_LINETAB]) then
-							-- line table
-							l_addr = allocate( 4 * length(eentry[S_LINETAB])) 
-							poke4(l_addr, eentry[S_LINETAB])
-							poke_pointer(addr + ST_LINETAB, l_addr)
-						else
-							-- pointer to linetable will be NULL
+				switch eentry[S_TOKEN] do
+					case PROC, FUNC, TYPE then
+						-- routines only
+						if sequence(eentry[S_CODE]) and (get_backend() or eentry[S_OPCODE]=0) then  
+							-- routines with code
+							e_addr = allocate( sizeof( C_POINTER ) * (length(eentry[S_CODE]) + 1 ) ) -- IL code
+							poke_pointer(e_addr, length(eentry[S_CODE]))
+							poke_pointer(e_addr + sizeof( C_POINTER ), eentry[S_CODE])
+							poke_pointer(addr + ST_CODE, e_addr)
+						
+							if sequence(eentry[S_LINETAB]) then
+								-- line table
+								l_addr = allocate( 4 * length(eentry[S_LINETAB])) 
+								poke4(l_addr, eentry[S_LINETAB])
+								poke_pointer(addr + ST_LINETAB, l_addr)
+							else
+								-- pointer to linetable will be NULL
+							end if
 						end if
-					end if
-					poke4(addr + ST_FIRSTLINE, eentry[S_FIRSTLINE])
-					poke_pointer(addr + ST_TEMPS, eentry[S_TEMPS])
-					poke4(addr + ST_NUM_ARGS, eentry[S_NUM_ARGS])
-					--
-					--
-					poke4(addr + ST_STACK_SPACE, eentry[S_STACK_SPACE])
-					poke_pointer(addr + ST_BLOCK, eentry[S_BLOCK])
+						poke4(addr + ST_FIRSTLINE, eentry[S_FIRSTLINE])
+						poke_pointer(addr + ST_TEMPS, eentry[S_TEMPS])
+						poke4(addr + ST_NUM_ARGS, eentry[S_NUM_ARGS])
+						--
+						--
+						poke4(addr + ST_STACK_SPACE, eentry[S_STACK_SPACE])
+						poke_pointer(addr + ST_BLOCK, eentry[S_BLOCK])
 					
-				else
-					poke_pointer(addr + ST_DECLARED_IN, eentry[S_BLOCK] )
-				end if
+					case MEMSTRUCT, MEMUNION, MS_MEMBER, 
+							MS_OBJECT, MS_CHAR, MS_SHORT, MS_INT,
+							MS_LONG, MS_LONGLONG, 
+							MS_FLOAT, MS_DOUBLE, MS_LONGDOUBLE, MS_EUDOUBLE then
+						if SIZEOF_MEMSTRUCT_ENTRY = length( eentry ) then
+							poke_pointer( addr + ST_MEM_NEXT, eentry[S_MEM_NEXT] )
+							poke_pointer( addr + ST_MEM_STRUCT, eentry[S_MEM_STRUCT] )
+							poke_pointer( addr + ST_MEM_PARENT, eentry[S_MEM_PARENT] )
+							
+							poke4( addr + ST_MEM_SIZE, eentry[S_MEM_SIZE] )
+							poke4( addr + ST_MEM_OFFSET, eentry[S_MEM_OFFSET] )
+							poke4( addr + ST_MEM_ARRAY, eentry[S_MEM_ARRAY] )
+							poke( addr + ST_MEM_SIGNED, eentry[S_MEM_SIGNED] )
+							poke( addr + ST_MEM_POINTER, eentry[S_MEM_POINTER] )
+						end if
+						
+					case else
+						poke_pointer(addr + ST_DECLARED_IN, eentry[S_BLOCK] )
+				end switch
 				
 			elsif eentry[S_MODE] = M_BLOCK then
 				poke_pointer(addr + ST_NEXT_IN_BLOCK, eentry[S_NEXT_IN_BLOCK] )
@@ -146,7 +163,8 @@ procedure BackEnd(integer il_file)
 					poke4(addr + ST_FIRST_LINE, eentry[S_FIRST_LINE] )
 					poke4(addr + ST_LAST_LINE, eentry[S_LAST_LINE] )
 				end if
-				
+			
+			
 			elsif (length(eentry) < S_NAME and eentry[S_MODE] = M_CONSTANT) or
 			(length(eentry) >= S_TOKEN and compare( eentry[S_OBJ], NOVALUE )) then
 				-- compress constants and literal values in memory

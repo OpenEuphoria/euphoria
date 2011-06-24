@@ -79,6 +79,17 @@ struct symtab_entry {
 			unsigned int first_line;
 			unsigned int last_line;
 		} block;
+		struct {
+			// for memstructs / memunions only
+			struct symtab_entry *next;
+			struct symtab_entry *struct_type;
+			struct symtab_entry *parent;
+			unsigned int size;
+			unsigned int offset;
+			int array;
+			char is_signed;
+			char pointer;
+		} memstruct;
 		
 	} u;
 	

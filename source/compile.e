@@ -6398,6 +6398,35 @@ procedure opTASK_CLOCK_START()
 	pc += 1
 end procedure
 
+procedure opMEMSTRUCT_ACCESS()
+	? 1/0
+end procedure
+
+procedure opMEMSTRUCT_ARRAY()
+	? 1/0
+end procedure
+
+procedure opPEEK_MEMBER()
+	? 1/0
+end procedure
+
+
+procedure opMEMSTRUCT_SERIALIZE()
+	? 1/0
+end procedure
+
+
+procedure opMEMSTRUCT_ASSIGN()
+	? 1/0
+end procedure
+
+
+procedure opMEMSTRUCT_ASSIGNOP()
+	? 1/0
+end procedure
+
+
+
 sequence operation -- routine ids for all opcode handlers
 
 export procedure init_opcodes()
@@ -6637,6 +6666,24 @@ export procedure init_opcodes()
 			case "MEM_SET" then
 				operation[i] = routine_id("opMEM_SET")
 
+			case "MEMSTRUCT_ACCESS" then
+				operation[i] = routine_id("opMEMSTRUCT_ACCESS")
+				
+			case "MEMSTRUCT_ARRAY" then
+				operation[i] = routine_id("opMEMSTRUCT_ARRAY")
+				
+			case "PEEK_MEMBER" then
+				operation[i] = routine_id("opPEEK_MEMBER")
+				
+			case "MEMSTRUCT_SERIALIZE" then
+				operation[i] = routine_id("opMEMSTRUCT_SERIALIZE")
+				
+			case "MEMSTRUCT_ASSIGN" then
+				operation[i] = routine_id("opMEMSTRUCT_ASSIGN")
+				
+			case "MEMSTRUCT_PLUS", "MEMSTRUCT_MINUS", "MEMSTRUCT_MULTIPLY", "MEMSTRUCT_DIVIDE" then
+				operation[i] = routine_id("opMEMSTRUCT_ASSIGNOP")
+				
 			case "MINUS" then
 				operation[i] = routine_id("opMINUS")
 
