@@ -37,6 +37,7 @@ include scanner.e
 include mode.e as mode
 include intinit.e
 include coverage.e
+include emit.e
 
 include std/machine.e as dep
 without inline
@@ -3217,13 +3218,23 @@ integer data_type = SymTab[sym][S_TOKEN]
 	end switch
 end procedure
 
-function peek_member( atom pointer, integer sym )
+function peek_member( atom pointer, integer sym, integer array_index = -1 )
 	integer data_type = SymTab[sym][S_TOKEN]
 	integer signed    = SymTab[sym][S_MEM_SIGNED]
 	
 	if SymTab[sym][S_MEM_POINTER] then
 		data_type = MS_OBJECT
 		signed    = 0
+	
+	elsif array_index != -1 then
+		pointer += SymTab[sym][S_MEM_SIZE] * array_index
+	
+	elsif SymTab[sym][S_MEM_ARRAY] then
+		sequence s = repeat( 0, SymTab[sym][S_MEM_ARRAY] )
+		for i = 1 to SymTab[sym][S_MEM_ARRAY] do
+			s[i] = peek_member( pointer, sym, i )
+		end for
+		return s
 	end if
 	
 	switch data_type do
@@ -3301,20 +3312,16 @@ function peek_member( atom pointer, integer sym )
 			end if
 		case else
 			-- just return the struct in bytes
-			return serialize_memstruct( pointer, sym )
+			return serialize_member( pointer, sym )
 	end switch
 end function
 
-function serialize_memstruct( atom pointer, symtab_index sym )
-
-	symtab_pointer member_sym = sym
-	integer tid = sym_token( sym )
-	if tid >= MS_SIGNED and tid <= MS_OBJECT then
-		-- simple serialization of primitives...
-		return peek_member( pointer, sym )
-	end if
-	
+function serialize_memstruct( atom pointer, symtab_pointer member_sym )
 	sequence s = {}
+	if sym_token( member_sym ) != MEMSTRUCT then
+		-- we want to walk the actual struct
+		member_sym = SymTab[member_sym][S_MEM_STRUCT]
+	end if
 	while member_sym with entry do
 		s = append( s, peek_member( pointer + SymTab[member_sym][S_MEM_OFFSET], member_sym ) )
 	entry
@@ -3323,9 +3330,42 @@ function serialize_memstruct( atom pointer, symtab_index sym )
 	return s
 end function
 
+function serialize_memunion( atom pointer, symtab_pointer member_sym )
+	return peek( { pointer, SymTab[member_sym][S_MEM_SIZE] } )
+end function
+
+function serialize_member( atom pointer, symtab_index sym )
+
+	symtab_pointer member_sym = sym
+	integer tid = sym_token( sym )
+	if tid >= MS_SIGNED and tid <= MS_OBJECT then
+		-- simple serialization of primitives...
+		return peek_member( pointer, sym )
+	end if
+	
+	integer member_token = sym_token( member_sym )
+	if member_token = MEMSTRUCT then
+		return serialize_memstruct( pointer, member_sym )
+	
+	elsif member_token = MEMUNION then
+		return serialize_memunion( pointer, member_sym )
+	
+	else
+		member_token = SymTab[SymTab[member_sym][S_MEM_STRUCT]][S_TOKEN]
+		if member_token = MEMSTRUCT then
+			return serialize_memstruct( pointer, member_sym )
+		
+		elsif member_token = MEMUNION then
+			return serialize_memunion( pointer, member_sym )
+		else
+			RTFatal( "Cannot serialize a: " & LexName( member_token ) )
+		end if
+	end if
+end function
+
 procedure opMEMSTRUCT_SERIALIZE()
 	atom pointer = val[Code[pc+1]]
-	val[Code[pc+3]] = serialize_memstruct( pointer, Code[pc+2] )
+	val[Code[pc+3]] = serialize_member( pointer, Code[pc+2] )
 	pc += 4
 end procedure
 

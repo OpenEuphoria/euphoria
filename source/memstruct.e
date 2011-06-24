@@ -192,10 +192,7 @@ export procedure MemStruct_declaration( integer scope )
 	entry
 		tok = next_token()
 	end while
-	if -1 = calculate_size() then
-		-- need to get back to this later...
--- 		new_forward_reference( MEMSTRUCT, mem_struct, MEMSTRUCT_DECL )
-	end if
+	calculate_size()
 	leave_memstruct()
 end procedure
 
@@ -206,7 +203,9 @@ end procedure
 export function recalculate_size( symtab_index sym )
 	mem_struct = sym
 	is_union   = sym_token( sym ) = MEMUNION_DECL
-	return calculate_size()
+	integer size = calculate_size()
+	is_union = 0
+	return size
 end function
 
 --**
@@ -255,15 +254,23 @@ function calculate_size()
 	return size
 end function
 
-
 function read_name()
 	token tok = next_token()
 	switch tok[T_ID] do
-		case VARIABLE, PROC, FUNC, TYPE then
+		case VARIABLE, PROC, FUNC, TYPE, 
+				MS_CHAR, MS_SHORT, MS_INT, MS_LONG, MS_LONGLONG, MS_OBJECT, 
+				MS_FLOAT, MS_DOUBLE, MS_LONGDOUBLE, MS_EUDOUBLE,
+				MS_MEMBER then
+			
 			DefinedYet( tok[T_SYM] )
-			return tok
+			
+			symtab_index member = NewBasicEntry( sym_name( tok[T_SYM] ), 0, SC_MEMSTRUCT, MS_MEMBER, 0, 0, 00 )
+			SymTab[member] &= repeat( 0, SIZEOF_MEMSTRUCT_ENTRY - length( SymTab[member] ) )
+			
+			return { MS_MEMBER, member }
+		
 		case else
-			CompileErr( 32 )
+			CompileErr( 68, {"identifier", LexName( tok[T_ID] )} )
 	end switch
 end function
 
@@ -308,6 +315,7 @@ procedure add_member( token tok, object mem_type, integer size, integer pointer,
 		signed = 1
 	end if
 	
+	SymTab[sym][S_SCOPE]       = SC_MEMSTRUCT
 	SymTab[sym][S_TOKEN]       = mem_type
 	SymTab[sym][S_MEM_SIZE]    = size
 	SymTab[sym][S_MEM_POINTER] = pointer
@@ -373,8 +381,7 @@ procedure MemStruct_member( token memstruct_tok, integer pointer, integer fwd = 
 	if fwd then
 		integer ref = new_forward_reference( MS_MEMBER, memstruct_tok[T_SYM], MEMSTRUCT_DECL )
 		set_data( ref, name_tok[T_SYM] )
-	end if
-	if sym_token( memstruct_tok[T_SYM] ) = MEMSTRUCT_DECL then
+	else
 		size = SymTab[memstruct_tok[T_SYM]][S_MEM_SIZE]
 	end if
 	add_member( name_tok, memstruct_tok, size, pointer )
@@ -526,6 +533,10 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 					SymTab[member] &= repeat( 0, SIZEOF_MEMSTRUCT_ENTRY - length( SymTab[member] ) )
 					emit_member( member, ref, MEMSTRUCT_ACCESS, names )
 				else
+					if member then
+						-- going into an embedded / linked struct or union
+						struct_sym = SymTab[member][S_MEM_STRUCT]
+					end if
 					member = resolve_member( tok[T_SYM], struct_sym )
 					if not member then
 						CompileErr( 358, { tok[T_SYM], sym_name( struct_sym ) } )

@@ -1903,7 +1903,7 @@ function mem_name( symtab_index member_sym )
 end function
 
 procedure dis_memstruct( integer ms )
-	if sym_token( ms ) = MEMSTRUCT_DECL then
+	if sym_token( ms ) = MEMSTRUCT then
 		puts( out, "\nMemStruct" )
 	else
 		puts( out, "\nMemUnion" )
@@ -1913,6 +1913,7 @@ procedure dis_memstruct( integer ms )
 		{known_files[SymTab[ms][S_FILE_NO]], SymTab[ms][S_NAME], ms })
 	printf( out, "    SIZE: %d\n", SymTab[ms][S_MEM_SIZE] )
 	symtab_pointer member_sym = ms
+	printf( out, "            %-20s  %-15s Other Information\n", {"Name", "Type"})
 	while member_sym with entry do
 		printf( out, "    %06d: %-20s  %-15s pointer[%d] signed[%d] array[%d] offset[%3d] size[%d]\n", 
 			{ 
@@ -1930,7 +1931,7 @@ procedure dis_memstruct( integer ms )
 	entry
 		member_sym = SymTab[member_sym][S_MEM_NEXT]
 	end while
-	if sym_token( ms ) = MEMSTRUCT_DECL then
+	if sym_token( ms ) = MEMSTRUCT then
 		puts( out, "End MemStruct" )
 	else
 		puts( out, "End MemUnion" )

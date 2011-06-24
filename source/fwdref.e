@@ -390,15 +390,12 @@ procedure patch_forward_msmember( token tok, integer ref )
 		-- a forward reference inside a declaration
 		symtab_index member = fr[FR_DATA]
 		SymTab[member][S_MEM_STRUCT] = sym
+		SymTab[member][S_SCOPE]      = SC_MEMSTRUCT
 		if not SymTab[member][S_MEM_POINTER] then
 			symtab_index parent_sym = SymTab[member][S_MEM_PARENT]
 			recalculate_size( parent_sym )
 		end if
 		resolved_reference( ref )
-	else
-		-- TODO: using a memstruct
-		CompileErr( "Unimplemented: patching forward member with op [1]", fr[FR_OP] )
-		
 	end if
 	
 end procedure

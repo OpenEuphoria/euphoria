@@ -127,7 +127,29 @@ constant token_name =
 	{WITH, "with"},
 	{WITHOUT, "without"},
 	{WHILE, "while"},
-	{'?', "?"}
+	{'?', "?"},
+	{MEMSTRUCT, "a memstruct"},
+	{MEMUNION, "a memunion"},
+	{MEMSTRUCT_ASSIGN, "="},
+	{MEMSTRUCT_PLUS, "+="},
+	{MEMSTRUCT_MINUS, "-="},
+	{MEMSTRUCT_MULTIPLY, "*="},
+	{MEMSTRUCT_DIVIDE, "/="},
+	{MS_CHAR, "char"},
+	{MS_SHORT, "short"},
+	{MS_INT, "int" },
+	{MS_LONG, "long int" },
+	{MS_LONGLONG, "long long int" },
+	{MS_FLOAT, "float" },
+	{MS_DOUBLE, "double" },
+	{MS_LONGDOUBLE, "long double" },
+	{MS_EUDOUBLE, "eudouble" },
+	{MS_OBJECT, "object" },
+	{MS_POINTER, "pointer" },
+	{MS_SIGNED, "signed" },
+	{MS_UNSIGNED, "unsigned" },
+	{MS_MEMBER, "a memstruct member"},
+	$
 }
 
 export procedure Push(symtab_pointer x)

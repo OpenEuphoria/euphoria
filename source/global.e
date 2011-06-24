@@ -159,10 +159,10 @@ export enum
 	S_MEM_SIZE = 14,
 	S_MEM_OFFSET,
 	S_MEM_SIGNED,
-	S_MEM_NEXT,
 	S_MEM_POINTER,
-	S_MEM_STRUCT,  -- for embedded structs
 	S_MEM_ARRAY,
+	S_MEM_NEXT,
+	S_MEM_STRUCT,  -- for embedded structs
 	S_MEM_PARENT,
 	$
 
