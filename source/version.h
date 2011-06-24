@@ -8,7 +8,6 @@
  * 3. /packaging/win32/euphoria-ow.iss
  * 4. /tests/t_condcmp.e
  * 5. /source/version.h
- * 6. /source/eu.manifest
 */
 
 #define MAJ_VER 4 

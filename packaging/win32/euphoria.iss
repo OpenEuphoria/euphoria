@@ -9,7 +9,6 @@
 ; 3. /packaging/win32/euphoria-ow.iss
 ; 4. /tests/t_condcmp.e
 ; 5. /source/version.h
-; 6. /source/eu.manifest
 [Setup]
 AppName=Euphoria
 AppVersion=4.0.4
