@@ -375,6 +375,7 @@ constant StdErrMsgs = {
 	{357, "Only 'int' or 'long' integers can have the 'long' modifier"},
 	{358, "[1] is not a member of memstruct or memunion [2]"},
 	{359, "Member is not a pointer or an embedded memstruct"},
+	{360, "Cannot assign to a non-primitive, non-pointer memstruct" },
 	$
 }
 

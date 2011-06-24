@@ -476,7 +476,15 @@ procedure opASSIGN()  -- or opASSIGN_I or SEQUENCE_COPY
     il( sprintf("%s => %s", names( {a,target} )), 2 )
     pc += 3
 end procedure
---
+
+procedure opMEMSTRUCT_ASSIGN()  -- or opASSIGN_I or SEQUENCE_COPY
+    a = Code[pc+1]  -- pointer
+    b = Code[pc+2]  -- member sym
+    c = Code[pc+3]  -- new value
+    il( sprintf("MEMSTRUCT_ASSIGN %s.%s = %s", names( {a, b, c} )), 3 )
+    pc += 4
+end procedure
+
 procedure opELSE()  -- or EXIT, ENDWHILE}) then
 	il( sprintf("%s goto %04d", {opnames[Code[pc]], Code[pc+1]}),1 )
 --    pc = Code[pc+1]
@@ -888,6 +896,22 @@ end procedure
 
 procedure opPLUS() -- or opPLUS_I then
     binary()
+end procedure
+
+procedure opMEMSTRUCT_PLUS()
+	binary()
+end procedure
+
+procedure opMEMSTRUCT_MINUS()
+	binary()
+end procedure
+
+procedure opMEMSTRUCT_MULTIPLY()
+	binary()
+end procedure
+
+procedure opMEMSTRUCT_DIVIDE()
+	binary()
 end procedure
 
 procedure opMINUS() -- or opMINUS_I then

@@ -478,19 +478,23 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 	No_new_entry = 1
 	integer members = 0
 	symtab_pointer member = 0
+	integer has_dot = 1
 	while 1 with entry do
 		integer tid = tok[T_ID]
 		switch tid do
 			case VARIABLE, FUNC, PROC, TYPE, NAMESPACE then
 				-- make it look like the IGNORED token
+				if not has_dot then
+					peek_member( members, member, ref, lhs, names )
+					putback( tok )
+					exit
+				end if
 				tok= { IGNORED, SymTab[tok[T_SYM]][S_NAME] }
 				fallthru
+			
 			case MULTIPLY then
 				-- ptr.struct.*  serialize the whole thing
-				if lhs then
-					-- ??
-					CompileErr("LHS memstruct ops not implemented")
-				elsif member then
+				if member then
 					tid = sym_token( member )
 					if tid >= MS_SIGNED and tid <= MS_OBJECT then
 						if SymTab[member][S_MEM_POINTER] then
@@ -498,20 +502,21 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 						else
 							CompileErr( 359 )
 						end if
-					else
-						
+					elsif lhs then
+						-- assignment of primitives only!
+						CompileErr( 360 )
 					end if
 					peek_member( members, member, ref, lhs, names )
 					-- re-emit the last member for serialization
 					emit_member( member, ref, PEEK_MEMBER, names )
 					emit_op( MEMSTRUCT_SERIALIZE )
-					
 					exit
 				else
 					emit_symstruct( struct_sym, ref )
 					emit_op( MEMSTRUCT_SERIALIZE )
 					exit
 				end if
+			
 			case IGNORED then
 				-- just look at it within this memstruct's context...
 				names = append( names, tok[T_SYM] )
@@ -529,6 +534,7 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 				end if
 				
 				members += 1
+				has_dot = 0
 				
 			case DOT then
 				-- another layer...
@@ -549,14 +555,16 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 							emit_opnd( 0 )
 							members += 1
 							peek_member( members, member, ref, lhs, names )
+							? -4
 							exit -- DONE!
 						else
 							CompileErr( 359 )
 						end if
 					end if
 				end if
-			case else
+				has_dot = 1
 				
+			case else
 				peek_member( members, member, ref, lhs, names )
 				putback( tok )
 				exit
@@ -571,10 +579,8 @@ procedure peek_member( integer members, symtab_index member, integer ref, intege
 	
 	emit_opnd( members )
 	emit_op( MEMSTRUCT_ACCESS )
-	
 	if lhs then
-		-- going to do some sort of poking here...
-		CompileErr("LHS memstruct ops not supported")
+		emit_member( member, ref, MEMSTRUCT_ACCESS, names )
 	else
 		-- geting the value...peek it
 		emit_member( member, ref, PEEK_MEMBER, names )

@@ -231,7 +231,12 @@ export constant
 	MEMSTRUCT_ARRAY     = 220,
 	PEEK_MEMBER         = 221,
 	MEMSTRUCT_SERIALIZE = 222,
-	MAX_OPCODE          = 222
+	MEMSTRUCT_ASSIGN    = 223, 
+	MEMSTRUCT_PLUS      = 224,
+	MEMSTRUCT_MINUS     = 225,
+	MEMSTRUCT_MULTIPLY  = 226,
+	MEMSTRUCT_DIVIDE    = 227,
+	MAX_OPCODE          = 227
 
 
 -- adding new opcodes possibly affects reswords.h (C-coded backend),

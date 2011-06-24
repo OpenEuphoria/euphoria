@@ -1796,7 +1796,18 @@ export procedure emit_op(integer op)
 		Push( c )
 		emit_addr( c )
 		assignable = FALSE
-		
+	
+	case MEMSTRUCT_ASSIGN, MEMSTRUCT_PLUS, MEMSTRUCT_MINUS, 
+			MEMSTRUCT_DIVIDE, MEMSTRUCT_MULTIPLY then
+		c = Pop() -- new value
+		b = Pop() -- member sym
+		a = Pop() -- pointer
+		emit_opcode( op )
+		emit_addr( a )
+		emit_addr( b )
+		emit_addr( c )
+		assignable = FALSE
+	
 	case else
 		InternalErr(259, {op})
 

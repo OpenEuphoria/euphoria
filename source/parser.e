@@ -36,6 +36,8 @@ constant UNDEFINED = -999
 constant DEFAULT_SAMPLE_SIZE = 25000  -- for time profile
 constant ASSIGN_OPS = {EQUALS, PLUS_EQUALS, MINUS_EQUALS, MULTIPLY_EQUALS,
 						DIVIDE_EQUALS, CONCAT_EQUALS}
+constant MEMSTRUCT_ASSIGN_OPS = {MEMSTRUCT_ASSIGN, MEMSTRUCT_PLUS, MEMSTRUCT_MINUS, MEMSTRUCT_MULTIPLY,
+						MEMSTRUCT_DIVIDE, 0}
 constant SCOPE_TYPES = {SC_LOCAL, SC_GLOBAL, SC_PUBLIC, SC_EXPORT, SC_UNDEFINED}
 
 --*****************
@@ -1547,6 +1549,35 @@ procedure TypeCheck(symtab_index var)
 	end if
 end procedure
 
+function check_assign_op( token left_var )
+	token tok = next_token()
+	integer assign_op = tok[T_ID]
+	
+	if not find(assign_op, ASSIGN_OPS) then
+		sequence lname = sym_name( left_var[T_SYM] )
+		if assign_op = DOT then
+			-- memstruct
+			MemStruct_access( left_var[T_SYM], TRUE )
+			assign_op = check_assign_op( left_var )
+			integer ox = find( assign_op, ASSIGN_OPS )
+			assign_op = 0
+			if ox then
+				assign_op = MEMSTRUCT_ASSIGN_OPS[ox]
+			end if
+			if not assign_op then
+				CompileErr(76, {lname})
+			end if
+			return assign_op
+		
+		elsif assign_op = COLON then
+			CompileErr(133, {lname})
+		else
+			CompileErr(76, {lname})
+		end if
+	end if
+	return assign_op
+end function
+
 procedure Assignment(token left_var)
 -- parse an assignment statement
 	token tok
@@ -1624,32 +1655,34 @@ procedure Assignment(token left_var)
 	end while
 
 	lhs_ptr = FALSE
+	
+	putback( tok )
+	assign_op = check_assign_op( left_var )
 
-	assign_op = tok[T_ID]
-	if not find(assign_op, ASSIGN_OPS) then
-		sequence lname = SymTab[left_var[T_SYM]][S_NAME]
-		if assign_op = COLON then
-			CompileErr(133, {lname})
-		else
-			CompileErr(76, {lname})
-		end if
-	end if
-
-	if subs = 0 then
+	if subs = 0 label "subs_if" then
 		-- not subscripted
 		integer temp_len = length(Code)
-		if assign_op = EQUALS then
-			Expr() -- RHS expression
-			InitCheck(left_sym, FALSE)
-		else
-			InitCheck(left_sym, TRUE)
-			if left_sym > 0 then
-				SymTab[left_sym][S_USAGE] = or_bits(SymTab[left_sym][S_USAGE], U_READ)
-			end if
-			emit_opnd(left_sym)
-			Expr() -- RHS expression
-			emit_assign_op(assign_op)
-		end if
+		switch assign_op do
+			case EQUALS then
+				Expr() -- RHS expression
+				InitCheck(left_sym, FALSE)
+			
+			case MEMSTRUCT_ASSIGN, MEMSTRUCT_PLUS, MEMSTRUCT_MINUS, 
+					MEMSTRUCT_MULTIPLY, MEMSTRUCT_DIVIDE then
+				
+				Expr()
+				emit_op( assign_op )
+				break "subs_if"
+			case else
+				InitCheck(left_sym, TRUE)
+				if left_sym > 0 then
+					SymTab[left_sym][S_USAGE] = or_bits(SymTab[left_sym][S_USAGE], U_READ)
+				end if
+				emit_opnd(left_sym)
+				Expr() -- RHS expression
+				emit_assign_op(assign_op)
+				
+		end switch
 		emit_op(ASSIGN)
 		TypeCheck(left_sym)
 	else

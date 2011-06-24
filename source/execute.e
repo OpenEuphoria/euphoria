@@ -1465,6 +1465,12 @@ procedure opASSIGN()
 	pc += 3
 end procedure
 
+procedure opMEMSTRUCT_ASSIGN()
+	atom pointer = val[Code[pc+1]]
+	poke_member( pointer, Code[pc+2], val[Code[pc+3]] )
+	pc += 4
+end procedure
+
 procedure opELSE()
 -- ELSE, EXIT, ENDWHILE
 	pc = Code[pc+1]
@@ -2226,6 +2232,24 @@ procedure opMULTIPLY()
 	b = Code[pc+2]
 	target = Code[pc+3]
 	val[target] = val[a] * val[b]
+	pc += 4
+end procedure
+
+procedure opMEMSTRUCT_ASSIGN_OP()
+	atom pointer = val[Code[pc+1]]
+	atom v = peek_member( pointer, Code[pc+2] )
+	atom x = val[Code[pc+3]]
+	switch Code[pc] do
+		case MEMSTRUCT_PLUS then
+			v += x
+		case MEMSTRUCT_MINUS then
+			v -= x
+		case MEMSTRUCT_DIVIDE then
+			v /= x
+		case MEMSTRUCT_MULTIPLY then
+			v *= x
+	end switch
+	poke_member( pointer, Code[pc+2], v )
 	pc += 4
 end procedure
 
@@ -3143,6 +3167,54 @@ procedure opMEMSTRUCT_ARRAY()
 	ptr += val[Code[pc+3]] * size
 	val[Code[pc+4]] = ptr
 	pc += 5
+end procedure
+
+procedure poke_member( atom pointer, integer sym, atom value )
+integer data_type = SymTab[sym][S_TOKEN]
+	integer signed    = SymTab[sym][S_MEM_SIGNED]
+	
+	if SymTab[sym][S_MEM_POINTER] then
+		data_type = MS_OBJECT
+		signed    = 0
+	end if
+	
+	switch data_type do
+		case MS_CHAR then
+			poke( pointer, value )
+		case MS_SHORT then
+			poke2( pointer, value )
+		case MS_INT then
+			poke4( pointer, value )
+		case MS_LONG then
+			ifdef WINDOWS then
+				poke4( pointer )
+			elsedef
+				if sizeof( C_LONG ) = 4 then
+					poke4( pointer, value )
+				else
+					poke8( pointer, value )
+				end if
+			end ifdef
+		case MS_LONGLONG then
+			poke8( pointer, value )
+		case MS_OBJECT then
+			poke_pointer( pointer, value )
+		case MS_FLOAT then
+			poke( pointer, atom_to_float32( value ) )
+		case MS_DOUBLE then
+			poke( pointer, atom_to_float64( value ) )
+		case MS_LONGDOUBLE then
+			poke( pointer, atom_to_float80( value ) )
+		case MS_EUDOUBLE then
+			if sizeof( C_POINTER ) = 4 then
+				poke( pointer, atom_to_float64( value ) )
+			else
+				poke( pointer, atom_to_float80( value ) )
+			end if
+		case else
+			-- just return the struct in bytes
+			RTFatal( "Error assigning to a memstruct -- can only assign primitive data members" )
+	end switch
 end procedure
 
 function peek_member( atom pointer, integer sym )
@@ -4161,7 +4233,7 @@ procedure do_exec()
 
 			case EQUALS then
 				opEQUALS()
-
+			
 			case EQUALS_IFW, EQUALS_IFW_I then
 				opEQUALS_IFW()
 
@@ -4605,6 +4677,13 @@ procedure do_exec()
 			
 			case MEMSTRUCT_SERIALIZE then
 				opMEMSTRUCT_SERIALIZE()
+			
+			case MEMSTRUCT_ASSIGN then
+				opMEMSTRUCT_ASSIGN()
+			
+			case MEMSTRUCT_PLUS, MEMSTRUCT_MINUS, MEMSTRUCT_MULTIPLY, MEMSTRUCT_DIVIDE then
+				opMEMSTRUCT_ASSIGN_OP()
+			
 
 			case else
 				RTFatal( sprintf("Unknown opcode: %d", op ) )
