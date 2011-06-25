@@ -1,6 +1,4 @@
 1 VERSIONINFO
-; See source/version.h, for a list of files to change when changing
-; version numbers.
 FILEVERSION 4,0,4,0
 PRODUCTVERSION 4,0,4,0
 FILEFLAGSMASK 0x3fL
