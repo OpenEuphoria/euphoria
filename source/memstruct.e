@@ -233,7 +233,13 @@ function calculate_size()
 		
 		if not is_union then
 			-- make sure we're properly aligned
-			integer padding = remainder( size, mem_size )
+			integer padding
+			if sym_token( member_sym ) = MEMUNION or sym_token( member_sym ) = MEMSTRUCT then
+				padding = remainder( size, sizeof( C_POINTER ) )
+			else
+				padding = remainder( size, mem_size )
+			end if
+			
 			if padding then
 				size += mem_size - padding
 			end if

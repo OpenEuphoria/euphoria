@@ -8,7 +8,7 @@
 -- values of each variable and operand. This allows it to emit C code that
 -- is more precise and efficient. It doesn't actually emit the C code
 -- until the final pass.
-
+namespace compile
 ifdef ETYPE_CHECK then
 	with type_check
 elsedef
@@ -25,6 +25,7 @@ include std/search.e
 include buildsys.e
 include c_decl.e
 include c_out.e
+include c_struct.e
 include cominit.e
 include compress.e
 include emit.e
@@ -40,7 +41,7 @@ include shift.e
 include fwdref.e
 
 
-integer np, pc
+export integer np, pc
 
 constant MAXLEN = MAXINT - 1000000  -- assumed maximum length of a sequence
 
@@ -135,7 +136,7 @@ sequence loop_stack
 -- Value: 1 = reference count incremented when created
 map:map dead_temp_walking = map:new()
 
-enum
+export constant
 	NO_REFERENCE = 0,
 	NEW_REFERENCE = 1,
 	KEEP_IN_MAP = 0,
@@ -166,7 +167,7 @@ enum
 -- If the object's reference count was incremented, then referenced
 -- should be NEW_REFERENCE, so that it can be cleaned up properly later.
 -- Otherwise, ##referenced## should be NO_REFERENCE.
-procedure create_temp( symtab_index sym, integer referenced )
+export procedure create_temp( symtab_index sym, integer referenced )
 	if is_temp( sym ) then
 		map:put( dead_temp_walking, sym, referenced )
 	end if
@@ -178,7 +179,7 @@ end procedure
 -- it was created.  If remove_from_map is REMOVE_FROM_MAP, then the temp will
 -- be cleared from the map.  If remove_from_map is KEEP_IN_MAP, then the
 -- temp will be left in the map.
-procedure dispose_temp( symtab_index sym, integer keep, integer remove_from_map )
+export procedure dispose_temp( symtab_index sym, integer keep, integer remove_from_map )
 	if is_temp( sym ) then
 		integer referenced = map:get( dead_temp_walking, sym, 0 )
 		if remove_from_map then
@@ -725,7 +726,7 @@ integer deref_type
 integer deref_elem_type
 integer deref_short
 
-procedure CSaveStr(sequence target, integer v, integer a, integer b, integer c)
+export procedure CSaveStr(sequence target, integer v, integer a, integer b, integer c)
 -- save a value (to be deref'd) in immediate target
 -- if value isn't known to be an integer
 	boolean deref_exist
@@ -791,7 +792,7 @@ procedure CSaveStr(sequence target, integer v, integer a, integer b, integer c)
 	end if
 end procedure
 
-procedure CDeRefStr(sequence s)
+export procedure CDeRefStr(sequence s)
 -- DeRef a string name  - see CSaveStr()
 	if length(deref_str) = 0 then
 		return
@@ -827,7 +828,7 @@ procedure CDeRefStr(sequence s)
 	end if
 end procedure
 
-procedure CDeRef(integer v)
+export procedure CDeRef(integer v)
 -- DeRef a var or temp
 	integer temp_type, elem_type
 
@@ -2211,6 +2212,36 @@ sequence target_val
 
 sequence dblfn
 boolean all_done
+
+export procedure opSIZEOF()
+	integer
+		datatype_sym = Code[pc+1],
+		target_sym   = Code[pc+2]
+	
+	switch sym_token( datatype_sym ) do
+		case MEMSTRUCT, MEMUNION then
+			sequence tag
+			if sym_token( datatype_sym ) = MEMSTRUCT then
+				tag = "struct"
+			else
+				tag = "union"
+			end if
+			c_stmt( sprintf( "@ = sizeof( %s @);\n", {tag} ), { target_sym, datatype_sym } )
+			CDeRef( target_sym )
+			
+		case else
+			c_stmt("@ = eu_sizeof( @ );\n", { target_sym, datatype_sym }, target_sym )
+			CSaveStr( "_0", target_sym, datatype_sym, 0, 0 )
+			CDeRef( target_sym )
+			dispose_temp( datatype_sym, compile:DISCARD_TEMP, compile:REMOVE_FROM_MAP )
+			
+	end switch
+	
+	SetBBType( target_sym, TYPE_INTEGER, {0, MAXINT}, TYPE_INTEGER, 0 )
+	create_temp( target_sym, 1 )
+	pc += 3
+end procedure
+
 
 procedure opSTARTLINE()
 -- common in Translator, not in Interpreter
@@ -5637,22 +5668,6 @@ procedure opPEEK()
 	pc += 3
 end procedure
 
-procedure opSIZEOF()
-	integer
-		datatype_sym = Code[pc+1],
-		target_sym   = Code[pc+2]
-	CSaveStr( "_0", target_sym, datatype_sym, 0, 0 )
-	
-	c_stmt("@ = eu_sizeof( @ );\n", { target_sym, datatype_sym }, target_sym )
-	
-	CDeRef( target_sym )
-	
-	dispose_temp( datatype_sym, DISCARD_TEMP, REMOVE_FROM_MAP )
-	SetBBType( target_sym, TYPE_INTEGER, {0, MAXINT}, TYPE_INTEGER, 0 )
-	create_temp( target_sym, 1 )
-	pc += 3
-end procedure
-
 procedure opPOKE()
 -- generate code for poke/2/4/8
 -- should optimize constant address
@@ -6398,34 +6413,6 @@ procedure opTASK_CLOCK_START()
 	pc += 1
 end procedure
 
-procedure opMEMSTRUCT_ACCESS()
-	? 1/0
-end procedure
-
-procedure opMEMSTRUCT_ARRAY()
-	? 1/0
-end procedure
-
-procedure opPEEK_MEMBER()
-	? 1/0
-end procedure
-
-
-procedure opMEMSTRUCT_SERIALIZE()
-	? 1/0
-end procedure
-
-
-procedure opMEMSTRUCT_ASSIGN()
-	? 1/0
-end procedure
-
-
-procedure opMEMSTRUCT_ASSIGNOP()
-	? 1/0
-end procedure
-
-
 
 sequence operation -- routine ids for all opcode handlers
 
@@ -7170,7 +7157,7 @@ procedure BackEnd(atom ignore)
 
 	-- prevent conflicts
 	for i = TopLevelSub+1 to length(SymTab) do
-		if sequence(SymTab[i][S_NAME]) and find( SymTab[i][S_TOKEN], {VARIABLE, CONSTANT, ENUM}) then
+		if sequence(SymTab[i][S_NAME]) and  sym_mode( i ) = M_NORMAL then --find( SymTab[i][S_TOKEN], {VARIABLE, CONSTANT, ENUM}) then
 			SymTab[i][S_NAME] &= sprintf( "_%d", i )
 		end if
 	end for
@@ -7227,7 +7214,8 @@ procedure BackEnd(atom ignore)
 	end if
 	c_puts("#include <time.h>\n")
 	c_puts("#include \"include/euphoria.h\"\n")
-	c_puts("#include \"main-.h\"\n\n")
+	c_puts("#include \"main-.h\"\n")
+	c_puts("#include \"struct.h\"\n\n")
 
 	if TUNIX then
 		c_puts("#include <unistd.h>\n")
@@ -7586,6 +7574,8 @@ procedure BackEnd(atom ignore)
 
 	close(c_code)
 	close(c_h)
+	
+	write_struct_header()
 
 	write_buildfile()
 end procedure

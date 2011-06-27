@@ -266,11 +266,14 @@ end procedure
 
 
 procedure Forward_InitCheck( token tok, integer ref )
+	integer sym = tok[T_SYM]
 	if ref then
+		if tok[T_ID] = QUALIFIED_VARIABLE then
+			set_qualified_fwd( SymTab[sym][S_FILE_NO] )
+		end if
 		ref = new_forward_reference( GLOBAL_INIT_CHECK, tok[T_SYM], GLOBAL_INIT_CHECK )
-
 		emit_op( GLOBAL_INIT_CHECK )
-		emit_addr( 0 )
+		emit_addr( -tok[T_SYM] )
 	end if
 end procedure
 
@@ -319,7 +322,6 @@ procedure InitCheck(symtab_index sym, integer ref)
 	elsif ref and sym > 0 and sym_mode( sym ) = M_CONSTANT and equal( NOVALUE, sym_obj( sym ) ) then
 		emit_op( GLOBAL_INIT_CHECK )
 		emit_addr(sym)
-	
 	end if
 	-- else .. ignore loop vars, constants
 end procedure

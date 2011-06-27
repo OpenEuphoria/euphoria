@@ -211,7 +211,7 @@ export constant M_VARS = {M_TEMP, M_NORMAL}
 	
 -- SCOPE values:
 export enum
-	SC_MEMSTRUCT,
+	SC_NONE,
 	SC_LOOP_VAR,    -- "private" loop vars known within a single loop
 	SC_PRIVATE,    -- private within subprogram
 	SC_GLOOP_VAR,   -- "global" loop var
@@ -223,7 +223,8 @@ export enum
 	SC_MULTIPLY_DEFINED,  -- global symbol defined in 2 or more files
 	SC_EXPORT,   -- visible to anyone that includes the file
 	SC_OVERRIDE, -- override an internal
-	SC_PUBLIC    -- visible to any file that includes it, or via "public include"
+	SC_PUBLIC,   -- visible to any file that includes it, or via "public include"
+	SC_MEMSTRUCT
 
 -- USAGE values          -- how symbol has been used (1,2 can be OR'd)
 export enum

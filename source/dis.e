@@ -1525,7 +1525,7 @@ end procedure
 
 constant MODES = {"M_NORMAL", "M_CONSTANT", "M_TEMP", "M_SCOPE" }
 constant SCOPES = {
-	"SC_MEMSTRUCT",
+	"SC_NONE",
 	"SC_LOOP_VAR",    -- "private" loop vars known within a single loop
 	"SC_PRIVATE",    -- private within subprogram
 	"SC_GLOOP_VAR",   -- "global" loop var
@@ -1537,7 +1537,10 @@ constant SCOPES = {
 	"SC_MULTIPLY_DEFINED",  -- global symbol defined in 2 or more files
 	"SC_EXPORT",   -- visible to anyone that includes the file
 	"SC_OVERRIDE", -- override an internal
-	"SC_PUBLIC" }   -- visible to any file that includes it, or via "public include"
+	"SC_PUBLIC",   -- visible to any file that includes it, or via "public include"
+	"SC_MEMSTRUCT",
+	$
+	}
 
 constant USAGE_VALUES = {
 	U_UNUSED,
@@ -2059,4 +2062,4 @@ export procedure BackEnd( object ignore )
 
 end procedure
 mode:set_backend( routine_id("BackEnd") )
-? MS_MEMBER
+

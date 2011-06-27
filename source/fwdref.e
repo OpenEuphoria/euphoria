@@ -472,9 +472,13 @@ end procedure
 procedure patch_forward_init_check( token tok, integer ref )
 -- forward reference for a variable
 	sequence fr = forward_references[ref]
+	integer sym = fr[FR_DATA]
 	set_code( ref )
-	Code[fr[FR_PC]+1] = tok[T_SYM]
-	resolved_reference( ref )
+	integer rx = find( -sym, Code, fr[FR_PC]+1 )
+	if rx then
+		Code[rx] = tok[T_SYM]
+		resolved_reference( ref )
+	end if
 	reset_code()
 end procedure
 
@@ -812,6 +816,8 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 	switch op do
 		case GOTO then
 			forward_references[ref][FR_DATA] = { sym }
+		case GLOBAL_INIT_CHECK then
+			forward_references[ref][FR_DATA] = sym
 	end switch
 	
 	-- If we're recording tokens (for a default parameter), this ref will never 
