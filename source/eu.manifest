@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- These version numbers have nothing to do with
+  EUPHORIA version numbers.  They must not be changed for
+  version updates of EUPHORIA. -->
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
 <assemblyIdentity
     version="4.1.0.0"

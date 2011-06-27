@@ -251,14 +251,23 @@ constant space_pattern = regex:new(" ")
 -- that is using spaces and build_commandline() will not work 
 -- in place of this.
 --
--- If the path passed in doesn't exist, its parent foldernames that do exist
--- are adjusted so that the path is composed of 'short filenames'
--- when possible.  For the parts of the path that doesn't exist,
--- a zero is returned if they contain spaces and if they don't contain
--- spaces they are returned as is in the path.
+-- Now, we will say that a folder is adjusted if it undergoes the
+-- above transformation.  
 --
--- If the path does exist it is adjusted such that the file path contains
--- no spaces on WINDOWS.
+-- An ancestor directory of a file or directory, is a either a parent of the 
+-- the said file or a parent of another ancestor.
+--
+-- Return Value:
+--
+-- If the path passed in does exist, the entire passed parameter is
+-- adjusted as described above.
+--
+-- If the path passed in doesn't exist but an ancestor directory does,
+-- that ancestor is adjusted in the return value and the non-existent
+-- version is left unchanged.
+--
+-- If the path passed in doesn't exist and the only ancestor directory that
+-- does is a root directory, then his routine returns 0.
 --
 -- Examples:
 --
@@ -800,7 +809,7 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 		case COMPILER_GCC then
 			cmd = sprintf("%s -o %s %s %s %s", { 
 				settings[SETUP_LEXE], exe_name[D_ALTNAME], objs, 
-				iif(length(res_file[D_ALTNAME]), res_file[D_ALTNAME], ""),
+				res_file[D_ALTNAME],
 				settings[SETUP_LFLAGS]
 			})
 
