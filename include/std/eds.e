@@ -955,7 +955,7 @@ end procedure
 -- * This does not create or open a database. It only associates a symbolic name with
 --   a database path. This name can then be used in the calls to db_create(), db_open(),
 --   and db_select() instead of the physical database name.
--- * If the path does not end in ".edb", it will be added automatically.
+-- * If the file in the path does not have an extention, ".edb" will be added automatically.
 -- * The ##dboptions## can contain any of the options detailed below. These can be
 -- given as a single string of the form ##"option=value, option=value, ..."## or as
 -- as sequence containing option-value pairs, ##{ {option,value}, {option,value}, ... }##
@@ -1105,7 +1105,7 @@ end function
 -- becomes the **current database** to which
 -- all other database operations will apply.
 --
--- If the path, s, does not end in .edb, it will be added automatically.
+-- If the file in the path does not have an extention, ".edb" will be added automatically.
 --
 -- A version number is stored in the database file so future
 -- versions of the database software can recognize the format, and
