@@ -6,7 +6,7 @@ include t_fwd.e as t_fwd
 include fwd2.e as fwd2
 
 export constant EXPORT_CONSTANT = 1
-export constant FOO = "fwd.e"
+export constant FOO = "fwd"
 
 export procedure foo2(integer a)
 	result2 = 123
