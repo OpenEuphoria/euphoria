@@ -4,7 +4,7 @@
   version updates of EUPHORIA. -->
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
 <assemblyIdentity
-    version="0.64.1.0"
+    version="4.0.3.0"
     processorArchitecture="x86"
     name="euphoria"
     type="win32"

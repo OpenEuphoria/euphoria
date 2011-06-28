@@ -2,9 +2,11 @@
 namespace fwdref
 include std/unittest.e
 
-include t_fwd.e
+include t_fwd.e as t_fwd
+include fwd2.e as fwd2
 
 export constant EXPORT_CONSTANT = 1
+export constant FOO = "fwd"
 
 export procedure foo2(integer a)
 	result2 = 123
@@ -33,4 +35,5 @@ test_pass("emit:IsInteger check on forward reference")
 public procedure foo5()
 	var2 = 3
 end procedure
+
 
