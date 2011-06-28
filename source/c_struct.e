@@ -35,7 +35,6 @@ procedure get_pointer( integer pointer )
 		c_stmt0( "}\n")
 		c_stmt0( "else{\n")
 			c_stmt("_0 = (intptr_t) DBL_PTR( @ )->dbl;\n", pointer )
-			CDeRef( pointer )
 		c_stmt0( "}\n")
 		
 	end if
@@ -53,14 +52,14 @@ export procedure opMEMSTRUCT_ACCESS()
 	
 	symtab_index sym = Code[pc+3]
 	
-	c_stmt( sprintf("@ = ((%s*)_0)",{struct_type(sym)}), { target }, target )
+	c_stmt0( sprintf("_0 = (intptr_t) &((%s*)_0)",{struct_type(sym)}) )
 	
 	integer 
 		first_pc    = pc + 3,
 		last_pc     = pc + 2 + access_count,
 		was_pointer = 1
 	
-	for i = first_pc to last_pc - 1 do
+	for i = first_pc to last_pc do
 		if was_pointer then
 			c_puts("->")
 		else
