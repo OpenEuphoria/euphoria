@@ -85,7 +85,7 @@ sequence trans_opt_def = {
 	{ "cflags", 	      0, GetMsgText(323,0), { HAS_PARAMETER, "flags" } },
 	{ "lflags", 	      0, GetMsgText(324,0), { HAS_PARAMETER, "flags" } },
 	{ "lib",              0, GetMsgText(186,0), { HAS_PARAMETER, "filename" } },
-	{ "lib-pic",          0, GetMsgText(351,0), { HAS_PARAMETER, "filename" } },
+	{ "lib-pic",          0, GetMsgText(353,0), { HAS_PARAMETER, "filename" } },
 	{ "stack",            0, GetMsgText(188,0), { HAS_PARAMETER, "size" } },
 	{ "maxsize",          0, GetMsgText(190,0), { HAS_PARAMETER, "size" } },
 	{ "keep",             0, GetMsgText(191,0), { } },
@@ -95,7 +95,7 @@ sequence trans_opt_def = {
 	{ "makefile-partial", 0, GetMsgText(192,0), { } },
 	{ "silent",           0, GetMsgText(177,0), { } },
 	{ "verbose",	      0, GetMsgText(319,0), { } },
-	{ "no-cygwin",        0, GetMsgText(353,0), { } },
+	{ "no-cygwin",        0, GetMsgText(351,0), { } },
 	$
 }
 
@@ -362,11 +362,7 @@ procedure InitBackEnd(integer c)
 			break -- to avoid empty block warning
 
 		case COMPILER_WATCOM then
-			if length(compiler_dir) then
-				wat_path = compiler_dir
-			else
-				wat_path = getenv("WATCOM")
-			end if
+			wat_path = getenv("WATCOM")
 
 			if atom(wat_path) then
 				if build_system_type = BUILD_DIRECT then
@@ -383,11 +379,16 @@ procedure InitBackEnd(integer c)
 				Warning( 214, translator_warning_flag)
 			elsif atom(getenv("INCLUDE")) then
 				Warning( 215, translator_warning_flag )
-			elsif match(upper(wat_path & "\\H;" & getenv("WATCOM") & "\\H\\NT"),
+			elsif not file_exists(wat_path & SLASH & "binnt" & SLASH & "wcc386.exe") then
+				if build_system_type = BUILD_DIRECT then
+					CompileErr( 352, {wat_path})
+				else
+					Warning( 352, translator_warning_flag, {wat_path})
+				end if
+			elsif match(upper(wat_path & "\\H;" & wat_path & "\\H\\NT"),
 				upper(getenv("INCLUDE"))) != 1
 			then
-				Warning( 216, translator_warning_flag )
-				--http://openeuphoria.org/EUforum/index.cgi?module=forum&action=message&id=101301#101301
+				Warning( 216, translator_warning_flag, {wat_path,getenv("INCLUDE")} )
 			end if
 
 		case else

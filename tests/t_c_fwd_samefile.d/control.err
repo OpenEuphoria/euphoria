@@ -1,6 +1,6 @@
 t_c_fwd_samefile.e:4
 <0074>:: Errors resolving the following references:
-	t_c_fwd_samefile.e (4): x
+	'x' has not been declared.
 
 x = 1
   ^

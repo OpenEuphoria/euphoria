@@ -608,7 +608,7 @@ $(INCLUDE_DIR)\be_ver.h $(BUILDDIR)\ver.cache : $(INCLUDE_DIR) $(BUILDDIR)\mkver
 
 !ifdef OBJDIR
 
-$(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(CONFIG) eui.rc version_info.rc
+$(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(CONFIG) eui.rc version_info.rc eu.manifest
 	@%create $(BUILDDIR)\$(OBJDIR)\euiw.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc option quiet
 	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc option caseexact
@@ -669,7 +669,7 @@ installbin : .SYMBOLIC
 
 !ifdef OBJDIR
 
-$(BUILDDIR)\euc.exe : $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
+$(BUILDDIR)\euc.exe : $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) eu.manifest
 	$(RM) $(BUILDDIR)\$(OBJDIR)\euc.lbc
 	@%create $(BUILDDIR)\$(OBJDIR)\euc.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\euc.lbc option quiet
@@ -691,7 +691,7 @@ $(BUILDDIR)\euc.exe : .always .recheck
 translator : .SYMBOLIC $(BUILDDIR)\euc.exe
 
 !ifdef OBJDIR
-$(BUILDDIR)\eubw.exe :  $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+$(BUILDDIR)\eub.exe $(BUILDDIR)\eubw.exe :  $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) eu.manifest
     @echo ------- BACKEND WINDOWS -----------
 	@%create $(BUILDDIR)\$(OBJDIR)\eub.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\eub.lbc option quiet

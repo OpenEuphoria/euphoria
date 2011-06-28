@@ -1,9 +1,11 @@
-C:\Users\Shawn\Documents\development\hg\4.0\tests\t_c_qualpredef.e:4
+C:\Users\Shawn\Documents\development\hg\4.0\tests\t_c_decl_redundant.e:7
 <0074>:: Errors resolving the following references:
-	'puts' was not declared in 't_c_qualpredef.e'.
+	'x' has been declared more than once.
+		in x1.e
+		in x2.e
 
-fail:puts(1, 1)
-        ^
+? x
+  ^
 
 
 --- Defined Words ---

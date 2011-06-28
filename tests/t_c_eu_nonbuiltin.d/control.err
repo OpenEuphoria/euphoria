@@ -1,0 +1,8 @@
+t_c_eu_nonbuiltin.e:3
+<0074>:: Errors resolving the following references:
+	'test_pass' is not a builtin.
+
+eu:test_pass("This should never happen")
+           ^
+
+

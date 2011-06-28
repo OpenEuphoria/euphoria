@@ -7157,7 +7157,7 @@ procedure BackEnd(atom ignore)
 
 	-- prevent conflicts
 	for i = TopLevelSub+1 to length(SymTab) do
-		if sequence(SymTab[i][S_NAME]) and  sym_mode( i ) = M_NORMAL then --find( SymTab[i][S_TOKEN], {VARIABLE, CONSTANT, ENUM}) then
+		if sequence(SymTab[i][S_NAME]) and  sym_mode( i ) = M_NORMAL and not find( sym_token( i ), { PROC, FUNC, TYPE} ) then --find( SymTab[i][S_TOKEN], {VARIABLE, CONSTANT, ENUM}) then
 			SymTab[i][S_NAME] &= sprintf( "_%d", i )
 		end if
 	end for

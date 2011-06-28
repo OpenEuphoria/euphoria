@@ -706,6 +706,11 @@ export function keyfind(sequence word, integer file_no, integer scanning_file = 
 -- If file_no is not -1 then file_no must match and symbol must be a GLOBAL.
 -- namespace_ok: 0 => ignore namespaces, 1 => ignore everything but namespaces,
 --              -1 => look at everything, and find the best resolution (probably a case statement)
+--
+-- If No_new_entry is true and we cannot resolve the symbol for word, it returns
+-- {IGNORED,word,scope,symbols}, word being the word passed in, scope being a scope error value and symbols being 
+-- a sequence of symbols that matched word.  In this case, the only possible values for scope are scope constants
+-- that begin with SC_* and symbols are a set of symtab_indeces.
 
 	sequence msg, b_name
 	integer scope, defined, ix
@@ -1032,7 +1037,7 @@ end ifdef
 	end if
 	
 	if No_new_entry then
-		return {IGNORED,word}
+		return {IGNORED,word,defined,dup_globals}
 	end if
 
 	tok = {VARIABLE, NewEntry(word, 0, defined,
