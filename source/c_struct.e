@@ -102,6 +102,10 @@ procedure peek_member( integer pointer, integer sym, integer target )
 		case MS_FLOAT, MS_DOUBLE, MS_LONGDOUBLE, MS_EUDOUBLE then
 			c_stmt( sprintf("@ = NewDouble( (eudouble) *(%s*)@ );\n", {type_name}), { target, pointer }, target )
 		
+		case MEMUNION then
+			-- TODO
+		case MEMSTRUCT then
+			-- TODO
 		case else
 			c_stmt( sprintf("@ = *(%s*)@;\n", {type_name}), { target, pointer }, target )
 			
@@ -130,9 +134,74 @@ export procedure opMEMSTRUCT_SERIALIZE()
 	? 1/0
 end procedure
 
+procedure poke_member( symtab_index pointer, symtab_index member, symtab_index val )
+	integer data_type = SymTab[member][S_TOKEN]
+	integer signed    = SymTab[member][S_MEM_SIGNED]
+	
+	if SymTab[member][S_MEM_POINTER] then
+		data_type = MS_OBJECT
+		signed    = 0
+	end if
+	sequence type_name = mem_name( sym_token( member ) )
+	if not signed then
+		if data_type = MS_OBJECT then
+			type_name = "uintptr_t"
+		else
+			type_name = "unsigned " & type_name
+		end if
+	end if
+	
+	switch data_type do
+		case MS_FLOAT, MS_DOUBLE, MS_LONGDOUBLE, MS_EUDOUBLE then
+			integer is_double = TypeIs( val, TYPE_DOUBLE )
+			if not is_double then
+				c_stmt( "if( IS_ATOM_INT( @ ) ){\n", val )
+					c_stmt( sprintf("*(%s)@ = (%s)@;\n", {type_name}), { pointer, val }, pointer )
+				c_stmt0( "}\n" )
+				c_stmt0( "else{\n")
+			end if
+			
+			c_stmt( sprintf("*(%s)@ = (%s)DBL_PTR( @ )->dbl;\n", {type_name}), { pointer, val }, pointer )
+			
+			if not is_double then
+				c_stmt0( "}\n")
+			end if
+		
+		case MEMUNION then
+			-- TODO
+		case MEMSTRUCT then
+			-- TODO
+		case else
+			integer is_integer = TypeIs( val, TYPE_INTEGER )
+			if not is_integer then
+				c_stmt( "if( IS_ATOM_INT( @ ) ){\n", val )
+			end if
+			
+			c_stmt( sprintf("*(%s*) @ = (%s) @;\n", {type_name, type_name}), {pointer, val}, pointer )
+			
+			if not is_integer then
+				c_stmt0("}\n" )
+				c_stmt0( "else{\n")
+				c_stmt( sprintf("*(%s*) @ = (%s) DBL_PTR( @ )->dbl;\n", {type_name, type_name}), {pointer, val}, pointer )
+				c_stmt0("}\n" )
+			end if
+	end switch
+end procedure
+
 
 export procedure opMEMSTRUCT_ASSIGN()
-	? 1/0
+	integer
+		pointer = Code[pc+1],
+		member  = Code[pc+2],
+		val     = Code[pc+3]
+	
+	if pointer != target_is_pointer then
+		get_pointer( pointer )
+	end if
+	
+	poke_member( pointer, member, val )
+	dispose_temp( val, compile:DISCARD_TEMP, REMOVE_FROM_MAP )
+	pc += 4
 end procedure
 
 

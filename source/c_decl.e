@@ -1151,7 +1151,8 @@ export procedure new_c_file(sequence name)
 
 	c_puts("#include \"include/euphoria.h\"\n")
 
-	c_puts("#include \"main-.h\"\n\n")
+	c_puts("#include \"main-.h\"\n")
+	c_puts("#include \"struct.h\"\n\n")
 
 	if not TUNIX then
 		name = lower(name)  -- for faster compare later
