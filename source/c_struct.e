@@ -4,13 +4,33 @@ include c_decl.e
 include c_out.e
 include compile.e
 include emit.e
+include error.e
 include global.e
 include reswords.e
 include symtab.e
 
 -- Use this to communicate between ops so we can avoid changing
 -- pointers into doubles.
-integer target_is_pointer = 0
+sequence target_is_pointer = {}
+
+
+function is_pointer( integer pointer )
+	return find( pointer, target_is_pointer )
+end function
+
+procedure add_pointer( integer pointer )
+	if not is_pointer( pointer ) then
+		target_is_pointer &= pointer
+	end if
+end procedure
+
+procedure remove_pointer( integer pointer )
+	integer px = is_pointer( pointer )
+	if px then
+		target_is_pointer = remove( target_is_pointer, px )
+	end if
+end procedure
+
 
 function struct_type( symtab_index sym )
 	sym = SymTab[sym][S_MEM_PARENT]
@@ -24,20 +44,32 @@ function struct_type( symtab_index sym )
 	return type_name & decorated_name( sym )
 end function
 
-procedure get_pointer( integer pointer )
-	if not TypeIs( pointer, TYPE_INTEGER ) then
-		c_stmt("if( IS_ATOM_INT( @ ) ){\n", pointer )
+procedure get_pointer( integer pointer, integer target )
+	if not is_pointer( target ) then
+		CDeRef( target )
 	end if
 	
-	c_stmt( "_0 = @;\n", pointer )
+	if is_pointer( pointer ) then
+		if target != pointer then
+			
+			c_stmt( "@ = @;\n", {target, pointer}, target )
+		end if
+	else
+		c_stmt( "_0 = @;\n", pointer )
 	
-	if not TypeIs( pointer, TYPE_INTEGER ) then
-		c_stmt0( "}\n")
-		c_stmt0( "else{\n")
-			c_stmt("_0 = (intptr_t) DBL_PTR( @ )->dbl;\n", pointer )
-		c_stmt0( "}\n")
+		if not TypeIs( pointer, TYPE_INTEGER ) then
+			c_stmt0("if( !IS_ATOM_INT( _0 ) ){\n" )
+				c_stmt0("_0 = (intptr_t) DBL_PTR( _0 )->dbl;\n" )
+			c_stmt0( "}\n")
+		end if
 		
+		c_stmt( "@ = _0;\n", target, target )
+		dispose_temp( pointer, compile:DISCARD_TEMP, REMOVE_FROM_MAP )
 	end if
+	
+	add_pointer( target )
+	SetBBType( target, TYPE_INTEGER, {MININT, MAXINT}, TYPE_INTEGER, 0 )
+	
 end procedure
 
 export procedure opMEMSTRUCT_ACCESS()
@@ -46,13 +78,11 @@ export procedure opMEMSTRUCT_ACCESS()
 		pointer      = Code[pc+2],
 		target       = Code[pc+ 3 + access_count]
 	
-	get_pointer( pointer )
-	
-	CDeRef( target )
+	get_pointer( pointer, target )
 	
 	symtab_index sym = Code[pc+3]
 	
-	c_stmt0( sprintf("_0 = (intptr_t) &((%s*)_0)",{struct_type(sym)}) )
+	c_stmt( sprintf("@ = (intptr_t) &((%s*)@)",{struct_type(sym)}), { target, target }, target )
 	
 	integer 
 		first_pc    = pc + 3,
@@ -68,29 +98,74 @@ export procedure opMEMSTRUCT_ACCESS()
 		CName( Code[i] )
 	end for
 	c_puts( ";\n")
-	dispose_temp( pointer, compile:DISCARD_TEMP, REMOVE_FROM_MAP )
-	SetBBType( target, TYPE_INTEGER, {MININT, MAXINT}, TYPE_INTEGER, 0 )
-	target_is_pointer = target
+	
 	pc += access_count + 4
 end procedure
 
 export procedure opMEMSTRUCT_ARRAY()
-	? 1/0
+	integer
+		pointer   = Code[pc+1],
+		member    = Code[pc+2],
+		subscript = Code[pc+3],
+		target    = Code[pc+4]
+	
+	get_pointer( pointer, target )
+	
+	
+	sequence type_name
+	integer data_type = sym_token( member )
+	switch data_type do
+		case MS_MEMBER then
+			member = SymTab[member][S_MEM_STRUCT]
+			fallthru
+			
+		case MEMSTRUCT, MEMUNION then
+			sequence tag
+			if data_type = MEMSTRUCT then
+				tag = "struct"
+			else
+				tag = "union"
+			end if
+			type_name = sprintf( "%s %s", { tag, decorated_name( member ) } )
+		case else
+			type_name = mem_name( data_type )
+	end switch
+	
+	integer is_integer = TypeIs( subscript, TYPE_INTEGER )
+	if not is_integer then
+		c_stmt("if( IS_ATOM_INT( @ ) ){\n", subscript )
+	end if
+	c_stmt("_1 = @;\n", subscript )
+	
+	if not is_integer then
+		c_stmt0( "}\n" )
+		c_stmt0( "else{\n" )
+		c_stmt(  "_1 = (intptr_t)DBL_PTR( @ )->dbl;\n", subscript )
+		c_stmt0( "}\n" )
+	end if
+	
+	dispose_temp( subscript, compile:DISCARD_TEMP, REMOVE_FROM_MAP )
+	c_stmt( sprintf( "@ = (intptr_t) &(((%s*)@)[_1]);\n", { type_name } ), { target, target }, target )
+	
+	pc += 5
 end procedure
 
 --**
 -- Stores the value pointed to by _0 into the target.
-procedure peek_member( integer sym, integer target )
+procedure peek_member( integer pointer, integer sym, integer target )
 	integer data_type = SymTab[sym][S_TOKEN]
 	integer signed    = SymTab[sym][S_MEM_SIGNED]
-	
+	sequence type_name
 	if SymTab[sym][S_MEM_POINTER] then
 		data_type = MS_OBJECT
 		signed    = 0
+		type_name = "object"
+	else
+		type_name = mem_name( sym_token( sym ) )
 	end if
 	
 	CDeRef( target )
-	sequence type_name = mem_name( sym_token( sym ) )
+	
 	if not signed then
 		if data_type = MS_OBJECT then
 			type_name = "uintptr_t"
@@ -101,14 +176,14 @@ procedure peek_member( integer sym, integer target )
 	
 	switch data_type do
 		case MS_FLOAT, MS_DOUBLE, MS_LONGDOUBLE, MS_EUDOUBLE then
-			c_stmt( sprintf("@ = NewDouble( (eudouble) *(%s*)_0 );\n", {type_name}), { target }, target )
+			c_stmt( sprintf("@ = NewDouble( (eudouble) *(%s*)@ );\n", {type_name}), { target, pointer }, target )
 		
 		case MEMUNION then
 			-- TODO
 		case MEMSTRUCT then
 			-- TODO
 		case else
-			c_stmt( sprintf("@ = *(%s*)_0;\n", {type_name}), { target }, target )
+			c_stmt( sprintf("@ = *(%s*)@;\n", {type_name}), { target, pointer }, target )
 			
 	end switch
 	
@@ -120,13 +195,12 @@ export procedure opPEEK_MEMBER()
 		member  = Code[pc+2],
 		target  = Code[pc+3]
 	
-	if pointer != target_is_pointer then
-		get_pointer( pointer )
-	end if
+	get_pointer( pointer, target )
 	
-	peek_member( member, target )
+	peek_member( pointer, member, target )
 	
-	target_is_pointer = 0
+	remove_pointer( pointer )
+	remove_pointer( target )
 	pc += 4
 end procedure
 
@@ -137,15 +211,20 @@ end procedure
 
 --**
 -- Stores the value into the memory pointed to by _0
-procedure poke_member( symtab_index member, symtab_index val )
+procedure poke_member( symtab_index target, symtab_index member, symtab_index val )
 	integer data_type = SymTab[member][S_TOKEN]
 	integer signed    = SymTab[member][S_MEM_SIGNED]
+	
+	sequence type_name
 	
 	if SymTab[member][S_MEM_POINTER] then
 		data_type = MS_OBJECT
 		signed    = 0
+		type_name = "object"
+	else
+		type_name = mem_name( sym_token( member ) )
 	end if
-	sequence type_name = mem_name( sym_token( member ) )
+	
 	if not signed then
 		if data_type = MS_OBJECT then
 			type_name = "uintptr_t"
@@ -159,12 +238,12 @@ procedure poke_member( symtab_index member, symtab_index val )
 			integer is_double = TypeIs( val, TYPE_DOUBLE )
 			if not is_double then
 				c_stmt( "if( IS_ATOM_INT( @ ) ){\n", val )
-					c_stmt( sprintf("*(%s)_0 = (%s)@;\n", {type_name, type_name}), { val } )
+					c_stmt( sprintf("*(%s)@ = (%s)@;\n", {type_name, type_name}), { target, val }, target )
 				c_stmt0( "}\n" )
 				c_stmt0( "else{\n")
 			end if
 			
-			c_stmt( sprintf("*(%s)_0 = (%s)DBL_PTR( @ )->dbl;\n", {type_name, type_name}), { val } )
+			c_stmt( sprintf("*(%s)@ = (%s)DBL_PTR( @ )->dbl;\n", {type_name, type_name}), { target, val }, target )
 			
 			if not is_double then
 				c_stmt0( "}\n")
@@ -180,12 +259,12 @@ procedure poke_member( symtab_index member, symtab_index val )
 				c_stmt( "if( IS_ATOM_INT( @ ) ){\n", val )
 			end if
 			
-			c_stmt( sprintf("*(%s*) _0 = (%s) @;\n", {type_name, type_name}), {val} )
+			c_stmt( sprintf("*(%s*) @ = (%s) @;\n", {type_name, type_name}), {target, val}, target )
 			
 			if not is_integer then
 				c_stmt0("}\n" )
 				c_stmt0( "else{\n")
-				c_stmt( sprintf("*(%s*) _0 = (%s) DBL_PTR( @ )->dbl;\n", {type_name}), {val} )
+				c_stmt( sprintf("*(%s*) @ = (%s) DBL_PTR( @ )->dbl;\n", {type_name, type_name}), {target, val}, target )
 				c_stmt0("}\n" )
 			end if
 	end switch
@@ -198,15 +277,12 @@ export procedure opMEMSTRUCT_ASSIGN()
 		member  = Code[pc+2],
 		val     = Code[pc+3]
 	
-	if pointer != target_is_pointer then
-		get_pointer( pointer )
-		dispose_temp( pointer, compile:DISCARD_TEMP, REMOVE_FROM_MAP )
-	end if
+	get_pointer( pointer, pointer )
 	
-	poke_member( member, val )
+	poke_member( pointer, member, val )
 	
 	dispose_temp( val, compile:DISCARD_TEMP, REMOVE_FROM_MAP )
-	target_is_pointer = 0
+	remove_pointer( pointer )
 	
 	pc += 4
 end procedure
@@ -219,10 +295,7 @@ export procedure opMEMSTRUCT_ASSIGNOP()
 		member  = Code[pc+2],
 		val     = Code[pc+3]
 	
-	if pointer != target_is_pointer then
-		get_pointer( pointer )
-		dispose_temp( pointer, compile:DISCARD_TEMP, REMOVE_FROM_MAP )
-	end if
+	get_pointer( pointer, pointer )
 	
 	sequence optext
 	switch op do
@@ -243,12 +316,12 @@ export procedure opMEMSTRUCT_ASSIGNOP()
 			integer is_double = TypeIs( val, TYPE_DOUBLE )
 			if not is_double then
 				c_stmt( "if( IS_ATOM_INT( @ ) ){\n", val )
-					c_stmt( sprintf("*(%s)_0 %s= (%s)@;\n", {type_name, optext, type_name}), { val } )
+					c_stmt( sprintf("*(%s)@ %s= (%s)@;\n", {type_name, optext, type_name}), { pointer, val }, pointer )
 				c_stmt0( "}\n" )
 				c_stmt0( "else{\n")
 			end if
 			
-			c_stmt( sprintf("*(%s)_0 %s= (%s)DBL_PTR( @ )->dbl;\n", {type_name, optext, type_name}), { val } )
+			c_stmt( sprintf("*(%s)@ %s= (%s)DBL_PTR( @ )->dbl;\n", {type_name, optext, type_name}), { pointer, val }, pointer )
 			
 			if not is_double then
 				c_stmt0( "}\n")
@@ -264,16 +337,17 @@ export procedure opMEMSTRUCT_ASSIGNOP()
 				c_stmt( "if( IS_ATOM_INT( @ ) ){\n", val )
 			end if
 			
-			c_stmt( sprintf("*(%s*) _0 %s= (%s) @;\n", {type_name, optext, type_name}), {val} )
+			c_stmt( sprintf("*(%s*) @ %s= (%s) @;\n", {type_name, optext, type_name}), {pointer, val}, pointer )
 			
 			if not is_integer then
 				c_stmt0("}\n" )
 				c_stmt0( "else{\n")
-				c_stmt( sprintf("*(%s*) _0 %s= (%s) DBL_PTR( @ )->dbl;\n", {type_name, optext, type_name}), {val} )
+				c_stmt( sprintf("*(%s*) @ %s= (%s) DBL_PTR( @ )->dbl;\n", {type_name, optext, type_name}), {pointer, val}, pointer )
 				c_stmt0("}\n" )
 			end if
 	end switch
 	dispose_temp( val, compile:DISCARD_TEMP, REMOVE_FROM_MAP )
+	remove_pointer( pointer )
 	pc += 4
 end procedure
 
@@ -303,6 +377,8 @@ function mem_name( integer tid )
 			return "long double"
 		case MS_EUDOUBLE then
 			return "eudouble"
+		case else
+			InternalErr("error finding name for token: [1] [2]", { tid, LexName( tid ) })
 	end switch
 end function
 

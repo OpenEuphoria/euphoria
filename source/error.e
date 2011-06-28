@@ -306,14 +306,19 @@ end procedure
 --**
 -- Handles internal compile-time errors
 -- see RTInternal() for run-time internal errors
-export procedure InternalErr(integer  msgno, object args = {})
+export procedure InternalErr(object  msgno, object args = {})
 
 	sequence msg
 	if atom(args) then
 		args = {args}
 	end if
-
-	msg = GetMsgText(msgno, 1, args)
+	
+	if atom( msgno ) then
+		msg = GetMsgText(msgno, 1, args)
+	else
+		msg = format(msgno, args)
+	end if
+	
 	if TRANSLATE then
 		screen_output(STDERR, GetMsgText(211, 1, {msg}))
 	else
