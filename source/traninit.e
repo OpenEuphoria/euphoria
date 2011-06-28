@@ -195,11 +195,7 @@ export procedure transoptions()
 				end switch
 
 			case "lib" then
-				user_library = canonical_path(val)
-				if not file_exists(user_library) then
-					ShowMsg(2, 348, { val })
-					abort(1)
-				end if
+				user_library = val
 
 			case "stack" then
 				sequence tmp = value(val)
@@ -252,6 +248,14 @@ export procedure transoptions()
 		end switch
 	end for
 
+	if compiler_type != COMPILER_GCC then
+		if not file_exists(canonical_path(user_library)) then
+			ShowMsg(2, 348, { user_library })
+			abort(1)
+		else
+			user_library = canonical_path(user_library)
+		end if
+	end if
 	if length(exe_name[D_NAME]) and not absolute_path(exe_name[D_NAME]) then
 		exe_name[D_NAME] = current_dir() & SLASH & exe_name[D_NAME]
 	end if
