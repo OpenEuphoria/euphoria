@@ -40,7 +40,7 @@ procedure init_op_info()
 	op_info[APPEND              ] = { FIXED_SIZE, 4, {}, {3}, {} }   -- ary: bin
 	op_info[ARCTAN              ] = { FIXED_SIZE, 3, {}, {2}, {} }   -- ary: un
 	op_info[ASSIGN              ] = { FIXED_SIZE, 3, {}, {2}, {} }
-	op_info[MEMSTRUCT_ASSIGN    ] = { FIXED_SIZE, 3, {}, {}, {} }
+	op_info[MEMSTRUCT_ASSIGN    ] = { FIXED_SIZE, 4, {}, {}, {} }
 	op_info[ASSIGN_I            ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[ASSIGN_OP_SLICE     ] = { FIXED_SIZE, 5, {}, {4}, {} }
 	op_info[ASSIGN_OP_SUBS      ] = { FIXED_SIZE, 4, {}, {3}, {} }
