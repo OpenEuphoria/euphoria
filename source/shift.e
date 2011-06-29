@@ -68,7 +68,7 @@ procedure init_op_info()
 	op_info[DELETE_OBJECT       ] = { FIXED_SIZE, 2, {}, {}, {} }
 	op_info[DIV2                ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[DIVIDE              ] = { FIXED_SIZE, 4, {}, {3}, {} }
-	op_info[MEMSTRUCT_DIVIDE    ] = { FIXED_SIZE, 3, {}, {}, {} }
+	op_info[MEMSTRUCT_DIVIDE    ] = { FIXED_SIZE, 4, {}, {}, {} }
 	op_info[ELSE                ] = { FIXED_SIZE, 2, {1}, {}, {} }
 	op_info[EXIT                ] = { FIXED_SIZE, 2, {1}, {}, {} }
 	op_info[EXIT_BLOCK          ] = { FIXED_SIZE, 2, {},  {}, {} }
@@ -130,10 +130,10 @@ procedure init_op_info()
 	op_info[MEMSTRUCT_ARRAY     ] = { FIXED_SIZE, 5, {}, {4}, {} }
 	op_info[MEMSTRUCT_SERIALIZE ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[MINUS               ] = { FIXED_SIZE, 4, {}, {3}, {} }
-	op_info[MEMSTRUCT_MINUS     ] = { FIXED_SIZE, 3, {}, {}, {} }
+	op_info[MEMSTRUCT_MINUS     ] = { FIXED_SIZE, 4, {}, {}, {} }
 	op_info[MINUS_I             ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[MULTIPLY            ] = { FIXED_SIZE, 4, {}, {3}, {} }
-	op_info[MEMSTRUCT_MULTIPLY  ] = { FIXED_SIZE, 3, {}, {}, {} }
+	op_info[MEMSTRUCT_MULTIPLY  ] = { FIXED_SIZE, 4, {}, {}, {} }
 	op_info[NOP1                ] = { FIXED_SIZE, 1, {}, {}, {} }
 	op_info[NOPWHILE            ] = { FIXED_SIZE, 1, {}, {}, {} }
 	op_info[NOP2                ] = { FIXED_SIZE, 2, {}, {}, {} }
@@ -171,7 +171,7 @@ procedure init_op_info()
 	op_info[PEEK_POINTER        ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[PLENGTH             ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[PLUS                ] = { FIXED_SIZE, 4, {}, {3}, {} }
-	op_info[MEMSTRUCT_PLUS      ] = { FIXED_SIZE, 3, {}, {}, {} }
+	op_info[MEMSTRUCT_PLUS      ] = { FIXED_SIZE, 4, {}, {}, {} }
 	op_info[PLUS_I              ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[PLUS1               ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[PLUS1_I             ] = { FIXED_SIZE, 4, {}, {3}, {} }
