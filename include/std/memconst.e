@@ -75,11 +75,10 @@ end ifdef
 -- You take the word PAGE and you concatonate an underscore and the aspect
 -- in the order above.  For example: PAGE_WRITE_EXECUTE
 -- The sole exception to this nomenclature is when you will have no acesss to the page the 
--- constant is called PAGE_NOACCESS.
+-- constant is called PAGE_NONE.
 
 --** 
--- You have no access to this page
--- An alias to PAGE_NOACCESS
+-- You have no access to this page.
 public constant PAGE_NONE = PAGE_NOACCESS
 
 --**
@@ -116,7 +115,8 @@ public constant PAGE_WRITE_COPY = PAGE_WRITECOPY
 
 
 
-
+--**
+-- @nodoc@
 export constant MEMORY_PROTECTION = {
 	PAGE_EXECUTE,
 	PAGE_EXECUTE_READ,
@@ -128,16 +128,14 @@ export constant MEMORY_PROTECTION = {
 	PAGE_NOACCESS
 }
 
---****
--- == Types supporting Memory
-
 --**
--- protection constants type
+-- @nodoc@
 public type valid_memory_protection_constant( object x )
 	return find( x, MEMORY_PROTECTION )
 end type
 
-
+--**
+-- @nodoc@
 export function test_read( valid_memory_protection_constant protection )
 	-- does this protection allow for reading?
 	ifdef UNIX then
@@ -149,7 +147,8 @@ export function test_read( valid_memory_protection_constant protection )
 	end ifdef			
 end function
 
-
+--**
+-- @nodoc@
 export function test_write( valid_memory_protection_constant protection )
 	-- does this protection allow for writing?
 	ifdef UNIX then
@@ -163,6 +162,8 @@ export function test_write( valid_memory_protection_constant protection )
 	end ifdef
 end function
 
+--**
+-- @nodoc@
 export function test_exec( valid_memory_protection_constant protection )
 	-- does this protection allow for executing?
 	ifdef UNIX then
@@ -176,28 +177,43 @@ export function test_exec( valid_memory_protection_constant protection )
 	end ifdef
 end function
 
-
+--**
+-- @nodoc@
 export type valid_wordsize( object i )
 	return find(i, {1,2,4})
 end type
 
+--**
+-- @nodoc@
 export integer DEP_really_works = 0
+--**
+-- @nodoc@
 export integer use_DEP = 1
 
+--**
+-- @nodoc@
 -- Windows constants
 export constant MEM_COMMIT = #1000,
 		MEM_RESERVE = #2000,
 		MEM_RESET = #80000,
 		MEM_RELEASE = #8000
 
+--**
+-- @nodoc@
 export integer FREE_RID		
 
+--**
+-- @nodoc@
 public enum A_READ = 1, A_WRITE = 2, A_EXECUTE = 3
 
+--**
+-- @nodoc@
 export constant
         M_ALLOC = 16,
         M_FREE = 17
 
+--**
+-- @nodoc@
 export atom kernel_dll, memDLL_id, 
 	VirtualAlloc_rid, VirtualLock_rid, VirtualUnlock_rid,
 	VirtualProtect_rid, GetLastError_rid, GetSystemInfo_rid

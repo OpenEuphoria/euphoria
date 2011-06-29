@@ -9,7 +9,6 @@ include std/os.e
 -- 3. /packaging/win32/euphoria-ow.iss
 -- 4. /tests/t_condcmp.e
 -- 5. /source/version.h
---
 
 
 ifdef hello then

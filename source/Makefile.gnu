@@ -92,11 +92,11 @@ ifeq "$(EMINGW)" "1"
 	EPTHREAD=
 	EOSTYPE=-DEWINDOWS
 	EBSDFLAG=-DEMINGW
-	LDLFLAG=-lws2_32 -lcomctl32
+	LDLFLAG=
 	SEDFLAG=-ri
-	EOSFLAGS=-mno-cygwin -mwindows
-	EOSFLAGSCONSOLE=-mno-cygwin
-	EOSPCREFLAGS=-mno-cygwin
+	EOSFLAGS=$(NO_CYGWIN) -mwindows
+	EOSFLAGSCONSOLE=$(NO_CYGWIN)
+	EOSPCREFLAGS=$(NO_CYGWIN)
 	EECUA=eu.a
 	EECUDBGA=eudbg.a
 	EECUSOA=euso.a
@@ -563,7 +563,7 @@ $(BUILDDIR)/$(EECU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_ST
 $(BUILDDIR)/$(EECU) :  EU_OBJS = $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 $(BUILDDIR)/$(EECU) : $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) $(EUC_RES)
 	@$(ECHO) making $(EECU)
-	$(CC) $(EOSFLAGSCONSOLE) $(EUC_RES) $(EU_TRANSLATOR_OBJECTS) $(DEBUG_FLAGS) $(PROFILE_FLAGS) $(EU_BACKEND_OBJECTS) $(MSIZE) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EECU)
+	$(CC) $(EOSFLAGSCONSOLE) $(EUC_RES) $(EU_TRANSLATOR_OBJECTS) $(DEBUG_FLAGS) $(PROFILE_FLAGS) $(EU_BACKEND_OBJECTS) $(MSIZE) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EECU) 
 	
 backend : builddirs
 ifeq "$(EUPHORIA)" "1"
@@ -977,7 +977,7 @@ $(BUILDDIR)/$(OBJDIR)/back/%.o : %.c $(CONFIG_FILE)
 	$(CC) $(BE_FLAGS) $(EBSDFLAG) -I $(BUILDDIR)/$(OBJDIR)/back -I $(BUILDDIR)/include $*.c -o$(BUILDDIR)/$(OBJDIR)/back/$*.o
 
 $(BUILDDIR)/$(OBJDIR)/back/be_callc.o : ./$(BE_CALLC).c $(CONFIG_FILE)
-	$(CC) -c -Wall $(FPIC) $(EOSTYPE) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -fsigned-char -Os -O3 -ffast-math -fno-defer-pop $(CALLC_DEBUG) $(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.o
+	$(CC) -c -Wall $(EOSTYPE) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -fsigned-char -O3 -fno-omit-frame-pointer -ffast-math -fno-defer-pop $(CALLC_DEBUG) $(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.o
 
 $(BUILDDIR)/$(OBJDIR)/back/be_inline.o : ./be_inline.c $(CONFIG_FILE) 
 	$(CC) -finline-functions $(BE_FLAGS) $(EBSDFLAG) $(RUNTIME_FLAGS) be_inline.c -o$(BUILDDIR)/$(OBJDIR)/back/be_inline.o

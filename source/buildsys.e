@@ -186,6 +186,10 @@ export integer force_build = 0
 
 export integer remove_output_dir = 0
 
+--**
+-- Use the -mno-cygwin flag with MinGW.
+export integer mno_cygwin = 0
+
 enum SETUP_CEXE, SETUP_CFLAGS, SETUP_LEXE, SETUP_LFLAGS, SETUP_OBJ_EXT, SETUP_EXE_EXT,
 	SETUP_LFLAGS_BEGIN, SETUP_RC_COMPILER
 
@@ -247,14 +251,23 @@ constant space_pattern = regex:new(" ")
 -- that is using spaces and build_commandline() will not work 
 -- in place of this.
 --
--- If the path passed in doesn't exist, its parent foldernames that do exist
--- are adjusted so that the path is composed of 'short filenames'
--- when possible.  For the parts of the path that doesn't exist,
--- a zero is returned if they contain spaces and if they don't contain
--- spaces they are returned as is in the path.
+-- Now, we will say that a folder is adjusted if it undergoes the
+-- above transformation.  
 --
--- If the path does exist it is adjusted such that the file path contains
--- no spaces on WINDOWS.
+-- An ancestor directory of a file or directory, is a either a parent of the 
+-- the said file or a parent of another ancestor.
+--
+-- Return Value:
+--
+-- If the path passed in does exist, the entire passed parameter is
+-- adjusted as described above.
+--
+-- If the path passed in doesn't exist but an ancestor directory does,
+-- that ancestor is adjusted in the return value and the non-existent
+-- version is left unchanged.
+--
+-- If the path passed in doesn't exist and the only ancestor directory that
+-- does is a root directory, then his routine returns 0.
 --
 -- Examples:
 --
@@ -382,7 +395,12 @@ function setup_build()
 	end if -- user_library = 0
 
 	if TWINDOWS then
-		c_flags &= " /dEWINDOWS"
+		if compiler_type = COMPILER_WATCOM then
+			c_flags &= " /dEWINDOWS"
+		else
+			c_flags &= " -DEWINDOWS"
+		end if
+		
 		if dll_option then
 			exe_ext = ".dll"
 		else
@@ -411,9 +429,9 @@ function setup_build()
 			obj_ext = "o"
 
 			if debug_option then
-				c_flags = " -g3"
+				c_flags &= " -g3"
 			else
-				c_flags = " -fomit-frame-pointer"
+				c_flags &= " -fomit-frame-pointer"
 			end if
 
 			if dll_option then
@@ -429,7 +447,9 @@ function setup_build()
 			end ifdef
 
 			if TWINDOWS then
-				c_flags &= " -mno-cygwin"
+				if mno_cygwin then
+					c_flags &= " -mno-cygwin"
+				end if
 
 				if not con_option then
 					c_flags &= " -mwindows"
@@ -453,8 +473,9 @@ function setup_build()
 			elsif TOSX then
 				l_flags &= " -lresolv"
 			elsif TWINDOWS then
-				/* We may be able to remove '-lws2_32' here now. */
-				l_flags &= " -mno-cygwin -lws2_32 -lcomctl32"				
+				if mno_cygwin then
+					l_flags &= " -mno-cygwin"
+				end if
 			end if
 			
 			-- input/output
@@ -487,7 +508,7 @@ function setup_build()
 				end if
 			end if
 
-			l_flags &= sprintf(" FILE %s LIBRARY comctl32", { user_library })
+			l_flags &= sprintf(" FILE %s", { user_library })
 			
 			
 			-- resource file, executable file
@@ -497,6 +518,7 @@ function setup_build()
 	end switch
 
 	if length(cflags) then
+		-- if the user supplied flags, use those instead
 		c_flags = cflags
 	end if
 
@@ -787,7 +809,7 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 		case COMPILER_GCC then
 			cmd = sprintf("%s -o %s %s %s %s", { 
 				settings[SETUP_LEXE], exe_name[D_ALTNAME], objs, 
-				iif(length(res_file[D_ALTNAME]), res_file[D_ALTNAME], ""),
+				res_file[D_ALTNAME],
 				settings[SETUP_LFLAGS]
 			})
 

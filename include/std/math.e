@@ -109,6 +109,69 @@ public function sign(object a)
 	return (a > 0) - (a < 0)
 end function
 
+--**
+-- Returns the larger of two objects.
+--
+-- Parameters:
+--		# ##objA## : an object.
+--		# ##objB## : an object.
+-- Returns:
+--		Whichever of ##objA## and ##objB## is the larger one.
+--
+-- Examples:
+-- <eucode>
+-- ? larger_of(10, 15.4) -- returns 15.4
+-- ? larger_of("cat", "dog") -- returns "dog"
+-- ? larger_of("apple", "apes") -- returns "apple"
+-- ? larger_of(10, 10) -- returns 10
+-- </eucode>
+--
+-- Comments:
+-- Introduced in v4.0.3
+--
+-- See Also:
+--		[[:max]], [[:compare]], [[:smaller_of]]
+
+public function larger_of(object objA, object objB)
+
+	if compare(objA, objB) > 0 then
+		return objA
+	else
+		return objB
+	end if
+end function
+
+--**
+-- Returns the smaller of two objects.
+--
+-- Parameters:
+--		# ##objA## : an object.
+--		# ##objB## : an object.
+--
+-- Returns:
+--		Whichever of ##objA## and ##objB## is the smaller one.
+--
+-- Examples:
+-- <eucode>
+-- ? smaller_of(10, 15.4) -- returns 10
+-- ? smaller_of("cat", "dog") -- returns "cat"
+-- ? smaller_of("apple", "apes") -- returns "apes"
+-- ? smaller_of(10, 10) -- returns 10
+-- </eucode>
+--
+-- Comments:
+-- Introduced in v4.0.3
+--
+-- See Also:
+--		[[:min]], [[:compare]], [[:larger_of]]
+
+public function smaller_of(object objA, object objB)
+	if compare(objA, objB) < 0 then
+		return objA
+	else
+		return objB
+	end if
+end function
 
 --**
 -- Computes the maximum value among all the argument's elements

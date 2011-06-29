@@ -14,7 +14,6 @@
 -- eui sanity.ex
 -- }}}
 --
-
 with type_check
 
 include std/convert.e
@@ -86,11 +85,25 @@ procedure same(object x, object y)
 	end if
 end procedure
 
-integer abs_id
+
+function abs(atom x)
+-- absolute value
+	if x < 0 then
+	return -x
+	else
+	return x
+	end if
+end function
 
 function built_in()
 -- built-in tests
 	sequence d
+	integer abs_id
+	
+	abs_id = routine_id("abs")
+	if abs_id = -1 then
+		crash("Invalid routine_id()")
+	end if
 
 	d = date()
 	if d[1] < 93 or d[2] > 12 or d[3] < 1 or d[4] > 23 or d[5] > 59 or
@@ -168,20 +181,6 @@ function built_in()
 	end if
 	end for
 end function
-
-function abs(atom x)
--- absolute value
-	if x < 0 then
-	return -x
-	else
-	return x
-	end if
-end function
-
-abs_id = routine_id("abs")
-if abs_id = -1 then
-	crash("Invalid routine_id()")
-end if
 
 procedure sub()
 	y = 200
@@ -814,7 +813,6 @@ end procedure
 without type_check
 integer color
 color = 1
-sequence v
 with type_check
 
 constant TRUE = 1/1, FALSE = 0, junk=-TRUE
@@ -1045,7 +1043,7 @@ procedure check_install(integer doit)
 	-- running with a non standard eui, see if there is
 	-- an interpreter in the path.
 	if equal( 
-		locate_file( "eui" & dexe, split( {PATHSEP}, path ) ), 
+		locate_file( "eui" & dexe, split( path, PATHSEP ) ), 
 		"eui" & dexe ) then
 	      puts(msg, "Note: the interpreter is not on your PATH.\n")
 	      reboot_msg()

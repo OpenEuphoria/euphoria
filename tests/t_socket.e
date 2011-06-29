@@ -68,15 +68,15 @@ object p = pipe:exec(interpreter & " " & build_commandline( option_switches() ) 
 if atom(p) then
 	test_fail("could not launch temporary server")
 else
-	-- Give the sever a second to actually launch
+	-- Give the server a second to actually launch
 	sleep(1)
-
-	for i = 1 to 4 do
+	integer maxwait = 10
+	for i = 1 to maxwait do
 		_ = sock:connect(socket, "127.0.0.1:"&port)
 		if _ = 0 then
 			exit
 		end if
-		if i = 4 then
+		if i = maxwait then
 			test_fail("connect to server")
 		else
 			if i = 1 then
@@ -107,5 +107,16 @@ else
 end if
 
 test_equal("close", sock:OK, sock:close(socket))
+
+procedure ticket680()
+	test_false("atom not a valid socket", sock:socket( 0 ) )
+	test_false("empty sequence not a valid socket", sock:socket( {} ) )
+	test_false("one element sequence not a valid socket", sock:socket( {0} ) )
+	test_false("three element sequence not a valid socket", sock:socket( {0,0,0} ) )
+	test_false("first element sequence not a valid socket", sock:socket( {"", 0}) )
+	test_false("second element sequence not a valid socket", sock:socket( {0, ""}) )
+	test_true("two elements, both atoms, valid socket", sock:socket( {0,0} ) )
+end procedure
+ticket680()
 
 test_report()

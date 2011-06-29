@@ -44,7 +44,13 @@ function forward_constant_default_param( atom val = EXPORT_CONSTANT )
 end function
 test_equal( "forward constant default param", EXPORT_CONSTANT, forward_constant_default_param() )
 
+
+
 include fwd.e
+include fwd2.e
+
+export constant FOO = "t_fwd"
+
 object a, b, c, d, e, f, g, h
 export atom fwd_var
 test_equal("forward assign different file", 1, fwd_var )

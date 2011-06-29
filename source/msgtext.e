@@ -231,7 +231,7 @@ constant StdErrMsgs = {
 	{213, "Failed due to internal error."},
 	{214, "Watcom cannot build translated files when there is a space in its parent folders"},
 	{215, "Watcom needs to have an INCLUDE variable set to its included directories"},
-	{216, "Watcom should have the H and the H\\NT includes at the front of the INCLUDE variable."},
+	{216, "Watcom should have the H and the H\\NT includes at the front of the INCLUDE variable.  Watcom is located in [1].  The INCLUDE environment variable is [2]."},
 	{217, "Statements have been inserted to trace execution of your program."},
 	{218, "[1]:[2] - statement after [3] will never be executed"},
 	{219, "[1]:[2] - call to [3]() might be short-circuited"},
@@ -366,8 +366,11 @@ constant StdErrMsgs = {
 	{348, "User supplied library does not exist:\n    [1]"},
 	{349, "Resource file does not exist:\n    [1]"},
 	{350, "Unable to compile resource file: [1]"},
-	{351, "Use a non-standard library when building a shared object"},
-	{352, "External debugger"},
+	{351, "Use the -mno-cygwin flag with MinGW"},
+	{352, "There is no watcom instalation under specified Watom Path [1]"},
+	{353, "Use a non-standard library when building a shared object"},
+	{354, "External debugger"},
+	{355, "Use the -mno-cygwin flag with MinGW"},
 	$
 }
 

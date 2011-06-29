@@ -1100,8 +1100,14 @@ object call_c(int func, object proc_ad, object arg_list)
 			if ((uintptr_t)iresult <= (uintptr_t)MAXINT) {
 				return iresult;
 			}
-			else{
-				return NewDouble((eudouble)(uintptr_t)iresult);
+			else {
+				// signed integer result
+				if (return_type >= E_INTEGER ||
+					(iresult >= MININT && iresult <= MAXINT)) {
+					return iresult;
+				}
+				else
+					return NewDouble((double)iresult);
 			}
 		case C_LONGLONG:
 			if ((long long int)iresult <= (long long int)MAXINT) {

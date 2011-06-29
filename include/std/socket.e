@@ -692,8 +692,13 @@ public constant
 -- === Server and Client sides
 --
 
+-- **
+-- @devdoc@
+--
 -- Not made public as the end user should have no need of accessing one value
 -- or the other.
+-- 
+-- Why even export them?
 export enum
 	--**
 	-- Accessor index for socket handle of a socket type
@@ -714,7 +719,7 @@ public type socket(object o)
         return 0 
     end if
 	
-    if not length(o) = 2 then 
+    if length(o) != 2 then 
         return 0 
     end if
 	

@@ -279,6 +279,9 @@ while [ "$1" != "" ]; do
 		echo WINE=$VAL >> "$PREFIX"${CONFIG_FILE}
 		;;
 
+	--no-cygwin )
+		NO_CYGWIN=-mno-cygwin
+		;;
 	* )
 		echo "Unknown option '$1'"
 		echo "Configures and prepares the euphoria source for building"
@@ -322,6 +325,8 @@ while [ "$1" != "" ]; do
 		echo "   --ssh-client value  SSH program to use for ssh commands (default ssh -C)"
 		echo "   --hg value          Mercurial binary command (default 'which hg')"
 		echo "   --wine value        Path to wine (useful for cross compilation to windows)"
+		echo "   --no-cygwin         Use the -mno-cygwin flag with MinGW.  This flag is obsoltete,"
+		echo "                       and may cause errors on newer versions of MinGW."
 		exit
 		;;
 	esac
@@ -425,6 +430,7 @@ else
 	echo CYPBUILDDIR=$BUILDDIR >> "$PREFIX"${CONFIG_FILE}
 fi
 echo XLTTARGETCC=$XLTTARGETCC >> "$PREFIX"${CONFIG_FILE}
+echo NO_CYGWIN=$NO_CYGWIN >> "$PREFIX"${CONFIG_FILE}
 
 # Make a generic Makefile that simply includes Makefile.gnu
 echo include Makefile.gnu > Makefile

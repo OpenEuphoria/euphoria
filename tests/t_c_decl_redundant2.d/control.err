@@ -1,0 +1,15 @@
+C:\Users\Shawn\Documents\development\hg\4.0\tests\t_c_decl_redundant2.e:2
+<0031>:: attempt to redefine foo.
+integer foo
+          ^
+
+
+--- Defined Words ---
+EU4
+EU4_0
+EU4_0_3
+WINDOWS
+WIN32
+CONSOLE
+EUI
+-------------------

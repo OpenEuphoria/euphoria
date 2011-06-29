@@ -429,7 +429,7 @@ LIBTARGET=$(BUILDDIR)\$(LIBRARY_NAME).lib
 CC = wcc386
 .ERASE
 COMMON_FLAGS = $(DEBUGFLAG) 
-FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s  /I..\ $(EREL_TYPE)
+FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s  /I$(TRUNKDIR) $(EREL_TYPE)
 BE_FLAGS = /ol /zp4 /d$(OSFLAG) /5r /dEWATCOM  /dEOW $(SETALIGN4) $(NOASSERT) $(HEAPCHECKFLAG) $(%ERUNTIME) $(EXTRACHECKFLAG) $(EXTRASTATSFLAG)  $(MEMFLAG) $(EREL_TYPE)
 
 !ifndef OBJDIR
@@ -606,11 +606,10 @@ $(INCLUDE_DIR)\be_ver.h $(BUILDDIR)\ver.cache : $(INCLUDE_DIR) $(BUILDDIR)\mkver
 
 !ifdef OBJDIR
 
-$(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(CONFIG) eui.rc version_info.rc
+$(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(CONFIG) eui.rc version_info.rc eu.manifest
 	@%create $(BUILDDIR)\$(OBJDIR)\euiw.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc option quiet
 	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc option caseexact
-	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc library comctl32
 	@for %i in ($(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc file %i
 	wlink  $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\euiw.lbc name $(BUILDDIR)\eui.exe
 	wrc -q -ad eui.rc $(BUILDDIR)\eui.exe
@@ -668,7 +667,7 @@ installbin : .SYMBOLIC
 
 !ifdef OBJDIR
 
-$(BUILDDIR)\euc.exe : $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
+$(BUILDDIR)\euc.exe : $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) eu.manifest
 	$(RM) $(BUILDDIR)\$(OBJDIR)\euc.lbc
 	@%create $(BUILDDIR)\$(OBJDIR)\euc.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\euc.lbc option quiet
@@ -690,7 +689,7 @@ $(BUILDDIR)\euc.exe : .always .recheck
 translator : .SYMBOLIC $(BUILDDIR)\euc.exe
 
 !ifdef OBJDIR
-$(BUILDDIR)\eubw.exe :  $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+$(BUILDDIR)\eub.exe $(BUILDDIR)\eubw.exe :  $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) eu.manifest
     @echo ------- BACKEND WINDOWS -----------
 	@%create $(BUILDDIR)\$(OBJDIR)\eub.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\eub.lbc option quiet
@@ -768,7 +767,7 @@ BE_FLAGS = $(BE_FLAGS) /dERUNTIME
 
 .c: $(BUILDDIR)\$(OBJDIR);$(BUILDDIR)\$(OBJDIR)\back
 .c.obj: 
-	$(CC) $(FE_FLAGS) $(BE_FLAGS) $(COMMON_FLAGS) -fr=$^@.err /I$(BUILDDIR)\$(OBJDIR)\back /I$(INCLUDE_DIR) $[@ -fo=$^@
+	$(CC) $(FE_FLAGS) $(BE_FLAGS) $(COMMON_FLAGS) -fr=$^@.err /I$(BUILDDIR)\$(OBJDIR) /I$(INCLUDE_DIR) $[@ -fo=$^@
 	
 $(BUILDDIR)\$(OBJDIR)\back\be_inline.obj : .\be_inline.c $(BUILDDIR)\$(OBJDIR)\back
 	$(CC) /oe=40 $(BE_FLAGS) $(FE_FLAGS) $(COMMON_FLAGS) $^&.c -fo=$^@

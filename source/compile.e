@@ -4989,50 +4989,74 @@ end procedure
 
 procedure opSPLICE()
 	splins()
+	integer
+		target_pc = Code[pc+4],
+		source_pc = Code[pc+1],
+		splice_pc = Code[pc+2],
+		splicing_sequence = TypeIs( splice_pc, TYPE_SEQUENCE )
+	
 	c_stmt0( "if (insert_pos <= 0) {\n" )
-		c_stmt( "Concat(&@,@,@);\n",{Code[pc+4],Code[pc+2],Code[pc+1]})
+		if not splicing_sequence then
+			c_stmt("if (IS_SEQUENCE(@)) {\n",{splice_pc})
+		end if
+		c_stmt( "Concat(&@,@,@);\n",{target_pc, splice_pc, source_pc} )
+		if not splicing_sequence then
+			c_stmt0("}\n")
+			c_stmt0("else{\n")
+				c_stmt( "Prepend(&@,@,@);\n", {target_pc, source_pc, splice_pc})
+			c_stmt0("}\n")
+		end if
 	c_stmt0( "}\n" )
-	c_stmt( "else if (insert_pos > SEQ_PTR(@)->length){\n", Code[pc+1] )
-		c_stmt( "Concat(&@,@,@);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
+	c_stmt( "else if (insert_pos > SEQ_PTR(@)->length){\n", source_pc )
+		if not splicing_sequence then
+			c_stmt("if (IS_SEQUENCE(@)) {\n",{splice_pc})
+		end if
+		c_stmt( "Concat(&@,@,@);\n", {target_pc, source_pc, splice_pc} )
+		if not splicing_sequence then
+			c_stmt0("}\n")
+			c_stmt0("else{\n")
+				c_stmt( "Append(&@,@,@);\n", {target_pc, source_pc, splice_pc})
+			c_stmt0("}\n")
+		end if
 	c_stmt0( "}\n")
-	c_stmt("else if (IS_SEQUENCE(@)) {\n",{Code[pc+2]})
-		c_stmt( "if( @ != @ || SEQ_PTR( @ )->ref != 1 ){\n", {Code[pc+4], Code[pc+1], Code[pc+1]})
+	c_stmt("else if (IS_SEQUENCE(@)) {\n",{splice_pc})
+		c_stmt( "if( @ != @ || SEQ_PTR( @ )->ref != 1 ){\n", {target_pc, source_pc, source_pc} )
 			--  not in place: need to deref the target and ref the orig seq
-			c_stmt( "DeRef( @ );\n", Code[pc+4] )
+			c_stmt( "DeRef( @ );\n", target_pc )
 			-- ensures that Add_internal_space will make a copy
-			c_stmt( "RefDS( @ );\n", Code[pc+1] )
+			c_stmt( "RefDS( @ );\n", source_pc )
 		c_stmt0( "}\n" )
-		c_stmt("assign_space = Add_internal_space( @, insert_pos,((s1_ptr)SEQ_PTR(@))->length);\n",{Code[pc+1],Code[pc+2]})
+		c_stmt("assign_space = Add_internal_space( @, insert_pos,((s1_ptr)SEQ_PTR(@))->length);\n", {source_pc, splice_pc} )
 		c_stmt0("assign_slice_seq = &assign_space;\n")
-		c_stmt("assign_space = Copy_elements( insert_pos, SEQ_PTR(@), @ == @ );\n",{Code[pc+2], Code[pc+1], Code[pc+4]})
-		c_stmt("@ = MAKE_SEQ( assign_space );\n",{Code[pc+4]})
+		c_stmt("assign_space = Copy_elements( insert_pos, SEQ_PTR(@), @ == @ );\n", {splice_pc, source_pc, target_pc})
+		c_stmt("@ = MAKE_SEQ( assign_space );\n",{target_pc})
 	c_stmt0("}\n")
 	c_stmt0( "else {\n" )
-		c_stmt( "if( @ != @ && SEQ_PTR( @ )->ref != 1 ){\n", {Code[pc+4], Code[pc+1], Code[pc+1]})
-			c_stmt("@ = Insert( @, @, insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
+		c_stmt( "if( @ != @ && SEQ_PTR( @ )->ref != 1 ){\n", {target_pc, source_pc, source_pc})
+			c_stmt("@ = Insert( @, @, insert_pos);\n", {target_pc, source_pc, splice_pc})
 		c_stmt0("}\n")
 		c_stmt0("else {\n")
-			c_stmt("DeRef( @ );\n", Code[pc+4] )
-			c_stmt("RefDS( @ );\n", Code[pc+1] )
-			c_stmt("@ = Insert( @, @, insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
+			c_stmt("DeRef( @ );\n", target_pc )
+			c_stmt("RefDS( @ );\n", source_pc )
+			c_stmt("@ = Insert( @, @, insert_pos);\n", {target_pc, source_pc, splice_pc})
 		c_stmt0("}\n")
 	c_stmt0("}\n")
 	
 	-- splins() starts a block that we need to close:
 	c_stmt0("}\n")
 	
-	if TypeIs(Code[pc+2], TYPE_SEQUENCE) then
-		t = or_type(SeqElem(Code[pc+1]),SeqElem(Code[pc+2]))
-	elsif TypeIs(Code[pc+2], TYPE_ATOM) then
-		t = or_type(SeqElem(Code[pc+1]),GType(Code[pc+2]))
+	if splicing_sequence then
+		t = or_type(SeqElem( source_pc ),SeqElem( splice_pc ) )
+	elsif TypeIs(splice_pc, TYPE_ATOM) then
+		t = or_type(SeqElem( source_pc ),GType( splice_pc ))
 	else
 		t = TYPE_OBJECT
 	end if
-	SetBBType(Code[pc+4], TYPE_SEQUENCE, novalue, t,
-		HasDelete( Code[pc+4] ) or HasDelete( Code[pc+2] )
+	SetBBType( target_pc, TYPE_SEQUENCE, novalue, t,
+		HasDelete( target_pc ) or HasDelete( splice_pc )
 		or HasDelete( Code[pc+3] ) )
 	dispose_temps( pc+1, 3, DISCARD_TEMP, REMOVE_FROM_MAP )
-	create_temp( Code[pc+4], NEW_REFERENCE )
+	create_temp( target_pc, NEW_REFERENCE )
 	pc += 5
 end procedure
 
@@ -7244,14 +7268,14 @@ procedure BackEnd(atom ignore)
 				c_stmt0("\nint __stdcall _CRT_INIT (int, int, void *);\n")
 				c_stmt0("\n")
 			end if
-			c_stmt0("\nvoid EuInit()\n")  -- __declspec(dllexport) __stdcall
+			c_stmt0("\nint EuInit()\n")  -- __declspec(dllexport) __stdcall
 		else
 			c_stmt0("\nint __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine, int iCmdShow)\n")
 		end if
 
 	else -- TUNIX
 		if dll_option then
-			c_stmt0("\nvoid __attribute__ ((constructor)) eu_init()\n")
+			c_stmt0("\nint __attribute__ ((constructor)) eu_init()\n")
 		else
 			c_stmt0("\nint main(int argc, char *argv[])\n")
 		end if

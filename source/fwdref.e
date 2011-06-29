@@ -11,6 +11,8 @@ elsedef
 end ifdef
 without type_check
 include std/filesys.e
+include std/sort.e
+include std/search.e
 
 include global.e
 include parser.e
@@ -641,6 +643,7 @@ procedure forward_error( token tok, integer ref )
 			expected_name( tok[T_ID] ) } ) 
 end procedure
 
+
 function find_reference( sequence fr )
 	
 	sequence name = fr[FR_NAME]
@@ -659,7 +662,7 @@ function find_reference( sequence fr )
 	end if
 	
 	No_new_entry = 1
-	token tok = keyfind( name, ns_file, file, , fr[FR_HASHVAL] )
+	object tok = keyfind( name, ns_file, file, , fr[FR_HASHVAL] )
 	No_new_entry = 0
 	return tok
 end function
@@ -848,6 +851,23 @@ function resolve_file( sequence refs, integer report_errors, integer unincluded_
 	return errors
 end function
 
+function file_name_based_symindex_compare(integer si1, integer si2)
+	if not symtab_index(si1) or not symtab_index(si2) then
+		return 1 -- put non symbols last
+	end if
+	if S_FILE_NO <= length(SymTab[si1]) and S_FILE_NO <= length(SymTab[si2]) then
+		integer fn1 = SymTab[si1][S_FILE_NO], fn2 = SymTab[si2][S_FILE_NO]
+		if find(1,{fn1,fn2} > length(known_files) or {fn1,fn2} <= 0) then
+			-- okay, the comparison would fail
+			return 1
+		end if
+		return compare(abbreviate_path(known_files[fn1]),
+			abbreviate_path(known_files[fn2]))
+	else
+		return 1 -- put non-names last
+	end if
+end function
+
 export procedure Resolve_forward_references( integer report_errors = 0 )
 	sequence errors = {}
 	integer unincluded_ok = get_resolve_unincluded_globals()
@@ -884,7 +904,46 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 				continue
 
 			else
-				errloc = sprintf("\t%s (%d): %s\n", {abbreviate_path(known_files[ref[FR_FILE]]), ref[FR_LINE], ref[FR_NAME]} )
+				-- tok might not be a valid token.
+				object tok = find_reference(ref)
+				integer THIS_SCOPE = 3
+				integer THESE_GLOBALS = 4
+				if tok[T_ID] = IGNORED then
+					-- tok is not a token but a sequence of data returned when it cannot find ref
+					switch tok[THIS_SCOPE] do
+						case SC_UNDEFINED then
+							if ref[FR_QUALIFIED] != -1 then
+								if ref[FR_QUALIFIED] > 0 then
+									-- some qualified filename
+									errloc = sprintf("\t\'%s\' was not declared in \'%s\'.\n", 
+										{ref[FR_NAME], 
+											find_replace('\\',abbreviate_path(known_files[ref[FR_QUALIFIED]]),'/')})
+								else
+									-- eu namespace non-file
+									errloc = sprintf("\t\'%s\' is not a builtin.\n", 
+										{ref[FR_NAME]})
+								end if		
+							else
+								-- unqualified
+								errloc = sprintf("\t\'%s\' has not been declared.\n", 
+									{ref[FR_NAME]})
+							end if
+						case SC_MULTIPLY_DEFINED then
+							sequence syms = tok[THESE_GLOBALS] -- there should be no forward references in here.
+							syms = custom_sort(routine_id("file_name_based_symindex_compare"), syms,, ASCENDING)
+							errloc = sprintf("\t\'%s\' has been declared more than once.\n", 
+								{ref[FR_NAME]} )
+							for si = 1 to length(syms) do
+								symtab_index s = syms[si] 
+								if equal(ref[FR_NAME], sym_name(s)) then
+									errloc &= sprintf("\t\tin %s\n", 
+										{find_replace('\\',abbreviate_path(known_files[SymTab[s][S_FILE_NO]]),'/')})
+								end if
+							end for
+						case else 
+							-- anything else okay...
+					end switch
+				end if
 				if not match(errloc, msg) then
 					msg &= errloc
 					prep_forward_error( errors[e] )

@@ -473,6 +473,11 @@ indicates that the referenced switch applies only to that execution mode.
   not presented. The exit code will be set to 1 on error, 0 on success. This
   option can also be set via the [[:with_batch "with batch"]] directive.
 
+; ##-COM dir## (translator)
+; Specifies the include directory for the C compiler once EUPHORIA code is translated.  
+; This should be set such that dir/include/euphoria.h exists.  
+; Normally, //dir// is detected. So, you don't not normally need to specify the location.
+
 ; ##-COPYRIGHT## (all)
 : Displays the copyright banner for euphoria.
 
