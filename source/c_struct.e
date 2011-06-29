@@ -45,7 +45,7 @@ function struct_type( symtab_index sym )
 end function
 
 procedure get_pointer( integer pointer, integer target )
-	if not is_pointer( target ) then
+	if not is_pointer( target ) and pointer != target then
 		CDeRef( target )
 	end if
 	
@@ -64,7 +64,9 @@ procedure get_pointer( integer pointer, integer target )
 		end if
 		
 		c_stmt( "@ = _0;\n", target, target )
-		dispose_temp( pointer, compile:DISCARD_TEMP, REMOVE_FROM_MAP )
+		if target != pointer then
+			dispose_temp( pointer, compile:DISCARD_TEMP, REMOVE_FROM_MAP )
+		end if
 	end if
 	
 	add_pointer( target )
@@ -96,6 +98,7 @@ export procedure opMEMSTRUCT_ACCESS()
 			c_puts(".")
 		end if
 		CName( Code[i] )
+		was_pointer = SymTab[Code[i]][S_MEM_POINTER]
 	end for
 	c_puts( ";\n")
 	
@@ -151,12 +154,15 @@ export procedure opMEMSTRUCT_ARRAY()
 end procedure
 
 --**
--- Stores the value pointed to by _0 into the target.
+-- Stores the value pointed to by _0 into the target.  If target is 0,
+-- then the caller has already emitted the LHS, and peek_member will
+-- only print the RHS.
 procedure peek_member( integer pointer, integer sym, integer target )
-	integer data_type = SymTab[sym][S_TOKEN]
-	integer signed    = SymTab[sym][S_MEM_SIGNED]
+	integer data_type  = SymTab[sym][S_TOKEN]
+	integer signed     = SymTab[sym][S_MEM_SIGNED]
+	integer is_pointer = SymTab[sym][S_MEM_POINTER]
 	sequence type_name
-	if SymTab[sym][S_MEM_POINTER] then
+	if is_pointer then
 		data_type = MS_OBJECT
 		signed    = 0
 		type_name = "object"
@@ -164,7 +170,9 @@ procedure peek_member( integer pointer, integer sym, integer target )
 		type_name = mem_name( sym_token( sym ) )
 	end if
 	
-	CDeRef( target )
+	if target then
+		CDeRef( target )
+	end if
 	
 	if not signed then
 		if data_type = MS_OBJECT then
@@ -174,16 +182,73 @@ procedure peek_member( integer pointer, integer sym, integer target )
 		end if
 	end if
 	
+	if data_type = MS_MEMBER then
+		data_type = sym_token( SymTab[sym][S_MEM_STRUCT] )
+	end if
+	
+	integer parent
 	switch data_type do
 		case MS_FLOAT, MS_DOUBLE, MS_LONGDOUBLE, MS_EUDOUBLE then
-			c_stmt( sprintf("@ = NewDouble( (eudouble) *(%s*)@ );\n", {type_name}), { target, pointer }, target )
+			if target then
+				c_stmt( sprintf("@ = NewDouble( (eudouble) *(%s*)@ );\n", {type_name}), { target, pointer }, target )
+			else
+				parent =  SymTab[sym][S_MEM_PARENT]
+				c_stmt( 
+						sprintf("_0 = NewDouble( (eudouble) ((%s %s*)@)->%s;\n", 
+							{
+								mem_name( sym_token( parent ) ),
+								decorated_name( SymTab[parent][S_MEM_STRUCT] ), 
+								decorated_name( sym ) 
+							}
+						), 
+						{ pointer }
+					)
+				
+			end if
 		
 		case MEMUNION then
-			-- TODO
+			serialize_memunion( pointer, sym )
 		case MEMSTRUCT then
-			-- TODO
+			serialize_memstruct( pointer, sym )
 		case else
-			c_stmt( sprintf("@ = *(%s*)@;\n", {type_name}), { target, pointer }, target )
+			if target then
+				c_stmt( sprintf("@ = *(%s*)@;\n", {type_name}), { target, pointer }, target )
+			else
+				parent        = SymTab[sym][S_MEM_PARENT]
+				
+				c_stmt( 
+						sprintf("_0 = ((%s %s*)@)->%s;\n", 
+							{
+								mem_name( sym_token( parent ) ),
+								decorated_name( parent ), 
+								decorated_name( sym ) 
+							}
+						),  { pointer } )
+				
+				if data_type != MS_CHAR and data_type != MS_SHORT label "convert" then
+					ifdef E64 then
+						ifdef WINDOWS then
+							if data_type = MS_LONG then
+								-- a long is still 32-bits on 64-bit windows
+								break "convert"
+							end if
+						end ifdef
+						
+						if data_type = MS_INT or is_pointer then
+							-- these are always safe under 64-bit arch
+							break "convert"
+						end if
+						
+					end ifdef
+					c_stmt0("if ((uintptr_t)_0 > (uintptr_t)MAXINT){\n" )
+					if signed then
+						c_stmt0("_0 = NewDouble((eudouble)(intptr_t)_0);\n" )
+					else
+						c_stmt0("_0 = NewDouble((eudouble)(uintptr_t)_0);\n" )
+					end if
+					c_stmt0("}\n")
+				end if
+			end if
 			
 	end switch
 	
@@ -204,9 +269,109 @@ export procedure opPEEK_MEMBER()
 	pc += 4
 end procedure
 
+integer serialize_level = 0
+
+--**
+-- Serialize the specified memstruct into a sequence and store the object in _2.
+procedure serialize_memstruct( integer pointer, symtab_pointer member_sym )
+	
+	if sym_token( member_sym ) != MEMSTRUCT then
+		-- we want to walk the actual struct
+		member_sym = SymTab[member_sym][S_MEM_STRUCT]
+	end if
+	
+	
+	integer size = 1
+	integer size_sym = member_sym
+	while size_sym with entry do
+		size += 1
+	entry
+		size_sym = SymTab[size_sym][S_MEM_NEXT]
+	end while
+	
+	serialize_level += 1
+	c_stmt0( "{\n" )
+	c_stmt0( sprintf("s1_ptr serialize_%d;\n", serialize_level ) )
+	c_stmt0( sprintf("serialize_%d = NewS1( %d );\n", { serialize_level, size } ) )
+	
+	integer ix = 0
+	while member_sym with entry do
+		peek_member( pointer, member_sym, 0 )
+		ix += 1
+		c_stmt0( sprintf( "serialize_%d->base[%d] = _0;\n", { serialize_level, ix } ) )
+		
+	entry
+		member_sym = SymTab[member_sym][S_MEM_NEXT]
+	end while
+	
+	c_stmt0( sprintf( "_0 = MAKE_SEQ( serialize_%d );\n", serialize_level ) )
+	
+	c_stmt0( "}\n" )
+	serialize_level -= 1
+end procedure
+
+--**
+-- Serialize the specified memunion into a sequence and store the object in _0.
+-- Also uses _1.
+procedure serialize_memunion( integer pointer, symtab_pointer member_sym )
+	integer size = SymTab[member_sym][S_MEM_SIZE]
+	c_stmt0( sprintf( "_1 = NewS1( %d );\n", size ) )
+	
+	for i = 1 to size do
+		c_stmt( sprintf( "((s1_ptr)_1)->base[%d] = ((unsigned char *) @)[%d];\n", {i, i-1} ), pointer )
+	end for
+	c_stmt0( "_0 = MAKE_SEQ( _1 );\n" )
+end procedure
+
+function serialize_member( integer pointer, integer sym  )
+	symtab_pointer member_sym = sym
+	integer tid = sym_token( sym )
+	if tid >= MS_SIGNED and tid <= MS_OBJECT then
+		-- simple serialization of primitives...
+		peek_member( pointer, sym, 0 )
+		return 0
+	end if
+	
+	integer member_token = sym_token( member_sym )
+	if member_token = MEMSTRUCT then
+		serialize_memstruct( pointer, member_sym )
+	
+	elsif member_token = MEMUNION then
+		serialize_memunion( pointer, member_sym  )
+		
+	else
+		member_token = SymTab[SymTab[member_sym][S_MEM_STRUCT]][S_TOKEN]
+		if member_token = MEMSTRUCT then
+			serialize_memstruct( pointer, member_sym )
+			
+		elsif member_token = MEMUNION then
+			serialize_memunion( pointer, member_sym )
+		else
+			InternalErr( "Cannot serialize a: [1]", { LexName( member_token )  })
+		end if
+	end if
+	return 1
+end function
 
 export procedure opMEMSTRUCT_SERIALIZE()
-	? 1/0
+	integer
+		pointer = Code[pc+1],
+		member  = Code[pc+2],
+		target  = Code[pc+3]
+	
+	get_pointer( pointer, pointer )
+	
+	integer is_sequence = serialize_member( pointer, member )
+	CDeRef( target )
+	c_stmt( "@ = _0;\n", target, target )
+	if is_sequence then
+		SetBBType( target, TYPE_SEQUENCE, {MININT, MAXINT}, TYPE_OBJECT, 0 )
+	else
+		SetBBType( target, TYPE_ATOM, {MININT, MAXINT}, TYPE_OBJECT, 0 )
+	end if
+	remove_pointer( pointer )
+	
+	pc += 4
 end procedure
 
 --**
@@ -377,6 +542,12 @@ function mem_name( integer tid )
 			return "long double"
 		case MS_EUDOUBLE then
 			return "eudouble"
+		case MEMSTRUCT then
+			return "struct"
+		case MEMUNION then
+			return "union"
+		case MS_MEMBER then
+			return ""
 		case else
 			InternalErr("error finding name for token: [1] [2]", { tid, LexName( tid ) })
 	end switch
