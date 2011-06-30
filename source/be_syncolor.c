@@ -16,7 +16,7 @@
 #ifdef EWINDOWS
 #include <windows.h>
 #endif
-#ifdef EWATCOM
+#ifdef __WATCOMC__
 #include <graph.h>
 #endif
 #include "alldefs.h"
