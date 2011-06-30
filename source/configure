@@ -395,6 +395,10 @@ if [ "$TARGET" = "EWINDOWS" ]; then
 	fi
 fi
 
+if [ "x$RC" = "x" ]; then
+	export RC=windres
+fi
+
 echo "ARCH=$ARCH" >> "$PREFIX"${CONFIG_FILE}
 echo "MSIZE=$MFLAG" >> "$PREFIX"${CONFIG_FILE}
 echo "EFLAG=-d $EFLAG" >> "$PREFIX"${CONFIG_FILE}
