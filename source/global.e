@@ -156,15 +156,15 @@ export constant
 	S_HAS_DELETE = 54
 
 -- for memstructs / memunions only
-export enum
-	S_MEM_SIZE = 14,
-	S_MEM_OFFSET,
-	S_MEM_SIGNED,
-	S_MEM_POINTER,
-	S_MEM_ARRAY,
-	S_MEM_NEXT,
-	S_MEM_STRUCT,  -- for embedded structs
-	S_MEM_PARENT,
+export constant
+	S_MEM_SIZE    = 14 - get_backend() * 5,
+	S_MEM_OFFSET  = 15 - get_backend() * 5,
+	S_MEM_SIGNED  = 16 - get_backend() * 5,
+	S_MEM_POINTER = 17 - get_backend() * 5,
+	S_MEM_ARRAY   = 18 - get_backend() * 5,
+	S_MEM_NEXT    = 19 - get_backend() * 5,
+	S_MEM_STRUCT  = 20 - get_backend() * 5,  -- for embedded structs
+	S_MEM_PARENT  = 21 - get_backend() * 5,
 	$
 
 export procedure print_sym(integer s)
@@ -196,7 +196,7 @@ export constant
 	SIZEOF_VAR_ENTRY       = 17 + 37 * TRANSLATE,
 	SIZEOF_BLOCK_ENTRY     = 19 + 35 * TRANSLATE,
 	SIZEOF_TEMP_ENTRY      =  6 + 32 * TRANSLATE,
-	SIZEOF_MEMSTRUCT_ENTRY = 21 + 33 * TRANSLATE,
+	SIZEOF_MEMSTRUCT_ENTRY = 21 + 33 * TRANSLATE - 5 * get_backend(),
 	$
 
 -- Permitted values for various symbol table fields

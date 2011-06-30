@@ -46,6 +46,7 @@ ifdef SHROUDER then
 		{ "quiet",       0, GetMsgText(304, 0), { } },
 		{ "copyright",   0, GetMsgText(312, 0), { } },
 		{ "eudir",     0, GetMsgText(328,0), { HAS_PARAMETER, "dir" } },
+		{ "eub",         0, GetMsgText(345,0), { HAS_PARAMETER, "backend runner" } },
 		$
 	}
 elsedef
@@ -118,9 +119,16 @@ procedure OutputSymTab(file f)
 		for i = length(SymTab) to 1 by -1 do
 			if length(SymTab[i]) >= S_NREFS then
 				-- not temp or literal or constant, and not deleted yet
-				if SymTab[i][S_MODE] = M_NORMAL and
+				if SymTab[i][S_SCOPE] = SC_MEMSTRUCT and
+				   length(SymTab[i]) != SIZEOF_MEMSTRUCT_ENTRY then
+				   
+				   SymTab[i] = {0, SymTab[i][S_NEXT]} -- delete it
+				   
+				elsif SymTab[i][S_MODE] = M_NORMAL and
 				   SymTab[i][S_NREFS] = 0 and
-				   SymTab[i][S_SCOPE] > SC_PRIVATE then -- tricky to delete privates
+				   SymTab[i][S_SCOPE] > SC_PRIVATE and
+				   SymTab[i][S_SCOPE] != SC_MEMSTRUCT and
+				   length(SymTab[i]) != SIZEOF_MEMSTRUCT_ENTRY then -- tricky to delete privates
 					-- delete this symbol
 					if find(SymTab[i][S_TOKEN], RTN_TOKS) then
 						-- a routine
@@ -195,7 +203,9 @@ procedure OutputSymTab(file f)
 			SymTab[i] = SymTab[i][1..4] & SymTab[i][S_NEXT_IN_BLOCK]
 
 		else
-			if find(SymTab[i][S_TOKEN], RTN_TOKS) then
+			switch SymTab[i][S_TOKEN] do
+			
+			case PROC, FUNC, TYPE then
 				-- routine
 				if not full_debug then
 					SymTab[i][S_LINETAB] = 0
@@ -208,8 +218,25 @@ procedure OutputSymTab(file f)
 							SymTab[i][S_TEMPS],  SymTab[i][S_NUM_ARGS],
 							SymTab[i][S_FIRSTLINE],
 							SymTab[i][S_STACK_SPACE]}
-
-			else
+			
+			case MS_CHAR, MS_SHORT, MS_INT, MS_LONG, MS_LONGLONG,
+				MS_FLOAT, MS_DOUBLE, MS_LONGDOUBLE, MS_EUDOUBLE,
+				MS_OBJECT, MS_MEMBER, MEMSTRUCT, MEMUNION,
+				MEMSTRUCT_DECL, MEMUNION_DECL
+			then
+				if length( SymTab[i] ) = SIZEOF_MEMSTRUCT_ENTRY then
+					SymTab[i] = SymTab[i][1..4] & 
+								{
+									SymTab[i][S_NEXT_IN_BLOCK],
+									SymTab[i][S_FILE_NO],
+									SymTab[i][S_NAME],
+									SymTab[i][S_TOKEN],
+									$
+								} &
+								SymTab[i][S_MEM_SIZE..S_MEM_PARENT]
+				end if
+			
+			case else
 				-- variable
 				-- constants are deleted (but there will be an OBJ field
 				-- to hold their value at run-time)
@@ -228,7 +255,7 @@ procedure OutputSymTab(file f)
 								SymTab[i][S_TOKEN],{},
 								SymTab[i][S_BLOCK]}
 				end if
-			end if
+			end switch
 
 		end if
 	end for

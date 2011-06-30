@@ -367,7 +367,6 @@ export enum
 	LAST_TOKEN,
 	$
 
-
 enum -- token category name id
 	TC_ILLCHAR,
 	TC_EOF,
