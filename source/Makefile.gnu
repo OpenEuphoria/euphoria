@@ -470,8 +470,8 @@ ifeq "$(EUPHORIA)" "1"
 endif	
 	$(MAKE) $(BUILDDIR)/$(EECU) OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 
-EUBIND=eubind
-EUSHROUD=eushroud
+EUBIND=eubind$(EXE_EXT)
+EUSHROUD=eushroud$(EXE_EXT)
 
 binder : translator library $(EU_BACKEND_RUNNER_FILES)
 	$(MAKE) $(BUILDDIR)/$(EUBIND)

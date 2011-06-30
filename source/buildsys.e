@@ -11,7 +11,7 @@ include std/io.e
 include std/regex.e as regex
 include std/text.e
 include std/hash.e
-include std/search.e
+include std/search.e as search
 include std/utils.e
 include c_decl.e
 include c_out.e
@@ -330,6 +330,18 @@ export function adjust_for_command_line_passing(sequence long_path)
 	end ifdef
 end function
 
+function adjust_for_build_file(sequence long_path)
+    object short_path = adjust_for_command_line_passing(long_path)
+    if atom(short_path) then
+    	return short_path
+    end if
+	if compiler_type = COMPILER_GCC and build_system_type != BUILD_DIRECT and 	TWINDOWS then
+		return windows_to_mingw_path(short_path)
+	else
+		return short_path
+	end if
+end function
+
 --**
 -- Setup the build environment. This includes things such as the
 -- compiler/linker executable, c flags, linker flags, debug settings,
@@ -366,12 +378,12 @@ function setup_build()
 			t_slash = "\\"
 		end if
 
-		object eudir = adjust_for_command_line_passing(get_eucompiledir())
-		if atom(eudir) then
+		object eudir = get_eucompiledir()
+		if not file_exists(eudir) then
 			printf(2,"Supplied directory \'%s\' is not a valid EUDIR\n",{get_eucompiledir()})
 			abort(1)
 		end if
-		for tk = 1 to length(l_names) do -- translation kind
+		for tk = 1 to length(l_names) label "translation kind" do
 			user_library = eudir & sprintf("%sbin%s%s.%s",{t_slash, t_slash, l_names[tk],l_ext})
 			if TUNIX or compiler_type = COMPILER_GCC then
 				ifdef UNIX then
@@ -381,7 +393,7 @@ function setup_build()
 						for i = 1 to length(locations) do
 							if file_exists( sprintf(locations[i],{l_names[tk]}) ) then
 								user_library = sprintf(locations[i],{l_names[tk]})
-								exit
+								exit "translation kind"
 							end if
 						end for
 					end if
@@ -393,7 +405,8 @@ function setup_build()
 			end if
 		end for -- tk
 	end if -- user_library = 0
-
+	user_library = adjust_for_build_file(user_library)
+	
 	if TWINDOWS then
 		if compiler_type = COMPILER_WATCOM then
 			c_flags &= " /dEWINDOWS"
@@ -416,8 +429,8 @@ function setup_build()
 		end if
 	end if
 
-	object compile_dir = adjust_for_command_line_passing(get_eucompiledir())
-	if atom(compile_dir) then
+	object compile_dir = get_eucompiledir()
+	if not file_exists(compile_dir) then
 		printf(2,"Couldn't get include directory '%s'",{get_eucompiledir()})
 		abort(1)
 	end if
@@ -438,14 +451,14 @@ function setup_build()
 				c_flags &= " -fPIC"
 			end if
 
-			ifdef EU4_0 then 
+            ifdef EU4_0 then 
 				c_flags &= sprintf(" -c -w -fsigned-char -O2 -m%d -I%s -ffast-math",
-				{ 4 * 8, get_eucompiledir() })
+				{ 4 * 8, adjust_for_build_file(get_eucompiledir()) })
 			elsedef
 				c_flags &= sprintf(" -c -w -fsigned-char -O2 -m%d -I%s -ffast-math",
-				{ sizeof( C_POINTER ) * 8, get_eucompiledir() })
+				{ sizeof( C_POINTER ) * 8, adjust_for_build_file(get_eucompiledir()) })
 			end ifdef
-
+			
 			if TWINDOWS then
 				if mno_cygwin then
 					c_flags &= " -mno-cygwin"
@@ -457,11 +470,11 @@ function setup_build()
 			end if
 
 			ifdef EU4_0 then
-				l_flags = sprintf( " %s -m%d", { user_library, 4 * 8 })
+				l_flags = sprintf( " %s -m%d", { adjust_for_build_file(user_library), 4 * 8 })
 			elsedef			
-				l_flags = sprintf( " %s -m%d", { user_library, sizeof( C_POINTER ) * 8 })
+				l_flags = sprintf( " %s -m%d", { adjust_for_build_file(user_library), sizeof( C_POINTER ) * 8 })
 			end ifdef
-				
+
 			if dll_option then
 				l_flags &= " -shared "
 			end if
@@ -479,7 +492,7 @@ function setup_build()
 			end if
 			
 			-- input/output
-			rc_comp = "windres -DSRCDIR=\"" & adjust_for_command_line_passing(current_dir()) & "\" [1] -O coff -o [2]"
+			rc_comp = "windres -DSRCDIR=\"" & adjust_for_build_file(current_dir()) & "\" [1] -O coff -o [2]"
 			
 		case COMPILER_WATCOM then
 			c_exe = "wcc386"
@@ -508,11 +521,11 @@ function setup_build()
 				end if
 			end if
 
-			l_flags &= sprintf(" FILE %s", { user_library })
+			l_flags &= sprintf(" FILE %s", { (user_library) })
 			
 			
 			-- resource file, executable file
-			rc_comp = "wrc -DSRCDIR=\"" & adjust_for_command_line_passing(current_dir()) & "\" -q -fo=[2] -ad [1] [3]"
+			rc_comp = "wrc -DSRCDIR=\"" & adjust_for_build_file(current_dir()) & "\" -q -fo=[2] -ad [1] [3]"
 		case else
 			CompileErr(43)
 	end switch
@@ -616,6 +629,26 @@ procedure write_makefile_srcobj_list(integer fh)
 	puts(fh, HOSTNL)
 end procedure
 
+--** 
+-- Convert to Mingw/Cygwin style from Windows style path
+-- Windows OS accepts forward slashes as back-slashes but
+-- be careful not to pass this into file_exists() and friends
+-- for it could cause problems with some older versions of
+-- Windows.
+function windows_to_mingw_path(sequence s)
+	ifdef TEST_FOR_WIN9X_ON_MING then
+		-- Define the above word, to make sure we are not
+		-- passing ming like paths to OS functions like file_exists().
+		-- Normally, these will pass anyway but not in all Windows versions,
+		-- this conversion breaks this yet it also breaks cygwin so
+		-- we leave this off in production.
+		if length(s)>3 and s[2] = ':' and find(s[3],"/\\") then
+			s = '/' & s[1] & '/' & s[4..$]
+		end if
+	end ifdef
+	return search:find_replace('\\',s,'/')
+end function
+
 --**
 -- Write a full Makefile
 
@@ -629,7 +662,7 @@ procedure write_makefile_full()
 	printf(fh, "CC     = %s" & HOSTNL, { settings[SETUP_CEXE] })
 	printf(fh, "CFLAGS = %s" & HOSTNL, { settings[SETUP_CFLAGS] })
 	printf(fh, "LINKER = %s" & HOSTNL, { settings[SETUP_LEXE] })
-
+	
 	if compiler_type = COMPILER_GCC then
 		printf(fh, "LFLAGS = %s" & HOSTNL, { settings[SETUP_LFLAGS] })
 	else
@@ -672,7 +705,7 @@ procedure write_makefile_full()
 		puts(fh, HOSTNL)
 
 	else
-		printf(fh, "%s: $(%s_OBJECTS) %s %s" & HOSTNL, { exe_name[D_ALTNAME], upper(file0), user_library, rc_file[D_ALTNAME] })
+		printf(fh, "%s: $(%s_OBJECTS) %s %s" & HOSTNL, { adjust_for_build_file(exe_name[D_ALTNAME]), upper(file0), user_library, rc_file[D_ALTNAME] })
 		if length(rc_file[D_ALTNAME]) then
 			writef(fh, "\t" & settings[SETUP_RC_COMPILER] & HOSTNL, { rc_file[D_ALTNAME], res_file[D_ALTNAME] })
 		end if

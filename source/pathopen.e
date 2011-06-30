@@ -9,7 +9,7 @@ end ifdef
 
 include std/machine.e
 include std/os.e
-include std/filesys.e
+include std/filesys.e as fs
 include std/text.e
 
 include global.e
