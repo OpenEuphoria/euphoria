@@ -770,7 +770,7 @@ integer delete_socket_rid = routine_id("delete_socket")
 --   * [[:SOCK_SEQPACKET]]
 --
 -- Returns:
---   An **object**, -1 on failure, else a supposedly valid socket id.
+--   An **object**, an atom, representing an integer code on failure, else a sequence representing a valid socket id.
 --
 -- Example 1:
 -- <eucode>
