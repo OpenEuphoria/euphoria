@@ -470,8 +470,8 @@ ifeq "$(EUPHORIA)" "1"
 endif	
 	$(MAKE) $(BUILDDIR)/$(EECU) OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 
-EUBIND=eubind
-EUSHROUD=eushroud
+EUBIND=eubind$(EXE_EXT)
+EUSHROUD=eushroud$(EXE_EXT)
 
 binder : translator library $(EU_BACKEND_RUNNER_FILES)
 	$(MAKE) $(BUILDDIR)/$(EUBIND)
@@ -819,12 +819,20 @@ else
 	MINGW_FLAGS=
 endif
 
+ifeq "$(ARCH)" "ARM"
+	EUC_CFLAGS=-cflags "-fomit-frame-pointer -c -w -fsigned-char -O2 -I$(TRUNKDIR) -ffast-math"
+	EUC_LFLAGS=-lflags "$(BUILDDIR)/eu.a -ldl -lm -lpthread"
+else
+	EUC_CFLAGS=
+	EUC_LFLAGS=
+endif
+
 $(BUILDDIR)/eudist-build/main-.c : eudist.ex
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eudist-build" \
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUDIST)" \
 		-lib "$(BUILDDIR)/eu.a" \
-		-makefile -eudir $(TRUNKDIR) \
+		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/eudist.ex
 
 $(BUILDDIR)/$(EUDIST) : $(TRUNKDIR)/source/eudist.ex translator library $(BUILDDIR)/eudist-build/main-.c
@@ -837,7 +845,7 @@ $(BUILDDIR)/eudis-build/main-.c : $(EU_INTERPRETER_FILES)
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUDIS)" \
 		-lib "$(BUILDDIR)/eu.a" \
-		-makefile -eudir $(TRUNKDIR) \
+		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/dis.ex
 
 $(BUILDDIR)/$(EUDIS) : translator library $(BUILDDIR)/eudis-build/main-.c
@@ -848,7 +856,7 @@ $(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/bind.ex $(EU_INTERPRETER_FIL
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUBIND)" \
 		-lib "$(BUILDDIR)/eu.a" \
-		-makefile -eudir $(TRUNKDIR) \
+		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/bind.ex
 
 $(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c
@@ -859,7 +867,7 @@ $(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/shroud.ex  $(EU_INTERPRETE
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUSHROUD)" \
 		-lib "$(BUILDDIR)/eu.a" \
-		-makefile -eudir $(TRUNKDIR) \
+		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/shroud.ex
 
 $(BUILDDIR)/$(EUSHROUD) : $(BUILDDIR)/shroud-build/main-.c
@@ -870,7 +878,7 @@ $(BUILDDIR)/eutest-build/main-.c : $(TRUNKDIR)/source/eutest.ex
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUTEST)" \
 		-lib "$(BUILDDIR)/eu.a" \
-		-makefile -eudir $(TRUNKDIR) \
+		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/eutest.ex
 
 $(BUILDDIR)/$(EUTEST) : $(BUILDDIR)/eutest-build/main-.c
@@ -881,7 +889,7 @@ $(BUILDDIR)/eucoverage-build/main-.c : $(TRUNKDIR)/bin/eucoverage.ex
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUCOVERAGE)" \
 		-lib "$(BUILDDIR)/eu.a" \
-		-makefile -eudir $(TRUNKDIR) \
+		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
 		$(MINGW_FLAGS) $(TRUNKDIR)/bin/eucoverage.ex
 
 $(BUILDDIR)/$(EUCOVERAGE) : $(BUILDDIR)/eucoverage-build/main-.c
