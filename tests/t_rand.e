@@ -1,6 +1,7 @@
 include std/unittest.e
 include std/rand.e
 include std/math.e
+include std/sort.e
 
 object s
 object t
@@ -81,10 +82,19 @@ for i = 1 to c do
 	end if
 end for
 test_equal("roll()",0, approx(y, c * length(ls) / sides, c * 0.025))
+test_equal("roll(-1)", 0, roll( {54}, -1 ) )
+test_equal( "roll( atom )", 1, integer( roll( 3, 6 ) ) )
 
 atom tmpNo = rand_range(0xFFFFFFFF, 0x3FFFFFFF)
 test_true("rand_range(hi,lo) ticket:501", 
 	(tmpNo >= 0x3FFFFFFF) and (tmpNo <= 0xFFFFFFFF))
+
+test_equal("empty sample", {}, sample( "abc", 0 ) )
+test_equal("empty sample without replacement, also unselected", {{}, "abc"}, sample( "abc", 0, 1 ) )
+test_equal("full sample", "abc", sort( sample( "abc", 4, 0 ) ) )
+sequence sample_result = sample( "abc", 4, 1 )
+sample_result[1] = sort( sample_result[1] )
+test_equal("full sample without replacement, also unselected", {"abc", {}}, sample_result )
 
 test_report()
 
