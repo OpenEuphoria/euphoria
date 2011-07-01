@@ -91,7 +91,7 @@
 #include <io.h>
 #include <direct.h>
 
-#ifdef EWATCOM
+#ifdef __WATCOMC__
 #  include <graph.h>
 #  include <i86.h>
 #endif
@@ -856,7 +856,7 @@ static object Where(object x)
 	if (user_file[file_no].mode == EF_CLOSED)
 		RTFatal("file must be open for where()");
 	f = user_file[file_no].fptr;
-#ifdef EWATCOM
+#ifdef __WATCOMC__
 	// if (user_file[file_no].mode & EF_APPEND)
 		iflush(f);  // This fixes a bug in Watcom 10.6 that is fixed in 11.0
 #endif
@@ -895,7 +895,7 @@ static object Seek(object x)
 	if (IS_ATOM_INT(x2)) {
 		if ((long)x2 == -1)
 		{
-#ifdef EWATCOM
+#ifdef __WATCOMC__
 			iflush(f);
 #endif
 			result = iseek(f, 0, SEEK_END);
@@ -917,7 +917,7 @@ static object Seek(object x)
 	else
 		return ATOM_1; // sequences are not permitted as position.
 		
-#ifdef EWATCOM
+#ifdef __WATCOMC__
 	iflush(f);  // Realign internal buffer position.
 #endif
 	result = iseek(f, pos, SEEK_SET);
@@ -3100,9 +3100,9 @@ object machine(object opcode, object x)
 				MakeCString(src, (object) *(((s1_ptr)x)->base+1),
 							SEQ_PTR(((s1_ptr) x)->base[1])->length + 1);
 			
-				// TODO: refactor, simply make an unset method for EWATCOM,
+				// TODO: refactor, simply make an unset method for __WATCOMC__,
 				// and EMINGW, then call unsetenv(src)
-#ifdef EWATCOM
+#ifdef __WATCOMC__
 				temp = setenv(src, NULL, 1);
 #else
 #ifdef EMINGW
@@ -3129,7 +3129,7 @@ object machine(object opcode, object x)
 #endif /* ELINUX */
 #endif /* EUNIX */
 #endif /* EMINGW */
-#endif /* EWATCOM */
+#endif /* __WATCOMC__ */
 
 				EFree(src);
 				return !temp;

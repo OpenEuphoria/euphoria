@@ -231,6 +231,7 @@ test_equal("breakup(int, BK_PIECES) odd size", {"ABC", "DE"}, breakup("ABCDE", 2
 test_equal("breakup(int, BK_PIECES) empty", {""}, breakup("", 2, BK_PIECES))
 test_equal("breakup(int, BK_PIECES) bad size 1", {"ABCDE"}, breakup("ABCDE", 0, BK_PIECES))
 test_equal("breakup(int, BK_PIECES) bad size 2", {"A", "B", "C", "D", "E"}, breakup("ABCDE", 99, BK_PIECES))
+test_equal("breakup(int, BK_PIECES) bad size 3 (size OK as non-integer atom)", {"A", "B", "C", "D", "E"}, breakup("ABCDE", 99.5, BK_PIECES))
 
 test_equal("breakup(int, CUSTOM) sequence", {{1}, {2,3}, {4,5,6}}, breakup({1,2,3,4,5,6}, {1,2,3}))
 test_equal("breakup(int, CUSTOM) string", {"", "ABCD", "E", "FGHI"}, breakup("ABCDEFGHI", {0,4,1}))
@@ -610,6 +611,7 @@ test_equal("mapping B", "u cut uto this brewn nat", mapping("a cat ate this brow
 test_equal("mapping C", "a23456789", mapping("123456789", "123", "a"))
 test_equal("mapping D", {'a','b',{'c',4},5}, mapping({1,2,{3,4},5}, {1,2,3}, "abc"))
 test_equal("mapping E", "312", mapping({"one", "two", "three"}, {"two", "three", "one"}, "123", 1))
+test_equal("mapping F", 4, mapping( 1, {1, 2, 3}, {4, 5, 6}) )
 
 -- remove_item
 test_equal("remove_item #1", {3,4,2}, remove_item( 1, {3,4,2,1} ))
@@ -655,6 +657,32 @@ procedure ticket_639()
 	test_equal("in place RHS_slice + in place splice()", "b123cd", a )
 end procedure
 ticket_639()
+
+procedure test_add_item()
+	sequence items = {}
+	items = add_item( 1, items )
+	test_equal( "add_item: empty sequence", {1}, items )
+	
+	items = add_item( 1, items )
+	test_equal( "add_item: duplicate value to add_item", {1}, items )
+	
+	items = add_item( 2, items )
+	test_equal( "add_item: default is prepend", {2, 1}, items )
+	
+	items = add_item( 3, items, ADD_APPEND )
+	test_equal( "add_item:  ADD_APPEND", {2,1,3}, items )
+	
+	items = add_item( {}, items )
+	test_equal( "add_item: add sequence item", {{},2,1,3}, items )
+	
+	items = add_item( "a", items, ADD_SORT_UP )
+	test_equal( "add_item: sort ascending", {1,2,3,{},"a"}, items )
+	
+	items = add_item( "b", items, ADD_SORT_DOWN )
+	test_equal( "add_item: sort descending", {"b","a",{},3,2,1}, items )
+end procedure
+test_add_item()
+
 
 test_report()
 

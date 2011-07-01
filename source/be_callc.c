@@ -97,7 +97,7 @@ void wcpush(intptr_t X);
 		"PUSH [EAX]" \
 		modify [ESP] \
 		parm [EAX];
-#endif // EWATCOM
+#endif // __WATCOMC__
 
 typedef union {
 	double dbl;
@@ -185,7 +185,8 @@ object call_c(int func, object proc_ad, object arg_list)
 	int proc_index;
 	int (*int_proc_address)();
 	unsigned return_type;
-#if defined(EWINDOWS) && !defined(EWATCOM)
+
+#if defined(EWINDOWS) && !defined(__WATCOMC__)
 	int cdecl_call;
 #endif
 
@@ -206,7 +207,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	}
 	
 	int_proc_address = c_routine[proc_index].address;
-#if defined(EWINDOWS) && !defined(EWATCOM)
+#if defined(EWINDOWS) && !defined(__WATCOMC__)
 	cdecl_call = c_routine[proc_index].convention;
 #endif
 	if (IS_ATOM(arg_list)) {
@@ -333,7 +334,7 @@ object call_c(int func, object proc_ad, object arg_list)
 
 	if (return_type == C_DOUBLE) {
 		// expect double to be returned from C routine
-#if defined(EWINDOWS) && !defined(EWATCOM)
+#if defined(EWINDOWS) && !defined(__WATCOMC__)
 		if (cdecl_call) {
 			dresult = (*((double (  __cdecl *)())int_proc_address))();
 			pop();
@@ -350,7 +351,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	
 	else if (return_type == C_FLOAT) {
 		// expect float to be returned from C routine
-#if defined(EWINDOWS) && !defined(EWATCOM)
+#if defined(EWINDOWS) && !defined(__WATCOMC__)
 		if (cdecl_call) {
 			fresult = (*((float (  __cdecl *)())int_proc_address))();
 			pop();
@@ -367,7 +368,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	
 	else {
 		// expect integer to be returned
-#if defined(EWINDOWS) && !defined(EWATCOM)
+#if defined(EWINDOWS) && !defined(__WATCOMC__)
 		if (cdecl_call) {
 			iresult = (*((int (  __cdecl *)())int_proc_address))();
 			pop();
@@ -862,7 +863,6 @@ object call_c(int func, object proc_ad, object arg_list)
 	uint64_t arg;
 
 	intptr_t arg_op[16];
-	int arg_op2[16];
 	intptr_t arg_len;
 	intptr_t arg_i = 0;
 #if INTPTR_MAX == INT64_MAX
@@ -886,7 +886,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	}
 	
 	long_proc_address = (intptr_t)(c_routine[proc_index].address);
-#if defined(EWINDOWS) && !defined(EWATCOM)
+#if defined(EWINDOWS) && !defined(__WATCOMC__)
 	cdecl_call = c_routine[proc_index].convention;
 #else
 	cdecl_call = 1;
