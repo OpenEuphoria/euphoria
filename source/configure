@@ -47,13 +47,17 @@ echo "# File generated from configure" > ${CONFIG_FILE}
 MFLAG=-m32
 EFLAG=E32
 if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
-	echo ARCH=ix86
 	ARCH=ix86
-	MFLAG=
+	MFLAG=-m32
+	EFLAG=E32
 elif echo "$UNAME_MACHINE" | grep "x86_64" > /dev/null; then
 	ARCH=ix86_64
 	MFLAG=-m64
 	EFLAG=E64
+elif echo "$UNAME_MACHINE" | grep ARM > /dev/null; then
+	ARCH=ARM
+	MFLAG=
+	EFLAG=E32
 fi
 
 if test $UNAME_SYSTEM = "Linux"; then
@@ -339,6 +343,7 @@ while [ "$1" != "" ]; do
 	shift
 done
 
+PWDARG=
 if [ "$TARGET" = "EBSD" ]; then
 	EBSD=1
 elif [ "$TARGET" = "EOPENBSD" ]; then
