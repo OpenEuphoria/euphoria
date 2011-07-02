@@ -38,7 +38,7 @@ object peek_member( object_ptr source, symtab_ptr memsym, int array_index, void 
 		is_signed = 0;
 	}
 	else if( array_index != -1 ){
-		pointer = (void*) ((intptr_t)pointer) + (array_index * memsym->u.memstruct.size);
+		pointer = (void*) (((intptr_t)pointer) + (array_index * memsym->u.memstruct.size));
 	}
 	else if( memsym->u.memstruct.array ){
 		s = NewS1( memsym->u.memstruct.array );
@@ -139,7 +139,7 @@ object serialize_memstruct( object_ptr source, void *pointer, symtab_ptr member_
 	size = 0;
 	for( sym = member_sym->u.memstruct.next; sym != 0; sym = sym->u.memstruct.next ){
 		s->base[++size] = peek_member( 0, sym, -1, pointer );
-		pointer = (void*) (uintptr_t)pointer + sym->u.memstruct.size;
+		pointer = (void*) ((uintptr_t)pointer + sym->u.memstruct.size);
 	}
 	return MAKE_SEQ( s );
 }
