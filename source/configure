@@ -24,9 +24,13 @@ if echo "$UNAME_SYSTEM" | grep CYGWIN > /dev/null; then
 	# mixed-mode paths (C:/dir/file) the way MSYS's make can, we turn
 	# CYPPATH on
 	USECYPPATH="true"
+	PWDARG=
+
 elif echo "$UNAME_SYSTEM" | grep MINGW > /dev/null; then
 	UNAME_SYSTEM=WINDOWS
-
+	PWDARG=-W
+else
+	PWDARG=
 fi
 
 if [ -e source/global.e ]; then
@@ -108,7 +112,7 @@ export CC=gcc
 
 SCP="scp -C"
 SSH="ssh -C"
-HG=`which hg`
+HG="hg"
 
 echo CONFIGURE_PARAMS=$@ >> "$PREFIX"${CONFIG_FILE}
 
@@ -350,17 +354,17 @@ elif test $UNAME_SYSTEM = "WINDOWS"; then
 	fi
 fi
 
+if [ "$EC" != "" ]; then
+	echo "TRANSLATE=$EC" >> "$PREFIX"${CONFIG_FILE}
+fi
+
 echo "CC=$CC" >> "$PREFIX"${CONFIG_FILE}
 echo "SCP=$SCP" >> "$PREFIX"${CONFIG_FILE}
 echo "SSH=$SSH" >> "$PREFIX"${CONFIG_FILE}
 echo "HG=$HG" >> "$PREFIX"${CONFIG_FILE}
 
-if [ "$EC" != "" ]; then
-	echo "TRANSLATE=$EC" >> "$PREFIX"${CONFIG_FILE}
-fi
-
-export PWD=`pwd`
-export PPWD=`cd .. && pwd`
+export PWD=`pwd $PWDARG`
+export PPWD=`cd .. && pwd $PWDARG`
 
 # The following works around a bug in djgpp's pwd
 # that at times returns the parent of the current
@@ -374,7 +378,7 @@ fi
 export TRUNKDIR=$PPWD
 
 mkdir -p $BUILDDIR
-export BUILDDIR=`cd "$BUILDDIR" && pwd`
+export BUILDDIR=`cd "$BUILDDIR" && pwd $PWDARG`
 
 echo TRUNKDIR=$TRUNKDIR >> "$PREFIX"${CONFIG_FILE}
 echo BUILDDIR=$BUILDDIR >> "$PREFIX"${CONFIG_FILE}
@@ -384,9 +388,6 @@ if [ "$USECYPPATH" = "true" ]; then
 	export CYPBUILDDIR=`cygpath -a -m $BUILDDIR`
 elif [ "$UNAME_SYSTEM" = "WINDOWS" ]; then
 	# MinGW
-	export CYPTRUNKDIR=`echo $TRUNKDIR | cut -c 2`':'`echo $TRUNKDIR | cut -c 3-`
-	export CYPBUILDDIR=`echo $BUILDDIR | cut -c 2`':'`echo $BUILDDIR | cut -c 3-`
-else
 	export CYPTRUNKDIR=$TRUNKDIR
 	export CYPBUILDDIR=$BUILDDIR
 fi

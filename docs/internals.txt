@@ -68,14 +68,13 @@ memory space.  Sequences are stored in a similar way.
 
 Euphoria integers are stored in object variables as-is.  An object variable is a
 four byte signed integer.  Legal integer values for Euphoria integers are 
-between -1,073,741,824 ( -power(2,30) ) and +1,073,741,823 ( power(2,30)+1 ).  
+between -1,073,741,824 ( -2^^30^^ ) and +1,073,741,823 ( 2^^30^^-1 ).
 Unsigned hexadecimal numbers from C000_0000 to FFFF_FFFF are the negative 
 integers and numbers from 0000_0000 to 3FFF_FFFF are the positive integers.  The
 hexadecimal values not used as integers are thus 4000_0000 to BFFF_FFFF.  Other 
 values are for encoded pointers.  Pointers are always 8 byte aligned.  So a 
 pointer is stored in 29-bits instead of 32 and can fit in a hexadecimal range 
-0x2000_0000 long. The other values are not stored in the same place but their 
-encoded pointers are. The pointers are encoded in such a way that their values 
+0x2000_0000 long. The pointers are encoded in such a way that their encoded values 
 will never be in the range of the integers. Pointers to sequence structures 
 (struct s1) are encoded into a range between 8000_0000 to 9FFF_FFFF.  Pointers 
 to structures for doubles (struct d) are encoded into a range between A000_0000 
@@ -312,6 +311,21 @@ The pointer to a ##'struct s1'## from the object o.
 ===== Assumption
 IS_SEQUENCE(o) is TRUE and //o// is not NOVALUE.
 
+@[:internals:get_pos_int|]
+===== get_pos_int
+<eucode>
+#include be_machine.h
+<internal> uintptr_t get_pos_int(char *where, object x)
+</eucode>
+
+===== Returns
+a unsigned long value by truncating what x's value is to an integer
+
+===== Comment
+Any object may be passed.  A sequence results in a runtime failure.
+There may be a cast of a double to a smaller ranged long type.
+
+
 === Creating Objects
 
 @[:internals:NewS1|]
@@ -365,7 +379,7 @@ The maximal Euphoria integer.  This is 2^30.
 HIGH_BITS is an integer value such that if another integer value c lies outside of the range 
 between MININT and MAXINT, c+HIGH_BITS will be non-negative.
 
-===== Proof that HIGH_BITS exists and is #C000_0000 on 32-bit version of EUPHORIA.
+===== Proof that HIGH_BITS is #C000_0000 on 32-bit version of EUPHORIA.
    *In the following expressions powers have higher precedence than unuary minus.*
    if c is a non-ATOM-INT value, then
    
