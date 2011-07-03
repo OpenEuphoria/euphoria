@@ -4032,3 +4032,219 @@ is in effect will never be inlined.
 ##with inline## takes an optional integer parameter that defines the largest
 routine (by size of IL code) that will be considered for inlining.  The default
 is 30.
+
+== Memory Structures
+
+=== Introduction
+
+Writing Euphoria code to interact with the operating system or external libraries often
+requires communicating via data structures stored in memory.  In addition to using
+peeks and pokes to read and write to memory locations, Euphoria programmers can also
+define structures that can be used to more easily read and write values from and into
+memory.
+
+The conventions used are similar to those found in the C programming language, since
+that's the way the most commonly encountered structures are defined and meant to be
+used.  This is meant to provide a familiar syntax to those who already know C, and
+also to make it easy to define and use memory structures.
+
+=== Basic Syntax
+
+There are two keywords for defining memory structures: memstruct and memunion.
+They are similar, except a memstruct is a way to define a data structure that
+may contain many different, distinct elements, while a memunion (just like a union in C)
+is a way to refer to the same locations in memory in different ways (e.g., either as an
+integer or as a floating point number).
+
+Within a memstruct or memunion, different elements are defined using names for data types
+along with some data type modifiers.
+
+@[memstruct]
+==== memstruct
+
+##memstruct## is used to declare a memory based structure to be used by a Euphoria program.
+The format is similar to other declarations:
+<eucode>
+memstruct foo
+    int a
+    unsigned int b
+    pointer int c
+end foo
+</eucode>
+
+Normal scope rules apply to ##memstruct## definitions, and so they can be local, ##export##,
+##public## or ##global##.  The members are laid out in memory sequentially, though
+based on their sizes, Euphoria may add some space in between members, just like a
+C compiler would.
+
+The size of a ##memstruct## may be determined at runtime using ##[[:sizeof]]()##.
+
+##memstructs## may contain other ##memstructs## or pointers to other ##memstructs##.
+
+@[memunion]
+==== memunion
+
+A ##memunion## is like a ##[[:memstruct]]##, except that the various data members
+of a ##memunion## are all located in the same place.  A ##memunion##, like a union in C,
+provides different ways to interpret the same location in memory.
+
+<eucode>
+memunion conversion
+	int i
+	float f
+	double d
+end memunion
+</eucode>
+
+The size of a ##memunion## may be determined at runtime using ##[[:sizeof]]()##.
+
+@[char]
+==== char
+
+A ##char## is a data type that is 1 byte long.  Elements of type ##char## are considered
+to be ##[[:signed]]## by default.  The range of a ##signed char## is -128 to 127.  An
+##unsigned char## has a range of 0 - 255.  They can only be declared inside of a 
+##[[:memstruct]]## or ##[[:memunion]]##.
+
+<eucode>
+memstruct char_types
+	char          c   -- signed by default, -128 - 127
+	unsigned char uc  -- 0 - 255
+	signed char   sc  -- -128 - 127
+end memstruct
+</eucode>
+
+
+@[short]
+==== short
+A ##short## is a data type that is 2 bytes long.  Elements of type ##short## are considered
+to be ##[[:signed]]## by default.  The range of a ##signed short## is −32,768 to 32,767.  An
+##unsigned short## has a range of 0 - 65,535.  They can only be declared inside of a 
+##[[:memstruct]]## or ##[[:memunion]]##.
+
+<eucode>
+memstruct char_types
+	short           s  -- signed by default, −32,768 to 32,767
+	unsigned short us  -- −32,768 to 32,767
+	signed short   ss  -- −32,768 to 32,767
+end memstruct
+</eucode>
+
+@[int]
+==== int
+
+An ##int## is a data type that is 4 bytes long.  Elements of type ##int## are considered
+to be ##[[:signed]]## by default.  The range of a ##signed int## is  −2,147,483,648 to 
+2,147,483,647.  An ##unsigned int## has a range of 0 - 4,294,967,295.  They can only be 
+declared inside of a ##[[:memstruct]]## or ##[[:memunion]]##.
+
+<eucode>
+memstruct char_types
+	int           i  -- signed by default, −2,147,483,648 to 2,147,483,647
+	unsigned int ui  -- 0 - 4,294,967,295
+	signed int   si  --  −2,147,483,648 to 2,147,483,647
+end memstruct
+</eucode>
+
+@[long]
+==== long
+
+A ##long## (can also be ##long int##) varies in size based on the platform.  On Windows
+and 32-bit Unix like operating systems, a ##long## is 4 bytes, or the same size as an
+##[[:int]]##.  On 64-bit Unix-like operating systems, a ##long## is 64-bits, or the 
+same size as a ##[[:long long]]##.
+
+
+@[long long]
+==== long long
+
+A ##long long## (can also be ##long long int##) is an integer that is 8 bytes (64-bits) in size.
+By default, it is signed (−9,223,372,036,854,775,808 to 9,223,372,036,854,775,807).  An ##unsigned
+long long## varies from  0 to 18,446,744,073,709,551,615.
+
+
+@[object (memstruct)]
+==== object (memstruct)
+
+An ##object##, in a ##[[:memstruct]]## or ##[[:memunion]]##, is an integer the same size as a Euphoria
+object, and is also the same size as a pointer.  By default, it is signed, but can be declared ##unsigned##.
+
+@[float]
+==== float
+
+A ##float## is a 32-bit floating point number, just like those used by ##[[:atom_to_float32]]##
+and ##[[:float32_to_atom]]##.
+
+@[double]
+==== double
+
+A ##double## is a 64-bit floating point number, just like those used by ##[[:atom_to_float64]]##
+and ##[[:float64_to_atom]]##.  This is the size of floating point numbers used by 32-bit
+Euphoria.
+
+@[long double]
+==== long double
+
+A ##long double## is an 80-bit floating point number, just like those used by ##[[:atom_to_float80]]##
+and ##[[:float80_to_atom]]##.  This is the size of floating point numbers used by 64-bit
+Euphoria.  Although they only use 80 bits, in ##[[:memstructs]]## they require 16 bytes of storage
+for alignment purposes.
+
+
+@[eudouble]
+==== eudouble
+
+A ##eudouble## is a platform independent floating point data type.  On 32-bit Euphoria, a ##eudouble##
+is the same size (64-bits) as a ##double##.  On 64-bit Euphoria, it is 80 bits, the same size
+as a ##long double##.
+
+@[pointer]
+==== pointer
+
+Data members may have the ##pointer## modifier prepended to their declaration.  This signifies that
+the ##memstruct## contains a pointer to that type of element, rather than the element itself.
+
+@[signed]
+==== signed
+
+Integer data types may be signed or unsiged.  The default is to be signed, but this can be made
+explicit by using the ##signed## modifier.
+
+@[unsigned]
+==== unsigned
+
+Integer data types may be signed or unsiged.  The default is to be signed, but to use an ##unsigned##
+integer type, use the ##unsigned## modifier.
+
+=== Using memstructs
+
+To use a ##[[:memstruct]]## requires a pointer to the memory where the structure is stored.
+This can be created by ##[[:allocate]]()##, or as the result of a call to an external library.
+No type information is ever stored with the pointer.  Instead, the memory may be manipulated
+using a dot notation, where the name of the ##[[:memstruct]]## follows the pointer, and
+the names of data elements 
+
+Example:
+<eucode>
+include std/machine.e
+
+memstruct point
+    int x
+    int y
+end memstruct
+
+memstruct rect
+    point upper_left
+    point lower_right
+end memstruct
+
+atom my_rect = allocate( sizeof( rect ) )
+
+my_rect.upper_left.x = 50
+my_rect.upper_left.y = 100
+
+my_rect.lower_right.x = 125
+my_rect.lower_right.y = 150
+
+? my_rect.lower_right.x  -- outputs 125
+</eucode>
