@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
+
 #include "alldefs.h"
 #include "be_alloc.h"
 #include "be_runtime.h"
