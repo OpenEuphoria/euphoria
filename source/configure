@@ -15,6 +15,8 @@ UNAME_MACHINE=`(uname -m) 2>/dev/null` || UNAME_MACHINE=unknown
 
 USECYPPATH="false"
 
+# argument sent to the pwd command.  Most platforms no arguments.
+PWDARG=
 if echo "$UNAME_SYSTEM" | grep CYGWIN > /dev/null; then
 	# for now, we build with -mno-cygwin under cygwin, so this is treated
 	# identically to MinGW
@@ -24,8 +26,10 @@ if echo "$UNAME_SYSTEM" | grep CYGWIN > /dev/null; then
 	# mixed-mode paths (C:/dir/file) the way MSYS's make can, we turn
 	# CYPPATH on
 	USECYPPATH="true"
+	
 elif echo "$UNAME_SYSTEM" | grep MINGW > /dev/null; then
 	UNAME_SYSTEM=WINDOWS
+	PWDARG=-W
 
 fi
 
@@ -198,6 +202,7 @@ while [ "$1" != "" ]; do
 		fi
 
 		echo EREL_TYPE=-DEREL_TYPE=\"$VAL\" >> ${CONFIG_FILE}
+		# "
 		;;
 
 	--verbose-tests )
@@ -324,7 +329,7 @@ while [ "$1" != "" ]; do
 		echo "                       Use the already built translator rather"
 		echo "                       than interpreting its source           "
 		echo "   --use-source-translator                                    "
-		echo "                       Interpret the translator's source rather"
+		echo "                       Interpret the translator's source rather" # '"
 		echo "                       than using the already built translator"
 		echo "                       (default)"
 		echo "   --verbose-tests     cause the 'test' target to use the verbose flag"
@@ -343,7 +348,6 @@ while [ "$1" != "" ]; do
 	shift
 done
 
-PWDARG=
 if [ "$TARGET" = "EBSD" ]; then
 	EBSD=1
 elif [ "$TARGET" = "EOPENBSD" ]; then
@@ -354,7 +358,6 @@ elif [ "$TARGET" = "LINUX" ]; then
 	ELINUX=1
 elif [ "$TARGET" = "EWINDOWS" ]; then
 	EMINGW=1
-	PWDARG=-W
 fi
 
 
