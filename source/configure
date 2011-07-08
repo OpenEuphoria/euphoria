@@ -242,7 +242,7 @@ while [ "$1" != "" ]; do
 		fi
 		ARCH=$VAL
 		case $ARCH in
-			x86.64)
+			x86*64)
 				ARCH=ix86_64
 				MFLAG=-m64
 				EFLAG=E64
