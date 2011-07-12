@@ -248,7 +248,7 @@ export procedure transoptions()
 		end switch
 	end for
 
-	if compiler_type != COMPILER_GCC then
+	if compiler_type != COMPILER_GCC and not equal(user_library,"") then
 		if not file_exists(canonical_path(user_library)) then
 			ShowMsg(2, 348, { user_library })
 			abort(1)

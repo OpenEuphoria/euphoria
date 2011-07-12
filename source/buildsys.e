@@ -205,7 +205,6 @@ export procedure write_checksum( integer file )
 	cfile_check = 0
 end procedure
 
-with trace
 -- searches for the file name needle in a list of files
 -- returned by dir().  First a case-sensitive search and
 -- then a case-insensitive search.  To handle the case when
@@ -372,7 +371,7 @@ function setup_build()
 			printf(2,"Supplied directory \'%s\' is not a valid EUDIR\n",{get_eucompiledir()})
 			abort(1)
 		end if
-		for tk = 1 to length(l_names) do -- translation kind
+		for tk = 1 to length(l_names) label "translation kind" do
 			user_library = eudir & sprintf("%sbin%s%s.%s",{t_slash, t_slash, l_names[tk],l_ext})
 			if TUNIX or compiler_type = COMPILER_GCC then
 				ifdef UNIX then
@@ -382,7 +381,7 @@ function setup_build()
 						for i = 1 to length(locations) do
 							if file_exists( sprintf(locations[i],{l_names[tk]}) ) then
 								user_library = sprintf(locations[i],{l_names[tk]})
-								exit
+								exit "translation kind"
 							end if
 						end for
 					end if
@@ -390,7 +389,7 @@ function setup_build()
 				          -- is done on a UNIX computer
 			end if -- compiling for UNIX and/or with GCC
 			if file_exists(user_library) then
-				exit
+				exit "translation kind"
 			end if
 		end for -- tk
 	end if -- user_library = 0
