@@ -206,7 +206,6 @@ export procedure write_checksum( integer file )
 	cfile_check = 0
 end procedure
 
-with trace
 -- searches for the file name needle in a list of files
 -- returned by dir().  First a case-sensitive search and
 -- then a case-insensitive search.  To handle the case when
@@ -401,7 +400,7 @@ function setup_build()
 				          -- is done on a UNIX computer
 			end if -- compiling for UNIX and/or with GCC
 			if file_exists(user_library) then
-				exit
+				exit "translation kind"
 			end if
 		end for -- tk
 	end if -- user_library = 0
