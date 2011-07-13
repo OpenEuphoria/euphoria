@@ -296,7 +296,6 @@ function Get()
 			if ch=-1 or ch='}' then -- '}' is expected only in the "{--\n}" case
 				return {GET_NOTHING, 0} -- just a comment
 			end if
-
 		elsif ch = '{' then
 			-- process a sequence
 			s = {}

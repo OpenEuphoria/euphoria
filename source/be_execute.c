@@ -43,7 +43,7 @@
 #	include <sys/times.h>
 #	include <string.h>
 #else
-#	ifdef EWATCOM
+#	ifdef __WATCOMC__
 #		include <graph.h>
 #	endif
 #	include <conio.h>
@@ -107,7 +107,7 @@ union pc_t {
 		: ((fp)->_cnt--,*(fp)->_ptr++))
 #endif
 
-#if defined(EWATCOM) || defined(EUNIX)
+#if defined(__WATCOMC__) || defined(EUNIX)
 	// a bit faster:
 #	define mygetc(fp) \
 		((fp)->_cnt<=0 \
@@ -735,7 +735,7 @@ static void do_poke4(object a, object top)
 #define FP_EMULATION_NEEDED // FOR WATCOM/DOS to run on old 486/386 without f.p.
 
 #if !defined(EMINGW)
-#if defined(EWINDOWS) || (defined(EWATCOM) && !defined(FP_EMULATION_NEEDED))
+#if defined(EWINDOWS) || (defined(__WATCOMC__) && !defined(FP_EMULATION_NEEDED))
 #ifdef EMSVC
 long msvc_spare = 0;
 #define thread() do { __asm { JMP [pc] } } while(0)
@@ -818,7 +818,7 @@ void threadpc3(void);
 
 #endif  // threaded code
 
-#ifdef EWATCOM
+#ifdef __WATCOMC__
 #pragma aux nop = \
 		"nop" \
 		modify[];
@@ -934,7 +934,7 @@ void InitExecute()
 #if defined(EUNIX) || defined(EMINGW)
 intptr_t **jumptab; // initialized in do_exec()
 #else
-#ifdef EWATCOM
+#ifdef __WATCOMC__
 /* Jump table location is determined by another program. */
 extern intptr_t ** jumptab;
 #else

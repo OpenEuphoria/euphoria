@@ -53,6 +53,15 @@
 #define NAME_MAX 255
 #endif
 
+// This is a workaround for ARM not recognizing INFINITY, which is included math.h
+// but is not recognized. This seems to be a bug/issue with Scratchbox and Maemo SDK
+#if ARCH == ARM
+#ifndef INFINITY
+#define INFINITY (1.0/0.0)
+#endif 
+#endif
+
+
 #include <sys/mman.h>
 
 #include <dirent.h>
@@ -82,7 +91,7 @@
 #include <io.h>
 #include <direct.h>
 
-#ifdef EWATCOM
+#ifdef __WATCOMC__
 #  include <graph.h>
 #  include <i86.h>
 #endif
@@ -847,7 +856,7 @@ static object Where(object x)
 	if (user_file[file_no].mode == EF_CLOSED)
 		RTFatal("file must be open for where()");
 	f = user_file[file_no].fptr;
-#ifdef EWATCOM
+#ifdef __WATCOMC__
 	// if (user_file[file_no].mode & EF_APPEND)
 		iflush(f);  // This fixes a bug in Watcom 10.6 that is fixed in 11.0
 #endif
@@ -886,7 +895,7 @@ static object Seek(object x)
 	if (IS_ATOM_INT(x2)) {
 		if ((long)x2 == -1)
 		{
-#ifdef EWATCOM
+#ifdef __WATCOMC__
 			iflush(f);
 #endif
 			result = iseek(f, 0, SEEK_END);
@@ -908,7 +917,7 @@ static object Seek(object x)
 	else
 		return ATOM_1; // sequences are not permitted as position.
 		
-#ifdef EWATCOM
+#ifdef __WATCOMC__
 	iflush(f);  // Realign internal buffer position.
 #endif
 	result = iseek(f, pos, SEEK_SET);
@@ -2206,6 +2215,10 @@ object DefineC(object x)
 	return c_routine_next++;
 }
 
+#if ARCH == ARM
+        #define CALLBACK_SIZE (129)
+#else
+
 #ifdef EOSX
 	#define CALLBACK_SIZE (108)
 #else
@@ -2222,6 +2235,7 @@ object DefineC(object x)
 	#else
 		#define CALLBACK_SIZE (80)
 	#endif
+#endif
 #endif
 
 #define EXECUTABLE_ALIGNMENT (4)
@@ -3086,9 +3100,9 @@ object machine(object opcode, object x)
 				MakeCString(src, (object) *(((s1_ptr)x)->base+1),
 							SEQ_PTR(((s1_ptr) x)->base[1])->length + 1);
 			
-				// TODO: refactor, simply make an unset method for EWATCOM,
+				// TODO: refactor, simply make an unset method for __WATCOMC__,
 				// and EMINGW, then call unsetenv(src)
-#ifdef EWATCOM
+#ifdef __WATCOMC__
 				temp = setenv(src, NULL, 1);
 #else
 #ifdef EMINGW
@@ -3115,7 +3129,7 @@ object machine(object opcode, object x)
 #endif /* ELINUX */
 #endif /* EUNIX */
 #endif /* EMINGW */
-#endif /* EWATCOM */
+#endif /* __WATCOMC__ */
 
 				EFree(src);
 				return !temp;
@@ -3215,8 +3229,8 @@ object machine(object opcode, object x)
 				
 			case M_F80_TO_A:
 				return float_to_atom( x, 10 );
-				
-			case M_INFINITY:
+			
+			case M_INFINITY: 
 				return NewDouble( (eudouble) INFINITY );
 				
 			case M_CALL_STACK:

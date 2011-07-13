@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
+
 #include "alldefs.h"
 #include "be_alloc.h"
 #include "be_runtime.h"
@@ -37,6 +39,7 @@ object decompress(uintptr_t c)
 	int32_t len;
 	int32_t i;
 	int64_t i8;
+	float f;
 	double d;
 	long double ld;
 	
@@ -72,7 +75,7 @@ object decompress(uintptr_t c)
 		return i8;
 	}
 	else if (c == F4B) {
-		d = (double)*(float *)string_ptr; 
+		d = (double)*(float*)memcpy((void*)&f, (void*)string_ptr, 4); 
 		string_ptr += sizeof( float );
 		return NewDouble((eudouble)d);
 	}

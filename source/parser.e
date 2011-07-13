@@ -3913,7 +3913,7 @@ procedure SubProg(integer prog_type, integer scope)
 	if prog_type = TYPE_DECL then
 		object tsym = prog_name[T_SYM]
 		if equal(sym_name(prog_name[T_SYM]),"enum") then
-			-- because enum types are both top level declarations and type routines, we
+			-- Because enum types are both top level declarations and type routines, we
 			-- have to Enter and Leave the top level, fixing up the LineTable, in order
 			-- to prevent corruption of the LineTables
 			EnterTopLevel( FALSE )

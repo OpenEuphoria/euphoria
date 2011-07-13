@@ -453,7 +453,7 @@ void MainScreen()
 
 #if !defined(EBSD62)
 #undef matherr // avoid OpenWATCOM problem
-#if (defined(EWATCOM) || defined(EUNIX)) && !defined(EOW)
+#if (defined(__WATCOMC__) || defined(EUNIX)) && !defined(EOW)
 int matherr(struct exception *err)   // 10.6 wants this
 #else
 int matherr(struct _exception *err)  // OW wants this
@@ -5461,7 +5461,7 @@ uintptr_t general_call_back(
 
 uintptr_t (*general_ptr)() = (void *)&general_call_back;
 
-#ifdef EWATCOM
+#ifdef __WATCOMC__
 #pragma off (check_stack);
 #endif
 

@@ -480,11 +480,11 @@ mem3 = mem0 + 3
 --		# ##fh## : an integer, the handle to an open file to read from.
 --
 -- Returns:
---		An **atom**, made of the bytes that could be read from the file.
+--		An **atom**, between -1 and power(2,32)-1, made of the bytes that could be read from the file.
+--      When an end of file is encountered, it returns -1.
 --
 -- Comments:
 --     * This function is normally used with files opened in binary mode, "rb".
---     * Assumes that there at least four bytes available to be read.
 --
 -- Example 1:
 --     <eucode>
@@ -501,10 +501,18 @@ mem3 = mem0 + 3
 
 public function get_integer32(integer fh)
 -- read the 4 bytes as a single integer value at current position in file
-	poke(mem0, getc(fh))
-	poke(mem1, getc(fh))
-	poke(mem2, getc(fh))
-	poke(mem3, getc(fh))
+	integer c -- a positive byte integer, 0 or -1
+	c = getc(fh)
+	poke(mem0, c)
+	c = getc(fh)
+	poke(mem1, c)
+	c = getc(fh)
+	poke(mem2, c)
+	c = getc(fh)
+	if c = -1 then
+		return -1
+	end if
+	poke(mem3, c)
 	return peek4u(mem0)
 end function
 
@@ -515,11 +523,11 @@ end function
 --		# ##fh## : an integer, the handle to an open file to read from.
 --
 -- Returns:
---		An **atom**, made of the bytes that could be read from the file.
+--		An **integer**, made of the bytes that could be read from the file.
+--      When an end of file is encountered, it returns -1.
 --
 -- Comments:
 --     * This function is normally used with files opened in binary mode, "rb".
---     * Assumes that there at least two bytes available to be read.
 --
 -- Example 1:
 --     <eucode>
@@ -536,8 +544,14 @@ end function
 
 public function get_integer16(integer fh)
 -- read the 2 bytes as a single integer value at current position in file
-	poke(mem0, getc(fh))
-	poke(mem1, getc(fh))
+	integer c -- a positive byte integer from 0 to 255 or -1
+	c = getc(fh)
+	poke(mem0, c)
+	c = getc(fh)
+	if c = -1 then
+		return -1
+	end if
+	poke(mem1, c)
 	return peek2u(mem0)
 end function
 

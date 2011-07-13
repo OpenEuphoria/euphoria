@@ -64,7 +64,7 @@ integer NATIVE_FORMAT
 ifdef EU4_0 then
 	NATIVE_FORMAT = DOUBLE
 elsedef
-	if sizeof( C_POINTER ) = 32 then
+	if sizeof( C_POINTER ) = 4 then
 		NATIVE_FORMAT = DOUBLE
 	else
 		NATIVE_FORMAT = EXTENDED

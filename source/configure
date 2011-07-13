@@ -5,16 +5,18 @@ CONFIG_FILE=config.gnu
 UNAME_SYSTEM=`(uname -s) 2>/dev/null`  || UNAME_SYSTEM=unknown
 UNAME_MACHINE=`(uname -m) 2>/dev/null` || UNAME_MACHINE=unknown
 
-# If under Cygwin, we have 2 sets of paths: the normal TRUNKDIR/BUILDDIR/INCDIR
-# defined by the Cygwin path (/cygdrive/c/dir/file) as well as the CYP- versions
-# (c:/dir/file). The normal variables are used by make itself, which can't
-# handle the mixed-mode path and can only deal with pure Cygwin ones.
-# (These are also used by the various utilities ike cp, gcc, etc, even though
-# they can handle either format). The CYP- versions are used whenever we call
-# eui, euc, or an euphoria program, as these can only handle mixed-mode paths.
+# If under Cygwin or Mingw, we have 2 sets of paths: the normal TRUNKDIR/BUILDDIR/INCDIR defined by
+# the Cygwin path (/cygdrive/c/dir/file) or under Mingw the Mingw path (/c/dir/file); as well as the
+# CYP- versions (c:/dir/file). The normal variables are used by make itself, which can't handle the
+# mixed-mode path and can only deal with pure Cygwin or Mingw ones. (These are also used by the
+# various utilities ike cp, gcc, etc, even though they can handle either format). The CYP- versions
+# are used whenever we call eui, euc, or an euphoria program, as these can only handle mixed-mode
+# paths.
 
 USECYPPATH="false"
 
+# argument sent to the pwd command.  Most platforms no arguments.
+PWDARG=
 if echo "$UNAME_SYSTEM" | grep CYGWIN > /dev/null; then
 	# for now, we build with -mno-cygwin under cygwin, so this is treated
 	# identically to MinGW
@@ -24,8 +26,13 @@ if echo "$UNAME_SYSTEM" | grep CYGWIN > /dev/null; then
 	# mixed-mode paths (C:/dir/file) the way MSYS's make can, we turn
 	# CYPPATH on
 	USECYPPATH="true"
+	PWDARG=
+
 elif echo "$UNAME_SYSTEM" | grep MINGW > /dev/null; then
 	UNAME_SYSTEM=WINDOWS
+	PWDARG=-W
+else
+	PWDARG=
 fi
 
 if [ -e source/global.e ]; then
@@ -36,14 +43,27 @@ fi
 
 echo "# File generated from configure" > ${CONFIG_FILE}
 
+# gcc doesn't seem to like -m32 on 32-bit machines when there are 
+# no 64-bit machines 
+# with an instruction super set of the 32-bit machine.  This means,
+# -m32 is fine for ix86 32bit machines but bad for ARM and Motorolla based
+# machines.
+
+
 MFLAG=-m32
 EFLAG=E32
 if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
-	echo ARCH=ix86
+	ARCH=ix86
+	MFLAG=-m32
+	EFLAG=E32
 elif echo "$UNAME_MACHINE" | grep "x86_64" > /dev/null; then
 	ARCH=ix86_64
 	MFLAG=-m64
 	EFLAG=E64
+elif echo "$UNAME_MACHINE" | grep ARM > /dev/null; then
+	ARCH=ARM
+	MFLAG=
+	EFLAG=E32
 fi
 
 if test $UNAME_SYSTEM = "Linux"; then
@@ -75,7 +95,7 @@ export CC=gcc
 
 SCP="scp -C"
 SSH="ssh -C"
-HG=`which hg`
+HG="hg"
 
 echo CONFIGURE_PARAMS=$@ >> "$PREFIX"${CONFIG_FILE}
 
@@ -184,6 +204,7 @@ while [ "$1" != "" ]; do
 		fi
 
 		echo EREL_TYPE=-DEREL_TYPE=\"$VAL\" >> ${CONFIG_FILE}
+		# "
 		;;
 
 	--verbose-tests )
@@ -252,11 +273,17 @@ while [ "$1" != "" ]; do
 				MFLAG=-m32
 				EFLAG=E32
 			;;
+			ARM)
+				ARCH=ARM
+				MFLAG=
+				EFLAG=E32
+			;;
 			*)
 				echo "Unknown Architecture '$VAL'"
 				echo "Supported Architectures:"
 				echo "   x86"
 				echo "   x86_64"
+				echo "   ARM"
 				exit
 		esac
 		;;
@@ -304,7 +331,7 @@ while [ "$1" != "" ]; do
 		echo "                       Use the already built translator rather"
 		echo "                       than interpreting its source           "
 		echo "   --use-source-translator                                    "
-		echo "                       Interpret the translator's source rather"
+		echo "                       Interpret the translator's source rather" # '"
 		echo "                       than using the already built translator"
 		echo "                       (default)"
 		echo "   --verbose-tests     cause the 'test' target to use the verbose flag"
@@ -378,22 +405,25 @@ if [ "$TARGET" = "EWINDOWS" ]; then
 	fi
 fi
 
+if [ "x$RC" = "x" ]; then
+	export RC=windres
+fi
+
+if [ "$EC" != "" ]; then
+	echo "TRANSLATE=$EC" >> "$PREFIX"${CONFIG_FILE}
+fi
+
 echo "ARCH=$ARCH" >> "$PREFIX"${CONFIG_FILE}
 echo "MSIZE=$MFLAG" >> "$PREFIX"${CONFIG_FILE}
 echo "EFLAG=-d $EFLAG" >> "$PREFIX"${CONFIG_FILE}
-
 echo "CC=$CC" >> "$PREFIX"${CONFIG_FILE}
 echo "RC=$RC" >> "$PREFIX"${CONFIG_FILE}
 echo "SCP=$SCP" >> "$PREFIX"${CONFIG_FILE}
 echo "SSH=$SSH" >> "$PREFIX"${CONFIG_FILE}
 echo "HG=$HG" >> "$PREFIX"${CONFIG_FILE}
 
-if [ "$EC" != "" ]; then
-	echo "TRANSLATE=$EC" >> "$PREFIX"${CONFIG_FILE}
-fi
-
-export PWD=`pwd`
-export PPWD=`cd .. && pwd`
+export PWD=`pwd $PWDARG`
+export PPWD=`cd .. && pwd $PWDARG`
 
 # The following works around a bug in djgpp's pwd
 # that at times returns the parent of the current
@@ -407,18 +437,22 @@ fi
 export TRUNKDIR=$PPWD
 
 mkdir -p $BUILDDIR
-export BUILDDIR=`cd "$BUILDDIR" && pwd`
+export BUILDDIR=`cd "$BUILDDIR" && pwd $PWDARG`
 
 echo TRUNKDIR=$TRUNKDIR >> "$PREFIX"${CONFIG_FILE}
 echo BUILDDIR=$BUILDDIR >> "$PREFIX"${CONFIG_FILE}
 
 if [ "$USECYPPATH" = "true" ]; then
-	echo CYPTRUNKDIR=`cygpath -a -m $TRUNKDIR` >> "$PREFIX"${CONFIG_FILE}
-	echo CYPBUILDDIR=`cygpath -a -m $BUILDDIR` >> "$PREFIX"${CONFIG_FILE}
+	export CYPTRUNKDIR=`cygpath -a -m $TRUNKDIR`
+	export CYPBUILDDIR=`cygpath -a -m $BUILDDIR`
 else
-	echo CYPTRUNKDIR=$TRUNKDIR >> "$PREFIX"${CONFIG_FILE}
-	echo CYPBUILDDIR=$BUILDDIR >> "$PREFIX"${CONFIG_FILE}
+	# MinGW and others
+	export CYPTRUNKDIR=$TRUNKDIR
+	export CYPBUILDDIR=$BUILDDIR
 fi
+echo CYPTRUNKDIR=$CYPTRUNKDIR >> "$PREFIX"${CONFIG_FILE}
+echo CYPBUILDDIR=$CYPBUILDDIR >> "$PREFIX"${CONFIG_FILE}
+
 echo XLTTARGETCC=$XLTTARGETCC >> "$PREFIX"${CONFIG_FILE}
 echo NO_CYGWIN=$NO_CYGWIN >> "$PREFIX"${CONFIG_FILE}
 
@@ -427,14 +461,15 @@ echo include Makefile.gnu > Makefile
 
 echo Writing eu.cfg to $BUILDDIR/eu.cfg
 echo "[all]" > $BUILDDIR/eu.cfg
-echo -i $TRUNKDIR/include >> $BUILDDIR/eu.cfg
 echo -d $EFLAG >> $BUILDDIR/eu.cfg
-echo -eudir $TRUNKDIR >> $BUILDDIR/eu.cfg
+echo -eudir $CYPTRUNKDIR >> $BUILDDIR/eu.cfg
+echo -i $CYPTRUNKDIR/include >> $BUILDDIR/eu.cfg
+
 echo "[translate]" >> $BUILDDIR/eu.cfg
-echo "-com" $TRUNKDIR >> $BUILDDIR/eu.cfg
-echo "-lib" $BUILDDIR/eu.a >> $BUILDDIR/eu.cfg
-echo "-lib-pic" $BUILDDIR/euso.a >> $BUILDDIR/eu.cfg
+echo "-com" $CYPTRUNKDIR >> $BUILDDIR/eu.cfg
+echo "-lib" $CYPBUILDDIR/eu.a >> $BUILDDIR/eu.cfg
+echo "-lib-pic" $CYPBUILDDIR/euso.a >> $BUILDDIR/eu.cfg
 echo "[bind]"  >> $BUILDDIR/eu.cfg
-echo "-eub" $BUILDDIR/eub >> $BUILDDIR/eu.cfg
+echo "-eub" $CYPBUILDDIR/eub >> $BUILDDIR/eu.cfg
 
 cp $BUILDDIR/eu.cfg $TRUNKDIR/source/eu.cfg

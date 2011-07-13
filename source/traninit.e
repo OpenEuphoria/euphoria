@@ -260,6 +260,15 @@ export procedure transoptions()
 		end switch
 	end for
 
+	if compiler_type != COMPILER_GCC and not equal(user_library,"") then
+		if not file_exists(canonical_path(user_library)) then
+			ShowMsg(2, 348, { user_library })
+			abort(1)
+		else
+			user_library = canonical_path(user_library)
+		end if
+	end if
+
 	if length(exe_name[D_NAME]) and not absolute_path(exe_name[D_NAME]) then
 		exe_name[D_NAME] = current_dir() & SLASH & exe_name[D_NAME]
 	end if
