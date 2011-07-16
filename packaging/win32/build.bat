@@ -15,7 +15,8 @@ REM --
 CD cleanbranch
 IF %ERRORLEVEL% EQU 1 GOTO CheckOut
 CD ..
-rmdir /s/q cleanbranch
+hg update
+GOTO DoBuild
 
 :Checkout
 
@@ -24,7 +25,7 @@ REM -- Checkout a clean copy of our repository
 REM --
 
 echo Performing a checkout...
-hg archive cleanbranch
+hg clone ..\.. cleanbranch
 
 GOTO DoBuild
 
