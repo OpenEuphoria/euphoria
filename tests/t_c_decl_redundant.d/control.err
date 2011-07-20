@@ -1,6 +1,6 @@
-C:\Users\Shawn\Documents\development\hg\4.0\tests\t_c_decl_redundant.e:7
+t_c_decl_redundant.e:7
 <0074>:: Errors resolving the following references:
-	'x' has been declared more than once.
+	'x' (t_c_decl_redundant.e:7) has been declared more than once.
 		in x1.e
 		in x2.e
 
