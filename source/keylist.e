@@ -185,6 +185,7 @@ export sequence keylist = {
 	{"double",           SC_MEMSTRUCT, MS_DOUBLE,           0, 0, 0 },
 	{"eudouble",         SC_MEMSTRUCT, MS_EUDOUBLE,         0, 0, 0 },
 	{"object",           SC_MEMSTRUCT, MS_OBJECT,           0, 0, 0 },
+	{"as",               SC_MEMSTRUCT, MS_AS,               0, 0, 0 },
 	
 	$
 

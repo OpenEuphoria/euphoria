@@ -363,6 +363,7 @@ export enum
 	MS_EUDOUBLE,
 	MS_OBJECT,
 	MS_MEMBER,
+	MS_AS,
 	
 	LAST_TOKEN,
 	$

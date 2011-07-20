@@ -1,11 +1,21 @@
 with trace
-trace(3)
+
 
 include std/unittest.e
 
 include std/dll.e
 include std/machine.e
 
+type token_id( object id )
+	if integer(id) then
+		if id < 542 then
+			if id > -101 then
+				return 1
+			end if
+		end if
+	end if
+	return 0
+end type
 
 set_test_verbosity( TEST_SHOW_ALL )
 memstruct Var
@@ -49,7 +59,7 @@ memstruct symtab_entry
 	char scope
 	unsigned char file_no
 	unsigned char dummy
-	int token
+	int as token_id token
 	pointer char name
 	U u
 end memstruct
@@ -60,7 +70,6 @@ end memstruct
 
 integer bits32 = sizeof( C_POINTER ) = 4
 procedure basic()
-? sizeof( symtab_entry )
 	atom symtab = allocate( 5 * sizeof( symtab_entry ) )
 	poke( symtab,  repeat( 0, 5 * sizeof( symtab_entry ) ) )
 	symtab.symtab_entry.obj = 9

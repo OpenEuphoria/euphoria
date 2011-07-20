@@ -270,6 +270,7 @@
 #define MS_EUDOUBLE          539
 #define MS_OBJECT            540
 #define MS_MEMBER            541
+#define MS_AS                542
 
 //struct key {
 //  char *name;

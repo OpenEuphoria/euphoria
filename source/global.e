@@ -165,6 +165,7 @@ export constant
 	S_MEM_NEXT    = 19 - get_backend() * 5,
 	S_MEM_STRUCT  = 20 - get_backend() * 5,  -- for embedded structs
 	S_MEM_PARENT  = 21 - get_backend() * 5,
+	S_MEM_TYPE    = 22 - get_backend() * 5,
 	$
 
 export procedure print_sym(integer s)
@@ -196,7 +197,7 @@ export constant
 	SIZEOF_VAR_ENTRY       = 17 + 37 * TRANSLATE,
 	SIZEOF_BLOCK_ENTRY     = 19 + 35 * TRANSLATE,
 	SIZEOF_TEMP_ENTRY      =  6 + 32 * TRANSLATE,
-	SIZEOF_MEMSTRUCT_ENTRY = 21 + 33 * TRANSLATE - 5 * get_backend(),
+	SIZEOF_MEMSTRUCT_ENTRY = 22 + 32 * TRANSLATE - 5 * get_backend(),
 	$
 
 -- Permitted values for various symbol table fields
