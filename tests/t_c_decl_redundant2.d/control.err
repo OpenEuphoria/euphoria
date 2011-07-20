@@ -1,4 +1,4 @@
-C:\Users\Shawn\Documents\development\hg\4.0\tests\t_c_decl_redundant2.e:2
+t_c_decl_redundant2.e:2
 <0031>:: attempt to redefine foo.
 integer foo
           ^
