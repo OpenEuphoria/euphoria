@@ -1,6 +1,6 @@
-C:\Users\Shawn\Documents\development\hg\4.0\tests\t_c_qualpredef.e:4
+t_c_qualpredef.e:4
 <0074>:: Errors resolving the following references:
-	'puts' was not declared in 't_c_qualpredef.e'.
+	'puts' (t_c_qualpredef.e:4) was not declared in 't_c_qualpredef.e'.
 
 fail:puts(1, 1)
         ^
