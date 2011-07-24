@@ -181,6 +181,7 @@ export procedure set_line( integer ref, integer line_no, sequence this_line, int
 	forward_references[ref][FR_LINE] = line_no
 	forward_references[ref][FR_THISLINE] = this_line
 	forward_references[ref][FR_BP] = bp
+	
 end procedure
 
 sequence fwd_private_sym  = {}

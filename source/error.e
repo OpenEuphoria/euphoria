@@ -27,10 +27,14 @@ integer Errors = 0 -- number of errors detected during compile
 export integer TempErrFile = -2
 export sequence TempErrName
 export integer display_warnings
-export object ThisLine = ""   -- current line of source (or -1)
-export object ForwardLine     -- remember the line when a possible forward reference occurs
-export integer bp = 0         -- input line index of next character
-export integer forward_bp     -- cached line index for a possible forward reference
+export object ThisLine = ""             -- current line of source (or -1)
+export object ForwardLine = ""          -- remember the line when a possible forward reference occurs
+export object putback_ForwardLine = ""  -- remember the line when a possible forward reference occurs
+export object last_ForwardLine = ""     -- remember the line when a possible forward reference occurs
+export integer bp = 0                   -- input line index of next character
+export integer forward_bp = 0           -- cached line index for a possible forward reference
+export integer putback_forward_bp = 0   -- cached line index for a possible forward reference
+export integer last_forward_bp = 0      -- cached line index for a possible forward reference
 export sequence warning_list = {}
 
 --**

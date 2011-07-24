@@ -473,6 +473,18 @@ end procedure
 export procedure putback(token t)
 -- push a scanner token back onto the input stream
 	backed_up_tok = append(backed_up_tok, t)
+	
+	if t[T_SYM] then
+		putback_ForwardLine     = ForwardLine
+		putback_forward_bp      = forward_bp
+		putback_fwd_line_number = fwd_line_number
+		
+		if last_fwd_line_number then
+			ForwardLine     = last_ForwardLine
+			forward_bp      = last_forward_bp
+			fwd_line_number = last_fwd_line_number
+		end if
+	end if
 end procedure
 
 sequence
@@ -643,6 +655,15 @@ export function next_token()
 	if length(backed_up_tok) > 0 then
 		t = backed_up_tok[$]
 		backed_up_tok = remove( backed_up_tok, length( backed_up_tok ) )
+		if putback_fwd_line_number then
+			
+			ForwardLine     = putback_ForwardLine
+			forward_bp      = putback_forward_bp
+			fwd_line_number = putback_fwd_line_number
+			
+			putback_fwd_line_number = 0
+			
+		end if
 	elsif Parser_mode = PAM_PLAYBACK then
 		if canned_index <= length(canned_tokens) then
 			t = canned_tokens[canned_index]
@@ -672,7 +693,7 @@ export function next_token()
 	        canned_tokens = append(canned_tokens,t)
 	    end if
 	end if
-
+	putback_fwd_line_number = 0
 	return t
 end function
 
@@ -4691,6 +4712,19 @@ export procedure real_parser(integer nested)
 				backed_up_tok = {}
 				PopGoto()
 				read_line()
+				
+				last_ForwardLine     = ThisLine
+				last_fwd_line_number = line_number
+				last_forward_bp      = bp
+				
+				putback_ForwardLine     = ThisLine
+				putback_fwd_line_number = line_number
+				putback_forward_bp      = bp
+				
+				ForwardLine     = ThisLine
+				fwd_line_number = line_number
+				forward_bp      = bp
+				
 			else
 				CheckForUndefinedGotoLabels()
 				exit -- all finished

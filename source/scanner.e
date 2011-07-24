@@ -79,7 +79,16 @@ constant FILE_NO = 1,           -- file number
 		 OP_DEFINES = 10,        -- ifdef defines
 		 PREV_OP_WARNING = 11,
 		 OP_INLINE = 12,
-		 OP_INDIRECT_INCLUDE = 13
+		 OP_INDIRECT_INCLUDE = 13,
+		 PUTBACK_FWD_LINE_NUMBER = 14,
+		 PUTBACK_FORWARDLINE = 15,
+		 PUTBACK_FORWARD_BP = 16,
+		 LAST_FWD_LINE_NUMBER = 17,
+		 LAST_FORWARDLINE = 18,
+		 LAST_FORWARD_BP = 19,
+		 THISLINE = 20,
+		 FWD_LINE_NUMBER = 21,
+		 FORWARD_BP = 22
 		 -- , OP_PREV_INDIRECT_INCLUDE = 14 -- not used
 
 integer qualified_fwd = -1 -- remember namespaces for forward reference purposes
@@ -754,7 +763,7 @@ procedure IncludePush()
 	integer new_file_handle, old_file_no
 	atom new_hash
 	integer idx
-
+	
 	start_include = FALSE
 
 	new_file_handle = path_open() -- sets new_include_name to full path
@@ -820,8 +829,16 @@ procedure IncludePush()
 							   OpDefines,
 							   prev_OpWarning,
 							   OpInline,
-							   OpIndirectInclude})
-
+							   OpIndirectInclude,
+							   putback_fwd_line_number,
+							   putback_ForwardLine,
+							   putback_forward_bp,
+							   last_fwd_line_number,
+							   last_ForwardLine,
+							   last_forward_bp,
+							   ThisLine,
+							   fwd_line_number,
+							   forward_bp})
 
 	file_include = append( file_include, {} )
 	file_include_by = append( file_include_by, {} )
@@ -898,6 +915,7 @@ end procedure
 export function IncludePop()
 -- stop reading from current source file and restore info for previous file
 -- (if any)
+
 	update_include_completion( current_file_no )
 	Resolve_forward_references()
 	HideLocals()
@@ -926,10 +944,25 @@ export function IncludePop()
 	prev_OpWarning     = top[PREV_OP_WARNING]
 	OpInline           = top[OP_INLINE]
 	OpIndirectInclude  = top[OP_INDIRECT_INCLUDE]
-
+	putback_fwd_line_number = line_number -- top[PUTBACK_FWD_LINE_NUMBER]
+	putback_ForwardLine = top[PUTBACK_FORWARDLINE]
+	putback_forward_bp = top[PUTBACK_FORWARD_BP]
+	last_fwd_line_number = top[LAST_FWD_LINE_NUMBER]
+	last_ForwardLine = top[LAST_FORWARDLINE]
+	last_forward_bp = top[LAST_FORWARD_BP]
+	ThisLine = top[THISLINE]
+	
+	fwd_line_number = line_number --top[FWD_LINE_NUMBER]
+	forward_bp = top[FORWARD_BP]
+	ForwardLine = ThisLine
+	
+	putback_ForwardLine = ThisLine
+	last_ForwardLine = ThisLine
+	
 	IncludeStk = IncludeStk[1..$-1]
-
 	SymTab[TopLevelSub][S_CODE] = Code
+
+	
 	return TRUE
 end function
 

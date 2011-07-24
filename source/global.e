@@ -428,7 +428,9 @@ export sequence file_name_entered = ""  -- interactively entered file name
 export integer shroud_only = FALSE      -- making an unbound .il file
 export integer current_file_no = 1      -- current file number
 export integer line_number              -- source line number within current file (16 bits)
-export integer fwd_line_number          -- remember the line number for forward references
+export integer fwd_line_number = 1      -- remember the line number for forward references
+export integer putback_fwd_line_number = 0  -- in case we go to the next line for the next token, but put it back
+export integer last_fwd_line_number     -- in case we go to the next line for the next token, but put it back
 export integer gline_number             -- overall line number (32 bits)
 export symtab_index file_start_sym
 export symtab_index TopLevelSub         -- s.t. index of top level procedure
