@@ -1009,6 +1009,7 @@ procedure Forward_call(token tok, integer opcode = PROC_FORWARD )
 	symtab_index proc = tok[T_SYM]
 	integer tok_id = tok[T_ID]
 	remove_symbol( proc )
+	short_circuit -= 1
 	while 1 do
 		tok = next_token()
 		integer id = tok[T_ID]
@@ -1053,6 +1054,7 @@ procedure Forward_call(token tok, integer opcode = PROC_FORWARD )
 			emit_op(UPDATE_GLOBALS)
 		end if
 	end if
+	short_circuit += 1
 end procedure
 
 procedure Object_call( token tok )
