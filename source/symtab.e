@@ -19,6 +19,7 @@ include fwdref.e
 include reswords.e
 include block.e
 include msgtext.e
+include error.e
 
 export constant NBUCKETS = 2003  -- prime helps
 
@@ -1009,9 +1010,17 @@ end ifdef
 	-- couldn't find unique one
 	if length(dup_globals) = 0 then
 		defined = SC_UNDEFINED
+		
+		if fwd_line_number then
+			last_ForwardLine     = ForwardLine
+			last_forward_bp      = forward_bp
+			last_fwd_line_number = fwd_line_number
+		end if
+
 		ForwardLine = ThisLine
 		forward_bp = bp
 		fwd_line_number = line_number
+	
 	elsif length(dup_globals) then
 		defined = SC_MULTIPLY_DEFINED
 	elsif length(dup_overrides) then
