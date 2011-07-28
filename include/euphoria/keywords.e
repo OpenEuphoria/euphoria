@@ -43,6 +43,8 @@ public constant keywords = {
 	"include",
 	"label",
 	"loop",
+	"memstruct",
+	"memunion",
 	"namespace",
 	"not",
 	"or",
