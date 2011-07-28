@@ -49,8 +49,9 @@ export procedure MemStruct_declaration( integer scope )
 	SymTab[mem_struct][S_SCOPE] = scope
 	
 	integer pointer = 0
-	integer signed = -1
-	integer long = 0
+	integer signed  = -1
+	integer long    = 0
+	integer eu_type = 0
 	while 1 with entry do
 		integer tid = tok[T_ID]
 		switch tid label "token" do
@@ -64,6 +65,10 @@ export procedure MemStruct_declaration( integer scope )
 				end if
 				exit
 			
+			case TYPE, QUALIFIED_TYPE then
+				tok_match( MS_AS )
+				eu_type = tok[T_SYM]
+				
 			case MEMSTRUCT, MEMUNION, QUALIFIED_MEMSTRUCT, QUALIFIED_MEMUNION then
 				-- embedding
 				MemStruct_member( tok, pointer )
@@ -71,6 +76,7 @@ export procedure MemStruct_declaration( integer scope )
 				pointer = 0
 				long    = 0
 				signed  = -1
+			
 			case VARIABLE, QUALIFIED_VARIABLE then
 				if SC_UNDEFINED = SymTab[tok[T_SYM]][S_SCOPE] then
 					-- forward reference
@@ -114,14 +120,14 @@ export procedure MemStruct_declaration( integer scope )
 				
 				switch tid do
 					case MS_CHAR then
-						Char( pointer, signed )
+						Char( eu_type, pointer, signed )
 					case MS_SHORT then
-						Short( pointer, signed )
+						Short( eu_type, pointer, signed )
 					case MS_INT then
 						if long then
-							Long( pointer, signed )
+							Long( eu_type, pointer, signed )
 						else
-							Int( pointer, signed )
+							Int( eu_type, pointer, signed )
 						end if
 					case MS_LONG then
 						token int_tok = next_token()
@@ -130,7 +136,7 @@ export procedure MemStruct_declaration( integer scope )
 							-- this is the second long...
 							if int_tok[T_ID] = MS_INT then
 								-- long long int
-								LongLong( pointer, signed )
+								LongLong( eu_type, pointer, signed )
 							
 							elsif int_tok[T_ID] = VARIABLE
 							or int_tok[T_ID] = PROCEDURE
@@ -140,7 +146,7 @@ export procedure MemStruct_declaration( integer scope )
 							then
 								-- long long
 								putback( int_tok )
-								LongLong( pointer, signed )
+								LongLong( eu_type, pointer, signed )
 							else
 								CompileErr( 25, { sym_name( int_tok[T_SYM] ) } )
 							end if
@@ -151,7 +157,7 @@ export procedure MemStruct_declaration( integer scope )
 							break "token"
 						else
 							putback( int_tok )
-							Long( pointer, signed )
+							Long( eu_type, pointer, signed )
 						end if
 						
 					case MS_FLOAT, MS_DOUBLE, MS_EUDOUBLE then
@@ -167,10 +173,10 @@ export procedure MemStruct_declaration( integer scope )
 							tid = MS_LONGDOUBLE
 						end if
 						
-						FloatingPoint( tid, pointer )
+						FloatingPoint( eu_type, tid, pointer )
 					
 					case MS_OBJECT then
-						Object( pointer, signed )
+						Object( eu_type, pointer, signed )
 					
 					case else
 						
@@ -181,6 +187,7 @@ export procedure MemStruct_declaration( integer scope )
 				pointer = 0
 				long    = 0
 				signed  = -1
+				eu_type = 0
 			
 			case MS_POINTER then
 				-- pointer!
@@ -280,23 +287,6 @@ function read_name()
 	end switch
 end function
 
-function read_type()
-	token tok = next_token()
-	if tok[T_ID] = MS_AS then
-		tok = next_token()
-		if SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
-			-- forward reference
-			CompileErr( "forward referenced types not supported yet" )
-		elsif tok[T_ID] != TYPE and tok[T_ID] != QUALIFIED_TYPE then
-			CompileErr( 37 )
-		end if
-		return tok
-	else
-		putback( tok )
-		return { IGNORED, 0 }
-	end if
-end function
-
 function member_array( symtab_index sym )
 	token tok = next_token()
 	if tok[T_ID] != LEFT_SQUARE then
@@ -315,7 +305,7 @@ function member_array( symtab_index sym )
 	return size
 end function
 
-procedure add_member( token type_tok, token name_tok, object mem_type, integer size, integer pointer, integer signed = 0 )
+procedure add_member( integer type_sym, token name_tok, object mem_type, integer size, integer pointer, integer signed = 0 )
 	
 	symtab_index sym = name_tok[T_SYM]
 	
@@ -344,33 +334,32 @@ procedure add_member( token type_tok, token name_tok, object mem_type, integer s
 	SymTab[sym][S_MEM_POINTER] = pointer
 	SymTab[sym][S_MEM_SIGNED]  = signed
 	SymTab[sym][S_MEM_PARENT]  = mem_struct
-	SymTab[sym][S_MEM_TYPE]    = type_tok[T_SYM]
+	SymTab[sym][S_MEM_TYPE]    = type_sym
 	
 	last_sym = sym
 end procedure
 
-procedure Char( integer pointer, integer signed )
-	add_member( read_type(), read_name(), MS_CHAR, 1, pointer, signed )
+procedure Char( integer eu_type, integer pointer, integer signed )
+	add_member( eu_type, read_name(), MS_CHAR, 1, pointer, signed )
 end procedure
 
-procedure Short( integer pointer, integer signed )
-	add_member( read_type(), read_name(), MS_SHORT, 2, pointer, signed )
+procedure Short( integer eu_type, integer pointer, integer signed )
+	add_member( eu_type, read_name(), MS_SHORT, 2, pointer, signed )
 end procedure
 
-procedure Int( integer pointer, integer signed )
-	add_member( read_type(), read_name(), MS_INT, sizeof( C_INT ), pointer, signed )
+procedure Int( integer eu_type, integer pointer, integer signed )
+	add_member( eu_type, read_name(), MS_INT, sizeof( C_INT ), pointer, signed )
 end procedure
 
-procedure Long( integer pointer, integer signed )
-	add_member( read_type(), read_name(), MS_LONG, sizeof( C_LONG ), pointer, signed )
+procedure Long( integer eu_type, integer pointer, integer signed )
+	add_member( eu_type, read_name(), MS_LONG, sizeof( C_LONG ), pointer, signed )
 end procedure
 
-procedure LongLong( integer pointer, integer signed )
-	add_member( read_type(), read_name(), MS_LONGLONG, sizeof( C_LONGLONG ), pointer, signed )
+procedure LongLong( integer eu_type, integer pointer, integer signed )
+	add_member( eu_type, read_name(), MS_LONGLONG, sizeof( C_LONGLONG ), pointer, signed )
 end procedure
 
-procedure FloatingPoint( integer fp_type, integer pointer )
-	token type_tok = read_type()
+procedure FloatingPoint( integer eu_type, integer fp_type, integer pointer )
 	token name_tok = read_name()
 	integer size
 	switch fp_type do
@@ -390,18 +379,16 @@ procedure FloatingPoint( integer fp_type, integer pointer )
 				size = 16
 			end ifdef
 	end switch
-	add_member( type_tok, name_tok, fp_type, size, pointer )
+	add_member( eu_type, name_tok, fp_type, size, pointer )
 end procedure
 
-procedure Object( integer pointer, integer signed )
-	token type_tok = read_type()
+procedure Object( integer eu_type, integer pointer, integer signed )
 	token name_tok = read_name()
 	
-	add_member( type_tok, name_tok, MS_OBJECT, sizeof( E_OBJECT ), pointer, signed )
+	add_member( eu_type, name_tok, MS_OBJECT, sizeof( E_OBJECT ), pointer, signed )
 end procedure
 
 procedure MemStruct_member( token memstruct_tok, integer pointer, integer fwd = 0 )
-	token type_tok = read_type()
 	token name_tok = read_name()
 	integer size = 0
 	
@@ -411,7 +398,7 @@ procedure MemStruct_member( token memstruct_tok, integer pointer, integer fwd = 
 	else
 		size = SymTab[memstruct_tok[T_SYM]][S_MEM_SIZE]
 	end if
-	add_member( type_tok, name_tok, memstruct_tok, size, pointer )
+	add_member( 0, name_tok, memstruct_tok, size, pointer )
 	
 	
 end procedure

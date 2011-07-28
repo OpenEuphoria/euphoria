@@ -59,7 +59,7 @@ memstruct symtab_entry
 	char scope
 	unsigned char file_no
 	unsigned char dummy
-	int as token_id token
+	token_id as int token
 	pointer char name
 	U u
 end memstruct
