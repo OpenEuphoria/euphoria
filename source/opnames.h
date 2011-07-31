@@ -228,5 +228,5 @@ static char *opnames[] = {
 	"MEMSTRUCT_MINUS",
 	"MEMSTRUCT_MULTIPLY",
 	"MEMSTRUCT_DIVIDE",
-	"MEMSTRUCT_AS"
+	"MEM_TYPE_CHECK"
 };

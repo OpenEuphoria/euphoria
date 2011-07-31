@@ -613,7 +613,7 @@ procedure quit_after_error()
 	abort(1)
 end procedure
 
-procedure RTFatalType(integer x)
+procedure RTFatalType(integer x, integer member = 0 )
 -- handle a fatal run-time type-check error
 	sequence msg, v
 	sequence vname
@@ -627,6 +627,9 @@ procedure RTFatalType(integer x)
 		vname = "inlined variable"
 	end if
 	msg = sprintf("type_check failure, %s is ", {vname})
+	if member then
+		a = member
+	end if
 	v = sprint(val[a])
 	if length(v) > 70 - length(vname) then
 		v = v[1..70 - length(vname)]
@@ -2010,6 +2013,16 @@ procedure opTYPE_CHECK()
 	end if
 	pc += 1
 end procedure
+
+procedure opMEM_TYPE_CHECK()
+-- type check for a user-defined type
+-- this always follows a type-call
+	if val[Code[pc-1]] = 0 then
+		RTFatalType(pc + 1, Code[pc - 2])
+	end if
+	pc += 2
+end procedure
+
 
 procedure kill_temp( symtab_index sym )
 	if sym_mode( sym ) = M_TEMP then
@@ -4670,6 +4683,9 @@ procedure do_exec()
 
 			case TYPE_CHECK then
 				opTYPE_CHECK()
+				
+			case MEM_TYPE_CHECK then
+				opMEM_TYPE_CHECK()
 
 			case UMINUS then
 				opUMINUS()

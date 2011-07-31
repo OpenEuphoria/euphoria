@@ -737,6 +737,13 @@ procedure opTYPE_CHECK()
 
 end procedure
 
+procedure opMEM_TYPE_CHECK()
+
+	punary()
+
+end procedure
+
+
 procedure is_an()
     a = Code[pc+1]
     target = Code[pc+2]

@@ -234,6 +234,7 @@ procedure init_op_info()
 	op_info[TIME                ] = { FIXED_SIZE, 2, {}, {1}, {} }
 	op_info[TRACE               ] = { FIXED_SIZE, 2, {}, {}, {} }
 	op_info[TYPE_CHECK          ] = { FIXED_SIZE, 1, {}, {}, {} }
+	op_info[MEM_TYPE_CHECK      ] = { FIXED_SIZE, 2, {}, {}, {} }
 	op_info[UMINUS              ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[UPDATE_GLOBALS      ] = { FIXED_SIZE, 1, {}, {}, {} }
 	op_info[WHILE               ] = { FIXED_SIZE, 3, {2}, {}, {} }

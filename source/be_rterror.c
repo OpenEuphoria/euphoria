@@ -88,6 +88,7 @@ int color_trace = 0;            /* display trace screen in multiple colors */
 int file_trace;                 /* log statements to ctrace.out */
 int trace_enabled = TRUE;       /* flag to disable tracing */
 char *type_error_msg = "\ntype_check failure, ";   /* changeable message */
+char *type_check_sym = NULL;    /* used for memstruct type check errors */
 
 /*******************/
 /* Local variables */
@@ -1194,7 +1195,11 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 			}
 			else {
 				sf_output(type_error_msg); // test
-				snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "%s is ", s_ptr->name);
+				if( type_check_sym == NULL ){
+					type_check_sym = s_ptr->name;
+				}
+				snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "%s is ", type_check_sym);
+				
 				TPTempBuff[TPTEMP_BUFF_SIZE-1] = 0;
 				sf_output(TPTempBuff);
 				if (screen_err_out)
@@ -1406,6 +1411,15 @@ void CleanUpError(char *msg, symtab_ptr s_ptr, ...)
 	va_start(ap, s_ptr);
 	CleanUpError_va(msg, s_ptr, ap);
 	va_end(ap);
+}
+
+void RTFatalMemType(intptr_t *pc, intptr_t member){
+	symtab_ptr s_ptr;
+	tpc = pc; /* points within the offending assignment/parm setting */
+	s_ptr = *(symtab_ptr *)pc;
+	type_check_sym = ((symtab_ptr)member)->name;
+	CleanUpError(NULL, s_ptr);
+
 }
 
 void RTFatalType(intptr_t *pc)

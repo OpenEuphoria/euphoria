@@ -236,7 +236,8 @@ export constant
 	MEMSTRUCT_MINUS     = 225,
 	MEMSTRUCT_MULTIPLY  = 226,
 	MEMSTRUCT_DIVIDE    = 227,
-	MAX_OPCODE          = 227
+	MEM_TYPE_CHECK      = 228,
+	MAX_OPCODE          = 228
 
 
 -- adding new opcodes possibly affects reswords.h (C-coded backend),

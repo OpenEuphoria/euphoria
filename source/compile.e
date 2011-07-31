@@ -3510,7 +3510,7 @@ procedure opRHS_SLICE()
 	pc += 5
 end procedure
 
-procedure opTYPE_CHECK()
+procedure opTYPE_CHECK() -- MEM_TYPE_CHECK
 -- type check for a user-defined type
 -- this always follows a type-call
 -- The Translator only performs the type-call and check,
@@ -3529,7 +3529,13 @@ procedure opTYPE_CHECK()
 		c_stmt0("}\n")
 		c_stmt0("}\n")
 	end if
-	pc += 1
+	
+	if Code[pc] = TYPE_CHECK then
+		pc += 1
+	else
+		pc += 2
+	end if
+	
 end procedure
 
 function is_temp( symtab_index sym )
@@ -6872,9 +6878,9 @@ export procedure init_opcodes()
 			case "TRACE" then
 				operation[i] = routine_id("opTRACE")
 
-			case "TYPE_CHECK" then
+			case "TYPE_CHECK", "MEM_TYPE_CHECK" then
 				operation[i] = routine_id("opTYPE_CHECK")
-
+			
 			case "UMINUS" then
 				operation[i] = routine_id("opUMINUS")
 

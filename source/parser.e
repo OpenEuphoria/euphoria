@@ -1480,6 +1480,44 @@ end procedure
 
 forward_expr = routine_id("Expr")
 
+procedure emit_mem_type_check( symtab_index var, symtab_index type_sym, symtab_index member_sym, symtab_index pointer, integer op )
+	if op != MEMSTRUCT_ASSIGN then
+		-- We have to read the value first via PEEK_MEMBER
+		emit_opnd( pointer )
+		emit_opnd( member_sym )
+		emit_op( PEEK_MEMBER )
+	else
+		emit_opnd( var )
+	end if
+	
+	op_info1 = type_sym
+	emit_or_inline()
+	emit_opnd( member_sym )
+	emit_op(MEM_TYPE_CHECK)
+end procedure
+
+procedure MemTypeCheck( symtab_index var, symtab_index member_sym, symtab_index pointer, integer op )
+	integer type_sym = SymTab[member_sym][S_MEM_TYPE]
+	if 0 = type_sym then
+		-- no type for this member
+		return
+	end if
+	
+	if TRANSLATE then
+		if OpTypeCheck then
+			if SymTab[type_sym][S_EFFECT] then
+				-- only call those with side effects
+				emit_mem_type_check( var, type_sym, member_sym, pointer, op )
+			end if
+		end if
+	else
+		if OpTypeCheck then
+			emit_mem_type_check( var, type_sym, member_sym, pointer, op )
+		end if
+	end if
+	
+end procedure
+
 procedure TypeCheck(symtab_index var)
 -- emit code to type-check a var (after it has been assigned-to)
 	integer which_type
@@ -1696,7 +1734,9 @@ procedure Assignment(token left_var)
 					MEMSTRUCT_MULTIPLY, MEMSTRUCT_DIVIDE then
 				
 				Expr()
+				integer top = length( Code )
 				emit_op( assign_op )
+				MemTypeCheck( Code[$], Code[$-1], Code[top], assign_op )
 				break "subs_if"
 			case else
 				InitCheck(left_sym, TRUE)

@@ -69,11 +69,11 @@ void ExternalDebugScreen(){
 }
 
 void ExternalEraseSymbol( symtab_ptr sym ){
-	((void (*)())UserEraseSymbol)( box_ptr( sym ) );
+	((void (*)())UserEraseSymbol)( box_ptr( (uintptr_t) sym ) );
 }
 
 void ExternalErasePrivates( symtab_ptr proc_sym ){
-	((void (*)())UserErasePrivates)( box_ptr( proc_sym ) );
+	((void (*)())UserErasePrivates)( box_ptr( (uintptr_t) proc_sym ) );
 }
 
 // debugger interface

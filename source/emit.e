@@ -1708,6 +1708,13 @@ export procedure emit_op(integer op)
 		c = Pop()
 		assignable = FALSE
 
+	case MEM_TYPE_CHECK then
+		-- 1 input, 0 output
+		emit_opcode(op)
+		c = Pop()
+		emit_addr( c )
+		assignable = FALSE
+	
 	-- 0 inputs, 1 output, special op
 	case DOLLAR then
 		if current_sequence[$] < 0 or SymTab[current_sequence[$]][S_SCOPE] = SC_UNDEFINED then
@@ -1824,6 +1831,7 @@ export procedure emit_op(integer op)
 		c = Pop() -- new value
 		b = Pop() -- member sym
 		a = Pop() -- pointer
+		
 		emit_opcode( op )
 		emit_addr( a )
 		emit_addr( b )

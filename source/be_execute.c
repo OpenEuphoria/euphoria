@@ -1013,6 +1013,7 @@ void code_set_pointers(intptr_t **code)
 			case DEREF_TEMP:
 			case REF_TEMP:
 			case NOVALUE_TEMP:
+			case MEM_TYPE_CHECK:
 				// one operand
 				code[i+1] = SET_OPERAND(code[i+1]);
 				i += 2;
@@ -1845,7 +1846,8 @@ void do_exec(intptr_t *start_pc)
   &&L_MEMSTRUCT_ACCESS, &&L_MEMSTRUCT_ARRAY, &&L_PEEK_MEMBER,
   &&L_MEMSTRUCT_SERIALIZE, &&L_MEMSTRUCT_ASSIGN, &&L_MEMSTRUCT_PLUS,
   &&L_MEMSTRUCT_MINUS, &&L_MEMSTRUCT_MULTIPLY, &&L_MEMSTRUCT_DIVIDE,
-/* 227 (previous) */
+  &&L_MEM_TYPE_CHECK
+/* 228 (previous) */
 
 	};
 #endif
@@ -2515,7 +2517,7 @@ void do_exec(intptr_t *start_pc)
 				BREAK;
 
 			case L_TYPE_CHECK: /* top has TRUE/FALSE */
-			deprintf("case L_TYPE_CHECK:");
+				deprintf("case L_TYPE_CHECK:");
 				/* type check for a user-defined type */
 				/* this always follows a type-call */
 				top = *(object_ptr)pc[-1];
@@ -2539,6 +2541,29 @@ void do_exec(intptr_t *start_pc)
 				}
 				BREAK;
 
+			case L_MEM_TYPE_CHECK:
+				deprintf("case L_MEM_TYPE_CHECK:");
+				top = *(object_ptr)pc[-1];
+				pc += 2;
+				if (top == ATOM_1) {
+					thread();
+					BREAK;  /* usual case L_*/
+				}
+				else if (IS_ATOM_INT(top)) {
+					if (top == ATOM_0)
+						RTFatalMemType(pc-4, pc[-1]);
+				}
+				else if (IS_ATOM_DBL(top)) {
+					if (DBL_PTR(top)->dbl == 0.0)
+						RTFatalMemType(pc-4, pc[-1]);
+				}
+				else  {/* sequence */
+					type_error_msg =
+						"\ntype_check failure (type returned a sequence!), ";
+					RTFatalMemType(pc-4, pc[-1]);
+				}
+				BREAK;
+				
 			case L_NOP2:
 			deprintf("case L_NOP2:");
 				thread2();

@@ -4,7 +4,13 @@
 #include <stdint.h>
 
 void RTFatalType(intptr_t *pc)
-#ifdef EUNIX
+#ifdef __GNUC__
+__attribute__ ((noreturn))
+#endif
+;
+
+void RTFatalMemType(intptr_t *pc, intptr_t member)
+#ifdef __GNUC__
 __attribute__ ((noreturn))
 #endif
 ;
@@ -38,7 +44,7 @@ void BadSubscript(object subs, int length);
 void NoValue(symtab_ptr s);
 
 void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap)
-#if defined(EUNIX) || defined(EMINGW)
+#ifdef __GNUC__
  __attribute__ ((noreturn))
 #else
 #pragma aux CleanUpError_va aborts;
