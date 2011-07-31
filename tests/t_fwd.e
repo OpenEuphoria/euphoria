@@ -112,4 +112,17 @@ end procedure
 ticket_560()
 test_pass( "ticket 560 issue is resolved" )
 
+include std/math.e
+procedure ticket_694()
+	object x 
+	x = {0,1,2,3,4} 
+	
+	if sum(x < 1 or x > 3) then 
+		test_pass( "don't short circuit inside of forward calls")
+	else 
+		test_fail( "don't short circuit inside of forward calls")
+	end if 
+end procedure
+ticket_694()
+
 test_report()

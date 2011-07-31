@@ -1,6 +1,6 @@
 t_c_ns_builtin.e:3
 <0074>:: Errors resolving the following references:
-	'puts' was not declared in '../include/std/unittest.e'.
+	'puts' (t_c_ns_builtin.e:3) was not declared in '../include/std/unittest.e'.
 
 ut:puts( 1, "This should crash\n" )
       ^

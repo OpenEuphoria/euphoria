@@ -5,10 +5,12 @@
 * [[ticket:664]] Symbol resolution errors now report whether you use a symbol is not declared or is declared more than once, 
 	or from not declared in the file you specify (via a namespace), or not a builtin.  When declared more than once, you are now
 	told where the symbols were declared.
-* [[ticket:661]] minGW euc source/buildsys.e now links to comctrl32 not comdlg32 		
 * [[ticket:602]] socket create documentation corrected to state that it returns an error code on failure.
 * [[ticket:672]] fixed dll creation under Windows.
 * [[ticket:687]] fixed source file distribution.
+* [[ticket:681]] fixed error reporting when the error is the last symbol on a line, but that might be part of
+  and expression that carries over to the next line
+* [[ticket:694]] do not short circuit inside of forward function calls
 
 === Enhancements
 

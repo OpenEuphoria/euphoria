@@ -386,7 +386,7 @@ echo BUILDDIR=$BUILDDIR >> "$PREFIX"${CONFIG_FILE}
 if [ "$USECYPPATH" = "true" ]; then
 	export CYPTRUNKDIR=`cygpath -a -m $TRUNKDIR`
 	export CYPBUILDDIR=`cygpath -a -m $BUILDDIR`
-elif [ "$UNAME_SYSTEM" = "WINDOWS" ]; then
+else
 	# MinGW
 	export CYPTRUNKDIR=$TRUNKDIR
 	export CYPBUILDDIR=$BUILDDIR
@@ -408,7 +408,7 @@ echo -eudir $CYPTRUNKDIR >> $BUILDDIR/eu.cfg
 echo "[translate]" >> $BUILDDIR/eu.cfg
 echo "-com" $CYPTRUNKDIR >> $BUILDDIR/eu.cfg
 echo "-lib" $CYPBUILDDIR/eu.a >> $BUILDDIR/eu.cfg
-echo "[bind]"  >> $CYPBUILDDIR/eu.cfg
+echo "[bind]"  >> $BUILDDIR/eu.cfg
 echo "-eub" $CYPBUILDDIR/eub >> $BUILDDIR/eu.cfg
 
 cp $BUILDDIR/eu.cfg $TRUNKDIR/source/eu.cfg

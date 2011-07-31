@@ -178,6 +178,7 @@ export procedure set_line( integer ref, integer line_no, sequence this_line, int
 	forward_references[ref][FR_LINE] = line_no
 	forward_references[ref][FR_THISLINE] = this_line
 	forward_references[ref][FR_BP] = bp
+	
 end procedure
 
 sequence fwd_private_sym  = {}
@@ -915,24 +916,24 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 							if ref[FR_QUALIFIED] != -1 then
 								if ref[FR_QUALIFIED] > 0 then
 									-- some qualified filename
-									errloc = sprintf("\t\'%s\' was not declared in \'%s\'.\n", 
-										{ref[FR_NAME], 
+									errloc = sprintf("\t\'%s\' (%s:%d) was not declared in \'%s\'.\n", 
+										{ref[FR_NAME], abbreviate_path(known_files[ref[FR_FILE]]), ref[FR_LINE],
 											find_replace('\\',abbreviate_path(known_files[ref[FR_QUALIFIED]]),'/')})
 								else
 									-- eu namespace non-file
-									errloc = sprintf("\t\'%s\' is not a builtin.\n", 
-										{ref[FR_NAME]})
+									errloc = sprintf("\t\'%s\' (%s:%d) is not a builtin.\n", 
+										{ref[FR_NAME], abbreviate_path(known_files[ref[FR_FILE]]), ref[FR_LINE]})
 								end if		
 							else
 								-- unqualified
-								errloc = sprintf("\t\'%s\' has not been declared.\n", 
-									{ref[FR_NAME]})
+								errloc = sprintf("\t\'%s\' (%s:%d) has not been declared.\n", 
+									{ref[FR_NAME], abbreviate_path(known_files[ref[FR_FILE]]), ref[FR_LINE]})
 							end if
 						case SC_MULTIPLY_DEFINED then
 							sequence syms = tok[THESE_GLOBALS] -- there should be no forward references in here.
 							syms = custom_sort(routine_id("file_name_based_symindex_compare"), syms,, ASCENDING)
-							errloc = sprintf("\t\'%s\' has been declared more than once.\n", 
-								{ref[FR_NAME]} )
+							errloc = sprintf("\t\'%s\' (%s:%d) has been declared more than once.\n", 
+								{ref[FR_NAME], abbreviate_path(known_files[ref[FR_FILE]]), ref[FR_LINE] } )
 							for si = 1 to length(syms) do
 								symtab_index s = syms[si] 
 								if equal(ref[FR_NAME], sym_name(s)) then
