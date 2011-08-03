@@ -68,20 +68,26 @@ fi
 
 if test $UNAME_SYSTEM = "Linux"; then
 	EHOST=ELINUX
+	TARGET=LINUX
 elif test $UNAME_SYSTEM = "WINDOWS"; then
 	EHOST=EWINDOWS
+	TARGET=WINDOWS
 elif test $UNAME_SYSTEM = "OpenBSD"; then
 	EHOST=OPENBSD
+	TARGET=EOPENBSD
 	EBSD=1
 elif test $UNAME_SYSTEM = "NetBSD"; then
 	EHOST=NETBSD
+	TARGET=EBSD
 	EBSD=1
 else
 	EBSD=1
 	if test $UNAME_SYSTEM = "Darwin"; then
 		EHOST=EOSX
+		TARGET=EOSX
 	else
 		EHOST=EBSD
+		TARGET=EBSD
 	fi
 fi
 TARGET=$EHOST
