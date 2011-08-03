@@ -90,7 +90,7 @@ else
 		TARGET=EBSD
 	fi
 fi
-TARGET=$EHOST
+
 echo EHOST=$EHOST >>  "$PREFIX"${CONFIG_FILE}
 
 # default use source
