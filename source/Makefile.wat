@@ -504,11 +504,22 @@ testeu : .SYMBOLIC  $(TRUNKDIR)\tests\ecp.dat
 
 !endif #EUPHORIA
 
-test : .SYMBOLIC $(TRUNKDIR)\tests\ecp.dat
+..\tests\unittest.log : ..\tests\ecp.dat
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR) 
-	$(EUTEST) $(TEST_EXTRA) $(VERBOSE_TESTS) -i ..\include -cc wat -eui $(FULLBUILDDIR)\eui.exe -euc $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -bind $(FULLBUILDDIR)\eubind.exe -eub $(BUILDDIR)\eub.exe $(LIST) $(TESTFILE)
+	$(EUTEST) -log $(TEST_EXTRA) $(VERBOSE_TESTS) -cc wat -eui $(FULLBUILDDIR)\eui.exe -euc $(FULLBUILDDIR)\euc.exe -bind $(FULLBUILDDIR)\eubind.exe $(LIST) $(TESTFILE)
 	cd ..\source
+	
+
+..\tests\test-report-$(CONFIG).html ..\tests\test-report-$(CONFIG).txt : ..\tests\unittest.log
+	cd ..\tests
+	$(EUTEST) -process-log -html > test-report-$(CONFIG).html
+	cd ..\source
+
+test : .SYMBOLIC 
+	# make log whether it is up to date or not.
+	wmake -a ..\tests\unittest.log
+	
 
 coverage : .SYMBOLIC code-page-db
 	cd ..\tests
@@ -517,15 +528,8 @@ coverage : .SYMBOLIC code-page-db
 	-del ecp.dat
 	cd ..\source
 
-report: .SYMBOLIC
-	$(MAKE) ..\reports\report.html
+report: .SYMBOLIC ..\tests\test-report-$(CONFIG).html
 	
-..\reports\report.html: $(EU_ALL_FILES)
-	cd ..\tests
-	set EUCOMPILEDIR=$(TRUNKDIR) 
-	-$(EUTEST) $(VERBOSE_TESTS) -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -euc $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -log $(LIST)
-	$(EUTEST) -process-log -html > ..\reports\report.html
-	cd ..\source
 
 tester: .SYMBOLIC 
 	wmake -h $(BUILDDIR)\eutestdr\eutest.exe BUILD_TOOLS=1 OBJDIR=eutestdr
@@ -742,14 +746,14 @@ $(BUILDDIR)\$(OBJDIR)\main-.c : $(EU_TARGET)ex $(BUILDDIR)\$(OBJDIR)\back $(EU_T
 	-$(RM) $(TRUNKDIR)\source\init-.c
 	-$(RM) $(TRUNKDIR)\source\main-.c
 	cd  $(BUILDDIR)\$(OBJDIR)
-	$(EC) $(TRANSDEBUG) -nobuild $(TRANS_CC_FLAG) -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) -c $(TRUNKDIR)\source\eu.cfg $(TRUNKDIR)\source\$(EU_TARGET)ex
+	$(EC) $(TRANSDEBUG) -nobuild $(TRANS_CC_FLAG) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) -c $(BUILDDIR)\eu.cfg $(TRUNKDIR)\source\$(EU_TARGET)ex
 	cd $(TRUNKDIR)\source
 
 $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex  $(BUILDDIR)\$(OBJDIR)\back $(EU_TRANSLATOR_FILES)
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\back\*.*
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\*.*
 	cd $(BUILDDIR)\$(OBJDIR)
-	$(EC)  $(TRANSDEBUG) -nobuild $(TRANS_CC_FLAG) -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) -c $(TRUNKDIR)\source\eu.cfg $(TRUNKDIR)\source\$(EU_TARGET)ex
+	$(EC)  $(TRANSDEBUG) -nobuild $(TRANS_CC_FLAG) -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) -c $(BUILDDIR)\eu.cfg $(TRUNKDIR)\source\$(EU_TARGET)ex
 	cd $(TRUNKDIR)\source
 !else
 # OBJDIR doesn't exist
