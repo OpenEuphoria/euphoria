@@ -15,14 +15,14 @@ SET DISABLED_MANAGED_MEM=
 SET SCP_CLIENT=pscp -C
 SET SSH_CLIENT=plink -C
 SET HG=hg
-
+SET DEBUG=
 rem ============================================================
 rem Be sure to start with a blank config.wat
 rem by simply writing in a comment
 rem ============================================================
 
 echo # Configuration for Watcom > config.wat
-echo ASSERT=1 >> config.wat
+SET ASSERT=1
 
 rem ============================================================
 rem Detect some parameters
@@ -78,7 +78,7 @@ IF "%1" =="--plat" (
 	GOTO EndLoop
 )
 IF "%1" =="--debug" (
-	echo DEBUG=1 >> config.wat
+	SET DEBUG=1
 	GOTO EndLoop
 )
 
@@ -110,7 +110,7 @@ IF "%1" == "--align4" (
 )
 
 IF "%1" == "--noassert" (
-	echo ASSERT=0 >> config.wat
+	set ASSERT=0
 	GOTO EndLoop
 )
 
@@ -178,10 +178,14 @@ rem ============================================================
 
 :Continue
 
+echo ASSERT=%ASSERT% >> config.wat
 echo SCP=%SCP_CLIENT% >> config.wat
 echo SSH=%SSH_CLIENT% >> config.wat
 echo HG=%HG% >> config.wat
 
+if "%DEBUG%" == "1" (
+	echo DEBUG=1 >> config.wat
+)
 if "%HAS_EUBIN%" == "1" (
 	SET NOEU=
 ) else (
@@ -302,9 +306,13 @@ echo -i %TRUNKDIR%\include >> %BUILDDIR%\eu.cfg
 echo -eudir %TRUNKDIR% >> %BUILDDIR%\eu.cfg
 echo [translate] >> %BUILDDIR%\eu.cfg
 echo -com %TRUNKDIR% >> %BUILDDIR%\eu.cfg
-echo -lib %BUILDDIR%\eu.lib >> %BUILDDIR%\eu.cfg
-echo [bind]  >> %BUILDDIR%\eu.cfg
-echo -eub %BUILDDIR%\eub >> %BUILDDIR%\eu.cfg
+if "%DEBUG%" == "1" (
+	echo -lib %FULL_BUILDDIR%\eudbg.lib >> %BUILDDIR%\eu.cfg
+) else (
+	echo -lib %FULL_BUILDDIR%\eu.lib >> %BUILDDIR%\eu.cfg
+)
+echo [bind]  >> %FULL_BUILDDIR%\eu.cfg
+echo -eub %FULL_BUILDDIR%\eub.exe >> %BUILDDIR%\eu.cfg
 
 copy %BUILDDIR%\eu.cfg %TRUNKDIR%\source\eu.cfg
 

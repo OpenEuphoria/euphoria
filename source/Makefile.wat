@@ -504,21 +504,16 @@ testeu : .SYMBOLIC  $(TRUNKDIR)\tests\ecp.dat
 
 !endif #EUPHORIA
 
-..\tests\unittest.log : ..\tests\ecp.dat
+..\tests\test-report-$(CONFIG).html : $(TRUNKDIR)\tests\ecp.dat .always
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR) 
-	$(EUTEST) -log $(TEST_EXTRA) $(VERBOSE_TESTS) -cc wat -eui $(FULLBUILDDIR)\eui.exe -euc $(FULLBUILDDIR)\euc.exe -bind $(FULLBUILDDIR)\eubind.exe $(LIST) $(TESTFILE)
+	-$(EUTEST) -log $(TEST_EXTRA) $(VERBOSE_TESTS) -cc wat -eui $(FULLBUILDDIR)\eui.exe -euc $(FULLBUILDDIR)\euc.exe -i $(TRUNKDIR)\include -bind $(FULLBUILDDIR)\eubind.exe $(LIST) $(TESTFILE)
+	$(EUTEST) -process-log -html > test-report-$(CONFIG).html
 	cd ..\source
 	
 
-..\tests\test-report-$(CONFIG).html ..\tests\test-report-$(CONFIG).txt : ..\tests\unittest.log
-	cd ..\tests
-	$(EUTEST) -process-log -html > test-report-$(CONFIG).html
-	cd ..\source
+test : .SYMBOLIC  ..\tests\test-report-$(CONFIG).html
 
-test : .SYMBOLIC 
-	# make log whether it is up to date or not.
-	wmake -a ..\tests\unittest.log
 	
 
 coverage : .SYMBOLIC code-page-db
