@@ -60,7 +60,6 @@ Source: "{app}\include\*.*"; DestDir: "{code:GetBackupPath}\include"; Flags: con
 Source: "{app}\include\std\*.*"; DestDir: "{code:GetBackupPath}\include\std"; Flags: confirmoverwrite external recursesubdirs skipifsourcedoesntexist
 Source: "{app}\include\euphoria\*.*"; DestDir: "{code:GetBackupPath}\include\euphoria"; Flags: confirmoverwrite external skipifsourcedoesntexist
 ; doc
-Source: "{app}\doc\*.*"; DestDir: "{code:GetBackupPath}\doc"; Flags: confirmoverwrite external recursesubdirs skipifsourcedoesntexist
 Source: "{app}\docs\*.*"; DestDir: "{code:GetBackupPath}\docs"; Flags: confirmoverwrite external recursesubdirs skipifsourcedoesntexist
 ; htm
 Source: "{app}\html\*.*"; DestDir: "{code:GetBackupPath}\html"; Flags: confirmoverwrite external recursesubdirs skipifsourcedoesntexist
@@ -131,16 +130,16 @@ Source: "cleanbranch\bin\*.exw"; DestDir: {app}\bin\; Flags: ignoreversion; Comp
 Source: "cleanbranch\demo\*.*"; DestDir: {app}\demo\; Flags: ignoreversion recursesubdirs; Components: comp_demos
 
 ; Docs
-Source: "..\..\build\*.pdf"; DestDir: {app}\docs\; Flags: ignoreversion; Components: comp_docs
+Source: "..\..\build\euphoria.pdf"; DestDir: {app}\docs\; Flags: ignoreversion; Components: comp_docs
 Source: "..\..\build\html\*.*"; DestDir: {app}\docs\html\; Flags: ignoreversion recursesubdirs; Components: comp_docs
 
 ; Includes
 Source: "cleanbranch\include\*.*"; DestDir: {app}\include\; Flags: ignoreversion recursesubdirs; Components: comp_main
 
 ; Sources
-Source: "..\..\source\*.*"; DestDir: {app}\source\; Flags: ignoreversion; Components: comp_source
-Source: "..\..\source\codepage\*.*"; DestDir: {app}\source\; Flags: ignoreversion; Components: comp_source
-Source: "..\..\source\pcre\*.*"; DestDir: {app}\source\; Flags: ignoreversion; Components: comp_source
+Source: "cleanbranch\source\*.*"; DestDir: {app}\source\; Flags: ignoreversion; Components: comp_source
+Source: "cleanbranch\source\codepage\*.*"; DestDir: {app}\source\codepage; Flags: ignoreversion; Components: comp_source
+Source: "cleanbranch\source\pcre\*.*"; DestDir: {app}\source\pcre; Flags: ignoreversion; Components: comp_source
 
 ; Test
 Source: "cleanbranch\tests\*.*"; DestDir: {app}\tests\; Flags: ignoreversion recursesubdirs; Components: comp_tests

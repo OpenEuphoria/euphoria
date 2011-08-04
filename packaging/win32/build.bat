@@ -6,6 +6,11 @@ REM --
 
 IF [%1] == [] GOTO NoISSFile
 
+REM --
+REM -- Ensure that we set the branch value
+REM --
+
+IF [%2] == [] GOTO NoTag
 
 REM --
 REM -- If the tag has already been checked out, then just skip to the
@@ -15,7 +20,8 @@ REM --
 CD cleanbranch
 IF %ERRORLEVEL% EQU 1 GOTO CheckOut
 CD ..
-rmdir /s/q cleanbranch
+hg update -r %2
+GOTO DoBuild
 
 :Checkout
 
@@ -24,7 +30,7 @@ REM -- Checkout a clean copy of our repository
 REM --
 
 echo Performing a checkout...
-hg archive cleanbranch
+hg clone ..\.. cleanbranch
 
 GOTO DoBuild
 
@@ -34,6 +40,7 @@ REM --
 
 :DoBuild
 echo Ensuring binaries are compressed
+copy ..\..\source\build\*.exe ..\..\bin
 upx ..\..\bin\creole.exe
 upx ..\..\bin\eub.exe
 upx ..\..\bin\eubind.exe
@@ -53,11 +60,12 @@ ISCC.exe /Q %1
 
 GOTO Done
 
+:NoTag
 :NoISSFile
 echo.
 echo ** ERROR **
 echo.
-echo Usage: build.bat package-name.iss
+echo Usage: build.bat package-name.iss tag
 echo.
 
 :Done
