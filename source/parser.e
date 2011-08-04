@@ -1040,7 +1040,6 @@ procedure Forward_call(token tok, integer opcode = PROC_FORWARD )
 		end switch
 	end while
 
-	integer fc_pc = length( Code ) + 1
 	emit_opnd( args )
 
 	op_info1 = proc
@@ -1490,8 +1489,16 @@ procedure emit_mem_type_check( symtab_index var, symtab_index type_sym, symtab_i
 		emit_opnd( var )
 	end if
 	
-	op_info1 = type_sym
-	emit_or_inline()
+	if type_sym > 0 then
+		op_info1 = type_sym
+		emit_or_inline()
+	else
+		-- we haven't resolved the type yet!
+		integer val_sym = Pop()
+		integer ref = new_forward_reference( MEM_TYPE_CHECK, type_sym, TYPE_CHECK_FORWARD )
+		Code &= { TYPE_CHECK_FORWARD, val_sym, OpTypeCheck }
+	end if
+	
 	emit_opnd( member_sym )
 	emit_op(MEM_TYPE_CHECK)
 end procedure

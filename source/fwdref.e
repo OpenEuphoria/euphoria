@@ -529,13 +529,22 @@ end function
 
 procedure patch_forward_type( token tok, integer ref )
 	sequence fr = forward_references[ref]
-	sequence syms = fr[FR_DATA]
-	for i = 2 to length( syms ) do
-		SymTab[syms[i]][S_VTYPE] = tok[T_SYM]
-		if TRANSLATE then
-			SymTab[syms[i]][S_GTYPE] = CompileType(tok[T_SYM])
+	if sequence( fr[FR_DATA] ) then
+		sequence syms = fr[FR_DATA]
+		
+		if fr[FR_OP] = MEMSTRUCT then
+			for i = 2 to length( syms ) do
+				SymTab[syms[i]][S_MEM_TYPE] = tok[T_SYM]
+			end for
+		else
+			for i = 2 to length( syms ) do
+				SymTab[syms[i]][S_VTYPE] = tok[T_SYM]
+				if TRANSLATE then
+					SymTab[syms[i]][S_GTYPE] = CompileType(tok[T_SYM])
+				end if
+			end for
 		end if
-	end for
+	end if
 	resolved_reference( ref )
 end procedure
 
@@ -584,6 +593,23 @@ procedure patch_forward_case( token tok, integer ref )
 	resolved_reference( ref )
 end procedure
 
+procedure patch_forward_mem_type_check( token tok, integer ref )
+	integer which_type = tok[T_SYM]
+	sequence fr = forward_references[ref]
+	set_code( ref )
+	
+	integer 
+		c   = NewTempSym(),
+		pc  = fr[FR_PC],
+		var = Code[pc+1]
+	
+	SymTab[fr[FR_SUBPROG]][S_STACK_SPACE] += 1
+	replace_code( { PROC, which_type, var, c }, pc, pc+2, fr[FR_SUBPROG] )
+	
+	reset_code()
+	
+	resolved_reference( ref )
+end procedure
 
 procedure patch_forward_type_check( token tok, integer ref )
 	sequence fr = forward_references[ref]
@@ -929,6 +955,10 @@ function resolve_file( sequence refs, integer report_errors, integer unincluded_
 			
 			case MEMSTRUCT then
 				patch_forward_memstruct( tok, ref )
+			
+			case MEM_TYPE_CHECK then
+				patch_forward_mem_type_check( tok, ref )
+				
 			case else
 				-- ?? what is it?
 				InternalErr( 263, {fr[FR_TYPE], fr[FR_NAME]})

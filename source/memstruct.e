@@ -81,7 +81,15 @@ export procedure MemStruct_declaration( integer scope )
 				if SC_UNDEFINED = SymTab[tok[T_SYM]][S_SCOPE] then
 					-- forward reference
 					
-					MemStruct_member( tok, pointer, 1 )
+					token nt = next_token()
+					if nt[T_ID] = MS_AS then
+						-- a forward reference to a type
+						integer ref = new_forward_reference( TYPE, tok[T_SYM], MEMSTRUCT )
+						eu_type = -ref
+						break "token"
+					else
+						MemStruct_member( tok, pointer, 1 )
+					end if
 					
 				else
 					CompileErr( 355 )
@@ -335,6 +343,10 @@ procedure add_member( integer type_sym, token name_tok, object mem_type, integer
 	SymTab[sym][S_MEM_SIGNED]  = signed
 	SymTab[sym][S_MEM_PARENT]  = mem_struct
 	SymTab[sym][S_MEM_TYPE]    = type_sym
+	
+	if type_sym < 0 then
+		register_forward_type( sym, -type_sym )
+	end if
 	
 	last_sym = sym
 end procedure
