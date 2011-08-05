@@ -11,6 +11,7 @@
 * [[ticket:681]] fixed error reporting when the error is the last symbol on a line, but that might be part of
   and expression that carries over to the next line
 * [[ticket:694]] do not short circuit inside of forward function calls
+* [[ticket:699]] Include public and export symbols in ex.err output
 
 === Enhancements
 

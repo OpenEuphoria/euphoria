@@ -1056,11 +1056,12 @@ static void DumpGlobals(IFILE f)
 
 	prev_file_no = -1;
 	sym = TopLevelSub->next;
-	iprintf(f, "\n\nGlobal & Local Variables\n");
+	iprintf(f, "\n\nPublic & Export & Global & Local Variables\n");
 	while (sym != NULL) {
 		if (sym->token == VARIABLE && 
 			sym->mode == M_NORMAL &&
 			(sym->scope == S_LOCAL || sym->scope == S_GLOBAL ||
+			 sym->scope == S_PUBLIC || sym->scope == S_EXPORT ||
 			 sym->scope == S_GLOOP_VAR)) {
 			if (sym->file_no != prev_file_no) {
 				prev_file_no = sym->file_no;
