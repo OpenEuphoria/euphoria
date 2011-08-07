@@ -16,6 +16,7 @@ include std/search.e
 include std/convert.e
 include std/filesys.e
 
+include literal_set.e as literal_set
 include global.e
 include platform.e
 include emit.e
@@ -3918,7 +3919,13 @@ procedure SubProg(integer prog_type, integer scope)
 			putback(i1_sym)
 			putback(keyfind("object",-1))
 			putback({LEFT_ROUND,0})
-			
+			sequence enum_names = enum_syms
+			for i = 1 to length(enum_syms) do
+				enum_names[i] = sym_name(enum_syms[i])
+			end for
+			literal_set ls
+			ls = literal_set:new(sym_name(prog_name[T_SYM]), , {seq_symbol,enum_names})
+			literal_sets = append(literal_sets,ls)
 			LeaveTopLevel()
 		end if
 	end if

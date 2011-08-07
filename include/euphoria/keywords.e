@@ -43,6 +43,7 @@ public constant keywords = {
 	"include",
 	"label",
 	"loop",
+	"name_of",
 	"namespace",
 	"not",
 	"or",

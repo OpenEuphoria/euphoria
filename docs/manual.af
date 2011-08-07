@@ -78,6 +78,7 @@ end ifdef
 :<<LEVELTOC depth=2>>
 
 ../docs/refman_2.txt
+../docs/literals.txt
 
 ########
 :%%output=syntax
