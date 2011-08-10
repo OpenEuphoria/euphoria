@@ -1,0 +1,82 @@
+== Alternative Literal Sets
+
+=== The name_of Keyword
+
+There are times when a number, is better represented in some way other than using digits.  A number 3 is always just 3, whether we pass it to a DirectX function as a set of two flags or we compare it to the value of platform() to see if we are running on LINUX.  However, the representation "3" is not the best way to represent the value in the previous two cases.  This is why we have constants, and enumerated types.
+ 
+There are times when a programmer wants a way to display the variable names to the user, or in debugging, or in error reporting.  Having types keyed to some set of literals can also help catch at parse time a class of errors that would be missed by other forms of syntax checking.  The ##name_of## key word gives the programmer a way of converting a variable and its value to a literal that corresponds to its type.
+
+Example 1:
+<eucode>
+
+type enum DDENUM by * 2
+    DDENUM_ATTACHEDSECONDARYDEVICES,
+    DDENUM_DETACHEDSECONDARYDEVICES,
+    DDENUM_NONDISPLAYDEVICES
+end type
+
+DDENUM dde_num = DDENUM_ATTACHEDSECONDARYDEVICES
+sequence s = name_of(dde_num)
+-- s is "DDENUM_ATTACHEDSECONDARYDEVICES"
+integer i = dde_num -- here type data doesn't go into i.
+s = name_of(i)
+-- s is now "1"
+dde_num = or_bits(DDENUM_NONDISPLAYDEVICES,DDENUM_ATTACHEDSECONDARYDEVICES)
+s = name_of(dde_num)
+-- s is now "DDENUM_NONDISPLAYDEVICES,DDENUM_ATTACHEDSECONDARYDEVICES"
+</eucode>
+
+Example 2:
+
+<eucode>
+namespace here
+type enum std_window_response
+--** Abort button was selected.
+IDABORT = 3,
+--** Cancel button was selected.
+IDCANCEL = 2,
+--** Ignore button was selected.
+IDIGNORE = 5,
+--** No button was selected.
+IDNO = 7,
+--** OK button was selected.
+IDOK = 1,
+--** Retry button was selected.
+IDRETRY = 4,
+--** Yes button was selected.
+IDYES = 6     
+end type
+
+std_window_response ok = message_box("This box is a test", "Info", MB_OK)
+ok = message("You clicked " & name_of(ok), "Info", MB_OK)
+-- displays "You clicked IDOK" in a Window.
+</eucode>
+
+
+Example 3:
+
+<eucode>
+integer i = 4
+sequence s = name_of(i)
+-- variables without special handling are given sensible output.
+-- Here s is "4"
+</eucode>
+
+
+=== Literal Mismatch Warning
+
+There are expressions that may be legal in EUPHORIA but do not make any semantic sense.  If you compare,or assign a variable to a constant that is not from its literal set, you will get an warning message.  In the following example, a variable that should be assigned an MS Windows Message Box Response ID is compared to a constant not from its enumerated type.  This produces a warning at parse time unless you disable this 'literal_mismatch'.
+
+<eucode>
+-- The following enum type includes things like IDOK, IDNO, etc...
+std_window_response ok = message_box("This box is a test", "Info", MB_OK)
+ok = message("You clicked " & name_of(ok), "Info", MB_OK)
+-- displays "You clicked IDOK" in a Window.
+if ok != MB_OK then -- WARNING 'literal_mismatch':  here for this code is wrong.  It should be ok != IDOK
+	puts(2,"Error\n")
+end if
+</eucode>
+
+Even though MB_OK is out of the value range of the ID* constants, this is something that can be caught at parse-time rather than during testing.  A preferable time to catch a problem.
+
+
