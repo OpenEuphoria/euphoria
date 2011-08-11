@@ -7,9 +7,11 @@
 	told where the symbols were declared.
 * [[ticket:602]] socket create documentation corrected to state that it returns an error code on failure.
 * [[ticket:672]] fixed dll creation under Windows.
+* [[ticket:687]] fixed source file distribution.
 * [[ticket:681]] fixed error reporting when the error is the last symbol on a line, but that might be part of
   and expression that carries over to the next line
 * [[ticket:694]] do not short circuit inside of forward function calls
+* [[ticket:699]] Include public and export symbols in ex.err output
 
 === Enhancements
 

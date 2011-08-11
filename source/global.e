@@ -251,7 +251,7 @@ export enum
 	MIN,
 	MAX
 
-ifdef E32 then
+ifdef E32 or EU4_0 then
 
 	constant max_int = #3FFFFFFF
 	export constant SIZEOF_POINTER = 4
