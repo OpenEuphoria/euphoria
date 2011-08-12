@@ -3094,7 +3094,7 @@ end procedure
 procedure opSIZEOF()
 	a = Code[pc+1]
 	b = Code[pc+2]
-	val[b] = sizeof( a )
+	val[b] = sizeof( val[a] )
 	pc += 3
 end procedure
 
