@@ -1432,10 +1432,18 @@ export procedure emit_op(integer op)
 		Pop()
 		if op = ADDRESSOF then
 			Push( Code[$-2] )
+			Code = remove( Code, length( Code ) - 3, length( Code ) )
 		else
 			Push( Code[$-1] )
+			for pc = length( Code ) - 8 to 1 by -1 do
+				if Code[pc] = MEMSTRUCT_ACCESS then
+					Code = remove( Code, pc, length( Code ) )
+					exit
+				end if
+			end for
+			
 		end if
-		Code = remove( Code, length( Code ) - 3, length( Code ) )
+		
 		cont11ii(op, FALSE)
 		
 	case SC2_NULL then  -- correct the stack - we aren't emitting anything
