@@ -517,11 +517,27 @@ export procedure opMEMSTRUCT_ASSIGNOP()
 end procedure
 
 export procedure opADDRESSOF()
+	integer
+		ptr    = Code[pc+1],
+		target = Code[pc+2]
+	CDeRef( target )
+	c_stmt("if( IS_ATOM_INT( @ ) ){\n", ptr )
+		c_stmt("@ = @;\n", { target, ptr }, target )
+	c_stmt0("}\n")
+	c_stmt0("else {\n")
+		c_stmt("@ = NewDouble( (eudouble) @ );\n", {target, ptr}, target )
+	c_stmt0( "}\n")
+	SetBBType( target, TYPE_ATOM, {MININT, MAXINT}, TYPE_OBJECT, 0 )
 	
 	pc += 3
 end procedure
 
 export procedure opOFFSETOF()
+	integer
+		member  = Code[pc+1],
+		target  = Code[pc+2]
+	CDeRef( target )
+	c_stmt( sprintf("@ = %d;\n", SymTab[member][S_MEM_OFFSET] ), { target }, target )
 	
 	pc += 3
 end procedure

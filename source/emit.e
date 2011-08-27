@@ -1209,8 +1209,7 @@ export procedure emit_op(integer op)
 
 	-- 1 input, 1 output
 	case RAND, PEEK, PEEK4S, PEEK4U, NOT_BITS, NOT, PEEK8U, PEEK8S, SIZEOF,
-		TASK_STATUS, PEEK2U, PEEK2S, PEEKS, PEEK_STRING, PEEK_POINTER,
-		OFFSETOF then
+		TASK_STATUS, PEEK2U, PEEK2S, PEEKS, PEEK_STRING, PEEK_POINTER then
 		cont11ii(op, TRUE)
 
 	case UMINUS then
@@ -1423,16 +1422,20 @@ export procedure emit_op(integer op)
 					PEEK_MEMBER, MEMSTRUCT_SERIALIZE  then
 		cont21ii(op, FALSE)
 
-	case ADDRESSOF then
+	case ADDRESSOF, OFFSETOF then
 		-- last OP should have been PEEK_MEMBER
-		if Code[$-2] != PEEK_MEMBER then
-			InternalErr("Expected addressof() to replace PEEK_MEMBER")
+		if Code[$-3] != PEEK_MEMBER then
+			InternalErr("Expected to replace PEEK_MEMBER")
 		end if
 		
 		-- We'll replace PEEK_MEMBER with ADDRESSOF
 		Pop()
-		Push( Code[$-1] )
-		Code = remove( Code, length( Code ) - 2, length( Code ) )
+		if op = ADDRESSOF then
+			Push( Code[$-2] )
+		else
+			Push( Code[$-1] )
+		end if
+		Code = remove( Code, length( Code ) - 3, length( Code ) )
 		cont11ii(op, FALSE)
 		
 	case SC2_NULL then  -- correct the stack - we aren't emitting anything

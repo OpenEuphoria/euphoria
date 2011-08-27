@@ -237,5 +237,7 @@ export constant opnames = {
 	"MEMSTRUCT_MULTIPLY",
 	"MEMSTRUCT_DIVIDE",
 	"MEM_TYPE_CHECK",
+	"ADDRESSOF",
+	"OFFSETOF",
 	$
 }

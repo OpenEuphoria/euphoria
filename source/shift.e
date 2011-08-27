@@ -35,7 +35,7 @@ export enum
 procedure init_op_info()
 	op_info = repeat( 0, MAX_OPCODE )
 	op_info[ABORT               ] = { FIXED_SIZE, 2, {}, {}, {} }   -- ary: pun
-	op_info[ADDRESSOF           ] = { FIXED_SIZE, 3, {}, {3}, {} }
+	op_info[ADDRESSOF           ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[AND                 ] = { FIXED_SIZE, 4, {}, {}, {} }   -- ary: bin
 	op_info[AND_BITS            ] = { FIXED_SIZE, 4, {}, {3}, {} }   -- ary: bin
 	op_info[APPEND              ] = { FIXED_SIZE, 4, {}, {3}, {} }   -- ary: bin
@@ -150,7 +150,7 @@ procedure init_op_info()
 	op_info[NOTEQ_IFW_I         ] = { FIXED_SIZE, 4, {3}, {}, {} }
 	op_info[NOT_BITS            ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[NOT_IFW             ] = { FIXED_SIZE, 3, {2}, {}, {} }
-	op_info[OFFSETOF            ] = { FIXED_SIZE, 3, {}, {3}, {} }
+	op_info[OFFSETOF            ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[OPEN                ] = { FIXED_SIZE, 5, {}, {4}, {} }
 	op_info[OPTION_SWITCHES     ] = { FIXED_SIZE, 2, {}, {1}, {} }
 	op_info[OR                  ] = { FIXED_SIZE, 4, {}, {3}, {} }

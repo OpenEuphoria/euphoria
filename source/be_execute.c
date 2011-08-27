@@ -1057,6 +1057,8 @@ void code_set_pointers(intptr_t **code)
 			case RAND:
 			case PEEK:
 			case SIZEOF:
+			case ADDRESSOF:
+			case OFFSETOF:
 			case PEEK_STRING:
 			case PEEKS:
 			case FLOOR:
@@ -1846,8 +1848,9 @@ void do_exec(intptr_t *start_pc)
   &&L_MEMSTRUCT_ACCESS, &&L_MEMSTRUCT_ARRAY, &&L_PEEK_MEMBER,
   &&L_MEMSTRUCT_SERIALIZE, &&L_MEMSTRUCT_ASSIGN, &&L_MEMSTRUCT_PLUS,
   &&L_MEMSTRUCT_MINUS, &&L_MEMSTRUCT_MULTIPLY, &&L_MEMSTRUCT_DIVIDE,
-  &&L_MEM_TYPE_CHECK
-/* 228 (previous) */
+  &&L_MEM_TYPE_CHECK, &&L_ADDRESSOF, &&L_OFFSETOF
+/* 230 (previous) */
+  
 
 	};
 #endif
@@ -4598,6 +4601,38 @@ void do_exec(intptr_t *start_pc)
 					a = *(object_ptr)pc[1]; /* the data type */
 					*(object_ptr)pc[2] = eu_sizeof( a );
 				}
+				DeRef( top );
+				inc3pc();
+				thread();
+				BREAK;
+			
+			case L_ADDRESSOF:
+				deprintf("case L_ADDRESSOF:");
+				tpc = pc;
+				top = *(object_ptr)pc[2];
+#if INTPTR_MAX == INT32_MAX
+				if ( (uintptr_t)*(object_ptr)pc[1] > (uintptr_t)MAXINT){
+					top = NewDouble((eudouble) *(object_ptr)pc[1]);
+				}
+				else{
+					*(object_ptr)pc[2] = *(object_ptr)pc[1];
+				}
+#else
+				// 64-bit ptr always fits in an eu integer
+				*(object_ptr)pc[2] = *(object_ptr)pc[1];
+#endif
+				Ref( *(object_ptr)pc[2] );
+				DeRef( top );
+				inc3pc();
+				thread();
+				BREAK;
+				
+			case L_OFFSETOF:
+				deprintf("case L_ADDRESSOF:");
+				tpc = pc;
+				top = *(object_ptr)pc[2];
+				*(object_ptr)pc[2] = ((symtab_ptr)pc[1])->u.memstruct.offset;
+				Ref( *(object_ptr)pc[2] );
 				DeRef( top );
 				inc3pc();
 				thread();
