@@ -3145,9 +3145,23 @@ procedure opSIZEOF()
 	if sym_token( a ) = MEMSTRUCT or sym_token( a ) = MEMUNION then
 		val[b] = SymTab[a][S_MEM_SIZE]
 	else
-		val[b] = sizeof( a )
+		val[b] = sizeof( val[a] )
 	end if
 	
+	pc += 3
+end procedure
+
+procedure opOFFSETOF()
+	a = Code[pc+1]
+	b = Code[pc+2]
+	val[b] = SymTab[a][S_MEM_OFFSET]
+	pc += 3
+end procedure
+
+procedure opADDRESSOF()
+	a = Code[pc+1]
+	b = Code[pc+2]
+	val[b] = val[a]
 	pc += 3
 end procedure
 
@@ -4740,6 +4754,11 @@ procedure do_exec()
 			case MEMSTRUCT_PLUS, MEMSTRUCT_MINUS, MEMSTRUCT_MULTIPLY, MEMSTRUCT_DIVIDE then
 				opMEMSTRUCT_ASSIGN_OP()
 			
+			case ADDRESSOF then
+				opADDRESSOF()
+			
+			case OFFSETOF then
+				opOFFSETOF()
 
 			case else
 				RTFatal( sprintf("Unknown opcode: %d", op ) )

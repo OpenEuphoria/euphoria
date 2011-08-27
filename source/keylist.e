@@ -186,6 +186,8 @@ export sequence keylist = {
 	{"eudouble",         SC_MEMSTRUCT, MS_EUDOUBLE,         0, 0, 0 },
 	{"object",           SC_MEMSTRUCT, MS_OBJECT,           0, 0, 0 },
 	{"as",               SC_MEMSTRUCT, MS_AS,               0, 0, 0 },
+	{"addressof",        SC_PREDEF, FUNC, ADDRESSOF,        1, E_PURE},
+	{"offsetof",         SC_PREDEF, FUNC, OFFSETOF,         1, E_PURE},
 	
 	$
 

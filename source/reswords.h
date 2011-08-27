@@ -239,7 +239,9 @@
 #define MEMSTRUCT_MULTIPLY  226
 #define MEMSTRUCT_DIVIDE    227
 #define MEM_TYPE_CHECK      228
-#define MAX_OPCODE          228
+#define ADDRESSOF           229
+#define OFFSETOF            230
+#define MAX_OPCODE          230
 
 /* remember to update reswords.e, opnames.e,
    opnames.h, optable[], localjumptab[]

@@ -79,6 +79,9 @@ procedure basic()
 	symtab.symtab_entry.obj /= 3
 	
 	test_equal("object read / write assignment / read", peek_pointer( symtab ), symtab.symtab_entry.obj )
+-- 	test_equal("addressof 1", symtab, addressof( symtab.symtab_entry.obj ) )
+	
+-- 	test_equal("offsetof 1", 0, offsetof( symtab.symtab_entry.obj ) )
 	
 	symtab.symtab_entry[1].obj = 1
 	symtab.symtab_entry.next = symtab.symtab_entry[1]

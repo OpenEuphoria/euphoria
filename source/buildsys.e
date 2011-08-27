@@ -369,7 +369,7 @@ function setup_build()
 			if dll_option then
 				for i = 1 to length( l_names ) do
 					-- use the -fPIC compiled library
-					l_names[i] = splice( l_names[i], "so", 2 )
+					l_names[i] &= "so"
 				end for
 			end if
 		elsif TWINDOWS then

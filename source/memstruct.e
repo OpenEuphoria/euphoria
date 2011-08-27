@@ -81,14 +81,20 @@ export procedure MemStruct_declaration( integer scope )
 				if SC_UNDEFINED = SymTab[tok[T_SYM]][S_SCOPE] then
 					-- forward reference
 					
-					token nt = next_token()
-					if nt[T_ID] = MS_AS then
-						-- a forward reference to a type
+					if pointer then
 						integer ref = new_forward_reference( TYPE, tok[T_SYM], MEMSTRUCT )
-						eu_type = -ref
-						break "token"
-					else
 						MemStruct_member( tok, pointer, 1 )
+					else
+					
+						token nt = next_token()
+						if nt[T_ID] = MS_AS then
+							-- a forward reference to a type
+							integer ref = new_forward_reference( TYPE, tok[T_SYM], MEMSTRUCT )
+							eu_type = -ref
+							break "token"
+						else
+							MemStruct_member( tok, pointer, 1 )
+						end if
 					end if
 					
 				else

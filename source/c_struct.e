@@ -516,6 +516,16 @@ export procedure opMEMSTRUCT_ASSIGNOP()
 	pc += 4
 end procedure
 
+export procedure opADDRESSOF()
+	
+	pc += 3
+end procedure
+
+export procedure opOFFSETOF()
+	
+	pc += 3
+end procedure
+
 function decorated_name( symtab_index sym )
 	return sprintf( "_%d%s", { SymTab[sym][S_FILE_NO], sym_name( sym ) } )
 end function

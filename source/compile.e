@@ -6433,6 +6433,9 @@ export procedure init_opcodes()
 		switch name do
 			case "AND_BITS" then
 				operation[i] = routine_id("opAND_BITS")
+				
+			case "ADDRESSOF" then
+				operation[i] = routine_id("opADDRESSOF")
 
 			case "AND" then
 				operation[i] = routine_id("opAND")
@@ -6707,6 +6710,9 @@ export procedure init_opcodes()
 			case "NOTEQ" then
 				operation[i] = routine_id("opNOTEQ")
 
+			case "OFFSETOF" then
+				operation[i] = routine_id("opOFFSETOF")
+			
 			case "OPEN" then
 				operation[i] = routine_id("opOPEN")
 

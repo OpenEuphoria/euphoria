@@ -1199,6 +1199,14 @@ procedure opSIZEOF()
 	unary()
 end procedure
 
+procedure opADDRESSOF()
+	unary()
+end procedure
+
+procedure opOFFSETOF()
+	unary()
+end procedure
+
 procedure opMEM_COPY()
 	ptrinary()
 end procedure
