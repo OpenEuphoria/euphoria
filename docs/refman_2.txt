@@ -4248,3 +4248,13 @@ my_rect.lower_right.y = 150
 
 ? my_rect.lower_right.x  -- outputs 125
 </eucode>
+
+@[addressof]
+==== addressof
+
+Returns the pointer to a memstruct member.
+
+@[offsetof]
+==== offsetof
+
+Returns the offset in bytes of a member inside of its memstruct.
