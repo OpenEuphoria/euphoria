@@ -1427,7 +1427,6 @@ export procedure emit_op(integer op)
 		if Code[$-3] != PEEK_MEMBER then
 			InternalErr("Expected to replace PEEK_MEMBER")
 		end if
-		
 		-- We'll replace PEEK_MEMBER with ADDRESSOF
 		Pop()
 		if op = ADDRESSOF then

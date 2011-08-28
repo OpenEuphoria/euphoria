@@ -1220,8 +1220,21 @@ procedure Factor()
 		case MEMSTRUCT, QUALIFIED_MEMSTRUCT, MEMUNION, QUALIFIED_MEMUNION then
 			-- probably needs error checking or something to make sure 
 			-- the struct makes sense
-			-- So far, only sizeof() can use this
-			emit_opnd( tok[T_SYM] )
+			
+			token look_ahead = next_token()
+			putback( look_ahead )
+			if look_ahead[T_ID] = DOT then
+				-- a "naked" memstruct access...offsetof() uses this
+				putback( tok )
+				
+				-- Need this extra push, used by MEMSTRUCT_ACCESS / PEEK_MEMBER
+				-- which OFFSETOF will eat.  Otherwise, we corrupt the stack.
+				Push( tok[T_SYM] )
+				MemStruct_access( tok[T_SYM], FALSE )
+			else
+				
+				emit_opnd( tok[T_SYM] )
+			end if
 			
 		case VARIABLE, QUALIFIED_VARIABLE then
 			sym = tok[T_SYM]

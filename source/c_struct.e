@@ -535,9 +535,14 @@ end procedure
 export procedure opOFFSETOF()
 	integer
 		member  = Code[pc+1],
-		target  = Code[pc+2]
+		target  = Code[pc+2],
+		parent  = SymTab[member][S_MEM_PARENT]
+	
 	CDeRef( target )
-	c_stmt( sprintf("@ = %d;\n", SymTab[member][S_MEM_OFFSET] ), { target }, target )
+	sequence 
+		memstruct_name = decorated_name( parent ),
+		member_name    = decorated_name( member )
+	c_stmt( sprintf("@ = offsetof( %s %s, %s);\n", { mem_name( sym_token( parent ) ), memstruct_name, member_name } ), { target }, target )
 	
 	pc += 3
 end procedure
@@ -636,6 +641,7 @@ export procedure write_struct_header()
 	puts( struct_h, "#ifndef STRUCT_H_\n" )
 	puts( struct_h, "#define STRUCT_H_\n\n" )
 	puts( struct_h, "#include <stdint.h>\n")
+	puts( struct_h, "#include <stddef.h>\n")
 	puts( struct_h, "#include \"include/euphoria.h\"\n\n" )
 	
 	sequence structs = {}
