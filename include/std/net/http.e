@@ -98,11 +98,11 @@ function format_base_request(sequence request_type, sequence url, object headers
 	-- only specify the port in the request if the caller did so explicitly
 	-- some sites, such as euphoria.pastey.net, will break otherwise
 	if noport then
-	request = sprintf("%s %s HTTP/1.0\r\nHost: %s\r\n", {
-		request_type, path, host })
+		request = sprintf("%s %s HTTP/1.0\r\nHost: %s\r\n", {
+			request_type, url, path, host })
 	else
-	request = sprintf("%s %s HTTP/1.0\r\nHost: %s:%d\r\n", {
-		request_type, path, host, port })
+		request = sprintf("%s %s HTTP/1.0\r\nHost: %s:%d\r\n", {
+			request_type, url, host, port })
 	end if
 
 	integer has_user_agent = 0
@@ -209,14 +209,24 @@ end function
 --
 
 function execute_request(sequence host, integer port, sequence request, integer timeout)
-	object addrinfo = host_by_name(host)
+	object addrinfo
+	integer conn_port
+	
+	if proxy_port > 0 then
+		addrinfo = host_by_name(proxy_ip)
+		conn_port = proxy_port
+	else
+		addrinfo = host_by_name(host)
+		conn_port = port
+	end if
+	
 	if atom(addrinfo) or length(addrinfo) < 3 or length(addrinfo[3]) = 0 then
 		return ERR_HOST_LOOKUP_FAILED
 	end if
 
 	sock:socket sock = sock:create(sock:AF_INET, sock:SOCK_STREAM, 0)
 
-	if sock:connect(sock, addrinfo[3][1], port) != sock:OK then
+	if sock:connect(sock, addrinfo[3][1], conn_port) != sock:OK then
 		return ERR_CONNECT_FAILED
 	end if
 
@@ -278,6 +288,25 @@ function execute_request(sequence host, integer port, sequence request, integer 
 
 	return { headers, content }
 end function
+
+--****
+-- === Configuration Routines
+
+sequence proxy_ip = {}
+integer proxy_port = 0
+
+--**
+-- Configure http client to use a proxy server
+--
+-- Parameters:
+--   * ##proxy_ip## - IP address of the proxy server
+--   * ##proxy_port## - Port of the proxy server
+--
+
+public procedure set_proxy_server(sequence ip, integer port)
+	proxy_ip = ip
+	proxy_port = port
+end procedure
 
 --****
 -- === Get/Post Routines
