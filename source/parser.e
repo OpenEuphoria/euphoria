@@ -3252,7 +3252,7 @@ function Global_declaration(integer type_ptr, integer scope)
 			-- Handle 'auto' type defn for this enum.
 			-- syntax form is "enum type TYPENAME ENUMID, ENUMID, ..., ENUMID end type"
 			putback(keyfind("enum",-1))
-			SubProg(TYPE_DECL, scope)
+			SubProg(TYPE_DECL, scope, 0)
 			return {}
 		elsif ptok[T_ID] = BY then
 
@@ -3868,7 +3868,7 @@ procedure Statement_list()
 end procedure
 forward_Statement_list = routine_id("Statement_list")
 
-procedure SubProg(integer prog_type, integer scope)
+procedure SubProg(integer prog_type, integer scope, integer deprecated)
 -- parse a function, type or procedure declaration
 -- global is 1 if it's global
 	integer h, pt
@@ -3980,6 +3980,7 @@ procedure SubProg(integer prog_type, integer scope)
 	SymTab[p][S_TEMPS] = 0
 	SymTab[p][S_RESIDENT_TASK] = 0
 	SymTab[p][S_SAVED_PRIVATES] = {}
+	SymTab[p][S_DEPRECATED] = deprecated
 	
 	if type_enum then
 		SymTab[p][S_FIRSTLINE] = type_enum_gline
@@ -4525,9 +4526,19 @@ export procedure real_parser(integer nested)
 			ExecCommand()
 
 		elsif id = PROCEDURE or id = FUNCTION or id = TYPE_DECL then
-			SubProg(tok[T_ID], SC_LOCAL)
+			SubProg(tok[T_ID], SC_LOCAL, 0)
 
-		elsif id = GLOBAL or id = EXPORT or id = OVERRIDE or id = PUBLIC then
+		elsif id = GLOBAL or id = EXPORT or id = OVERRIDE or id = PUBLIC or id = DEPRECATE then
+			integer deprecated = 0
+			
+			if id = DEPRECATE then
+				deprecated = 1
+				
+				tok = next_token()
+				id = tok[T_ID]
+			end if
+			
+			scope = SC_LOCAL
 			if id = GLOBAL then
 			    scope = SC_GLOBAL
 			elsif id = EXPORT then
@@ -4537,9 +4548,12 @@ export procedure real_parser(integer nested)
 			elsif id = PUBLIC then
 				scope = SC_PUBLIC
 			end if
-
-			tok = next_token()
-			id = tok[T_ID]
+			
+			-- Did we parse a scope modifier? If so, advance to the next token
+			if scope != SC_LOCAL then
+				tok = next_token()
+				id = tok[T_ID]
+			end if
 
 			if id = TYPE or id = QUALIFIED_TYPE then
 				Global_declaration(tok[T_SYM], scope )
@@ -4553,16 +4567,15 @@ export procedure real_parser(integer nested)
 				ExecCommand()
 
 			elsif id = PROCEDURE or id = FUNCTION or id = TYPE_DECL then
-				SubProg(id, scope )
-				
-
+				SubProg(id, scope, deprecated)
+			
 			elsif (scope = SC_PUBLIC) and id = INCLUDE then
 				IncludeScan( 1 )
 				PushGoto()
 			elsif (id = VARIABLE or id = QUALIFIED_VARIABLE)
-			and SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED
-			and undefined_var( tok, scope ) then
-			
+					and SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED
+					and undefined_var( tok, scope ) then
+				
 				continue
 				
 			elsif scope = SC_GLOBAL then

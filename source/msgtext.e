@@ -342,7 +342,7 @@ constant StdErrMsgs = {
 	{324, "Flags to pass to linker (overrides internal linker flags)"},
 	{325, "Skipping  [1:3.0]% [2] (up-to-date)"},
 	{326, "Force building, even if file is up-to-date"},
-	{327, "[1] is deprecated ([2]:[3])"},
+	{327, "[1] is deprecated"},
 	{328, "Overrides the value of EUDIR"},
 	{329, "Invalid character in HEX string"},
 	{330, "Only enums may be declared as types"},

@@ -42,7 +42,7 @@ type file_number(integer x)
 	return x >= - 1
 end type
 
-function simple_sort(sequence x)
+deprecate function simple_sort(sequence x)
 	-- put x into ascending order
 	-- using a very simple sort
 	object temp
