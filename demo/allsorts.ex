@@ -193,6 +193,9 @@ end function
 
 sequence x
 
+deprecate function abc() return 10 end function
+object a = abc()
+
 procedure g_insertion_sort()
 	-- put global variable x into ascending order
 	-- using insertion sort of general objects
