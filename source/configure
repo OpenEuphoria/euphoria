@@ -41,6 +41,8 @@ else
 	PREFIX=./
 fi
 
+echo "UNAME_SYSTEM = $UNAME_SYSTEM"
+
 echo "# File generated from configure" > ${CONFIG_FILE}
 
 # gcc doesn't seem to like -m32 on 32-bit machines when there are 
@@ -71,7 +73,7 @@ if test $UNAME_SYSTEM = "Linux"; then
 	TARGET=LINUX
 elif test $UNAME_SYSTEM = "WINDOWS"; then
 	EHOST=EWINDOWS
-	TARGET=WINDOWS
+	TARGET=EWINDOWS
 elif test $UNAME_SYSTEM = "OpenBSD"; then
 	EHOST=OPENBSD
 	TARGET=EOPENBSD
