@@ -67,8 +67,9 @@ export sequence keylist = {
 	{"case",      SC_KEYWORD, CASE,      0, 0, 0},
 	{"override",  SC_KEYWORD, OVERRIDE,  0, 0, 0},
 	{"goto",      SC_KEYWORD, GOTO,      0, 0, 0},
-	{"public",    SC_KEYWORD, PUBLIC,    0, 0, 0 },
+	{"public",    SC_KEYWORD, PUBLIC,    0, 0, 0},
 	{"fallthru",  SC_KEYWORD, FALLTHRU,  0, 0, 0},
+	
 	-- new ones must go at end to maintain compatibility with old shrouded code
 
 	-- PREDEFINED SUBPROGRAMS and TYPEs
@@ -165,8 +166,8 @@ export sequence keylist = {
 	{"replace",          SC_PREDEF, FUNC, REPLACE,          4, E_PURE, {0,0,0,{{DEF_PARAM,3}}}, {4,3,{4}}},
 	{"delete_routine",   SC_PREDEF, FUNC, DELETE_ROUTINE,   2, E_PURE},
 	{"delete",           SC_PREDEF, PROC, DELETE_OBJECT,    1, E_OTHER_EFFECT},
-	{"routine",          SC_KEYWORD, ROUTINE,   0, 0, 0}
-
+	{"routine",          SC_KEYWORD, ROUTINE,   0, 0, 0},
+	{"deprecate",        SC_KEYWORD, DEPRECATE, 0, 0, 0}
 }
 	-- new words must go at end to maintain compatibility
 

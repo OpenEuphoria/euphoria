@@ -854,6 +854,10 @@ procedure ParseArgs(symtab_index subsym)
 		lnda = 0
 	end if
 	s = subsym
+	
+	if SymTab[subsym][S_DEPRECATE] then
+		printf(1, "Parsing args for deprecated routine: %s\n", { SymTab[subsym][S_NAME]})
+	end if
 
 	parseargs_states = append(parseargs_states,
 				{length(private_list),lock_scanner,use_private_list,on_arg})
@@ -1153,7 +1157,7 @@ end procedure
 
 procedure Function_call( token tok )
 --	token tok2, tok3
-	integer id, scope, opcode, e
+	integer id, scope, opcode, e, deprecated
 
 	id = tok[T_ID]
 	if id = FUNC or id = TYPE then
@@ -1179,6 +1183,7 @@ procedure Function_call( token tok )
 	end if
 	tok_match(LEFT_ROUND)
 	scope = SymTab[tok[T_SYM]][S_SCOPE]
+	deprecated = SymTab[tok[T_SYM]][S_DEPRECATE]
 	opcode = SymTab[tok[T_SYM]][S_OPCODE]
 	if equal(SymTab[tok[T_SYM]][S_NAME],"object") and scope = SC_PREDEF then
 		-- handled specially to check for uninitialized variables
@@ -1200,6 +1205,11 @@ procedure Function_call( token tok )
 			end if
 		end if
 	end if
+	
+	if deprecated then
+		printf(1, "Deprecated %s\n", { SymTab[tok[T_SYM]][S_NAME] })
+		Warning(353, deprecated_warning_flag, { SymTab[tok[T_SYM]][S_NAME] })
+	end if	
 end procedure
 
 procedure Factor()
@@ -3252,7 +3262,7 @@ function Global_declaration(integer type_ptr, integer scope)
 			-- Handle 'auto' type defn for this enum.
 			-- syntax form is "enum type TYPENAME ENUMID, ENUMID, ..., ENUMID end type"
 			putback(keyfind("enum",-1))
-			SubProg(TYPE_DECL, scope)
+			SubProg(TYPE_DECL, scope, 0)
 			return {}
 		elsif ptok[T_ID] = BY then
 
@@ -3598,7 +3608,7 @@ end procedure
 
 procedure Procedure_call(token tok)
 -- parse a procedure call statement
-	integer n, scope, opcode
+	integer n, scope, opcode, deprecated
 	token temp_tok
 	symtab_index s, sub
 
@@ -3607,6 +3617,7 @@ procedure Procedure_call(token tok)
 	sub=s
 	n = SymTab[s][S_NUM_ARGS]
 	scope = SymTab[s][S_SCOPE]
+	deprecated = SymTab[s][S_DEPRECATE]
 	opcode = SymTab[s][S_OPCODE]
 	if SymTab[s][S_EFFECT] then
 		SymTab[CurrentSub][S_EFFECT] = or_bits(SymTab[CurrentSub][S_EFFECT],
@@ -3625,7 +3636,7 @@ procedure Procedure_call(token tok)
 		end if
 		s = SymTab[s][S_NEXT]
 	end while
-
+	
 	s = sub
 	if scope = SC_PREDEF then
 		emit_op(opcode)
@@ -3644,6 +3655,11 @@ procedure Procedure_call(token tok)
 			end if
 		end if
 	end if
+	
+	if deprecated then
+		printf(1, "Deprecated %s\n", { SymTab[s][S_NAME] })
+		Warning(353, deprecated_warning_flag, { SymTab[s][S_NAME] })
+	end if	
 end procedure
 
 procedure Print_statement()
@@ -3868,7 +3884,7 @@ procedure Statement_list()
 end procedure
 forward_Statement_list = routine_id("Statement_list")
 
-procedure SubProg(integer prog_type, integer scope)
+procedure SubProg(integer prog_type, integer scope, integer deprecated)
 -- parse a function, type or procedure declaration
 -- global is 1 if it's global
 	integer h, pt
@@ -3963,6 +3979,11 @@ procedure SubProg(integer prog_type, integer scope)
 	temps_allocated = 0
 
 	SymTab[p][S_SCOPE] = scope
+	SymTab[p][S_DEPRECATE] = deprecated
+	
+	if deprecated then
+		printf(1, "Setting %s to deprecated\n", { SymTab[p][S_NAME] })
+	end if
 
 	SymTab[p][S_TOKEN] = pt
 
@@ -4501,6 +4522,7 @@ export procedure real_parser(integer nested)
 	token tok
 	integer id
 	integer scope
+	integer deprecated = 0
 
 	while TRUE do  -- infinite loop until scanner aborts
 		if OpInline = 25000 then
@@ -4519,7 +4541,8 @@ export procedure real_parser(integer nested)
 			ExecCommand()
 
 		elsif id = PROCEDURE or id = FUNCTION or id = TYPE_DECL then
-			SubProg(tok[T_ID], SC_LOCAL)
+			SubProg(tok[T_ID], SC_LOCAL, deprecated)
+			deprecated = 0
 
 		elsif id = GLOBAL or id = EXPORT or id = OVERRIDE or id = PUBLIC then
 			if id = GLOBAL then
@@ -4547,8 +4570,8 @@ export procedure real_parser(integer nested)
 				ExecCommand()
 
 			elsif id = PROCEDURE or id = FUNCTION or id = TYPE_DECL then
-				SubProg(id, scope )
-				
+				SubProg(id, scope, deprecated)
+				deprecated = 0
 
 			elsif (scope = SC_PUBLIC) and id = INCLUDE then
 				IncludeScan( 1 )
@@ -4564,6 +4587,12 @@ export procedure real_parser(integer nested)
 			else
 				CompileErr( 16 )
 			end if
+			
+			deprecated = 0
+		
+		elsif id = DEPRECATE then
+			deprecated = 1
+			printf(1, "Got a deprecated keyword\n", {})
 			
 		elsif id = TYPE or id = QUALIFIED_TYPE then
 			token test = next_token()

@@ -368,6 +368,7 @@ constant StdErrMsgs = {
 	{350, "Unable to compile resource file: [1]"},
 	{351, "Use the -mno-cygwin flag with MinGW"},
 	{352, "There is no watcom instalation under specified Watom Path [1]"},
+	{353, "[1] is deprecated, please consult routine documentation"},
 	$
 }
 

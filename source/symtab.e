@@ -97,7 +97,7 @@ end procedure
 -- nor connect it in the S_NEXT chain
 export function NewBasicEntry(sequence name, integer varnum, integer scope,
 				  integer token, integer hashval, symtab_index samehash,
-				  symtab_index type_sym )
+				  symtab_index type_sym, integer deprecated = 0)
 	
 	sequence new
 	
@@ -113,6 +113,7 @@ export function NewBasicEntry(sequence name, integer varnum, integer scope,
 	new[S_MODE] = M_NORMAL
 	new[S_USAGE] = U_UNUSED
 	new[S_FILE_NO] = current_file_no
+	new[S_DEPRECATE] = deprecated
 
 	if TRANSLATE then
 		-- initialize extra fields for Translator

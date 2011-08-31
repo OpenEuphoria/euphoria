@@ -220,6 +220,7 @@ export constant
 	NOVALUE_TEMP        = 209,  -- Interpreter only?
 	COVERAGE_LINE       = 210,
 	COVERAGE_ROUTINE    = 211,
+	DEPRECATE           = 212,
 	MAX_OPCODE          = 213
 
 

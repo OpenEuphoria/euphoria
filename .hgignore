@@ -47,6 +47,7 @@ regex:
 ^source/mkver.o$
 ^source/build/.*
 ^source/build_mingw/.*
+^source/build_gcc/.*
 .*/cleanbranch/.*
 ^.*~
 ^.*\.dis$
