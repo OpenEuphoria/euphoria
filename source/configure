@@ -41,8 +41,6 @@ else
 	PREFIX=./
 fi
 
-echo "UNAME_SYSTEM = $UNAME_SYSTEM"
-
 echo "# File generated from configure" > ${CONFIG_FILE}
 
 # gcc doesn't seem to like -m32 on 32-bit machines when there are 
