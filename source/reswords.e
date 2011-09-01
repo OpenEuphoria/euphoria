@@ -307,7 +307,8 @@ export enum
 	OVERRIDE,
 	PUBLIC,
 	FALLTHRU,
-	ROUTINE
+	ROUTINE,
+	DEPRECATE
 
 export enum
 	FUNC = 501,

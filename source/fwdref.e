@@ -247,6 +247,10 @@ procedure patch_forward_call( token tok, integer ref )
 			{ known_files[current_file_no], sym_name( fr[FR_SUBPROG] ), fr[FR_LINE], fr[FR_NAME] })
 	end if
 	
+	if SymTab[sub][S_DEPRECATED] then
+		Warning(327, deprecated_warning_flag, { SymTab[sub][S_NAME] })
+	end if
+	
 	integer old_temps_allocated = temps_allocated
 	temps_allocated = 0
 	

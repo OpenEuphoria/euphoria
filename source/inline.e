@@ -927,6 +927,11 @@ end procedure
 export procedure emit_or_inline()
 	symtab_index sub = op_info1
 	inline_sub = sub
+	
+	if SymTab[sub][S_DEPRECATED] then
+		Warning(327, deprecated_warning_flag, { SymTab[sub][S_NAME] })
+	end if
+	
 	if Parser_mode != PAM_NORMAL then
 		-- TODO:  this is probably possible in PAM_PLAYBACK mode,
 		-- but it doesn't currently work.
