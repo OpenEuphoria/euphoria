@@ -42,7 +42,7 @@ type file_number(integer x)
 	return x >= - 1
 end type
 
-deprecate function simple_sort(sequence x)
+function simple_sort(sequence x)
 	-- put x into ascending order
 	-- using a very simple sort
 	object temp
@@ -192,9 +192,6 @@ global function hybrid_sort(sequence x)
 end function
 
 sequence x
-
-deprecate function abc() return 10 end function
-object a = abc()
 
 procedure g_insertion_sort()
 	-- put global variable x into ascending order
