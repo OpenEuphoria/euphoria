@@ -2279,6 +2279,7 @@ If an identifier is declared global, public or export, but not override, and
 there is a built-in of the same name, Euphoria will not assume an override, and
 will choose the built-in. A warning will be generated whenever this happens.
 
+@[deprecate|]
 === Deprecation
 
 Beginning in Euphoria 4.1, procedures and functions can be marked as deprecated.
