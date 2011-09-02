@@ -23,6 +23,7 @@ public constant keywords = {
 	"case",
 	"constant",
 	"continue",
+    "deprecate",
 	"do",
 	"else",
 	"elsedef",

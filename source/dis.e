@@ -1793,6 +1793,8 @@ procedure InitBackEnd( object ignore )
 			name = "SWITCH"
 		elsif equal( name, "PROC_TAIL" ) then
 			name = "PROC"
+		elsif equal( name, "STARTLINE_BREAK" ) then
+			name = "STARTLINE"
 		end if
 
 		operation[i] = routine_id("op" & name)
