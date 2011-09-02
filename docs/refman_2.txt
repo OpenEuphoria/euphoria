@@ -2279,6 +2279,46 @@ If an identifier is declared global, public or export, but not override, and
 there is a built-in of the same name, Euphoria will not assume an override, and
 will choose the built-in. A warning will be generated whenever this happens.
 
+=== Deprecation
+
+Beginning in Euphoria 4.1, procedures and functions can be marked as deprecated.
+Deprecation is a computer software term that assigns a status to a particular item
+to indicate that it should be avoided, typically because it has been superseded.
+Deprecated routines remain in the language or library but should be avoided.
+
+The ##deprecate## modifier will cause a warning to appear if that routine is
+used. It serves no more purpose but is a powerful way to keep an evolving library
+clean, slim and fit for the task. Instead of simply removing an old routine
+authors are encouraged to use the ##deprecate## modifier on a routine and leave
+it a part of the library for at least one major version increment. It can then
+be removed. This allows your users time to upgrade their code to the new
+recommended routine. Deprecated routines should be included in your manual, state
+when and why they were deprecated and what is the path future for accomplishing
+the same task.
+
+<eucode>
+--**
+-- Say hello to someone
+--
+-- Parameters:
+--   * name - name of person to say hello to
+--
+-- Deprecated:
+--   ##say_hello## has been deprecated in favor of the new greet routine.
+--
+
+deprecate public procedure say_hello(sequence name)
+    printf(1, "Hello, %s\n", { name })
+end procedure
+
+public procedure greet(sequence name="World", sequence greeting="Hello")
+    printf(1, "%s, %s\n", { greeting, name })
+end procedure
+</eucode>
+
+When deprecating a routine, the keyword ##deprecate## should occur before any
+scope modifier.
+
 %%output=lang_assignment
 == Assignment statement
 :<<LEVELTOC level=2 depth=4>>

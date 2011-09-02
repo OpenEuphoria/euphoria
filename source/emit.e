@@ -890,6 +890,11 @@ export procedure emit_op(integer op)
 				end if
 			end for
 		end if
+		
+		if SymTab[subsym][S_DEPRECATED] then
+			Warning(327, deprecated_warning_flag, { SymTab[subsym][S_NAME] })
+		end if
+		
 		emit_opcode(op)
 		emit_addr(subsym)
 		for i = cgi-n+1 to cgi do

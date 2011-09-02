@@ -188,7 +188,7 @@ export sequence keylist = {
 	{"as",               SC_MEMSTRUCT, MS_AS,               0, 0, 0 },
 	{"addressof",        SC_PREDEF, FUNC, ADDRESSOF,        1, E_PURE},
 	{"offsetof",         SC_PREDEF, FUNC, OFFSETOF,         1, E_PURE},
-	
+	{"deprecate",        SC_KEYWORD, DEPRECATE, 0, 0, 0},
 	$
 
 }

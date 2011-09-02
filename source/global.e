@@ -109,11 +109,12 @@ export constant
 	                                       -- executing this routine
 	S_STACK_SPACE = 27 - get_backend()*12, -- amount of stack space needed by this routine
 	                                       -- (for private data)
-	S_DEF_ARGS = 28,                  -- {index of first defaulted arg in a routine, last
-										--	nondef, list of middle defaulted params}
-	                                    -- or 0 if none
-	S_INLINE = 29                          -- 0 if routine cannot be inlined, or sequence of
+	S_DEF_ARGS = 28,                       -- {index of first defaulted arg in a routine, last
+	                                       -- nondef, list of middle defaulted params}
+	                                       -- or 0 if none
+	S_INLINE = 29,                         -- 0 if routine cannot be inlined, or sequence of
 	                                       -- inline code if it can
+	S_DEPRECATED = 30
 	
 
 -- extra fields for TRANSLATOR (for temps and vars/routines)
@@ -193,13 +194,12 @@ end procedure
 	
 		
 export constant
-	SIZEOF_ROUTINE_ENTRY   = 29 + 25 * TRANSLATE,
-	SIZEOF_VAR_ENTRY       = 17 + 37 * TRANSLATE,
-	SIZEOF_BLOCK_ENTRY     = 19 + 35 * TRANSLATE,
-	SIZEOF_TEMP_ENTRY      =  6 + 32 * TRANSLATE,
+	SIZEOF_ROUTINE_ENTRY = 30 + 25 * TRANSLATE,
+	SIZEOF_VAR_ENTRY     = 17 + 37 * TRANSLATE,
+	SIZEOF_BLOCK_ENTRY   = 19 + 35 * TRANSLATE,
+	SIZEOF_TEMP_ENTRY    =  6 + 32 * TRANSLATE,
 	SIZEOF_MEMSTRUCT_ENTRY = 22 + 32 * TRANSLATE - 5 * get_backend(),
 	$
-
 -- Permitted values for various symbol table fields
 
 -- MODE values:

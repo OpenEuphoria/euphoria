@@ -322,6 +322,7 @@ export enum
 	ROUTINE,
 	MEMSTRUCT_DECL,
 	MEMUNION_DECL,
+	DEPRECATE,
 	$
 
 export enum
