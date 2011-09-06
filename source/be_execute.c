@@ -43,9 +43,6 @@
 #	include <sys/times.h>
 #	include <string.h>
 #else
-#	ifdef __WATCOMC__
-#		include <graph.h>
-#	endif
 #	include <conio.h>
 #endif
 #include <math.h>
@@ -94,19 +91,7 @@ union pc_t {
     s1_ptr * sptr;
 };*/
 
-/* took out:    || (fp)->_flag&_UNGET \
-   added:       tpc = pc */
-#ifdef ORIGINALWATCOM
-#define getc(fp) \
-		((fp)->_cnt<=0 \
-		|| (fp)->_flag&_UNGET \
-		|| (*(fp)->_ptr)=='\x0d' \
-		|| (*(fp)->_ptr)=='\x1a' \
-		? igetc(fp) \
-		: ((fp)->_cnt--,*(fp)->_ptr++))
-#endif
-
-#if defined(__WATCOMC__) || defined(EUNIX)
+#if defined(EUNIX)
 	// a bit faster:
 #	define mygetc(fp) \
 		((fp)->_cnt<=0 \
@@ -733,78 +718,6 @@ static void do_poke4(object a, object top)
 
 #define FP_EMULATION_NEEDED // FOR WATCOM/DOS to run on old 486/386 without f.p.
 
-#if !defined(EMINGW)
-#if defined(EWINDOWS) || (defined(__WATCOMC__) && !defined(FP_EMULATION_NEEDED))
-#ifdef EMSVC
-long msvc_spare = 0;
-#define thread() do { __asm { JMP [pc] } } while(0)
-#define thread2() do { msvc_spare = pc + 8; __asm { JMP [msvc_spare] } } while(0)
-#define thread4() do { msvc_spare = pc + 16; __asm { JMP [msvc_spare] } } while(0)
-#define thread5() do { msvc_spare = pc + 20; __asm { JMP [msvc_spare] } } while(0)
-#define inc3pc() do { __asm { ADD pc, 12 } } while(0)
-// not converted because it is not used
-#define threadpc3()
-#define BREAK break
-#include "redef.h"
-#else
-// #pragma aux thread aborts; does nothing
-
-#define thread() do { wcthread((long)pc); } while (0)
-void wcthread(long x);
-#pragma aux wcthread = \
-		"jmp [ECX]" \
-		modify [EAX EBX EDX] \
-		parm [ECX];
-
-long wcinc2pc(long x);
-#pragma aux wcinc2pc = \
-		"ADD ECX, 8" \
-		modify [] \
-		value [ECX] \
-		parm [ECX];
-
-long wcinc4pc(long x);
-#pragma aux wcinc4pc = \
-		"ADD ECX, 16" \
-		modify [] \
-		value [ECX] \
-		parm [ECX];
-
-long wcinc5pc(long x);
-#pragma aux wcinc5pc = \
-		"ADD ECX, 20" \
-		modify [] \
-		value [ECX] \
-		parm [ECX];
-
-#define thread2() do { pc = (intptr_t *)wcinc2pc((long)pc); wcthread((long)pc); } while (0)
-#define thread4() do { pc = (intptr_t *)wcinc4pc((long)pc); wcthread((long)pc); } while (0)
-#define thread5() do { pc = (intptr_t *)wcinc5pc((long)pc); wcthread((long)pc); } while (0)
-
-/* have to hide this from WATCOM or it will generate stupid code
-   at the top of the switch */
-long wcinc3pc(long x);
-#pragma aux wcinc3pc = \
-		"ADD ECX, 12" \
-		modify [] \
-		value [ECX] \
-		parm [ECX];
-#define inc3pc() do { pc = (intptr_t *)wcinc3pc((long)pc); } while (0)
-
-// not converted because it is not used
-void threadpc3(void);
-#pragma aux threadpc3 = \
-		"MOV ECX, EDI" \
-		"jmp [ECX]"    \
-		modify [EAX EBX ECX EDX];
-
-#define BREAK break
-#include "redef.h"
-#endif // EMSVC
-#endif
-#endif // !defined(EMINGW)
-
-#if defined(EUNIX) || defined(EMINGW)
 // these GNU-based compilers support dynamic labels,
 // so threading is much easier
 #define thread() goto *((void *)*pc)
@@ -813,15 +726,7 @@ void threadpc3(void);
 #define thread5() {pc += 5; goto *((void *)*pc);}
 #define inc3pc() pc += 3
 #define BREAK goto *((void *)*pc)
-#endif
-
 #endif  // threaded code
-
-#ifdef __WATCOMC__
-#pragma aux nop = \
-		"nop" \
-		modify[];
-#endif
 
 static int recover_rhs_subscript(object subscript, s1_ptr s)
 /* rhs subscript failed initial check, but might be ok */
@@ -933,12 +838,7 @@ void InitExecute()
 #if defined(EUNIX) || defined(EMINGW)
 intptr_t **jumptab; // initialized in do_exec()
 #else
-#ifdef __WATCOMC__
-/* Jump table location is determined by another program. */
-extern intptr_t ** jumptab;
-#else
 #error Not supported use INT_CODES?
-#endif
 #endif // not GNU-C
 #endif //not INT_CODES
 
@@ -1681,8 +1581,6 @@ void Execute(intptr_t *start_index)
 void do_exec(intptr_t *start_pc)
 /* execute code, starting at start_pc */
 {
-	/* WATCOM keeps pc in a register, and usually top, a, obj_ptr */
-
 	/* address registers: (3 max) */
 	register intptr_t *pc;               /* program counter, kept in a register */
 	register object_ptr obj_ptr;    /* general pointer to an object */
@@ -3526,7 +3424,7 @@ void do_exec(intptr_t *start_pc)
 				/* we're going in - patch the ENDFOR opcode */
 				patch = (opcode_type *) ((intptr_t *)pc[6] - 5);
 				i = (intptr_t)opcode(i);
-				pc += 7;   // so WATCOM will do it before thread()
+				pc += 7;
 				if (patch[0] != (opcode_type)i) {
 					// changing the endfor op from what it was
 					sub = (symtab_ptr)pc[-3];
@@ -3671,7 +3569,6 @@ void do_exec(intptr_t *start_pc)
 				// if length is huge it will be rejected here,
 				// so max_stack_per_call will protect against stack overflow
 				if (sub->u.subp.num_args != (uintptr_t)((s1_ptr)a)->length) {
-					// must avoid > 3 arg calls to get better WATCOM code gen
 					wrong_arg_count(sub, a);
 				}
 				obj_ptr = ((s1_ptr)a)->base;
@@ -4237,7 +4134,7 @@ void do_exec(intptr_t *start_pc)
 				}
 				tpc = pc;
 				Concat((object_ptr)pc[3], b, top);
-				pc += 4;  // WATCOM thread() fails
+				pc += 4;
 				BREAK;
 
 			case L_SPLICE:
@@ -4310,7 +4207,7 @@ void do_exec(intptr_t *start_pc)
 				nvars = pc[1];
 				tpc = pc;
 				Concat_Ni((object_ptr)pc[nvars+2], (object_ptr *)(pc+2), nvars);
-				pc += nvars + 3; // WATCOM thread() fails
+				pc += nvars + 3;
 				BREAK;
 
 			case L_REPEAT:

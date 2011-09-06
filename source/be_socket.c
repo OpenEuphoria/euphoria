@@ -777,15 +777,13 @@ int eusock_getsock_option(int x)
 	sendto_fntype sendtoPtr;
 	WSACleanup_fntype  WSAGetLastErrorPtr;
 	
-	#ifndef __WATCOMC__
-		typedef int (*WSAFDIsSet_fntype)(
-			SOCKET fd,
-			fd_set *set
-		);
-		WSAFDIsSet_fntype WSAFDIsSetPtr;
-		#undef FD_ISSET
-		#define FD_ISSET( p1, p2 )  (*WSAFDIsSetPtr)( (SOCKET)(p1), (fd_set *)(p2) )
-	#endif
+	typedef int (*WSAFDIsSet_fntype)(
+		SOCKET fd,
+		fd_set *set
+	);
+	WSAFDIsSet_fntype WSAFDIsSetPtr;
+	#undef FD_ISSET
+	#define FD_ISSET( p1, p2 )  (*WSAFDIsSetPtr)( (SOCKET)(p1), (fd_set *)(p2) )
 	
 	typedef u_short WSAAPI (*htons_fntype)(
 		__in  u_short hostshort
@@ -823,21 +821,6 @@ int eusock_getsock_option(int x)
 	);
 	recv_fntype recvPtr;	
 
-	#if defined(__WATCOMC__)
-		/* must be inlined in the header file,
-		  for this always tries to get linked in.*/
-		int __WSAFDIsSet(
-				SOCKET fd,
-				fd_set *set) {
-			int ecx = set->fd_count;
-			int eax = 0;
-			while (ecx--) {
-				eax += (fd == set->fd_array[ecx]);
-			}
-			return eax;
-		}
-	#endif
-	
     void eusock_wsastart()
     {
     	WORD wVersionRequested;
@@ -866,12 +849,10 @@ int eusock_getsock_option(int x)
 			RTFatal("Could not load routine WSAGetLastError.");
 		}
 		
-#if !defined(__WATCOMC__)	
 		WSAFDIsSetPtr = (WSAFDIsSet_fntype)GetProcAddress(eusock_wsastarted, "__WSAFDIsSet");
 		if (WSAFDIsSetPtr == NULL) {
 			RTFatal("Could not load routine WSAFDIsSet.");
 		}
-#endif
 		
 		socketPtr = (socket_fntype)GetProcAddress(eusock_wsastarted, "socket");
 		if (socketPtr == NULL) {
@@ -998,9 +979,7 @@ int eusock_getsock_option(int x)
 #define inet_addr (*inet_addrPtr)
 #define send (*sendPtr)
 #define recv (*recvPtr)
-#if !defined(__WATCOMC__)
 #define WSAFDIsSet (*WSAFDIsSetPtr)
-#endif
 
 
     void eusock_wsacleanup()

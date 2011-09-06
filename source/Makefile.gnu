@@ -813,11 +813,7 @@ EUTEST=eutest
 EUCOVERAGE=eucoverage
 EUDIST=eudist
 
-ifeq "$(EMINGW)" "1"
-	MINGW_FLAGS=-gcc
-else
-	MINGW_FLAGS=
-endif
+MINGW_FLAGS=
 
 ifeq "$(ARCH)" "ARM"
 	EUC_CFLAGS=-cflags "-fomit-frame-pointer -c -w -fsigned-char -O2 -I$(TRUNKDIR) -ffast-math"

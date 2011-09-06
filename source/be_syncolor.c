@@ -19,9 +19,6 @@
 #ifdef EWINDOWS
 #include <windows.h>
 #endif
-#ifdef __WATCOMC__
-#include <graph.h>
-#endif
 
 #include "alldefs.h"
 #include "be_alloc.h"

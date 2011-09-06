@@ -75,6 +75,7 @@ sequence trans_opt_def = {
 	{ "plat",             0, GetMsgText(185,0), { HAS_PARAMETER, "platform" } },
 	{ "con",              0, GetMsgText(182,0), { } },
 	{ "dll",              0, GetMsgText(183,0), { } },
+    { "gcc",              0, "Ignore", {} }, -- -gcc is being added by current translators during build process, TODO: REMOVE later
 	{ "so",               0, GetMsgText(184,0), { } },
 	{ "o",                0, GetMsgText(198,0), { HAS_PARAMETER, "filename" } },
 	{ "build-dir",        0, GetMsgText(197,0), { HAS_PARAMETER, "dir" } },

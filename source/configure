@@ -321,8 +321,6 @@ while [ "$1" != "" ]; do
 		echo "   --prefix value      set the install directory (default /usr/local)"
 		echo "   --plat value        set the OS that we will translate to."
 		echo "                       values can be: WINDOWS, OSX, LINUX, FREEBSD, OPENBSD or NETBSD."
-		echo "   --watcom            set this so the translator will create C code for"
-		echo "                       Watcom C."
 		echo "   --no-managed-mem    disable managed memory"
 		echo "   --align4            malloc allocates addresses that are"
 		echo "                       always 4 byte aligned."

@@ -130,7 +130,7 @@ int main(int argc, char **argv)
 
     had_old_info = get_version_info(cache_filename, old_ver, BUF_SIZE, old_date, BUF_SIZE, &old_rev);
 
-#if defined(__WATCOMC__) || defined(__MINGW32__)
+#if defined(__MINGW32__)
     snprintf(tmp, MAX_PATH,
 			 "\"%s\" parents --template {node}\\n{date}\\n{rev} > %s",
 			 hg_executable, cache_filename);

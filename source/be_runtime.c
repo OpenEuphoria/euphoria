@@ -453,7 +453,7 @@ void MainScreen()
 
 #if !defined(EBSD62)
 #undef matherr // avoid OpenWATCOM problem
-#if (defined(__WATCOMC__) || defined(EUNIX)) && !defined(EOW)
+#if defined(EUNIX) && !defined(EOW)
 int matherr(struct exception *err)   // 10.6 wants this
 #else
 int matherr(struct _exception *err)  // OW wants this
@@ -3361,10 +3361,6 @@ void RHS_Slice( object a, object start, object end)
 		endval = INT_VAL(end);
 	else if (IS_ATOM_DBL(end)) {
 		endval = (int)(DBL_PTR(end)->dbl);
-		 /* f.p.: if the double is too big for
-			a long WATCOM produces the most negative number. This
-			will be caught as a bad subscript, although the value in the
-			diagnostic will be wrong */
 	}
 	else
 		RTFatal("slice upper index is not an atom");
@@ -5460,10 +5456,6 @@ uintptr_t general_call_back(
 }
 
 uintptr_t (*general_ptr)() = (void *)&general_call_back;
-
-#ifdef __WATCOMC__
-#pragma off (check_stack);
-#endif
 
 #ifdef EOSX
 uintptr_t __cdecl osx_cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
