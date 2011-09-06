@@ -79,8 +79,6 @@ sequence trans_opt_def = {
 	{ "o",                0, GetMsgText(198,0), { HAS_PARAMETER, "filename" } },
 	{ "build-dir",        0, GetMsgText(197,0), { HAS_PARAMETER, "dir" } },
 	{ "rc-file",          0, GetMsgText(171,0), { HAS_PARAMETER, "filename" } },
-	{ "wat",              0, GetMsgText(178,0), { } },
-	{ "gcc",              0, GetMsgText(180,0), { } },
 	{ "com",              0, GetMsgText(181,0), { HAS_PARAMETER, "dir" } },
 	{ "cflags", 	      0, GetMsgText(323,0), { HAS_PARAMETER, "flags" } },
 	{ "lflags", 	      0, GetMsgText(324,0), { HAS_PARAMETER, "flags" } },
@@ -149,12 +147,6 @@ export procedure transoptions()
 
 			case "lflags" then
 				lflags = val
-
-			case "wat" then
-				compiler_type = COMPILER_WATCOM
-
-			case "gcc" then
-				compiler_type = COMPILER_GCC
 
 			case "com" then
 				compiler_dir = val
@@ -260,15 +252,6 @@ export procedure transoptions()
 		end switch
 	end for
 
-	if compiler_type != COMPILER_GCC and not equal(user_library,"") then
-		if not file_exists(canonical_path(user_library)) then
-			ShowMsg(2, 348, { user_library })
-			abort(1)
-		else
-			user_library = canonical_path(user_library)
-		end if
-	end if
-
 	if length(exe_name[D_NAME]) and not absolute_path(exe_name[D_NAME]) then
 		exe_name[D_NAME] = current_dir() & SLASH & exe_name[D_NAME]
 	end if
@@ -352,57 +335,9 @@ procedure InitBackEnd(integer c)
 
 	if c = 1 then
 		OpenCFiles()
-
+        
 		return
 	end if
-
-	if compiler_type = COMPILER_UNKNOWN then
-		if TWINDOWS then
-			compiler_type = COMPILER_WATCOM
-		elsif TUNIX then
-			compiler_type = COMPILER_GCC
-		end if
-	end if
-
-	switch compiler_type do
-	  	case COMPILER_GCC then
-			-- Nothing special we have to do for gcc
-			break -- to avoid empty block warning
-
-		case COMPILER_WATCOM then
-			wat_path = getenv("WATCOM")
-
-			if atom(wat_path) then
-				if build_system_type = BUILD_DIRECT then
-					-- We know the building process will fail when the translator starts
-					-- calling the compiler.  So, the process fails here.
-					CompileErr(159)
-				else
-					-- In this case, the user has to call something to compile after the
-					-- translation.  The user may set up the environment after the translation or
-					-- the environment may be on another machine on the network.
-					Warning(159, translator_warning_flag)
-				end if
-			elsif find(' ', wat_path) then
-				Warning( 214, translator_warning_flag)
-			elsif atom(getenv("INCLUDE")) then
-				Warning( 215, translator_warning_flag )
-			elsif not file_exists(wat_path & SLASH & "binnt" & SLASH & "wcc386.exe") then
-				if build_system_type = BUILD_DIRECT then
-					CompileErr( 352, {wat_path})
-				else
-					Warning( 352, translator_warning_flag, {wat_path})
-				end if
-			elsif match(upper(wat_path & "\\H;" & wat_path & "\\H\\NT"),
-				upper(getenv("INCLUDE"))) != 1
-			then
-				Warning( 216, translator_warning_flag, {wat_path,getenv("INCLUDE")} )
-			end if
-
-		case else
-			CompileErr(150)
-
-	end switch
 end procedure
 mode:set_init_backend( routine_id("InitBackEnd") )
 

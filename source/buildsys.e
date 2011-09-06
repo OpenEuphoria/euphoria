@@ -118,13 +118,7 @@ export integer build_system_type = BUILD_DIRECT
 
 export enum
 	COMPILER_UNKNOWN = 0,
-	COMPILER_GCC,
-	COMPILER_WATCOM
-
---**
--- Compiler type flag for this invocation
-
-export integer compiler_type = COMPILER_UNKNOWN
+	COMPILER_GCC
 
 --**
 -- Compiler directory (only used for a few compilers)
@@ -334,7 +328,8 @@ function adjust_for_build_file(sequence long_path)
     if atom(short_path) then
     	return short_path
     end if
-	if compiler_type = COMPILER_GCC and build_system_type != BUILD_DIRECT and 	TWINDOWS then
+    
+	if build_system_type != BUILD_DIRECT and TWINDOWS then
 		return windows_to_mingw_path(short_path)
 	else
 		return short_path
@@ -361,21 +356,14 @@ function setup_build()
 			l_names = { "eu", "eudbg" }
 		end if
 
-		-- We assume the platform the compiler will **build on** is the same
-		-- as the platform the compiler will **build for*.
-		if TUNIX or compiler_type = COMPILER_GCC then
-			l_ext = "a"
-			t_slash = "/"
-			if dll_option then
-				for i = 1 to length( l_names ) do
-					-- use the -fPIC compiled library
-					l_names[i] &= "so"
-				end for
-			end if
-		elsif TWINDOWS then
-			l_ext = "lib"
-			t_slash = "\\"
-		end if
+        l_ext = "a"
+        t_slash = "/"
+        if dll_option then
+            for i = 1 to length( l_names ) do
+                -- use the -fPIC compiled library
+                l_names[i] &= "so"
+            end for
+        end if
 
 		object eudir = get_eucompiledir()
 		if not file_exists(eudir) then
@@ -384,21 +372,19 @@ function setup_build()
 		end if
 		for tk = 1 to length(l_names) label "translation kind" do
 			user_library = eudir & sprintf("%sbin%s%s.%s",{t_slash, t_slash, l_names[tk],l_ext})
-			if TUNIX or compiler_type = COMPILER_GCC then
-				ifdef UNIX then
-					sequence locations = { "/usr/local/lib/%s.a", "/usr/lib/%s.a"}
-					if match( "/share/euphoria", eudir ) then
-						-- EUDIR probably not set, look in /usr/local/lib or /usr/lib
-						for i = 1 to length(locations) do
-							if file_exists( sprintf(locations[i],{l_names[tk]}) ) then
-								user_library = sprintf(locations[i],{l_names[tk]})
-								exit "translation kind"
-							end if
-						end for
-					end if
-				end ifdef -- The translation or interpretation of the translator
-				          -- is done on a UNIX computer
-			end if -- compiling for UNIX and/or with GCC
+            ifdef UNIX then
+                sequence locations = { "/usr/local/lib/%s.a", "/usr/lib/%s.a"}
+                if match( "/share/euphoria", eudir ) then
+                    -- EUDIR probably not set, look in /usr/local/lib or /usr/lib
+                    for i = 1 to length(locations) do
+                        if file_exists( sprintf(locations[i],{l_names[tk]}) ) then
+                            user_library = sprintf(locations[i],{l_names[tk]})
+                            exit "translation kind"
+                        end if
+                    end for
+                end if
+            end ifdef -- The translation or interpretation of the translator
+                      -- is done on a UNIX computer
 			if file_exists(user_library) then
 				exit "translation kind"
 			end if
@@ -407,11 +393,7 @@ function setup_build()
 	user_library = adjust_for_build_file(user_library)
 	
 	if TWINDOWS then
-		if compiler_type = COMPILER_WATCOM then
-			c_flags &= " /dEWINDOWS"
-		else
-			c_flags &= " -DEWINDOWS"
-		end if
+		c_flags &= " -DEWINDOWS"
 		
 		if dll_option then
 			exe_ext = ".dll"
@@ -434,100 +416,62 @@ function setup_build()
 		abort(1)
 	end if
 	
-	switch compiler_type do
-		case COMPILER_GCC then
-			c_exe = "gcc"
-			l_exe = "gcc"
-			obj_ext = "o"
+    c_exe = "gcc"
+    l_exe = "gcc"
+    obj_ext = "o"
 
-			if debug_option then
-				c_flags &= " -g3"
-			else
-				c_flags &= " -fomit-frame-pointer"
-			end if
+    if debug_option then
+        c_flags &= " -g3"
+    else
+        c_flags &= " -fomit-frame-pointer"
+    end if
 
-			if dll_option then
-				c_flags &= " -fPIC"
-			end if
+    if dll_option then
+        c_flags &= " -fPIC"
+    end if
 
-            ifdef EU4_0 then 
-				c_flags &= sprintf(" -c -w -fsigned-char -O2 -m%d -I%s -ffast-math",
-				{ 4 * 8, adjust_for_build_file(get_eucompiledir()) })
-			elsedef
-				c_flags &= sprintf(" -c -w -fsigned-char -O2 -m%d -I%s -ffast-math",
-				{ sizeof( C_POINTER ) * 8, adjust_for_build_file(get_eucompiledir()) })
-			end ifdef
-			
-			if TWINDOWS then
-				if mno_cygwin then
-					c_flags &= " -mno-cygwin"
-				end if
+    ifdef EU4_0 then 
+        c_flags &= sprintf(" -c -w -fsigned-char -O2 -m%d -I%s -ffast-math",
+        { 4 * 8, adjust_for_build_file(get_eucompiledir()) })
+    elsedef
+        c_flags &= sprintf(" -c -w -fsigned-char -O2 -m%d -I%s -ffast-math",
+        { sizeof( C_POINTER ) * 8, adjust_for_build_file(get_eucompiledir()) })
+    end ifdef
+    
+    if TWINDOWS then
+        if mno_cygwin then
+            c_flags &= " -mno-cygwin"
+        end if
 
-				if not con_option then
-					c_flags &= " -mwindows"
-				end if
-			end if
+        if not con_option then
+            c_flags &= " -mwindows"
+        end if
+    end if
 
-			ifdef EU4_0 then
-				l_flags = sprintf( " %s -m%d", { adjust_for_build_file(user_library), 4 * 8 })
-			elsedef			
-				l_flags = sprintf( " %s -m%d", { adjust_for_build_file(user_library), sizeof( C_POINTER ) * 8 })
-			end ifdef
+    ifdef EU4_0 then
+        l_flags = sprintf( " %s -m%d", { adjust_for_build_file(user_library), 4 * 8 })
+    elsedef			
+        l_flags = sprintf( " %s -m%d", { adjust_for_build_file(user_library), sizeof( C_POINTER ) * 8 })
+    end ifdef
 
-			if dll_option then
-				l_flags &= " -shared "
-			end if
+    if dll_option then
+        l_flags &= " -shared "
+    end if
 
-			if TLINUX then
-				l_flags &= " -ldl -lm -lpthread"
-			elsif TBSD then
-				l_flags &= " -lm -lpthread"
-			elsif TOSX then
-				l_flags &= " -lresolv"
-			elsif TWINDOWS then
-				if mno_cygwin then
-					l_flags &= " -mno-cygwin"
-				end if
-			end if
-			
-			-- input/output
-			rc_comp = "windres -DSRCDIR=\"" & adjust_for_build_file(current_dir()) & "\" [1] -O coff -o [2]"
-			
-		case COMPILER_WATCOM then
-			c_exe = "wcc386"
-			l_exe = "wlink"
-			obj_ext = "obj"
-
-			if debug_option then
-				c_flags = " /d3"
-				l_flags_begin &= " DEBUG ALL "
-			end if
-
-			l_flags &= sprintf(" OPTION STACK=%d ", { total_stack_size })
-			l_flags &= sprintf(" COMMIT STACK=%d ", { total_stack_size })
-			l_flags &= " OPTION QUIET OPTION ELIMINATE OPTION CASEEXACT"
-
-			if dll_option then
-				c_flags &= " /bd /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /I" & compile_dir 
-				l_flags &= " SYSTEM NT_DLL initinstance terminstance"
-			else
-				c_flags &= " /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /I" & compile_dir
-				if con_option then
-					-- SYSTEM NT *MUST* come first, otherwise memory dump
-					l_flags = " SYSTEM NT" & l_flags
-				else
-					l_flags = " SYSTEM NT_WIN RUNTIME WINDOWS=4.0" & l_flags
-				end if
-			end if
-
-			l_flags &= sprintf(" FILE %s", { (user_library) })
-			
-			
-			-- resource file, executable file
-			rc_comp = "wrc -DSRCDIR=\"" & adjust_for_build_file(current_dir()) & "\" -q -fo=[2] -ad [1] [3]"
-		case else
-			CompileErr(43)
-	end switch
+    if TLINUX then
+        l_flags &= " -ldl -lm -lpthread"
+    elsif TBSD then
+        l_flags &= " -lm -lpthread"
+    elsif TOSX then
+        l_flags &= " -lresolv"
+    elsif TWINDOWS then
+        if mno_cygwin then
+            l_flags &= " -mno-cygwin"
+        end if
+    end if
+    
+    -- input/output
+    rc_comp = "windres -DSRCDIR=\"" & adjust_for_build_file(current_dir()) & "\" [1] -O coff -o [2]"
 
 	if length(cflags) then
 		-- if the user supplied flags, use those instead
@@ -552,56 +496,6 @@ procedure ensure_exename(sequence ext)
 		exe_name[D_NAME] = current_dir() & SLASH & file0 & ext
 		exe_name[D_ALTNAME] = adjust_for_command_line_passing(exe_name[D_NAME])
 	end if
-end procedure
-
---**
--- Write a objlink.lnk file for Watcom
-
-procedure write_objlink_file()
-	sequence settings = setup_build()
-	integer fh = open(output_dir & file0 & ".lnk", "wb")
-
-	ensure_exename(settings[SETUP_EXE_EXT])
-
-	if length(settings[SETUP_LFLAGS_BEGIN]) > 0 then
-		puts(fh, settings[SETUP_LFLAGS_BEGIN] & HOSTNL)
-	end if
-
-	for i = 1 to length(generated_files) do
-		if match(".o", generated_files[i]) then
-			if compiler_type = COMPILER_WATCOM then
-				puts(fh, "FILE ")
-			end if
-
-			puts(fh, generated_files[i] & HOSTNL)
-		end if
-	end for
-
-	if compiler_type = COMPILER_WATCOM then
-		printf(fh, "NAME '%s'" & HOSTNL, { exe_name[D_ALTNAME] })
-	end if
-
-	puts(fh, trim(settings[SETUP_LFLAGS] & HOSTNL))
-
-	if compiler_type = COMPILER_WATCOM and dll_option then
-		puts(fh, HOSTNL)
-
-		object s = SymTab[TopLevelSub][S_NEXT]
-		while s do
-			if eu:find(SymTab[s][S_TOKEN], RTN_TOKS) then
-				if is_exported( s ) then
-					printf(fh, "EXPORT %s='__%d%s@%d'" & HOSTNL,
-						   {SymTab[s][S_NAME], SymTab[s][S_FILE_NO],
-							SymTab[s][S_NAME], SymTab[s][S_NUM_ARGS] * 4})
-				end if
-			end if
-			s = SymTab[s][S_NEXT]
-		end while
-	end if
-
-	close(fh)
-
-	generated_files = append(generated_files, file0 & ".lnk")
 end procedure
 
 procedure write_makefile_srcobj_list(integer fh)
@@ -662,67 +556,29 @@ procedure write_makefile_full()
 	printf(fh, "CFLAGS = %s" & HOSTNL, { settings[SETUP_CFLAGS] })
 	printf(fh, "LINKER = %s" & HOSTNL, { settings[SETUP_LEXE] })
 	
-	if compiler_type = COMPILER_GCC then
-		printf(fh, "LFLAGS = %s" & HOSTNL, { settings[SETUP_LFLAGS] })
-	else
-		write_objlink_file()
-	end if
+	printf(fh, "LFLAGS = %s" & HOSTNL, { settings[SETUP_LFLAGS] })
 
 	write_makefile_srcobj_list(fh)
 	puts(fh, HOSTNL)
 	
-	if compiler_type = COMPILER_WATCOM then
-		printf(fh, "\"%s\" : $(%s_OBJECTS) %s" & HOSTNL, { 
-			exe_name[D_ALTNAME], upper(file0), user_library
-		})
-		printf(fh, "\t$(LINKER) @%s.lnk" & HOSTNL, { file0 })
-		if length(rc_file[D_ALTNAME]) and length(settings[SETUP_RC_COMPILER]) then
-			writef(fh, "\t" & settings[SETUP_RC_COMPILER], { rc_file[D_ALTNAME], res_file[D_ALTNAME], exe_name[D_ALTNAME] })
-		end if
-		puts(fh, HOSTNL)
-		printf(fh, "%s-clean : .SYMBOLIC" & HOSTNL, { file0 })
-		if length(res_file[D_ALTNAME]) then
-			printf(fh, "\tdel \"%s\"" & HOSTNL, { res_file[D_ALTNAME] })
-		end if
-		for i = 1 to length(generated_files) do
-			if match(".o", generated_files[i]) then
-				printf(fh, "\tdel \"%s\"" & HOSTNL, { generated_files[i] })
-			end if
-		end for
-		puts(fh, HOSTNL)
-		printf(fh, "%s-clean-all : .SYMBOLIC" & HOSTNL, { file0 })
-		printf(fh, "\tdel \"%s\"" & HOSTNL, { exe_name[D_ALTNAME] })
-		if length(res_file[D_ALTNAME]) then
-			printf(fh, "\tdel \"%s\"" & HOSTNL, { res_file[D_ALTNAME] })
-		end if
-		for i = 1 to length(generated_files) do
-			printf(fh, "\tdel \"%s\"" & HOSTNL, { generated_files[i] })
-		end for
-		puts(fh, HOSTNL)
-		puts(fh, ".c.obj : .autodepend" & HOSTNL)
-		puts(fh, "\t$(CC) $(CFLAGS) $<" & HOSTNL)
-		puts(fh, HOSTNL)
-
-	else
-		printf(fh, "%s: $(%s_OBJECTS) %s %s" & HOSTNL, { adjust_for_build_file(exe_name[D_ALTNAME]), upper(file0), user_library, rc_file[D_ALTNAME] })
-		if length(rc_file[D_ALTNAME]) then
-			writef(fh, "\t" & settings[SETUP_RC_COMPILER] & HOSTNL, { rc_file[D_ALTNAME], res_file[D_ALTNAME] })
-		end if
-		printf(fh, "\t$(LINKER) -o %s $(%s_OBJECTS) %s $(LFLAGS)" & HOSTNL, {
-			exe_name[D_ALTNAME], upper(file0), iif(length(res_file[D_ALTNAME]), res_file[D_ALTNAME], "") })
-		puts(fh, HOSTNL)
-		printf(fh, ".PHONY: %s-clean %s-clean-all" & HOSTNL, { file0, file0 })
-		puts(fh, HOSTNL)
-		printf(fh, "%s-clean:" & HOSTNL, { file0 })
-		printf(fh, "\trm -rf $(%s_OBJECTS) %s" & HOSTNL, { upper(file0), res_file[D_ALTNAME] })
-		puts(fh, HOSTNL)
-		printf(fh, "%s-clean-all: %s-clean" & HOSTNL, { file0, file0 })
-		printf(fh, "\trm -rf $(%s_SOURCES) %s %s" & HOSTNL, { upper(file0), res_file[D_ALTNAME], exe_name[D_ALTNAME] })
-		puts(fh, HOSTNL)
-		puts(fh, "%.o: %.c" & HOSTNL)
-		puts(fh, "\t$(CC) $(CFLAGS) $*.c -o $*.o" & HOSTNL)
-		puts(fh, HOSTNL)
-	end if
+    printf(fh, "%s: $(%s_OBJECTS) %s %s" & HOSTNL, { adjust_for_build_file(exe_name[D_ALTNAME]), upper(file0), user_library, rc_file[D_ALTNAME] })
+    if length(rc_file[D_ALTNAME]) then
+        writef(fh, "\t" & settings[SETUP_RC_COMPILER] & HOSTNL, { rc_file[D_ALTNAME], res_file[D_ALTNAME] })
+    end if
+    printf(fh, "\t$(LINKER) -o %s $(%s_OBJECTS) %s $(LFLAGS)" & HOSTNL, {
+        exe_name[D_ALTNAME], upper(file0), iif(length(res_file[D_ALTNAME]), res_file[D_ALTNAME], "") })
+    puts(fh, HOSTNL)
+    printf(fh, ".PHONY: %s-clean %s-clean-all" & HOSTNL, { file0, file0 })
+    puts(fh, HOSTNL)
+    printf(fh, "%s-clean:" & HOSTNL, { file0 })
+    printf(fh, "\trm -rf $(%s_OBJECTS) %s" & HOSTNL, { upper(file0), res_file[D_ALTNAME] })
+    puts(fh, HOSTNL)
+    printf(fh, "%s-clean-all: %s-clean" & HOSTNL, { file0, file0 })
+    printf(fh, "\trm -rf $(%s_SOURCES) %s %s" & HOSTNL, { upper(file0), res_file[D_ALTNAME], exe_name[D_ALTNAME] })
+    puts(fh, HOSTNL)
+    puts(fh, "%.o: %.c" & HOSTNL)
+    puts(fh, "\t$(CC) $(CFLAGS) $*.c -o $*.o" & HOSTNL)
+    puts(fh, HOSTNL)
 
 	close(fh)
 end procedure
@@ -751,20 +607,8 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 
 	ensure_exename(settings[SETUP_EXE_EXT])
 
-	if not link_only then
-		switch compiler_type do
-			case COMPILER_GCC then
-				if not silent then
-					ShowMsg(1, 176, {"GCC"})
-				end if
-
-			case COMPILER_WATCOM then
-				write_objlink_file()
-
-				if not silent then
-					ShowMsg(1, 176, {"Watcom"})
-				end if
-		end switch
+	if not link_only and not silent then
+        ShowMsg(1, 176, {"GCC"})
 	end if
 
 	if sequence(output_dir) and length(output_dir) > 0 then
@@ -823,7 +667,7 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 	end if
 
 	-- For MinGW the RC file gets compiled to a .res file and then put in the normal link line
-	if length(rc_file[D_ALTNAME]) and length(settings[SETUP_RC_COMPILER]) and compiler_type = COMPILER_GCC then
+	if length(rc_file[D_ALTNAME]) and length(settings[SETUP_RC_COMPILER]) then
 		cmd = text:format(settings[SETUP_RC_COMPILER], { rc_file[D_ALTNAME], res_file[D_ALTNAME] })
 		status = system_exec(cmd, 0)
 		if status != 0 then
@@ -834,22 +678,11 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 		end if
 	end if
 
-	switch compiler_type do
-		case COMPILER_WATCOM then
-			cmd = sprintf("%s @%s.lnk", { settings[SETUP_LEXE], file0 })
-
-		case COMPILER_GCC then
-			cmd = sprintf("%s -o %s %s %s %s", { 
-				settings[SETUP_LEXE], exe_name[D_ALTNAME], objs, 
-				res_file[D_ALTNAME],
-				settings[SETUP_LFLAGS]
-			})
-
-		case else
-			ShowMsg(2, 167, { compiler_type })
-			
-			goto "build_direct_cleanup"
-	end switch
+    cmd = sprintf("%s -o %s %s %s %s", { 
+        settings[SETUP_LEXE], exe_name[D_ALTNAME], objs, 
+        res_file[D_ALTNAME],
+        settings[SETUP_LFLAGS]
+    })
 
 	if not silent then
 		if not verbose then
@@ -867,18 +700,6 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 		goto "build_direct_cleanup"
 	end if
 	
-	-- For Watcom the rc file links in after the fact	
-	if length(rc_file[D_ALTNAME]) and length(settings[SETUP_RC_COMPILER]) and compiler_type = COMPILER_WATCOM then
-		cmd = text:format(settings[SETUP_RC_COMPILER], { rc_file[D_ALTNAME], res_file[D_ALTNAME], exe_name[D_ALTNAME] })
-		status = system_exec(cmd, 0)
-		if status != 0 then
-			ShowMsg(2, 187, { rc_file[D_NAME], exe_name[D_NAME] })
-			ShowMsg(2, 169, { status, cmd })
-			
-			goto "build_direct_cleanup"
-		end if
-	end if
-
 label "build_direct_cleanup"
 	if keep = 0 then
 		for i = 1 to length(generated_files) do
@@ -918,13 +739,8 @@ export procedure write_buildfile()
 			write_makefile_full()
 
 			if not silent then
-				sequence make_command
-				if compiler_type = COMPILER_WATCOM then
-					make_command = "wmake /f "
-				else
-					make_command = "make -f "
-				end if
-
+				sequence make_command = "make -f "
+                
 				ShowMsg(1, 170, { cfile_count + 2 })
 				
 				if sequence(output_dir) and length(output_dir) > 0 then

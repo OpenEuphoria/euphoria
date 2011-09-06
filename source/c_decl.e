@@ -1232,13 +1232,7 @@ export procedure add_file(sequence filename, sequence eu_filename = "")
 		return
 	end if
 	
-	sequence obj_fname = filename, src_fname = filename & ".c"
-
-	if compiler_type = COMPILER_WATCOM then
-		obj_fname &= ".obj"
-	else
-		obj_fname &= ".o"
-	end if
+	sequence obj_fname = filename & ".o", src_fname = filename & ".c"
 	
 	generated_files = append(generated_files, src_fname)
 	generated_files = append(generated_files, obj_fname)
