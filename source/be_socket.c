@@ -776,9 +776,12 @@ int eusock_getsock_option(int x)
 	);
 	sendto_fntype sendtoPtr;
 	WSACleanup_fntype  WSAGetLastErrorPtr;
-	
 	#ifndef __WATCOMC__
-		typedef int (*WSAFDIsSet_fntype)(
+		#ifndef PASCAL
+		// MinGW uses this for PASCAL calling convention
+		#define PASCAL
+		#endif
+		typedef int PASCAL (*WSAFDIsSet_fntype)(
 			SOCKET fd,
 			fd_set *set
 		);
@@ -786,7 +789,7 @@ int eusock_getsock_option(int x)
 		#undef FD_ISSET
 		#define FD_ISSET( p1, p2 )  (*WSAFDIsSetPtr)( (SOCKET)(p1), (fd_set *)(p2) )
 	#endif
-	
+
 	typedef u_short WSAAPI (*htons_fntype)(
 		__in  u_short hostshort
 	);
@@ -1758,9 +1761,11 @@ object eusock_select(object x)
 	}
 
 	result_p = NewS1(socks_pall->length);
+	
 	for (i=1; i <= socks_pall->length; i++) {
-		if (!IS_SOCKET(socks_pall->base[i]))
+		if (!IS_SOCKET(socks_pall->base[i])){
 			RTFatal("fourth argument to select must be a sequence of sockets");
+			}
 		tmp_socket = ATOM_INT_VAL(SEQ_PTR(socks_pall->base[i])->base[SOCK_SOCKET]);
 
 		RefDS(socks_pall->base[i]);
@@ -1770,10 +1775,9 @@ object eusock_select(object x)
 		tmp_sp->base[2] = FD_ISSET(tmp_socket, &readable) != 0;
 		tmp_sp->base[3] = FD_ISSET(tmp_socket, &writable) != 0;
 		tmp_sp->base[4] = FD_ISSET(tmp_socket, &errd) != 0;
-
+		
 		result_p->base[i] = MAKE_SEQ(tmp_sp);
 	}
-
 	return MAKE_SEQ(result_p);
 }
 
