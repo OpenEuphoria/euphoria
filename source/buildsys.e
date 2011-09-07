@@ -114,13 +114,6 @@ export enum
 export integer build_system_type = BUILD_DIRECT
 
 --**
--- Known/Supported compiler types
-
-export enum
-	COMPILER_UNKNOWN = 0,
-	COMPILER_GCC
-
---**
 -- Compiler directory (only used for a few compilers)
 
 export sequence compiler_dir = ""
