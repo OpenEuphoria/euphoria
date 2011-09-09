@@ -3249,6 +3249,15 @@ object machine(object opcode, object x)
 				// translated code doesn't do anything
 				return 0;
 #endif
+			case M_EXPAT_CREATE_PARSER:
+				return euexpat_create_parser(x);
+			
+			case M_EXPAT_RESET_PARSER:
+				return euexpat_reset_parser(x);
+			
+			case M_EXPAT_FREE_PARSER:
+				return euexpat_free_parser(x);
+			
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:
 				/* could be out-of-range int, or double, or sequence */

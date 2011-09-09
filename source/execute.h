@@ -444,6 +444,9 @@ struct char_cell {
 #define M_INFINITY           102
 #define M_CALL_STACK         103
 #define M_INIT_DEBUGGER      104
+#define M_EXPAT_CREATE_PARSER 105
+#define M_EXPAT_RESET_PARSER  106
+#define M_EXPAT_FREE_PARSER   107
 
 enum CLEANUP_TYPES {
 	CLEAN_UDT,
