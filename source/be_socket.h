@@ -1,5 +1,5 @@
 #ifndef BE_SOCKET_H_
-#define BE_SOCKTET_H_
+#define BE_SOCKET_H_
 
 #ifdef EWINDOWS
     #include <windows.h>
@@ -53,4 +53,5 @@ object eusock_listen(object x);
 object eusock_accept(object x);
 object eusock_getsockopt(object x);
 object eusock_setsockopt(object x);
-#endif
+
+#endif // BE_SOCKET_H_
