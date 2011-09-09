@@ -310,6 +310,7 @@ EU_BACKEND_RUNNER_FILES = \
 	backend.ex
 	
 PREFIXED_PCRE_OBJECTS = $(addprefix $(BUILDDIR)/pcre$(FPIC)/,$(PCRE_OBJECTS))
+PREFIXED_EXPAT_OBJECTS = $(BUILDDIR)/xmlparse.o $(BUILDDIR)/xmltok.o $(BUILDDIR)/xmlrole.o
 
 EU_BACKEND_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_decompress.o \
@@ -329,7 +330,8 @@ EU_BACKEND_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_symtab.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_socket.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_w.o \
-	$(PREFIXED_PCRE_OBJECTS)
+	$(PREFIXED_PCRE_OBJECTS) \
+	$(PREFIXED_EXPAT_OBJECTS)
 
 EU_LIB_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_decompress.o \
@@ -344,8 +346,8 @@ EU_LIB_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_runtime.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_task.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_callc.o \
-	$(PREFIXED_PCRE_OBJECTS)
-	
+	$(PREFIXED_PCRE_OBJECTS) \
+	$(PREFIXED_EXPAT_OBJECTS)
 
 EU_STD_INC = \
 	$(wildcard $(INCDIR)/std/*.e) \
@@ -603,6 +605,19 @@ $(BUILDDIR)/ver.cache : update-version-cache
 
 $(BUILDDIR)/include/be_ver.h:  $(BUILDDIR)/ver.cache
 	
+###############################################################################
+#
+# Expat
+#
+###############################################################################
+
+EXPAT_CFLAGS=-Wall -O2 -fexceptions -DHAVE_MEMMOVE=1
+$(BUILDDIR)/xmlparse.o :
+	gcc -I$(TRUNKDIR)/source/expat $(EXPAT_CFLAGS) -o $(BUILDDIR)/xmlparse.o -c $(TRUNKDIR)/source/expat/xmlparse.c
+$(BUILDDIR)/xmltok.o :
+	gcc -I$(TRUNKDIR)/source/expat $(EXPAT_CFLAGS) -o $(BUILDDIR)/xmltok.o -c $(TRUNKDIR)/source/expat/xmltok.c
+$(BUILDDIR)/xmlrole.o :
+	gcc -I$(TRUNKDIR)/source/expat $(EXPAT_CFLAGS) -o $(BUILDDIR)/xmlrole.o -c $(TRUNKDIR)/source/expat/xmlrole.c
 
 ###############################################################################
 #
