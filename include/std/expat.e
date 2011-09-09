@@ -18,7 +18,16 @@ enum
     M_EXPAT_CREATE_PARSER = 105,
     M_EXPAT_RESET_PARSER,
     M_EXPAT_FREE_PARSER,
-    M_EXPAT_PARSE
+    M_EXPAT_PARSE,
+    M_EXPAT_SET_CALLBACK,
+    M_EXPAT_GET_CALLBACK
+
+enum
+    START_ELEMENT_CALLBACK = 1,
+    END_ELEMENT_CALLBACK,
+    CHAR_DATA_CALLBACK,
+    DEFAULT_CALLBACK,
+    COMMENT_CALLBACK
 
 ------------------------------------------------------------------------------
 --
@@ -27,27 +36,52 @@ enum
 ------------------------------------------------------------------------------
 
 function start_element_handler(object userdata, object name, object atts)
-    printf(1, "start_element\n")
+    integer rid = get_start_element_callback(userdata)
+    
+    if rid >= 0 then
+        call_proc(rid, { peek_string(name), {} })
+    end if
+    
     return 0
 end function
 
 function end_element_handler(object userdata, object name)
-    printf(1, "end_element\n")
+    integer rid = get_end_element_callback(userdata)
+    
+    if rid >= 0 then
+        call_proc(rid, { peek_string(name) })
+    end if
+    
     return 0
 end function
 
 function char_data_handler(object userdata, object s, object len)
-    printf(1, "char_data\n")
+    integer rid = get_char_data_callback(userdata)
+    
+    if rid >= 0 then
+        call_proc(rid, { peek({ s, len }) })
+    end if
+    
     return 0
 end function
 
 function default_handler(object userdata, object s, object len)
-    printf(1, "default handler\n")
+    integer rid = get_default_callback(userdata)
+    
+    if rid >= 0 then
+        call_proc(rid, { peek({ s, len }) })
+    end if
+    
     return 0
 end function
 
 function comment_handler(object userdata, object data)
-    printf(1, "comment handler\n")
+    integer rid = get_comment_callback(userdata)
+    
+    if rid >= 0 then
+        call_proc(rid, { peek_string(data) })
+    end if
+    
     return 0
 end function
 
@@ -85,6 +119,84 @@ end function
 --****
 -- === Parsing
 
+--**
+-- Parse an XML string
+--
+
 public function parse(object parser, sequence buffer)
     return machine_func(M_EXPAT_PARSE, { parser, buffer })
+end function
+
+--****
+-- ==== Callbacks
+--
+
+--**
+-- Set the start element callback routine.
+
+public procedure set_start_element_callback(object parser, integer rid)
+    machine_func(M_EXPAT_SET_CALLBACK, { parser, START_ELEMENT_CALLBACK, rid })
+end procedure
+
+--**
+-- Set the end element callback routine.
+
+public procedure set_end_element_callback(object parser, integer rid)
+    machine_func(M_EXPAT_SET_CALLBACK, { parser, END_ELEMENT_CALLBACK, rid })
+end procedure
+
+--**
+-- Set the character data callback routine.
+
+public procedure set_char_data_callback(object parser, integer rid)
+    machine_func(M_EXPAT_SET_CALLBACK, { parser, CHAR_DATA_CALLBACK, rid })
+end procedure
+
+--**
+-- Set the default callback routine.
+
+public procedure set_default_callback(object parser, integer rid)
+    machine_func(M_EXPAT_SET_CALLBACK, { parser, DEFAULT_CALLBACK, rid })
+end procedure
+
+--**
+-- Set the comment callback routine.
+
+public procedure set_comment_callback(object parser, integer rid)
+    machine_func(M_EXPAT_SET_CALLBACK, { parser, COMMENT_CALLBACK, rid })
+end procedure
+
+--**
+-- Get the start element callback routine.
+
+public function get_start_element_callback(object parser)
+    return machine_func(M_EXPAT_GET_CALLBACK, { parser, START_ELEMENT_CALLBACK})
+end function
+
+--**
+-- Get the end element callback routine.
+
+public function get_end_element_callback(object parser)
+    return machine_func(M_EXPAT_GET_CALLBACK, { parser, END_ELEMENT_CALLBACK })
+end function
+
+--**
+-- Get the character data callback routine.
+
+public function get_char_data_callback(object parser)
+    return machine_func(M_EXPAT_GET_CALLBACK, { parser, CHAR_DATA_CALLBACK })
+end function
+
+--**
+-- Get the default callback routine.
+
+public function get_default_callback(object parser)
+    return machine_func(M_EXPAT_GET_CALLBACK, { parser, DEFAULT_CALLBACK })
+end function
+
+--**
+-- Get the comment callback routine.
+
+public function get_comment_callback(object parser)
+    return machine_func(M_EXPAT_GET_CALLBACK, { parser, COMMENT_CALLBACK })
 end function

@@ -3262,6 +3262,12 @@ object machine(object opcode, object x)
 			case M_EXPAT_PARSE:
 				return euexpat_parse(x);
 			
+			case M_EXPAT_SET_CALLBACK:
+				return euexpat_set_callback(x);
+			
+			case M_EXPAT_GET_CALLBACK:
+				return euexpat_get_callback(x);
+			
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:
 				/* could be out-of-range int, or double, or sequence */

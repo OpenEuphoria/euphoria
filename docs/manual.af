@@ -216,6 +216,9 @@ end ifdef
 ../include/std/stack.e
 ../include/std/scinot.e
 
+# Data Storage?
+../include/std/expat.e
+
 # Network Routines
 ../include/std/socket.e
 ../include/std/net/common.e

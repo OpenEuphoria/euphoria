@@ -448,6 +448,8 @@ struct char_cell {
 #define M_EXPAT_RESET_PARSER  106
 #define M_EXPAT_FREE_PARSER   107
 #define M_EXPAT_PARSE         108
+#define M_EXPAT_SET_CALLBACK  109
+#define M_EXPAT_GET_CALLBACK  110
 
 enum CLEANUP_TYPES {
 	CLEAN_UDT,

@@ -136,22 +136,17 @@ object euexpat_parse(object x)
     char *buffer = EMalloc(buffer_s->length + 1);
     MakeCString(buffer, base[2], buffer_s->length + 1);
     
-    printf("Parsing `%s`\n", buffer);
-    
     euexpat *p = ATOM_INT_VAL(base[1]);
     
     int parse_result = XML_Parse(p->p, buffer, buffer_s->length, 1);
     EFree(buffer);
     
     if (parse_result == 0) {
-        printf("Error\n");
         int error_code = XML_GetErrorCode(p->p);
         char *error_str = XML_ErrorString(error_code);
         int error_line = XML_GetCurrentLineNumber(p->p);
         int error_column = XML_GetCurrentColumnNumber(p->p);
         int error_byte_index = XML_GetCurrentByteIndex(p->p);
-        
-        printf("Code: %d, Str: %s, Line: %d, Col: %d\n", error_code, error_str, error_line, error_column);
         
         s1_ptr r = NewS1(5);
         r->base[1] = error_code;
@@ -164,4 +159,78 @@ object euexpat_parse(object x)
     }
     
     return parse_result;
+}
+
+#define START_ELEMENT_CALLBACK 1
+#define END_ELEMENT_CALLBACK   2
+#define CHAR_DATA_CALLBACK     3
+#define DEFAULT_CALLBACK       4
+#define COMMENT_CALLBACK       5
+
+/*
+ * set_callback(parser, callback_type, routine_id)
+ */
+
+object euexpat_set_callback(object x)
+{
+    object_ptr base = SEQ_PTR(x)->base;
+    
+    euexpat *p = ATOM_INT_VAL(base[1]);
+    int callback_type = ATOM_INT_VAL(base[2]);
+    int rtn_id = ATOM_INT_VAL(base[3]);
+    
+    switch (callback_type) {
+        case START_ELEMENT_CALLBACK:
+            p->start_element_handler = rtn_id;
+            break;
+        
+        case END_ELEMENT_CALLBACK:
+            p->end_element_handler = rtn_id;
+            break;
+        
+        case CHAR_DATA_CALLBACK:
+            p->char_data_handler = rtn_id;
+            break;
+        
+        case DEFAULT_CALLBACK:
+            p->default_handler = rtn_id;
+            break;
+        
+        case COMMENT_CALLBACK:
+            p->comment_handler = rtn_id;
+            break;
+    }
+    
+    return 0;
+}
+
+/*
+ * get_callback(parser, callback_type)
+ */
+
+object euexpat_get_callback(object x)
+{
+    object_ptr base = SEQ_PTR(x)->base;
+    
+    euexpat *p = ATOM_INT_VAL(base[1]);
+    int callback_type = ATOM_INT_VAL(base[2]);
+    
+    switch (callback_type) {
+        case START_ELEMENT_CALLBACK:
+            return p->start_element_handler;
+        
+        case END_ELEMENT_CALLBACK:
+            return p->end_element_handler;
+        
+        case CHAR_DATA_CALLBACK:
+            return p->char_data_handler;
+        
+        case DEFAULT_CALLBACK:
+            return p->default_handler;
+        
+        case COMMENT_CALLBACK:
+            return p->comment_handler;
+    }
+    
+    return -1;
 }
