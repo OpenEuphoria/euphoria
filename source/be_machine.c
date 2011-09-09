@@ -31,6 +31,7 @@
 #include "be_runtime.h"
 #include "be_symtab.h"
 #include "be_machine.h"
+#include "be_expat.h"
 #include "be_pcre.h"
 #include "be_task.h"
 #include "be_alloc.h"
@@ -3257,6 +3258,9 @@ object machine(object opcode, object x)
 			
 			case M_EXPAT_FREE_PARSER:
 				return euexpat_free_parser(x);
+			
+			case M_EXPAT_PARSE:
+				return euexpat_parse(x);
 			
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:

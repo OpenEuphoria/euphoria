@@ -18,8 +18,22 @@
 #define ATOM_INT_VAL(x) (int)(((((unsigned long)x) | 0xE0000000) == 0xA0000000) ? DBL_PTR(x)->dbl : x)
 
 /*
- * create_parser(encoding)
+ * create_parser(
+ *     encoding,
+ *     element_handler,
+ *     start_element_handler,
+ *     end_element_handler,
+ *     char_data_handler,
+ *     default_handler,
+ *     comment_handler)
  */
+
+#define PARSER                1
+#define START_ELEMENT_HANDLER 2
+#define END_ELEMENT_HANDLER   3
+#define CHAR_DATA_HANDLER     4
+#define DEFAULT_HANDLER       5
+#define COMMENT_HANDLER       6
 
 object euexpat_create_parser(object x)
 {
@@ -35,22 +49,39 @@ object euexpat_create_parser(object x)
     encoding   = EMalloc(encoding_s->length + 1);
     MakeCString(encoding, base[1], encoding_s->length + 1);
     
-    XML_Parser p = XML_ParserCreate(encoding);
-    
+    euexpat *p = EMalloc(sizeof(euexpat));
+    XML_Parser xp = XML_ParserCreate(encoding);
     EFree(encoding);
     
-	if ((uintptr_t) p > (uintptr_t)MAXINT)
-		ret = NewDouble((double)(uintptr_t)p);
+    p->start_element_handler = -1;
+    p->end_element_handler   = -1;
+    p->char_data_handler     = -1;
+    p->default_handler       = -1;
+    p->comment_handler       = -1;
+    
+	if ((uintptr_t) xp > (uintptr_t)MAXINT)
+		p->p = NewDouble((double)(uintptr_t) xp);
 	else
-		ret = (uintptr_t)p;
+		p->p = (uintptr_t) xp;
 	
+	if ((uintptr_t) p > (uintptr_t)MAXINT)
+		ret = NewDouble((double)(uintptr_t) p);
+	else
+		ret = (uintptr_t) p;
+    
+    XML_SetUserData(p->p, p);
+    XML_SetElementHandler(p->p, base[START_ELEMENT_HANDLER], base[END_ELEMENT_HANDLER]);
+    XML_SetCharacterDataHandler(p->p, base[CHAR_DATA_HANDLER]);
+    XML_SetDefaultHandler(p->p, base[DEFAULT_HANDLER]);
+    XML_SetCommentHandler(p->p, base[COMMENT_HANDLER]);
+    
 	return ret;
 }
 
 object euexpat_reset_parser(object x)
 {
     char *encoding;
-    XML_Parser p;
+    euexpat *p;
     
     s1_ptr encoding_s;
     object_ptr base;
@@ -66,7 +97,7 @@ object euexpat_reset_parser(object x)
     
     p = ATOM_INT_VAL(base[1]);
     
-    XML_ParserReset(p, encoding);
+    XML_ParserReset(p->p, encoding);
     
     EFree(encoding);
     
@@ -80,11 +111,57 @@ object euexpat_reset_parser(object x)
 object euexpat_free_parser(object x)
 {
     object parser = SEQ_PTR(x)->base[1];
-    XML_Parser p;
+    euexpat *p;
     
     p = ATOM_INT_VAL(parser);
     
-    XML_ParserFree(p);
+    XML_ParserFree(p->p);
+    EFree(p);
     
     return 0;
+}
+
+/*
+ * parse(parser, buffer)
+ */
+
+object euexpat_parse(object x)
+{
+    object_ptr base = SEQ_PTR(x)->base;
+    
+    if (!IS_SEQUENCE(base[2]))
+        RTFatal("second argument to parse must be a sequence");
+    
+    s1_ptr buffer_s = SEQ_PTR(base[2]);
+    char *buffer = EMalloc(buffer_s->length + 1);
+    MakeCString(buffer, base[2], buffer_s->length + 1);
+    
+    printf("Parsing `%s`\n", buffer);
+    
+    euexpat *p = ATOM_INT_VAL(base[1]);
+    
+    int parse_result = XML_Parse(p->p, buffer, buffer_s->length, 1);
+    EFree(buffer);
+    
+    if (parse_result == 0) {
+        printf("Error\n");
+        int error_code = XML_GetErrorCode(p->p);
+        char *error_str = XML_ErrorString(error_code);
+        int error_line = XML_GetCurrentLineNumber(p->p);
+        int error_column = XML_GetCurrentColumnNumber(p->p);
+        int error_byte_index = XML_GetCurrentByteIndex(p->p);
+        
+        printf("Code: %d, Str: %s, Line: %d, Col: %d\n", error_code, error_str, error_line, error_column);
+        
+        s1_ptr r = NewS1(5);
+        r->base[1] = error_code;
+        r->base[2] = NewString(error_str);
+        r->base[3] = error_line;
+        r->base[4] = error_column;
+        r->base[5] = error_byte_index;
+        
+        return MAKE_SEQ(r);
+    }
+    
+    return parse_result;
 }
