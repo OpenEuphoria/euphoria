@@ -90,7 +90,7 @@ end function
 --
 
 public function create(sequence encoding)
-    return machine_func(M_EXPAT_CREATE_PARSER, {
+    object o = machine_func(M_EXPAT_CREATE_PARSER, {
         encoding,
         call_back({'+', routine_id("start_element_handler")}),
         call_back({'+', routine_id("end_element_handler")}),
@@ -98,6 +98,10 @@ public function create(sequence encoding)
         call_back({'+', routine_id("default_handler")}),
         call_back({'+', routine_id("comment_handler")})
     })
+    
+    delete_routine(o, routine_id("free"))
+    
+    return o
 end function
 
 --**

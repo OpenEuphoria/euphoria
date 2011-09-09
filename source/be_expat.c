@@ -111,10 +111,7 @@ object euexpat_reset_parser(object x)
 object euexpat_free_parser(object x)
 {
     object parser = SEQ_PTR(x)->base[1];
-    euexpat *p;
-    
-    p = ATOM_INT_VAL(parser);
-    
+    euexpat *p = ATOM_INT_VAL(parser);
     XML_ParserFree(p->p);
     EFree(p);
     
