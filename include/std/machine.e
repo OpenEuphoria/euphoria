@@ -1045,6 +1045,36 @@ public function peek_wstring(atom addr)
 	return peek2u({addr, (ptr - addr) / 2})
 end function
 
+--**
+-- Return a sequence of strings starting from the supplied address.
+--
+-- Parameters:
+--   # ##addr## : an atom, the address of the string pointer array
+--
+-- Returns:
+--   The sequence containing all the strings from the string pointer array at ##addr##.
+--
+-- See Also:
+--   [[:Using Strings]], [[:Using Pointer Arrays]], [[:allocate_string_pointer_array]]
+
+public function peek_string_pointer_array(atom m)
+    sequence ary = {}
+    
+    while 1 do
+        atom this_m = peek4u(m)
+        
+        if this_m = 0 then
+            exit
+        end if
+        
+        ary = append(ary, peek_string(this_m))
+        
+        m += 4
+    end while
+    
+    return ary
+end function
+
 --****
 -- === Writing to Memory
 

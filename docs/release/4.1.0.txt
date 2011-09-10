@@ -21,3 +21,4 @@
 * -lib-pic switch for translator to specify the PIC runtime library to be used
 * [[ticket:166]] get_integer{16,32} will return -1 on EOF.
 * Added [[:deprecate]] keyword
+* Added [[:peek_string_pointer_array]]
