@@ -13,6 +13,7 @@ namespace expat
 
 include std/machine.e
 include std/dll.e
+include std/map.e
 
 enum
     M_EXPAT_CREATE_PARSER = 105,
@@ -39,7 +40,18 @@ function start_element_handler(object userdata, object name, object atts)
     integer rid = get_start_element_callback(userdata)
     
     if rid >= 0 then
-        call_proc(rid, { peek_string(name), {} })
+        object attrs_m = 0
+        sequence attrs = peek_string_pointer_array(atts)
+        
+        if length(attrs) > 0 then
+            attrs_m = map:new(length(attrs) / 2)
+            
+            for i = 1 to length(attrs) by 2 do
+                map:put(attrs_m, attrs[i], attrs[i+1])
+            end for
+        end if
+        
+        call_proc(rid, { peek_string(name), attrs_m })
     end if
     
     return 0
