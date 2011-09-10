@@ -20,5 +20,6 @@ object euexpat_free_parser(object x);
 object euexpat_parse(object x);
 object euexpat_set_callback(object x);
 object euexpat_get_callback(object x);
+object euexpat_get_current(object x);
 
 #endif // BE_EXPAT_H_

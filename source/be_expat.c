@@ -158,6 +158,24 @@ object euexpat_parse(object x)
     return parse_result;
 }
 
+/*
+ * get_current(parser)
+ */
+
+object euexpat_get_current(object x)
+{
+	object_ptr base = SEQ_PTR(x)->base;
+	
+	euexpat *p = ATOM_INT_VAL(base[1]);
+	
+	s1_ptr current_info = NewS1(3);
+	current_info->base[1] = XML_GetCurrentByteIndex(p->p);
+	current_info->base[2] = XML_GetCurrentLineNumber(p->p);
+	current_info->base[3] = XML_GetCurrentColumnNumber(p->p);
+	
+	return MAKE_SEQ(current_info);
+}
+
 #define START_ELEMENT_CALLBACK 1
 #define END_ELEMENT_CALLBACK   2
 #define CHAR_DATA_CALLBACK     3

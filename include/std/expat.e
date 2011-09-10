@@ -21,7 +21,8 @@ enum
     M_EXPAT_FREE_PARSER,
     M_EXPAT_PARSE,
     M_EXPAT_SET_CALLBACK,
-    M_EXPAT_GET_CALLBACK
+    M_EXPAT_GET_CALLBACK,
+    M_EXPAT_GET_CURRENT
 
 enum
     START_ELEMENT_CALLBACK = 1,
@@ -141,6 +142,23 @@ end function
 
 public function parse(object parser, sequence buffer)
     return machine_func(M_EXPAT_PARSE, { parser, buffer })
+end function
+
+--**
+-- Get current parsing information.
+--
+-- Parameters:
+--  # ##parser## - parser to get information about
+--
+-- Returns:
+--   A sequence containing
+--   # integer - Current byte index
+--   # integer - Current line number
+--   # integer - Current column number
+--
+
+public function current_info(object parser)
+    return machine_func(M_EXPAT_GET_CURRENT, { parser })
 end function
 
 --****

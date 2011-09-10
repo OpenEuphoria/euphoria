@@ -3268,6 +3268,9 @@ object machine(object opcode, object x)
 			case M_EXPAT_GET_CALLBACK:
 				return euexpat_get_callback(x);
 			
+			case M_EXPAT_GET_CURRENT:
+				return euexpat_get_current(x);
+			
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:
 				/* could be out-of-range int, or double, or sequence */
