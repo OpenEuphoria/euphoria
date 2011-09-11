@@ -371,6 +371,8 @@ constant StdErrMsgs = {
 	{353, "Use a non-standard library when building a shared object"},
 	{354, "External debugger"},
 	{355, "Use the -mno-cygwin flag with MinGW"},
+	{356, "Specify the target architecture (X86, X86_64, ARM)"},
+	{357, "Unknown architecture: [1].  Supported architectures are: [2]"},
 	$
 }
 

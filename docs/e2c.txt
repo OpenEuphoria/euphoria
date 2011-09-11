@@ -206,6 +206,17 @@ The resulting output can be compiled by the appropriate compiler on the
 specified platform, or, possibly a cross platform compiler, if you have
 one configured.
 
+==== -arch - Set architecture
+
+The translator generally produces cross platform code.  However, the euphoria
+source code may have different code for different architectures.  The default
+is to use the architecture of the translator binary that is being used.  To
+target a different architecture, you can use one of three supported architectures:
+
+* X86
+* X86_64
+* ARM
+
 ==== -makefile / -makefile-partial - Using makefiles
 
 You can optionally have the translator create a makefile that you can use

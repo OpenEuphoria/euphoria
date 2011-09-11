@@ -2760,6 +2760,25 @@ defined, but ##EU5## will be defined.
 * **BSD** - Platform is a BSD variant (FreeBSD, OpenBSD, NetBSD and OS X)
 * **UNIX** - Platform is any Unix
 
+==== Architecture Definitions
+
+Chip architecture:
+* **X86**
+* **X86_64**
+* **ARM**
+
+Size of pointers and euphoria objects.  This information can be derived from
+the chip architecture, but is provided for convenience.
+* **BITS32**
+* **BITS64**
+
+Size of long integers.  On Windows, long integers are always 32 bits.  On other
+platforms, long integers are the same size as pointers.  This information can
+also be derived from a combination of other architecture and platform ifdefs,
+but is provided for convenience.
+* **LONG32**
+* **LONG64**
+
 ==== Application Definitions
 
 * **EUI** - Application is being interpreted by ##eui##.

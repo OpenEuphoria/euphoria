@@ -121,6 +121,34 @@ elsedef -- xyz or qwe
 	test_fail("missed the elsifdef ABC or FOO")
 end ifdef -- zxy or qwe
 
+include std/dll.e
+ifdef X86 then
+	test_equal("sizeof C_POINTER X86", 4, sizeof( C_POINTER ) )
+elsifdef X86_64 then
+	test_equal("sizeof C_POINTER X86_64", 8, sizeof( C_POINTER ) )
+elsifdef ARM then
+	test_equal("sizeof C_POINTER ARM", 4, sizeof( C_POINTER ) )
+elsedef
+	test_fail("no valid arch ifdef exists")
+end ifdef
+
+ifdef BITS32 then
+	test_equal("sizeof C_POINTER BITS32", 4, sizeof( C_POINTER ) )
+elsifdef BITS64 then
+	test_equal("sizeof C_POINTER BITS64", 8, sizeof( C_POINTER ) )
+elsedef
+	test_fail("no valid BITS ifdef exists")
+end ifdef
+
+
+ifdef LONG32 then
+	test_equal("sizeof C_LONG", 4, sizeof( C_LONG ) )
+elsifdef LONG64 then
+	test_equal("sizeof C_LONG LONG64", 8, sizeof( C_LONG ) )
+elsedef
+	test_fail("no valid LONG ifdef exists")
+end ifdef
+
 -- ifdef then
 -- end ifdef
 -- 

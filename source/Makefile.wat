@@ -726,7 +726,7 @@ $(BUILDDIR)\$(OBJDIR)\main-.c : $(EU_TARGET)ex $(EU_TRANSLATOR_FILES) $(BUILDDIR
 	-$(RM) $(TRUNKDIR)\source\init-.c
 	-$(RM) $(TRUNKDIR)\source\main-.c
 	cd  $(BUILDDIR)\$(OBJDIR)
-	$(EC) $(TRANSDEBUG) -nobuild $(TRANS_CC_FLAG) -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) -c $(BUILDDIR)\eu.cfg $(TRUNKDIR)\source\$(EU_TARGET)ex $(LIBTARGET)
+	$(EC) $(TRANSDEBUG) -nobuild $(TRANS_CC_FLAG) -plat $(OS) -arch X86 $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) -c $(BUILDDIR)\eu.cfg $(TRUNKDIR)\source\$(EU_TARGET)ex $(LIBTARGET)
 	cd $(TRUNKDIR)\source
 
 $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex  $(BUILDDIR)\$(OBJDIR) $(EU_TRANSLATOR_FILES)
