@@ -11,7 +11,17 @@ include std/locale.e
 include std/text.e
 
 include common.e
-                                                       
+
+export constant
+	EXPECTED_VALID_MEMSTRUCT   = 358,
+	FP_NOT_SIGNED              = 359,
+	ONLY_DOUBLE_FP_LONG        = 360,
+	ONLY_INT_LONG_LONG         = 361,
+	NOT_A_MEMBER               = 362,
+	NOT_A_POINTER_OR_MEMSTRUCT = 363,
+	CANNOT_ASSIGN_NONPRIMATIVE = 364,
+	$
+
 -- don't change this please, but please look for -deleted- items before adding new options
 -- to the bottom of this list. Re-use -deleted- items.
 constant StdErrMsgs = {
@@ -374,13 +384,13 @@ constant StdErrMsgs = {
 	{355, "Use the -mno-cygwin flag with MinGW"},
 	{356, "Specify the target architecture (X86, X86_64, ARM)"},
 	{357, "Unknown architecture: [1].  Supported architectures are: [2]"},
-	{358, "Expected to see a valid memory structure type" },
-	{359, "Floating point data cannot have signed or unsigned modifiers"},
-	{360, "Only 'double' floating point type can have the 'long' modifier"},
-	{361, "Only 'int' or 'long' integers can have the 'long' modifier"},
-	{362, "[1] is not a member of memstruct or memunion [2]"},
-	{363, "Member is not a pointer or an embedded memstruct"},
-	{364, "Cannot assign to a non-primitive, non-pointer memstruct" },
+	{EXPECTED_VALID_MEMSTRUCT, "Expected to see a valid memory structure type" },
+	{FP_NOT_SIGNED, "Floating point data cannot have signed or unsigned modifiers"},
+	{ONLY_DOUBLE_FP_LONG, "Only 'double' floating point type can have the 'long' modifier"},
+	{ONLY_INT_LONG_LONG, "Only 'int' or 'long' integers can have the 'long' modifier"},
+	{NOT_A_MEMBER, "[1] is not a member of memstruct or memunion [2]"},
+	{NOT_A_POINTER_OR_MEMSTRUCT, "Member is not a pointer or an embedded memstruct"},
+	{CANNOT_ASSIGN_NONPRIMATIVE, "Cannot assign to a non-primitive, non-pointer memstruct" },
 	$
 }
 

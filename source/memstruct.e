@@ -98,7 +98,7 @@ export procedure MemStruct_declaration( integer scope )
 					end if
 					
 				else
-					CompileErr( 358 )
+					CompileErr( EXPECTED_VALID_MEMSTRUCT )
 				end if
 				-- reset the flags
 				pointer = 0
@@ -108,14 +108,14 @@ export procedure MemStruct_declaration( integer scope )
 			case MS_SIGNED then
 				if signed != -1 then
 					-- error...multiple signed modifiers
-					CompileErr( 358 )
+					CompileErr( EXPECTED_VALID_MEMSTRUCT )
 				end if
 				signed = 1
 			
 			case MS_UNSIGNED then
 				if signed != -1 then
 					-- error...multiple signed modifiers
-					CompileErr( 358 )
+					CompileErr( EXPECTED_VALID_MEMSTRUCT )
 				end if
 				signed = 0
 				
@@ -177,12 +177,12 @@ export procedure MemStruct_declaration( integer scope )
 					case MS_FLOAT, MS_DOUBLE, MS_EUDOUBLE then
 						if signed != - 1 then
 							-- can't have signed modifiers here
-							CompileErr( 359 )
+							CompileErr( FP_NOT_SIGNED )
 						end if
 						
 						if long and tid != MS_DOUBLE then
 							-- long modifier only for doubles
-							CompileErr( 360 )
+							CompileErr( ONLY_DOUBLE_FP_LONG )
 						elsif long then
 							tid = MS_LONGDOUBLE
 						end if
@@ -208,7 +208,7 @@ export procedure MemStruct_declaration( integer scope )
 				pointer = 1
 				
 			case else
-				CompileErr( 358 )
+				CompileErr( EXPECTED_VALID_MEMSTRUCT )
 		end switch
 	entry
 		tok = next_token()
@@ -457,7 +457,7 @@ function parse_symstruct( token tok )
 		
 	elsif tok[T_ID] != MEMSTRUCT and tok[T_ID] != QUALIFIED_MEMSTRUCT then
 		-- something else
-		CompileErr( 358 )
+		CompileErr( EXPECTED_VALID_MEMSTRUCT )
 	end if
 	
 	tok = next_token()
@@ -539,11 +539,11 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 						if SymTab[member][S_MEM_POINTER] then
 							tok_match( MULTIPLY )
 						else
-							CompileErr( 361 )
+							CompileErr( ONLY_INT_LONG_LONG )
 						end if
 					elsif lhs then
 						-- assignment of primitives only!
-						CompileErr( 362 )
+						CompileErr( NOT_A_MEMBER )
 					end if
 					peek_member( members, member, ref, lhs, names )
 					-- re-emit the last member for serialization
@@ -571,7 +571,7 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 					end if
 					member = resolve_member( tok[T_SYM], struct_sym )
 					if not member then
-						CompileErr( 362, { tok[T_SYM], sym_name( struct_sym ) } )
+						CompileErr( NOT_A_MEMBER, { tok[T_SYM], sym_name( struct_sym ) } )
 					end if
 					emit_opnd( member )
 				end if
@@ -600,7 +600,7 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 							peek_member( members, member, ref, lhs, names )
 							exit -- DONE!
 						else
-							CompileErr( 363 )
+							CompileErr( NOT_A_POINTER_OR_MEMSTRUCT )
 						end if
 					end if
 				end if
