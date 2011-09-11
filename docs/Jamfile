@@ -1,3 +1,0 @@
-SubDir TOP docs ;
-
-EuDoc manual : manual.af : euphoria.txt : template.html ;

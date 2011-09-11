@@ -1,3 +1,0 @@
-SubDir TOP tests ;
-
-EuTestDir test : $(SUBDIR) ;

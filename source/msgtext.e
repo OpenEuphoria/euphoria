@@ -370,14 +370,17 @@ constant StdErrMsgs = {
 	{352, "There is no watcom instalation under specified Watom Path [1]"},
 	{353, "Use a non-standard library when building a shared object"},
 	{354, "External debugger"},
-	{355, "Expected to see a valid memory structure type" },
-	{356, "Floating point data cannot have signed or unsigned modifiers"},
-	{357, "Only 'double' floating point type can have the 'long' modifier"},
-	{358, "Only 'int' or 'long' integers can have the 'long' modifier"},
-	{359, "[1] is not a member of memstruct or memunion [2]"},
-	{360, "Member is not a pointer or an embedded memstruct"},
-	{361, "Cannot assign to a non-primitive, non-pointer memstruct" },
-
+	
+	{355, "Use the -mno-cygwin flag with MinGW"},
+	{356, "Specify the target architecture (X86, X86_64, ARM)"},
+	{357, "Unknown architecture: [1].  Supported architectures are: [2]"},
+	{358, "Expected to see a valid memory structure type" },
+	{359, "Floating point data cannot have signed or unsigned modifiers"},
+	{360, "Only 'double' floating point type can have the 'long' modifier"},
+	{361, "Only 'int' or 'long' integers can have the 'long' modifier"},
+	{362, "[1] is not a member of memstruct or memunion [2]"},
+	{363, "Member is not a pointer or an embedded memstruct"},
+	{364, "Cannot assign to a non-primitive, non-pointer memstruct" },
 	$
 }
 
