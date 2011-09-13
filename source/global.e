@@ -75,7 +75,7 @@ export constant
 	S_CODE = 13 - get_backend()*4  -- IL code for proc/func/type
 
 -- canned tokens for defaulted routine parameters
--- for vars only:
+-- for vars only (although S_VTYPE is used for any kind of variable):
 export constant
 	
 	S_INITLEVEL = 14, -- nesting level where initialized or -1
