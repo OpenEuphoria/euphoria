@@ -779,7 +779,7 @@ int eusock_getsock_option(int x)
 	WSACleanup_fntype  WSAGetLastErrorPtr;
 	
 	#ifndef __WATCOMC__
-		typedef int (*WSAFDIsSet_fntype)(
+		typedef int WSAAPI (*WSAFDIsSet_fntype)(
 			SOCKET fd,
 			fd_set *set
 		);
