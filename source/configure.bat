@@ -283,9 +283,9 @@ echo -i %TRUNKDIR%\include >> %BUILDDIR%\eu.cfg
 echo -eudir %TRUNKDIR% >> %BUILDDIR%\eu.cfg
 echo [translate] >> %BUILDDIR%\eu.cfg
 echo -com %TRUNKDIR% >> %BUILDDIR%\eu.cfg
-echo -lib %BUILDDIR%\eu.lib >> %BUILDDIR%\eu.cfg
+echo -lib %FULL_BUILDDIR%\eu.lib >> %BUILDDIR%\eu.cfg
 echo [bind]  >> %BUILDDIR%\eu.cfg
-echo -eub %BUILDDIR%\eub >> %BUILDDIR%\eu.cfg
+echo -eub %FULL_BUILDDIR%\eub >> %BUILDDIR%\eu.cfg
 
 copy %BUILDDIR%\eu.cfg %TRUNKDIR%\source\eu.cfg
 
