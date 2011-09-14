@@ -1,10 +1,10 @@
 == Alternative Literal Sets
 
-=== The name_of Keyword
+=== The name_of Built-in
 
 There are times when a number, is better represented in some way other than using digits.  A number 3 is always just 3, whether we pass it to a DirectX function as a set of two flags or we compare it to the value of platform() to see if we are running on LINUX.  However, the representation "3" is not the best way to represent the value in the previous two cases.  This is why we have constants, and enumerated types.
  
-There are times when a programmer wants a way to display the variable names to the user, or in debugging, or in error reporting.  Having types keyed to some set of literals can also help catch at parse time a class of errors that would be missed by other forms of syntax checking.  The ##name_of## key word gives the programmer a way of converting a variable and its value to a literal that corresponds to its type.
+There are times when a programmer wants a way to display the variable names to the user, or in debugging, or in error reporting.  Having types keyed to some set of literals can also help catch at parse time a class of errors that would be missed by other forms of syntax checking.  The ##name_of## built-in gives the programmer a way of converting a variable and its value to a literal that corresponds to its type.
 
 Example 1:
 <eucode>

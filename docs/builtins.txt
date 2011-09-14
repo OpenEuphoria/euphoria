@@ -11,7 +11,7 @@ These methods are built into Euphoria and require no includes.
 | ##[[:getenv]]## | ##[[:gets]]## | ##[[:hash]]## | ##[[:head]]## |
 | ##[[:include_paths]]## | ##[[:insert]]## | ##[[:integer]]## | ##[[:length]]## |
 | ##[[:log]]## | ##[[:machine_func]]## | ##[[:machine_proc]]## | ##[[:match]]## |
-| ##[[:mem_copy]]## | ##[[:mem_set]]## | ##[[:not_bits]]## | ##[[:object]]## |
+| ##[[:mem_copy]]## | ##[[:mem_set]]## | ##[[:name_of]]## | ##[[:not_bits]]## | ##[[:object]]## |
 | ##[[:open]]## | ##[[:option_switches]]## | ##[[:or_bits]]## | ##[[:peek]]## |
 | ##[[:peek2s]]## | ##[[:peek2u]]## | ##[[:peek4s]]## | ##[[:peek4u]]## |
 | ##[[:peek_string]]## | ##[[:peeks]]## | ##[[:pixel]]## | ##[[:platform]]## |

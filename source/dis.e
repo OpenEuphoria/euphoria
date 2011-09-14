@@ -1615,6 +1615,9 @@ procedure save_il( sequence name )
 		end if
 	end for
 
+	if not length(slist) then
+		crash("SList is empty.")
+	end if
 	line_format = sprintf("%%%ds %%%dd : %%s\n", {max_width, floor(log( length(slist) ) / log(10) ) + 1})
 
 

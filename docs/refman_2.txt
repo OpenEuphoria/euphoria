@@ -1122,7 +1122,7 @@ as identifiers:
 !! |$$(k elsif           )|$$(k loop             )|$$(k with  )|
 !! |$$(k elsifdef        )|$$(k namespace        )|$$(k without  )|
 !! |$$(k end             )|$$(k not              )|$$(k xor  )|
-!! |$$(k entry           )|$$(k or               )|$$(k name_of)|
+!! |$$(k entry           )|$$(k or               )||
 !! |$$(k enum            )|$$(k override  )||
 !! |$$(k exit            )|$$(k procedure   )||
 
@@ -1143,7 +1143,7 @@ elsedef         label            while
 elsif           loop             with 
 elsifdef        namespace        without
 end             not              xor 
-entry           or               name_of
+entry           or               
 enum            override
 exit            procedure
 </eucode>
@@ -1516,7 +1516,7 @@ enum by / 2 A=5,B,C --> values are 5, 2.5, 1.25
 </eucode>
 
 When using type enum, you will be able to access the variable
-names later with the name_of keyword.  The name_of keyword gives you 
+names later with the name_of built-in.  The name_of built-in gives you 
 back the literal name of a value according to what type it is.
 See [[:Alternative Literal Sets]].
 

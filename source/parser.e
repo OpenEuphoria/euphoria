@@ -8,6 +8,10 @@ elsedef
 	without type_check
 end ifdef
 
+-- dev stage include
+include std/error.e
+--
+
 include euphoria/info.e
 
 include std/sequence.e
@@ -1152,6 +1156,104 @@ procedure Object_call( token tok )
 	end if
 end procedure
 
+with trace
+-- parse a name_of call...
+procedure Name_of_call( token tok )
+	object ls
+	integer i
+	object argument_tok = next_token(), argument, argument_type
+	sequence name_of_type_of_argument
+	
+	if find(argument_tok[T_ID],{
+		VARIABLE, QUALIFIED_VARIABLE})=0  then
+			puts(2,"Compiler Error: Supplied argument must be a single variable\n") 
+			abort(1)
+	end if
+	tok_match( RIGHT_ROUND )
+	UndefinedVar( argument_tok[T_SYM] )
+	-- must set name_of_type_of_argument to the name of the type.
+	if symtab_index( argument_tok[T_SYM] ) then
+		argument = SymTab[argument_tok[T_SYM]]
+		if length(argument) >= S_VTYPE then
+			if argument[S_VTYPE] = 0 then
+				puts(2,"Supplied variable does not have a type.")
+				abort(1)
+			end if
+			argument_type = SymTab[argument[S_VTYPE]]
+			name_of_type_of_argument = argument_type[S_NAME]
+		end if
+	end if
+	if not object(name_of_type_of_argument) then
+		puts(2,"Forward referencing not supported for name_of")
+		abort(1)
+	end if
+	i = find(name_of_type_of_argument,literal_sets[1])
+	if not i then
+		puts(2,"Compiler Error: Supplied value is not of an enumerated type.\n")
+	end if
+	ls = literal_sets[2][i]
+	symtab_index two = tmp_alloc()
+	SymTab[two][S_OBJ] = 2
+	if TRANSLATE then
+		SymTab[two][S_GTYPE] = TYPE_INTEGER
+		SymTab[two][S_OBJ_MIN] = 2
+		SymTab[two][S_OBJ_MAX] = 2
+	end if
+	symtab_index one = tmp_alloc()
+	SymTab[one][S_OBJ] = 1
+	-- [2]
+	if (literal_set:get_access_method(ls) = SEQUENCE_PAIR) then
+		-- -- ls_data[2][find(x,ls_data[1])]
+		symtab_index result, top_val = Top()
+		symtab_index ds =  literal_set:emit_literals_data_structure(ls)
+
+		-- stack has two things ( I suppose these are arguments to the functions called. )
+		sequence stack = {}
+		stack &= Pop()
+		stack &= Pop()
+		Push(stack[$])
+		Push(stack[$-1])
+
+		Push(ds)
+		Push(one)
+		
+		-- stack is :
+		--            one
+		--            ds
+		--            .
+		--            .
+		emit_op(RHS_SUBS)
+		
+		-- stack is :
+		--            new value (returned value)
+		--            .
+		--            .
+		result = Pop()
+		Push(argument_tok[T_SYM])
+		Push(result)
+		Push(one)
+		emit_op(FIND_FROM)
+		
+		result = Pop()
+		Push(ds)
+		Push(two)
+		emit_op(RHS_SUBS)
+		
+		Push(result)
+		emit_op(RHS_SUBS)
+		
+	elsif (literal_set:get_access_method(ls) = INDEX_MAP) then                                   
+		putback({RIGHT_SQUARE,0})
+			putback({VARIABLE,two})
+		putback({LEFT_SQUARE,0})
+		putback({RIGHT_SQUARE,0})
+		putback({VARIABLE,argument_tok[T_SYM]})
+		putback({LEFT_SQUARE,0})
+		putback({VARIABLE,literal_set:emit_literals_data_structure(ls)})
+		Expr()
+	end if
+end procedure
+
 procedure Function_call( token tok )
 --	token tok2, tok3
 	integer id, scope, opcode, e
@@ -1181,14 +1283,22 @@ procedure Function_call( token tok )
 	tok_match(LEFT_ROUND)
 	scope = SymTab[tok[T_SYM]][S_SCOPE]
 	opcode = SymTab[tok[T_SYM]][S_OPCODE]
-	if equal(SymTab[tok[T_SYM]][S_NAME],"object") and scope = SC_PREDEF then
-		-- handled specially to check for uninitialized variables
-		Object_call( tok )
-
+	if scope = SC_PREDEF then
+		switch SymTab[tok[T_SYM]][S_NAME] do
+			case "object" then
+				-- handled specially to check for uninitialized variables
+				Object_call( tok )
+			case "nameof", "name_of" then
+				Name_of_call( tok )
+				return
+			case else
+				ParseArgs(tok[T_SYM])
+		end switch
 	else
 		ParseArgs(tok[T_SYM])
 	end if
 
+	
 	if scope = SC_PREDEF then
 		emit_op(opcode)
 	else
@@ -3228,6 +3338,11 @@ function Global_declaration(integer type_ptr, integer scope)
 -- type_ptr is -1 if it is an enumerated list of constants (where the first is assigned one and
 -- each value is assumed to be one greater than the previous one unless assigned )
 -- type_ptr otherwise must point to a valid symbol index of a variable.
+--
+-- This function returns { step_kind, step_value, list of symbols }
+-- step_kind should be one of '+', '-', '/' or '*' (default '+')
+-- step_value can be any atom value (default 1)
+-- list of symbols should be valid sym_ptrs (not forward references).
 	sequence new_symbols
 	token tok
 	object tsym
@@ -3540,7 +3655,7 @@ function Global_declaration(integer type_ptr, integer scope)
 		prevtok = tok
 	end while
 	putback(tok)
-	return new_symbols
+	return {deltafunc, delta, new_symbols}
 end function
 
 procedure Private_declaration(symtab_index type_sym)
@@ -3869,6 +3984,7 @@ procedure Statement_list()
 end procedure
 forward_Statement_list = routine_id("Statement_list")
 
+token zero, one
 procedure SubProg(integer prog_type, integer scope, integer deprecated)
 -- parse a function, type or procedure declaration
 -- global is 1 if it's global
@@ -3878,11 +3994,20 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 	integer first_def_arg
 	integer again
 	integer type_enum
+	integer enum_all_constants = 1 -- should always be 1 but things change. 
 	object seq_sym
 	object i1_sym
 	sequence enum_syms = {}
 	integer type_enum_gline, real_gline
+	object ls = 0
+	
 
+	if not object(zero) then
+		zero = {VARIABLE,NewIntSym(0)}
+		SymTab[zero[2]][S_OBJ] = 0
+		one = {VARIABLE,NewIntSym(1)}
+		SymTab[one[2]][S_OBJ] = 1
+	end if	
 	LeaveTopLevel()
 	prog_name = next_token()
 	if prog_name[T_ID] = END_OF_FILE then
@@ -3891,19 +4016,20 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 	type_enum =  0
 	if prog_type = TYPE_DECL then
 		object tsym = prog_name[T_SYM]
-		if equal(sym_name(prog_name[T_SYM]),"enum") then
+		if equal(sym_name(tsym),"enum") then
 			-- Because enum types are both top level declarations and type routines, we
 			-- have to Enter and Leave the top level, fixing up the LineTable, in order
 			-- to prevent corruption of the LineTables
 			EnterTopLevel( FALSE )
 			type_enum_gline = gline_number
 			type_enum = 1
-			sequence seq_symbol
+			sequence seq_symbol, buf
 			prog_name = next_token()
 			if not find(prog_name[T_ID], ADDR_TOKS) then
 				CompileErr(25, {find_category(prog_name[T_ID])} )
 			end if
-			enum_syms = Global_declaration(-1, scope)
+			buf = Global_declaration(-1, scope)
+			enum_syms = buf[3]
 			seq_symbol = enum_syms
 			for i = 1 to length( enum_syms ) do
 				seq_symbol[i] = sym_obj(enum_syms[i])
@@ -3913,19 +4039,16 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 			-- range of the enum is accepted
 			-- as valid.
 			i1_sym = keyfind("i1",-1)
-			seq_sym = NewStringSym(seq_symbol)
 			putback(keyfind("return",-1))
 			putback({RIGHT_ROUND,0})
 			putback(i1_sym)
 			putback(keyfind("object",-1))
 			putback({LEFT_ROUND,0})
-			sequence enum_names = enum_syms
-			for i = 1 to length(enum_syms) do
-				enum_names[i] = sym_name(enum_syms[i])
-			end for
-			literal_set ls
-			ls = literal_set:new(sym_name(prog_name[T_SYM]), , {seq_symbol,enum_names})
-			literal_sets = append(literal_sets,ls)
+			ls = literal_set:new(sym_name(prog_name[T_SYM]), enum_syms, 0)
+			if compare(ls,0) > 0 then
+				literal_sets = {append(literal_sets[1], sym_name(prog_name[T_SYM])),
+								append(literal_sets[2],ls)}
+			end if
 			LeaveTopLevel()
 		end if
 	end if
@@ -3962,7 +4085,7 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 		p = NewEntry(SymTab[p][S_NAME], 0, 0, pt, h, sym, 0)
 		buckets[h] = p
 	end if
-
+	
 	Start_block( pt, p )
 
 	CurrentSub = p
@@ -3973,6 +4096,12 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 
 	SymTab[p][S_TOKEN] = pt
 
+	-- make defining constants of enum type also
+	-- of the this new type.
+	for sym_i = 1 to length(enum_syms) do
+		SymTab[enum_syms[sym_i]][S_VTYPE] = CurrentSub
+	end for
+	
 	if length(SymTab[p]) < SIZEOF_ROUTINE_ENTRY then
 		-- expand var entry to routine entry
 		SymTab[p] = SymTab[p] & repeat(0, SIZEOF_ROUTINE_ENTRY -
@@ -4152,18 +4281,100 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 	end if
 	putback(tok)
 
-	-- parse body of routine.
 	FuncReturn = FALSE
+	-- parse body of routine.
 	if type_enum then
-		-- Parse a list of statements
+		integer elist_base
 		stmt_nest += 1
 		tok_match(RETURN)
-		putback({RIGHT_ROUND,0})
-		putback({VARIABLE,seq_sym})
-		putback({COMMA,0})
-		putback(i1_sym)
-		putback({LEFT_ROUND,0})
-		putback(keyfind("find",-1))
+		-- Create the body ourselves
+		switch literal_set:get_access_method(ls)  do
+			case INDEX_MAP then
+				stmt_nest += 1
+				putback({IF,0})
+				putback({END,0})
+						-- 0
+					putback(zero)
+					putback({RETURN,0})
+				putback({THEN,0})
+				putback({RIGHT_ROUND,0})
+				putback(i1_sym)
+				putback({LEFT_ROUND,0})
+				putback(keyfind("integer",-1))
+				putback(keyfind("not",-1))
+				putback({IF,0})
+				stmt_nest -= 1
+				Statement_list()
+				
+				putback({IF,0})
+				putback({END,0})
+				putback(zero)
+				putback({RETURN,0})
+				putback({ELSE,0})
+				if not literal_set:is_continuous(ls) or not literal_set:is_monotonic(ls) then
+				-- ls_data[x][1]
+					-- [1]
+					putback({RIGHT_SQUARE,0})
+						putback(one)
+					putback({LEFT_SQUARE,0})
+					putback({RIGHT_SQUARE,0})
+						putback(i1_sym)
+					putback({LEFT_SQUARE,0})
+					putback({VARIABLE,literal_set:get_data_structure_symbol(ls)})
+					putback({RETURN,0})
+					putback({THEN,0})
+					putback({RIGHT_ROUND,0})					
+					putback({RIGHT_SQUARE,0})
+						putback(i1_sym)
+					putback({LEFT_SQUARE,0})
+					putback({VARIABLE,literal_set:get_data_structure_symbol(ls)})
+					putback({LEFT_ROUND,0})
+					putback(keyfind("sequence",-1))
+					putback({AND,0})
+				else
+					-- x-ls_minimum+1
+					putback(one)
+					putback({PLUS,0})
+					putback({VARIABLE,literal_set:get_minimal(ls)})
+					putback({MINUS,0})
+					putback(i1_sym)
+					putback({RETURN,0})
+					putback({THEN,0})
+				end if
+				
+				putback({VARIABLE,literal_set:get_maximal(ls)})
+				putback({LESSEQ,0})
+				putback(i1_sym)
+				putback({AND,0})
+				putback(i1_sym)
+				putback({LESSEQ,0})
+				putback({VARIABLE,literal_set:get_minimal(ls)})
+				putback({IF,0})
+				stmt_nest -= 1
+				Statement_list()
+				
+				-- 0
+				putback(zero)
+				
+
+			case SEQUENCE_PAIR then
+				-- find(x,ls_data[1])
+				putback({RIGHT_ROUND,0})
+					putback({RIGHT_SQUARE,0})
+					putback(one)
+					putback({LEFT_SQUARE,0})
+				putback({VARIABLE,literal_set:emit_literals_data_structure(ls)})
+				putback({COMMA,0})
+				putback(i1_sym)
+				putback({LEFT_ROUND,0})
+				putback(keyfind("find",-1))
+				-- putback({NOTEQ,0})
+				-- putback({RIGHT_ROUND,0})
+				-- putback(i1_sym)
+				-- putback({LEFT_ROUND,0})
+				-- putback(keyfind("object",-1))				
+				-- putback(keyfind("not",-1))
+		end switch
 		if not TRANSLATE then
 			if OpTrace then
 				emit_op(ERASE_PRIVATE_NAMES)
@@ -4177,7 +4388,11 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 		stmt_nest -= 1
 		InitDelete()
 		flush_temps()
+		if literal_set:get_access_method(ls) = INDEX_MAP then
+			tok_match(END)
+		end if
 	else
+		-- Parse a list of statements
 		Statement_list()
 		-- parse routine end.
 		tok_match(END)
@@ -4232,6 +4447,34 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 		SymTab[last_sym][S_NEXT] = enum_syms[1]
 		last_sym = enum_syms[$]
 		SymTab[last_sym][S_NEXT] = 0
+	end if
+
+	if type_enum and 0 then -- disabled until completed.
+		symtab_index name_of_literal
+		sequence name_of_names
+		sequence name_of_syms
+		switch get_access_method(ls) do
+			case INDEX_MAP then
+				name_of_literal = NewEntry("__" & prog_name[T_SYM], 0, 0, VARIABLE, h, buckets[h], 0)
+				SymTab[name_of_literal][S_MODE] = M_CONSTANT
+				name_of_names = repeat(0,length(enum_syms))
+				name_of_syms  = repeat(0,length(enum_syms))
+				for i = 1 to length(enum_syms) do
+					name_of_names[sym_obj(enum_syms[i])] = sym_name(enum_syms[i])
+					name_of_syms[sym_obj(enum_syms[i])] = enum_syms[i]
+				end for
+				if TRANSLATE then
+					SymTab[name_of_literal][S_OBJ_MIN] = name_of_names
+					SymTab[name_of_literal][S_OBJ_MAX] = name_of_names
+				end if
+				SymTab[name_of_literal][S_OBJ] = name_of_names
+				emit_op(RIGHT_BRACE_N)
+				-- emit: length of enum_syms
+				-- the various symbols from name_of_syms
+				-- emit the new symbol name_of_literals
+			case else
+				crash("Not yet implemented.")
+		end switch
 	end if
 end procedure
 
