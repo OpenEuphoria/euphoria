@@ -104,7 +104,7 @@ SSH="ssh -C"
 HG="hg"
 
 echo CONFIGURE_PARAMS=$@ >> "$PREFIX"${CONFIG_FILE}
-
+PLAT=""
 # parameters
 while [ "$1" != "" ]; do
     case $1 in
@@ -115,7 +115,7 @@ while [ "$1" != "" ]; do
 		fi
 		TARGET=E$VAL
 
-		echo "PLAT=$VAL" >> "$PREFIX"${CONFIG_FILE}
+		PLAT=$VAL
 		;;
 
 	--watcom )
@@ -472,10 +472,15 @@ echo -eudir $CYPTRUNKDIR >> $BUILDDIR/eu.cfg
 echo -i $CYPTRUNKDIR/include >> $BUILDDIR/eu.cfg
 
 echo "[translate]" >> $BUILDDIR/eu.cfg
+if [ x"$PLAT" != x"" ]; then
+	echo "-plat" $PLAT  >> $BUILDDIR/eu.cfg
+fi
+echo "-$XLTTARGETCC " >> $BUILDDIR/eu.cfg
+echo "-con " >> $BUILDDIR/eu.cfg
 echo "-com" $CYPTRUNKDIR >> $BUILDDIR/eu.cfg
 echo "-lib" $CYPBUILDDIR/eu.a >> $BUILDDIR/eu.cfg
 echo "-lib-pic" $CYPBUILDDIR/euso.a >> $BUILDDIR/eu.cfg
 echo "[bind]"  >> $BUILDDIR/eu.cfg
 echo "-eub" $CYPBUILDDIR/eub >> $BUILDDIR/eu.cfg
 
-cp $BUILDDIR/eu.cfg $TRUNKDIR/source/eu.cfg
+rm -f $TRUNKDIR/source/eu.cfg
