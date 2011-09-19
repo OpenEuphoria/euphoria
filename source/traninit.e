@@ -96,6 +96,7 @@ sequence trans_opt_def = {
 	{ "silent",           0, GetMsgText(177,0), { } },
 	{ "verbose",	      0, GetMsgText(319,0), { } },
 	{ "no-cygwin",        0, GetMsgText(355,0), { } },
+	{ "arch",             0, GetMsgText(356),   { HAS_PARAMETER, "architecture" } },
 	$
 }
 
@@ -256,6 +257,9 @@ export procedure transoptions()
 			
 			case "no-cygwin" then
 				mno_cygwin = 1
+			
+			case "arch" then
+				set_target_arch( upper( val ) )
 			
 		end switch
 	end for

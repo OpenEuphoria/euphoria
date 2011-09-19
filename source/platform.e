@@ -12,6 +12,9 @@ end ifdef
 include std/os.e
 include std/text.e
 include std/io.e
+include std/dll.e
+
+include msgtext.e
 
 public constant
 	ULINUX = LINUX,
@@ -29,7 +32,11 @@ public integer
 	IBSD     = 0, TBSD     = 0,
 	IOSX     = 0, TOSX     = 0,
 	IOPENBSD = 0, TOPENBSD = 0,
-	INETBSD  = 0, TNETBSD  = 0
+	INETBSD  = 0, TNETBSD  = 0,
+	IX86     = 0, TX86     = 0,
+	IX86_64  = 0, TX86_64  = 0,
+	IARM     = 0, TARM     = 0,
+	$
 
 -- operating system:
 ifdef WINDOWS then
@@ -79,6 +86,27 @@ elsedef
 	public sequence HOSTNL = "\r\n" -- may change if cross-translating
 end ifdef
 
+ifdef ARM then
+	IARM = 1
+elsifdef X86 then
+	IX86 = 1
+elsifdef X86_64 then
+	IX86_64 = 1
+elsedef
+	-- building with earlier versions needs this:
+	if sizeof( dll:C_POINTER ) = 4 then
+		-- could technically be ARM here, but we'll default to the most common case:
+		IX86 = 1
+	else
+		IX86_64 = 1
+	end if
+end ifdef
+
+TX86    = IX86
+TX86_64 = IX86_64
+TARM    = IARM
+
+
 integer ihost_platform = platform()
 public function host_platform()
 	return ihost_platform
@@ -109,6 +137,32 @@ public procedure set_host_platform(atom plat)
 	else
 		HOSTNL = "\r\n"
 	end if
+end procedure
+
+public procedure set_target_arch( sequence arch )
+	IX86    = 0
+	TX86    = 0
+	IX86_64 = 0
+	TX86_64 = 0
+	IARM    = 0
+	TARM    = 0
+	switch arch do
+		case "X86", "IX86" then
+			IX86    = 1
+			TX86    = 1
+		
+		case "X86_64", "IX86_64" then
+			IX86_64 = 1
+			TX86_64 = 1
+		
+		case "ARM" then
+			IARM = 1
+			TARM = 1
+		
+		case else
+			ShowMsg( 2, 357, { arch, "X86, X86_64, ARM" } )
+			abort( 1 )
+	end switch
 end procedure
 
 public function GetPlatformDefines(integer for_translator = 0)
@@ -180,6 +234,21 @@ public function GetPlatformDefines(integer for_translator = 0)
 			local_defines &= {"UNIX", "BSD", "FREEBSD"}
 		end if
 	end if
+	
+	if (IX86 and not for_translator) or (TX86 and for_translator) then
+		local_defines &= {"X86", "BITS32", "LONG32"}
+	
+	elsif (IX86_64 and not for_translator) or (TX86_64 and for_translator) then
+		local_defines &= {"X86_64", "BITS64"}
+		if (IWINDOWS and not for_translator) or (TWINDOWS and for_translator) then
+			local_defines &= {"LONG32"}
+		else
+			local_defines &= {"LONG64"}
+		end if
+	elsif (IARM and not for_translator) or (TARM and for_translator) then
+		local_defines &= {"ARM", "BITS32", "LONG64"}
+	end if
+	
 	-- So the translator knows what to strip from defines if translating
 	-- to a different platform
 	return { "_PLAT_START" } & local_defines & { "_PLAT_STOP" }

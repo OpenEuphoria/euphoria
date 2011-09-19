@@ -434,6 +434,11 @@ function setup_build()
 		abort(1)
 	end if
 	
+	integer ptr_size = 4
+	if TX86_64 then
+		ptr_size = 8
+	end if
+	
 	switch compiler_type do
 		case COMPILER_GCC then
 			c_exe = "gcc"
@@ -455,7 +460,7 @@ function setup_build()
 				{ 4 * 8, adjust_for_build_file(get_eucompiledir()) })
 			elsedef
 				c_flags &= sprintf(" -c -w -fsigned-char -O2 -m%d -I%s -ffast-math",
-				{ sizeof( C_POINTER ) * 8, adjust_for_build_file(get_eucompiledir()) })
+				{ ptr_size * 8, adjust_for_build_file(get_eucompiledir()) })
 			end ifdef
 			
 			if TWINDOWS then
@@ -471,7 +476,7 @@ function setup_build()
 			ifdef EU4_0 then
 				l_flags = sprintf( " %s -m%d", { adjust_for_build_file(user_library), 4 * 8 })
 			elsedef			
-				l_flags = sprintf( " %s -m%d", { adjust_for_build_file(user_library), sizeof( C_POINTER ) * 8 })
+				l_flags = sprintf( " %s -m%d", { adjust_for_build_file(user_library), ptr_size * 8 })
 			end ifdef
 
 			if dll_option then
