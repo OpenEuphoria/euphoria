@@ -300,6 +300,67 @@ export function NewStringSym(sequence s)
 	return p
 end function
 
+export function NewSequenceSym(sequence s)
+-- create a new temp that holds a sequence
+	symtab_index p, tp, prev
+	integer search_count
+
+	-- check if it exists already
+	tp = literal_init
+	prev = 0
+	search_count = 0
+	while tp != 0 do
+		search_count += 1
+		if search_count > SEARCH_LIMIT then  -- avoid n-squared algorithm
+			exit
+		end if
+		if equal(s, SymTab[tp][S_OBJ]) then
+			-- move it to first on list
+			if tp != literal_init then
+				SymTab[prev][S_NEXT] = SymTab[tp][S_NEXT]
+				SymTab[tp][S_NEXT] = literal_init
+				literal_init = tp
+			end if
+			return tp
+		end if
+		prev = tp
+		tp = SymTab[tp][S_NEXT]
+	end while
+
+	p = tmp_alloc()
+	SymTab[p][S_OBJ] = s
+
+	if TRANSLATE then
+		SymTab[p][S_MODE] = M_TEMP    -- override CONSTANT for compile
+		SymTab[p][S_GTYPE] = TYPE_SEQUENCE
+		SymTab[p][S_SEQ_LEN] = length(s)
+		SymTab[p][S_SEQ_ELEM] = TYPE_NULL
+		for i = 1 to length(s) do
+			if SymTab[p][S_SEQ_ELEM] = TYPE_NULL then
+				if sequence(s[i]) then
+					SymTab[p][S_SEQ_ELEM] = TYPE_SEQUENCE
+				else
+					SymTab[p][S_SEQ_ELEM] = TYPE_OBJECT
+				end if
+			elsif SymTab[p][S_SEQ_ELEM] = TYPE_SEQUENCE then
+				if not sequence(s[i]) then
+					SymTab[p][S_SEQ_ELEM] = TYPE_OBJECT
+				end if
+			end if
+		end for
+		c_printf("object _%d;\n", SymTab[p][S_TEMP_NAME])
+		c_hprintf("extern object _%d;\n", SymTab[p][S_TEMP_NAME])
+
+	else
+		SymTab[p][S_MODE] = M_CONSTANT
+
+	end if
+
+	SymTab[p][S_NEXT] = literal_init
+	literal_init = p
+	return p
+end function
+
 export function NewIntSym(integer int_val)
 -- New integer symbol
 -- int_val must not be too big for a Euphoria int

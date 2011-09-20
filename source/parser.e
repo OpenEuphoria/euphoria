@@ -113,6 +113,8 @@ sequence_of_tokens canned_tokens = {}   -- recording stack when parser is in rec
 
 integer canned_index = 0      -- previous playback position
 
+token zero, one, two  -- constants we often need.  Initialized on the first declaration of a type enum.
+
 procedure EndLineTable()
 -- put marker at end of current line number table
 	LineTable = append(LineTable, -2)
@@ -1192,30 +1194,13 @@ procedure Name_of_call( token tok )
 		puts(2,"Compiler Error: Supplied value is not of an enumerated type.\n")
 	end if
 	ls = literal_sets[2][i]
-	symtab_index two = tmp_alloc()
-	SymTab[two][S_OBJ] = 2
-	if TRANSLATE then
-		SymTab[two][S_GTYPE] = TYPE_INTEGER
-		SymTab[two][S_OBJ_MIN] = 2
-		SymTab[two][S_OBJ_MAX] = 2
-	end if
-	symtab_index one = tmp_alloc()
-	SymTab[one][S_OBJ] = 1
-	-- [2]
 	if (literal_set:get_access_method(ls) = SEQUENCE_PAIR) then
 		-- -- ls_data[2][find(x,ls_data[1])]
 		symtab_index result, top_val = Top()
 		symtab_index ds =  literal_set:emit_literals_data_structure(ls)
 
-		-- stack has two things ( I suppose these are arguments to the functions called. )
-		sequence stack = {}
-		stack &= Pop()
-		stack &= Pop()
-		Push(stack[$])
-		Push(stack[$-1])
-
 		Push(ds)
-		Push(one)
+		Push(one[T_SYM])
 		
 		-- stack is :
 		--            one
@@ -1231,12 +1216,12 @@ procedure Name_of_call( token tok )
 		result = Pop()
 		Push(argument_tok[T_SYM])
 		Push(result)
-		Push(one)
+		Push(one[T_SYM])
 		emit_op(FIND_FROM)
 		
 		result = Pop()
 		Push(ds)
-		Push(two)
+		Push(two[T_SYM])
 		emit_op(RHS_SUBS)
 		
 		Push(result)
@@ -3984,7 +3969,6 @@ procedure Statement_list()
 end procedure
 forward_Statement_list = routine_id("Statement_list")
 
-token zero, one
 procedure SubProg(integer prog_type, integer scope, integer deprecated)
 -- parse a function, type or procedure declaration
 -- global is 1 if it's global
@@ -4007,6 +3991,8 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 		SymTab[zero[2]][S_OBJ] = 0
 		one = {VARIABLE,NewIntSym(1)}
 		SymTab[one[2]][S_OBJ] = 1
+		two = {VARIABLE,NewIntSym(2)}
+		SymTab[two[2]][S_OBJ] = 2
 	end if	
 	LeaveTopLevel()
 	prog_name = next_token()
@@ -4368,12 +4354,6 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 				putback(i1_sym)
 				putback({LEFT_ROUND,0})
 				putback(keyfind("find",-1))
-				-- putback({NOTEQ,0})
-				-- putback({RIGHT_ROUND,0})
-				-- putback(i1_sym)
-				-- putback({LEFT_ROUND,0})
-				-- putback(keyfind("object",-1))				
-				-- putback(keyfind("not",-1))
 		end switch
 		if not TRANSLATE then
 			if OpTrace then
@@ -4449,29 +4429,28 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 		SymTab[last_sym][S_NEXT] = 0
 	end if
 
-	if type_enum and 0 then -- disabled until completed.
-		symtab_index name_of_literal
-		sequence name_of_names
-		sequence name_of_syms
+	if type_enum and 0 and TRANSLATE then -- disabled until completed.
+		symtab_index name_of_literal = literal_set:emit_literals_data_structure(ls)
+		sequence literal_map = literal_set:get_map(ls)
 		switch get_access_method(ls) do
-			case INDEX_MAP then
-				name_of_literal = NewEntry("__" & prog_name[T_SYM], 0, 0, VARIABLE, h, buckets[h], 0)
-				SymTab[name_of_literal][S_MODE] = M_CONSTANT
-				name_of_names = repeat(0,length(enum_syms))
-				name_of_syms  = repeat(0,length(enum_syms))
-				for i = 1 to length(enum_syms) do
-					name_of_names[sym_obj(enum_syms[i])] = sym_name(enum_syms[i])
-					name_of_syms[sym_obj(enum_syms[i])] = enum_syms[i]
+			case SEQUENCE_PAIR then
+				-- we have to make the following work at compile time here...
+				emit_opnd(name_of_literal)
+				emit_opnd(two)
+
+				emit_opnd(length(literal_map[1]))
+				for i = 1 to length(literal_map[1]) do
+					emit_opnd(literal_map[1][i])
 				end for
-				if TRANSLATE then
-					SymTab[name_of_literal][S_OBJ_MIN] = name_of_names
-					SymTab[name_of_literal][S_OBJ_MAX] = name_of_names
-				end if
-				SymTab[name_of_literal][S_OBJ] = name_of_names
 				emit_op(RIGHT_BRACE_N)
-				-- emit: length of enum_syms
-				-- the various symbols from name_of_syms
-				-- emit the new symbol name_of_literals
+
+				emit_opnd(length(literal_map[2]))
+				for i = 1 to length(literal_map[2]) do
+					emit_opnd(literal_map[2][i])
+				end for
+				emit_op(RIGHT_BRACE_N)
+
+				emit_op(RIGHT_BRACE_N)
 			case else
 				crash("Not yet implemented.")
 		end switch

@@ -240,7 +240,7 @@ export function new(
 	for i = 1 to length(syms) do
 		list = {append(list[1],sym_obj(syms[i])),append(list[2],sym_name(syms[i]))}
 	end for
-	symbol = NewStringSym(list)	
+	symbol = NewSequenceSym(list)	
 	-- Failing all else we can always use a pair of sequences with the
 	-- keys in the first sequence and the names in the other.
 	return {type_name, list, SEQUENCE_PAIR, all_integers, 0, min_sym, max_sym, symbol, 0, monotonic_flag}
@@ -273,6 +273,7 @@ export function get_literal_code(symtab_index sym)
 end function
 
 -- get a literal for the value at parse time
+-- if there is no enum literal it returns 0.
 export function get_literal(literal_set s, object value)
 	integer k
 	object name = 0
@@ -288,8 +289,9 @@ export function get_literal(literal_set s, object value)
 				name = s[MAP][value]
 			end if
 	end switch
-	if atom(name) then
-		return pretty_sprint(value)
-	end if
 	return name
+end function
+
+export function get_map(literal_set s)
+	return s[MAP]
 end function
