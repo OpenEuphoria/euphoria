@@ -3986,14 +3986,13 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 	object ls = 0
 	
 
-	if not object(zero) then
-		zero = {VARIABLE,NewIntSym(0)}
-		SymTab[zero[2]][S_OBJ] = 0
-		one = {VARIABLE,NewIntSym(1)}
-		SymTab[one[2]][S_OBJ] = 1
-		two = {VARIABLE,NewIntSym(2)}
-		SymTab[two[2]][S_OBJ] = 2
-	end if	
+	zero = {VARIABLE,NewIntSym(0)}
+	SymTab[zero[2]][S_OBJ] = 0
+	one = {VARIABLE,NewIntSym(1)}
+	SymTab[one[2]][S_OBJ] = 1
+	two = {VARIABLE,NewIntSym(2)}
+	SymTab[two[2]][S_OBJ] = 2
+
 	LeaveTopLevel()
 	prog_name = next_token()
 	if prog_name[T_ID] = END_OF_FILE then
