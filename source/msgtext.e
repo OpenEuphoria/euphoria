@@ -9,9 +9,10 @@ end ifdef
 include std/filesys.e
 include std/locale.e
 include std/text.e
-
+include global.e
 include common.e
-                                                       
+
+	
 -- don't change this please, but please look for -deleted- items before adding new options
 -- to the bottom of this list. Re-use -deleted- items.
 constant StdErrMsgs = {
@@ -373,6 +374,10 @@ constant StdErrMsgs = {
 	{355, "Use the -mno-cygwin flag with MinGW"},
 	{356, "Specify the target architecture (X86, X86_64, ARM)"},
 	{357, "Unknown architecture: [1].  Supported architectures are: [2]"},
+	{ERRMSG_NAME_OF_NOT_VARIABLE, "Compiler Error: Supplied argument must be a single variable"},
+	{ERRMSG_NAME_OF_NOT_UDT, "Supplied variable does not have a user defined type"},
+	{ERRMSG_FWD_REF_NOTSUPPORTED,"Forward referencing not supported for [1]"},
+	{ERRMSG_NAME_OF_NOT_ENUM_TYPE,"Compiler Error: Supplied value is not of an enumerated type"},
 	$
 }
 

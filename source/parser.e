@@ -1168,8 +1168,7 @@ procedure Name_of_call( token tok )
 	
 	if find(argument_tok[T_ID],{
 		VARIABLE, QUALIFIED_VARIABLE})=0  then
-			puts(2,"Compiler Error: Supplied argument must be a single variable\n") 
-			abort(1)
+			CompileErr( ERRMSG_NAME_OF_NOT_VARIABLE )
 	end if
 	tok_match( RIGHT_ROUND )
 	UndefinedVar( argument_tok[T_SYM] )
@@ -1177,21 +1176,20 @@ procedure Name_of_call( token tok )
 	if symtab_index( argument_tok[T_SYM] ) then
 		argument = SymTab[argument_tok[T_SYM]]
 		if length(argument) >= S_VTYPE then
-			if argument[S_VTYPE] = 0 then
-				puts(2,"Supplied variable does not have a type.")
-				abort(1)
+			if argument[S_VTYPE] = 0 or find(argument[S_VTYPE],{object_type,sequence_type,atom_type,integer_type}) then
+				CompileErr( ERRMSG_NAME_OF_NOT_UDT )
 			end if
 			argument_type = SymTab[argument[S_VTYPE]]
 			name_of_type_of_argument = argument_type[S_NAME]
 		end if
 	end if
 	if not object(name_of_type_of_argument) then
-		puts(2,"Forward referencing not supported for name_of")
+		CompileErr(ERRMSG_FWD_REF_NOTSUPPORTED,{"name_of"})
 		abort(1)
 	end if
 	i = find(name_of_type_of_argument,literal_sets[1])
 	if not i then
-		puts(2,"Compiler Error: Supplied value is not of an enumerated type.\n")
+		CompileErr( ERRMSG_NAME_OF_NOT_ENUM_TYPE )
 	end if
 	ls = literal_sets[2][i]
 	if (literal_set:get_access_method(ls) = SEQUENCE_PAIR) then

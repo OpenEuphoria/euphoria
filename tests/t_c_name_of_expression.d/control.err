@@ -1,0 +1,19 @@
+C:\Users\Shawn\Documents\development\hg\657\tests\t_c_name_of_expression.e:2
+<0358>:: Compiler Error: Supplied argument must be a single variable
+sequence name = name_of(4 * 12 / 3)
+                        ^
+
+
+--- Defined Words ---
+EU4
+EU4_1
+EU4_1_0
+WINDOWS
+WIN32
+CONSOLE
+X86
+BITS32
+LONG32
+E32
+EUI
+-------------------
