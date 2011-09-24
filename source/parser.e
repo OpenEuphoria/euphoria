@@ -1224,15 +1224,15 @@ procedure Name_of_call( token tok )
 		Push(result)
 		emit_op(RHS_SUBS)
 		
-	elsif (literal_set:get_access_method(ls) = INDEX_MAP) then                             
-		putback({RIGHT_SQUARE,0})
-			putback(two)
-		putback({LEFT_SQUARE,0})
-		putback({RIGHT_SQUARE,0})
-		putback(argument_tok)
-		putback({LEFT_SQUARE,0})
-		putback({VARIABLE,literal_set:emit_literals_data_structure(ls)})
-		Expr()
+	elsif (literal_set:get_access_method(ls) = INDEX_MAP) then
+
+		Push(literal_set:emit_literals_data_structure(ls))
+		Push(argument_tok[T_SYM])
+		emit_op(RHS_SUBS)
+		
+		Push(two[T_SYM])
+		emit_op(RHS_SUBS)
+		
 	end if
 end procedure
 
