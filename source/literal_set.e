@@ -10,7 +10,7 @@ include std/text.e
 include std/sequence.e
 include std/sort.e
 
-constant METHODS_OTHER_THAN_SEQUENCE_PAIR_ACTUALLY_WORK = 0
+constant METHODS_OTHER_THAN_SEQUENCE_PAIR_ACTUALLY_WORK = 1
 with trace
 with type_check
 

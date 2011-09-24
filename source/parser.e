@@ -1185,7 +1185,6 @@ procedure Name_of_call( token tok )
 	end if
 	if not object(name_of_type_of_argument) then
 		CompileErr(ERRMSG_FWD_REF_NOTSUPPORTED,{"name_of"})
-		abort(1)
 	end if
 	i = find(name_of_type_of_argument,literal_sets[1])
 	if not i then
@@ -1225,12 +1224,12 @@ procedure Name_of_call( token tok )
 		Push(result)
 		emit_op(RHS_SUBS)
 		
-	elsif (literal_set:get_access_method(ls) = INDEX_MAP) then                                   
+	elsif (literal_set:get_access_method(ls) = INDEX_MAP) then                             
 		putback({RIGHT_SQUARE,0})
-			putback({VARIABLE,two})
+			putback(two)
 		putback({LEFT_SQUARE,0})
 		putback({RIGHT_SQUARE,0})
-		putback({VARIABLE,argument_tok[T_SYM]})
+		putback(argument_tok)
 		putback({LEFT_SQUARE,0})
 		putback({VARIABLE,literal_set:emit_literals_data_structure(ls)})
 		Expr()
