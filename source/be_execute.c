@@ -2926,20 +2926,23 @@ void do_exec(intptr_t *start_pc)
 					b = top;
 
 #if INT64_MAX == INTPTR_MAX
-					if ( c == (int32_t) c ){
-						/* c is 32-bit */
-						if( (b <= INT31 && b >= INT31) ||
-							( c == (int16_t)c && b <= INT47 && b >= -INT47 ) ||
-							( c == (int8_t) c && b <= INT55 && b >= -INT55 ) ||
-							( b == (int32_t)b && c <= INT31 && c >= -INT31 )
-						){
+					{
+						int128_t product = (int128_t)c * (int128_t)b;
+						if( product == (int128_t)( a = (intptr_t)product ) ){
+							top = MAKE_INT( a );
+						}
+						else{
+							tpc = pc;
+							top = NewDouble( (eudouble) product );
+						}
+					}
+					
 #else
 					if (c == (short)c) {
 						/* c is 16-bit */
 						if ((b <= INT15 && b >= -INT15) ||
 							(c == (char)c && b <= INT23 && b >= -INT23) ||
 							(b == (short)b && c <= INT15 && c >= -INT15)) {
-#endif
 							top = MAKE_INT(c * b);
 						}
 						else {
@@ -2947,20 +2950,15 @@ void do_exec(intptr_t *start_pc)
 							top = (object)NewDouble(c * (eudouble)b);
 						}
 					}
-#if INT64_MAX == INTPTR_MAX
-					else if ( (b == (int16_t)b && c <= INT47 && c >= -INT47 ) ||
-						(b == (int8_t)b && c <= INT55 && c >= INT55 )
-						 ){
-#else
 					else if (b == (char)b && c <= INT23 && c >= -INT23) {
 						/* b is 8-bit, c is 23-bit */
-#endif
 						top = MAKE_INT(c * b);
 					}
 					else {
 						tpc = pc;
 						top = (object)NewDouble(c * (eudouble)b);
 					}
+#endif
 					STORE_TOP_I
 				}
 				else {

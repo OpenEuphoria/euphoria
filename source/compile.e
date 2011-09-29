@@ -1632,7 +1632,7 @@ function IntegerMultiply(integer a, integer b)
 		test_a = int64_mult_testa( range_a )
 	end if
 	
-	if atom( test_a ) then
+	if atom( test_a ) and SIZEOF_POINTER = 4 then
 		return dblcode
 	end if
 	
@@ -1681,17 +1681,15 @@ function IntegerMultiply(integer a, integer b)
 		if SIZEOF_POINTER = 4 then
 			multiply_code &= "@1 = NewDouble(@2 * (eudouble)@3);\n}\n"
 		else
-			multiply_code &= "long double ld = ((long double)@2) * ((long double)@3);\n"
-			multiply_code &= "if( ld <= (long double)MAXINT && ld >= (long double)MININT ){\n"
-			multiply_code &= "@1 = (object)ld;\n"
-			multiply_code &= "}\nelse{\n"
-			multiply_code &= "@1 = NewDouble( (eudouble)ld );\n"
+			multiply_code  = "{\nint128_t p128 = (int128_t)@2 * (int128_t)@3;\n"
+			multiply_code &= "if( p128 != (int128_t)(@1 = (intptr_t)p128) ){\n"
+			multiply_code &= "@1 = NewDouble( (eudouble)p128 );\n"
 			multiply_code &= "}\n}\n"
 		end if
 	else
 		multiply_code = "@1 = @2 * @3;\n"  -- no tests, must be integer
 	end if
-
+	
 	return multiply_code
 end function
 
@@ -3864,6 +3862,7 @@ procedure opMULTIPLY()
 		atom_type = TYPE_DOUBLE
 	end if
 	dblfn="*"
+	
 	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure

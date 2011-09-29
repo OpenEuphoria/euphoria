@@ -52,6 +52,8 @@
 
 #else
 
+typedef int int128_t __attribute__((mode(TI)));
+
 #define DBL_MASK     (uintptr_t)INT64_C( 0xA000000000000000 )
 #define SEQ_MASK     (uintptr_t)INT64_C( 0x8000000000000000 )
 #define DS_MASK      (uintptr_t)INT64_C( 0xE000000000000000 )
