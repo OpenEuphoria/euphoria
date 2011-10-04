@@ -777,11 +777,7 @@ int eusock_getsock_option(int x)
 	sendto_fntype sendtoPtr;
 	WSACleanup_fntype  WSAGetLastErrorPtr;
 	#ifndef __WATCOMC__
-		#ifndef PASCAL
-		// MinGW uses this for PASCAL calling convention
-		#define PASCAL
-		#endif
-		typedef int PASCAL (*WSAFDIsSet_fntype)(
+		typedef int WSAAPI (*WSAFDIsSet_fntype)(
 			SOCKET fd,
 			fd_set *set
 		);

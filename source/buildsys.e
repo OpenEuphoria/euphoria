@@ -292,6 +292,14 @@ export function adjust_for_command_line_passing(sequence long_path)
 -- WINDOWS sends all parameters as one string so and programs have to 
 -- split the command line string up itself.  So, we need this
 -- for programs that do not use escape characters for spaces.
+	integer slash
+	if compiler_type = COMPILER_GCC then
+		slash = '/'
+	elsif compiler_type = COMPILER_WATCOM then
+		slash = '\\'
+	else
+		slash = SLASH
+	end if
 	ifdef UNIX then
 		return long_path
 	elsifdef WINDOWS then
@@ -300,7 +308,7 @@ export function adjust_for_command_line_passing(sequence long_path)
 		if length(longs)=0 then
 			return long_path
 		end if
-		sequence short_path = longs[1] & SLASH
+		sequence short_path = longs[1] & slash
 		for i = 2 to length(longs) do
 			object files = dir(short_path)
 			integer file_location = 0
@@ -313,16 +321,16 @@ export function adjust_for_command_line_passing(sequence long_path)
 				else
 					short_path &= files[file_location][D_NAME]
 				end if
-				short_path &= SLASH
+				short_path &= slash
 			else
 				if not find(' ',longs[i]) then
-					short_path &= longs[i] & SLASH
+					short_path &= longs[i] & slash
 					continue
 				end if
 				return 0
 			end if
 		end for -- i
-		if short_path[$] = SLASH then
+		if short_path[$] = slash then
 			short_path = short_path[1..$-1]
 		end if
 		return short_path
@@ -334,7 +342,7 @@ function adjust_for_build_file(sequence long_path)
     if atom(short_path) then
     	return short_path
     end if
-	if compiler_type = COMPILER_GCC and build_system_type != BUILD_DIRECT and 	TWINDOWS then
+	if compiler_type = COMPILER_GCC and build_system_type != BUILD_DIRECT and TWINDOWS then
 		return windows_to_mingw_path(short_path)
 	else
 		return short_path
@@ -845,11 +853,14 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 
 		case COMPILER_GCC then
 			cmd = sprintf("%s -o %s %s %s %s", { 
-				settings[SETUP_LEXE], exe_name[D_ALTNAME], objs, 
+				settings[SETUP_LEXE],
+				-- MINGW requires forward slashes 
+				adjust_for_build_file( exe_name[D_ALTNAME] ),
+				objs, 
 				res_file[D_ALTNAME],
 				settings[SETUP_LFLAGS]
 			})
-
+			
 		case else
 			ShowMsg(2, 167, { compiler_type })
 			

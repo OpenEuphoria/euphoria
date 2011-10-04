@@ -408,4 +408,15 @@ between MININT and MAXINT, c+HIGH_BITS will be non-negative.
     	1. (c > MAXINT) || (c < MININT)
         2. (c + HIGH_BITS) >= 0
         
+==== Parser
+
+Inserting tokens into the token buffer is the easiest way to add features to the EUPHORIA parser.  The tokens are two-element sequences one of the class of token and the other the token's value:
+ 
+ {<class>,<value>}
+ 
+Each of the class values are capitalized words for some keyword or VARIABLE.  The list of constants is in reswords.e.  Often it is enough to only examin the class.  In the case of variables, it is important to know which variable.  In this case the second element, comes into play.
+
+You can use putback() to put tokens into the token buffer.  The tokens will be pulled out by the parser in a filo manner, like a stack.  
+
+        
 

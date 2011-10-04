@@ -223,10 +223,6 @@ endif
 INCDIR=-i $(TRUNKDIR)/include
 CYPINCDIR=-i $(CYPTRUNKDIR)/include
 
-ifdef PLAT
-TARGETPLAT=-plat $(PLAT)
-endif
-
 BE_CALLC = be_callc
 
 ifndef ECHO
@@ -244,6 +240,7 @@ endif
 ifeq "$(TRANSLATE)" "euc"
 	TRANSLATE=$(EECU)
 else
+#   We MUST pass these arguments to $(EXE), for $(EXE) is not and shouldn't be governed by eu.cfg in BUILDDIR.
 	TRANSLATE=$(HOST_EXE) $(CYPINCDIR) $(EC_DEBUG) $(EFLAG) $(CYPTRUNKDIR)/source/ec.ex
 endif
 
@@ -829,7 +826,6 @@ endif
 
 $(BUILDDIR)/eudist-build/main-.c : eudist.ex
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eudist-build" \
-		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUDIST)" \
 		-lib "$(BUILDDIR)/eu.a" \
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
@@ -842,7 +838,6 @@ $(BUILDDIR)/eudis-build/main-.c : $(TRUNKDIR)/source/dis.ex  $(TRUNKDIR)/source/
 $(BUILDDIR)/eudis-build/main-.c : $(EU_CORE_FILES) 
 $(BUILDDIR)/eudis-build/main-.c : $(EU_INTERPRETER_FILES) 
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eudis-build" \
-		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUDIS)" \
 		-lib "$(BUILDDIR)/eu.a" \
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
@@ -853,7 +848,6 @@ $(BUILDDIR)/$(EUDIS) : translator library $(BUILDDIR)/eudis-build/main-.c
 
 $(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/bind.ex $(EU_INTERPRETER_FILES) $(EU_BACKEND_RUNNER_FILES)
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/bind-build" \
-		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUBIND)" \
 		-lib "$(BUILDDIR)/eu.a" \
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
@@ -864,7 +858,6 @@ $(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c
 
 $(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/shroud.ex  $(EU_INTERPRETER_FILES) $(EU_BACKEND_RUNNER_FILES)
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/shroud-build" \
-		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUSHROUD)" \
 		-lib "$(BUILDDIR)/eu.a" \
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
@@ -875,7 +868,6 @@ $(BUILDDIR)/$(EUSHROUD) : $(BUILDDIR)/shroud-build/main-.c
 
 $(BUILDDIR)/eutest-build/main-.c : $(TRUNKDIR)/source/eutest.ex
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eutest-build" \
-		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUTEST)" \
 		-lib "$(BUILDDIR)/eu.a" \
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
@@ -886,7 +878,6 @@ $(BUILDDIR)/$(EUTEST) : $(BUILDDIR)/eutest-build/main-.c
 
 $(BUILDDIR)/eucoverage-build/main-.c : $(TRUNKDIR)/bin/eucoverage.ex
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eucoverage-build" \
-		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUCOVERAGE)" \
 		-lib "$(BUILDDIR)/eu.a" \
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
