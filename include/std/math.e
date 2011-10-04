@@ -1479,7 +1479,7 @@ end function
 -- <built-in> function and_bits(object a, object b)
 --
 -- Description:
--- Perform the logical AND operation on corresponding bits in two objects. A bit in the
+-- Perform the bitwise AND operation on corresponding bits in two objects. A bit in the
 -- result will be 1 only if the corresponding bits in both arguments are 1.
 --
 -- Parameters:
@@ -1488,7 +1488,7 @@ end function
 --
 -- Returns:
 -- An **object**, whose shape depends on the shape of both arguments. Each atom in this object 
--- is obtained by logical AND between atoms on both objects.
+-- is obtained by bitwise AND between atoms on both objects.
 --
 -- Comments: 
 --
@@ -1519,7 +1519,7 @@ end function
 --  a = and_bits(#FFFFFFFF, #FFFFFFFF)
 -- -- a is -1
 -- -- Note that #FFFFFFFF is a positive number,
--- -- but the result of a bitwise logical operation is interpreted
+-- -- but the result of a bitwise operation is interpreted
 -- -- as a signed 32-bit number, so it's negative.
 -- </eucode>
 --
@@ -1532,7 +1532,7 @@ end function
 -- <built-in> function xor_bits(object a, object b)
 --
 -- Description:
--- Perform the logical XOR operation on corresponding bits in two objects. A bit in the
+-- Perform the bitwise XOR operation on corresponding bits in two objects. A bit in the
 -- result will be 1 only if the corresponding bits in both arguments are different.
 --
 -- Parameters:
@@ -1541,7 +1541,7 @@ end function
 --
 -- Returns:
 -- An **object**, whose shape depends on the shape of both arguments. Each atom in this object 
--- is obtained by logical XOR between atoms on both objects.
+-- is obtained by bitwisel XOR between atoms on both objects.
 --
 -- Comments:
 -- The arguments must be representable as 32-bit numbers, either signed or unsigned.
@@ -1564,7 +1564,7 @@ end function
 -- <built-in> function or_bits(object a, object b)
 --
 -- Description:
--- Perform the logical OR operation on corresponding bits in two objects. A bit in the
+-- Perform the bitwise OR operation on corresponding bits in two objects. A bit in the
 -- result will be 1 only if the corresponding bits in both arguments are both 0.
 --
 -- Parameters:
@@ -1573,7 +1573,7 @@ end function
 --
 -- Returns:
 -- An **object**, whose shape depends on the shape of both arguments. Each atom in this object 
--- is obtained by logical XOR between atoms on both objects.
+-- is obtained by bitwise OR between atoms on both objects.
 --
 -- Comments:
 -- The arguments must be representable as 32-bit numbers, either signed or unsigned.
@@ -1602,7 +1602,7 @@ end function
 -- <built-in> function not_bits(object a)
 --
 -- Description:
--- Perform the logical NOT operation on each bit in an object. A bit in the result will be 1
+-- Perform the bitwise NOT operation on each bit in an object. A bit in the result will be 1
 -- when the corresponding bit in x1 is 0, and will be 0 when the corresponding bit in x1 is 1.
 --
 -- Parameters:
