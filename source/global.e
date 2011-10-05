@@ -198,7 +198,7 @@ export constant
 	SIZEOF_VAR_ENTRY     = 17 + 37 * TRANSLATE,
 	SIZEOF_BLOCK_ENTRY   = 19 + 35 * TRANSLATE,
 	SIZEOF_TEMP_ENTRY    =  6 + 32 * TRANSLATE,
-	SIZEOF_MEMSTRUCT_ENTRY = 22 + 32 * TRANSLATE - 5 * get_backend(),
+	SIZEOF_MEMSTRUCT_ENTRY = 22 + 33 * TRANSLATE - 5 * get_backend(),
 	$
 -- Permitted values for various symbol table fields
 
