@@ -323,6 +323,7 @@ export enum
 	MEMSTRUCT_DECL,
 	MEMUNION_DECL,
 	DEPRECATE,
+	MEMTYPE,
 	$
 
 export enum

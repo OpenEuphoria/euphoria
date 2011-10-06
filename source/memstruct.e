@@ -21,6 +21,38 @@ export procedure MemUnion_declaration( integer scope )
 	is_union = 0
 end procedure
 
+--*
+-- Creates an alias for a memstruct type.  May be a primitive or
+-- a memstruct.
+export procedure MemType( integer scope )
+	enter_memstruct( 1 )
+	token mem_type = next_token()
+	symtab_index type_sym = mem_type[T_SYM]
+	
+	tok_match( MS_AS )
+	
+	token new_memtype = next_token()
+	symtab_index sym = new_memtype[T_SYM]
+	symtab:DefinedYet( sym )
+	SymTab[sym] &= repeat( 0, SIZEOF_MEMSTRUCT_ENTRY - length( SymTab[sym] ) )
+	SymTab[sym][S_SCOPE]    = scope
+	SymTab[sym][S_TOKEN]    = MEMTYPE
+	
+	switch mem_type[T_ID] do
+		case MS_CHAR, MS_SHORT, MS_INT, 
+			MS_FLOAT, MS_DOUBLE, MS_EUDOUBLE, 
+			MS_OBJECT,
+			MS_LONG, MS_LONGDOUBLE, MS_LONGLONG
+		then
+			SymTab[sym][S_MEM_TYPE] = mem_type[T_ID]
+			
+		case else
+			
+			SymTab[sym][S_MEM_PARENT] = type_sym
+	end switch
+	leave_memstruct()
+end procedure
+
 procedure DefinedYet( symtab_index sym )
 	sequence name = sym_name( sym )
 	symtab_pointer mem_entry = mem_struct
@@ -54,6 +86,18 @@ export procedure MemStruct_declaration( integer scope )
 	integer eu_type = 0
 	while 1 with entry do
 		integer tid = tok[T_ID]
+		
+		if tid = MEMTYPE then
+			symtab_index memtype_sym = tok[T_SYM]
+			tid = SymTab[memtype_sym][S_MEM_TYPE]
+			if not tid then
+				symtab_index type_sym = SymTab[memtype_sym][S_MEM_PARENT]
+				tid = sym_token( type_sym )
+				tok[T_SYM] = type_sym
+				tok[T_ID]  = tid
+			end if
+		end if
+		
 		switch tid label "token" do
 			case END then
 				-- eventually, we probably need to handle ifdefs,

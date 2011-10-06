@@ -1217,6 +1217,19 @@ procedure Factor()
 		id = tok[T_ID]
 	end if
 	switch id label "factor" do
+		case MEMTYPE then
+			-- use its alias
+			printf(1, "memtype: %s\n", {sym_name( tok[T_SYM] )})
+			sym = tok[T_SYM]
+			id = SymTab[sym][S_MEM_TYPE]
+			if not id then
+				sym = SymTab[sym][S_MEM_PARENT]
+				id = sym_token( sym )
+				tok[T_SYM] = sym
+				tok[T_ID]  = id
+			end if
+			
+			fallthru
 		case MEMSTRUCT, QUALIFIED_MEMSTRUCT, MEMUNION, QUALIFIED_MEMUNION then
 			-- probably needs error checking or something to make sure 
 			-- the struct makes sense
@@ -4680,6 +4693,9 @@ export procedure real_parser(integer nested)
 			
 			elsif id = MEMUNION_DECL then
 				MemUnion_declaration( scope )
+			
+			elsif id = MEMTYPE then
+				MemType( scope )
 				
 			elsif (scope = SC_PUBLIC) and id = INCLUDE then
 				IncludeScan( 1 )
@@ -4871,6 +4887,9 @@ export procedure real_parser(integer nested)
 		
 		elsif id = ILLEGAL_CHAR then
 			CompileErr(102)
+			
+		elsif id = MEMTYPE then
+			MemType( SC_LOCAL )
 
 		else
 			if nested then
