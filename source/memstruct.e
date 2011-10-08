@@ -137,6 +137,7 @@ export procedure MemStruct_declaration( integer scope )
 							eu_type = -ref
 							break "token"
 						else
+							putback( nt )
 							MemStruct_member( tok, pointer, 1 )
 						end if
 					end if
