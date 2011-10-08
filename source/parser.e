@@ -1219,7 +1219,6 @@ procedure Factor()
 	switch id label "factor" do
 		case MEMTYPE then
 			-- use its alias
-			printf(1, "memtype: %s\n", {sym_name( tok[T_SYM] )})
 			sym = tok[T_SYM]
 			id = SymTab[sym][S_MEM_TYPE]
 			if not id then
