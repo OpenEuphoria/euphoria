@@ -68,9 +68,11 @@ memstruct SymbolTable
 	symtab_entry entries[5]
 end memstruct
 
+memtype SymbolTable as SymTab5
+
 integer bits32 = sizeof( C_POINTER ) = 4
 procedure basic()
-	atom symtab = allocate( 5 * sizeof( symtab_entry ) )
+	atom symtab = allocate( sizeof( SymTab5 ) )
 	poke( symtab,  repeat( 0, 5 * sizeof( symtab_entry ) ) )
 	symtab.symtab_entry.obj = 9
 	symtab.symtab_entry.obj += 5

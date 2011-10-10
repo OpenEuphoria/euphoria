@@ -75,7 +75,6 @@ end function
 export procedure remove_symbol( symtab_index sym )
 	integer hash
 	integer st_ptr
-	
 	hash = SymTab[sym][S_HASHVAL]
 	st_ptr = buckets[hash]
 	
@@ -1052,7 +1051,6 @@ end ifdef
 	tok = {VARIABLE, NewEntry(word, 0, defined,
 					   VARIABLE, hashval, buckets[hashval], 0)}
 	buckets[hashval] = tok[T_SYM]
-	
 	if file_no != -1 then
 		SymTab[tok[T_SYM]][S_FILE_NO] = file_no
 	end if
@@ -1064,7 +1062,6 @@ export procedure Hide(symtab_index s)
 -- remove the visibility of a symbol
 -- by deleting it from its hash chain
 	symtab_index prev, p
-	
 	p = buckets[SymTab[s][S_HASHVAL]]
 	prev = 0
 	

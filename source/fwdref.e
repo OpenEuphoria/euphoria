@@ -31,7 +31,8 @@ sequence
 	active_subprogs     = {},
 	active_references   = {},
 	toplevel_references = {},
-	inactive_references = {}
+	inactive_references = {},
+	$
 
 
 enum
@@ -394,10 +395,26 @@ procedure patch_forward_msmember( token tok, integer ref )
 	symtab_index sym = tok[T_SYM]
 	
 	if fr[FR_OP] = MEMSTRUCT_DECL then
-		-- a forward reference inside a declaration
 		symtab_index member = fr[FR_DATA]
-		SymTab[member][S_MEM_STRUCT] = sym
-		SymTab[member][S_SCOPE]      = SC_MEMSTRUCT
+		
+		switch tok[T_ID] do
+			case MEMSTRUCT_DECL, MEMSTRUCT then
+				-- a forward reference inside a declaration
+				SymTab[member][S_MEM_STRUCT] = sym
+			
+			case  MEMTYPE then
+				-- memtype alias
+				integer real_type_sym = SymTab[sym][S_MEM_PARENT]
+				SymTab[member][S_MEM_STRUCT] = real_type_sym
+				
+			case else
+				-- ?? not handled...leave it unreferenced
+				return
+		end switch
+		
+		SymTab[member][S_SCOPE]    = SC_MEMSTRUCT
+		SymTab[member][S_MEM_SIZE] = SymTab[sym][S_MEM_SIZE]
+		
 		if not SymTab[member][S_MEM_POINTER] then
 			symtab_index parent_sym = SymTab[member][S_MEM_PARENT]
 			recalculate_size( parent_sym )
@@ -414,7 +431,11 @@ procedure patch_forward_memstruct( token tok, integer ref )
 	switch fr[FR_OP] do
 		case MEMSTRUCT_DECL then
 			-- need to check the size
-			if recalculate_size( sym ) != -1 then
+			
+			if sym_token( sym ) = MEMTYPE then
+				recalculate_size( SymTab[sym][S_MEM_PARENT] )
+			end if
+			if recalculate_size( sym )> 0 then
 				resolved_reference( ref )
 			end if
 		
@@ -799,7 +820,6 @@ export type forward_reference( integer ref )
 	end if
 end type
 
-
 export function new_forward_reference( integer fwd_op, symtab_index sym, integer op = fwd_op  )
 	integer 
 		ref, 
@@ -957,7 +977,7 @@ function resolve_file( sequence refs, integer report_errors, integer unincluded_
 			case MS_MEMBER then
 				patch_forward_msmember( tok, ref )
 			
-			case MEMSTRUCT then
+			case MEMSTRUCT, MEMTYPE then
 				patch_forward_memstruct( tok, ref )
 			
 			case MEM_TYPE_CHECK then
@@ -1009,14 +1029,12 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 		if (length( active_subprogs[i] ) or length(toplevel_references[i])) 
 		and (i = current_file_no or finished_files[i] or unincluded_ok)
 		then
-			
 			for j = length( active_references[i] ) to 1 by -1 do
 				errors &= resolve_file( active_references[i][j], report_errors, unincluded_ok )
 			end for
 			errors &= resolve_file( toplevel_references[i], report_errors, unincluded_ok )
 		end if
 	end for
-		
 	if report_errors and length( errors ) then
 		sequence msg = ""
 		sequence errloc
@@ -1049,8 +1067,17 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 								end if		
 							else
 								-- unqualified
-								errloc = sprintf("\t\'%s\' (%s:%d) has not been declared.\n", 
-									{ref[FR_NAME], abbreviate_path(known_files[ref[FR_FILE]]), ref[FR_LINE]})
+								if ref[FR_TYPE] = MEMTYPE then
+									if SymTab[ref[FR_DATA]][S_MEM_SIZE] then
+										continue
+									else
+										errloc = sprintf("\tthe size of \'%s\' (%s:%d) could not be determined.\n", 
+											{ref[FR_NAME], abbreviate_path(known_files[ref[FR_FILE]]), ref[FR_LINE]})
+									end if
+								else
+									errloc = sprintf("\t\'%s\' (%s:%d) has not been declared.\n", 
+										{ref[FR_NAME], abbreviate_path(known_files[ref[FR_FILE]]), ref[FR_LINE]})
+								end if
 							end if
 						case SC_MULTIPLY_DEFINED then
 							sequence syms = tok[THESE_GLOBALS] -- there should be no forward references in here.

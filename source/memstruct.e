@@ -21,6 +21,34 @@ export procedure MemUnion_declaration( integer scope )
 	is_union = 0
 end procedure
 
+function primitive_size( integer primitive )
+	switch primitive do
+		case MS_CHAR then
+			return 1
+		case MS_SHORT then
+			return 2
+		case MS_INT then
+			return sizeof( C_INT )
+		case MS_LONG then
+			return sizeof( C_LONG )
+		case MS_LONGLONG then
+			return sizeof( C_LONGLONG )
+		case MS_OBJECT then
+			return sizeof( C_POINTER )
+		case MS_FLOAT then
+			return 4
+		case MS_DOUBLE then
+			return 8
+		case MS_EUDOUBLE then
+			ifdef E32 then
+				return 8
+			elsifdef E64 then
+				-- same as long double
+				return 16
+			end ifdef
+	end switch
+end function
+
 --*
 -- Creates an alias for a memstruct type.  May be a primitive or
 -- a memstruct.
@@ -32,11 +60,13 @@ export procedure MemType( integer scope )
 	tok_match( MS_AS )
 	
 	token new_memtype = next_token()
+	
 	symtab_index sym = new_memtype[T_SYM]
 	symtab:DefinedYet( sym )
 	SymTab[sym] &= repeat( 0, SIZEOF_MEMSTRUCT_ENTRY - length( SymTab[sym] ) )
 	SymTab[sym][S_SCOPE]    = scope
 	SymTab[sym][S_TOKEN]    = MEMTYPE
+	SymTab[sym][S_MODE]     = M_NORMAL
 	
 	switch mem_type[T_ID] do
 		case MS_CHAR, MS_SHORT, MS_INT, 
@@ -44,12 +74,25 @@ export procedure MemType( integer scope )
 			MS_OBJECT,
 			MS_LONG, MS_LONGDOUBLE, MS_LONGLONG
 		then
-			SymTab[sym][S_MEM_TYPE] = mem_type[T_ID]
-			
+			SymTab[sym][S_MEM_TYPE]   = mem_type[T_ID]
+			SymTab[sym][S_MEM_PARENT] = type_sym
+			SymTab[sym][S_MEM_SIZE]   = primitive_size( mem_type[T_ID] )
 		case else
 			
 			SymTab[sym][S_MEM_PARENT] = type_sym
+			SymTab[sym][S_MEM_SIZE]   = SymTab[type_sym][S_MEM_SIZE]
+			
+			if not TRANSLATE and not SymTab[sym][S_MEM_SIZE] then
+				SymTab[sym][S_MEM_SIZE] = recalculate_size( type_sym )
+				-- mark it as a forward reference to have its size recalculated
+				
+				integer ref = new_forward_reference( MEMTYPE, sym, MEMSTRUCT_DECL )
+				set_data( ref, sym )
+				add_recalc( type_sym, sym )
+				Show( sym ) -- creating a fwdref removes the symbol, but we just want to recalc the size later on
+			end if
 	end switch
+	
 	leave_memstruct()
 end procedure
 
@@ -270,9 +313,26 @@ export function recalculate_size( symtab_index sym )
 	mem_struct = sym
 	is_union   = sym_token( sym ) = MEMUNION_DECL
 	integer size = calculate_size()
+	
 	is_union = 0
+	if size > 0 then
+		for i = 2 to length( SymTab[sym][S_MEM_RECALC] ) do
+			symtab_index recalc_sym =  SymTab[sym][S_MEM_RECALC][i]
+			
+			SymTab[recalc_sym][S_MEM_SIZE] = recalculate_size( recalc_sym )
+			
+		end for
+	end if
 	return size
 end function
+
+procedure add_recalc( symtab_index parent_struct, symtab_index dependent_struct )
+	if length( SymTab[parent_struct] ) >= SIZEOF_MEMSTRUCT_ENTRY
+	and (atom( SymTab[parent_struct][S_MEM_RECALC] )
+		or not find( dependent_struct, SymTab[parent_struct][S_MEM_RECALC] )) then
+		SymTab[parent_struct][S_MEM_RECALC] &= dependent_struct
+	end if
+end procedure
 
 --**
 -- Returns the size and offsets for the memstruct, or -1 if all
@@ -281,49 +341,67 @@ function calculate_size()
 	
 	symtab_pointer member_sym = mem_struct
 	
+	if sym_token( member_sym ) = MEMTYPE then
+		return SymTab[SymTab[member_sym][S_MEM_PARENT]][S_MEM_SIZE]
+	end if
+	
 	integer size = 0
+	integer indeterminate = 0
 	while member_sym with entry do
 		integer mem_size = SymTab[member_sym][S_MEM_SIZE]
-		if not mem_size then
+		if mem_size < 1 then
 			-- might be a struct that's been recalculated
 			symtab_pointer struct_type = SymTab[member_sym][S_MEM_STRUCT]
 			if struct_type then
 				mem_size = SymTab[struct_type][S_MEM_SIZE]
-				if not mem_size then
-					return -1
+				if mem_size < 1 then
+					if length( struct_type ) >= SIZEOF_MEMSTRUCT_ENTRY then
+						mem_size = recalculate_size( struct_type )
+					end if
+					if mem_size < 1 then
+						SymTab[mem_struct][S_MEM_SIZE] = 0
+						indeterminate = 1
+						add_recalc( struct_type, mem_struct )
+					end if
 				end if
 			else
-				return -1
+				SymTab[mem_struct][S_MEM_SIZE] = 0
+				indeterminate = 1
+				add_recalc( struct_type, mem_struct )
 			end if
 		end if
-		
-		if not is_union then
-			-- make sure we're properly aligned
-			integer padding
-			if sym_token( member_sym ) = MEMUNION or sym_token( member_sym ) = MEMSTRUCT then
-				padding = remainder( size, sizeof( C_POINTER ) )
+		if not indeterminate then
+			if not is_union then
+				-- make sure we're properly aligned
+				integer padding
+				if sym_token( member_sym ) = MEMUNION or sym_token( member_sym ) = MEMSTRUCT then
+					padding = remainder( size, sizeof( C_POINTER ) )
+				else
+					padding = remainder( size, mem_size )
+				end if
+				
+				if padding then
+					size += mem_size - padding
+				end if
+				
+				SymTab[member_sym][S_MEM_OFFSET] = size
+				size += mem_size
 			else
-				padding = remainder( size, mem_size )
-			end if
-			
-			if padding then
-				size += mem_size - padding
-			end if
-			
-			SymTab[member_sym][S_MEM_OFFSET] = size
-			size += mem_size
-		else
-			if mem_size > size then
-				size = mem_size
+				if mem_size > size then
+					size = mem_size
+				end if
 			end if
 		end if
-		
 	entry
 		member_sym = SymTab[member_sym][S_MEM_NEXT]
 	end while
 	
-	SymTab[mem_struct][S_MEM_SIZE] = size
-	return size
+	if indeterminate then
+		return 0
+	else
+		SymTab[mem_struct][S_MEM_SIZE] = size
+		return size
+	end if
 end function
 
 function read_name()
@@ -500,7 +578,9 @@ function parse_symstruct( token tok )
 		-- a forward reference
 		ref = new_forward_reference( MEMSTRUCT, struct_sym, MEMSTRUCT_ACCESS )
 		
-	elsif tok[T_ID] != MEMSTRUCT and tok[T_ID] != QUALIFIED_MEMSTRUCT then
+	elsif tok[T_ID] != MEMSTRUCT
+	and tok[T_ID]   != QUALIFIED_MEMSTRUCT
+	and tok[T_ID]   != MEMTYPE then
 		-- something else
 		CompileErr( EXPECTED_VALID_MEMSTRUCT )
 	end if
@@ -613,6 +693,10 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 					if member then
 						-- going into an embedded / linked struct or union
 						struct_sym = SymTab[member][S_MEM_STRUCT]
+					end if
+					if SymTab[struct_sym][S_TOKEN] = MEMTYPE then
+						-- use whatever it really is
+						struct_sym = SymTab[struct_sym][S_MEM_PARENT]
 					end if
 					member = resolve_member( tok[T_SYM], struct_sym )
 					if not member then

@@ -1216,11 +1216,13 @@ procedure Factor()
 		tok = read_recorded_token(tok[T_SYM])
 		id = tok[T_ID]
 	end if
+	
 	switch id label "factor" do
 		case MEMTYPE then
 			-- use its alias
 			sym = tok[T_SYM]
 			id = SymTab[sym][S_MEM_TYPE]
+			
 			if not id then
 				sym = SymTab[sym][S_MEM_PARENT]
 				id = sym_token( sym )
