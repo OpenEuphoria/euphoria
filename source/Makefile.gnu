@@ -223,6 +223,7 @@ endif
 INCDIR=-i $(TRUNKDIR)/include
 CYPINCDIR=-i $(CYPTRUNKDIR)/include
 
+
 BE_CALLC = be_callc
 
 ifndef ECHO
@@ -509,6 +510,7 @@ ifeq "$(PLAT)" ""
 SOURCEDIR=euphoria-$(REV)
 else
 SOURCEDIR=euphoria-$(PLAT)-$(REV)
+TARGETPLAT=-plat $(PLAT)
 endif
 
 endif

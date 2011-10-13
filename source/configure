@@ -474,6 +474,7 @@ echo -i $CYPTRUNKDIR/include >> $BUILDDIR/eu.cfg
 echo "[translate]" >> $BUILDDIR/eu.cfg
 if [ x"$PLAT" != x"" ]; then
 	echo "-plat" $PLAT  >> $BUILDDIR/eu.cfg
+	echo PLAT=$PLAT >> "$PREFIX"${CONFIG_FILE}
 fi
 echo "-$XLTTARGETCC " >> $BUILDDIR/eu.cfg
 echo "-con " >> $BUILDDIR/eu.cfg
