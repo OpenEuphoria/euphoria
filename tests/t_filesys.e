@@ -28,15 +28,16 @@ elsedef
 	entire_driveid = driveid & ":"
 end ifdef
 
-object home
+object home = getenv("HOME")
 ifdef WINDOWS then
-	-- Not defined so use alternative.
-	home = getenv("HOMEDRIVE")
-	if sequence(home) then
-		home &= getenv("HOMEPATH")
+	-- When MingW or CygWin is used HOME will be set.  In this case, we should use this variable.
+	if atom(home) then
+		-- Not defined so use alternative.
+		home = getenv("HOMEDRIVE")
+		if sequence(home) then
+			home &= getenv("HOMEPATH")
+		end if
 	end if
-elsedef
-	home = getenv("HOME")
 end ifdef
 if sequence(home) then
 	if home[$] != SLASH then
