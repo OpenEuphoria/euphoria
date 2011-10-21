@@ -9,21 +9,18 @@ There are times when a programmer wants a way to display the variable names to t
 Example 1:
 <eucode>
 
-type enum DDENUM by * 2
+type enum DDENUM_basis by * 2
     DDENUM_ATTACHEDSECONDARYDEVICES,
     DDENUM_DETACHEDSECONDARYDEVICES,
     DDENUM_NONDISPLAYDEVICES
 end type
 
-DDENUM dde_num = DDENUM_ATTACHEDSECONDARYDEVICES
-sequence s = name_of(dde_num)
+DDENUM_basis dde_num_base = DDENUM_ATTACHEDSECONDARYDEVICES
+sequence s = name_of(dde_num_base)
 -- s is "DDENUM_ATTACHEDSECONDARYDEVICES"
 integer i = dde_num -- here type data doesn't go into i.
 s = name_of(i)
 -- s is now "1"
-dde_num = or_bits(DDENUM_NONDISPLAYDEVICES,DDENUM_ATTACHEDSECONDARYDEVICES)
-s = name_of(dde_num)
--- s is now "DDENUM_NONDISPLAYDEVICES,DDENUM_ATTACHEDSECONDARYDEVICES"
 </eucode>
 
 Example 2:
@@ -49,7 +46,7 @@ end type
 
 std_window_response ok = message_box("This box is a test", "Info", MB_OK)
 ok = message("You clicked " & name_of(ok), "Info", MB_OK)
--- displays "You clicked IDOK" in a Window.
+-- displays "You clicked IDOK in a Window.
 </eucode>
 
 
@@ -77,6 +74,6 @@ if ok != MB_OK then -- WARNING 'literal_mismatch':  here for this code is wrong.
 end if
 </eucode>
 
-Even though MB_OK is out of the value range of the ID* constants, this is something that can be caught at parse-time rather than during testing.  A preferable time to catch a problem.
+Even though MB_OK is out of the value range of the ID* constants, this is something that can be caught at parse-time rather than during testing, a preferable time to catch a problem.
 
 
