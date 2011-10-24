@@ -240,7 +240,7 @@ export function new(
 	for i = 1 to length(syms) do
 		list = {append(list[1],sym_obj(syms[i])),append(list[2],sym_name(syms[i]))}
 	end for
-	symbol = NewSequenceSym(list)	
+	symbol = NewSequenceSym(list)
 	-- Failing all else we can always use a pair of sequences with the
 	-- keys in the first sequence and the names in the other.
 	return {type_name, list, SEQUENCE_PAIR, all_integers, 0, min_sym, max_sym, symbol, 0, monotonic_flag}
@@ -266,6 +266,44 @@ procedure not_impl()
 	crash("Not yet implemented.")
 end procedure
 
+-- Returns the C code to set the value in a specific symbol from a value in the literal set.
+-- This provides us with a way of populating the other variables with the exactly the same
+-- numbers in the C code when they share the same value in the EUPHORIA code.  As long as it
+-- is a part of ls.  If value is not in the literal set an empty string is returned.
+export function set_value_code(literal_set ls, object value, symtab_index source)
+	integer vl =  find(value, ls[MAP][1])
+	if not vl then
+		return ""
+	end if
+	if ls[ACCESS_METHOD] != SEQUENCE_PAIR then
+		return "" -- not implemented for non SEQUENCE_PAIR literal_sets
+	end if
+	if length(SymTab[ls[DATA_SYMBOL]]) < S_TEMP_NAME then
+		return ""
+	end if
+	symtab_index ds = SymTab[ls[DATA_SYMBOL]][S_TEMP_NAME]
+	
+	return  
+	sprintf("\tRef(SEQ_PTR(SEQ_PTR(_%d)->base[%d])->base[%d]);\n" &
+            "\t_%d = SEQ_PTR(SEQ_PTR(_%d)->base[%d])->base[%d];\n", 
+		    {ds, 1, vl, 
+		     SymTab[source][S_TEMP_NAME], ds, 1, vl})
+end function
+
+export function first_assign_value_code(literal_set ls, sequence str, object x)
+ 	symtab_index ds = SymTab[ls[DATA_SYMBOL]][S_TEMP_NAME]
+	if ls[ACCESS_METHOD] = SEQUENCE_PAIR then
+		integer vl = find(x,ls[MAP][1])
+		if vl then
+			return 
+				sprintf("\tRef(SEQ_PTR(SEQ_PTR(_%d)->base[%d])->base[%d]);\n" &
+            "\t%s = SEQ_PTR(SEQ_PTR(_%d)->base[%d])->base[%d];\n", 
+		    {ds, 1, vl, 
+		    str, ds, 1, vl})
+		end if
+	end if
+	return ""
+end function
 
 export function get_literal_code(symtab_index sym)
 	not_impl()

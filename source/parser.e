@@ -1183,10 +1183,10 @@ procedure Name_of_call( token tok )
 			name_of_type_of_argument = argument_type[S_NAME]
 		end if
 	end if
-	if not object(name_of_type_of_argument) then
+	if not object(argument_type) then
 		CompileErr(ERRMSG_FWD_REF_NOTSUPPORTED,{"name_of"})
 	end if
-	i = find(name_of_type_of_argument,literal_sets[1])
+	i = find(argument[S_VTYPE],literal_sets[1])
 	if not i then
 		CompileErr( ERRMSG_NAME_OF_NOT_ENUM_TYPE )
 	end if
@@ -4028,7 +4028,7 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 			putback({LEFT_ROUND,0})
 			ls = literal_set:new(sym_name(prog_name[T_SYM]), enum_syms, 0)
 			if compare(ls,0) > 0 then
-				literal_sets = {append(literal_sets[1], sym_name(prog_name[T_SYM])),
+				literal_sets = {append(literal_sets[1], prog_name[T_SYM]),
 								append(literal_sets[2],ls)}
 			end if
 			LeaveTopLevel()
@@ -4267,12 +4267,10 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 	-- parse body of routine.
 	if type_enum then
 		integer elist_base
-		stmt_nest += 1
 		tok_match(RETURN)
 		-- Create the body ourselves
 		switch literal_set:get_access_method(ls)  do
 			case INDEX_MAP then
-				stmt_nest += 1
 				putback({IF,0})
 				putback({END,0})
 						-- 0
@@ -4285,7 +4283,6 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 				putback(keyfind("integer",-1))
 				putback(keyfind("not",-1))
 				putback({IF,0})
-				stmt_nest -= 1
 				Statement_list()
 				
 				putback({IF,0})
@@ -4332,7 +4329,6 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 				putback({LESSEQ,0})
 				putback({VARIABLE,literal_set:get_minimal(ls)})
 				putback({IF,0})
-				stmt_nest -= 1
 				Statement_list()
 				
 				-- 0
