@@ -2346,6 +2346,11 @@ object CallBack(object x)
 #endif
 	}
 
+#if defined( EWINDOWS ) && INTPTR_MAX == INT64_MAX
+	// For some reason the cdecl callback crashes on windows, but this always works.
+	// We're not really using stdcall or cdecl anyways
+	convention = C_STDCALL;
+#endif
 	/* Check routine_id value and get the number of arguments */
 #ifdef ERUNTIME
 	num_args = rt00[routine_id].num_args;
