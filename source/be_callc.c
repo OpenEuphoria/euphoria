@@ -765,6 +765,425 @@ intptr_t call_cdecl_func(intptr_t i, intptr_t * op, long len) {
 #else
 // 64-bit Call-C
 
+#ifdef EWINDOWS
+
+// icall typedefs
+typedef int64_t (*icall_sig1) ( double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef int64_t (*icall_sig2) ( intptr_t, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef int64_t (*icall_sig3) ( double, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef int64_t (*icall_sig4) ( intptr_t, intptr_t, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef int64_t (*icall_sig5) ( double, intptr_t, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef int64_t (*icall_sig6) ( intptr_t, double, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef int64_t (*icall_sig7) ( double, double, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef int64_t (*icall_sig8) ( intptr_t, intptr_t, intptr_t, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef int64_t (*icall_sig9) ( double, intptr_t, intptr_t, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef int64_t (*icall_sig10)( intptr_t, double, intptr_t, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef int64_t (*icall_sig11)( double, double, intptr_t, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef int64_t (*icall_sig12)( intptr_t, intptr_t, double, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef int64_t (*icall_sig13)( double, intptr_t, double, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef int64_t (*icall_sig14)( intptr_t, double, double, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef int64_t (*icall_sig15)( double, double, double, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+
+
+// dcall typedefs
+typedef double (*dcall_sig1) ( double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef double (*dcall_sig2) ( intptr_t, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef double (*dcall_sig3) ( double, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef double (*dcall_sig4) ( intptr_t, intptr_t, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef double (*dcall_sig5) ( double, intptr_t, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef double (*dcall_sig6) ( intptr_t, double, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef double (*dcall_sig7) ( double, double, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef double (*dcall_sig8) ( intptr_t, intptr_t, intptr_t, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef double (*dcall_sig9) ( double, intptr_t, intptr_t, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef double (*dcall_sig10)( intptr_t, double, intptr_t, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef double (*dcall_sig11)( double, double, intptr_t, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef double (*dcall_sig12)( intptr_t, intptr_t, double, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef double (*dcall_sig13)( double, intptr_t, double, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef double (*dcall_sig14)( intptr_t, double, double, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef double (*dcall_sig15)( double, double, double, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+
+// fcall typedefs
+typedef float (*fcall_sig1) ( double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef float (*fcall_sig2) ( intptr_t, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef float (*fcall_sig3) ( double, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef float (*fcall_sig4) ( intptr_t, intptr_t, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef float (*fcall_sig5) ( double, intptr_t, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef float (*fcall_sig6) ( intptr_t, double, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef float (*fcall_sig7) ( double, double, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef float (*fcall_sig8) ( intptr_t, intptr_t, intptr_t, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef float (*fcall_sig9) ( double, intptr_t, intptr_t, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef float (*fcall_sig10)( intptr_t, double, intptr_t, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef float (*fcall_sig11)( double, double, intptr_t, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef float (*fcall_sig12)( intptr_t, intptr_t, double, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef float (*fcall_sig13)( double, intptr_t, double, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef float (*fcall_sig14)( intptr_t, double, double, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+typedef float (*fcall_sig15)( double, double, double, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
+
+int64_t icall_x86_64( intptr_t func, double* xmm, int64_t *r, int args, int signature ){
+	switch( signature ){
+		case 0:
+			if( args == 0 ) return ((int64_t (*)())func)();
+			else if( args == 1 ) return ((int64_t (*)())func)( r[0] );
+			else if( args == 2 ) return ((int64_t (*)())func)( r[0], r[1] );
+			else if( args == 3 ) return ((int64_t (*)())func)( r[0], r[1], r[2] );
+			else if( args == 4 ) return ((int64_t (*)())func)( r[0], r[1], r[2], r[3] );
+			else
+				return ((int64_t (*)())func)(
+						r[0], r[1], r[2], r[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		
+		case 1:
+			return ((icall_sig1)func)(
+					xmm[0], r[1], r[2], r[3], r[4], 
+					r[5], r[6], r[7], r[8], r[9],
+					r[10], r[11], r[12], r[13], 
+					r[14], r[15], r[16] );
+					
+		case 2:
+			// int fp...
+			return ((icall_sig2)func)(
+				r[0], xmm[1], r[2], r[3], r[4], 
+				r[5], r[6], r[7], r[8], r[9],
+				r[10], r[11], r[12], r[13], 
+				r[14], r[15], r[16] );
+			
+		case 3:
+			// fp fp ...
+			return ((icall_sig3)func)(
+						xmm[0], xmm[1], r[2], r[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 4:
+			// int int fp ...
+			return ((icall_sig4)func)(
+						r[0], r[1], xmm[2], r[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 5:
+			// fp int fp
+			return ((icall_sig5)func)(
+						xmm[0], r[1], xmm[2], r[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 6:
+			// int fp fp
+			return ((icall_sig6)func)(
+						r[0], xmm[1], xmm[2], r[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 7:
+			// fp fp fp
+			return ((icall_sig7)func)(
+						xmm[0], xmm[1], xmm[2], r[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 8:
+			// int int int fp
+			return ((icall_sig8)func)(
+						r[0], r[1], r[2], xmm[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 9:
+			// fp int int fp
+			return ((icall_sig9)func)(
+						r[0], r[1], r[2], xmm[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 10:
+			// int fp int fp
+			return ((icall_sig10)func)(
+						r[0], xmm[1], r[2], xmm[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 11:
+			// fp, fp, int fp
+			return ((icall_sig11)func)(
+						xmm[0], xmm[1], r[2], xmm[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 12:
+			// int int fp fp
+			return ((icall_sig12)func)(
+						r[0], r[1], xmm[2], xmm[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 13:
+			// fp int fp fp
+			return ((icall_sig13)func)(
+						xmm[0], r[1], xmm[2], xmm[3] , r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 14:
+			// int fp fp fp
+			return ((icall_sig14)func)(
+						r[0], xmm[1], xmm[2], xmm[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 15:
+			// fp fp fp fp
+			return ((icall_sig15)func)(
+						xmm[0], xmm[1], xmm[2], xmm[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+	}
+	RTFatal("Illegal signature");
+}
+
+
+double dcall_x86_64( intptr_t func, double* xmm, int64_t *r, int signature ){
+	switch( signature ){
+		case 0:
+			return ((double (*)())func)(
+						r[0], r[1], r[2], r[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		
+		case 1:
+			return ((dcall_sig1)func)(
+					xmm[0], r[1], r[2], r[3], r[4], 
+					r[5], r[6], r[7], r[8], r[9],
+					r[10], r[11], r[12], r[13], 
+					r[14], r[15], r[16] );
+					
+		case 2:
+			// int fp...
+			return ((dcall_sig2)func)(
+				r[0], xmm[1], r[2], r[3], r[4], 
+				r[5], r[6], r[7], r[8], r[9],
+				r[10], r[11], r[12], r[13], 
+				r[14], r[15], r[16] );
+			
+		case 3:
+			// fp fp ...
+			return ((dcall_sig3)func)(
+						xmm[0], xmm[1], r[2], r[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 4:
+			// int int fp ...
+			return ((dcall_sig4)func)(
+						r[0], r[1], xmm[2], r[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 5:
+			// fp int fp
+			return ((dcall_sig5)func)(
+						xmm[0], r[1], xmm[2], r[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 6:
+			// int fp fp
+			return ((dcall_sig6)func)(
+						r[0], xmm[1], xmm[2], r[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 7:
+			// fp fp fp
+			return ((dcall_sig7)func)(
+						xmm[0], xmm[1], xmm[2], r[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 8:
+			// int int int fp
+			return ((dcall_sig8)func)(
+						r[0], r[1], r[2], xmm[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 9:
+			// fp int int fp
+			return ((dcall_sig9)func)(
+						r[0], r[1], r[2], xmm[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 10:
+			// int fp int fp
+			return ((dcall_sig10)func)(
+						r[0], xmm[1], r[2], xmm[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 11:
+			// fp, fp, int fp
+			return ((dcall_sig11)func)(
+						xmm[0], xmm[1], r[2], xmm[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 12:
+			// int int fp fp
+			return ((dcall_sig12)func)(
+						r[0], r[1], xmm[2], xmm[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 13:
+			// fp int fp fp
+			return ((dcall_sig13)func)(
+						xmm[0], r[1], xmm[2], xmm[3] , r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 14:
+			// int fp fp fp
+			return ((dcall_sig14)func)(
+						r[0], xmm[1], xmm[2], xmm[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 15:
+			// fp fp fp fp
+			return ((dcall_sig15)func)(
+						xmm[0], xmm[1], xmm[2], xmm[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+	}
+	RTFatal("Illegal signature");
+}
+
+
+float fcall_x86_64( intptr_t func, double* xmm, int64_t *r, int signature ){
+	switch( signature ){
+		case 0:
+			return ((float (*)())func)(
+						r[0], r[1], r[2], r[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		
+		case 1:
+			return ((fcall_sig1)func)(
+					xmm[0], r[1], r[2], r[3], r[4], 
+					r[5], r[6], r[7], r[8], r[9],
+					r[10], r[11], r[12], r[13], 
+					r[14], r[15], r[16] );
+					
+		case 2:
+			// int fp...
+			return ((fcall_sig2)func)(
+				r[0], xmm[1], r[2], r[3], r[4], 
+				r[5], r[6], r[7], r[8], r[9],
+				r[10], r[11], r[12], r[13], 
+				r[14], r[15], r[16] );
+			
+		case 3:
+			// fp fp ...
+			return ((fcall_sig3)func)(
+						xmm[0], xmm[1], r[2], r[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 4:
+			// int int fp ...
+			return ((fcall_sig4)func)(
+						r[0], r[1], xmm[2], r[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 5:
+			// fp int fp
+			return ((fcall_sig5)func)(
+						xmm[0], r[1], xmm[2], r[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 6:
+			// int fp fp
+			return ((fcall_sig6)func)(
+						r[0], xmm[1], xmm[2], r[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 7:
+			// fp fp fp
+			return ((fcall_sig7)func)(
+						xmm[0], xmm[1], xmm[2], r[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 8:
+			// int int int fp
+			return ((fcall_sig8)func)(
+						r[0], r[1], r[2], xmm[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 9:
+			// fp int int fp
+			return ((fcall_sig9)func)(
+						r[0], r[1], r[2], xmm[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 10:
+			// int fp int fp
+			return ((fcall_sig10)func)(
+						r[0], xmm[1], r[2], xmm[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 11:
+			// fp, fp, int fp
+			return ((fcall_sig11)func)(
+						xmm[0], xmm[1], r[2], xmm[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 12:
+			// int int fp fp
+			return ((fcall_sig12)func)(
+						r[0], r[1], xmm[2], xmm[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 13:
+			// fp int fp fp
+			return ((fcall_sig13)func)(
+						xmm[0], r[1], xmm[2], xmm[3] , r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 14:
+			// int fp fp fp
+			return ((fcall_sig14)func)(
+						r[0], xmm[1], xmm[2], xmm[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+		case 15:
+			// fp fp fp fp
+			return ((fcall_sig15)func)(
+						xmm[0], xmm[1], xmm[2], xmm[3], r[4], 
+						r[5], r[6], r[7], r[8], r[9],
+						r[10], r[11], r[12], r[13], 
+						r[14], r[15], r[16] );
+	}
+	RTFatal("Illegal signature");
+}
+#else
 int64_t icall_x86_64( intptr_t func, double* xmm, int64_t *r, int args ){
 	
 	switch( args ){
@@ -799,7 +1218,7 @@ float fcall_x86_64( intptr_t func, double* xmm, int64_t *r ){
 			r[10], r[11], r[12], r[13], 
 			r[14], r[15], r[16]);
 }
-
+#endif // EWINDOWS / !EWINDOWS
 union xmm_param {
 	double d;
 	float f;
@@ -807,6 +1226,22 @@ union xmm_param {
 #endif
 
 #if INTPTR_MAX == INT64_MAX
+
+#ifdef EWINDOWS
+
+/* The Windows x86-64 calling convention only uses a maximum of
+ * four registers for passing parameters, regardless of the type.
+ * Integer parameters are spread among 4 integer registers,
+ * and floating point parameters are spread among the floating point
+ * registers.
+ */
+#define MAX_INT_PARAM_REGISTERS 4
+#define MAX_FP_PARAM_REGISTERS 4
+#define INCREMENT_FP_ARGS ++xmm_i;
+#define INCREMENT_INT_ARGS ++arg_i;
+#define SIGNATURE_PARAM , signature
+#define UPDATE_SIGNATURE signature |= (arg_i<<1);
+#else
 /* The x86-64 calling convention uses 6 registers for the first 6 integer
  * parameters.  After that, parameters are pushed on the stack.  Also,
  * the first 5 floating point parameters are put into floating point
@@ -814,19 +1249,27 @@ union xmm_param {
  * stack, so we have to track the number of args we're putting onto the
  * stack separately from what goes into the registers.
  */
- 
+#define MAX_INT_PARAM_REGISTERS 6
+#define MAX_FP_PARAM_REGISTERS 5
+#define INCREMENT_FP_ARGS;
+#define INCREMENT_INT_ARGS;
+#define SIGNATURE_PARAM
+#define UPDATE_SIGNATURE
+#endif // Platform defines for argument pushes
+
 /* Pushes the variable //arg// on to our argument stack, but not the
  * runtime stack, as an integer. */
 #define PUSH_INT_ARG \
-if( arg_i < 6 ){ \
+if( arg_i < MAX_INT_PARAM_REGISTERS ){ \
 	arg_op[arg_i++] = arg; \
 	++int_args; \
 } \
 else{ \
 	arg_op[arg_stack++] = arg; \
-}
+} \
+INCREMENT_FP_ARGS
 
-#else
+#else // 32-bit
 #define PUSH_INT_ARG arg_op[arg_i++] = arg;
 #endif
 
@@ -843,7 +1286,6 @@ inline static object type_stack_pop(object_ptr * this_type_stack) {
 }
 #define value_stack_init type_stack_init
 #define  value_stack_pop type_stack_pop
-
 
 object call_c(int func, object proc_ad, object arg_list)
 /* Call a WIN32 or Linux C function in a DLL or shared library. 
@@ -868,7 +1310,11 @@ object call_c(int func, object proc_ad, object arg_list)
 	intptr_t arg_op[16];
 	intptr_t arg_len;
 	intptr_t arg_i = 0;
+	
 #if INTPTR_MAX == INT64_MAX
+#ifdef EWINDOWS
+	int signature = 0;
+#endif
 	/* The x86-64 calling convention requires us to keep the first
 	 * few floating point values separate from the ints.  And the
 	 * floating point params could start overflowing onto the stack
@@ -964,13 +1410,15 @@ object call_c(int func, object proc_ad, object arg_list)
 					arg_op[arg_i++] = dbl_arg.ints[1];
 					arg_op[arg_i++] = dbl_arg.ints[0];
 				#elif INTPTR_MAX == INT64_MAX
-					if( xmm_i < 5 ){
+					if( xmm_i < MAX_FP_PARAM_REGISTERS ){
+						UPDATE_SIGNATURE
 						dbl_op[xmm_i++].d = dbl_arg.dbl;
 					}
 					else{
 						arg_op[arg_stack++] = dbl_arg.int64;
 					}
 					int_args += 6;
+					INCREMENT_INT_ARGS;
 				#endif
 				
 			}
@@ -980,13 +1428,15 @@ object call_c(int func, object proc_ad, object arg_list)
 				#if INTPTR_MAX == INT32_MAX
 					arg_op[arg_i++] = (uintptr_t)flt_arg.int32;
 				#elif INTPTR_MAX == INT64_MAX
-					if( xmm_i < 5 ){
+					if( xmm_i < MAX_FP_PARAM_REGISTERS ){
+						UPDATE_SIGNATURE
 						dbl_op[xmm_i++].f = flt_arg.flt;
 					}
 					else{
 						arg_op[arg_stack++] = flt_arg.int32;
 					}
 					int_args += 6;
+					INCREMENT_INT_ARGS;
 				#endif
 			}
 		}
@@ -1090,9 +1540,9 @@ object call_c(int func, object proc_ad, object arg_list)
 		}
 	}
 #else
-	if( is_double ) dresult = dcall_x86_64( long_proc_address, (double*)dbl_op, arg_op );
-	if( is_float  ) fresult = fcall_x86_64( long_proc_address, (double*)dbl_op, arg_op );
-	else            iresult = icall_x86_64( long_proc_address, (double*)dbl_op, arg_op, int_args );
+	if( is_double ) dresult = dcall_x86_64( long_proc_address, (double*)dbl_op, arg_op SIGNATURE_PARAM);
+	if( is_float  ) fresult = fcall_x86_64( long_proc_address, (double*)dbl_op, arg_op SIGNATURE_PARAM);
+	else            iresult = icall_x86_64( long_proc_address, (double*)dbl_op, arg_op, int_args SIGNATURE_PARAM );
 #endif
 	switch( return_type ){
 		case C_DOUBLE:
