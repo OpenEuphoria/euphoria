@@ -4306,6 +4306,9 @@ object_ptr v_elem;
 			EFree(sval);
 	}
 	else if (c == 'd' || c == 'x' || c == 'o') {
+#if defined( EWINDOWS ) && INTPTR_MAX == INT64_MAX
+		cstring[flen++] = 'l';
+#endif
 		cstring[flen++] = 'l';
 		if (c == 'x')
 			c = 'X';
