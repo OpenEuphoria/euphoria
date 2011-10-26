@@ -2465,7 +2465,10 @@ object CallBack(object x)
 			*(intptr_t *)(copy_addr+i) = (intptr_t)e_routine[routine_id];
 #endif
 			not_patched = 0;
+#if INTPTR_MAX == INT32_MAX || defined( EUNIX )
+			// MinGW-64 puts this before the general_ptr, so we can't break out of the loop
 			break;
+#endif
 		}
 #if INTPTR_MAX == INT64_MAX
 		else if( *((uintptr_t*)(copy_addr + i)) == 0xabcdefabcdefabcdLL ){
