@@ -822,17 +822,19 @@ typedef float (*fcall_sig15)( double, double, double, double, intptr_t, intptr_t
 int64_t icall_x86_64( intptr_t func, double* xmm, int64_t *r, int args, int signature ){
 	switch( signature ){
 		case 0:
-			if( args == 0 ) return ((int64_t (*)())func)();
-			else if( args == 1 ) return ((int64_t (*)())func)( r[0] );
-			else if( args == 2 ) return ((int64_t (*)())func)( r[0], r[1] );
-			else if( args == 3 ) return ((int64_t (*)())func)( r[0], r[1], r[2] );
-			else if( args == 4 ) return ((int64_t (*)())func)( r[0], r[1], r[2], r[3] );
-			else
+			switch( args ){
+				case 0: ((int64_t (*)())func)();
+				case 1: ((int64_t (*)())func)( r[0] );
+				case 2: ((int64_t (*)())func)( r[0], r[1] );
+				case 3: ((int64_t (*)())func)( r[0], r[1], r[2] );
+				case 4: ((int64_t (*)())func)( r[0], r[1], r[2], r[3] );
+				default:
 				return ((int64_t (*)())func)(
 						r[0], r[1], r[2], r[3], r[4], 
 						r[5], r[6], r[7], r[8], r[9],
 						r[10], r[11], r[12], r[13], 
 						r[14], r[15], r[16] );
+			}
 		
 		case 1:
 			return ((icall_sig1)func)(
@@ -1260,9 +1262,9 @@ union xmm_param {
 /* Pushes the variable //arg// on to our argument stack, but not the
  * runtime stack, as an integer. */
 #define PUSH_INT_ARG \
+++int_args; \
 if( arg_i < MAX_INT_PARAM_REGISTERS ){ \
 	arg_op[arg_i++] = arg; \
-	++int_args; \
 } \
 else{ \
 	arg_op[arg_stack++] = arg; \
@@ -1322,7 +1324,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	 */
 	union xmm_param dbl_op[5];
 	intptr_t xmm_i = 0;
-	intptr_t arg_stack = 6;
+	intptr_t arg_stack = MAX_INT_PARAM_REGISTERS;
 	int int_args = 0;
 #endif
 	int is_double, is_float;
