@@ -48,7 +48,9 @@
 #ifdef EWINDOWS
 	#if defined(EMINGW) && INTPTR_MAX == INT32_MAX
 		// some versions of MinGW don't define this
-		#define _WIN32_IE 0x0400
+		#if __GNUC__ < 5 && __GNUC_MINOR__ < 6
+			#define _WIN32_IE 0x0400
+		#endif
 	#endif
 	#include <windows.h>
 	#include <commctrl.h>
