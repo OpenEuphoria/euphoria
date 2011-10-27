@@ -38,7 +38,7 @@ include scanner.e
 include symtab.e
 include shift.e
 include fwdref.e
-
+include literal_set.e as ls
 
 integer np, pc
 
@@ -7081,10 +7081,37 @@ export procedure escape_string( t:string string )
 	end if
 end procedure
 
-procedure init_string( symtab_index tp )
+-- pass an object x, which must be value from a constant.
+-- and a beginning and final symtab_indices and
+-- returns a sequence of index sequence, symbol pairs
+-- of the form { {p1, q1}, {p2, q2}, ... , {pn, qn} }
+-- such that for each pair, {pk, qk}
+--     cs[S_OBJ][pk[1]][pk[2]]...[pk[$]] = SymTab[qk][S_OBJ]
+-- Note that each qk will be a constant symbol and will
+-- be in range start..final.
+function locate_equivalent_existing_symbols(sequence s, symtab_index start, symtab_index final)
+	sequence retlist = {}
+	for object_index = 1 to length(s) label "object index loop" do
+		for symbol_index = start to final do
+			if sym_mode(symbol_index) = M_CONSTANT and equal(s[object_index],sym_obj(symbol_index)) then
+				retlist = append(retlist,{object_index,symbol_index})
+				continue "object index loop"
+			end if
+		end for
+		if sequence(s[object_index]) then
+			sequence listi = locate_equivalent_existing_symbols(s[object_index], start, final)
+			for j = 1 to length(listi) do
+				listi[j][1] = prepend(listi[j][1],object_index)
+			end for			
+		end if
+	end for
+	return retlist
+end function
+	
+procedure init_string( integer destination, symtab_index tp )
 -- string
 	sequence string
-
+	
 	string = SymTab[tp][S_OBJ]
 	integer decompress = not is_string( string )
 
@@ -7094,18 +7121,20 @@ procedure init_string( symtab_index tp )
 		c_stmt0("string_ptr = \"")
 	else
 		c_stmt0("_")
-		c_printf("%d = NewString(\"", SymTab[tp][S_TEMP_NAME])
+		c_printf("%d = NewString(\"", SymTab[tp][destination])
 	end if
 
 	escape_string( string )
 
 	if decompress then
-		c_printf("\";\n\t_%d = decompress( 0 );\n", SymTab[tp][S_TEMP_NAME])
+		c_printf("\";\n\t_%d = decompress( 0 );\n", SymTab[tp][destination])
 	else
 		c_puts("\");\n")
 	end if
+	
 end procedure
 
+with trace
 --**
 -- Translate the IL into C
 procedure BackEnd(atom ignore)
@@ -7441,9 +7470,12 @@ procedure BackEnd(atom ignore)
 	-- initialize the (non-integer) literals
 	tp = literal_init
 	tp_count = 0
-
+	integer enum_constant_last = 0, enum_constant_first = 0
+	sequence evl = {}
+	object ls = 0 -- literal set 
+	symtab_index ls_sym
+	
 	while tp != 0 do
-
 		if tp_count > INIT_CHUNK then
 			-- close current .c and start a new one
 			c_stmt0("init_literal")
@@ -7463,12 +7495,29 @@ procedure BackEnd(atom ignore)
 
 		if atom(SymTab[tp][S_OBJ]) then -- can't be NOVALUE
 			-- double
-			c_stmt0("_")
-			c_printf("%d = NewDouble((eudouble)", SymTab[tp][S_TEMP_NAME])
-			c_printf8(SymTab[tp][S_OBJ])
-			c_puts(");\n")
+			if not equal(ls,0) then
+				string = ls:first_assign_value_code(ls, sprintf("_%d",SymTab[tp][S_TEMP_NAME]), SymTab[tp][S_OBJ])
+				if equal(string,"") then
+					ls = 0
+				end if
+			else
+				string = ""
+			end if
+			if equal(string,"") = 0 then
+				c_puts(string)
+			else
+				c_stmt0("_")
+				c_printf("%d = NewDouble((eudouble)", SymTab[tp][S_TEMP_NAME])
+				c_printf8(SymTab[tp][S_OBJ])
+				c_puts(");\n")
+			end if
 		else
-			init_string( tp )
+			if length(literal_sets[2]) and equal(SymTab[tp][S_OBJ],ls:get_map(literal_sets[2][$])) 
+				and ls:get_access_method(literal_sets[2][$]) = ls:SEQUENCE_PAIR then
+					-- mark tp as the literal set
+					ls = literal_sets[2][$]
+			end if			
+			init_string( S_TEMP_NAME, tp )
 		end if
 		tp = SymTab[tp][S_NEXT]
 		tp_count += 1
@@ -7515,14 +7564,30 @@ procedure BackEnd(atom ignore)
 				if decompress then
 					c_printf( "\";\n\t_%d", SymTab[csym][S_FILE_NO] )
 					c_puts( SymTab[csym][S_NAME] )
-					c_printf(" = decompress( 0 );\n", SymTab[csym][S_TEMP_NAME])
+					c_printf(" = decompress( 0 );\n", {})
 				else
 					c_puts("\");\n")
 				end if
 			else
-				c_printf( "\t_%d", SymTab[csym][S_FILE_NO] )
-				c_puts( SymTab[csym][S_NAME] )
-				c_printf( " = NewDouble( %0.20fL );\n", SymTab[csym][S_OBJ] )
+				integer type_d = find(SymTab[csym][S_VTYPE], literal_sets[1])
+				sequence sv = SymTab[csym]
+				if type_d then
+					ls = literal_sets[2][type_d]
+					string = ls:first_assign_value_code(ls, sprintf("_%d%s", {SymTab[csym][S_FILE_NO],SymTab[csym][S_NAME]}), SymTab[csym][S_OBJ]) 
+				else
+					string = ""
+				end if
+				
+				if equal(string,"") then
+					ls = 0
+					c_printf( "\t_%d", SymTab[csym][S_FILE_NO] )
+					c_puts( SymTab[csym][S_NAME] )
+					c_printf( " = NewDouble( %0.20fL );\n", SymTab[csym][S_OBJ] )
+				else
+					c_puts("/* Set Using ticket 657 code. */\n")
+					c_puts(string)
+				end if
+				
 			end if
 
 			tp_count += 1
