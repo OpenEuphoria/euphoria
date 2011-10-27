@@ -1,5 +1,3 @@
-include std/unittest.e
-
 -- There are several implementations used by the parser for enumerated types.  The type doesn't 
 -- return just one or zero.  The type function returns a value showing the order it was defined.  
 -- name_of should return a string that represents the constant defined in the enumerated type 
@@ -19,6 +17,12 @@ include std/unittest.e
 -- else return 0 and 
 -- name_of is implemented with ls[x][name]
 -- This detail is hidden from the user.
+include std/unittest.e
+include std/get.e
+include std/convert.e
+
+sequence buf
+
 type enum weekday
 	MONDAY = 2,
 	TUESDAY = 1,
@@ -31,7 +35,8 @@ test_equal("assigned values out of order integer (incomplete interval) enumerate
 test_equal("type values out of order integer (incomplete interval) enumerated type", {1,2,3,4,5}, {weekday(MONDAY), weekday(TUESDAY), weekday(WEDNESDAY), weekday(THURSDAY), weekday(FRIDAY)})
 test_false("non-weekday in the numeric hull is false #1", weekday(4))
 test_false("non-weekday in the numeric hull is false #2", weekday(8))
-
+buf = value("9")
+test_true("parsed integer values are also valid", weekday(buf[2]))
 -- continuous monotonic enumerated type
 -- internally, the parser will implement name of by using a sequence of pairs indexed by 
 -- inner_planets.  So ds[MERCURY] will contain an object pair:  The appearance number and the name "MERCURY".  
@@ -73,13 +78,19 @@ type enum metric_prefix by * 1000
 	giga
 end type
 test_equal("assigned values non-integer enumerated type", {0.000_000_001, 0.000_001, 0.001, 1_000, 1_000_000, 1_000_000_000 }, {nano, micro, milli, kilo, mega, giga})
-test_equal("type values out of order integer enumerated type", {1,2,3,4,5,6}, {metric_prefix(nano),
+test_equal("type values non-integer enumerated type", {1,2,3,4,5,6}, {metric_prefix(nano),
 	metric_prefix(micro),
 	metric_prefix(milli),
 	metric_prefix(kilo),
 	metric_prefix(mega),
 	metric_prefix(giga)})
-
+-- floating point parsed values
+buf = value("0.000"&"001")
+test_equal("micro is also the same as 0.000_001 parsed", micro, buf[2])
+buf = value("0.001")
+test_equal("milli is also the same as 0.001 parsed", milli, buf[2])
+buf = value("1000")
+test_equal("kilo is also the same as 1000 parsed", kilo, buf[2])
 weekday thisday
 thisday = MONDAY
 thisday = TUESDAY
@@ -110,6 +121,9 @@ test_true("micro is a metric prefix", metric_prefix(micro))
 test_false("micro+kilo is not a metric prefix", metric_prefix(micro+kilo))
 test_false("-1 is not a metric prefix", metric_prefix(-1))
 test_false(`"Hello" is not a metric prefix`, metric_prefix("Hello"))
+test_false("9.999999999999995e-07 is not a metric prefix", metric_prefix(9.999999999999995e-07))
+test_equal("micro is 0.000_001", micro, 0.000_001)
+test_equal("atom_to_float64(micro)", {141,237,181,160,247,198,176,62}, atom_to_float64(micro))
 
 outer_planet farthest
 farthest = NEPTUNE
