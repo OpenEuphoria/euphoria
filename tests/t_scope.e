@@ -20,4 +20,6 @@ export function export_foo()
 	return 0
 end function
 
+include scope_4.e
+
 test_report()
