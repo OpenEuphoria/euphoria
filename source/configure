@@ -483,4 +483,4 @@ echo "-lib-pic" $CYPBUILDDIR/euso.a >> $BUILDDIR/eu.cfg
 echo "[bind]"  >> $BUILDDIR/eu.cfg
 echo "-eub" $CYPBUILDDIR/eub >> $BUILDDIR/eu.cfg
 
-rm -f $TRUNKDIR/source/eu.cfg
+cp $BUILDDIR/eu.cfg $TRUNKDIR/source/eu.cfg

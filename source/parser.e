@@ -4357,7 +4357,6 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 		FuncReturn = TRUE
 		emit_op(RETURNF)
 		flush_temps()
-		stmt_nest -= 1
 		InitDelete()
 		flush_temps()
 		if literal_set:get_access_method(ls) = INDEX_MAP then
