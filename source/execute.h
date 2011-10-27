@@ -68,6 +68,8 @@
 #define TOO_BIG_INT  (intptr_t) INT64_C( 0x4000000000000000 )
 #define HIGH_BITS    (intptr_t )INT64_C( 0xC000000000000000 )
 
+typedef   signed int int128_t __attribute__((mode(TI)));
+typedef unsigned int uint128_t __attribute__((mode(TI)));
 #endif
 
 #define IS_ATOM_INT(ob)       (((intptr_t)(ob)) > NOVALUE)

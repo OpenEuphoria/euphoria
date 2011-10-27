@@ -223,6 +223,7 @@ endif
 INCDIR=-i $(TRUNKDIR)/include
 CYPINCDIR=-i $(CYPTRUNKDIR)/include
 
+
 BE_CALLC = be_callc
 
 ifndef ECHO
@@ -241,7 +242,7 @@ ifeq "$(TRANSLATE)" "euc"
 	TRANSLATE=$(EECU)
 else
 #   We MUST pass these arguments to $(EXE), for $(EXE) is not and shouldn't be governed by eu.cfg in BUILDDIR.
-	TRANSLATE=$(EXE) $(CYPINCDIR) $(EC_DEBUG) $(CYPTRUNKDIR)/source/ec.ex
+	TRANSLATE=$(HOST_EXE) $(CYPINCDIR) $(EC_DEBUG) $(EFLAG) $(CYPTRUNKDIR)/source/ec.ex
 endif
 
 ifeq "$(MANAGED_MEM)" "1"
@@ -509,6 +510,7 @@ ifeq "$(PLAT)" ""
 SOURCEDIR=euphoria-$(REV)
 else
 SOURCEDIR=euphoria-$(PLAT)-$(REV)
+TARGETPLAT=-plat $(PLAT)
 endif
 
 endif
@@ -810,6 +812,12 @@ EUTEST=eutest
 EUCOVERAGE=eucoverage
 EUDIST=eudist
 
+ifeq "$(EMINGW)" "1"
+	MINGW_FLAGS=-gcc
+else
+	MINGW_FLAGS=
+endif
+
 ifeq "$(ARCH)" "ARM"
 	EUC_CFLAGS=-cflags "-fomit-frame-pointer -c -w -fsigned-char -O2 -I$(TRUNKDIR) -ffast-math"
 	EUC_LFLAGS=-lflags "$(BUILDDIR)/eu.a -ldl -lm -lpthread"
@@ -821,8 +829,9 @@ endif
 $(BUILDDIR)/eudist-build/main-.c : eudist.ex
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eudist-build" \
 		-o "$(BUILDDIR)/$(EUDIST)" \
+		-lib "$(BUILDDIR)/eu.a" \
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
-		$(TRUNKDIR)/source/eudist.ex
+		$(MINGW_FLAGS) $(TRUNKDIR)/source/eudist.ex
 
 $(BUILDDIR)/$(EUDIST) : $(TRUNKDIR)/source/eudist.ex translator library $(BUILDDIR)/eudist-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/eudist-build" -f eudist.mak
@@ -832,8 +841,9 @@ $(BUILDDIR)/eudis-build/main-.c : $(EU_CORE_FILES)
 $(BUILDDIR)/eudis-build/main-.c : $(EU_INTERPRETER_FILES) 
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eudis-build" \
 		-o "$(BUILDDIR)/$(EUDIS)" \
+		-lib "$(BUILDDIR)/eu.a" \
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
-		$(TRUNKDIR)/source/dis.ex
+		$(MINGW_FLAGS) $(TRUNKDIR)/source/dis.ex
 
 $(BUILDDIR)/$(EUDIS) : translator library $(BUILDDIR)/eudis-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/eudis-build" -f dis.mak
@@ -841,8 +851,9 @@ $(BUILDDIR)/$(EUDIS) : translator library $(BUILDDIR)/eudis-build/main-.c
 $(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/bind.ex $(EU_INTERPRETER_FILES) $(EU_BACKEND_RUNNER_FILES)
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/bind-build" \
 		-o "$(BUILDDIR)/$(EUBIND)" \
+		-lib "$(BUILDDIR)/eu.a" \
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
-		$(TRUNKDIR)/source/bind.ex
+		$(MINGW_FLAGS) $(TRUNKDIR)/source/bind.ex
 
 $(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/bind-build" -f bind.mak
@@ -850,8 +861,9 @@ $(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c
 $(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/shroud.ex  $(EU_INTERPRETER_FILES) $(EU_BACKEND_RUNNER_FILES)
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/shroud-build" \
 		-o "$(BUILDDIR)/$(EUSHROUD)" \
+		-lib "$(BUILDDIR)/eu.a" \
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
-		$(TRUNKDIR)/source/shroud.ex
+		$(MINGW_FLAGS) $(TRUNKDIR)/source/shroud.ex
 
 $(BUILDDIR)/$(EUSHROUD) : $(BUILDDIR)/shroud-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/shroud-build" -f shroud.mak
@@ -859,8 +871,9 @@ $(BUILDDIR)/$(EUSHROUD) : $(BUILDDIR)/shroud-build/main-.c
 $(BUILDDIR)/eutest-build/main-.c : $(TRUNKDIR)/source/eutest.ex
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eutest-build" \
 		-o "$(BUILDDIR)/$(EUTEST)" \
+		-lib "$(BUILDDIR)/eu.a" \
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
-		$(TRUNKDIR)/source/eutest.ex
+		$(MINGW_FLAGS) $(TRUNKDIR)/source/eutest.ex
 
 $(BUILDDIR)/$(EUTEST) : $(BUILDDIR)/eutest-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/eutest-build" -f eutest.mak
@@ -868,8 +881,9 @@ $(BUILDDIR)/$(EUTEST) : $(BUILDDIR)/eutest-build/main-.c
 $(BUILDDIR)/eucoverage-build/main-.c : $(TRUNKDIR)/bin/eucoverage.ex
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eucoverage-build" \
 		-o "$(BUILDDIR)/$(EUCOVERAGE)" \
+		-lib "$(BUILDDIR)/eu.a" \
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
-		$(TRUNKDIR)/bin/eucoverage.ex
+		$(MINGW_FLAGS) $(TRUNKDIR)/bin/eucoverage.ex
 
 $(BUILDDIR)/$(EUCOVERAGE) : $(BUILDDIR)/eucoverage-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/eucoverage-build" -f eucoverage.mak
@@ -947,6 +961,7 @@ $(BUILDDIR)/$(OBJDIR)/%.c : $(EU_MAIN)
 	@$(ECHO) Translating $(EU_TARGET) to create $(EU_MAIN)
 	rm -f $(BUILDDIR)/$(OBJDIR)/{*.c,*.o}
 	(cd $(BUILDDIR)/$(OBJDIR);$(TRANSLATE) -nobuild $(RELEASE_FLAG) \
+		-arch $(ARCH) \
 		-c $(BUILDDIR)/eu.cfg $(CYPTRUNKDIR)/source/$(EU_TARGET) )
 	
 endif
