@@ -123,7 +123,6 @@ test_false("-1 is not a metric prefix", metric_prefix(-1))
 test_false(`"Hello" is not a metric prefix`, metric_prefix("Hello"))
 test_false("9.999999999999995e-07 is not a metric prefix", metric_prefix(9.999999999999995e-07))
 test_equal("micro is 0.000_001", micro, 0.000_001)
-test_equal("atom_to_float64(micro)", {141,237,181,160,247,198,176,62}, atom_to_float64(micro))
 
 outer_planet farthest
 farthest = NEPTUNE
