@@ -2459,7 +2459,7 @@ object CallBack(object x)
 #endif
 		
 #if ARCH == ARM
-		/* What is good ANSI can be bad for ARM.
+		/* ARM cannot do unaligned memory access.
 		 * We cannot compare copy_addr[i..i+3] as an int here because this would be
 		 * a misaligned memory access.  The following code will however, sums everything 
 		 * into a register before comparing with CALLBACK_POINTER. */
