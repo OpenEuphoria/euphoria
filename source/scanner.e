@@ -736,6 +736,15 @@ procedure add_include_by( integer by_file, integer included_file, integer is_pub
 			file_public[by_file] &= included_file
 		end if
 	end if
+	
+	for propagate = 1 to length( include_matrix[included_file] ) do
+		if and_bits( PUBLIC_INCLUDE, include_matrix[included_file][propagate] ) then
+			include_matrix[by_file][propagate] = or_bits( DIRECT_INCLUDE, include_matrix[by_file][propagate] )
+			if is_public then
+				include_matrix[by_file][propagate] = or_bits( PUBLIC_INCLUDE, include_matrix[by_file][propagate] )
+			end if
+		end if
+	end for
 end procedure
 
 procedure IncludePush()
