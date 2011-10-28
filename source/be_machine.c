@@ -202,7 +202,6 @@ int use_prompt() {
 #define setenv MySetEnv
 static int MySetEnv(const char *name, const char *value, const int overwrite) {
 	int len;
-	int real_len;
 	char *str;
 
 	if (!overwrite && (getenv(name) != NULL))
@@ -212,7 +211,7 @@ static int MySetEnv(const char *name, const char *value, const int overwrite) {
 	str = EMalloc(len + 1); // NOTE: This is deliberately never freed until the application ends.
 	if (! str)
 		return 0;
-	real_len = snprintf(str, len+1, "%s=%s", name, value);
+	snprintf(str, len+1, "%s=%s", name, value);
 	str[len] = '\0'; // ensure NULL
 	len = putenv(str);
 	return len;
@@ -2458,29 +2457,35 @@ object CallBack(object x)
 			*(uintptr_t *)(copy_addr+i) = (uintptr_t)general_ptr;
 		}
 #endif
-		if (
+		
 #if ARCH == ARM
 		/* What is good ANSI can be bad for ARM.
 		 * We cannot compare copy_addr[i..i+3] as an int here because this would be
 		 * a misaligned memory access.  The following code will however, sums everything 
 		 * into a register before comparing with CALLBACK_POINTER. */
-(copy_addr[i] == (CALLBACK_POINTER & 0xff)) &&
+		if ((copy_addr[i] == (CALLBACK_POINTER & 0xff)) &&
 			(copy_addr[i]          +
 			(copy_addr[i+1] << 8)  +
 			(copy_addr[i+2] << 16) +
-			(copy_addr[i+3] << 24)) == CALLBACK_POINTER
+			(copy_addr[i+3] << 24)) == CALLBACK_POINTER ){
 			
-#else
-		*(intptr_t *)(copy_addr+i) == CALLBACK_POINTER
-#endif
-		) {
-		memcpy((intptr_t *)(copy_addr+i),
+			memcpy((intptr_t *)(copy_addr+i),
 #ifdef ERUNTIME
 			&routine_id,
 #else
-			&(intptr_t)e_routine[routine_id],
+			(intptr_t)e_routine[routine_id],
 #endif
 			sizeof(intptr_t));
+				   
+#else // !ARM
+		if ( *(intptr_t *)(copy_addr+i) == (intptr_t)CALLBACK_POINTER ) {
+#ifdef ERUNTIME
+			*(intptr_t *)(copy_addr+i) = routine_id;
+#else
+			*(intptr_t *)(copy_addr+i) = (intptr_t)e_routine[routine_id];
+#endif
+#endif
+			
 			not_patched = 0;
 #if INTPTR_MAX == INT32_MAX || defined( EUNIX )
 			// MinGW-64 puts this before the general_ptr, so we can't break out of the loop
