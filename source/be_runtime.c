@@ -11,6 +11,11 @@
 /******************/
 #define _LARGE_FILE_API
 #define _LARGEFILE64_SOURCE
+#include <stdint.h>
+#if defined(EWINDOWS) && INTPTR_MAX == INT64_MAX
+// MSVCRT doesn't handle long double output correctly
+#define __USE_MINGW_ANSI_STDIO 1
+#endif
 #include <stdio.h>
 
 #include <stdarg.h>
@@ -43,7 +48,9 @@
 #ifdef EWINDOWS
 	#if defined(EMINGW) && INTPTR_MAX == INT32_MAX
 		// some versions of MinGW don't define this
-		#define _WIN32_IE 0x0400
+		#if __GNUC__ < 5 && __GNUC_MINOR__ < 6
+			#define _WIN32_IE 0x0400
+		#endif
 	#endif
 	#include <windows.h>
 	#include <commctrl.h>
@@ -4301,6 +4308,9 @@ object_ptr v_elem;
 			EFree(sval);
 	}
 	else if (c == 'd' || c == 'x' || c == 'o') {
+#if defined( EWINDOWS ) && INTPTR_MAX == INT64_MAX
+		cstring[flen++] = 'l';
+#endif
 		cstring[flen++] = 'l';
 		if (c == 'x')
 			c = 'X';

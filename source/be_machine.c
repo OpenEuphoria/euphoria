@@ -15,6 +15,11 @@
 
 #define _LARGEFILE64_SOURCE
 #include <stdlib.h>
+#include <stdint.h>
+#if defined(EWINDOWS) && INTPTR_MAX == INT64_MAX
+// MSVCRT doesn't handle long double output correctly
+#define __USE_MINGW_ANSI_STDIO 1
+#endif
 #include <stdio.h>
 #include <math.h>
 
@@ -2341,6 +2346,11 @@ object CallBack(object x)
 #endif
 	}
 
+#if defined( EWINDOWS ) && INTPTR_MAX == INT64_MAX
+	// For some reason the cdecl callback crashes on windows, but this always works.
+	// We're not really using stdcall or cdecl anyways
+	convention = C_STDCALL;
+#endif
 	/* Check routine_id value and get the number of arguments */
 #ifdef ERUNTIME
 	num_args = rt00[routine_id].num_args;
@@ -2467,7 +2477,10 @@ object CallBack(object x)
 #endif
 			sizeof(intptr_t));
 			not_patched = 0;
+#if INTPTR_MAX == INT32_MAX || defined( EUNIX )
+			// MinGW-64 puts this before the general_ptr, so we can't break out of the loop
 			break;
+#endif
 		}
 #elif INTPTR_MAX == INT64_MAX
 		else if( *((uintptr_t*)(copy_addr + i)) == 0xabcdefabcdefabcdLL ){
