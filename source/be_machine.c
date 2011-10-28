@@ -2458,17 +2458,22 @@ object CallBack(object x)
 			*(uintptr_t *)(copy_addr+i) = (uintptr_t)general_ptr;
 		}
 #endif
-#if INTPTR_MAX == INT32_MAX
+		if (
+#if ARCH == ARM
 		/* What is good ANSI can be bad for ARM.
-		 * we cannot compare copy_addr[i..i+3] as an int here because this would be
+		 * We cannot compare copy_addr[i..i+3] as an int here because this would be
 		 * a misaligned memory access.  The following code will however, sums everything 
 		 * into a register before comparing with CALLBACK_POINTER. */
-		if ((copy_addr[i] == (CALLBACK_POINTER & 0xff)) &&
+(copy_addr[i] == (CALLBACK_POINTER & 0xff)) &&
 			(copy_addr[i]          +
 			(copy_addr[i+1] << 8)  +
 			(copy_addr[i+2] << 16) +
-			(copy_addr[i+3] << 24)) == CALLBACK_POINTER ) {
-
+			(copy_addr[i+3] << 24)) == CALLBACK_POINTER
+			
+#else
+		*(intptr_t *)(copy_addr+i) == CALLBACK_POINTER
+#endif
+		) {
 		memcpy((intptr_t *)(copy_addr+i),
 #ifdef ERUNTIME
 			&routine_id,
@@ -2479,10 +2484,12 @@ object CallBack(object x)
 			not_patched = 0;
 #if INTPTR_MAX == INT32_MAX || defined( EUNIX )
 			// MinGW-64 puts this before the general_ptr, so we can't break out of the loop
+			// Is it safe to assume that all 64-bit UNIXes don't and wont generate this before
+			// general_ptr?
 			break;
 #endif
 		}
-#elif INTPTR_MAX == INT64_MAX
+#if INTPTR_MAX == INT64_MAX
 		else if( *((uintptr_t*)(copy_addr + i)) == 0xabcdefabcdefabcdLL ){
 			*((uintptr_t*)(copy_addr + i)) = (uintptr_t)general_ptr;
 		}
