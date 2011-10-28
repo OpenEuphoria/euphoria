@@ -2448,16 +2448,28 @@ object CallBack(object x)
 			*(uintptr_t *)(copy_addr+i) = (uintptr_t)general_ptr;
 		}
 #endif
-		if ( *(intptr_t*)(copy_addr + i) == (intptr_t)CALLBACK_POINTER ) {
+#if INTPTR_MAX == INT32_MAX
+		/* What is good ANSI can be bad for ARM.
+		 * we cannot compare copy_addr[i..i+3] as an int here because this would be
+		 * a misaligned memory access.  The following code will however, sums everything 
+		 * into a register before comparing with CALLBACK_POINTER. */
+		if ((copy_addr[i] == (CALLBACK_POINTER & 0xff)) &&
+			(copy_addr[i]          +
+			(copy_addr[i+1] << 8)  +
+			(copy_addr[i+2] << 16) +
+			(copy_addr[i+3] << 24)) == CALLBACK_POINTER ) {
+
+		memcpy((intptr_t *)(copy_addr+i),
 #ifdef ERUNTIME
-			*(intptr_t *)(copy_addr+i) = routine_id;
+			&routine_id,
 #else
-			*(intptr_t *)(copy_addr+i) = (intptr_t)e_routine[routine_id];
+			&(intptr_t)e_routine[routine_id],
 #endif
+			sizeof(intptr_t));
 			not_patched = 0;
 			break;
 		}
-#if INTPTR_MAX == INT64_MAX
+#elif INTPTR_MAX == INT64_MAX
 		else if( *((uintptr_t*)(copy_addr + i)) == 0xabcdefabcdefabcdLL ){
 			*((uintptr_t*)(copy_addr + i)) = (uintptr_t)general_ptr;
 		}
