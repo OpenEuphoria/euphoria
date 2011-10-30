@@ -429,4 +429,6 @@ The IF instruction is used for making runtime branch statements.  The IF instruc
 
 [ IF instruction ] [ test value ] [ failure address ]
 
+INTEGER_CHECK instruction:
 
+The INTEGER_CHECK is used to determine whether something has the value considered to be 'integer' to the EUPHORIA language definition.  The instruction takes the next argument's pointer to its value and determines whether it is in the legal integer range, regardless of how that number is represented.
