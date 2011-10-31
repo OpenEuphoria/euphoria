@@ -9,6 +9,8 @@
 ; 3. /packaging/win32/euphoria-ow.iss
 ; 4. /tests/t_condcmp.e
 ; 5. /source/version.h
+; 6. /docs/refman_2.txt (Euphoria Version Definitions)
+
 [Setup]
 AppName=Euphoria
 AppVersion=4.0.4
