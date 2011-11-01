@@ -4271,25 +4271,12 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 		-- Create the body ourselves
 		switch literal_set:get_access_method(ls)  do
 			case INDEX_MAP then
-				putback({IF,0})
-				putback({END,0})
-						-- 0
-					putback(zero)
-					putback({RETURN,0})
-				putback({THEN,0})
-				putback({RIGHT_ROUND,0})
-				putback(i1_sym)
-				putback({LEFT_ROUND,0})
-				putback(keyfind("integer",-1))
-				putback(keyfind("not",-1))
-				putback({IF,0})
-				Statement_list()
+				-- 0
+				putback(zero)
+				putback({RETURN,0})
 				
 				putback({IF,0})
 				putback({END,0})
-				putback(zero)
-				putback({RETURN,0})
-				putback({ELSE,0})
 				if not literal_set:is_continuous(ls) or not literal_set:is_monotonic(ls) then
 				-- ls_data[x][1]
 					-- [1]
@@ -4328,7 +4315,13 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 				putback(i1_sym)
 				putback({LESSEQ,0})
 				putback({VARIABLE,literal_set:get_minimal(ls)})
+				putback({AND,0})
+				putback({RIGHT_ROUND,0})
+				putback(i1_sym)
+				putback({LEFT_ROUND,0})
+				putback(keyfind("integer",-1))
 				putback({IF,0})
+				
 				Statement_list()
 				
 				-- 0
