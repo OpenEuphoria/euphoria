@@ -2294,7 +2294,13 @@ void set_page_to_read_write_execute(page_ptr page_addr) {
 	mprotect(page_addr, pagesize, PROT_EXEC | PROT_READ | PROT_WRITE );
 #endif
 }
-
+/* addressable version of CALLBACK_POINTER constant for use with memcmp */
+const uintptr_t callback_pointer_magic = CALLBACK_POINTER;
+#if defined(EOSX)
+	const uintptr_t general_ptr_magic = 0xF001F001;
+#elif (INTPTR_MAX == INT64_MAX)
+	const uintptr_t general_ptr_magic = 0xabcdefabcdefabcdLL;
+#endif
 object CallBack(object x)
 /* return either a call-back address for routine id x
    x can be the routine id for stdcall, or {'+', routine_id} for cdecl
@@ -2326,7 +2332,9 @@ object CallBack(object x)
 	int convention;
 	int res;
 	convention = C_CDECL;
-	not_patched = 1;
+	/* bit 0 set, iff the symtab_ptr has not been patched yet. */
+	not_patched = 1;	
+	
 	/* Handle whether it is {'+', routine_id} or {routine_id}:
 	 * Set flags and extract routine id value. */
 	if (IS_SEQUENCE(x)) {
@@ -2447,56 +2455,42 @@ object CallBack(object x)
 	if (res != 0) {
 		RTFatal("Internal error: CallBack memcopy failed (%d).", res);
 	}
-	
-
-	// Plug in the symtab pointer
-	// Find 78 56 34 12
-	for (i = 4; i < CALLBACK_SIZE-4; i++) {
-#ifdef EOSX
-		if( (*(uintptr_t*)(addr + i)) == 0xF001F001 ){
-			*(uintptr_t *)(copy_addr+i) = (uintptr_t)general_ptr;
-		}
+#if defined(EOSX) || (INTPTR_MAX == INT64_MAX)
+	// For platforms that also have 'general_ptr' to patch, 'not_patched' should have another
+	// bit set to be cleared when they patch this value.
+	not_patched = 010 | not_patched;
 #endif
+	// Plug in the symtab pointer
+	// Find the magic number, CALLBACK_POINTER (callback_pointer_magic)
+	// in memory.
+	for (i = 4; not_patched && (i < CALLBACK_SIZE-4); i++) { 
 		
-#if ARCH == ARM
 		/* ARM cannot do unaligned memory access.
-		 * We cannot compare copy_addr[i..i+3] as an int here because this would be
-		 * a misaligned memory access.  The following code will however, sums everything 
-		 * into a register before comparing with CALLBACK_POINTER. */
+		 * We cannot compare copy_addr[i..i+sizeof(intptr_t)] as an intptr_t here because this would be
+		 * a misaligned memory access.  The following code however, compares the data byte by byte using
+		 * callback_pointer_magic, which has the same value as CALLBACK_POINTER. */
 		if ((copy_addr[i] == (CALLBACK_POINTER & 0xff)) &&
-			(copy_addr[i]          +
-			(copy_addr[i+1] << 8)  +
-			(copy_addr[i+2] << 16) +
-			(copy_addr[i+3] << 24)) == CALLBACK_POINTER ){
+			(memcmp(&copy_addr[i],&callback_pointer_magic,sizeof(intptr_t))==0)) {
 			
-			memcpy((intptr_t *)(copy_addr+i),
+			memcpy(&copy_addr[i],
 #ifdef ERUNTIME
 			&routine_id,
 #else
-			(intptr_t)e_routine[routine_id],
+			&e_routine[routine_id],
 #endif
 			sizeof(intptr_t));
-				   
-#else // !ARM
-		if ( *(intptr_t *)(copy_addr+i) == (intptr_t)CALLBACK_POINTER ) {
-#ifdef ERUNTIME
-			*(intptr_t *)(copy_addr+i) = routine_id;
-#else
-			*(intptr_t *)(copy_addr+i) = (intptr_t)e_routine[routine_id];
-#endif
-#endif
 			
-			not_patched = 0;
-#if INTPTR_MAX == INT32_MAX || defined( EUNIX )
-			// MinGW-64 puts this before the general_ptr, so we can't break out of the loop
-			// Is it safe to assume that all 64-bit UNIXes don't and wont generate this before
-			// general_ptr?
-			break;
-#endif
+			not_patched &= ~1;
+						
 		}
-#if INTPTR_MAX == INT64_MAX
-		else if( *((uintptr_t*)(copy_addr + i)) == 0xabcdefabcdefabcdLL ){
+#if defined(EOSX) || (INTPTR_MAX == INT64_MAX)
+/* If OS/X ever gets ported to ARM ... */
+#if ARCH == ARM
+#error "misaligned comparison code" 
+#endif
+		else if( *((uintptr_t*)(copy_addr + i)) == general_ptr_magic ){
 			*((uintptr_t*)(copy_addr + i)) = (uintptr_t)general_ptr;
+			not_patched &= ~010;
 		}
 #endif
 	}
