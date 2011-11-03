@@ -2322,7 +2322,8 @@ object CallBack(object x)
 	static long call_increment = 0;
 	static long last_block_offset = 0;
 	uintptr_t addr;
-	int routine_id, i, num_args;
+	intptr_t routine_id;
+	int i, num_args;
 	unsigned char *copy_addr;
 #ifndef ERUNTIME
 	symtab_ptr routine;
