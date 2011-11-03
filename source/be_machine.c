@@ -2469,7 +2469,7 @@ object CallBack(object x)
 		 * We cannot compare copy_addr[i..i+sizeof(intptr_t)] as an intptr_t here because this would be
 		 * a misaligned memory access.  The following code however, compares the data byte by byte using
 		 * callback_pointer_magic, which has the same value as CALLBACK_POINTER. */
-		if ((copy_addr[i] == (CALLBACK_POINTER & 0xff)) &&
+		if ((copy_addr[i] == ((intptr_t)CALLBACK_POINTER & 0xff)) &&
 			(memcmp(&copy_addr[i],&callback_pointer_magic,sizeof(intptr_t))==0)) {
 			
 			memcpy(&copy_addr[i],
