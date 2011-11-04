@@ -11,7 +11,11 @@ include std/locale.e
 include std/text.e
 
 include common.e
-                                                       
+
+export enum
+	MSG_CC_PREFIX = 600,
+	$
+
 -- don't change this please, but please look for -deleted- items before adding new options
 -- to the bottom of this list. Re-use -deleted- items.
 constant StdErrMsgs = {
@@ -373,6 +377,7 @@ constant StdErrMsgs = {
 	{355, "Use the -mno-cygwin flag with MinGW"},
 	{356, "Specify the target architecture (X86, X86_64, ARM)"},
 	{357, "Unknown architecture: [1].  Supported architectures are: [2]"},
+	{ MSG_CC_PREFIX, "Prefix for compiler and related binaries"},
 	$
 }
 

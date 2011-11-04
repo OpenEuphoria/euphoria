@@ -127,6 +127,10 @@ export enum
 export integer compiler_type = COMPILER_UNKNOWN
 
 --**
+-- Prefix for the compiler and other related binaries.
+export sequence compiler_prefix = ""
+
+--**
 -- Compiler directory (only used for a few compilers)
 
 export sequence compiler_dir = ""
@@ -449,8 +453,8 @@ function setup_build()
 	
 	switch compiler_type do
 		case COMPILER_GCC then
-			c_exe = "gcc"
-			l_exe = "gcc"
+			c_exe = compiler_prefix & "gcc"
+			l_exe = compiler_prefix & "gcc"
 			obj_ext = "o"
 
 			if debug_option then
@@ -504,11 +508,11 @@ function setup_build()
 			end if
 			
 			-- input/output
-			rc_comp = "windres -DSRCDIR=\"" & adjust_for_build_file(current_dir()) & "\" [1] -O coff -o [2]"
+			rc_comp = compiler_prefix & "windres -DSRCDIR=\"" & adjust_for_build_file(current_dir()) & "\" [1] -O coff -o [2]"
 			
 		case COMPILER_WATCOM then
-			c_exe = "wcc386"
-			l_exe = "wlink"
+			c_exe = compiler_prefix & "wcc386"
+			l_exe = compiler_prefix & "wlink"
 			obj_ext = "obj"
 
 			if debug_option then
@@ -537,7 +541,7 @@ function setup_build()
 			
 			
 			-- resource file, executable file
-			rc_comp = "wrc -DSRCDIR=\"" & adjust_for_build_file(current_dir()) & "\" -q -fo=[2] -ad [1] [3]"
+			rc_comp = compiler_prefix &"wrc -DSRCDIR=\"" & adjust_for_build_file(current_dir()) & "\" -q -fo=[2] -ad [1] [3]"
 		case else
 			CompileErr(43)
 	end switch

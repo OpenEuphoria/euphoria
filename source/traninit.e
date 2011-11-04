@@ -97,6 +97,7 @@ sequence trans_opt_def = {
 	{ "verbose",	      0, GetMsgText(319,0), { } },
 	{ "no-cygwin",        0, GetMsgText(355,0), { } },
 	{ "arch",             0, GetMsgText(356),   { HAS_PARAMETER, "architecture" } },
+	{ "cc-prefix",        0, GetMsgText( MSG_CC_PREFIX ), { HAS_PARAMETER, "prefix" } },
 	$
 }
 
@@ -127,9 +128,10 @@ export procedure transoptions()
 	integer option_w = 0
 
 	for idx = 1 to length(opt_keys) do
+		
 		sequence key = opt_keys[idx]
 		object val = map:get(opts, key)
-
+		
 		switch key do
 			case "silent" then
 				silent = TRUE
@@ -260,6 +262,9 @@ export procedure transoptions()
 			
 			case "arch" then
 				set_target_arch( upper( val ) )
+			
+			case "cc-prefix" then
+				compiler_prefix = val
 			
 		end switch
 	end for
