@@ -44,6 +44,7 @@
 
 CONFIG_FILE = config.gnu
 CC=$(CC_PREFIX)$(CC_SUFFIX)
+RC=$(CC_PREFIX)$(RC_SUFFIX)
 ifndef CONFIG
 CONFIG = $(CONFIG_FILE)
 endif
