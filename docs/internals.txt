@@ -418,5 +418,15 @@ Each of the class values are capitalized words for some keyword or VARIABLE.  Th
 
 You can use putback() to put tokens into the token buffer.  The tokens will be pulled out by the parser in a filo manner, like a stack.  
 
-        
+==== Backend Instructions
+
+After the Parser processes the instructions.  It creates Backend instructions that are easily translated or interpreted.  The system uses opcodes and some parameters which are put on a stack.  This backend language is similar to assembler.  You have opcodes (instructions) and parameters.  These parameters must be integers themselves but some may serve as pointers to arbitrary EUPHORIA objects.  As a developer of EUPHORIA itself, rather than a developer that users EUPHORIA, it is important to know exactly what these opcodes do and what they are for.  In this section we will document what they are for, and how they manipulate the instruction pointer, and stack.
+
+
+IF instruction:
+
+The IF instruction is used for making runtime branch statements.  The IF instruction takes the top of the stack as the condition value, if the condition is 0, it passes control to the address stored just below the top of the stack.  If the condition is non-zero and an atom the instruction pointer just past the failure address.
+
+[ IF instruction ] [ test value ] [ failure address ]
+
 
