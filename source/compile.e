@@ -7346,7 +7346,13 @@ procedure BackEnd(atom ignore)
 			c_stmt0("argc = 1;\n")
 			c_stmt0("Argc = 1;\n")
 			c_stmt0("argv = make_arg_cv(szCmdLine, &argc);\n")
+			c_stmt0("if( hInstance ){\n")
 			c_stmt0("winInstance = hInstance;\n")
+			c_stmt0("}\n")
+			c_stmt0("else{\n")
+			c_stmt0("winInstance = GetModuleHandle(0);\n")
+			c_stmt0("}\n")
+			
 		end if
 	else --TUNIX
 		if dll_option then

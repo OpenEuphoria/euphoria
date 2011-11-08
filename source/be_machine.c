@@ -15,6 +15,11 @@
 
 #define _LARGEFILE64_SOURCE
 #include <stdlib.h>
+#include <stdint.h>
+#if defined(EWINDOWS) && INTPTR_MAX == INT64_MAX
+// MSVCRT doesn't handle long double output correctly
+#define __USE_MINGW_ANSI_STDIO 1
+#endif
 #include <stdio.h>
 #include <math.h>
 
@@ -197,7 +202,6 @@ int use_prompt() {
 #define setenv MySetEnv
 static int MySetEnv(const char *name, const char *value, const int overwrite) {
 	int len;
-	int real_len;
 	char *str;
 
 	if (!overwrite && (getenv(name) != NULL))
@@ -207,7 +211,7 @@ static int MySetEnv(const char *name, const char *value, const int overwrite) {
 	str = EMalloc(len + 1); // NOTE: This is deliberately never freed until the application ends.
 	if (! str)
 		return 0;
-	real_len = snprintf(str, len+1, "%s=%s", name, value);
+	snprintf(str, len+1, "%s=%s", name, value);
 	str[len] = '\0'; // ensure NULL
 	len = putenv(str);
 	return len;
@@ -2290,7 +2294,13 @@ void set_page_to_read_write_execute(page_ptr page_addr) {
 	mprotect(page_addr, pagesize, PROT_EXEC | PROT_READ | PROT_WRITE );
 #endif
 }
-
+/* addressable version of CALLBACK_POINTER constant for use with memcmp */
+const uintptr_t callback_pointer_magic = CALLBACK_POINTER;
+#if defined(EOSX)
+	const uintptr_t general_ptr_magic = 0xF001F001;
+#elif (INTPTR_MAX == INT64_MAX)
+	const uintptr_t general_ptr_magic = 0xabcdefabcdefabcdLL;
+#endif
 object CallBack(object x)
 /* return either a call-back address for routine id x
    x can be the routine id for stdcall, or {'+', routine_id} for cdecl
@@ -2312,7 +2322,8 @@ object CallBack(object x)
 	static long call_increment = 0;
 	static long last_block_offset = 0;
 	uintptr_t addr;
-	int routine_id, i, num_args;
+	intptr_t routine_id;
+	int i, num_args;
 	unsigned char *copy_addr;
 #ifndef ERUNTIME
 	symtab_ptr routine;
@@ -2322,7 +2333,9 @@ object CallBack(object x)
 	int convention;
 	int res;
 	convention = C_CDECL;
-	not_patched = 1;
+	/* bit 0 set, iff the symtab_ptr has not been patched yet. */
+	not_patched = 1;	
+	
 	/* Handle whether it is {'+', routine_id} or {routine_id}:
 	 * Set flags and extract routine id value. */
 	if (IS_SEQUENCE(x)) {
@@ -2341,6 +2354,11 @@ object CallBack(object x)
 #endif
 	}
 
+#if defined( EWINDOWS ) && INTPTR_MAX == INT64_MAX
+	// For some reason the cdecl callback crashes on windows, but this always works.
+	// We're not really using stdcall or cdecl anyways
+	convention = C_STDCALL;
+#endif
 	/* Check routine_id value and get the number of arguments */
 #ifdef ERUNTIME
 	num_args = rt00[routine_id].num_args;
@@ -2438,28 +2456,42 @@ object CallBack(object x)
 	if (res != 0) {
 		RTFatal("Internal error: CallBack memcopy failed (%d).", res);
 	}
-	
-
+#if defined(EOSX) || (INTPTR_MAX == INT64_MAX)
+	// For platforms that also have 'general_ptr' to patch, 'not_patched' should have another
+	// bit set to be cleared when they patch this value.
+	not_patched = 010 | not_patched;
+#endif
 	// Plug in the symtab pointer
-	// Find 78 56 34 12
-	for (i = 4; i < CALLBACK_SIZE-4; i++) {
-#ifdef EOSX
-		if( (*(uintptr_t*)(addr + i)) == 0xF001F001 ){
-			*(uintptr_t *)(copy_addr+i) = (uintptr_t)general_ptr;
-		}
-#endif
-		if ( *(intptr_t*)(copy_addr + i) == (intptr_t)CALLBACK_POINTER ) {
+	// Find the magic number, CALLBACK_POINTER (callback_pointer_magic)
+	// in memory.
+	for (i = 4; not_patched && (i < CALLBACK_SIZE-4); i++) { 
+		
+		/* ARM cannot do unaligned memory access.
+		 * We cannot compare copy_addr[i..i+sizeof(intptr_t)] as an intptr_t here because this would be
+		 * a misaligned memory access.  The following code however, compares the data byte by byte using
+		 * callback_pointer_magic, which has the same value as CALLBACK_POINTER. */
+		if ((copy_addr[i] == ((intptr_t)CALLBACK_POINTER & 0xff)) &&
+			(memcmp(&copy_addr[i],&callback_pointer_magic,sizeof(intptr_t))==0)) {
+			
+			memcpy(&copy_addr[i],
 #ifdef ERUNTIME
-			*(intptr_t *)(copy_addr+i) = routine_id;
+			&routine_id,
 #else
-			*(intptr_t *)(copy_addr+i) = (intptr_t)e_routine[routine_id];
+			&e_routine[routine_id],
 #endif
-			not_patched = 0;
-			break;
+			sizeof(intptr_t));
+			
+			not_patched &= ~1;
+						
 		}
-#if INTPTR_MAX == INT64_MAX
-		else if( *((uintptr_t*)(copy_addr + i)) == 0xabcdefabcdefabcdLL ){
+#if defined(EOSX) || (INTPTR_MAX == INT64_MAX)
+/* If OS/X ever gets ported to ARM ... */
+#if ARCH == ARM
+#error "misaligned comparison code" 
+#endif
+		else if( *((uintptr_t*)(copy_addr + i)) == general_ptr_magic ){
 			*((uintptr_t*)(copy_addr + i)) = (uintptr_t)general_ptr;
+			not_patched &= ~010;
 		}
 #endif
 	}

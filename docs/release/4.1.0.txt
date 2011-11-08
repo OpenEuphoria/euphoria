@@ -23,3 +23,4 @@
 * Added [[:deprecate]] keyword
 * Architecture ifdefs (X86, X86_64, ARM, BITS32, BITS64, LONG32, LONG64)
 * -arch option for translator for cross translating
+* -cc-prefix option for translator

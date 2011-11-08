@@ -43,7 +43,8 @@
 #
 
 CONFIG_FILE = config.gnu
-
+CC=$(CC_PREFIX)$(CC_SUFFIX)
+RC=$(CC_PREFIX)$(RC_SUFFIX)
 ifndef CONFIG
 CONFIG = $(CONFIG_FILE)
 endif
@@ -222,6 +223,7 @@ HOST_EXE=$(EUBIN)/$(HOST_EEXU)
 endif
 INCDIR=-i $(TRUNKDIR)/include
 CYPINCDIR=-i $(CYPTRUNKDIR)/include
+
 
 BE_CALLC = be_callc
 
@@ -440,7 +442,7 @@ debug-shared-library : builddirs
 	$(MAKE) $(BUILDDIR)/$(EECUSODBGA) OBJDIR=libobjdbg-fPIC ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE) FPIC=-fPIC
 
 $(BUILDDIR)/$(LIBRARY_NAME) : $(EU_LIB_OBJECTS)
-	ar -rc $(BUILDDIR)/$(LIBRARY_NAME) $(EU_LIB_OBJECTS)
+	$(CC_PREFIX)ar -rc $(BUILDDIR)/$(LIBRARY_NAME) $(EU_LIB_OBJECTS)
 	$(ECHO) $(MAKEARGS)
 
 builddirs : $(BUILD_DIRS)
@@ -511,6 +513,7 @@ ifeq "$(PLAT)" ""
 SOURCEDIR=euphoria-$(REV)
 else
 SOURCEDIR=euphoria-$(PLAT)-$(REV)
+TARGETPLAT=-plat $(PLAT)
 endif
 
 endif
@@ -754,6 +757,7 @@ endif
 
 install :
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria
+	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria/debug
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/std/win32
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/std/net
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/langwar
@@ -776,6 +780,10 @@ install :
 	install $(BUILDDIR)/$(EBACKENDU) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EUBIND) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EUSHROUD) $(DESTDIR)$(PREFIX)/bin
+	install $(BUILDDIR)/$(EUTEST) $(DESTDIR)$(PREFIX)/bin
+	install $(BUILDDIR)/$(EUDIS) $(DESTDIR)$(PREFIX)/bin
+	install $(BUILDDIR)/$(EUDIST) $(DESTDIR)$(PREFIX)/bin
+	install $(BUILDDIR)/$(EUCOVERAGE) $(DESTDIR)$(PREFIX)/bin
 ifeq "$(EMINGW)" "1"
 	install $(BUILDDIR)/$(EBACKENDC) $(DESTDIR)$(PREFIX)/bin
 endif
@@ -783,7 +791,8 @@ endif
 	install ../include/std/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std
 	install ../include/std/net/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std/net
 	install ../include/std/win32/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std/win32
-	install ../include/euphoria/*  $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria
+	install ../include/euphoria/*.e  $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria
+	install ../include/euphoria/debug/*.e  $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria
 	install ../include/euphoria.h $(DESTDIR)$(PREFIX)/share/euphoria/include
 	install ../demo/*.e* $(DESTDIR)$(PREFIX)/share/euphoria/demo
 	install ../demo/bench/* $(DESTDIR)$(PREFIX)/share/euphoria/demo/bench 

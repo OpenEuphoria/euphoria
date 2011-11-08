@@ -20,6 +20,7 @@ export constant
 	NOT_A_MEMBER               = 362,
 	NOT_A_POINTER_OR_MEMSTRUCT = 363,
 	CANNOT_ASSIGN_NONPRIMATIVE = 364,
+	MSG_CC_PREFIX = 600,
 	$
 
 -- don't change this please, but please look for -deleted- items before adding new options
@@ -391,6 +392,7 @@ constant StdErrMsgs = {
 	{NOT_A_MEMBER, "[1] is not a member of memstruct or memunion [2]"},
 	{NOT_A_POINTER_OR_MEMSTRUCT, "Member is not a pointer or an embedded memstruct"},
 	{CANNOT_ASSIGN_NONPRIMATIVE, "Cannot assign to a non-primitive, non-pointer memstruct" },
+	{ MSG_CC_PREFIX, "Prefix for compiler and related binaries"},
 	$
 }
 

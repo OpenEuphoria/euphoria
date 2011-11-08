@@ -127,6 +127,10 @@ export enum
 export integer compiler_type = COMPILER_UNKNOWN
 
 --**
+-- Prefix for the compiler and other related binaries.
+export sequence compiler_prefix = ""
+
+--**
 -- Compiler directory (only used for a few compilers)
 
 export sequence compiler_dir = ""
@@ -449,8 +453,8 @@ function setup_build()
 	
 	switch compiler_type do
 		case COMPILER_GCC then
-			c_exe = "gcc"
-			l_exe = "gcc"
+			c_exe = compiler_prefix & "gcc"
+			l_exe = compiler_prefix & "gcc"
 			obj_ext = "o"
 
 			if debug_option then
@@ -504,11 +508,11 @@ function setup_build()
 			end if
 			
 			-- input/output
-			rc_comp = "windres -DSRCDIR=\"" & adjust_for_build_file(current_dir()) & "\" [1] -O coff -o [2]"
+			rc_comp = compiler_prefix & "windres -DSRCDIR=\"" & adjust_for_build_file(current_dir()) & "\" [1] -O coff -o [2]"
 			
 		case COMPILER_WATCOM then
-			c_exe = "wcc386"
-			l_exe = "wlink"
+			c_exe = compiler_prefix & "wcc386"
+			l_exe = compiler_prefix & "wlink"
 			obj_ext = "obj"
 
 			if debug_option then
@@ -521,10 +525,10 @@ function setup_build()
 			l_flags &= " OPTION QUIET OPTION ELIMINATE OPTION CASEEXACT"
 
 			if dll_option then
-				c_flags &= " /bd /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /I" & compile_dir 
+				c_flags &= " /bd /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /I" & adjust_for_build_file(compile_dir) 
 				l_flags &= " SYSTEM NT_DLL initinstance terminstance"
 			else
-				c_flags &= " /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /I" & compile_dir
+				c_flags &= " /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /I" & adjust_for_build_file(compile_dir)
 				if con_option then
 					-- SYSTEM NT *MUST* come first, otherwise memory dump
 					l_flags = " SYSTEM NT" & l_flags
@@ -537,7 +541,7 @@ function setup_build()
 			
 			
 			-- resource file, executable file
-			rc_comp = "wrc -DSRCDIR=\"" & adjust_for_build_file(current_dir()) & "\" -q -fo=[2] -ad [1] [3]"
+			rc_comp = compiler_prefix &"wrc -DSRCDIR=\"" & adjust_for_build_file(current_dir()) & "\" -q -fo=[2] -ad [1] [3]"
 		case else
 			CompileErr(43)
 	end switch
@@ -927,12 +931,11 @@ end procedure
 -- See Also:
 --   [[:build_system_type]], [[:BUILD_NONE]], [[:BUILD_MAKEFILE_FULL]],
 --   [[:BUILD_MAKEFILE_PARTIAL]]
-
 export procedure write_buildfile()
 	switch build_system_type do
 		case BUILD_MAKEFILE_FULL then
 			write_makefile_full()
-
+			
 			if not silent then
 				sequence make_command
 				if compiler_type = COMPILER_WATCOM then
@@ -942,7 +945,7 @@ export procedure write_buildfile()
 				end if
 
 				ShowMsg(1, 170, { cfile_count + 2 })
-				
+					
 				if sequence(output_dir) and length(output_dir) > 0 then
 					ShowMsg(1, 174, { output_dir, make_command, file0 })
 				else

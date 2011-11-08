@@ -22,9 +22,14 @@ typedef signed   char   schar;
 #include <stdarg.h>
 
 #define _LARGEFILE64_SOURCE
-
-#include <stdio.h>
 #include <stdint.h>
+
+#if defined(EWINDOWS) && INTPTR_MAX == INT64_MAX
+// MSVCRT doesn't handle long double output correctly
+#define __USE_MINGW_ANSI_STDIO 1
+#endif
+#include <stdio.h>
+
 
 #include "object.h"
 #include "symtab.h"

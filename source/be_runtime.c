@@ -11,6 +11,11 @@
 /******************/
 #define _LARGE_FILE_API
 #define _LARGEFILE64_SOURCE
+#include <stdint.h>
+#if defined(EWINDOWS) && INTPTR_MAX == INT64_MAX
+// MSVCRT doesn't handle long double output correctly
+#define __USE_MINGW_ANSI_STDIO 1
+#endif
 #include <stdio.h>
 
 #include <stdarg.h>
@@ -43,7 +48,9 @@
 #ifdef EWINDOWS
 	#if defined(EMINGW) && INTPTR_MAX == INT32_MAX
 		// some versions of MinGW don't define this
-		#define _WIN32_IE 0x0400
+		#if __GNUC__ < 5 && __GNUC_MINOR__ < 6
+			#define _WIN32_IE 0x0400
+		#endif
 	#endif
 	#include <windows.h>
 	#include <commctrl.h>
@@ -4301,6 +4308,9 @@ object_ptr v_elem;
 			EFree(sval);
 	}
 	else if (c == 'd' || c == 'x' || c == 'o') {
+#if defined( EWINDOWS ) && INTPTR_MAX == INT64_MAX
+		cstring[flen++] = 'l';
+#endif
 		cstring[flen++] = 'l';
 		if (c == 'x')
 			c = 'X';
@@ -4878,33 +4888,6 @@ void Position(object line, object col)
 	SetPosition(line_val, col_val);
 }
 
-#ifdef EWINDOWS
-char* buildCmdLine(){
-	char *szCmdLine;
-	int size;
-	int c, argc;
-	int len;
-	char **argv;
-	size = 1;
-	argv = __argv;
-	argc = __argc;
-	for( c = 1; c < argc; ++c ){
-		size += strlen( argv[c] );
-		++size;
-	}
-	szCmdLine = EMalloc( size );
-	size = 0;
-	for( c = 1; c < argc; ++c ){
-		len = strlen( argv[c] );
-		strncpy( szCmdLine + size, argv[c], len );
-		size += len;
-		szCmdLine[size++] = ' ';
-	}
-	szCmdLine[size] = '\0';
-	return szCmdLine;
-}
-#endif
-
 char **make_arg_cv(char *cmdline, int *argc)
 /* Convert command line string to argc, argv.
    If *argc is 1, then get program name from GetModuleFileName().
@@ -4920,7 +4903,9 @@ char **make_arg_cv(char *cmdline, int *argc)
 	InitEMalloc();
 #ifdef EWINDOWS
 	if( cmdline == NULL ){
-		cmdline = buildCmdLine();
+		// Windows already did the work for us
+		*argc = __argc;
+		return __argv;
 	}
 #endif
 	argv = (char **)EMalloc((strlen(cmdline)/2+3) * sizeof(char *));
@@ -5086,7 +5071,10 @@ object system_exec_call(object command, object wait)
 	argv = make_arg_cv(string_ptr, &exit_code);
 	exit_code = spawnvp(P_WAIT, argv[0], (char * const *)argv);
 
+	#if INTPTR_MAX == INT32_MAX
+	// This causes a crash on Win64
 	EFree(argv[0]);		// free the 'process' name
+	#endif
 	EFree((char *)argv); // free the list of arg addresses, but not the args themself.
 
 #endif
