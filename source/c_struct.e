@@ -637,6 +637,7 @@ end procedure
 
 export procedure write_struct_header()
 	atom struct_h = open( output_dir & "struct.h", "w", 1 )
+	generated_files = append( generated_files, "struct.h" )
 	
 	puts( struct_h, "#ifndef STRUCT_H_\n" )
 	puts( struct_h, "#define STRUCT_H_\n\n" )
