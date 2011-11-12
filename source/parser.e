@@ -9,6 +9,7 @@ elsedef
 end ifdef
 
 -- dev stage include
+
 include std/error.e
 --
 
@@ -238,6 +239,13 @@ export procedure InitParser()
 	block_list = {}
 	block_index = 0
 	param_num = -1
+	zero = {VARIABLE,NewIntSym(0)}
+	SymTab[zero[2]][S_OBJ] = 0
+	one = {VARIABLE,NewIntSym(1)}
+	SymTab[one[2]][S_OBJ] = 1
+	two = {VARIABLE,NewIntSym(2)}
+	SymTab[two[2]][S_OBJ] = 2
+	
 end procedure
 
 sequence switch_stack = {}
@@ -1158,7 +1166,7 @@ procedure Object_call( token tok )
 	end if
 end procedure
 
-with trace
+
 -- parse a name_of call...
 procedure Name_of_call( token tok )
 	object ls
@@ -1236,20 +1244,23 @@ procedure Name_of_call( token tok )
 	end if
 end procedure
 
+
 procedure Function_call( token tok )
 --	token tok2, tok3
 	integer id, scope, opcode, e
+	integer routine_sym
 
 	id = tok[T_ID]
+	routine_sym = tok[T_SYM]
 	if id = FUNC or id = TYPE then
 		-- to warn if not in include tree
-		UndefinedVar( tok[T_SYM] )
+		UndefinedVar( routine_sym )
 	end if
 
-	e = SymTab[tok[T_SYM]][S_EFFECT]
+	e = SymTab[routine_sym][S_EFFECT]
 	if e then
 		-- the routine we are calling has side-effects
-		if e = E_ALL_EFFECT or tok[T_SYM] > left_sym then
+		if e = E_ALL_EFFECT or routine_sym > left_sym then
 			-- it can access the LHS var (it uses indirect calls or comes later)
 			side_effect_calls = or_bits(side_effect_calls, e)
 		end if
@@ -1263,8 +1274,8 @@ procedure Function_call( token tok )
 		end if
 	end if
 	tok_match(LEFT_ROUND)
-	scope = SymTab[tok[T_SYM]][S_SCOPE]
-	opcode = SymTab[tok[T_SYM]][S_OPCODE]
+	scope = SymTab[routine_sym][S_SCOPE]
+	opcode = SymTab[routine_sym][S_OPCODE]
 	if scope = SC_PREDEF then
 		switch SymTab[tok[T_SYM]][S_NAME] do
 			case "object" then
@@ -1279,9 +1290,41 @@ procedure Function_call( token tok )
 	else
 		ParseArgs(tok[T_SYM])
 	end if
-
+	
+	routine_sym = tok[T_SYM]
+	ifdef BOO then	
+		sequence stack_segment = {}
+		symtab_pointer s = routine_sym
+		if 1 then
+			
+			integer n = SymTab[routine_sym][S_NUM_ARGS]
+			-- grab elements from the stack
+			for i = 1 to n do
+				if not Empty() then
+					stack_segment &= Pop()
+				end if
+			end for
+			-- test elements against their literal sets
+			for i = 2 to n do
+				s = SymTab[s][S_NEXT]
+				test_literal_match(stack_segment[i], s)
+			end for
+			-- put elements back into the stack
+			while length(stack_segment) != 0 do
+				Push(stack_segment[length(stack_segment)])
+				stack_segment = remove(stack_segment,length(stack_segment))
+			end while
+			delete(stack_segment)
+		end if
+		delete(s)
+	end ifdef
 	
 	if scope = SC_PREDEF then
+		if find(routine_sym,{compare_builtin,equal_builtin}) != 0 then
+			integer last = Pop()
+			test_literal_match(Top(),last)
+			Push(last)
+		end if
 		emit_op(opcode)
 	else
 		op_info1 = tok[T_SYM]
@@ -1487,6 +1530,9 @@ function rexpr()
 	while tok[T_ID] <= GREATER and tok[T_ID] >= LESS do
 		id = tok[T_ID]
 		tok = cexpr()
+		integer last = Pop()
+		test_literal_match(last,Top())
+		Push(last)
 		emit_op(id)
 	end while
 	return tok
@@ -1653,6 +1699,37 @@ procedure TypeCheck(symtab_index var)
 	end if
 end procedure
 
+procedure test_literal_match(symtab_pointer lsym, symtab_pointer valsym)
+	if symtab_index(lsym) and symtab_index(valsym) and lsym != 0 and valsym != 0 then
+		-- nothing
+	else
+		return
+	end if
+	ifdef DEBUG then
+		sequence lsym_name
+		if sym_mode(lsym) = M_NORMAL then
+			lsym_name = sym_name(lsym)
+		end if
+		sequence valsym_name
+		if length(SymTab[valsym]) >= S_VTYPE then
+			valsym_name = sym_name(valsym)
+		end if
+	end ifdef
+	if find(sym_mode(lsym),  {M_CONSTANT, M_NORMAL}) != 0 
+		and find(sym_mode(valsym),  {M_CONSTANT, M_NORMAL}) != 0 then
+		symtab_index valsym_type = sym_type(valsym)
+		integer lsym_type = sym_type(lsym)
+		integer valsym_ls, lsym_ls
+		valsym_ls = find(valsym_type,literal_sets[LS_KEY])
+		lsym_ls = find(lsym_type,literal_sets[LS_KEY])
+		if valsym_ls != 0 and lsym_ls != 0 and (valsym_ls != lsym_ls) then
+			-- issue warning
+			Warning(WARNMSG_ENUM_MISMATCH_TYPES_BINOP, enum_mismatch_warning_flag, {sym_name(valsym), sym_name(valsym_type), sym_name(lsym), sym_name(lsym_type)})
+		end if
+	end if
+end procedure
+
+
 procedure Assignment(token left_var)
 -- parse an assignment statement
 	token tok
@@ -1746,6 +1823,7 @@ procedure Assignment(token left_var)
 		integer temp_len = length(Code)
 		if assign_op = EQUALS then
 			Expr() -- RHS expression
+			test_literal_match(left_sym, Top()) 
 			InitCheck(left_sym, FALSE)
 		else
 			InitCheck(left_sym, TRUE)
@@ -3699,7 +3777,9 @@ procedure Procedure_call(token tok)
 	integer n, scope, opcode
 	token temp_tok
 	symtab_index s, sub
+	sequence stack_segment
 
+	
 	tok_match(LEFT_ROUND)
 	s = tok[T_SYM]
 	sub=s
@@ -3712,10 +3792,26 @@ procedure Procedure_call(token tok)
 	end if
 	ParseArgs(s)
 
-	-- check for any initialisation code for variables
-	for i=1 to n+1 do
-		s = SymTab[s][S_NEXT]
+	stack_segment = {}
+	-- grab elements from the stack
+	for i = 1 to n do
+		if not Empty() then
+			stack_segment &= Pop()
+		end if
 	end for
+	-- test elements against their literal sets
+	for i=1 to n do
+		s = SymTab[s][S_NEXT]
+		test_literal_match(stack_segment[i], s)
+	end for
+	-- put elements back into the stack
+	while length(stack_segment) do
+		Push(stack_segment[$])
+		stack_segment = remove(stack_segment,length(stack_segment))
+	end while
+	
+	-- check for any initialisation code for variables
+	s = SymTab[s][S_NEXT]
 	while s and SymTab[s][S_SCOPE]=SC_PRIVATE do
 		if sequence(SymTab[s][S_CODE]) then
 			start_playback(SymTab[s][S_CODE])
@@ -3723,7 +3819,7 @@ procedure Procedure_call(token tok)
 		end if
 		s = SymTab[s][S_NEXT]
 	end while
-
+	
 	s = sub
 	if scope = SC_PREDEF then
 		emit_op(opcode)
@@ -3982,14 +4078,6 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 	integer type_enum_gline, real_gline
 	object ls = 0
 	
-
-	zero = {VARIABLE,NewIntSym(0)}
-	SymTab[zero[2]][S_OBJ] = 0
-	one = {VARIABLE,NewIntSym(1)}
-	SymTab[one[2]][S_OBJ] = 1
-	two = {VARIABLE,NewIntSym(2)}
-	SymTab[two[2]][S_OBJ] = 2
-
 	LeaveTopLevel()
 	prog_name = next_token()
 	if prog_name[T_ID] = END_OF_FILE then

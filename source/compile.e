@@ -7133,7 +7133,7 @@ procedure init_string( integer destination, symtab_index tp )
 	
 end procedure
 
-with trace
+
 --**
 -- Translate the IL into C
 procedure BackEnd(atom ignore)

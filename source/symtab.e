@@ -28,6 +28,8 @@ export symtab_index object_type       -- s.t. index of object type
 export symtab_index atom_type         -- s.t. index of atom type
 export symtab_index sequence_type     -- s.t. index of sequence type
 export symtab_index integer_type      -- s.t. index of integer type
+export symtab_index equal_builtin     -- s.t. index of equal builtin
+export symtab_index compare_builtin   -- s.t. index of compare builtin
 
 ifdef EUDIS then
 export sequence bucket_hits = repeat( 0, NBUCKETS ) -- count how many times we look at each bucket
@@ -541,6 +543,12 @@ export procedure InitSymTab()
 			elsif equal(kname, "sequence") then
 				sequence_type = st_index
 			end if
+		else
+			if equal(kname, "equal") then
+				equal_builtin = st_index
+			elsif equal(kname, "compare") then
+				compare_builtin = st_index
+			end if
 		end if
 		if buckets[hashval] = 0 then
 			buckets[hashval] = st_index
@@ -589,6 +597,7 @@ export procedure InitSymTab()
 		end for
 		SymTab[fixups[i]][S_CODE] = si
 	end for
+	
 end procedure
 
 export procedure add_ref(token tok)
@@ -1314,6 +1323,9 @@ export function sym_usage( symtab_index sym )
 	return SymTab[sym][S_USAGE]
 end function
 
+export function sym_type( symtab_index sym )
+	return SymTab[sym][S_VTYPE]
+end function
 
 export function calc_stack_required( symtab_index sub )
 	integer required = SymTab[sub][S_NUM_ARGS]

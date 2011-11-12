@@ -140,6 +140,10 @@ export procedure Push(symtab_pointer x)
 
 end procedure
 
+export function Empty()
+	return cgi = 0
+end function
+
 export function Top()
 -- return top element on code gen stack
 	return cg_stack[cgi]

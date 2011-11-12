@@ -11,7 +11,7 @@ include std/sequence.e
 include std/sort.e
 
 constant METHODS_OTHER_THAN_SEQUENCE_PAIR_ACTUALLY_WORK = 0
-with trace
+
 with type_check
 
 enum type literal_accessor 

@@ -444,7 +444,8 @@ export constant -- maskable warning flags
 	no_case_else_warning_flag   = #1000,
 	def_arg_type_warning_flag   = #2000,
 	deprecated_warning_flag     = #4000,
-	all_warning_flag            = #7FFF
+	enum_mismatch_warning_flag  = #8000,
+	all_warning_flag            = #FFFF
 
 constant default_maskable_warnings =
 	resolution_warning_flag + 
@@ -454,6 +455,7 @@ constant default_maskable_warnings =
 	not_reached_warning_flag +
 	mixed_profile_warning_flag + 
 	custom_warning_flag +
+	enum_mismatch_warning_flag +
 	0
 
 export constant warning_flags = {
@@ -473,6 +475,7 @@ export constant warning_flags = {
 	no_case_else_warning_flag,
 	def_arg_type_warning_flag,
 	deprecated_warning_flag,
+	enum_mismatch_warning_flag,
 	all_warning_flag
 }
 
@@ -493,6 +496,7 @@ export constant warning_names = {
 	"default_case",
 	"default_arg_type",
 	"deprecated",
+	"literal_mismatch",
 	"all"
 }
 
@@ -597,6 +601,8 @@ export sequence literal_sets = {{} -- keys are symtab indicies of the type
 export enum ERRMSG_NAME_OF_NOT_VARIABLE = 358,
 	ERRMSG_NAME_OF_NOT_UDT,
 	ERRMSG_FWD_REF_NOTSUPPORTED,
-	ERRMSG_NAME_OF_NOT_ENUM_TYPE
+	ERRMSG_NAME_OF_NOT_ENUM_TYPE,
+    WARNMSG_ENUM_MISMATCH_TYPES_BINOP,
+    WARNMSG_ENUM_MISMATCH_TYPES_FNCALL = WARNMSG_ENUM_MISMATCH_TYPES_BINOP
 	
 

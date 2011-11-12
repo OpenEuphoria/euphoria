@@ -1,9 +1,9 @@
 include std/unittest.e
 
 with warning
-with warning&= {none}
+with warning &= {none}
 with warning &={resolution}
-with warning&={short_circuit}
+with warning &={short_circuit}
 with warning &= {override}
 with warning &= {builtin_chosen}
 with warning &= {not_used}
@@ -15,6 +15,7 @@ with warning &= {not_reached}
 with warning &= {mixed_profile}
 with warning &= {empty_case}
 with warning &= {default_case}
+with warning &= {literal_mismatch}
 with warning &= {all}
 
 with warning &= {none, resolution, short_circuit, override, builtin_chosen, 
@@ -37,6 +38,7 @@ with warning += {not_reached}
 with warning += {mixed_profile}
 with warning += {empty_case}
 with warning += {default_case}
+with warning += {literal_mismatch}
 with warning += {all}
 
 without warning
@@ -57,7 +59,7 @@ without warning &= {default_case}
 without warning &= {all}
 without warning &= {none, resolution, short_circuit, override, builtin_chosen, 
                  not_used,no_value, custom, translator, cmdline, not_reached
-                 , mixed_profile, empty_case
+                 , mixed_profile, empty_case, literal_mismatch
                  ,
                  default_case, all}
 
@@ -75,6 +77,7 @@ without warning += {not_reached}
 without warning += {mixed_profile}
 without warning += {empty_case}
 without warning += {default_case}
+without warning += {literal_mismatch}
 without warning += {all}
 
 with warning= {none}
@@ -90,6 +93,7 @@ with warning = {cmdline}
 with warning = {not_reached}
 with warning = {mixed_profile}
 with warning = {empty_case}
+with warning = {literal_mismatch}
 with warning = {default_case}
 with warning = {all}
 with warning = {none, resolution, short_circuit, override, builtin_chosen, 
@@ -112,11 +116,12 @@ without warning = {not_reached}
 without warning = {mixed_profile}
 without warning = {empty_case}
 without warning = {default_case}
+without warning = {literal_mismatch}
 without warning = {all}
 
 without warning = {none, resolution, short_circuit, override, builtin_chosen, 
                  not_used,no_value, custom, translator, cmdline, not_reached
-                 , mixed_profile, empty_case
+                 , mixed_profile, empty_case, literal_mismatch
                  ,
                  default_case, all}
 with warning save

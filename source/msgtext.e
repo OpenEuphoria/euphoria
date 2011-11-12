@@ -378,6 +378,7 @@ constant StdErrMsgs = {
 	{ERRMSG_NAME_OF_NOT_UDT, "Supplied variable does not have a user defined type"},
 	{ERRMSG_FWD_REF_NOTSUPPORTED,"Forward referencing not supported for [1]"},
 	{ERRMSG_NAME_OF_NOT_ENUM_TYPE,"Compiler Error: Supplied value is not of an enumerated type"},
+	{WARNMSG_ENUM_MISMATCH_TYPES_BINOP,"The two values have different associated literal sets: [1] is of type [2] but [3] is of type [4]."},
 	$
 }
 
