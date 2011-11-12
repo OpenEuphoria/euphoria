@@ -475,7 +475,7 @@ echo "[translate]" >> $BUILDDIR/eu.cfg
 if [ x"$PLAT" != x"" ]; then
 	echo "-plat" $PLAT  >> $BUILDDIR/eu.cfg
 fi
-echo "-arch" $(ARCH) >> $BUILDDIR/eu.cfg
+echo "-arch" $ARCH >> $BUILDDIR/eu.cfg
 echo "-$XLTTARGETCC " >> $BUILDDIR/eu.cfg
 echo "-con " >> $BUILDDIR/eu.cfg
 echo "-com" $CYPTRUNKDIR >> $BUILDDIR/eu.cfg
