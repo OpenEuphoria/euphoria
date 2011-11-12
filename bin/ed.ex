@@ -58,7 +58,6 @@ constant CONTROL_B = 2,
 		 CONTROL_T = 20,
 		 CONTROL_U = 21   -- alternate key for PAGE-UP in Linux
 		 
-constant CAPS_LOCK = 314  -- eui only
 
 integer ESCAPE, CR, NUM_PAD_ENTER, BS, HOME, END, CONTROL_HOME, CONTROL_END,
 		PAGE_UP, PAGE_DOWN, INSERT, NUM_PAD_SLASH,
@@ -69,6 +68,9 @@ integer ESCAPE, CR, NUM_PAD_ENTER, BS, HOME, END, CONTROL_HOME, CONTROL_END,
 						-- (not available on some systems)
 sequence delete_cmd, compare_cmd
 integer SAFE_CHAR -- minimum ASCII char that's safe to display
+sequence ignore_keys
+sequence window_swap_keys
+sequence window_name
 		 
 ifdef UNIX then
 	SAFE_CHAR = 32
@@ -93,6 +95,7 @@ ifdef UNIX then
 	CONTROL_ARROW_RIGHT = CONTROL_R -- (right)
 	ARROW_UP = 259
 	ARROW_DOWN = 258
+	window_swap_keys = {265,266,267,268,269,270,271,272,273,274} -- F1 - F10
 	F1 = 265
 	F10 = 274
 	F11 = 275
@@ -100,38 +103,55 @@ ifdef UNIX then
 	CONTROL_DELETE = DELETE -- key for line-delete 
 							-- (not available on some systems)
 	NUM_PAD_SLASH = -999  -- Please check on console and Xterm
+	ingore_keys = {}
 elsifdef WINDOWS then
+object kc
+
+	kc = key_codes()
+	
 	SAFE_CHAR = 14
 	delete_cmd = "del "
 	compare_cmd = "fc /T "
 	ESCAPE = 27
 	CR = 13
 	BS = 8
-	HOME = 327
-	END = 335
-	CONTROL_HOME = 583
-	CONTROL_END = 591
-	PAGE_UP = 329
-	PAGE_DOWN = 337
-	INSERT = 338
-	DELETE = 339
+	HOME = kc[KC_HOME] --327
+	END = kc[KC_END] --335
+	CONTROL_HOME = HOME + KM_CONTROL -- 583
+	CONTROL_END = END + KM_CONTROL --591
+	PAGE_UP = kc[KC_PRIOR] --329
+	PAGE_DOWN = kc[KC_NEXT] --337
+	INSERT = kc[KC_INSERT] -- 338
+	DELETE = kc[KC_DELETE] --339
 	XDELETE = -999 -- never
-	ARROW_LEFT = 331
-	ARROW_RIGHT = 333
-	CONTROL_ARROW_LEFT = 587
-	CONTROL_ARROW_RIGHT = 589
-	ARROW_UP = 328
-	ARROW_DOWN = 336
-	F1 = 315
-	F10 = 324	
-	F11 = 343
-	F12 = 344
-	NUM_PAD_ENTER = 284
-	NUM_PAD_SLASH = 309	
-	CONTROL_DELETE = 595 -- key for line-delete 
+	ARROW_LEFT = kc[KC_LEFT] -- 331
+	ARROW_RIGHT = kc[KC_RIGHT] --333
+	CONTROL_ARROW_LEFT = ARROW_LEFT + KM_CONTROL --587
+	CONTROL_ARROW_RIGHT = ARROW_RIGHT + KM_CONTROL --589
+	ARROW_UP = kc[KC_UP] --328
+	ARROW_DOWN = kc[KC_DOWN] -- 336
+	window_swap_keys = {kc[KC_F1],
+						kc[KC_F2],
+						kc[KC_F3],
+						kc[KC_F4],
+						kc[KC_F5],
+						kc[KC_F6],
+						kc[KC_F7],
+						kc[KC_F8],
+						kc[KC_F9],
+						kc[KC_F10]} -- F1 - F10
+	F1 = kc[KC_F1] --315
+	F10 = kc[KC_F10] --324	
+	F11 = kc[KC_F11] --343
+	F12 = kc[KC_F12] --344
+	NUM_PAD_ENTER = kc[KC_RETURN] --284
+	NUM_PAD_SLASH = kc[KC_DIVIDE] --309	
+	CONTROL_DELETE = DELETE + KM_CONTROL --595 -- key for line-delete 
+	ignore_keys = {kc[KC_CAPITAL], kc[KC_CONTROL]+KM_CONTROL, kc[KC_SHIFT]+KM_SHIFT, kc[KC_MENU]+KM_ALT}
+	kc = 0
 end ifdef
 
-
+	window_name        = {"F01:","F02:","F03:","F04:","F05:","F06:","F07:","F08:","F09:","F10:"}
 
 -------- START OF USER-MODIFIABLE PARAMETERS ---------------------------------- 
 
@@ -204,8 +224,7 @@ constant SPECIAL_KEYS = {ESCAPE, BS, DELETE, XDELETE, PAGE_UP, PAGE_DOWN,
 						 CONTROL_D, ARROW_LEFT, ARROW_RIGHT, ARROW_UP, 
 						 ARROW_DOWN, CONTROL_ARROW_LEFT, CONTROL_ARROW_RIGHT,
 						 HOME, END, CONTROL_HOME, CONTROL_END,
-						 CAPS_LOCK, F1, F1+1, F1+2, F1+3, F1+4, F1+5,
-						 F1+6, F1+7, F1+8, F10, CUSTOM_KEY}
+						 CUSTOM_KEY} & window_swap_keys & ignore_keys
 
 -- output device:
 constant SCREEN = 1
@@ -462,6 +481,7 @@ end procedure
 
 procedure DisplayLine(buffer_line bline, window_line sline, boolean all_clear)
 -- display a buffer line on a given line on the screen
+-- if all_clear is TRUE then the screen area has already been cleared before getting here.
 	sequence this_line, color_line, text
 	natural last, last_pos, color, len
 	
@@ -505,6 +525,7 @@ procedure DisplayLine(buffer_line bline, window_line sline, boolean all_clear)
 		puts(SCREEN, this_line[screen_width+s_shift])
 		normal_video()
 	elsif not all_clear then
+		-- clear rest of screen line.
 		puts(SCREEN, BLANK_LINE)
 	end if
 end procedure
@@ -513,7 +534,7 @@ procedure DisplayWindow(positive_int bline, window_line sline)
 -- print a series of buffer lines, starting at sline on screen
 -- and continue until the end of screen, or end of buffer
 	boolean all_clear
-	
+
 	if sline = 1 then 
 		ClearWindow()
 		all_clear = TRUE
@@ -884,16 +905,15 @@ procedure set_f_line(natural w, sequence comment)
 	
 	if length(window_list) = 1 then
 		f_key = ""
-	elsif w = 10 then
-		f_key = "F10: "
 	else
-		f_key = 'F' & ('0' + w) & ": "
+		f_key = window_name[w] & ' '
 	end if
 	set_top_line("")
 	puts(SCREEN, ' ' & f_key & file_name & comment)
 	text = "Esc for commands"
 	set_position(0, screen_width - length(text))
 	puts(SCREEN, text)
+	normal_video()
 end procedure
 
 constant W_BUFFER_NUMBER = 1,
@@ -939,7 +959,7 @@ procedure restore_state(window_id w)
 	file_name = state[10]
 	edit_tab_width = state[16]
 	set_f_line(w, "")
-	normal_video()
+
 	if buffer_version != my_buffer_version then
 		-- buffer has changed since we were last in this window
 		-- or window size has changed
@@ -972,7 +992,6 @@ procedure refresh_other_windows(positive_int w)
 		if i != w then
 			restore_state(i)
 			set_f_line(i, "")
-			normal_video()
 			goto_line(0, b_col)
 			save_state()
 		end if
@@ -1022,6 +1041,8 @@ procedure switch_window(integer new_window_number)
 	if new_window_number != window_number then
 		save_state()
 		restore_state(new_window_number)
+	else
+		set_f_line(window_number, "")
 	end if
 end procedure
 
@@ -1722,11 +1743,7 @@ procedure get_escape(boolean help)
 		first_bold("write ")
 		first_bold("new ")
 		if dot_e then
-			ifdef UNIX then
-				first_bold("eui ")
-			elsedef
-				first_bold("eui ")
-			end ifdef
+			first_bold("eui ")
 		end if
 		first_bold("dos ")
 		first_bold("find ")
@@ -2172,12 +2189,13 @@ procedure edit_file()
 			if key = CUSTOM_KEY then
 				add_queue(CUSTOM_KEYSTROKES)
 
-			elsif key >= F1 and key <= F10 then
-				if key < F1 + length(window_list) then
-					switch_window(key - F1 + 1)
+			elsif find(key, window_swap_keys) then
+				integer next_window = find(key, window_swap_keys)
+				if next_window <= length(window_list) then
+					switch_window(next_window)
 				else
 					set_top_line("")
-					printf(SCREEN, "F%d is not an active window", key - F1 + 1)
+					printf(SCREEN, "F%d is not an active window", next_window)
 					normal_video()
 				end if
 				adding_to_kill = FALSE
@@ -2291,7 +2309,7 @@ procedure edit_file()
 						try_auto_complete(key)
 					end if
 				
-				elsif key = CAPS_LOCK then
+				elsif find(key, ignore_keys) then
 					-- ignore
 				
 				else
@@ -2409,11 +2427,9 @@ procedure ed(sequence command)
 	end while
 	if file_no = -1 then
 		set_f_line(window_number, " <new file>")
-		normal_video()
 		ClearWindow()
 	else
 		set_f_line(window_number, "")
-		normal_video()
 		set_position(1, 1)
 		cursor(NO_CURSOR)
 		read_file(file_no)
@@ -2426,21 +2442,21 @@ end procedure
 procedure ed_main()
 -- startup and shutdown of ed()
 	sequence cl
-	
+
 	allow_break(FALSE)
 	
 	config = video_config()
-
 	if config[VC_XPIXELS] > 0 then
 		config = video_config()
 	end if
 
-	if config[VC_LINES] != INITIAL_LINES then
+	if config[VC_SCRNLINES] != INITIAL_LINES then
 		screen_length = text_rows(INITIAL_LINES)
 		config = video_config()
 	end if
-	screen_length = config[VC_LINES]
-	screen_width = config[VC_COLUMNS]
+	screen_length = config[VC_SCRNLINES]
+	screen_width = config[VC_SCRNCOLS]
+
 	BLANK_LINE = repeat(' ', screen_width)
 	window_length = screen_length - 1
 
@@ -2456,6 +2472,7 @@ procedure ed_main()
 	if screen_length != FINAL_LINES then
 		screen_length = text_rows(FINAL_LINES)
 	end if
+	
 	clear_screen()
 	ifdef UNIX then
 		free_console()

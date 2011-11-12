@@ -184,6 +184,11 @@ struct videoconfig {
 struct rccoord {
 	int row;
 	int col;
+	int winwidth;
+	int winheight;
+	int bufwidth;
+	int bufheight;
+	WORD attrs;
 };
 #endif
 
@@ -215,6 +220,7 @@ extern unsigned default_heap;
 
 
 #endif
+extern int VK_to_EuKBCode[256];
 
 void show_console();
 
@@ -251,8 +257,8 @@ struct EuViewPort
 };
 
 #ifdef EWINDOWS
-	int wingetch();
-	int MyReadConsoleChar();
+	int getKBchar();
+	int getKBcode();
 	void EClearLines(int first_line, int last_line, int len, WORD attributes);
 #endif
 

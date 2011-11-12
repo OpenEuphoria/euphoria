@@ -77,22 +77,14 @@
 /* convert atom to char. *must avoid side effects in elem* */
 #define Char(elem) ((IS_ATOM_INT(elem)) ? ((char)INT_VAL(elem)) : doChar(elem))
 
-#if defined(EMINGW)
-int winkbhit();
-#endif
-
 #define CONTROL_Z 26
-
-#define NAG_DELAY 7
-
-#ifdef EUNIX
-#define LEFT_ARROW 260
-#define BS 263
-#else
-#define LEFT_ARROW 331
+#define CR 13
+#define LF 10
 #define BS 8
-#endif
 
+#ifdef EWINDOWS
+static int winkbhit();
+#endif
 /**********************/
 /* Imported variables */
 /**********************/
@@ -3780,12 +3772,7 @@ object EGets(object file_no)
 		show_console();
 #endif
 		if (in_from_keyb) {
-#ifdef EUNIX
-			echo_wait();
-			c = getc(stdin);
-#else
-			c = wingetch();
-#endif //EUNIX
+			c = getKBchar();
 		}
 		else {
 			c = getc(f);
@@ -3819,11 +3806,7 @@ object EGets(object file_no)
 
 				/* read next character */
 				if (in_from_keyb)
-#ifdef EUNIX
-					c = getc(stdin);
-#else
-					c = wingetch();
-#endif
+					c = getKBchar();
 				else
 					c = getc(f);
 
@@ -3865,11 +3848,7 @@ object EGets(object file_no)
 				/* read next character */
 				if (f == stdin) {
 					if (in_from_keyb)
-#ifdef EUNIX
-						c = getc(stdin);
-#else
-						c = wingetch();
-#endif
+						c = getKBchar();
 					else
 						c = getc(f);
 				}
@@ -4523,43 +4502,14 @@ int get_key(int wait)
 /* Get one key from keyboard, without echo. If wait is TRUE then wait until
    a key is typed, otherwise return -1 if no key is available. */
 {
-	unsigned a;
+	int a;
 
 #ifdef EWINDOWS
-#if defined(EMINGW)
 		if (wait || winkbhit()) {
-			SetConsoleMode(console_input, ENABLE_PROCESSED_INPUT);
-			a = wingetch();
-
-			//if (a == 0) {  // SAFE TO DO THIS?
-				//a = 256 + wingetch();
-			//}
-
-			// return to normal mode
-			SetConsoleMode(console_input, ENABLE_LINE_INPUT |
-									ENABLE_ECHO_INPUT |
-									ENABLE_PROCESSED_INPUT);
+			a = getKBcode();
 
 			return a;
 		}
-#else
-		if (wait || kbhit()) {
-			a = getch();
-			if (a == 0) {
-				a = 256 + getch();
-				if ( 0x8000 & GetAsyncKeyState(VK_CONTROL)) {
-					a += 256;
-				}
-				if ( 0x8000 & GetAsyncKeyState(VK_SHIFT)) {
-					a += 512;
-				}
-				if ( 0x8000 & GetAsyncKeyState(VK_MENU)) {
-					a += 1024;
-				}
-			}
-			return a;
-		}
-#endif
 		return -1;
 #endif
 
@@ -4992,7 +4942,7 @@ void system_call(object command, object wait)
 		EFree(string_ptr);
 
 	if (w == 1) {
-		get_key(TRUE); //getch(); bug: doesn't pick up next byte of F-keys, arrows etc.
+		get_key(TRUE);
 	}
 	if (w != 2)
 		RestoreConfig();
@@ -5050,7 +5000,7 @@ object system_exec_call(object command, object wait)
 		EFree(string_ptr);
 
 	if (w == 1) {
-		get_key(TRUE); //getch(); bug: doesn't pick up next byte of F-keys, arrows etc.
+		get_key(TRUE);
 	}
 	if (w != 2)
 		RestoreConfig();
@@ -5645,11 +5595,7 @@ void Cleanup(int status)
 				screen_output(stderr, warning_list[i]);
 				if (((i+1) % 20) == 0 && use_prompt()) {
 					screen_output(stderr, "\nPress Enter to continue, q to quit\n");
-#ifdef EWINDOWS
-					c = wingetch();
-#else // EWINDOWS
-					c = getc(stdin);
-#endif // EWINDOWS
+					c = getKBchar();
 					if (c == 'q') {
 						break;
 					}
@@ -5670,7 +5616,7 @@ void Cleanup(int status)
 		  		strcmp_ins(xterm, "xterm") == 0))) 
 	{
 		screen_output(stderr, "\n\nPress Enter...\n");
-		getc(stdin);
+		getKBchar();
 	}
 
 #else // EUNIX
@@ -5678,14 +5624,13 @@ void Cleanup(int status)
 	if (use_prompt() && TempWarningName == NULL && display_warnings &&
 		(warning_count || (status && !user_abort)))
 	{
+		DisableControlCHandling();
 		// we will have a console if we showed an error trace back or
 		// if this program was using a console when it called abort(>0)
 		screen_output(stderr, "\n\nPress Enter...\n");
-		DisableControlCHandling();
-		MyReadConsoleChar();
+		getKBchar();
 	}
 #endif // EUNIX
-
 	EndGraphics();
 
 #ifndef ERUNTIME
@@ -5730,16 +5675,23 @@ void UserCleanup(int status)
 	Cleanup(status);
 }
 
+#ifdef EUNIX
+int getKBchar()
+{
+	echo_wait();
+	return getc(stdin);
+}
+#endif
+
 #ifdef EWINDOWS
-static char one_line[84];
+static char one_line[300];
 static char *next_char_ptr = NULL;
 
-#if defined(EMINGW)
-int winkbhit()
+static int winkbhit()
 /* kbhit for Windows GUI apps */
 {
 	INPUT_RECORD pbuffer;
-	DWORD junk;
+	DWORD junk = 0;
 	int c;
 
 	while (TRUE) {
@@ -5753,20 +5705,15 @@ int winkbhit()
 		ReadConsoleInput(console_input, &pbuffer, 1, &junk);
 	}
 }
-#endif
 
-int wingetch()
+
+int getKBchar()
 // Windows - read next char from keyboard
 {
-#if defined(EMINGW)
-
-	return MyReadConsoleChar();
-
-#else // defined(EMINGW)
-
 	int c;
+	
 	if (next_char_ptr == NULL) {
-		key_gets(one_line);
+		key_gets(one_line, sizeof(one_line));
 		next_char_ptr = one_line;
 	}
 	c = *next_char_ptr++;
@@ -5774,71 +5721,91 @@ int wingetch()
 		// end of line
 		next_char_ptr = NULL;
 		c = '\n';
+	} else {
+		if (c == CONTROL_Z) {
+			c = -1; // EOF
+			next_char_ptr--; // Move pointer back to EOF char.
+		}
 	}
-	if (c == CONTROL_Z)
-		c = -1; // EOF
 
 	return c;
-#endif // defined(EMINGW)
+
 }
 #endif
 
-void key_gets(char *input_string)
+void key_gets(char *input_string, int buffsize)
 /* return input string from keyboard */
 /* lets us use any color to echo user input in graphics modes */
 {
 	int line, len, init_column, column, c;
 	struct rccoord cursor;
 	char one_char[2];
+	int maxin;
+	int maxcol;
+	int numpad_enter;
+	int left_arrow;
+	char *ip;
+	
+	numpad_enter = VK_to_EuKBCode[VK_RETURN];
+	left_arrow   = VK_to_EuKBCode[VK_LEFT];
+	
 #ifdef EWINDOWS
-	CONSOLE_SCREEN_BUFFER_INFO console_info;
+	show_console();
+#endif	
+	GetTextPositionP(&cursor);
 
-	GetConsoleScreenBufferInfo(console_output, &console_info);
-	cursor.row = console_info.dwCursorPosition.Y+1;
-	cursor.col = console_info.dwCursorPosition.X+1;
-#else
-
-	cursor = GetTextPositionP();
-
-#endif
 	line = cursor.row;
 	init_column = cursor.col;
+	maxin = cursor.bufwidth - init_column + 1;
+	if (maxin >= buffsize) {
+		maxin = buffsize - 1; // allow for trailing null byte.
+	}
+	maxcol = init_column + maxin - 1;
+	
 	one_char[1] = '\0';
 	column = init_column;
+	
 	input_string[0] = '\0';
+	ip = &input_string[0];
+	len = 0;
+	
 	while (TRUE) {
 		c = get_key(TRUE);
 
-		if (c == '\r' || c == '\n'
-#ifdef EWINDOWS
-			|| c == 284
-#endif
-		)
+		if (c == CR || c == LF || c == numpad_enter)
 			break;
 
-		else if (c == BS || c == LEFT_ARROW
-#ifdef EUNIX   //FOR NOW - must decide what to do about different key codes
-		|| c == 263
-#endif
-) {
-			if (column > init_column) {
-				column = column - 1;
+		if (c == BS || c == left_arrow) {
+			if (len > 0) {
+				// update buffer
+				ip--;
+				*ip = '\0';
+				len--;
+				
+				// update screen display
+				column--;
 				SetPosition(line, column);
 				screen_output(NULL, " ");
 				SetPosition(line, column);
-				input_string[column - init_column] = '\0';
 			}
+			continue;
 		}
-		else if (c >= CONTROL_Z && c <= 255) {
-			if (column < 79) {
-				len = strlen(input_string);
+		
+		if ((c >= ' ' && c <= 255) ||  c == CONTROL_Z) { // Only allow extended ascii byte chars for now.
+			if (column <= maxcol) {
+				// update buffer
+				*ip = c;
+				ip++;
+				*ip = '\0';
+				len++;
+				
+				if (c == CONTROL_Z)
+					break;
+					
+				// update screen display
 				one_char[0] = c;
 				screen_output(NULL, one_char);
-				input_string[column - init_column] = c;
-				column = column + 1;
-				if (column - init_column > len) {
-					input_string[column - init_column] = '\0';
-				}
+				column++;
 			}
 		}
 	}

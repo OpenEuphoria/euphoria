@@ -64,9 +64,9 @@
 
 #else
 
-#define FLIP_TO_MAIN 315  /* F1 */
-#define FLIP_TO_DEBUG 316 /* F2 */
-#define DOWN_ARROW 336
+#define FLIP_TO_MAIN VK_to_EuKBCode[0x70] /* 315  F1 */
+#define FLIP_TO_DEBUG VK_to_EuKBCode[0x71] /* 316  F2 */
+#define DOWN_ARROW VK_to_EuKBCode[0x28] /* 336 */
 #endif
 
 struct display_slot {
@@ -124,7 +124,6 @@ static long trace_line;      /* current traced line */
 static void screen_blank();
 static void SaveDebugImage();
 static void RestoreDebugImage();
-struct rccoord GetTextPositionP();
 static void ShowName();
 #endif
 
@@ -786,18 +785,18 @@ static void DebugCommand()
 		// must handle ANSI codes
 		if (c == 27) {
 			c = get_key(TRUE);
-			if (c == 91) {
+			if (c == '[') {
 				c = get_key(TRUE);
-				if (c == 66) {
+				if (c == 'B') {
 					c = DOWN_ARROW;
 				}
-				else if (c == 49) {
+				else if (c == '1') {
 					c = get_key(TRUE);
-					if (c == 49) {
+					if (c == '1') {
 						c = FLIP_TO_MAIN;
 						get_key(TRUE);  // 126
 					}
-					else if (c == 50) {
+					else if (c == '2') {
 						c = FLIP_TO_DEBUG;
 						get_key(TRUE); // 126
 					}
@@ -920,7 +919,7 @@ static void ShowName()
 	
 	SetPosition(prompt, 16); 
 
-	key_gets(name);
+	key_gets(name, sizeof(name));
 	/* ignore leading whitespace */
 	i = 0;
 	while (name[i] == ' ' || name[i] == '\t')
