@@ -122,6 +122,14 @@ while [ "$1" != "" ]; do
 		export XLTTARGETCC=wat
 		;;
 
+	--cc-prefix*)
+		VAL=`echo $1 | cut -d = -f 2`
+		if [ "$VAL" = "$1" ]; then
+			shift ; VAL=$1
+		fi
+
+		export CC_PREFIX=$VAL
+		;;
 	--cc*)
 		VAL=`echo $1 | cut -d = -f 2`
 		if [ "$VAL" = "$1" ]; then
@@ -331,6 +339,9 @@ while [ "$1" != "" ]; do
 		echo "                       name is not 'gcc'"
 		echo "   --rc value          Name of the windows resource compiler.  This is used with"
 		echo "                       MinGW builds."
+		echo "   --cc-prefix         Prefix to use with the compiler and other build binaries.  This"
+		echo "                       is generally used from cross compilers, or Windows MinGW"
+		echo "                       installations that use a prefix"
 		echo "   --roodir value      the root dir to use for checking the svn revision"
 		echo "                       default is the parent directory"
 		echo "   --use-binary-translator"
@@ -422,8 +433,9 @@ fi
 echo "ARCH=$ARCH" >> "$PREFIX"${CONFIG_FILE}
 echo "MSIZE=$MFLAG" >> "$PREFIX"${CONFIG_FILE}
 echo "EFLAG=-d $EFLAG" >> "$PREFIX"${CONFIG_FILE}
-echo "CC=$CC" >> "$PREFIX"${CONFIG_FILE}
-echo "RC=$RC" >> "$PREFIX"${CONFIG_FILE}
+echo "CC_SUFFIX=$CC" >> "$PREFIX"${CONFIG_FILE}
+echo "CC_PREFIX=$CC_PREFIX" >> "$PREFIX"${CONFIG_FILE}
+echo "RC_SUFFIX=$RC" >> "$PREFIX"${CONFIG_FILE}
 echo "SCP=$SCP" >> "$PREFIX"${CONFIG_FILE}
 echo "SSH=$SSH" >> "$PREFIX"${CONFIG_FILE}
 echo "HG=$HG" >> "$PREFIX"${CONFIG_FILE}
@@ -481,6 +493,10 @@ echo "-con " >> $BUILDDIR/eu.cfg
 echo "-com" $CYPTRUNKDIR >> $BUILDDIR/eu.cfg
 echo "-lib" $CYPBUILDDIR/eu.a >> $BUILDDIR/eu.cfg
 echo "-lib-pic" $CYPBUILDDIR/euso.a >> $BUILDDIR/eu.cfg
+if [ x"$CC_PREFIX" != x"" ]; then
+	echo "-cc-prefix" $CC_PREFIX  >> $BUILDDIR/eu.cfg
+fi
+	
 echo "[bind]"  >> $BUILDDIR/eu.cfg
 echo "-eub" $CYPBUILDDIR/eub >> $BUILDDIR/eu.cfg
 

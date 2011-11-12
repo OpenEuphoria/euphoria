@@ -5071,7 +5071,10 @@ object system_exec_call(object command, object wait)
 	argv = make_arg_cv(string_ptr, &exit_code);
 	exit_code = spawnvp(P_WAIT, argv[0], (char * const *)argv);
 
+	#if INTPTR_MAX == INT32_MAX
+	// This causes a crash on Win64
 	EFree(argv[0]);		// free the 'process' name
+	#endif
 	EFree((char *)argv); // free the list of arg addresses, but not the args themself.
 
 #endif

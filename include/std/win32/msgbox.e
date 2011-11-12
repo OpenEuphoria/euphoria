@@ -94,14 +94,14 @@ integer msgbox_id, get_active_id
 
 ifdef WINDOWS then
 	lib = dll:open_dll("user32.dll")
-	msgbox_id = dll:define_c_func(lib, "MessageBoxA", {C_UINT, C_POINTER, 
+	msgbox_id = dll:define_c_func(lib, "MessageBoxA", {C_POINTER, C_POINTER, 
 												   C_POINTER, C_UINT}, C_INT)
 	if msgbox_id = -1 then
 		puts(2, "couldn't find MessageBoxA\n")
 		abort(1)
 	end if
 
-	get_active_id = dll:define_c_func(lib, "GetActiveWindow", {}, C_UINT)
+	get_active_id = dll:define_c_func(lib, "GetActiveWindow", {}, C_POINTER)
 	if get_active_id = -1 then
 		puts(2, "couldn't find GetActiveWindow\n")
 		abort(1)
@@ -149,6 +149,7 @@ public function message_box(sequence text, sequence title, object style)
 			or_style = or_bits(or_style, style[i])
 		end for
 	end if
+	
 	ret = c_func(msgbox_id, {c_func(get_active_id, {}), 
 							 text_ptr, title_ptr, or_style})
 	machine:free(text_ptr)
