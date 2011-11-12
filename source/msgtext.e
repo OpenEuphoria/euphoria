@@ -379,6 +379,7 @@ constant StdErrMsgs = {
 	{ERRMSG_FWD_REF_NOTSUPPORTED,"Forward referencing not supported for [1]"},
 	{ERRMSG_NAME_OF_NOT_ENUM_TYPE,"Compiler Error: Supplied value is not of an enumerated type"},
 	{WARNMSG_ENUM_MISMATCH_TYPES_BINOP,"The two values have different associated literal sets: [1] is of type [2] but [3] is of type [4]."},
+	{WARNMSG_ENUM_MISMATCH_TYPES_FNCALL,"The value passed to [1] as parameter [2] has different associated literal set than what is expected: It is a [3] and should be a [4]."},
 	$
 }
 

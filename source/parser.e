@@ -1292,32 +1292,27 @@ procedure Function_call( token tok )
 	end if
 	
 	routine_sym = tok[T_SYM]
-	ifdef BOO then	
-		sequence stack_segment = {}
-		symtab_pointer s = routine_sym
-		if 1 then
-			
-			integer n = SymTab[routine_sym][S_NUM_ARGS]
-			-- grab elements from the stack
-			for i = 1 to n do
-				if not Empty() then
-					stack_segment &= Pop()
-				end if
-			end for
-			-- test elements against their literal sets
-			for i = 2 to n do
-				s = SymTab[s][S_NEXT]
-				test_literal_match(stack_segment[i], s)
-			end for
-			-- put elements back into the stack
-			while length(stack_segment) != 0 do
-				Push(stack_segment[length(stack_segment)])
-				stack_segment = remove(stack_segment,length(stack_segment))
-			end while
-			delete(stack_segment)
+	sequence stack_segment = {}
+	symtab_pointer s = routine_sym
+	integer n = SymTab[routine_sym][S_NUM_ARGS]
+	-- grab elements from the stack
+	for i = 1 to n do
+		if not Empty() then
+			stack_segment &= Pop()
 		end if
-		delete(s)
-	end ifdef
+	end for
+	-- test elements against their literal sets
+	for i = n to 2 by -1 do
+		s = SymTab[s][S_NEXT]
+		test_literal_match({routine_sym,n-i+1,s}, stack_segment[n])
+	end for
+	-- put elements back into the stack
+	while length(stack_segment) != 0 do
+		Push(stack_segment[length(stack_segment)])
+		stack_segment = remove(stack_segment,length(stack_segment))
+	end while
+	delete(stack_segment)
+	delete(s)
 	
 	if scope = SC_PREDEF then
 		if find(routine_sym,{compare_builtin,equal_builtin}) != 0 then
@@ -1699,32 +1694,32 @@ procedure TypeCheck(symtab_index var)
 	end if
 end procedure
 
-procedure test_literal_match(symtab_pointer lsym, symtab_pointer valsym)
-	if symtab_index(lsym) and symtab_index(valsym) and lsym != 0 and valsym != 0 then
-		-- nothing
+procedure test_literal_match(object left_param, symtab_pointer valsym)
+	integer lsym
+	if atom(left_param) then
+		lsym = left_param
+	elsif length(left_param) = 3 then
+		lsym = left_param[3]
 	else
 		return
 	end if
-	ifdef DEBUG then
-		sequence lsym_name
-		if sym_mode(lsym) = M_NORMAL then
-			lsym_name = sym_name(lsym)
-		end if
-		sequence valsym_name
-		if length(SymTab[valsym]) >= S_VTYPE then
-			valsym_name = sym_name(valsym)
-		end if
-	end ifdef
-	if find(sym_mode(lsym),  {M_CONSTANT, M_NORMAL}) != 0 
-		and find(sym_mode(valsym),  {M_CONSTANT, M_NORMAL}) != 0 then
-		symtab_index valsym_type = sym_type(valsym)
-		integer lsym_type = sym_type(lsym)
-		integer valsym_ls, lsym_ls
-		valsym_ls = find(valsym_type,literal_sets[LS_KEY])
-		lsym_ls = find(lsym_type,literal_sets[LS_KEY])
-		if valsym_ls != 0 and lsym_ls != 0 and (valsym_ls != lsym_ls) then
-			-- issue warning
-			Warning(WARNMSG_ENUM_MISMATCH_TYPES_BINOP, enum_mismatch_warning_flag, {sym_name(valsym), sym_name(valsym_type), sym_name(lsym), sym_name(lsym_type)})
+	if symtab_index(lsym) and symtab_index(valsym) and lsym != 0 and valsym != 0 then
+		if find(sym_mode(lsym),  {M_CONSTANT, M_NORMAL}) != 0 
+			and find(sym_mode(valsym),  {M_CONSTANT, M_NORMAL}) != 0 then
+			symtab_index valsym_type = sym_type(valsym)
+			integer lsym_type = sym_type(lsym)
+			integer valsym_ls, lsym_ls
+			valsym_ls = find(valsym_type,literal_sets[LS_KEY])
+			lsym_ls = find(lsym_type,literal_sets[LS_KEY])
+			if valsym_ls != 0 and lsym_ls != 0 and (valsym_ls != lsym_ls) then
+				-- issue warning
+				if atom(left_param) then
+					Warning(WARNMSG_ENUM_MISMATCH_TYPES_BINOP, enum_mismatch_warning_flag, {sym_name(valsym), sym_name(valsym_type), sym_name(lsym), sym_name(lsym_type)})
+				else
+					Warning(WARNMSG_ENUM_MISMATCH_TYPES_FNCALL, enum_mismatch_warning_flag,
+					{sym_name(left_param[1]), left_param[2], sym_name(valsym_type), sym_name(lsym_type)})
+				end if
+			end if
 		end if
 	end if
 end procedure
@@ -3802,7 +3797,7 @@ procedure Procedure_call(token tok)
 	-- test elements against their literal sets
 	for i=1 to n do
 		s = SymTab[s][S_NEXT]
-		test_literal_match(stack_segment[i], s)
+		test_literal_match({sub,i,s}, stack_segment[n-i+1])
 	end for
 	-- put elements back into the stack
 	while length(stack_segment) do
