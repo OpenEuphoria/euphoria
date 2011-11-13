@@ -1305,6 +1305,7 @@ static object PutScreenChar(object x)
 	unsigned c;
 	char s1[2];
 	int save_line, save_col;
+	unsigned int fg, bg;
 #endif
 #ifdef EWINDOWS
 	COORD coords;

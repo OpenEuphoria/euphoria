@@ -222,4 +222,6 @@ object e_floor(long a);  // not used anymore
 
 int memcopy( void *dest, size_t avail, void *src, size_t len);
 
+int getKBchar();
+
 #endif /* BE_RUNTIME_H */

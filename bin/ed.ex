@@ -103,7 +103,7 @@ ifdef UNIX then
 	CONTROL_DELETE = DELETE -- key for line-delete 
 							-- (not available on some systems)
 	NUM_PAD_SLASH = -999  -- Please check on console and Xterm
-	ingore_keys = {}
+	ignore_keys = {}
 elsifdef WINDOWS then
 object kc
 

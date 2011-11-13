@@ -188,7 +188,7 @@ struct rccoord {
 	int winheight;
 	int bufwidth;
 	int bufheight;
-	WORD attrs;
+	short attrs;
 };
 #endif
 
@@ -220,7 +220,6 @@ extern unsigned default_heap;
 
 
 #endif
-extern int VK_to_EuKBCode[256];
 
 void show_console();
 
@@ -255,11 +254,5 @@ struct EuViewPort
 	int vars_per_line;  	/* number of variables slots per line */
 	int display_size;   	/* number of slots for variables */
 };
-
-#ifdef EWINDOWS
-	int getKBchar();
-	int getKBcode();
-	void EClearLines(int first_line, int last_line, int len, WORD attributes);
-#endif
 
 #endif // H_GLOBAL
