@@ -84,7 +84,7 @@ export procedure opMEMSTRUCT_ACCESS()
 	
 	symtab_index sym = Code[pc+3]
 	
-	c_stmt( sprintf("@ = (intptr_t) &((%s*)@)",{struct_type(sym)}), { target, target }, target )
+	c_stmt( sprintf("@ = (intptr_t) &(((%s*)@)",{struct_type(sym)}), { target, target }, target )
 	
 	integer 
 		first_pc    = pc + 3,
@@ -100,7 +100,7 @@ export procedure opMEMSTRUCT_ACCESS()
 		CName( Code[i] )
 		was_pointer = SymTab[Code[i]][S_MEM_POINTER]
 	end for
-	c_puts( ";\n")
+	c_puts( ");\n")
 	
 	pc += access_count + 4
 end procedure
@@ -157,11 +157,13 @@ end procedure
 -- Stores the value pointed to by _0 into the target.  If target is 0,
 -- then the caller has already emitted the LHS, and peek_member will
 -- only print the RHS.
-procedure peek_member( integer pointer, integer sym, integer target )
+procedure peek_member( integer pointer, integer sym, integer target, integer indirect = 0, integer array_index = -1 )
 	integer data_type  = SymTab[sym][S_TOKEN]
 	integer signed     = SymTab[sym][S_MEM_SIGNED]
 	integer is_pointer = SymTab[sym][S_MEM_POINTER]
 	sequence type_name
+	sequence array_modifier = ""
+	
 	if is_pointer then
 		data_type = MS_OBJECT
 		signed    = 0
@@ -186,19 +188,37 @@ procedure peek_member( integer pointer, integer sym, integer target )
 		data_type = sym_token( SymTab[sym][S_MEM_STRUCT] )
 	end if
 	
+	if array_index != -1 then
+		array_modifier = sprintf("[%d]", array_index )
+		
+	elsif SymTab[sym][S_MEM_ARRAY] then
+		c_stmt0( sprintf( "_2 = NewS1( %d );\n", SymTab[sym][S_MEM_ARRAY] ) )
+		for i = 1 to SymTab[sym][S_MEM_ARRAY] do
+			peek_member( pointer, sym, 0, indirect, i-1 )
+			c_stmt0( sprintf( "((s1_ptr)_2)->base[%d] = _0;\n", i ) )
+		end for
+		c_stmt0( "_0 = MAKE_SEQ( _2 );\n" )
+		return
+	end if
+	
 	integer parent
 	switch data_type do
 		case MS_FLOAT, MS_DOUBLE, MS_LONGDOUBLE, MS_EUDOUBLE then
 			if target then
-				c_stmt( sprintf("@ = NewDouble( (eudouble) *(%s*)@ );\n", {type_name}), { target, pointer }, target )
+				if length( array_modifier ) then
+					c_stmt( sprintf("@ = NewDouble( (eudouble) ((%s*)@)%s );\n", {type_name, array_modifier}), { target, pointer }, target )
+				else
+					c_stmt( sprintf("@ = NewDouble( (eudouble) *(%s*)@ );\n", {type_name}), { target, pointer }, target )
+				end if
 			else
 				parent =  SymTab[sym][S_MEM_PARENT]
 				c_stmt( 
-						sprintf("_0 = NewDouble( (eudouble) ((%s %s*)@)->%s;\n", 
+						sprintf("_0 = NewDouble( (eudouble) (((%s %s*)@)->%s%s);\n", 
 							{
 								mem_name( sym_token( parent ) ),
 								decorated_name( SymTab[parent][S_MEM_STRUCT] ), 
-								decorated_name( sym ) 
+								decorated_name( sym ),
+								array_modifier
 							}
 						), 
 						{ pointer }
@@ -207,21 +227,31 @@ procedure peek_member( integer pointer, integer sym, integer target )
 			end if
 		
 		case MEMUNION then
-			serialize_memunion( pointer, sym )
+			serialize_memunion( pointer, sym, indirect )
+			if target then
+				c_stmt( "@ = _0;\n", target, target )
+			end if
 		case MEMSTRUCT then
 			serialize_memstruct( pointer, sym )
+			if target then
+				c_stmt( "@ = _0;\n", target, target )
+			end if
 		case else
 			if target then
-				c_stmt( sprintf("@ = *(%s*)@;\n", {type_name}), { target, pointer }, target )
+				if length( array_modifier ) then
+					c_stmt( sprintf("@ = ((%s*)@)%s;\n", {type_name, array_modifier}), { target, pointer }, target )
+				else
+					c_stmt( sprintf("@ = *(%s*)@;\n", {type_name}), { target, pointer }, target )
+				end if
 			else
 				parent        = SymTab[sym][S_MEM_PARENT]
-				
 				c_stmt( 
-						sprintf("_0 = ((%s %s*)@)->%s;\n", 
+						sprintf("_0 = ((%s %s*)@)->%s%s;\n", 
 							{
 								mem_name( sym_token( parent ) ),
 								decorated_name( parent ), 
-								decorated_name( sym ) 
+								decorated_name( sym ),
+								array_modifier
 							}
 						),  { pointer } )
 				
@@ -281,7 +311,7 @@ procedure serialize_memstruct( integer pointer, symtab_pointer member_sym )
 	end if
 	
 	
-	integer size = 1
+	integer size = 0
 	integer size_sym = member_sym
 	while size_sym with entry do
 		size += 1
@@ -296,7 +326,7 @@ procedure serialize_memstruct( integer pointer, symtab_pointer member_sym )
 	
 	integer ix = 0
 	while member_sym with entry do
-		peek_member( pointer, member_sym, 0 )
+		peek_member( pointer, member_sym, 0, 1 )
 		ix += 1
 		c_stmt0( sprintf( "serialize_%d->base[%d] = _0;\n", { serialize_level, ix } ) )
 		
@@ -313,12 +343,20 @@ end procedure
 --**
 -- Serialize the specified memunion into a sequence and store the object in _0.
 -- Also uses _1.
-procedure serialize_memunion( integer pointer, symtab_pointer member_sym )
+procedure serialize_memunion( integer pointer, symtab_pointer member_sym, integer indirect = 0 )
 	integer size = SymTab[member_sym][S_MEM_SIZE]
+	
 	c_stmt0( sprintf( "_1 = NewS1( %d );\n", size ) )
 	
 	for i = 1 to size do
-		c_stmt( sprintf( "((s1_ptr)_1)->base[%d] = ((unsigned char *) @)[%d];\n", {i, i-1} ), pointer )
+		if indirect then
+			c_stmt( 
+				sprintf( "((s1_ptr)_1)->base[%d] = ((unsigned char *) &(((%s*)@ )->%s))[%d];\n",
+						{i, struct_type( member_sym ) , decorated_name( member_sym ), i-1} ),
+				pointer )
+		else
+			c_stmt( sprintf( "((s1_ptr)_1)->base[%d] = ((unsigned char *) @)[%d];\n", {i, i-1} ), pointer )
+		end if
 	end for
 	c_stmt0( "_0 = MAKE_SEQ( _1 );\n" )
 end procedure

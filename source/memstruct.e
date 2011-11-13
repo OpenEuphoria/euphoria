@@ -374,7 +374,7 @@ function calculate_size()
 			if not is_union then
 				-- make sure we're properly aligned
 				integer padding
-				if sym_token( member_sym ) = MEMUNION or sym_token( member_sym ) = MEMSTRUCT then
+				if sym_token( member_sym ) = MS_MEMBER then
 					padding = remainder( size, sizeof( C_POINTER ) )
 				else
 					padding = remainder( size, mem_size )
@@ -597,11 +597,13 @@ function parse_symstruct( token tok )
 			putback( tok )
 			return 0
 		end if
+		return { struct_sym, ref }
+	elsif tok[T_ID] = DOT then
+		return { struct_sym, ref }
 	else
 		putback( tok )
-		tok_match( DOT )
+		return { struct_sym, ref, 0 }
 	end if
-	return { struct_sym, ref }
 end function
 
 procedure emit_member( integer member, integer ref, integer op, sequence names )
@@ -623,6 +625,10 @@ procedure emit_symstruct( integer symstruct, integer ref )
 	end if
 end procedure
 
+function is_pointer( symtab_index member )
+	return SymTab[member][S_MEM_POINTER]
+end function
+
 --**
 -- Parse the dot notation of accessing a memstruct.
 export procedure MemStruct_access( symtab_index sym, integer lhs )
@@ -637,6 +643,18 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 	end if
 	symtab_index struct_sym = sym_ref[1]
 	integer      ref        = sym_ref[2]
+	
+	if length( sym_ref ) = 3 then
+		-- just the sym...serialize it
+		if lhs then
+			CompileErr("De-serialization of memstructs not implemented")
+		else
+			emit_symstruct( struct_sym, ref )
+			emit_op( MEMSTRUCT_SERIALIZE )
+		end if
+		return
+	end if
+	
 	sequence names = {}
 
 	No_new_entry = 1
@@ -647,17 +665,60 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 		integer tid = tok[T_ID]
 		switch tid do
 			case VARIABLE, FUNC, PROC, TYPE, NAMESPACE then
-				-- make it look like the IGNORED token
+				
 				if not has_dot then
 					peek_member( members, member, ref, lhs, names )
 					putback( tok )
 					exit
 				end if
+				
+				putback( tok )
+				-- make it look like the IGNORED token
 				tok= { IGNORED, SymTab[tok[T_SYM]][S_NAME] }
 				fallthru
 			
+			case IGNORED then
+				if not has_dot then
+					peek_member( members, member, ref, lhs, names )
+					if tid != IGNORED then
+						putback( tok )
+					else
+						No_new_entry = 0
+						putback( keyfind( tok[T_SYM], -1 ) )
+					end if
+					exit
+				end if
+				
+				-- just look at it within this memstruct's context...
+				names = append( names, tok[T_SYM] )
+				if ref then
+					-- we don't know the memstruct yet!
+					member = NewBasicEntry( tok[T_SYM], 0, SC_MEMSTRUCT, MS_MEMBER, 0, 0, 00 )
+					SymTab[member] &= repeat( 0, SIZEOF_MEMSTRUCT_ENTRY - length( SymTab[member] ) )
+					emit_member( member, ref, MEMSTRUCT_ACCESS, names )
+				else
+					if member then
+						-- going into an embedded / linked struct or union
+						struct_sym = SymTab[member][S_MEM_STRUCT]
+					end if
+					if SymTab[struct_sym][S_TOKEN] = MEMTYPE then
+						-- use whatever it really is
+						struct_sym = SymTab[struct_sym][S_MEM_PARENT]
+					end if
+					member = resolve_member( tok[T_SYM], struct_sym )
+					if not member then
+						
+						CompileErr( NOT_A_MEMBER, { tok[T_SYM], sym_name( struct_sym ) } )
+					end if
+					emit_opnd( member )
+				end if
+				
+				members += 1
+				has_dot = 0
+				
 			case MULTIPLY then
-				-- ptr.struct.*  serialize the whole thing
+				-- ptr.struct.ptr_to_something.*  fetch the value pointed to
+				-- TODO: this is serializing, not dereferencing:
 				if member then
 					tid = sym_token( member )
 					if tid >= MS_SIGNED and tid <= MS_OBJECT then
@@ -681,32 +742,7 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 					exit
 				end if
 			
-			case IGNORED then
-				-- just look at it within this memstruct's context...
-				names = append( names, tok[T_SYM] )
-				if ref then
-					-- we don't know the memstruct yet!
-					member = NewBasicEntry( tok[T_SYM], 0, SC_MEMSTRUCT, MS_MEMBER, 0, 0, 00 )
-					SymTab[member] &= repeat( 0, SIZEOF_MEMSTRUCT_ENTRY - length( SymTab[member] ) )
-					emit_member( member, ref, MEMSTRUCT_ACCESS, names )
-				else
-					if member then
-						-- going into an embedded / linked struct or union
-						struct_sym = SymTab[member][S_MEM_STRUCT]
-					end if
-					if SymTab[struct_sym][S_TOKEN] = MEMTYPE then
-						-- use whatever it really is
-						struct_sym = SymTab[struct_sym][S_MEM_PARENT]
-					end if
-					member = resolve_member( tok[T_SYM], struct_sym )
-					if not member then
-						CompileErr( NOT_A_MEMBER, { tok[T_SYM], sym_name( struct_sym ) } )
-					end if
-					emit_opnd( member )
-				end if
-				
-				members += 1
-				has_dot = 0
+			
 				
 			case DOT then
 				-- another layer...
