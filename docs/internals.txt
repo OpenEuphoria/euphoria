@@ -429,6 +429,21 @@ The IF instruction is used for making runtime branch statements.  The IF instruc
 
 [ IF instruction ] [ test value ] [ failure address ]
 
+
 INTEGER_CHECK instruction:
 
-The INTEGER_CHECK is used to determine whether something has the value considered to be 'integer' to the EUPHORIA language definition.  The instruction takes the next argument's pointer to its value and determines whether it is in the legal integer range, regardless of how that number is represented.
+The INTEGER_CHECK is used to ensure that something has a value considered to be 'integer' to the EUPHORIA language definition.  The instruction takes the next argument as a pointer to a value and determines whether this value is in the legal integer range, regardless of how that number is represented.  If not in legal range, then the program ends execution in a type-check failure error message.
+
+[ INTEGER_CHECK instruction ] [ test pointer ]
+
+ATOM_CHECK instruction:
+
+The ATOM_CHECK is used to determine whether something has a numeric value rather than a sequence.  The instruction takes an argument as a pointer to a value and determines whether the value is an atom.  If it is not an atom, then the program ends execution in a type-check failure error message.
+
+[ ATOM_CHECK instruction ] [ test pointer ]
+
+IS_AN_INTEGER instruction:
+
+The IS_AN_INTEGER instruction is used to determine whether something has a value considered to be 'integer' to the EUPHORIA language definition.  The instruction takes the argument as a pointer to a value and determines whether this value is in the legal integer range, regardless of how that number is represented.  If it is in the 'integer' range the the value pointed by the second argument will be 1.  Otherwise, 0.
+
+[ IS_AN_INTEGER instruction ] [ test pointer ][ return value pointer ]

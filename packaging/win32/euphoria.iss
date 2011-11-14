@@ -132,8 +132,8 @@ Source: "cleanbranch\bin\*.exw"; DestDir: {app}\bin\; Flags: ignoreversion; Comp
 Source: "cleanbranch\demo\*.*"; DestDir: {app}\demo\; Flags: ignoreversion recursesubdirs; Components: comp_demos
 
 ; Docs
-Source: "..\..\build\euphoria.pdf"; DestDir: {app}\docs\; Flags: ignoreversion; Components: comp_docs
-Source: "..\..\build\html\*.*"; DestDir: {app}\docs\html\; Flags: ignoreversion recursesubdirs; Components: comp_docs
+Source: "..\..\source\build\euphoria.pdf"; DestDir: {app}\docs\; Flags: ignoreversion; Components: comp_docs
+Source: "..\..\source\build\html\*.*"; DestDir: {app}\docs\html\; Flags: ignoreversion recursesubdirs; Components: comp_docs
 
 ; Includes
 Source: "cleanbranch\include\*.*"; DestDir: {app}\include\; Flags: ignoreversion recursesubdirs; Components: comp_main
