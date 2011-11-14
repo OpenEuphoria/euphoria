@@ -49,6 +49,72 @@ function primitive_size( integer primitive )
 	end switch
 end function
 
+constant
+	MULTI_CHAR          = { MS_CHAR },
+	MULTI_SHORT         = { MS_SHORT },
+	MULTI_INT           = { MS_INT },
+	MULTI_LONG          = { MS_LONG },
+	MULTI_LONG_INT      = { MS_LONG, MS_INT },
+	MULTI_LONG_LONG     = { MS_LONG, MS_LONG },
+	MULTI_LONG_LONG_INT = { MS_LONG, MS_LONG, MS_INT },
+	MULTI_LONG_DOUBLE   = { MS_LONG, MS_DOUBLE },
+	$
+
+function multi_part_memtype( token tok )
+	integer tid = tok[T_ID]
+	integer signed = tid != MS_UNSIGNED
+	integer sign_specified = 1
+	sequence parts = {}
+	if signed and tid != MS_SIGNED then
+		putback( tok )
+		sign_specified = 0
+	end if
+	
+	for i = 1 to 4 do
+		-- 3 is the most we can have, and then we better his an MS_AS...
+		tok = next_token()
+		tid = tok[T_ID]
+		
+		switch tid do
+			case MS_CHAR, MS_SHORT, MS_INT, MS_DOUBLE then
+				parts &= tid
+				exit
+			case MS_LONG then
+				parts &= tid
+			
+			case MS_AS then
+				putback( tok )
+				exit
+			case else
+				if sign_specified or length( parts ) then
+					CompileErr( EXPECTED_PRIMITIVE_MEMSTRUCT_TYPE )
+				end if
+				parts &= tid
+				exit
+		end switch
+	end for
+	
+	-- validate...
+	switch parts do
+		case MULTI_CHAR, MULTI_SHORT, MULTI_INT, MULTI_LONG, MULTI_LONG_INT then
+			tid = parts[$]
+			
+		case MULTI_LONG_LONG, MULTI_LONG_LONG_INT then
+			tid = MS_LONGLONG
+			
+		case MULTI_LONG_DOUBLE then
+			if not sign_specified then
+				tid = MS_LONGDOUBLE
+			else
+				-- error!
+				CompileErr( FP_NOT_SIGNED )
+			end if
+		
+	end switch
+	return { signed, tid }
+end function
+
+
 --*
 -- Creates an alias for a memstruct type.  May be a primitive or
 -- a memstruct.
@@ -57,6 +123,8 @@ export procedure MemType( integer scope )
 	token mem_type = next_token()
 	symtab_index type_sym = mem_type[T_SYM]
 	
+	sequence signed_type = multi_part_memtype( mem_type )
+	
 	tok_match( MS_AS )
 	
 	token new_memtype = next_token()
@@ -64,19 +132,21 @@ export procedure MemType( integer scope )
 	symtab_index sym = new_memtype[T_SYM]
 	symtab:DefinedYet( sym )
 	SymTab[sym] &= repeat( 0, SIZEOF_MEMSTRUCT_ENTRY - length( SymTab[sym] ) )
-	SymTab[sym][S_SCOPE]    = scope
-	SymTab[sym][S_TOKEN]    = MEMTYPE
-	SymTab[sym][S_MODE]     = M_NORMAL
+	SymTab[sym][S_SCOPE]      = scope
+	SymTab[sym][S_TOKEN]      = MEMTYPE
+	SymTab[sym][S_MODE]       = M_NORMAL
+	SymTab[sym][S_MEM_SIGNED] = signed_type[1]
 	
-	switch mem_type[T_ID] do
-		case MS_CHAR, MS_SHORT, MS_INT, 
+	switch signed_type[$] do
+		case MS_SIGNED, MS_UNSIGNED, MS_LONG, 
+			MS_CHAR, MS_SHORT, MS_INT, 
 			MS_FLOAT, MS_DOUBLE, MS_EUDOUBLE, 
-			MS_OBJECT,
-			MS_LONG, MS_LONGDOUBLE, MS_LONGLONG
+			MS_OBJECT
 		then
-			SymTab[sym][S_MEM_TYPE]   = mem_type[T_ID]
+			SymTab[sym][S_MEM_TYPE]   = signed_type[$]
 			SymTab[sym][S_MEM_PARENT] = type_sym
-			SymTab[sym][S_MEM_SIZE]   = primitive_size( mem_type[T_ID] )
+			SymTab[sym][S_MEM_SIZE]   = primitive_size( signed_type[$] )
+		
 		case else
 			
 			SymTab[sym][S_MEM_PARENT] = type_sym

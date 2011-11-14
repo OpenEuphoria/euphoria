@@ -135,4 +135,24 @@ procedure basic()
 end procedure
 basic()
 
+-- Make sure we correctly parse all of these multi-part primitive types:
+memtype unsigned int as uint
+memtype signed int as sint
+
+memtype long int as lint
+memtype signed long int as slint
+memtype unsigned long int as ulint
+
+memtype long long as llong
+memtype signed long long as sllong
+memtype unsigned long long as ullong
+
+memtype long long int as llint
+memtype signed long long int as sllint
+memtype unsigned long long int as ullint
+
+memtype long double as ldouble
+
+test_pass( "multi-part memtype declarations" )
+
 test_report()

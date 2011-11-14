@@ -12,14 +12,15 @@ include std/text.e
 
 include common.e
 
-export constant
+export enum
 	EXPECTED_VALID_MEMSTRUCT   = 358,
-	FP_NOT_SIGNED              = 359,
-	ONLY_DOUBLE_FP_LONG        = 360,
-	ONLY_INT_LONG_LONG         = 361,
-	NOT_A_MEMBER               = 362,
-	NOT_A_POINTER_OR_MEMSTRUCT = 363,
-	CANNOT_ASSIGN_NONPRIMATIVE = 364,
+	FP_NOT_SIGNED,
+	ONLY_DOUBLE_FP_LONG,
+	ONLY_INT_LONG_LONG,
+	NOT_A_MEMBER,
+	NOT_A_POINTER_OR_MEMSTRUCT,
+	CANNOT_ASSIGN_NONPRIMATIVE,
+	EXPECTED_PRIMITIVE_MEMSTRUCT_TYPE,
 	MSG_CC_PREFIX = 600,
 	$
 
@@ -392,6 +393,7 @@ constant StdErrMsgs = {
 	{NOT_A_MEMBER, "[1] is not a member of memstruct or memunion [2]"},
 	{NOT_A_POINTER_OR_MEMSTRUCT, "Member is not a pointer or an embedded memstruct"},
 	{CANNOT_ASSIGN_NONPRIMATIVE, "Cannot assign to a non-primitive, non-pointer memstruct" },
+	{EXPECTED_PRIMITIVE_MEMSTRUCT_TYPE, "Expected to see a valid primitive memory structure type" },
 	{ MSG_CC_PREFIX, "Prefix for compiler and related binaries"},
 	$
 }
