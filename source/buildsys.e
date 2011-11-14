@@ -902,12 +902,11 @@ end procedure
 -- See Also:
 --   [[:build_system_type]], [[:BUILD_NONE]], [[:BUILD_MAKEFILE_FULL]],
 --   [[:BUILD_MAKEFILE_PARTIAL]]
-with trace
 export procedure write_buildfile()
 	switch build_system_type do
 		case BUILD_MAKEFILE_FULL then
 			write_makefile_full()
-			trace(1)
+			
 			if not silent then
 				sequence make_command
 				if compiler_type = COMPILER_WATCOM then
@@ -917,7 +916,6 @@ export procedure write_buildfile()
 				end if
 
 				ShowMsg(1, 170, { cfile_count + 2 })
-				puts(1, "output_dir is \"" & output_dir & "\"")
 					
 				if sequence(output_dir) and length(output_dir) > 0 then
 					ShowMsg(1, 174, { output_dir, make_command, file0 })
