@@ -4091,7 +4091,10 @@ is in effect will never be inlined.
 routine (by size of IL code) that will be considered for inlining.  The default
 is 30.
 
-== Memory Structures
+%%output=lang_memstruct
+== Memory Structures ==
+@[memorystructures|]
+:<<LEVELTOC level=2 depth=4>>
 
 === Introduction
 
@@ -4117,7 +4120,7 @@ integer or as a floating point number).
 Within a memstruct or memunion, different elements are defined using names for data types
 along with some data type modifiers.
 
-@[memstruct]
+@[memstruct|]
 ==== memstruct
 
 ##memstruct## is used to declare a memory based structure to be used by a Euphoria program.
@@ -4139,7 +4142,7 @@ The size of a ##memstruct## may be determined at runtime using ##[[:sizeof]]()##
 
 ##memstructs## may contain other ##memstructs## or pointers to other ##memstructs##.
 
-@[memunion]
+@[memunion|]
 ==== memunion
 
 A ##memunion## is like a ##[[:memstruct]]##, except that the various data members
@@ -4156,7 +4159,23 @@ end memunion
 
 The size of a ##memunion## may be determined at runtime using ##[[:sizeof]]()##.
 
-@[char]
+@[memtype|]
+==== memtype
+
+A ##memtype## is an alias of another type that can be used in a ##[[:memstruct]]##
+or a ##[[:memunion]]##.  They are used similarly to how ##typedef##s are used in C,
+and can make porting C structs easier.  Especially on Windows, it is common for 
+many common struct declarations to be typedefs.  The euphoria programmer can 
+therefore create a ##memtype## and use the same terminology as the native structs.
+
+<eucode>
+memtype object as HANDLE
+
+memtype int as BOOL
+</eucode>
+
+
+@[char|]
 ==== char
 
 A ##char## is a data type that is 1 byte long.  Elements of type ##char## are considered
@@ -4173,7 +4192,7 @@ end memstruct
 </eucode>
 
 
-@[short]
+@[short|]
 ==== short
 A ##short## is a data type that is 2 bytes long.  Elements of type ##short## are considered
 to be ##[[:signed]]## by default.  The range of a ##signed short## is −32,768 to 32,767.  An
@@ -4188,7 +4207,7 @@ memstruct char_types
 end memstruct
 </eucode>
 
-@[int]
+@[int|]
 ==== int
 
 An ##int## is a data type that is 4 bytes long.  Elements of type ##int## are considered
@@ -4204,7 +4223,7 @@ memstruct char_types
 end memstruct
 </eucode>
 
-@[long]
+@[long|]
 ==== long
 
 A ##long## (can also be ##long int##) varies in size based on the platform.  On Windows
@@ -4213,7 +4232,7 @@ and 32-bit Unix like operating systems, a ##long## is 4 bytes, or the same size 
 same size as a ##[[:long long]]##.
 
 
-@[long long]
+@[long long|]
 ==== long long
 
 A ##long long## (can also be ##long long int##) is an integer that is 8 bytes (64-bits) in size.
@@ -4221,26 +4240,26 @@ By default, it is signed (−9,223,372,036,854,775,808 to 9,223,372,036,854,775,
 long long## varies from  0 to 18,446,744,073,709,551,615.
 
 
-@[object (memstruct)]
+@[object (memstruct)|]
 ==== object (memstruct)
 
 An ##object##, in a ##[[:memstruct]]## or ##[[:memunion]]##, is an integer the same size as a Euphoria
 object, and is also the same size as a pointer.  By default, it is signed, but can be declared ##unsigned##.
 
-@[float]
+@[float|]
 ==== float
 
 A ##float## is a 32-bit floating point number, just like those used by ##[[:atom_to_float32]]##
 and ##[[:float32_to_atom]]##.
 
-@[double]
+@[double|]
 ==== double
 
 A ##double## is a 64-bit floating point number, just like those used by ##[[:atom_to_float64]]##
 and ##[[:float64_to_atom]]##.  This is the size of floating point numbers used by 32-bit
 Euphoria.
 
-@[long double]
+@[long double|]
 ==== long double
 
 A ##long double## is an 80-bit floating point number, just like those used by ##[[:atom_to_float80]]##
@@ -4249,26 +4268,26 @@ Euphoria.  Although they only use 80 bits, in ##[[:memstructs]]## they require 1
 for alignment purposes.
 
 
-@[eudouble]
+@[eudouble|]
 ==== eudouble
 
 A ##eudouble## is a platform independent floating point data type.  On 32-bit Euphoria, a ##eudouble##
 is the same size (64-bits) as a ##double##.  On 64-bit Euphoria, it is 80 bits, the same size
 as a ##long double##.
 
-@[pointer]
+@[pointer|]
 ==== pointer
 
 Data members may have the ##pointer## modifier prepended to their declaration.  This signifies that
 the ##memstruct## contains a pointer to that type of element, rather than the element itself.
 
-@[signed]
+@[signed|]
 ==== signed
 
 Integer data types may be signed or unsiged.  The default is to be signed, but this can be made
 explicit by using the ##signed## modifier.
 
-@[unsigned]
+@[unsigned|]
 ==== unsigned
 
 Integer data types may be signed or unsiged.  The default is to be signed, but to use an ##unsigned##
@@ -4307,12 +4326,12 @@ my_rect.lower_right.y = 150
 ? my_rect.lower_right.x  -- outputs 125
 </eucode>
 
-@[addressof]
+@[addressof|]
 ==== addressof
 
 Returns the pointer to a memstruct member.
 
-@[offsetof]
+@[offsetof|]
 ==== offsetof
 
 Returns the offset in bytes of a member inside of its memstruct.
