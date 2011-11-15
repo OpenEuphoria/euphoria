@@ -1783,6 +1783,7 @@ procedure Multi_assign()
 		elsif tok[T_ID] = VARIABLE or tok[T_ID] = QUALIFIED_VARIABLE then
 			-- TODO: forward refs
 			lhs_syms &= tok[T_SYM]
+			
 		else
 			CompileErr( 24 )
 		end if
@@ -1800,21 +1801,30 @@ procedure Multi_assign()
 	symtab_index temp_sym = Pop()
 	sequence temps = pop_temps()
 	
-	TempKeep( temp_sym )
 	-- super simple...explicit subscript and assign...
 	for i = 1 to length( lhs_syms ) do
 		if lhs_syms[i] then
-			SymTab[lhs_syms[i]][S_USAGE] = or_bits(SymTab[lhs_syms[i]][S_USAGE], U_WRITTEN)
+			if SymTab[lhs_syms[i]][S_SCOPE] = SC_UNDEFINED then
+				Forward_var( { VARIABLE, lhs_syms[i]}, ,ASSIGN )
+				lhs_syms[i] = Pop()
+			else
+				SymTab[lhs_syms[i]][S_USAGE] = or_bits(SymTab[lhs_syms[i]][S_USAGE], U_WRITTEN)
+				
+			end if
 			emit_opnd( lhs_syms[i] )
 			
 			emit_opnd( temp_sym )
-			symtab_index int_sym = NewIntSym( i )
-			
-			emit_opnd( int_sym )
+			emit_opnd( NewIntSym( i ) )
 			emit_op( RHS_SUBS )
-			
+			integer len = length( Code )
+			if Code[len] = temp_sym then
+				-- RHS_SUBS may try to NOVALUE_TEMP our temp_sym...we don't want that
+				Code = remove( Code, len - 1, len )
+			end if
 			emit_op( ASSIGN )
+			
 			TypeCheck( lhs_syms[i] )
+			
 		end if
 	end for
 	
