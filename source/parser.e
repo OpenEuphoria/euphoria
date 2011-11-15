@@ -1761,6 +1761,68 @@ procedure Assignment(token left_var)
 	end if
 end procedure
 
+--**
+-- Automatic handling of returning multiple items.
+-- Only handles simple assignment.  No subs assignment!
+procedure Multi_assign()
+	
+	sequence lhs_syms = {}
+	token tok
+	integer need_comma = 0
+	while tok[T_ID] != RIGHT_BRACE with entry do
+		
+		if need_comma then
+			putback( tok )
+			tok_match( COMMA )
+			tok = next_token()
+		end if
+		
+		if tok[T_ID] = DOLLAR then
+			-- these will be ignored
+			lhs_syms &= 0
+		elsif tok[T_ID] = VARIABLE or tok[T_ID] = QUALIFIED_VARIABLE then
+			-- TODO: forward refs
+			lhs_syms &= tok[T_SYM]
+		else
+			CompileErr( 24 )
+		end if
+		
+		need_comma = 1
+	entry
+		tok = next_token()
+	end while
+	
+	tok_match( EQUALS )
+	
+	-- Get the RHS:
+	Expr()
+	
+	symtab_index temp_sym = Pop()
+	sequence temps = pop_temps()
+	
+	TempKeep( temp_sym )
+	-- super simple...explicit subscript and assign...
+	for i = 1 to length( lhs_syms ) do
+		if lhs_syms[i] then
+			SymTab[lhs_syms[i]][S_USAGE] = or_bits(SymTab[lhs_syms[i]][S_USAGE], U_WRITTEN)
+			emit_opnd( lhs_syms[i] )
+			
+			emit_opnd( temp_sym )
+			symtab_index int_sym = NewIntSym( i )
+			
+			emit_opnd( int_sym )
+			emit_op( RHS_SUBS )
+			
+			emit_op( ASSIGN )
+			TypeCheck( lhs_syms[i] )
+		end if
+	end for
+	
+	push_temps( temps )
+	flush_temps()
+end procedure
+
+
 procedure Return_statement()
 -- Parse a return statement
 	token tok
@@ -3825,9 +3887,10 @@ procedure Statement_list()
 					Global_declaration( tok[T_SYM], SC_LOCAL )
 				end if
 			end if
-
-
-
+		elsif id = LEFT_BRACE then
+			StartSourceLine( TRUE )
+			Multi_assign()
+			
 		else
 			if id = ELSE then
 				if length(if_stack) = 0 then
@@ -4749,6 +4812,10 @@ export procedure real_parser(integer nested)
 		elsif id = SWITCH then
 			StartSourceLine(TRUE)
 			Switch_statement()
+		
+		elsif id = LEFT_BRACE then
+			StartSourceLine( TRUE )
+			Multi_assign()
 
 		elsif id = ILLEGAL_CHAR then
 			CompileErr(102)
