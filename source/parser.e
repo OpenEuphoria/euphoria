@@ -15,6 +15,7 @@ include std/text.e
 include std/search.e
 include std/convert.e
 include std/filesys.e
+include std/sort.e
 
 include global.e
 include platform.e
@@ -30,6 +31,7 @@ include c_out.e
 include block.e
 include keylist.e
 include coverage.e
+include msgtext.e
 
 constant UNDEFINED = -999
 constant DEFAULT_SAMPLE_SIZE = 25000  -- for time profile
@@ -1767,6 +1769,7 @@ end procedure
 procedure Multi_assign()
 	
 	sequence lhs_syms = {}
+	sequence lhs_list = {} -- make sure we don't repeat anything
 	token tok
 	integer need_comma = 0
 	while tok[T_ID] != RIGHT_BRACE with entry do
@@ -1781,9 +1784,12 @@ procedure Multi_assign()
 			-- these will be ignored
 			lhs_syms &= 0
 		elsif tok[T_ID] = VARIABLE or tok[T_ID] = QUALIFIED_VARIABLE then
-			-- TODO: forward refs
 			lhs_syms &= tok[T_SYM]
-			
+			if SymTab[lhs_syms[$]][S_SCOPE] = SC_UNDEFINED then
+				lhs_list = append( lhs_list, sym_name( lhs_syms[$] ) )
+			else
+				lhs_list &= lhs_syms[$]
+			end if
 		else
 			CompileErr( 24 )
 		end if
@@ -1793,6 +1799,10 @@ procedure Multi_assign()
 		tok = next_token()
 	end while
 	
+	-- make sure we have no duplicates in the LHS
+	if length( lhs_list ) != length( remove_dups( sort( lhs_list ) ) ) then
+		CompileErr( DUPLICATE_MULTI_ASSIGN )
+	end if
 	tok_match( EQUALS )
 	
 	-- Get the RHS:

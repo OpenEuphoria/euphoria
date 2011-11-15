@@ -14,6 +14,7 @@ include common.e
 
 export enum
 	MSG_CC_PREFIX = 600,
+	DUPLICATE_MULTI_ASSIGN,
 	$
 
 -- don't change this please, but please look for -deleted- items before adding new options
@@ -378,6 +379,7 @@ constant StdErrMsgs = {
 	{356, "Specify the target architecture (X86, X86_64, ARM)"},
 	{357, "Unknown architecture: [1].  Supported architectures are: [2]"},
 	{ MSG_CC_PREFIX, "Prefix for compiler and related binaries"},
+	{DUPLICATE_MULTI_ASSIGN, "duplicate variables in left hand side of multiple assignment"},
 	$
 }
 
