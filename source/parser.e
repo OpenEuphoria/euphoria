@@ -1800,7 +1800,10 @@ procedure Multi_assign()
 	
 	symtab_index temp_sym = Pop()
 	sequence temps = pop_temps()
-	
+	if TRANSLATE then
+		emit_opnd( temp_sym )
+		emit_op( REF_TEMP )
+	end if
 	-- super simple...explicit subscript and assign...
 	for i = 1 to length( lhs_syms ) do
 		if lhs_syms[i] then
@@ -1830,6 +1833,11 @@ procedure Multi_assign()
 	
 	push_temps( temps )
 	flush_temps()
+	
+	if TRANSLATE then
+		emit_opnd( temp_sym )
+		emit_op( DEREF_TEMP )
+	end if
 end procedure
 
 
