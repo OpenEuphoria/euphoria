@@ -11,7 +11,11 @@ include std/locale.e
 include std/text.e
 
 include common.e
-                                                       
+
+export enum
+	MISSING_CMD_PARAMETER = 353,
+	$
+
 -- don't change this please, but please look for -deleted- items before adding new options
 -- to the bottom of this list. Re-use -deleted- items.
 constant StdErrMsgs = {
@@ -368,6 +372,7 @@ constant StdErrMsgs = {
 	{350, "Unable to compile resource file: [1]"},
 	{351, "Use the -mno-cygwin flag with MinGW"},
 	{352, "There is no watcom instalation under specified Watom Path [1]"},
+	{MISSING_CMD_PARAMETER, "Command line argument [1] requires a parameter"},
 	$
 }
 
