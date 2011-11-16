@@ -921,6 +921,38 @@ x = {apple, orange*2, {1,2,3}, 99/4+foobar}
 The sequence-formation operator is listed at the bottom of the a
 [[:precedence chart]].
 
+==== Multiple Assignment
+
+Special sequence notation on the left hand side of an assignment can be made to
+assign to multiple variables with a single statement.  This can be useful for
+using functions that return multiple values in a sequence, such as ##[[:value]]##.
+
+<eucode>
+atom success, val
+
+{ success, val } = value( "100" )
+
+-- success = GET_SUCCESS
+-- val = 100
+</eucode>
+
+It is also possible to ignore some of the values in the right hand side.  Any
+elements beyond the number supplied on the left hand side are ignored.  Other
+values can also be ignored by using a dollar sign ('##$##') instead of a variable
+name:
+
+<eucode>
+{ $, val } = value( "100" )
+</eucode>
+
+Variables may only appear once on the left hand side, however, they may appear
+on both the left and right hand side.  For instance, to swap the values of two
+variables:
+
+<eucode>
+{ a, b } = { b, a }
+</eucode>
+
 ==== Other Operations on Sequences
 
 Some other important operations that you can perform on sequences have English
