@@ -114,13 +114,12 @@ function multi_part_memtype( token tok )
 	return { signed, tid }
 end function
 
-
---*
--- Creates an alias for a memstruct type.  May be a primitive or
--- a memstruct.
-export procedure MemType( integer scope )
-	enter_memstruct( 1 )
+procedure parse_memtype( integer scope )
 	token mem_type = next_token()
+	if mem_type[T_ID] = DOLLAR then
+		return
+	end if
+	
 	symtab_index type_sym = mem_type[T_SYM]
 	
 	sequence signed_type = multi_part_memtype( mem_type )
@@ -162,6 +161,20 @@ export procedure MemType( integer scope )
 				Show( sym ) -- creating a fwdref removes the symbol, but we just want to recalc the size later on
 			end if
 	end switch
+end procedure
+
+--*
+-- Creates an alias for a memstruct type.  May be a primitive or
+-- a memstruct.
+export procedure MemType( integer scope )
+	enter_memstruct( 1 )
+	
+	token tok = { COMMA, 0 }
+	while tok[T_ID] = COMMA do
+		parse_memtype( scope )
+		tok = next_token()
+	end while
+	putback( tok )
 	
 	leave_memstruct()
 end procedure
