@@ -442,7 +442,7 @@ procedure patch_forward_memstruct( token tok, integer ref )
 		case VARIABLE then
 			patch_var_use( ref, fr, sym, 1 )
 		
-		case MEMSTRUCT_ACCESS then
+		case MEMSTRUCT_ACCESS, SIZEOF then
 			integer pc = fr[FR_PC]
 			set_code( ref )
 			integer rx = find( -ref, Code, pc )
@@ -451,6 +451,11 @@ procedure patch_forward_memstruct( token tok, integer ref )
 				Code[rx] = sym
 			end if
 			resolved_reference( ref )
+			
+			if fr[FR_OP] = SIZEOF then
+				break
+			end if
+			
 			for i = 2 to length( fr[FR_DATA] ) do
 				-- clean up any members tied to this
 				integer m_ref = fr[FR_DATA][i]
@@ -465,7 +470,8 @@ procedure patch_forward_memstruct( token tok, integer ref )
 				end if
 			end for
 			reset_code()
-		case else
+	
+			case else
 			-- TODO: ??
 			CompileErr( "Unimplemented: patching forward memstruct with op - %d\n", fr[FR_OP] )
 	end switch

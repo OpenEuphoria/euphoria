@@ -149,6 +149,7 @@ constant token_name =
 	{MS_SIGNED, "signed" },
 	{MS_UNSIGNED, "unsigned" },
 	{MS_MEMBER, "a memstruct member"},
+	{MEMTYPE, "a memtype"},
 	$
 }
 

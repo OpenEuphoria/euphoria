@@ -183,8 +183,13 @@ export function parse_sizeof()
 					emit_opnd( 152 )
 				end ifdef
 		case else
-			putback( tok )
-			parsed = 0
+			if SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
+				integer ref = new_forward_reference( MEMSTRUCT, tok[T_SYM], SIZEOF )
+				emit_opnd( -ref )
+			else
+				putback( tok )
+				parsed = 0
+			end if
 		
 	end switch
 	leave_memstruct()
