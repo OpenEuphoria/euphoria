@@ -13,6 +13,8 @@
 * [[ticket:694]] do not short circuit inside of forward function calls
 * [[ticket:699]] Include public and export symbols in ex.err output
 * [[ticket:717]] Fix docs to correctly describe bitwise functions
+* [[ticket:725]] Smarter reading of command line options.  Euphoria could consume switches meant for the
+  the end user program
 
 === Enhancements
 
