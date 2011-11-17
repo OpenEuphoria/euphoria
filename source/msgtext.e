@@ -14,6 +14,8 @@ include common.e
 
 export enum
 	MSG_CC_PREFIX = 600,
+	NONSTANDARD_LIBRARY,
+	MISSING_CMD_PARAMETER = 353,
 	$
 
 -- don't change this please, but please look for -deleted- items before adding new options
@@ -372,12 +374,13 @@ constant StdErrMsgs = {
 	{350, "Unable to compile resource file: [1]"},
 	{351, "Use the -mno-cygwin flag with MinGW"},
 	{352, "There is no watcom instalation under specified Watom Path [1]"},
-	{353, "Use a non-standard library when building a shared object"},
+	{NONSTANDARD_LIBRARY, "Use a non-standard library when building a shared object"},
 	{354, "External debugger"},
 	{355, "Use the -mno-cygwin flag with MinGW"},
 	{356, "Specify the target architecture (X86, X86_64, ARM)"},
 	{357, "Unknown architecture: [1].  Supported architectures are: [2]"},
 	{ MSG_CC_PREFIX, "Prefix for compiler and related binaries"},
+	{MISSING_CMD_PARAMETER, "Command line argument [1] requires a parameter"},
 	$
 }
 

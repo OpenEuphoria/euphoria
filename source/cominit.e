@@ -327,18 +327,100 @@ export function merge_parameters(sequence a, sequence b, sequence opts, integer 
 end function
 
 --**
+-- Validates that the apparent option is valid, and that it has a parameter
+-- if required.  Raises a [[:CompileErr]] if a required parameter is missing.
+function validate_opt( integer opt_type, sequence arg, sequence args, integer ix )
+	sequence opt
+	if opt_type = SHORTNAME then
+		opt = arg[2..$]
+	else
+		opt = arg[3..$]
+	end if
+	
+	sequence this_opt = find_opt( opt_type, opt, options )
+	if not length( this_opt ) then
+		-- not a valid option
+		return { 0, 0 }
+	end if
+	
+	if find( HAS_PARAMETER, this_opt[OPTIONS] ) then
+		if ix = length( args ) - 1 then
+			-- missing parameter
+			CompileErr( MISSING_CMD_PARAMETER, { arg } )
+		else
+			return { ix, ix + 2 }
+		end if
+	else
+		return { ix, ix + 1 }
+	end if
+end function
+
+--**
+-- Finds the next valid option, if any, stopping at the
+-- end of euphoria options, when the user's file is encountered.
+-- Prevents mistaking command line arguments meant for the user's
+-- program from being used by euphoria.
+--
+-- Returns a sequence with the index of the argument as the 
+-- first element, and the next index to continue checking after 
+-- validating that option.
+--
+-- Returns ##{0,0}## when it is finished checking options.
+-- It does not check the entire argument list, as at least
+-- the last argument is assumed to be 
+function find_next_opt( integer ix, sequence args )
+	sequence this_opt
+	while ix < length( args ) do
+		sequence arg = args[ix]
+		if length( arg ) > 1 then
+			if arg[1] = '-' then
+				if arg[2] = '-' then
+					-- long option?
+					if length( arg ) = 2 then
+						-- explicit 'extras' delimiter
+						return { 0, 0 }
+					end if
+					
+					return validate_opt( LONGNAME, arg, args, ix )
+					
+				else
+					-- short opt
+					return validate_opt( SHORTNAME, arg, args, ix )
+				end if
+			else
+				-- done
+				return {0,0}
+			end if
+		else
+			-- done
+			return { 0, 0 }
+		end if
+		
+		ix += 1
+	end while
+	return {0, 0}
+end function
+
+--**
 -- Expand any config file options on the command line adding
 -- their content to the supplied arguments.
 
 export function expand_config_options(sequence args)
 	integer idx = 1
-	while idx < length(args) do
+	sequence next_idx
+	while idx with entry do
 		if equal(upper(args[idx]), "-C") then
 			sequence new_args = load_euphoria_config(args[idx+1])
 			args = args[1..idx-1] & new_args & args[idx + 2..$]
+			-- since the -c was replaced, we continue parsing from
+			-- the same index
+		else
+			-- jump over the option and parameter, if any
+			idx = next_idx[2]
 		end if
-
-		idx += 1
+	entry
+		next_idx = find_next_opt( idx, args )
+		idx = next_idx[1]
 	end while
 
 	return args
