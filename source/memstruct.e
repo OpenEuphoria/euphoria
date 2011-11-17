@@ -173,7 +173,7 @@ export function parse_sizeof()
 			
 			emit_opnd( tok[T_SYM] )
 		
-		case OBJECT, MS_OBJECT then
+		case OBJECT, MS_OBJECT, MS_POINTER then
 				ifdef EU_EX then
 					-- some extra stuff gets put in the eu backend
 					-- at the beginning of the SymTab

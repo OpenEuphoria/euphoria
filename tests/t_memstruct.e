@@ -174,4 +174,6 @@ elsedef
 	test_equal( "sizeof( eudouble ) = sizeof( long double )", sizeof( long double), sizeof( eudouble ) )
 end ifdef
 
+test_equal( "sizeof( pointer ) = sizeof( object )", sizeof( pointer ), sizeof( object ) )
+
 test_report()
