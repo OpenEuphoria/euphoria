@@ -2295,7 +2295,7 @@ void set_page_to_read_write_execute(page_ptr page_addr) {
 #endif
 }
 /* addressable version of CALLBACK_POINTER constant for use with memcmp */
-const uintptr_t callback_pointer_magic = CALLBACK_POINTER;
+const uintptr_t callback_pointer_magic = (uintptr_t) CALLBACK_POINTER;
 #if defined(EOSX)
 	const uintptr_t general_ptr_magic = 0xF001F001;
 #elif (INTPTR_MAX == INT64_MAX)

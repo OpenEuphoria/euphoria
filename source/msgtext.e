@@ -22,6 +22,8 @@ export enum
 	CANNOT_ASSIGN_NONPRIMATIVE,
 	EXPECTED_PRIMITIVE_MEMSTRUCT_TYPE,
 	MSG_CC_PREFIX = 600,
+	NONSTANDARD_LIBRARY,
+	MISSING_CMD_PARAMETER = 353,
 	$
 
 -- don't change this please, but please look for -deleted- items before adding new options
@@ -380,7 +382,7 @@ constant StdErrMsgs = {
 	{350, "Unable to compile resource file: [1]"},
 	{351, "Use the -mno-cygwin flag with MinGW"},
 	{352, "There is no watcom instalation under specified Watom Path [1]"},
-	{353, "Use a non-standard library when building a shared object"},
+	{NONSTANDARD_LIBRARY, "Use a non-standard library when building a shared object"},
 	{354, "External debugger"},
 	
 	{355, "Use the -mno-cygwin flag with MinGW"},
@@ -395,6 +397,7 @@ constant StdErrMsgs = {
 	{CANNOT_ASSIGN_NONPRIMATIVE, "Cannot assign to a non-primitive, non-pointer memstruct" },
 	{EXPECTED_PRIMITIVE_MEMSTRUCT_TYPE, "Expected to see a valid primitive memory structure type" },
 	{ MSG_CC_PREFIX, "Prefix for compiler and related binaries"},
+	{MISSING_CMD_PARAMETER, "Command line argument [1] requires a parameter"},
 	$
 }
 
