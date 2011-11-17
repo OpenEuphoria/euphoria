@@ -4595,7 +4595,8 @@ void do_exec(intptr_t *start_pc)
 				top = *(object_ptr)pc[2];
 				if( ((symtab_ptr)pc[1])->token == MEMSTRUCT ||
 					((symtab_ptr)pc[1])->token == MEMUNION ||
-					((symtab_ptr)pc[1])->token == MS_MEMBER
+					((symtab_ptr)pc[1])->token == MS_MEMBER ||
+					((symtab_ptr)pc[1])->token == MEMTYPE
 				){
 					*(object_ptr)pc[2] = ((symtab_ptr)pc[1])->u.memstruct.size;
 				}

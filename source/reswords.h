@@ -255,6 +255,9 @@
 #define FUNC              501
 #define TYPE              504
 
+
+#define MEMTYPE              436
+
 #define MEMSTRUCT            524
 #define QUALIFIED_MEMSTRUCT  523
 #define MEMUNION             526

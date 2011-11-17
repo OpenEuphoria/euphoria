@@ -136,7 +136,7 @@ procedure BackEnd(integer il_file)
 						poke4(addr + ST_STACK_SPACE, eentry[S_STACK_SPACE])
 						poke_pointer(addr + ST_BLOCK, eentry[S_BLOCK])
 					
-					case MEMSTRUCT, MEMUNION, MS_MEMBER, 
+					case MEMSTRUCT, MEMUNION, MEMTYPE, MS_MEMBER, 
 							MS_OBJECT, MS_CHAR, MS_SHORT, MS_INT,
 							MS_LONG, MS_LONGLONG, 
 							MS_FLOAT, MS_DOUBLE, MS_LONGDOUBLE, MS_EUDOUBLE then

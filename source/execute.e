@@ -3142,7 +3142,11 @@ end procedure
 procedure opSIZEOF()
 	a = Code[pc+1]
 	b = Code[pc+2]
-	if sym_token( a ) = MEMSTRUCT or sym_token( a ) = MEMUNION then
+	? sym_token( a )
+	if sym_token( a ) = MEMSTRUCT
+	or sym_token( a ) = MEMUNION
+	or sym_token( a ) = MS_MEMBER
+	or sym_token( a ) = MEMTYPE then
 		val[b] = SymTab[a][S_MEM_SIZE]
 	else
 		val[b] = sizeof( val[a] )
