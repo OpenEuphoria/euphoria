@@ -4600,6 +4600,16 @@ void do_exec(intptr_t *start_pc)
 				){
 					*(object_ptr)pc[2] = ((symtab_ptr)pc[1])->u.memstruct.size;
 				}
+				else if( ((symtab_ptr)pc[1])->token == MS_CHAR       ){ *(object_ptr)pc[2] = sizeof( char ); }
+				else if( ((symtab_ptr)pc[1])->token == MS_SHORT      ){ *(object_ptr)pc[2] = sizeof( short ); }
+				else if( ((symtab_ptr)pc[1])->token == MS_INT        ){ *(object_ptr)pc[2] = sizeof( int ); }
+				else if( ((symtab_ptr)pc[1])->token == MS_LONG       ){ *(object_ptr)pc[2] = sizeof( long ); }
+				else if( ((symtab_ptr)pc[1])->token == MS_LONGLONG   ){ *(object_ptr)pc[2] = sizeof( long long ); }
+				else if( ((symtab_ptr)pc[1])->token == MS_OBJECT     ){ *(object_ptr)pc[2] = sizeof( void * ); }
+				else if( ((symtab_ptr)pc[1])->token == MS_FLOAT      ){ *(object_ptr)pc[2] = sizeof( float ); }
+				else if( ((symtab_ptr)pc[1])->token == MS_DOUBLE     ){ *(object_ptr)pc[2] = sizeof( double ); }
+				else if( ((symtab_ptr)pc[1])->token == MS_LONGDOUBLE ){ *(object_ptr)pc[2] = sizeof( long double ); }
+				else if( ((symtab_ptr)pc[1])->token == MS_EUDOUBLE   ){ *(object_ptr)pc[2] = sizeof( eudouble ); }
 				else{
 					
 					a = *(object_ptr)pc[1]; /* the data type */

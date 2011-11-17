@@ -60,8 +60,14 @@ constant
 	MULTI_LONG_DOUBLE   = { MS_LONG, MS_DOUBLE },
 	$
 
-function multi_part_memtype( token tok )
+enum
+	MULTI_PARSE_SIGNED,
+	MULTI_PARSE_ID,
+	MULTI_PARSE_SYM
+
+function multi_part_memtype( token tok, integer terminator = MS_AS )
 	integer tid = tok[T_ID]
+	integer sym = tok[T_SYM]
 	integer signed = tid != MS_UNSIGNED
 	integer sign_specified = 1
 	sequence parts = {}
@@ -76,20 +82,41 @@ function multi_part_memtype( token tok )
 		tid = tok[T_ID]
 		
 		switch tid do
-			case MS_CHAR, MS_SHORT, MS_INT, MS_DOUBLE then
+			case MS_CHAR, MS_SHORT, MS_INT then
 				parts &= tid
+				sym = tok[T_SYM]
 				exit
 			case MS_LONG then
 				parts &= tid
+				sym = tok[T_SYM]
 			
-			case MS_AS then
-				putback( tok )
+			case MS_DOUBLE then
+				if sign_specified then
+					CompileErr( FP_NOT_SIGNED )
+				end if
+				parts &= tid
+				sym = tok[T_SYM]
+				exit
+				
+			case MS_FLOAT then
+				if sign_specified or length( parts ) then
+					CompileErr( FP_NOT_SIGNED )
+				end if
+				parts &= tid
+				sym = tok[T_SYM]
 				exit
 			case else
-				if sign_specified or length( parts ) then
+				
+				if tid = terminator then
+					putback( tok )
+					exit
+				end if
+				
+				if sign_specified and not length( parts ) then
 					CompileErr( EXPECTED_PRIMITIVE_MEMSTRUCT_TYPE )
 				end if
 				parts &= tid
+				sym = tok[T_SYM]
 				exit
 		end switch
 	end for
@@ -105,15 +132,67 @@ function multi_part_memtype( token tok )
 		case MULTI_LONG_DOUBLE then
 			if not sign_specified then
 				tid = MS_LONGDOUBLE
+				ifdef EU_EX then
+					-- some extra stuff gets put in the eu backend
+					-- at the beginning of the SymTab
+					sym = 163
+				elsedef
+					-- WARNING: Magic number from the keylist!
+					sym = 158
+				end ifdef
 			else
 				-- error!
 				CompileErr( FP_NOT_SIGNED )
 			end if
 		
 	end switch
-	return { signed, tid }
+	return { signed, tid, sym }
 end function
 
+--**
+-- Special parser for sizeof().  Handles multi-part primitive
+-- memstruct types.
+-- 
+-- Returns: 1 if the argument was parsed and emitted, otherwise,
+--          returns 0, which means that normal argument parsing
+--          should occur.
+export function parse_sizeof()
+	tok_match( LEFT_ROUND )
+	enter_memstruct( 1 )
+	integer parsed = 1
+	
+	token tok = next_token()
+	switch tok[T_ID] do
+		case MS_SIGNED, MS_UNSIGNED, MS_LONG then
+			
+			sequence multi = multi_part_memtype( tok, RIGHT_ROUND )
+			emit_opnd( multi[MULTI_PARSE_SYM] )
+			
+		case MS_INT, MS_CHAR, MS_SHORT, MS_DOUBLE, MS_FLOAT, MS_EUDOUBLE,
+			MEMSTRUCT, MEMTYPE, MEMUNION then
+			
+			emit_opnd( tok[T_SYM] )
+		
+		case OBJECT, MS_OBJECT then
+				ifdef EU_EX then
+					-- some extra stuff gets put in the eu backend
+					-- at the beginning of the SymTab
+					emit_opnd( 157 )
+				elsedef
+					-- WARNING: Magic number from the keylist!
+					emit_opnd( 152 )
+				end ifdef
+		case else
+			putback( tok )
+			parsed = 0
+		
+	end switch
+	leave_memstruct()
+	return parsed
+end function
+
+--**
+-- Parses one memtype declaration.
 procedure parse_memtype( integer scope )
 	token mem_type = next_token()
 	if mem_type[T_ID] = DOLLAR then
@@ -134,17 +213,17 @@ procedure parse_memtype( integer scope )
 	SymTab[sym][S_SCOPE]      = scope
 	SymTab[sym][S_TOKEN]      = MEMTYPE
 	SymTab[sym][S_MODE]       = M_NORMAL
-	SymTab[sym][S_MEM_SIGNED] = signed_type[1]
+	SymTab[sym][S_MEM_SIGNED] = signed_type[MULTI_PARSE_SIGNED]
 	
-	switch signed_type[$] do
+	switch signed_type[MULTI_PARSE_ID] do
 		case MS_SIGNED, MS_UNSIGNED, MS_LONG, 
 			MS_CHAR, MS_SHORT, MS_INT, 
 			MS_FLOAT, MS_DOUBLE, MS_EUDOUBLE, 
 			MS_OBJECT
 		then
-			SymTab[sym][S_MEM_TYPE]   = signed_type[$]
+			SymTab[sym][S_MEM_TYPE]   = signed_type[MULTI_PARSE_ID]
 			SymTab[sym][S_MEM_PARENT] = type_sym
-			SymTab[sym][S_MEM_SIZE]   = primitive_size( signed_type[$] )
+			SymTab[sym][S_MEM_SIZE]   = primitive_size( signed_type[MULTI_PARSE_ID] )
 		
 		case else
 			
@@ -165,7 +244,8 @@ end procedure
 
 --*
 -- Creates an alias for a memstruct type.  May be a primitive or
--- a memstruct.
+-- a memstruct.  Multiple memtypes may be declared at once, separated
+-- by commas, possibly ending with a list terminating $.
 export procedure MemType( integer scope )
 	enter_memstruct( 1 )
 	

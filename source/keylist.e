@@ -190,6 +190,7 @@ export sequence keylist = {
 	{"offsetof",         SC_PREDEF, FUNC, OFFSETOF,         1, E_PURE},
 	{"deprecate",        SC_KEYWORD, DEPRECATE, 0, 0, 0},
 	{"memtype",          SC_KEYWORD, MEMTYPE,               0, 0, 0 },
+	{"long double",      SC_MEMSTRUCT, MS_LONGDOUBLE,       0, 0, 0 },
 	$
 
 }

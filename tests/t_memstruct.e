@@ -137,9 +137,9 @@ basic()
 
 -- Make sure we correctly parse all of these multi-part primitive types:
 memtype unsigned int as uint
-memtype signed int as sint
+export memtype signed int as sint
 
-memtype long int as lint
+global memtype long int as lint
 memtype signed long int as slint
 memtype unsigned long int as ulint
 
@@ -147,12 +147,31 @@ memtype long long as llong
 memtype signed long long as sllong
 memtype unsigned long long as ullong
 
-memtype long long int as llint
-memtype signed long long int as sllint
-memtype unsigned long long int as ullint
+-- list of memtypes
+public memtype 
+	long long int as llint,
+	signed long long int as sllint,
+	unsigned long long int as ullint,
+	$
 
 memtype long double as ldouble
 
 test_pass( "multi-part memtype declarations" )
+
+test_equal("sizeof( memtype ) vs sizeof( primitive )", sizeof( uint ), sizeof( unsigned int ) )
+
+memstruct one_pointer
+	pointer int p
+end memstruct
+test_equal( "sizeof( object ) same as pointer", sizeof( object ), sizeof( one_pointer ) )
+
+test_equal( "sizeof( float ) = 4", 4, sizeof( float ) )
+test_equal( "sizeof( double ) = 8", 8, sizeof( double ) )
+
+ifdef BITS32 then
+	test_equal( "sizeof( eudouble ) = sizeof( double )", sizeof( double ), sizeof( eudouble ) )
+elsedef
+	test_equal( "sizeof( eudouble ) = sizeof( long double )", sizeof( long double), sizeof( eudouble ) )
+end ifdef
 
 test_report()

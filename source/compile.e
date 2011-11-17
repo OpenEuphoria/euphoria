@@ -2211,29 +2211,56 @@ sequence target_val
 sequence dblfn
 boolean all_done
 
-export procedure opSIZEOF()
-	integer
-		datatype_sym = Code[pc+1],
-		target_sym   = Code[pc+2]
-	
+procedure sizeof_struct( symtab_index datatype_sym, symtab_index target_sym )
+	sequence tag
+	if sym_token( datatype_sym ) = MEMSTRUCT then
+		tag = "struct"
+	else
+		tag = "union"
+	end if
+	c_stmt( sprintf( "@ = sizeof( %s @);\n", {tag} ), { target_sym, datatype_sym } )
+	CDeRef( target_sym )
+end procedure
+
+procedure do_sizeof( symtab_index datatype_sym, symtab_index target_sym )
 	switch sym_token( datatype_sym ) do
 		case MEMSTRUCT, MEMUNION then
-			sequence tag
-			if sym_token( datatype_sym ) = MEMSTRUCT then
-				tag = "struct"
-			else
-				tag = "union"
-			end if
-			c_stmt( sprintf( "@ = sizeof( %s @);\n", {tag} ), { target_sym, datatype_sym } )
-			CDeRef( target_sym )
-			
+			sizeof_struct( datatype_sym, target_sym )
+		
+		case MEMTYPE then
+			-- use whatever the actual type is...
+			do_sizeof( SymTab[datatype_sym][S_MEM_PARENT], target_sym )
+		
+		-- memstruct primitives:
+		case MS_CHAR       then c_stmt( "@ = sizeof( char );\n", target_sym, target_sym )
+		case MS_SHORT      then c_stmt( "@ = sizeof( short );\n", target_sym, target_sym )
+		case MS_SIGNED     then c_stmt( "@ = sizeof( int );\n", target_sym, target_sym )
+		case MS_UNSIGNED   then c_stmt( "@ = sizeof( int );\n", target_sym, target_sym )
+		case MS_INT        then c_stmt( "@ = sizeof( int );\n", target_sym, target_sym )
+		case MS_LONG       then c_stmt( "@ = sizeof( long );\n", target_sym, target_sym )
+		case MS_LONGLONG   then c_stmt( "@ = sizeof( long long );\n", target_sym, target_sym )
+		case MS_FLOAT      then c_stmt( "@ = sizeof( float );\n", target_sym, target_sym )
+		case MS_DOUBLE     then c_stmt( "@ = sizeof( double );\n", target_sym, target_sym )
+		case MS_LONGDOUBLE then c_stmt( "@ = sizeof( long double );\n", target_sym, target_sym )
+		case MS_EUDOUBLE   then c_stmt( "@ = sizeof( eudouble );\n", target_sym, target_sym )
+		case MS_OBJECT     then c_stmt( "@ = sizeof( void * );\n", target_sym, target_sym )
+		
 		case else
+			-- Will be evaluated like on of the C_* constants
 			c_stmt("@ = eu_sizeof( @ );\n", { target_sym, datatype_sym }, target_sym )
 			CSaveStr( "_0", target_sym, datatype_sym, 0, 0 )
 			CDeRef( target_sym )
 			dispose_temp( datatype_sym, compile:DISCARD_TEMP, compile:REMOVE_FROM_MAP )
 			
 	end switch
+end procedure
+
+export procedure opSIZEOF()
+	integer
+		datatype_sym = Code[pc+1],
+		target_sym   = Code[pc+2]
+	
+	do_sizeof( datatype_sym, target_sym )
 	
 	SetBBType( target_sym, TYPE_INTEGER, {0, MAXINT}, TYPE_INTEGER, 0 )
 	create_temp( target_sym, 1 )
