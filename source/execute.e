@@ -1471,7 +1471,23 @@ end procedure
 
 procedure opMEMSTRUCT_ASSIGN()
 	atom pointer = val[Code[pc+1]]
-	poke_member( pointer, Code[pc+2], val[Code[pc+3]] )
+	integer struct_sym = Code[pc+2]
+	object source_val = val[Code[pc+3]]
+	integer tok
+	if SymTab[struct_sym][S_MEM_POINTER] then
+		tok = MS_MEMBER
+	else
+		tok = sym_token( struct_sym )
+	end if
+	
+	switch tok do
+		case MEMSTRUCT then
+			write_memstruct( pointer, struct_sym, source_val )
+		case MEMUNION then
+			poke( pointer, source_val & repeat( 0, SymTab[struct_sym][S_MEM_SIZE] - length( source_val ) ) )
+		case else
+			poke_member( pointer, struct_sym, source_val )
+	end switch
 	pc += 4
 end procedure
 
@@ -3229,11 +3245,7 @@ procedure poke_member( atom pointer, integer sym, atom value )
 			ifdef WINDOWS then
 				poke4( pointer )
 			elsedef
-				if sizeof( C_LONG ) = 4 then
-					poke4( pointer, value )
-				else
-					poke8( pointer, value )
-				end if
+				poke_pointer( pointer, value )
 			end ifdef
 		case MS_LONGLONG then
 			poke8( pointer, value )
@@ -3255,6 +3267,33 @@ procedure poke_member( atom pointer, integer sym, atom value )
 			-- just return the struct in bytes
 			RTFatal( "Error assigning to a memstruct -- can only assign primitive data members" )
 	end switch
+end procedure
+
+procedure write_memstruct( atom pointer, integer sym, object value )
+	if atom( value ) then
+		value = {value}
+	end if
+	
+	integer member = SymTab[sym][S_MEM_NEXT]
+	
+	for i = 1 to length( value ) do
+		
+		if not member then
+			exit
+		end if
+		poke_member( pointer + SymTab[member][S_MEM_OFFSET], member, value[i] )
+		
+		member = SymTab[member][S_MEM_NEXT]
+		
+	end for
+	
+	-- zero out the rest
+	integer ix = length( value ) + 1
+	while member do
+		poke_member( pointer + SymTab[member][S_MEM_OFFSET], member, 0 )
+		
+		member = SymTab[member][S_MEM_NEXT]
+	end while
 end procedure
 
 function peek_member( atom pointer, integer sym, integer array_index = -1 )

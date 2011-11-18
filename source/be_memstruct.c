@@ -13,6 +13,7 @@
 static object read_member( void *pointer, symtab_ptr member_sym );
 static object read_memunion( void *pointer, symtab_ptr member_sym );
 
+
 static object box_int( intptr_t x )
 {
 	if(x > NOVALUE && x < TOO_BIG_INT)
@@ -124,24 +125,137 @@ object read_memstruct( object_ptr source, void *pointer, symtab_ptr member_sym )
 	symtab_ptr sym;
 	int size;
 	s1_ptr s;
+	uintptr_t src_pointer;
 	
 	if( pointer == 0 ){
-		pointer = (void*)get_pos_int( "serialize memstruct", *source );
+		src_pointer = (uintptr_t)get_pos_int( "read memstruct", *source );
 	}
-	if( member_sym->token != MEMSTRUCT ){
-		member_sym = member_sym->u.memstruct.struct_type;
+	else{
+		src_pointer = (uintptr_t) pointer;
 	}
-	size = 0;
-	for( sym = member_sym->u.memstruct.next; sym != 0; sym = sym->u.memstruct.next ){
-		++size;
+	
+	if( member_sym->token == MEMUNION ){
+		// Unions are handled specially
+		int i;
+		unsigned char *target;
+		
+		size = member_sym->u.memstruct.size;
+		target = (unsigned char*) src_pointer;
+		s = NewS1( size );
+		for( i = 1; i <= size; ++i, ++target ){
+			s->base[i] = (object) *target;
+		}
 	}
-	s = NewS1( size );
-	size = 0;
-	for( sym = member_sym->u.memstruct.next; sym != 0; sym = sym->u.memstruct.next ){
-		s->base[++size] = peek_member( 0, sym, -1, pointer );
-		pointer = (void*) ((uintptr_t)pointer + sym->u.memstruct.size);
+	else{
+		if( member_sym->token != MEMSTRUCT ){
+			member_sym = member_sym->u.memstruct.struct_type;
+		}
+		size = 0;
+		for( sym = member_sym->u.memstruct.next; sym != 0; sym = sym->u.memstruct.next ){
+			++size;
+		}
+		s = NewS1( size );
+		size = 0;
+		for( sym = member_sym->u.memstruct.next; sym != 0; sym = sym->u.memstruct.next ){
+			pointer = (void*) (src_pointer + sym->u.memstruct.offset);
+			s->base[++size] = peek_member( 0, sym, -1, pointer );
+			
+		}
 	}
 	return MAKE_SEQ( s );
+}
+void write_member( object_ptr source, symtab_ptr sym, object_ptr val ){
+	s1_ptr src;
+	int free_src;
+	symtab_ptr member;
+	int i;
+	uintptr_t pointer, src_pointer;
+	intptr_t zero;
+	#if INTPTR_MAX == INT32_MAX
+	struct d dbl;
+	object dbl_ptr;
+	dbp_ptr = MAKE_DBL( &d );
+	dbl.ref = -1;
+	#endif
+	zero = 0;
+	
+	if( IS_ATOM_INT( *val ) || IS_ATOM( *val ) ){
+		src = NewS1( 1 );
+		src->base[1] = *val;
+		free_src = 1;
+	}
+	else{
+		src = SEQ_PTR( *val );
+		free_src = 0;
+	}
+	
+	src_pointer = (uintptr_t)get_pos_int( "write member", *source );
+	for( member = sym->u.memstruct.next, i = 1; member && i <= src->length; ++i, member = member->u.memstruct.next ){
+		pointer = src_pointer + member->u.memstruct.offset;
+		#if INTPTR_MAX == INT32_MAX
+		if( IS_ATOM_INT( (intptr_t)pointer ) )
+		#endif
+			poke_member( &pointer, member, src->base + i );
+		#if INTPTR_MAX == INT32_MAX
+		else{
+			dbl.dbl = (eudouble) pointer;
+			poke_member( &dbl_ptr, member, src->base + i );
+		}
+		#endif
+		
+	}
+	
+	// Zero out the rest...
+	for( ; member; ++i, member = member->u.memstruct.next ){
+		pointer = src_pointer + member->u.memstruct.offset;
+		#if INTPTR_MAX == INT32_MAX
+		if( IS_ATOM_INT( (intptr_t)pointer ) )
+		#endif
+			poke_member( &pointer, member, &zero);
+		#if INTPTR_MAX == INT32_MAX
+		else{
+			dbl.dbl = (eudouble) pointer;
+			poke_member( &dbl_ptr, member, &zero);
+		}
+		#endif
+	}
+	
+	if( free_src ){
+		EFree( src );
+	}
+}
+
+
+void write_union( object_ptr source, symtab_ptr sym, object_ptr val ){
+	
+	s1_ptr src;
+	int free_src;
+	int i;
+	char *pointer;
+	
+	if( IS_ATOM_INT( *val ) || IS_ATOM( *val ) ){
+		src = NewS1( 1 );
+		src->base[1] = *val;
+		free_src = 1;
+	}
+	else{
+		src = SEQ_PTR( *val );
+		free_src = 0;
+	}
+	
+	pointer = (char*)get_pos_int( "write union", *source );
+	for( i = 1; i <= src->length && i <= sym->u.memstruct.size; ++i, ++pointer ){
+		*pointer = src->base[i];
+	}
+	
+	// Zero out the rest...
+	for( ; i <= sym->u.memstruct.size; ++i, ++pointer ){
+		*pointer = 0;
+	}
+	
+	if( free_src ){
+		EFree( src );
+	}
 }
 
 object memstruct_access( int access_count, object_ptr source, symtab_ptr access_sym ){

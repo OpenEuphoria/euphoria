@@ -748,6 +748,8 @@ function parse_symstruct( token tok )
 		
 	elsif tok[T_ID] != MEMSTRUCT
 	and tok[T_ID]   != QUALIFIED_MEMSTRUCT
+	and tok[T_ID]   != MEMUNION
+	and tok[T_ID]   != QUALIFIED_MEMUNION
 	and tok[T_ID]   != MEMTYPE then
 		-- something else
 		CompileErr( EXPECTED_VALID_MEMSTRUCT )
@@ -815,7 +817,9 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 	if length( sym_ref ) = 3 then
 		-- just the sym...serialize it
 		if lhs then
-			CompileErr("De-serialization of memstructs not implemented")
+			emit_opnd( sym )
+			emit_symstruct( struct_sym, ref )
+			return
 		else
 			emit_symstruct( struct_sym, ref )
 			emit_op( MEMSTRUCT_READ )

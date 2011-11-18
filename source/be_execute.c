@@ -5400,7 +5400,24 @@ void do_exec(intptr_t *start_pc)
 			case L_MEMSTRUCT_ASSIGN:
 				deprintf("case L_MEMSTRUCT_ASSIGN");
 				tpc = pc;
-				poke_member( (object_ptr) pc[1], (symtab_ptr) pc[2], (object_ptr) pc[3] );
+				
+				sym = (symtab_ptr) pc[2];
+				if( sym->u.memstruct.pointer ){
+					puts("assign to memstruct.pointer");
+					poke_member( (object_ptr) pc[1], sym, (object_ptr) pc[3] );
+				}
+				else if( sym->token == MEMSTRUCT ){
+					puts("assign to memstruct");
+					write_member( (object_ptr) pc[1], sym, (object_ptr) pc[3] );
+				}
+				else if( sym->token == MEMUNION ){
+					puts("assign to memunion");
+					write_union( (object_ptr) pc[1], sym, (object_ptr) pc[3] );
+				}
+				else{
+					puts("assign to memstruct.member");
+					poke_member( (object_ptr) pc[1], (symtab_ptr) pc[2], (object_ptr) pc[3] );
+				}
 				thread4();
 				BREAK;
 				
