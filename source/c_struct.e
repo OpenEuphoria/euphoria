@@ -227,12 +227,12 @@ procedure peek_member( integer pointer, integer sym, integer target, integer ind
 			end if
 		
 		case MEMUNION then
-			serialize_memunion( pointer, sym, indirect )
+			read_memunion( pointer, sym, indirect )
 			if target then
 				c_stmt( "@ = _0;\n", target, target )
 			end if
 		case MEMSTRUCT then
-			serialize_memstruct( pointer, sym )
+			read_memstruct( pointer, sym )
 			if target then
 				c_stmt( "@ = _0;\n", target, target )
 			end if
@@ -303,7 +303,7 @@ integer serialize_level = 0
 
 --**
 -- Serialize the specified memstruct into a sequence and store the object in _2.
-procedure serialize_memstruct( integer pointer, symtab_pointer member_sym )
+procedure read_memstruct( integer pointer, symtab_pointer member_sym )
 	
 	if sym_token( member_sym ) != MEMSTRUCT then
 		-- we want to walk the actual struct
@@ -343,7 +343,7 @@ end procedure
 --**
 -- Serialize the specified memunion into a sequence and store the object in _0.
 -- Also uses _1.
-procedure serialize_memunion( integer pointer, symtab_pointer member_sym, integer indirect = 0 )
+procedure read_memunion( integer pointer, symtab_pointer member_sym, integer indirect = 0 )
 	integer size = SymTab[member_sym][S_MEM_SIZE]
 	
 	c_stmt0( sprintf( "_1 = NewS1( %d );\n", size ) )
@@ -361,7 +361,7 @@ procedure serialize_memunion( integer pointer, symtab_pointer member_sym, intege
 	c_stmt0( "_0 = MAKE_SEQ( _1 );\n" )
 end procedure
 
-function serialize_member( integer pointer, integer sym  )
+function read_member( integer pointer, integer sym  )
 	symtab_pointer member_sym = sym
 	integer tid = sym_token( sym )
 	if tid >= MS_SIGNED and tid <= MS_OBJECT then
@@ -372,18 +372,18 @@ function serialize_member( integer pointer, integer sym  )
 	
 	integer member_token = sym_token( member_sym )
 	if member_token = MEMSTRUCT then
-		serialize_memstruct( pointer, member_sym )
+		read_memstruct( pointer, member_sym )
 	
 	elsif member_token = MEMUNION then
-		serialize_memunion( pointer, member_sym  )
+		read_memunion( pointer, member_sym  )
 		
 	else
 		member_token = SymTab[SymTab[member_sym][S_MEM_STRUCT]][S_TOKEN]
 		if member_token = MEMSTRUCT then
-			serialize_memstruct( pointer, member_sym )
+			read_memstruct( pointer, member_sym )
 			
 		elsif member_token = MEMUNION then
-			serialize_memunion( pointer, member_sym )
+			read_memunion( pointer, member_sym )
 		else
 			InternalErr( "Cannot serialize a: [1]", { LexName( member_token )  })
 		end if
@@ -391,7 +391,7 @@ function serialize_member( integer pointer, integer sym  )
 	return 1
 end function
 
-export procedure opMEMSTRUCT_SERIALIZE()
+export procedure opMEMSTRUCT_READ()
 	integer
 		pointer = Code[pc+1],
 		member  = Code[pc+2],
@@ -399,7 +399,7 @@ export procedure opMEMSTRUCT_SERIALIZE()
 	
 	get_pointer( pointer, pointer )
 	
-	integer is_sequence = serialize_member( pointer, member )
+	integer is_sequence = read_member( pointer, member )
 	CDeRef( target )
 	c_stmt( "@ = _0;\n", target, target )
 	if is_sequence then

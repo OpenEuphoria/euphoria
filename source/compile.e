@@ -6697,8 +6697,8 @@ export procedure init_opcodes()
 			case "PEEK_MEMBER" then
 				operation[i] = routine_id("opPEEK_MEMBER")
 				
-			case "MEMSTRUCT_SERIALIZE" then
-				operation[i] = routine_id("opMEMSTRUCT_SERIALIZE")
+			case "MEMSTRUCT_READ" then
+				operation[i] = routine_id("opMEMSTRUCT_READ")
 				
 			case "MEMSTRUCT_ASSIGN" then
 				operation[i] = routine_id("opMEMSTRUCT_ASSIGN")

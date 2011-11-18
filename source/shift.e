@@ -129,7 +129,7 @@ procedure init_op_info()
 	op_info[MEM_COPY            ] = { FIXED_SIZE, 4, {}, {}, {} }
 	op_info[MEM_SET             ] = { FIXED_SIZE, 4, {}, {}, {} }
 	op_info[MEMSTRUCT_ARRAY     ] = { FIXED_SIZE, 5, {}, {4}, {} }
-	op_info[MEMSTRUCT_SERIALIZE ] = { FIXED_SIZE, 4, {}, {3}, {} }
+	op_info[MEMSTRUCT_READ ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[MINUS               ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[MEMSTRUCT_MINUS     ] = { FIXED_SIZE, 4, {}, {}, {} }
 	op_info[MINUS_I             ] = { FIXED_SIZE, 4, {}, {3}, {} }

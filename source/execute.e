@@ -3351,11 +3351,11 @@ function peek_member( atom pointer, integer sym, integer array_index = -1 )
 			end if
 		case else
 			-- just return the struct in bytes
-			return serialize_member( pointer, sym )
+			return read_member( pointer, sym )
 	end switch
 end function
 
-function serialize_memstruct( atom pointer, symtab_pointer member_sym )
+function read_memstruct( atom pointer, symtab_pointer member_sym )
 	sequence s = {}
 	if sym_token( member_sym ) != MEMSTRUCT then
 		-- we want to walk the actual struct
@@ -3369,11 +3369,11 @@ function serialize_memstruct( atom pointer, symtab_pointer member_sym )
 	return s
 end function
 
-function serialize_memunion( atom pointer, symtab_pointer member_sym )
+function read_memunion( atom pointer, symtab_pointer member_sym )
 	return peek( { pointer, SymTab[member_sym][S_MEM_SIZE] } )
 end function
 
-function serialize_member( atom pointer, symtab_index sym )
+function read_member( atom pointer, symtab_index sym )
 
 	symtab_pointer member_sym = sym
 	integer tid = sym_token( sym )
@@ -3384,27 +3384,27 @@ function serialize_member( atom pointer, symtab_index sym )
 	
 	integer member_token = sym_token( member_sym )
 	if member_token = MEMSTRUCT then
-		return serialize_memstruct( pointer, member_sym )
+		return read_memstruct( pointer, member_sym )
 	
 	elsif member_token = MEMUNION then
-		return serialize_memunion( pointer, member_sym )
+		return read_memunion( pointer, member_sym )
 	
 	else
 		member_token = SymTab[SymTab[member_sym][S_MEM_STRUCT]][S_TOKEN]
 		if member_token = MEMSTRUCT then
-			return serialize_memstruct( pointer, member_sym )
+			return read_memstruct( pointer, member_sym )
 		
 		elsif member_token = MEMUNION then
-			return serialize_memunion( pointer, member_sym )
+			return read_memunion( pointer, member_sym )
 		else
 			RTFatal( "Cannot serialize a: " & LexName( member_token ) )
 		end if
 	end if
 end function
 
-procedure opMEMSTRUCT_SERIALIZE()
+procedure opMEMSTRUCT_READ()
 	atom pointer = val[Code[pc+1]]
-	val[Code[pc+3]] = serialize_member( pointer, Code[pc+2] )
+	val[Code[pc+3]] = read_member( pointer, Code[pc+2] )
 	pc += 4
 end procedure
 
@@ -4757,8 +4757,8 @@ procedure do_exec()
 			case PEEK_MEMBER then
 				opPEEK_MEMBER()
 			
-			case MEMSTRUCT_SERIALIZE then
-				opMEMSTRUCT_SERIALIZE()
+			case MEMSTRUCT_READ then
+				opMEMSTRUCT_READ()
 			
 			case MEMSTRUCT_ASSIGN then
 				opMEMSTRUCT_ASSIGN()

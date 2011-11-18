@@ -818,7 +818,7 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 			CompileErr("De-serialization of memstructs not implemented")
 		else
 			emit_symstruct( struct_sym, ref )
-			emit_op( MEMSTRUCT_SERIALIZE )
+			emit_op( MEMSTRUCT_READ )
 		end if
 		return
 	end if
@@ -902,11 +902,11 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 					peek_member( members, member, ref, lhs, names )
 					-- re-emit the last member for serialization
 					emit_member( member, ref, PEEK_MEMBER, names )
-					emit_op( MEMSTRUCT_SERIALIZE )
+					emit_op( MEMSTRUCT_READ )
 					exit
 				else
 					emit_symstruct( struct_sym, ref )
-					emit_op( MEMSTRUCT_SERIALIZE )
+					emit_op( MEMSTRUCT_READ )
 					exit
 				end if
 			

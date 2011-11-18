@@ -1174,7 +1174,7 @@ void code_set_pointers(intptr_t **code)
 			case MEMSTRUCT_MINUS:
 			case MEMSTRUCT_DIVIDE:
 			case MEMSTRUCT_MULTIPLY:
-			case MEMSTRUCT_SERIALIZE:
+			case MEMSTRUCT_READ:
 			case PEEK_MEMBER:
 				// 3 operands follow
 				code[i+1] = SET_OPERAND(code[i+1]);
@@ -1851,7 +1851,7 @@ void do_exec(intptr_t *start_pc)
   &&L_SIZEOF, &&L_STARTLINE_BREAK,
   
   &&L_MEMSTRUCT_ACCESS, &&L_MEMSTRUCT_ARRAY, &&L_PEEK_MEMBER,
-  &&L_MEMSTRUCT_SERIALIZE, &&L_MEMSTRUCT_ASSIGN, &&L_MEMSTRUCT_PLUS,
+  &&L_MEMSTRUCT_READ, &&L_MEMSTRUCT_ASSIGN, &&L_MEMSTRUCT_PLUS,
   &&L_MEMSTRUCT_MINUS, &&L_MEMSTRUCT_MULTIPLY, &&L_MEMSTRUCT_DIVIDE,
   &&L_MEM_TYPE_CHECK, &&L_ADDRESSOF, &&L_OFFSETOF
 /* 230 (previous) */
@@ -5429,10 +5429,10 @@ void do_exec(intptr_t *start_pc)
 				thread4();
 				BREAK;
 				
-			case L_MEMSTRUCT_SERIALIZE:
-				deprintf("case L_MEMSTRUCT_SERIALIZE");
+			case L_MEMSTRUCT_READ:
+				deprintf("case L_MEMSTRUCT_READ");
 				tpc = pc;
-				a = serialize_memstruct( (object_ptr) pc[1], 0, (symtab_ptr) pc[2] );
+				a = read_memstruct( (object_ptr) pc[1], 0, (symtab_ptr) pc[2] );
 				obj_ptr = (object_ptr) pc[3];
 				DeRef( *obj_ptr );
 				*obj_ptr = a;

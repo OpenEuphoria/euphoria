@@ -1423,7 +1423,7 @@ procedure opMEMSTRUCT_ARRAY()
 	trinary()
 end procedure
 
-procedure opMEMSTRUCT_SERIALIZE()
+procedure opMEMSTRUCT_READ()
 	binary()
 end procedure
 

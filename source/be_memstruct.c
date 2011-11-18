@@ -10,8 +10,8 @@
 #include "be_memstruct.h"
 #include "be_runtime.h"
 
-static object serialize_member( void *pointer, symtab_ptr member_sym );
-static object serialize_memunion( void *pointer, symtab_ptr member_sym );
+static object read_member( void *pointer, symtab_ptr member_sym );
+static object read_memunion( void *pointer, symtab_ptr member_sym );
 
 static object box_int( intptr_t x )
 {
@@ -73,11 +73,11 @@ object peek_member( object_ptr source, symtab_ptr memsym, int array_index, void 
 		case MS_LONGDOUBLE:
 			return NewDouble( (eudouble) *(long double*)pointer );
 		default:
-			return serialize_member( pointer, memsym );
+			return read_member( pointer, memsym );
 	}
 }
 
-static object serialize_member( void *pointer, symtab_ptr member_sym ){
+static object read_member( void *pointer, symtab_ptr member_sym ){
 	
 	int token;
 	
@@ -92,10 +92,10 @@ static object serialize_member( void *pointer, symtab_ptr member_sym ){
 	while(1){
 		// should only go twice through at most
 		if( token == MEMSTRUCT ){
-			return serialize_memstruct( 0, pointer, member_sym );
+			return read_memstruct( 0, pointer, member_sym );
 		}
 		else if( token == MEMUNION ){
-			return serialize_memunion( pointer, member_sym );
+			return read_memunion( pointer, member_sym );
 		}
 		
 		// get the member's actual struct
@@ -103,7 +103,7 @@ static object serialize_member( void *pointer, symtab_ptr member_sym ){
 	}
 }
 
-static object serialize_memunion( void *pointer, symtab_ptr member_sym ){
+static object read_memunion( void *pointer, symtab_ptr member_sym ){
 	s1_ptr s;
 	int size;
 	int i;
@@ -120,7 +120,7 @@ static object serialize_memunion( void *pointer, symtab_ptr member_sym ){
 	return MAKE_SEQ( s );
 }
 
-object serialize_memstruct( object_ptr source, void *pointer, symtab_ptr member_sym ){
+object read_memstruct( object_ptr source, void *pointer, symtab_ptr member_sym ){
 	symtab_ptr sym;
 	int size;
 	s1_ptr s;
