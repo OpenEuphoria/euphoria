@@ -4120,6 +4120,72 @@ integer or as a floating point number).
 Within a memstruct or memunion, different elements are defined using names for data types
 along with some data type modifiers.
 
+==== Assigning memstruct values
+
+Assigning a value to a memstruct is an alternative to using one of the ##[[:poke]]## built in
+procedures.  The big advantage to using a ##[[:memstruct]]## over ##[[:poke]]## is that
+euphoria handles data conversion and the calculation of offsets.
+
+The sytax for assigning a value to memory is the pointer to the memory,
+followed by a dot, then the name of the memstruct, optionally followed by a dot and
+then a member of the memstruct:
+
+<eucode>
+memstruct POINT
+	int x
+	int y
+end memstruct
+
+atom point = allocate( sizeof( POINT ) )
+point.POINT.x = 1
+point.POINT.y = 2
+</eucode>
+
+When a member is itself a memstruct, the dot notation may be continued to access the 
+nested members.  Continuing the ##POINT## example from above:
+
+<eucode>
+memstruct RECT
+	POINT upper_left
+	POINT lower_right
+end memstruct
+
+atom rect = allocate( sizeof( RECT ) )
+rect.RECT.upper_left.x  = 0
+rect.RECT.lower_right.x = 5
+</eucode>
+
+Additionally, you can assign to multiple members of a memstruct at a time.  When the last
+referenced member of the left hand side is itself a memstruct, the right hand side will
+be assigned to the respective members of the memstruct:
+
+<eucode>
+point.POINT = { 3, 6 }
+rect.RECT.upper_left = { 0, 0 }
+</eucode>
+
+If an atom is passed on the right hand side, it is treated as a single element sequence.
+If the sequence has more elements than the memstruct has members, the extra elements are 
+ignored.  If the sequence has fewer elements than the memstruct has members, then the
+additional members are set to zero.  This provides for a simple way to zero out all
+elements:
+
+<eucode>
+point.POINT = {3}  -- x = 3, y = 0
+point.POINT = {}   -- x = 0, y = 0
+</eucode>
+
+Note that a ##[[:memunion]]## is treated as ##unsigned char## data.
+
+==== Reading memstruct values
+
+Reading from a memstruct is an alternative to using one of the ##peek## built in
+procedures.    The big advantage to using a ##[[:memstruct]]## over ##[[:peek]]## is that
+euphoria handles data conversion and the calculation of offsets.
+
+The syntax is the same as for [[:Assigning memstruct values]], except that it is applied
+to the right hand side of an expression.
+
 @[memstruct|]
 ==== memstruct
 

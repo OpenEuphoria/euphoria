@@ -384,7 +384,7 @@ function SeqElem(integer x)
 	return local_t
 end function
 
-function SeqLen(integer x)
+export function SeqLen(integer x)
 -- the length of a sequence
 	symtab_index s
 	atom len, local_len

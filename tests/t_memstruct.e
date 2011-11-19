@@ -3,7 +3,6 @@ with trace
 
 include std/unittest.e
 
-include std/dll.e
 include std/machine.e
 
 type token_id( object id )
@@ -70,7 +69,7 @@ end memstruct
 
 memtype SymbolTable as SymTab5
 
-integer bits32 = sizeof( C_POINTER ) = 4
+integer bits32 = (sizeof( pointer ) = 4)
 procedure basic()
 	atom symtab = allocate( sizeof( SymTab5 ) )
 	poke( symtab,  repeat( 0, 5 * sizeof( symtab_entry ) ) )
@@ -134,6 +133,43 @@ procedure basic()
 	test_equal( "serialize array length", 5, length( SymTab_Serialized[1] ) )
 end procedure
 basic()
+
+memstruct ASSIGN
+	char a
+	unsigned short b
+	int c
+	long d
+	float e
+	double f
+	long long g
+	object h
+end memstruct
+
+memunion UNION_ASSIGN
+	char a
+	short b
+	int c
+	long d
+	long long e
+end memunion
+
+procedure bulk_assign()
+	atom ptr = allocate( sizeof( ASSIGN ), 1 )
+	ptr.ASSIGN = {}
+	test_equal( "assign an empty sequence -> memset 0", repeat( 0, 8 ), ptr.ASSIGN )
+	
+	ptr.ASSIGN = { 1, 2, 3, 4, 5, 6, 7, 8}
+	test_equal( "bulk assign #1", { 1, 2, 3, 4, 5, 6, 7, 8}, ptr.ASSIGN )
+	
+	ptr = allocate( sizeof( UNION_ASSIGN ), 1 )
+	ptr.UNION_ASSIGN = 0
+	test_equal( "union assign atom", repeat( 0, sizeof( UNION_ASSIGN ) ), ptr.UNION_ASSIGN )
+	
+	ptr.UNION_ASSIGN = {255, 255, 255, 255}
+	test_equal( "union assign sequence", -1, ptr.UNION_ASSIGN.c )
+	
+end procedure
+bulk_assign()
 
 -- Make sure we correctly parse all of these multi-part primitive types:
 memtype unsigned int as uint

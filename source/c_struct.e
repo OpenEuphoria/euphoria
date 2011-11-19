@@ -212,11 +212,19 @@ procedure peek_member( integer pointer, integer sym, integer target, integer ind
 				end if
 			else
 				parent =  SymTab[sym][S_MEM_PARENT]
+				sequence parent_struct
+				switch sym_token( parent ) do
+					case MEMSTRUCT, MEMUNION, QUALIFIED_MEMSTRUCT, QUALIFIED_MEMUNION then
+						parent_struct = decorated_name( parent )
+					case else
+						parent_struct = decorated_name( SymTab[parent][S_MEM_STRUCT] )
+				end switch
+				
 				c_stmt( 
-						sprintf("_0 = NewDouble( (eudouble) (((%s %s*)@)->%s%s);\n", 
+						sprintf("_0 = NewDouble( (eudouble) (((%s %s*)@)->%s%s) );\n", 
 							{
 								mem_name( sym_token( parent ) ),
-								decorated_name( SymTab[parent][S_MEM_STRUCT] ), 
+								parent_struct, 
 								decorated_name( sym ),
 								array_modifier
 							}
@@ -473,6 +481,206 @@ procedure poke_member( symtab_index target, symtab_index member, symtab_index va
 	end switch
 end procedure
 
+procedure poke_memstruct( symtab_index target, symtab_index struct_sym, symtab_index member, integer subscript )
+	integer data_type = SymTab[member][S_TOKEN]
+	integer signed    = SymTab[member][S_MEM_SIGNED]
+	
+	sequence type_name
+	
+	if SymTab[member][S_MEM_POINTER] then
+		data_type = MS_OBJECT
+		signed    = 0
+		type_name = "object"
+	else
+		type_name = mem_name( sym_token( member ) )
+	end if
+	
+	sequence rhs
+	if subscript then
+		rhs = sprintf( "src_s1->base[%d]", subscript )
+	else
+		rhs = "0"
+	end if
+	
+	switch data_type do
+		case MS_FLOAT, MS_DOUBLE, MS_LONGDOUBLE, MS_EUDOUBLE then
+			
+			if subscript then
+				c_stmt0( sprintf( "if( IS_ATOM_INT( %s ) ){\n", { rhs } ) )
+			end if
+				c_stmt( sprintf("((struct %s*)@)->%s = (%s)%s;\n",
+								{ decorated_name( struct_sym), decorated_name( member) ,type_name, rhs}), { target }, target )
+			if subscript then
+				c_stmt0( "}\n" )
+				c_stmt0( "else{\n")
+					c_stmt( sprintf("((struct %s*)@)->%s = (%s)DBL_PTR( %s )->dbl;\n",
+								{decorated_name( struct_sym), decorated_name( member) , type_name, rhs}), { target }, target )
+				c_stmt0( "}\n")
+			end if
+		case MEMUNION then
+			-- TODO
+		case MEMSTRUCT then
+			-- TODO
+		case else
+			if not signed then
+				if data_type = MS_OBJECT then
+					type_name = "uintptr_t"
+				else
+					type_name = "unsigned " & type_name
+				end if
+			end if
+			if subscript then
+				c_stmt0( sprintf("if( IS_ATOM_INT( %s ) ){\n", {rhs} ) )
+			end if
+				c_stmt( sprintf("((struct %s*) @)->%s = (%s) %s;\n",
+							{decorated_name( struct_sym), decorated_name( member) , type_name, rhs}), {target}, target )
+			if subscript then
+				c_stmt0("}\n" )
+				c_stmt0( "else{\n")
+				c_stmt( sprintf("((struct %s*) @)->%s = (%s) DBL_PTR( %s )->dbl;\n",
+								{decorated_name( struct_sym), decorated_name( member) , type_name, rhs}), {target}, target )
+				c_stmt0("}\n" )
+			end if
+			
+	end switch
+end procedure
+
+function set_up_assign_sequence( integer source_val )
+	
+	atom seqlen
+	integer is_sequence = TypeIs( source_val, TYPE_SEQUENCE )
+	
+	
+	c_stmt0("s1_ptr src_s1;\n")	
+	
+	if is_sequence then
+		-- see if we know how big the sequence is:
+		seqlen = SeqLen( source_val )
+		c_stmt("src_s1 = SEQ_PTR( @ );\n", source_val )
+	else
+		c_stmt0("int free_src;\n" )
+		-- might be an atom
+		seqlen = NOVALUE
+		c_stmt("if( IS_ATOM( @ ) || IS_ATOM_INT( @ ) ){\n", { source_val, source_val } )
+			c_stmt0("free_src = 1;\n")
+			c_stmt0("src_s1 = NewS1( 1 );\n" )
+			c_stmt("src_s1->base[1] = @;\n", source_val )
+		c_stmt0("}\n")
+		c_stmt0("else {\n" )
+			c_stmt0("free_src = 0;\n")
+			c_stmt("src_s1 = SEQ_PTR( @ );\n", source_val )
+		c_stmt0("}\n")
+	end if
+	return is_sequence & seqlen
+end function
+
+procedure assign_memstruct( integer pointer, integer struct_sym, integer source_val )
+	-- use a private block
+	c_stmt0("{\n")
+	sequence seq_len     = set_up_assign_sequence( source_val )
+	integer  is_sequence = seq_len[1]
+	atom     seqlen      = seq_len[2]
+	
+	integer members = 0
+	integer member_sym = struct_sym
+	sequence member_list = {}
+	while member_sym with entry do
+		members += 1
+		member_list &= member_sym
+	entry
+		member_sym = SymTab[member_sym][S_MEM_NEXT]
+	end while
+	
+	if seqlen != NOVALUE then
+		integer ix = 1
+		member_sym = SymTab[struct_sym][S_MEM_NEXT]
+		while ix <= seqlen and member_sym do
+			poke_memstruct( pointer, struct_sym, member_sym, ix )
+			ix += 1
+			member_sym = SymTab[member_sym][S_MEM_NEXT]
+		end while
+		
+		while member_sym do
+			-- zero out the rest
+			poke_memstruct( pointer, struct_sym, member_sym, 0 )
+			member_sym = SymTab[member_sym][S_MEM_NEXT]
+		end while
+	else
+		-- unknown length:
+		c_stmt0( "switch( src_s1->length ){\n" )
+			-- the sequence is bigger than the struct:
+			c_stmt0("default:\n")
+			for i = members to 1 by -1 do
+				c_stmt0( sprintf( "case %d:\n", i ) )
+				poke_memstruct( pointer, struct_sym, member_list[i], i )
+			end for
+			c_stmt0( "case 0: break;\n" )
+		c_stmt0("}\n")
+		
+		c_stmt0( "switch( src_s1->length + 1 ){\n" )
+			for i = 0 to members do
+				c_stmt0( sprintf( "case %d:\n", i ) )
+				if i then
+					poke_memstruct( pointer, struct_sym, member_list[i], 0 )
+				end if
+			end for
+			c_stmt0("default: break;\n")
+		c_stmt0("}\n")
+	end if
+	
+	if not is_sequence then
+		c_stmt0("if( free_src ){\n")
+		c_stmt0("DeRefDS( MAKE_SEQ(src_s1) );\n")
+		c_stmt0("}\n" )
+	end if
+	
+	c_stmt0("}\n")
+end procedure
+
+procedure assign_memunion( integer pointer, integer struct_sym, integer source_val )
+	c_stmt0("{\n")
+	c_stmt0("unsigned char *ptr;\n")
+	c_stmt0("int i;\n")
+	sequence seq_len     = set_up_assign_sequence( source_val )
+	integer  is_sequence = seq_len[1]
+	atom     seqlen      = seq_len[2]
+	
+	integer union_size = SymTab[struct_sym][S_MEM_SIZE]
+	
+	c_stmt("ptr = (unsigned char *) @;\n", pointer )
+	if seqlen = NOVALUE then
+		-- unknown length
+		c_stmt0(sprintf("for( i = 1; i <= src_s1->length && i <= %d; ++i, ++ptr ){\n", union_size ) )
+			c_stmt0("*ptr = (unsigned char) src_s1->base[i];\n")
+		c_stmt0("}\n")
+		
+		c_stmt0(sprintf("for( i = src_s1->length + 1; i <= %d; ++i, ++ptr ){\n", union_size ) )
+			c_stmt0("*ptr = 0;\n")
+		c_stmt0("}\n")
+		
+	else
+		-- we know the length
+		if seqlen > union_size then
+			seqlen = union_size
+		end if
+		
+		for i = 1 to seqlen do
+			c_stmt0( sprintf("*ptr++ = (unsigned char) src_s1->base[%d];\n", i ) )
+		end for
+		
+		for i = seqlen + 1 to union_size do
+			c_stmt0( "*ptr++ = 0;\n" )
+		end for
+	end if
+	
+	if not is_sequence then
+		c_stmt0("if( free_src ){\n")
+		c_stmt0("DeRefDS( MAKE_SEQ(src_s1) );\n")
+		c_stmt0("}\n" )
+	end if
+	c_stmt0("}\n")
+end procedure
+
 
 export procedure opMEMSTRUCT_ASSIGN()
 	integer
@@ -482,7 +690,22 @@ export procedure opMEMSTRUCT_ASSIGN()
 	
 	get_pointer( pointer, pointer )
 	
-	poke_member( pointer, member, val )
+	integer tok
+	if SymTab[member][S_MEM_POINTER] then
+		tok = MS_MEMBER
+	else
+		tok = sym_token( member )
+	end if
+	
+	switch tok do
+		case MEMSTRUCT then
+			assign_memstruct( pointer, member, val )
+		case MEMUNION then
+			assign_memunion( pointer, member, val )
+		case else
+			poke_member( pointer, member, val )
+	end switch
+	
 	
 	dispose_temp( val, compile:DISCARD_TEMP, REMOVE_FROM_MAP )
 	remove_pointer( pointer )
@@ -630,7 +853,12 @@ procedure write_data_type( atom struct_h, symtab_index member )
 	-- signed / unsigned
 	if not SymTab[member][S_MEM_SIGNED]
 	and data_type != MS_OBJECT
-	and data_type != MS_MEMBER then
+	and data_type != MS_MEMBER
+	and data_type != MS_FLOAT
+	and data_type != MS_DOUBLE 
+	and data_type != MS_LONGDOUBLE 
+	and data_type != MS_EUDOUBLE
+	then
 		-- floating points are always marked signed
 		puts( struct_h, "unsigned " )
 	end if
