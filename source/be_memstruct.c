@@ -258,14 +258,16 @@ void write_union( object_ptr source, symtab_ptr sym, object_ptr val ){
 	}
 }
 
-object memstruct_access( int access_count, object_ptr source, symtab_ptr access_sym ){
+object memstruct_access( int access_count, object_ptr source, symtab_ptr *access_sym ){
 	uintptr_t pointer;
 	int i;
 	
 	pointer = (uintptr_t)get_pos_int( "memstruct access", *source );
 	for( i = 0; i < access_count; ++i ){
-		pointer += access_sym[i].u.memstruct.offset;
-		if( access_sym[i].u.memstruct.pointer && (i+1) < access_count ){
+		pointer += access_sym[i]->u.memstruct.offset;
+		printf("MEMSTRUCT_ACCESS: %p (+%d from %s %d of %d)\n",
+			   pointer, access_sym[i]->u.memstruct.offset, access_sym[i]->name, i+1, access_count );
+		if( access_sym[i]->u.memstruct.pointer && (i+1) < access_count ){
 			pointer = *(uintptr_t*)pointer;
 		}
 	}

@@ -11,7 +11,7 @@ void write_member( object_ptr source, symtab_ptr sym, object_ptr val );
 void write_union( object_ptr source, symtab_ptr sym, object_ptr val );
 
 object memstruct_array( object_ptr source, symtab_ptr sym, object_ptr subscript );
-object memstruct_access( int access_count, object_ptr source, symtab_ptr access_sym );
+object memstruct_access( int access_count, object_ptr source, symtab_ptr* access_sym );
 object read_memstruct( object_ptr source, void *pointer, symtab_ptr member_sym );
 
 

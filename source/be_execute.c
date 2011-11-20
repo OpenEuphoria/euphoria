@@ -5465,7 +5465,7 @@ void do_exec(intptr_t *start_pc)
 				deprintf("case L_MEMSTRUCT_ACCESS");
 				tpc = pc;
 				b = pc[1];
-				a = memstruct_access( b, (object_ptr) pc[2], (symtab_ptr) pc[3] );
+				a = memstruct_access( b, (object_ptr) pc[2], (symtab_ptr *) pc + 3 );
 				obj_ptr = (object_ptr) pc[b+3];
 				DeRef( *obj_ptr );
 				*obj_ptr = a;
