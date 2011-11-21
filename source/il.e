@@ -68,6 +68,8 @@ elsedef
 	}	
 end ifdef
 
+add_options( OPTIONS )
+
 -- options for BIND
 integer list, quiet, full_debug
 integer del_routines, del_vars
@@ -307,15 +309,7 @@ procedure copyrights()
 end procedure
 
 function extract_options( sequence cl )
-	sequence argv = cl[1..2]
-	if length(cl) > 2 then
-		argv &= merge_parameters(GetDefaultArgs(), cl[3..$], OPTIONS)
-	else
-		argv &= GetDefaultArgs()
-	end if
-	
-	argv = expand_config_options(argv)
-
+	sequence argv = expand_config_options( cl )
 	Argv = argv
 	Argc = length(Argv)
 	
