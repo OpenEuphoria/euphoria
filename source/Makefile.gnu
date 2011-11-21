@@ -307,7 +307,6 @@ EU_BACKEND_RUNNER_FILES = \
 	pathopen.e \
 	common.e \
 	backend.ex
-	
 PREFIXED_PCRE_OBJECTS = $(addprefix $(BUILDDIR)/pcre$(FPIC)/,$(PCRE_OBJECTS))
 
 EU_BACKEND_OBJECTS = \

@@ -378,7 +378,7 @@ function find_next_opt( integer ix, sequence args )
 					-- long option?
 					if length( arg ) = 2 then
 						-- explicit 'extras' delimiter
-						return { 0, 0 }
+						return { 0, ix - 1 }
 					end if
 					
 					return validate_opt( LONGNAME, arg, args, ix )
@@ -389,16 +389,16 @@ function find_next_opt( integer ix, sequence args )
 				end if
 			else
 				-- done
-				return {0,0}
+				return {0, ix-1}
 			end if
 		else
 			-- done
-			return { 0, 0 }
+			return { 0, ix-1 }
 		end if
 		
 		ix += 1
 	end while
-	return {0, 0}
+	return {0, ix-1}
 end function
 
 --**
@@ -406,14 +406,13 @@ end function
 -- their content to the supplied arguments.
 
 export function expand_config_options(sequence args)
-	integer idx = 1
+	integer idx = 3
 	sequence next_idx
+	sequence files = {}
 	while idx with entry do
 		if equal(upper(args[idx]), "-C") then
-			sequence new_args = load_euphoria_config(args[idx+1])
-			args = args[1..idx-1] & new_args & args[idx + 2..$]
-			-- since the -c was replaced, we continue parsing from
-			-- the same index
+			files = append( files, args[idx+1] )
+			args = remove( args, idx, idx + 1 )
 		else
 			-- jump over the option and parameter, if any
 			idx = next_idx[2]
@@ -422,8 +421,7 @@ export function expand_config_options(sequence args)
 		next_idx = find_next_opt( idx, args )
 		idx = next_idx[1]
 	end while
-
-	return args
+	return args[1..2] & merge_parameters( GetDefaultArgs( files ), args[3..next_idx[2]], options, 1 ) & args[next_idx[2]+1..$]
 end function
 
 --**
