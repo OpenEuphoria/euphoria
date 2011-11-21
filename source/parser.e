@@ -1548,6 +1548,10 @@ procedure emit_mem_type_check( symtab_index var, symtab_index type_sym, symtab_i
 end procedure
 
 procedure MemTypeCheck( symtab_index var, symtab_index member_sym, symtab_index pointer, integer op )
+	if member_sym < 0 then
+		-- TODO: need to handle fwd refs here
+		return
+	end if
 	integer type_sym = SymTab[member_sym][S_MEM_TYPE]
 	if 0 = type_sym then
 		-- no type for this member

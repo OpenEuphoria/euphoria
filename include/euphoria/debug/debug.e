@@ -2,7 +2,6 @@ namespace debug
 
 include std/dll.e
 include std/machine.e
-include euphoria/symstruct.e
 
 without trace
 
@@ -82,6 +81,59 @@ end type
 public function call_stack()
 	return machine_func( M_CALL_STACK, {} )
 end function
+
+public memstruct Var
+	pointer symtab_entry declared_in
+end memstruct
+
+public memstruct Block
+	unsigned int first_line
+	unsigned int last_line
+end memstruct
+
+public memstruct private_block
+	int task_number
+	pointer private_block next
+	object block[2]
+end memstruct
+
+public memstruct Subp
+	pointer object code
+	pointer symtab_entry temps
+	pointer private_block saved_privates
+	pointer object block
+	pointer int linetab
+	unsigned int firstline
+	unsigned int num_args
+	int resident_task
+	unsigned int stack_space
+end memstruct
+
+public memunion U
+	Var var
+	Subp subp
+	Block block
+end memunion
+
+public memstruct symtab_entry
+	object obj
+	pointer symtab_entry next
+	pointer symtab_entry next_in_block
+	char mode
+	char scope
+	unsigned char file_no
+	unsigned char dummy
+	int token
+	pointer char name
+	U u
+end memstruct
+
+public memstruct source_line
+	pointer char src
+	short        line
+	char         file_no
+	char         options
+end memstruct
 
 
 atom
@@ -318,27 +370,27 @@ public function break_routine( atom routine_sym, integer enable )
 end function
 
 public function get_name( atom sym )
-	return peek_string( peek_pointer( sym + ST_NAME ) )
+	return peek_string( sym.symtab_entry.name )
 end function
 
-public function get_source( integer line )
-	return peek_string( peek_pointer( slist + SL_SIZE * line + SL_SRC ) )
+public function get_source( integer src_line )
+	return peek_string( slist.source_line[src_line].src )
 end function
 
 public function get_file_no( integer line )
-	return peek( slist + line * SL_SIZE + SL_FILE_NO )
+	return slist.source_line[line].file_no
 end function
 
 public function get_file_name( integer file_no )
-	return peek_string( peek_pointer( file_name_ptr + sizeof( C_POINTER ) * file_no ) )
+	return peek_string( file_name_ptr + sizeof( pointer ) * file_no )
 end function
 
-public function get_file_line( integer line )
-	return peek2u( slist + line * SL_SIZE + SL_LINE )
+public function get_file_line( integer line_no )
+	return slist.source_line[line_no].line
 end function
 
 public function get_next( atom sym )
-	return peek_pointer( sym + ST_NEXT )
+	return sym.symtab_entry.next
 end function
 
 public function is_variable( atom sym_ptr )
@@ -346,16 +398,16 @@ public function is_variable( atom sym_ptr )
 		return 0
 	end if
 	
-	return -100 = peek4s( sym_ptr + ST_TOKEN )
+	return -100 = sym_ptr.symtab_entry.token
 end function
 
 public function get_parameter_syms( atom rtn_sym )
-	integer param_count = peek4u( rtn_sym + ST_NUM_ARGS )
+	integer param_count = rtn_sym.symtab_entry.u.subp.num_args
 	sequence syms = repeat( 0, param_count )
-	atom next_sym = peek_pointer( rtn_sym + ST_NEXT )
+	atom next_sym = rtn_sym.symtab_entry.next
 	for i = 1 to param_count do
-		while peek( next_sym + ST_SCOPE ) != 3 do -- SC_PRIVATE = 3
-			next_sym = peek_pointer( next_sym + ST_NEXT )
+		while next_sym.symtab_entry.scope != 3 do -- SC_PRIVATE = 3
+			next_sym = next_sym.symtab_entry.next
 		end while
 		syms[i] = next_sym
 	end for

@@ -100,6 +100,7 @@ procedure display_stack_level( integer level )
 			printf( 1, " %s", { get_name( params[j] ) } )
 		end for
 		puts( 1, " )")
+		
 	end if
 	puts( 1, "\n" )
 end procedure

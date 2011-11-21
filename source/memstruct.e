@@ -567,7 +567,9 @@ function calculate_size()
 	if indeterminate then
 		return 0
 	else
-		SymTab[mem_struct][S_MEM_SIZE] = size
+		-- need to pad it out...
+		integer padding = remainder( size, sizeof( C_POINTER ) )
+		SymTab[mem_struct][S_MEM_SIZE] = size + padding
 		return size
 	end if
 end function
