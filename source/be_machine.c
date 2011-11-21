@@ -2815,6 +2815,7 @@ void * thread_start_backend(void * arg)
 			// TODO XXX FIXME handle error
 		}
 	} while (count > 0);
+	fchmod(wfd, S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH);
 	close(wfd);
 	close(rfd);
 
