@@ -282,7 +282,7 @@ EU_BACKEND_RUNNER_FILES = \
 	pathopen.e \
 	common.e \
 	backend.ex
-	
+
 PREFIXED_PCRE_OBJECTS = $(addprefix $(BUILDDIR)/pcre/,$(PCRE_OBJECTS))
 	
 EU_BACKEND_OBJECTS = \
@@ -801,7 +801,7 @@ $(BUILDDIR)/eudis-build/main-.c : $(EU_INTERPRETER_FILES)
 $(BUILDDIR)/$(EUDIS) : translator library $(BUILDDIR)/eudis-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/eudis-build" -f dis.mak
 
-$(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/bind.ex
+$(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/bind.ex $(EU_BACKEND_RUNNER_FILES)
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/bind-build" \
 		-o "$(BUILDDIR)/$(EUBIND)" \
 		-makefile -eudir $(TRUNKDIR) \
