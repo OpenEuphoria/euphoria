@@ -192,17 +192,9 @@ export procedure transoptions()
 
 			case "lib" then
 				user_library = canonical_path(val)
-				if not file_exists(user_library) then
-					ShowMsg(2, 348, { val })
-					abort(1)
-				end if
 			
 			case "lib-pic" then
 				user_pic_library = canonical_path( val )
-				if not file_exists( user_pic_library ) then
-					ShowMsg(2, 348, { val })
-					abort(1)
-				end if
 
 			case "stack" then
 				sequence tmp = value(val)
@@ -261,15 +253,18 @@ export procedure transoptions()
 		end switch
 	end for
 
-	if compiler_type != COMPILER_GCC and not equal(user_library,"") then
-		if not file_exists(canonical_path(user_library)) then
-			ShowMsg(2, 348, { user_library })
-			abort(1)
+	-- validate user supplied libraries (if necessary)
+	if dll_option then
+		if TX86_64  then
+			-- special fPIC library used
+			user_pic_library = check_library( user_pic_library )
 		else
-			user_library = canonical_path(user_library)
+			user_library = check_library( user_library )
 		end if
+	else
+		user_library = check_library( user_library )
 	end if
-
+	
 	if length(exe_name[D_NAME]) and not absolute_path(exe_name[D_NAME]) then
 		exe_name[D_NAME] = current_dir() & SLASH & exe_name[D_NAME]
 	end if
@@ -418,3 +413,17 @@ procedure CheckPlatform()
 	OpDefines &= GetPlatformDefines(1)
 end procedure
 mode:set_check_platform( routine_id("CheckPlatform") )
+
+function check_library( sequence lib )
+	if equal( lib, "" ) then
+		return ""
+	end if
+	
+	if not file_exists( lib ) then
+		ShowMsg(2, 348, { lib })
+		if force_build or build_system_type = BUILD_DIRECT then
+			abort(1)
+		end if
+	end if
+	return canonical_path( lib )
+end function

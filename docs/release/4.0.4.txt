@@ -15,6 +15,8 @@
 * [[ticket:717]] Fix docs to correctly describe bitwise functions
 * [[ticket:725]] Smarter reading of command line options.  Euphoria could consume switches meant for the
   the end user program
+* When there is a user supplied library, the translator does not abort when the library doesn't exist and one of 
+  ##-nobuild##, ##-makefile## or ##-makefile-partial## is used
 
 === Enhancements
 
