@@ -243,7 +243,9 @@ export procedure transoptions()
 	if compiler_type != COMPILER_GCC and not equal(user_library,"") then
 		if not file_exists(canonical_path(user_library)) then
 			ShowMsg(2, 348, { user_library })
-			abort(1)
+			if force_build or build_system_type = BUILD_DIRECT then
+				abort(1)
+			end if
 		else
 			user_library = canonical_path(user_library)
 		end if
