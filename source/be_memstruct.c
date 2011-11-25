@@ -174,7 +174,7 @@ void write_member( object_ptr source, symtab_ptr sym, object_ptr val ){
 	#if INTPTR_MAX == INT32_MAX
 	struct d dbl;
 	object dbl_ptr;
-	dbp_ptr = MAKE_DBL( &d );
+	dbl_ptr = MAKE_DBL( &dbl );
 	dbl.ref = -1;
 	#endif
 	zero = 0;
