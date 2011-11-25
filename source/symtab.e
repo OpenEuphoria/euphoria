@@ -1324,6 +1324,12 @@ export function sym_usage( symtab_index sym )
 end function
 
 export function sym_type( symtab_index sym )
+	if sym = 0 then
+		return 0
+	end if
+	if length(SymTab[sym]) < S_VTYPE then
+		return 0
+	end if
 	return SymTab[sym][S_VTYPE]
 end function
 

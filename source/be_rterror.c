@@ -534,19 +534,83 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 		inc = vp.vars_per_line;
 	}
 	else {
+		short lsobj;
+		s1_ptr ls,keys,names;
+		symtab_ptr ls_symptr;
+		access_method  am;
+		object lit = MAKE_INT(0);
+		if ((lsobj = (long)s_ptr->u.var.ls) &&
+			(ls_symptr = &fe.st[lsobj]) &&
+			(ls_symptr->obj != NOVALUE) &&
+			(ls = SEQ_PTR(ls_symptr->obj)) &&
+			(ls->length == 2) &&
+			(keys = SEQ_PTR(ls->base[1]))  &&
+			(names = SEQ_PTR(ls->base[2])) &&
+			(names->length == keys->length)) {
+				int count = names->length;
+				object_ptr key_base = keys->base;
+				object_ptr data_base = names->base;
+				if (IS_ATOM_INT(val)) {
+					int iv = INT_VAL(val);
+					while (count--) {
+						++data_base;
+						++key_base;
+						if (
+							(iv == *key_base) ||
+								((IS_ATOM(*key_base)) && 
+									(!IS_ATOM_INT(*key_base)) && 
+									(DBL_PTR(*key_base)->dbl == (double)iv))
+							) {
+								lit = *data_base;
+								break;
+						}
+					}
+				} else if (IS_ATOM(val)) {
+					double dv = DBL_PTR(val)->dbl;
+					while (count--) {
+						++data_base;
+						++key_base;
+						if (
+								(IS_ATOM(*key_base) &&
+									(!IS_ATOM_INT(*key_base)) &&
+									(DBL_PTR(*key_base)->dbl == dv)
+									) ||
+								(IS_ATOM_INT(*key_base) && 
+									(dv == (eudouble)INT_VAL(*key_base)))
+							) {
+								lit = *data_base;
+								break;
+							}
+					}
+				}
+		}
+		if (lit != 0) {
+			s1_ptr lit_ptr = SEQ_PTR(lit);
+			val_string[0] = '(';
+			for (i = 1; i <= lit_ptr->length && i < DV_len; ++i) {
+				if (!IS_ATOM_INT(lit_ptr->base[i])) {
+						i = 1;
+						break;
+				}
+				val_string[i] = (unsigned char)lit_ptr->base[i];
+			}
+			val_string[i++] = ')';
+		} else {
+			i = 0;
+		}
 		if (val == NOVALUE) 
 			copy_string( val_string, "<no value>", DV_len);
 		else if (IS_ATOM_INT(val)) {
 			iv = INT_VAL(val);
-			snprintf(val_string,  DV_len, "%ld", (long)iv);
-			if (iv >= ' ' && iv <= 127)
+			snprintf(&val_string[i],  DV_len-i, "%ld", (long)iv);
+			if (lit == 0 && iv >= ' ' && iv <= 127)
 				add_char = TRUE;
 		}
 		else{ 
 #if INTPTR_MAX == INT64_MAX
-			snprintf(val_string,  DV_len, "%.10Lg", DBL_PTR(val)->dbl);
+			snprintf(&val_string[i],  DV_len-i, "%.10Lg", DBL_PTR(val)->dbl);
 #else
-			snprintf(val_string,  DV_len, "%.10g", DBL_PTR(val)->dbl);
+			snprintf(&val_string[i],  DV_len-i, "%.10g", DBL_PTR(val)->dbl);
 #endif
 		}
 		val_string[ DV_len - 1] = 0; // ensure NULL
@@ -603,7 +667,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 	}
 	tstamp++;
 
-	set_text_color(15); 
+	set_text_color(15);
 	buffer_screen();
 	if (already_there && display_list[found].value_on_screen != (NOVALUE-1)) {
 		// skip printing the name and '=' sign

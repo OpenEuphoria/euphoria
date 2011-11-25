@@ -26,7 +26,7 @@ include std/io.e
 include std/types.e
 include std/text.e
 
-include global.e
+include global.e as gl
 include opnames.e
 include error.e
 include reswords.e as res
@@ -35,6 +35,7 @@ include scanner.e
 include mode.e as mode
 include intinit.e
 include coverage.e
+include literal_set.e as ls
 
 include std/machine.e as dep
 without inline
@@ -231,9 +232,25 @@ end function
 procedure show_var(symtab_index x)
 -- display a variable name and value
 
+	object ls_string
+	if length(SymTab[x]) >= S_VTYPE then
+		integer ls_key = find(SymTab[x][S_VTYPE],gl:literal_sets[gl:LS_KEY])
+		if ls_key = 0 then
+			ls_string = 0
+		else
+			ls_string = get_literal(gl:literal_sets[gl:LS_DATA][ls_key], val[x])
+		end if
+	else
+		ls_string = 0
+	end if
+
 	puts(err_file, "    " & SymTab[x][S_NAME] & " = ")
 	if equal(val[x], NOVALUE) then
 		puts(err_file, "<no value>")
+	elsif sequence(ls_string) then
+		printf(err_file, "(%s)", { ls_string } )
+		pretty_print(err_file, val[x],
+			{1, 2, length(SymTab[x][S_NAME]) + 7, 78, "%d", "%.10g", 32, 127, 500})
 	else
 		pretty_print(err_file, val[x],
 			{1, 2, length(SymTab[x][S_NAME]) + 7, 78, "%d", "%.10g", 32, 127, 500})

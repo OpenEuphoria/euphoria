@@ -8,7 +8,7 @@
 #define _SYMTAB_H_ 1
 
 #include <stdint.h>
-
+#include "literal_set.h"
 // N.B.!!! fields and size of backend symtab_entry is assumed in backend.e 
 
 // for literal constants and temporaries 
@@ -61,6 +61,8 @@ struct symtab_entry {
 		struct {
 			// for variables only: 
 		   struct symtab_entry *declared_in;
+		   struct literal_set * ls;
+		   access_method am;
 		} var;
 		struct {
 			// for subprograms only: 

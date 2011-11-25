@@ -25,6 +25,7 @@ include symtab.e
 include coverage.e
 include syncolor.e
 include euphoria/symstruct.e
+include literal_set.e as ls
 
 procedure InitBackEnd(integer x)
 	if not BIND then
@@ -136,7 +137,25 @@ procedure BackEnd(integer il_file)
 					poke_pointer(addr + ST_BLOCK, eentry[S_BLOCK])
 					
 				else
-					poke_pointer(addr + ST_DECLARED_IN, eentry[S_BLOCK] )
+					poke_pointer(addr + ST_DECLARED_IN, eentry[S_BLOCK])
+					integer ls_key
+					if S_VTYPE < length(eentry) then
+						ls_key = find(eentry[S_VTYPE],literal_sets[LS_KEY])
+					else
+						ls_key = 0
+					end if
+					if ls_key then
+						literal_set ls = literal_sets[LS_DATA][ls_key]
+						integer ls_symbol = emit_literals_data_structure(ls)
+						-- we cannot peek in a type defined after this variable
+						if ls_symbol > i then
+							ls_key = 0
+						else
+							poke_pointer(addr + ST_LITERAL_SET,
+								emit_literals_data_structure(ls))
+							--poke4(addr + ST_LS_ACCESS_METHOD, ls:get_access_method(ls))
+						end if
+					end if
 				end if
 				
 			elsif eentry[S_MODE] = M_BLOCK then
@@ -151,8 +170,7 @@ procedure BackEnd(integer il_file)
 			(length(eentry) >= S_TOKEN and compare( eentry[S_OBJ], NOVALUE )) then
 				-- compress constants and literal values in memory
 				poke_pointer(addr, length(lit_string))  -- record the current offset
-				lit_string &= compress(eentry[S_OBJ])
-				
+				lit_string &= compress(eentry[S_OBJ])				
 			end if
 
 		end if

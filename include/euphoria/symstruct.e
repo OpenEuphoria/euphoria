@@ -23,6 +23,8 @@ public constant
 	
 	-- var:
 	ST_DECLARED_IN    = offset( C_POINTER ), -- 24,
+	ST_LITERAL_SET    = offset( C_POINTER ), -- 28
+	ST_LS_ACCESS_METHOD = offset( C_INT ),   -- 30
 	
 	-- block:
 	ST_FIRST_LINE     = offset( C_INT, ST_DECLARED_IN ), -- 24,

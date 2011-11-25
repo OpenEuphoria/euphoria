@@ -247,9 +247,9 @@ export function new(
 end function
 
 -- emits code for type checking.  Done in parser.e for now
-procedure emit_type_function_body(literal_set s)
-	symtab_index seq_sym
-end procedure
+--procedure emit_type_function_body(literal_set s)
+--	symtab_index seq_sym
+--end procedure
 
 
 -- emits the data structure for the name_of builtin.
@@ -288,6 +288,10 @@ export function set_value_code(literal_set ls, object value, symtab_index source
             "\t_%d = SEQ_PTR(SEQ_PTR(_%d)->base[%d])->base[%d];\n", 
 		    {ds, 1, vl, 
 		     SymTab[source][S_TEMP_NAME], ds, 1, vl})
+end function
+
+export function get_sequence_pair_name_pointer(literal_set ls)
+	return 0
 end function
 
 export function first_assign_value_code(literal_set ls, sequence str, object x)
@@ -332,4 +336,8 @@ end function
 
 export function get_map(literal_set s)
 	return s[MAP]
+end function
+
+export function get_name(literal_set s)
+	return s[NAME]
 end function

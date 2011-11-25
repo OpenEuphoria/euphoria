@@ -595,8 +595,9 @@ end type
 export constant  LS_KEY = 1 -- symtab index of type
 export constant LS_DATA = 2 -- literal set
 
+
 export sequence literal_sets = {{} -- keys are symtab indicies of the type
-								,{}} -- values
+								,{}} -- data
 				
 export enum ERRMSG_NAME_OF_NOT_VARIABLE = 358,
 	ERRMSG_NAME_OF_NOT_UDT,
