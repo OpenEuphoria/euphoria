@@ -405,9 +405,12 @@ end function
 -- their content to the supplied arguments.
 
 export function expand_config_options(sequence args)
-	integer idx = 3
+	integer idx = 1
 	sequence next_idx
 	sequence files = {}
+	sequence cmd_1_2 = args[1..2]
+	args = remove( args, 1, 2 )
+	
 	while idx with entry do
 		if equal(upper(args[idx]), "-C") then
 			files = append( files, args[idx+1] )
@@ -420,7 +423,7 @@ export function expand_config_options(sequence args)
 		next_idx = find_next_opt( idx, args )
 		idx = next_idx[1]
 	end while
-	return args[1..2] & merge_parameters( GetDefaultArgs( files ), args[3..next_idx[2]], options, 1 ) & args[next_idx[2]+1..$]
+	return cmd_1_2 & merge_parameters( GetDefaultArgs( files ), args[1..next_idx[2]], options, 1 ) & args[next_idx[2]+1..$]
 end function
 
 --**
