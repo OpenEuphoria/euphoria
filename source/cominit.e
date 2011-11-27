@@ -368,7 +368,6 @@ end function
 -- It does not check the entire argument list, as at least
 -- the last argument is assumed to be 
 function find_next_opt( integer ix, sequence args )
-	sequence this_opt
 	while ix < length( args ) do
 		sequence arg = args[ix]
 		if length( arg ) > 1 then
