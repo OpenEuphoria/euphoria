@@ -368,7 +368,6 @@ end function
 -- It does not check the entire argument list, as at least
 -- the last argument is assumed to be 
 function find_next_opt( integer ix, sequence args )
-	sequence this_opt
 	while ix < length( args ) do
 		sequence arg = args[ix]
 		if length( arg ) > 1 then
@@ -400,13 +399,17 @@ function find_next_opt( integer ix, sequence args )
 	return {0, ix-1}
 end function
 
+type non_negative_pair(sequence s)
+	return s[1] >= 0 and s[2] >= 0
+end type
+
 --**
 -- Expand any config file options on the command line adding
 -- their content to the supplied arguments.
 
 export function expand_config_options(sequence args)
 	integer idx = 3
-	sequence next_idx
+	non_negative_pair next_idx
 	sequence files = {}
 	while idx with entry do
 		if equal(upper(args[idx]), "-C") then
@@ -420,7 +423,11 @@ export function expand_config_options(sequence args)
 		next_idx = find_next_opt( idx, args )
 		idx = next_idx[1]
 	end while
-	return args[1..2] & merge_parameters( GetDefaultArgs( files ), args[3..next_idx[2]], options, 1 ) & args[next_idx[2]+1..$]
+	if next_idx[2] > 2 then
+		return args[1..2] & merge_parameters( GetDefaultArgs( files ), args[3..next_idx[2]], options, 1 ) & args[next_idx[2]+1..$]
+	else -- <= 1
+		return args
+	end if
 end function
 
 --**
