@@ -17,6 +17,7 @@
   the end user program
 * When there is a user supplied library, the translator does not abort when the library doesn't exist and one of 
   ##-nobuild##, ##-makefile## or ##-makefile-partial## is used
+* [[ticket:728]] Fix sequence slice error when invalid command line arguments are passed to euphoria. 
 
 === Enhancements
 

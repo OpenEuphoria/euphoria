@@ -19,8 +19,9 @@ REM --
 
 CD cleanbranch
 IF %ERRORLEVEL% EQU 1 GOTO CheckOut
+hg pull
+hg update -C -r %2
 CD ..
-hg update -R cleanbranch -r %2
 GOTO DoBuild
 
 :Checkout
