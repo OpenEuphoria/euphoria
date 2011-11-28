@@ -1492,7 +1492,7 @@ static object GetPosition()
 /* return {line, column} for cursor */
 {
 
-	struct rccoord pos;
+	struct eu_rccoord pos;
 	object_ptr obj_ptr;
 	s1_ptr result;
 

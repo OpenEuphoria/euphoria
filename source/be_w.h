@@ -58,7 +58,7 @@ extern int already_had_console; /* were we created with a console window or did 
 
 void ClearScreen(void);
 void SetPosition(int line, int col);
-void GetTextPositionP(struct rccoord *p);
+void GetTextPositionP(struct eu_rccoord *p);
 void screen_output(IFILE f, char *out_string);
 void screen_output_va(IFILE f, char *out_string, va_list ap);
 void screen_output_vararg(IFILE f, char *out_string, ...);

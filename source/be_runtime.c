@@ -5738,7 +5738,7 @@ void key_gets(char *input_string, int buffsize)
 /* lets us use any color to echo user input in graphics modes */
 {
 	int line, len, init_column, column, c;
-	struct rccoord cursor;
+	struct eu_rccoord cursor;
 	char one_char[2];
 	int maxin;
 	int maxcol;

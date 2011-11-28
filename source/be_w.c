@@ -341,7 +341,7 @@ int has_console() {
 	return _has_console;
 }
 
-void GetTextPositionP(struct rccoord *p)
+void GetTextPositionP(struct eu_rccoord *p)
 {
 #ifdef EWINDOWS
 	CONSOLE_SCREEN_BUFFER_INFO console_info;
@@ -422,7 +422,7 @@ void InitInOut()
    is initialized right away. The rest is done later if necesssary on first
    use of the console - see show_console() below. */
 {
-    struct rccoord position;
+    struct eu_rccoord position;
 #ifdef EWINDOWS
     position.col = 1;   // should do these 2 properly
     position.row = 1;
@@ -1095,7 +1095,7 @@ void SetPosition(int line, int col)
 
 #ifdef EWINDOWS
 
-static void ReadInto(WORD * buf, LPTSTR str, int size, unsigned long * n, unsigned long * m, struct rccoord * pos)
+static void ReadInto(WORD * buf, LPTSTR str, int size, unsigned long * n, unsigned long * m, struct eu_rccoord * pos)
 {
     COORD ch;
 
@@ -1107,7 +1107,7 @@ static void ReadInto(WORD * buf, LPTSTR str, int size, unsigned long * n, unsign
     ReadConsoleOutputAttribute(console_output, buf, size, ch, m);
 }
 
-void WriteOutFrom(WORD * buf, LPTSTR str, unsigned long n, unsigned long m, struct rccoord * pos)
+void WriteOutFrom(WORD * buf, LPTSTR str, unsigned long n, unsigned long m, struct eu_rccoord * pos)
 {
     unsigned long size1, size2;
     COORD ch;
@@ -1128,13 +1128,13 @@ TCHAR console_save_str[65536];
 unsigned long console_save_str_n = 0;
 WORD console_save_buf[65536];
 unsigned long console_save_buf_n = 0;
-struct rccoord console_save_pos;
+struct eu_rccoord console_save_pos;
 
 TCHAR console_trace_str[65536];
 unsigned long console_trace_str_n = 0;
 WORD console_trace_buf[65536];
 unsigned long console_trace_buf_n = 0;
-struct rccoord console_trace_pos;
+struct eu_rccoord console_trace_pos;
 
 void SaveNormal()
 {

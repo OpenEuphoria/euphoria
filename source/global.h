@@ -181,7 +181,9 @@ struct videoconfig {
 #  define _BROWN 3
 #  define _CYAN 6
 #  define _YELLOW 11
-struct rccoord {
+#endif
+
+struct eu_rccoord {
 	int row;
 	int col;
 	int winwidth;
@@ -190,7 +192,7 @@ struct rccoord {
 	int bufheight;
 	short attrs;
 };
-#endif
+
 
 struct videoconfigEx {
 	int screenrows;

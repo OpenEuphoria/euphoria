@@ -98,7 +98,7 @@ static int MainCol;   /* Main foreground color */
 static int MainBkCol; /* Main background color */
 #endif
 
-static struct rccoord MainPos; /* text position save area */
+static struct eu_rccoord MainPos; /* text position save area */
 static int MainWrap;  /* Main wrap mode */
 static char *DebugScreenSave = NULL;   /* place to save debug screen */
 static int main_screen_line = 1;
