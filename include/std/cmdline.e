@@ -111,6 +111,10 @@ public enum
 	-- Disable the automatic inclusion of -h, -? and ~--help as help switches.
 	NO_HELP,
 	
+	--**
+	-- Disable the automatic display of all of the possible options on error.
+	NO_HELP_ON_ERROR,
+	
 	$
 
 public enum
@@ -757,7 +761,7 @@ end procedure
 --
 
 public procedure show_help(sequence opts, object add_help_rid=-1, sequence cmds = command_line(), object parse_options = {})
-	local_help(opts, add_help_rid, cmds, 0, parse_options)
+    local_help(opts, add_help_rid, cmds, 0, parse_options)
 end procedure
 
 function find_opt(sequence opts, sequence opt_style, object cmd_text)
@@ -874,7 +878,8 @@ function get_help_options( sequence opts )
 	return help_opts
 end function
 
-function parse_at_cmds( sequence cmd, sequence cmds, sequence opts, integer arg_idx, object add_help_rid, object parse_options )
+function parse_at_cmds( sequence cmd, sequence cmds, sequence opts, integer arg_idx, object add_help_rid,
+						object parse_options, integer help_on_error, integer auto_help )
 	-- Called to parse out a command option that's an @file
 	-- returns the new list of commands after expansion
 	
@@ -895,7 +900,11 @@ function parse_at_cmds( sequence cmd, sequence cmds, sequence opts, integer arg_
 		at_cmds = io:read_lines(cmd[2..$])
 		if equal(at_cmds, -1) then
 			printf(2, "Cannot access '@' argument file '%s'\n", {cmd[2..$]})
-			local_help(opts, add_help_rid, cmds, 1, parse_options)
+			if help_on_error then
+				local_help(opts, add_help_rid, cmds, 1, parse_options)
+			elsif auto_help then
+				printf(2,"Try '--help' for more information.\n",{})          
+			end if
 			local_abort(1)
 		end if
 	end if
@@ -931,20 +940,29 @@ function parse_at_cmds( sequence cmd, sequence cmds, sequence opts, integer arg_
 end function
 
 
-procedure check_mandatory( sequence opts, map parsed_opts, object add_help_rid, sequence cmds, object parse_options )
+procedure check_mandatory( sequence opts, map parsed_opts, object add_help_rid, sequence cmds, object parse_options,
+	integer help_on_error, integer auto_help )
 	-- Check options to make sure all the manadory options are covered
 	for i = 1 to length(opts) do
 		if find(MANDATORY, opts[i][OPTIONS]) then
 			if atom(opts[i][SHORTNAME]) and atom(opts[i][LONGNAME]) then
 				if length(map:get(parsed_opts, opts[i][MAPNAME])) = 0 then
 					puts(1, "Additional arguments were expected.\n\n")
-					local_help(opts, add_help_rid, cmds, 1, parse_options)
+					if help_on_error then
+						local_help(opts, add_help_rid, cmds, 1, parse_options)
+					elsif auto_help then
+						printf(2,"Try '--help' for more information.\n",{})          
+					end if
 					local_abort(1)
 				end if
 			else
 				if not map:has(parsed_opts, opts[i][MAPNAME]) then
 					printf(1, "option '%s' is mandatory but was not supplied.\n\n", {opts[i][MAPNAME]})
-					local_help(opts, add_help_rid, cmds, 1, parse_options)
+					if help_on_error then
+						local_help(opts, add_help_rid, cmds, 1, parse_options)
+					elsif auto_help then
+						printf(2,"Try '--help' for more information.\n",{})          
+					end if
 					local_abort(1)
 				end if
 			end if
@@ -953,16 +971,20 @@ procedure check_mandatory( sequence opts, map parsed_opts, object add_help_rid, 
 end procedure
 
 procedure parse_abort( sequence format_msg, sequence msg_data,
-		sequence opts, object add_help_rid, sequence cmds, object parse_options )
+		sequence opts, object add_help_rid, sequence cmds, object parse_options, integer help_on_error, integer auto_help )
 -- something is wrong with the option
 	printf(1, format_msg, msg_data)
-	local_help(opts, add_help_rid, cmds, 1, parse_options)
+	if help_on_error then
+		local_help(opts, add_help_rid, cmds, 1, parse_options)
+	elsif auto_help then
+		printf(2,"Try '--help' for more information.\n",{})          
+	end if
 	local_abort(1)
 end procedure
 
 function parse_commands( sequence cmds, sequence opts, map parsed_opts, sequence help_opts, 
 		object add_help_rid, object parse_options, integer use_at, integer validation, 
-		integer has_extra, sequence call_count )
+		integer has_extra, sequence call_count, integer help_on_error, integer auto_help )
 	-- Parses the actual command line vs the options
 	-- Returns a two element sequence:
 	--  1: the list of command line options (may be altered due to @file expansion)
@@ -984,7 +1006,7 @@ function parse_commands( sequence cmds, sequence opts, map parsed_opts, sequence
 		end if
 
 		if cmd[1] = '@' and use_at then
-			cmds = parse_at_cmds( cmd, cmds, opts, arg_idx, add_help_rid, parse_options )
+			cmds = parse_at_cmds( cmd, cmds, opts, arg_idx, add_help_rid, parse_options, help_on_error, auto_help )
 			arg_idx -= 1
 			continue
 		end if
@@ -1021,7 +1043,11 @@ function parse_commands( sequence cmds, sequence opts, map parsed_opts, sequence
 		end if
 
 		if find(cmd[from_..$], help_opts) then
-			local_help(opts, add_help_rid, cmds, 1, parse_options)
+			if help_on_error then
+				local_help(opts, add_help_rid, cmds, 1, parse_options)
+			elsif auto_help then
+				printf(2,"Try '--help' for more information.\n",{})          
+			end if
 			ifdef UNITTEST then
 				return 0
 			end ifdef
@@ -1040,14 +1066,14 @@ function parse_commands( sequence cmds, sequence opts, map parsed_opts, sequence
 			then
 				-- something is wrong with the option
 				parse_abort( "option '%s': %s\n\n", {cmd, find_result[2]}, 
-					opts, add_help_rid, cmds, parse_options)
+					opts, add_help_rid, cmds, parse_options, help_on_error, auto_help )
 			end if
 
 			continue
 		end if
 
 		sequence handle_result = handle_opt( find_result, arg_idx, opts, parsed_opts, cmds, add_help_rid,
-			parse_options, call_count, validation )
+			parse_options, call_count, validation, help_on_error, auto_help )
 		arg_idx     = handle_result[1]
 		call_count = handle_result[2]
 	end while
@@ -1056,7 +1082,7 @@ end function
 
 function handle_opt( sequence find_result, integer arg_idx, sequence opts, map parsed_opts,
 		sequence cmds, object add_help_rid, object parse_options, sequence call_count,
-		integer validation )
+		integer validation, integer help_on_error, integer auto_help )
 	-- Called to deal with an option found on the command line
 	-- Returns 2 element sequence:
 	--  1: the new arg_idx
@@ -1083,7 +1109,7 @@ function handle_opt( sequence find_result, integer arg_idx, sequence opts, map p
 				validation = NO_VALIDATION_AFTER_FIRST_EXTRA))
 			then
 				parse_abort( "option '%s' must have a parameter\n\n", {find_result[2]}, 
-					opts, add_help_rid, cmds, parse_options)
+					opts, add_help_rid, cmds, parse_options, help_on_error, auto_help )
 			end if
 		else
 			param = find_result[4]
@@ -1110,7 +1136,7 @@ function handle_opt( sequence find_result, integer arg_idx, sequence opts, map p
 			then
 				if find(HAS_PARAMETER, opt[OPTIONS]) or find(ONCE, opt[OPTIONS]) then
 					parse_abort( "option '%s' must not occur more than once in the command line.\n\n", 
-						{find_result[2]}, opts, add_help_rid, cmds, parse_options)
+						{find_result[2]}, opts, add_help_rid, cmds, parse_options, help_on_error, auto_help )
 				end if
 			else
 				map:put(parsed_opts, opt[MAPNAME], param)
@@ -1177,6 +1203,7 @@ end function
 --   routine_id of a procedure that accepts no parameters, or a sequence containing
 --   lines of text (one line per element).  The procedure is expected
 --   to write text to the stdout device.
+-- # ##NO_HELP_ON_ERROR## ~-- Do not show a list of options on a command line error.
 -- # ##NO_HELP## ~-- Do not automatically add the switches '-h', '-?', and '--help'
 --   to display the help text (if any).
 -- # ##NO_AT_EXPANSION## ~-- Do not expand arguments that begin with '@.'
@@ -1358,6 +1385,7 @@ public function cmd_parse(sequence opts, object parse_options = {}, sequence cmd
 	integer has_extra = 0
 	integer use_at = 1
 	integer auto_help = 1
+	integer help_on_error = 1
 
 	integer po = 1
 	if atom(parse_options) then
@@ -1382,7 +1410,11 @@ public function cmd_parse(sequence opts, object parse_options = {}, sequence cmd
 				else
 					error:crash("HELP_RID was given to cmd_parse with no routine_id")
 				end if
-			
+
+			case NO_HELP_ON_ERROR then
+				-- if this is not from show_
+				help_on_error = 0
+
 			case PAUSE_MSG then
 				if po < length(parse_options) then
 					po += 1
@@ -1408,7 +1440,7 @@ public function cmd_parse(sequence opts, object parse_options = {}, sequence cmd
 	help_opts = get_help_options( opts )
 	
 	object cmds_ok = parse_commands( cmds, opts, parsed_opts, help_opts, add_help_rid, parse_options, 
-		use_at, validation, has_extra, call_count )
+		use_at, validation, has_extra, call_count, help_on_error, auto_help )
 	if atom( cmds_ok ) then
 		return 0
 	end if
@@ -1416,7 +1448,7 @@ public function cmd_parse(sequence opts, object parse_options = {}, sequence cmd
 	call_count = cmds_ok[2]
 	
 	-- Check that all mandatory options have been supplied. (may abort)
-	check_mandatory( opts, parsed_opts, add_help_rid, cmds, parse_options )
+	check_mandatory( opts, parsed_opts, add_help_rid, cmds, parse_options, help_on_error, auto_help )
 	
 	return parsed_opts
 end function

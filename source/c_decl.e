@@ -383,6 +383,17 @@ export function or_type(integer t1, integer t2)
 	end if
 end function
 
+export procedure RemoveFromBB( symtab_index s )
+	integer int
+	for i = 1 to length(BB_info) do
+		int = BB_info[i][BB_VAR]
+		if int = s then
+			BB_info = remove( BB_info, int )
+			return
+		end if
+	end for
+end procedure
+
 --**
 -- Set the type and value, or sequence length and element type,
 -- of a temp or var s locally within a BB.
@@ -401,7 +412,7 @@ constant dummy_bb = {0, TYPE_NULL, TYPE_OBJECT, NOVALUE, {MININT, MAXINT}, 0}
 export procedure SetBBType(symtab_index s, integer t, sequence val, integer etype, integer has_delete )
 	integer found, i, tn, int
 	sequence sym
-
+	
 	if has_delete then
 		p_has_delete = 1
 		g_has_delete = 1
@@ -1550,7 +1561,7 @@ export procedure GenerateUserRoutines()
 								c_puts(" = NOVALUE;\n")
 								target[MIN] = NOVALUE
 								target[MAX] = NOVALUE
-								SetBBType(sp, TYPE_INTEGER, target, TYPE_OBJECT, 0)
+								RemoveFromBB( sp )
 								
 								break
 
