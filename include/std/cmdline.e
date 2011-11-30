@@ -111,6 +111,10 @@ public enum
 	-- Disable the automatic inclusion of -h, -? and ~--help as help switches.
 	NO_HELP,
 	
+	--**
+	-- Disable the automatic display of all of the possible options on error.
+	NO_HELP_ON_ERROR,
+	
 	$
 
 public enum
@@ -374,6 +378,7 @@ procedure local_help(sequence opts, object add_help_rid = -1, sequence cmds = co
 
 	while po <= length(parse_options) do
 		switch parse_options[po] do
+				
 			case HELP_RID then
 				if po < length(parse_options) then
 					po += 1
@@ -723,7 +728,7 @@ end procedure
 --
 
 public procedure show_help(sequence opts, object add_help_rid=-1, sequence cmds = command_line(), object parse_options = {})
-	local_help(opts, add_help_rid, cmds, 0, parse_options)
+    local_help(opts, add_help_rid, cmds, 0, parse_options)
 end procedure
 
 function find_opt(sequence opts, sequence opt_style, object cmd_text)
@@ -860,6 +865,7 @@ end function
 --   routine_id of a procedure that accepts no parameters, or a sequence containing
 --   lines of text (one line per element).  The procedure is expected
 --   to write text to the stdout device.
+-- # ##NO_HELP_ON_ERROR## ~-- Do not show a list of options on a command line error.
 -- # ##NO_HELP## ~-- Do not automatically add the switches '-h', '-?', and '--help'
 --   to display the help text (if any).
 -- # ##NO_AT_EXPANSION## ~-- Do not expand arguments that begin with '@.'
@@ -1046,6 +1052,7 @@ public function cmd_parse(sequence opts, object parse_options = {}, sequence cmd
 	integer has_extra = 0
 	integer use_at = 1
 	integer auto_help = 1
+	integer help_on_error = 1
 
 	integer po = 1
 	if atom(parse_options) then
@@ -1064,6 +1071,10 @@ public function cmd_parse(sequence opts, object parse_options = {}, sequence cmd
 			
 			case NO_HELP then
 				auto_help = 0
+
+			case NO_HELP_ON_ERROR then
+				-- if this is not from show_
+				help_on_error = 0
 
 			case VALIDATE_ALL then
 				validation = VALIDATE_ALL
@@ -1153,7 +1164,11 @@ public function cmd_parse(sequence opts, object parse_options = {}, sequence cmd
 				at_cmds = io:read_lines(cmd[2..$])
 				if equal(at_cmds, -1) then
 					printf(2, "Cannot access '@' argument file '%s'\n", {cmd[2..$]})
-					local_help(opts, add_help_rid, cmds, 1, parse_options)
+					if help_on_error then
+						local_help(opts, add_help_rid, cmds, 1, parse_options)
+					elsif auto_help then
+						printf(2,"Try '--help' for more information.\n",{})
+					end if                
 					local_abort(1)
 				end if
 			end if
@@ -1221,7 +1236,7 @@ public function cmd_parse(sequence opts, object parse_options = {}, sequence cmd
 		end if
 
 		if find(cmd[from_..$], help_opts) then
-			local_help(opts, add_help_rid, cmds, 1, parse_options)
+				local_help(opts, add_help_rid, cmds, 1, parse_options)
 			ifdef UNITTEST then
 				return 0
 			end ifdef
@@ -1239,8 +1254,13 @@ public function cmd_parse(sequence opts, object parse_options = {}, sequence cmd
 				(validation = NO_VALIDATION_AFTER_FIRST_EXTRA and has_extra = 0)
 			then
 				-- something is wrong with the option
-				printf(1, "option '%s': %s\n\n", {cmd, find_result[2]})
-				local_help(opts, add_help_rid, cmds, 1, parse_options)
+				printf(1, "option '%s': %s\n", {cmd, find_result[2]})
+				if help_on_error then
+					puts(2,10)
+					local_help(opts, add_help_rid, cmds, 1, parse_options)
+				elsif auto_help then
+					printf(2,"Try '--help' for more information.\n",{})               
+				end if
 				local_abort(1)
 			end if
 
@@ -1266,8 +1286,12 @@ public function cmd_parse(sequence opts, object parse_options = {}, sequence cmd
 				if length(param) = 0 and (validation = VALIDATE_ALL or (
 					validation = NO_VALIDATION_AFTER_FIRST_EXTRA))
 				then
-					printf(1, "option '%s' must have a parameter\n\n", {find_result[2]})
-					local_help(opts, add_help_rid, cmds, 1, parse_options)
+					printf(1, "option '%s' must have a parameter\n", {find_result[2]})
+					if help_on_error then
+						local_help(opts, add_help_rid, cmds, 1, parse_options)
+					elsif auto_help then
+						printf(2,"Try '--help' for more information.\n",{})          
+					end if
 					local_abort(1)
 				end if
 			else
@@ -1294,8 +1318,13 @@ public function cmd_parse(sequence opts, object parse_options = {}, sequence cmd
 					(validation = NO_VALIDATION_AFTER_FIRST_EXTRA))
 				then
 					if find(HAS_PARAMETER, opt[OPTIONS]) or find(ONCE, opt[OPTIONS]) then
-						printf(1, "option '%s' must not occur more than once in the command line.\n\n", {find_result[2]})
-						local_help(opts, add_help_rid, cmds, 1, parse_options)
+						printf(1, "option '%s' must not occur more than once in the command line.\n", {find_result[2]})
+						if help_on_error then
+							puts(2,10)
+							local_help(opts, add_help_rid, cmds, 1, parse_options)
+						elsif auto_help then
+							printf(2,"Try '--help' for more information.\n",{})          
+						end if
 						local_abort(1)
 					end if
 				else
@@ -1323,14 +1352,24 @@ public function cmd_parse(sequence opts, object parse_options = {}, sequence cmd
 		if find(MANDATORY, opts[i][OPTIONS]) then
 			if atom(opts[i][SHORTNAME]) and atom(opts[i][LONGNAME]) then
 				if length(map:get(parsed_opts, opts[i][MAPNAME])) = 0 then
-					puts(1, "Additional arguments were expected.\n\n")
-					local_help(opts, add_help_rid, cmds, 1, parse_options)
+					puts(1, "Additional arguments were expected.\n")
+					if help_on_error then
+						puts(2,10)
+						local_help(opts, add_help_rid, cmds, 1, parse_options)
+					elsif auto_help then
+						printf(2,"Try '--help' for more information.\n",{})          
+					end if
 					local_abort(1)
 				end if
 			else
 				if not map:has(parsed_opts, opts[i][MAPNAME]) then
-					printf(1, "option '%s' is mandatory but was not supplied.\n\n", {opts[i][MAPNAME]})
-					local_help(opts, add_help_rid, cmds, 1, parse_options)
+					printf(1, "option '%s' is mandatory but was not supplied.\n", {opts[i][MAPNAME]})
+					if help_on_error then
+						puts(2,10)
+						local_help(opts, add_help_rid, cmds, 1, parse_options)
+					elsif auto_help then
+						printf(2,"Try '--help' for more information.\n",{})          
+					end if
 					local_abort(1)
 				end if
 			end if
