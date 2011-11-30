@@ -508,37 +508,22 @@ void ErasePrivates(symtab_ptr proc_ptr)
 	}
 }
 
-void DisplayVar(symtab_ptr s_ptr, int user_requested)
-/* display a variable and its value in debug area on screen */
+/* Copies the alternative literal for s_ptr into val_string up to max_len characters are copied
+ * including the null character, which is appended at the end.  The function returns the number
+ * of characters copied.  If there is no alternative literal, it will return 0 for it will not
+ * write to the string.  If there is an error while copying it will write a NULL character to the
+ * first character of the string and return 1.  If the required space is greater than max_len, it
+ * will return max_len and copy that many characters. */
+unsigned int CopyLiteral(symtab_ptr s_ptr, char * val_string, unsigned int max_len)
 {
-	register int i, already_there;
-	int col, found, inc, len_required;
-	object val, screen_val;
-	struct EuViewPort vp;
-	
-#define DV_len (40)
-	char val_string[DV_len];
-	int add_char, iv;
-	
-	if( external_debugger ){
-		ExternalDisplayVar( s_ptr, user_requested );
-		return;
-	}
-	GetViewPort( &vp );
-	add_char = 0;
-	if (TEXT_MODE)
-		set_bk_color(_BLUE);
-
-	val = s_ptr->obj;
-	if (IS_SEQUENCE(val)) {
-		inc = vp.vars_per_line;
-	}
-	else {
-		short lsobj;
-		s1_ptr ls,keys,names;
+		long lsobj;
+		short i;
+		s1_ptr ls, keys, names;
 		symtab_ptr ls_symptr;
-		access_method  am;
+		object val = s_ptr->obj;
 		object lit = MAKE_INT(0);
+		if (max_len <= 4)
+			return 0;
 		if ((lsobj = (long)s_ptr->u.var.ls) &&
 			(ls_symptr = &fe.st[lsobj]) &&
 			(ls_symptr->obj != NOVALUE) &&
@@ -547,7 +532,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 			(keys = SEQ_PTR(ls->base[1]))  &&
 			(names = SEQ_PTR(ls->base[2])) &&
 			(names->length == keys->length)) {
-				int count = names->length;
+				short count = names->length;
 				object_ptr key_base = keys->base;
 				object_ptr data_base = names->base;
 				if (IS_ATOM_INT(val)) {
@@ -585,16 +570,62 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 				}
 		}
 		if (lit != 0) {
+			object_ptr base_ptr;
 			s1_ptr lit_ptr = SEQ_PTR(lit);
-			val_string[0] = '(';
-			for (i = 1; i <= lit_ptr->length && i < DV_len; ++i) {
-				if (!IS_ATOM_INT(lit_ptr->base[i])) {
-						i = 1;
-						break;
+			base_ptr = lit_ptr->base;
+			++base_ptr;
+			for (i = 0; (i < lit_ptr->length) && (i < (max_len-1)); ++i) {
+				if ((!IS_ATOM_INT(val = base_ptr[i]))
+						|| (val < -128)
+						|| (val > 127)) {
+						/* variable and constant names must be ASCII */
+						val_string[0] = '\0';
+						return 1;
 				}
-				val_string[i] = (unsigned char)lit_ptr->base[i];
+				val_string[i] = (char)val;
 			}
-			val_string[i++] = ')';
+			val_string[i] = '\0';
+			if (i == (max_len-1)) {
+				for (i = i - 3; i < (max_len-1); ++i)
+					val_string[i] = '.';
+			}
+			return i+1;
+		} else {
+			return 0;
+		}
+}
+
+void DisplayVar(symtab_ptr s_ptr, int user_requested)
+/* display a variable and its value in debug area on screen */
+{
+	register int i, already_there;
+	int col, found, inc, len_required;
+	object val, screen_val;
+	struct EuViewPort vp;
+	
+#define DV_len (40)
+	char val_string[DV_len];
+	int add_char, iv;
+	
+	if( external_debugger ){
+		ExternalDisplayVar( s_ptr, user_requested );
+		return;
+	}
+	GetViewPort( &vp );
+	add_char = 0;
+	if (TEXT_MODE)
+		set_bk_color(_BLUE);
+
+	val = s_ptr->obj;
+	if (IS_SEQUENCE(val)) {
+		inc = vp.vars_per_line;
+	}
+	else {
+		if ((i = CopyLiteral(s_ptr, val_string+1, DV_len-15)) > 1) {
+			val_string[0] = '(';
+			val_string[i] = ')';
+			val_string[i+1] = '\0';
+			++i;
 		} else {
 			i = 0;
 		}
@@ -603,7 +634,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 		else if (IS_ATOM_INT(val)) {
 			iv = INT_VAL(val);
 			snprintf(&val_string[i],  DV_len-i, "%ld", (long)iv);
-			if (lit == 0 && iv >= ' ' && iv <= 127)
+			if (i <= 1 && iv >= ' ' && iv <= 127)
 				add_char = TRUE;
 		}
 		else{ 
@@ -1092,7 +1123,12 @@ static void DumpPrivates(IFILE f, symtab_ptr proc)
 /* display the local variables and their values for a subprogram */
 {
 	symtab_ptr sym;
-
+	char * lb;
+	unsigned int lb_len;
+	 // must be bigger than 3, should be greater than any expected enummerated constant length
+	unsigned int lb_size = 40; 
+	lb = (char*)malloc(lb_size);
+	
 	/* iprintf(f, " %s()\n", proc->name);*/
 	sym = proc->next; 
 	while (sym != NULL && 
@@ -1103,12 +1139,21 @@ static void DumpPrivates(IFILE f, symtab_ptr proc)
 			}
 			else {
 				iprintf(f, "    %s = ", sym->name);
+				if ((lb_len = CopyLiteral(sym, lb, lb_size)) > 1) {
+					--lb_len; // don't count null char for the length.
+					iprintf(f, "(%s)", lb);
+					lb_len += 2;
+				} else {
+					lb_len = 0;
+				}
 				Print(f, sym->obj, 500, 80 - 3, strlen(sym->name)+6, TRUE);
 				iprintf(f, "\n");
 			}
 		}
 		sym = sym->next;
 	}
+	
+	free(lb);
 }
 
 static void DumpGlobals(IFILE f)
@@ -1116,6 +1161,10 @@ static void DumpGlobals(IFILE f)
 {
 	symtab_ptr sym;
 	int prev_file_no;
+	char * lb;
+	unsigned lb_len;
+	unsigned int lb_size = 40;
+	lb = (char*)malloc(lb_size);
 
 	prev_file_no = -1;
 	sym = TopLevelSub->next;
@@ -1133,13 +1182,22 @@ static void DumpGlobals(IFILE f)
 			iprintf(f, "    %s = ", sym->name);
 			if (sym->obj == NOVALUE)
 				iprintf(f, "<no value>");
-			else 
+			else {
+				if ((lb_len = CopyLiteral(sym, lb, lb_size)) > 1) {
+					--lb_len; // don't count null char for the length.
+					iprintf(f, "(%s)", lb);
+					lb_len += 2; // add () chars
+				} else {
+					lb_len = 0;
+				}
 				Print(f, sym->obj, 500, 80 - 3, strlen(sym->name)+6, TRUE);
+			}
 			iprintf(f, "\n");
 		}
 		sym = sym->next;
 	}
 	iprintf(f, "\n");
+	free(lb);
 }
 
 static int screen_err_out;

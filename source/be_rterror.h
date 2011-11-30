@@ -20,7 +20,13 @@ extern char *type_error_msg;   /* changeable message */
 
 void InitTraceWindow();
 void InitDebug();
-
+/* Copies the alternative literal for s_ptr into val_string up to max_len characters are copied
+ * including the null character, which is appended at the end.  The function returns the number
+ * of characters copied.  If there is no alternative literal, it will return 0 for it will not
+ * write to the string.  If there is an error while copying it will write a NULL character to the
+ * first character of the string and return 1.  If the required space is greater than max_len, it
+ * will return max_len and copy that many characters. */
+unsigned int CopyLiteral(symtab_ptr s_ptr, char * val_string, unsigned int max_len);
 void GetViewPort(struct EuViewPort *vp);
 void SubsAtomAss();
 void SubsNotAtom();
