@@ -18,6 +18,8 @@
 * When there is a user supplied library, the translator does not abort when the library doesn't exist and one of 
   ##-nobuild##, ##-makefile## or ##-makefile-partial## is used
 * [[ticket:728]] Fix sequence slice error when invalid command line arguments are passed to euphoria. 
+* [[ticket:730]] Fixed initialization of private variables.  The translator incorrectly assumed that all
+  variables started as integers to prevent them from being dereferenced.
 
 === Enhancements
 
