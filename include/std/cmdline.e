@@ -1043,11 +1043,7 @@ function parse_commands( sequence cmds, sequence opts, map parsed_opts, sequence
 		end if
 
 		if find(cmd[from_..$], help_opts) then
-			if help_on_error then
-				local_help(opts, add_help_rid, cmds, 1, parse_options)
-			elsif auto_help then
-				printf(2,"Try '--help' for more information.\n",{})          
-			end if
+			local_help(opts, add_help_rid, cmds, 1, parse_options)
 			ifdef UNITTEST then
 				return 0
 			end ifdef
