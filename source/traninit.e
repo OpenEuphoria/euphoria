@@ -112,7 +112,7 @@ export procedure transoptions()
 	Argv = expand_config_options( Argv )
 	Argc = length(Argv)
 	
-	map:map opts = cmd_parse( tranopts, , Argv)
+	map:map opts = cmd_parse( tranopts, NO_HELP_ON_ERROR, Argv)
 
 	handle_common_options(opts)
 

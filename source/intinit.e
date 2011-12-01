@@ -47,7 +47,7 @@ export procedure intoptions()
 	sequence opts_array = get_options()
 
 	m:map opts = cmd_parse( opts_array, 
-		{ NO_VALIDATION_AFTER_FIRST_EXTRA, PAUSE_MSG, pause_msg }, Argv)
+		{ NO_HELP_ON_ERROR, NO_VALIDATION_AFTER_FIRST_EXTRA, PAUSE_MSG, pause_msg }, Argv)
 	
 	handle_common_options(opts)
 
