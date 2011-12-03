@@ -40,9 +40,11 @@
 
 #include <string.h>
 #ifdef EWINDOWS
-	#ifdef EMINGW
-		#define _WIN32_IE 0x0400
+	/* Ensure we set this to 0x400 whether or not it is set. */
+	#ifdef _WIN32_IE
+		#undef _WIN32_IE
 	#endif
+	#define _WIN32_IE 0x400
 	#include <windows.h>
 	#include <commctrl.h>
 #endif
