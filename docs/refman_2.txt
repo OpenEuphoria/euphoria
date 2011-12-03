@@ -1267,16 +1267,19 @@ in memory (although there will still be just one shared copy of ##8.5## and
 
 For a number of procedures or functions{{{--}}}see below{{{--}}}some parameters
 may have the same value in many cases. The most expected value for any parameter
-may be given a default value. Omitting the value of such a parameter on a given
-call will cause its default value to be passed.
+may be given a default value. To pass the default value, use a question mark ##?##,
+or omit the value.  When the parameter is not the last in the list to the routine,
+you should use the ##?## for clarity, rather than simply omitting the parameter,
+and having consecutive commas.
 
 <eucode>
 procedure foo(sequence s, integer n=1)
     ? n + length(s)
 end procedure
 
-foo("abc")    -- prints out 4 = 3 + 1. n was not specified, so was set to 1.
-foo("abc", 3) -- prints out 6 = 3 + 3
+foo("abc")     -- prints out 4 = 3 + 1. n was not specified, so was set to 1.
+foo("abc", ? ) -- prints out 4 = 3 + 1. n was not specified, so was set to 1.
+foo("abc", 3)  -- prints out 6 = 3 + 3
 </eucode>
 
 This is not limited to the last parameter(s):
@@ -1286,11 +1289,12 @@ procedure bar(sequence s="abc", integer n, integer p=1)
     ? length(s)+n+p
 end procedure
 
-bar(, 2)      -- prints out 6 = 3 + 2 + 1
+bar(?, 2)     -- prints out 6 = 3 + 2 + 1
+bar(, 2)      -- prints out 6 = 3 + 2 + 1.  Legal, but considered bad form.
 bar(2)        -- errors out, as 2 is not a sequence
-bar(, 2,)     -- same as bar(,2)
-bar(, 2, 3)   -- prints out 8 = 3 + 22 + 3
-bar({}, 2, )  -- prints out 3 = 0 + 2 + 1
+bar(?, 2, ?)  -- same as bar(,2)
+bar(?, 2, 3)  -- prints out 8 = 3 + 22 + 3
+bar({}, 2, ?) -- prints out 3 = 0 + 2 + 1
 bar()         -- errors out, second parameter is omitted,
               -- but doesn't have a default value
 </eucode>

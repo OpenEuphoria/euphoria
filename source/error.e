@@ -18,6 +18,10 @@ include msgtext.e
 include coverage.e
 include scanner.e
 
+ifdef CRASH_ON_ERROR then
+	include std/console.e
+	include euphoria/debug/debug.e
+end ifdef
 integer Errors = 0 -- number of errors detected during compile
 
 export integer TempErrFile = -2
@@ -289,6 +293,9 @@ export procedure CompileErr(object msg, object args = {}, integer preproc = 0 )
 
 		close(TempErrFile)
 		TempErrFile = -2
+		ifdef CRASH_ON_ERROR then
+			display( call_stack() )
+		end ifdef
 		Cleanup(1)
 	end if
 	

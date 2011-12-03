@@ -868,8 +868,19 @@ procedure ParseArgs(symtab_index subsym)
 
 	  	tok = next_token()
 
-		if tok[T_ID] = COMMA then
+		if tok[T_ID] = QUESTION_MARK or tok[T_ID] = COMMA then
 			-- defaulted arg
+			
+			if tok[T_ID] = QUESTION_MARK then
+				tok = next_token()
+				if tok[T_ID] != RIGHT_ROUND and tok[T_ID] != COMMA then
+					CompileErr( 41 )
+				elsif tok[T_ID] = RIGHT_ROUND then
+					putback( tok )
+				end if
+			else
+				-- TODO: warning here?
+			end if
 			if SymTab[subsym][S_OPCODE] then
 				if atom(SymTab[subsym][S_CODE]) then
 					var_code = 0
@@ -898,6 +909,7 @@ procedure ParseArgs(symtab_index subsym)
 			private_list = append(private_list,name)
 			private_sym &= Top()
 			backed_up_tok = {tok} -- ????
+			
 
 		elsif tok[T_ID] != RIGHT_ROUND then
 			-- It's a real arg
@@ -921,7 +933,7 @@ procedure ParseArgs(symtab_index subsym)
 				putback( tok )
 			end if
 			tok = next_token()
-			if tok[T_ID] != COMMA then
+			if tok[T_ID] != COMMA and tok[T_ID] != QUESTION_MARK then
 				--
 		  		if tok[T_ID] = RIGHT_ROUND then
 		  			-- not as many actual args as formal args
