@@ -45,16 +45,9 @@ export procedure intoptions()
 	Argc = length(Argv)
 	
 	sequence opts_array = get_options()
-	sequence argv_to_parse = Argv[1..2]
-	
-	if length(Argv) > 2 then
-		argv_to_parse &= merge_parameters(GetDefaultArgs(), Argv[3..$], opts_array)
-	else
-		argv_to_parse &= GetDefaultArgs()
-	end if
-	
+
 	m:map opts = cmd_parse( opts_array, 
-		{ NO_VALIDATION_AFTER_FIRST_EXTRA, PAUSE_MSG, pause_msg }, argv_to_parse)
+		{ NO_HELP_ON_ERROR, NO_VALIDATION_AFTER_FIRST_EXTRA, PAUSE_MSG, pause_msg }, Argv)
 	
 	handle_common_options(opts)
 
