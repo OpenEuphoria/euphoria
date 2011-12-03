@@ -1780,7 +1780,7 @@ procedure Multi_assign()
 			tok = next_token()
 		end if
 		
-		if tok[T_ID] = DOLLAR then
+		if tok[T_ID] = QUESTION_MARK then
 			-- these will be ignored
 			lhs_syms &= 0
 		elsif tok[T_ID] = VARIABLE or tok[T_ID] = QUALIFIED_VARIABLE then

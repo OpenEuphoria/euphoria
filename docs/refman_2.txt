@@ -938,11 +938,11 @@ atom success, val
 
 It is also possible to ignore some of the values in the right hand side.  Any
 elements beyond the number supplied on the left hand side are ignored.  Other
-values can also be ignored by using a dollar sign ('##$##') instead of a variable
+values can also be ignored by using a question mark ('##?##') instead of a variable
 name:
 
 <eucode>
-{ $, val } = value( "100" )
+{ ?, val } = value( "100" )
 </eucode>
 
 Variables may only appear once on the left hand side, however, they may appear
