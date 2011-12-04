@@ -921,6 +921,38 @@ x = {apple, orange*2, {1,2,3}, 99/4+foobar}
 The sequence-formation operator is listed at the bottom of the a
 [[:precedence chart]].
 
+==== Multiple Assignment
+
+Special sequence notation on the left hand side of an assignment can be made to
+assign to multiple variables with a single statement.  This can be useful for
+using functions that return multiple values in a sequence, such as ##[[:value]]##.
+
+<eucode>
+atom success, val
+
+{ success, val } = value( "100" )
+
+-- success = GET_SUCCESS
+-- val = 100
+</eucode>
+
+It is also possible to ignore some of the values in the right hand side.  Any
+elements beyond the number supplied on the left hand side are ignored.  Other
+values can also be ignored by using a question mark ('##?##') instead of a variable
+name:
+
+<eucode>
+{ ?, val } = value( "100" )
+</eucode>
+
+Variables may only appear once on the left hand side, however, they may appear
+on both the left and right hand side.  For instance, to swap the values of two
+variables:
+
+<eucode>
+{ a, b } = { b, a }
+</eucode>
+
 ==== Other Operations on Sequences
 
 Some other important operations that you can perform on sequences have English
@@ -1235,16 +1267,19 @@ in memory (although there will still be just one shared copy of ##8.5## and
 
 For a number of procedures or functions{{{--}}}see below{{{--}}}some parameters
 may have the same value in many cases. The most expected value for any parameter
-may be given a default value. Omitting the value of such a parameter on a given
-call will cause its default value to be passed.
+may be given a default value. To pass the default value, use a question mark ##?##,
+or omit the value.  When the parameter is not the last in the list to the routine,
+you should use the ##?## for clarity, rather than simply omitting the parameter,
+and having consecutive commas.
 
 <eucode>
 procedure foo(sequence s, integer n=1)
     ? n + length(s)
 end procedure
 
-foo("abc")    -- prints out 4 = 3 + 1. n was not specified, so was set to 1.
-foo("abc", 3) -- prints out 6 = 3 + 3
+foo("abc")     -- prints out 4 = 3 + 1. n was not specified, so was set to 1.
+foo("abc", ? ) -- prints out 4 = 3 + 1. n was not specified, so was set to 1.
+foo("abc", 3)  -- prints out 6 = 3 + 3
 </eucode>
 
 This is not limited to the last parameter(s):
@@ -1254,11 +1289,12 @@ procedure bar(sequence s="abc", integer n, integer p=1)
     ? length(s)+n+p
 end procedure
 
-bar(, 2)      -- prints out 6 = 3 + 2 + 1
+bar(?, 2)     -- prints out 6 = 3 + 2 + 1
+bar(, 2)      -- prints out 6 = 3 + 2 + 1.  Legal, but considered bad form.
 bar(2)        -- errors out, as 2 is not a sequence
-bar(, 2,)     -- same as bar(,2)
-bar(, 2, 3)   -- prints out 8 = 3 + 22 + 3
-bar({}, 2, )  -- prints out 3 = 0 + 2 + 1
+bar(?, 2, ?)  -- same as bar(,2)
+bar(?, 2, 3)  -- prints out 8 = 3 + 22 + 3
+bar({}, 2, ?) -- prints out 3 = 0 + 2 + 1
 bar()         -- errors out, second parameter is omitted,
               -- but doesn't have a default value
 </eucode>
