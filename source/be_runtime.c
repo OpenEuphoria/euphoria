@@ -2685,6 +2685,7 @@ static unsigned int calc_hsieh32(object a)
  	unsigned int lHashVal;
 	int has_string;
 
+	sp = 0;
 	IS_DOUBLE_AN_INTEGER(a)
 	if (IS_ATOM_INT(a)) {
 	 	tf.integer = a;
@@ -3740,6 +3741,142 @@ object EOpen(object filename, object mode_obj, object cleanup)
 
 
 object EGets(object file_no)
+/* reads a line of text from a file for the user (GETS) */
+{
+	long i, c;
+	long oldc;
+	IFILE f;
+	object_ptr line_ptr;
+	object_ptr next_char_ptr;
+	object_ptr last_char_ptr;
+	object_ptr obj_ptr;
+	object result_line;
+	int bufsize;
+	
+	bufsize = 134;	// Initial value. Assumes most line lengths are less than this.
+
+	if (file_no == last_r_file_no)
+		f = last_r_file_ptr;
+	else {
+		f = which_file(file_no, EF_READ);
+		if (IS_ATOM_INT(file_no))
+			last_r_file_no = file_no;
+		else
+			last_r_file_no = NOVALUE;
+		last_r_file_ptr = f;
+	}
+
+	if (current_screen != MAIN_SCREEN && might_go_screen(last_r_file_no))
+		MainScreen();
+
+	line_ptr = (object_ptr)EMalloc(bufsize * sizeof(object));
+	next_char_ptr = line_ptr - 1; // Point to the [-1] object.
+	last_char_ptr = line_ptr + (bufsize - 2); // Leave room for final NL and NOVALUE
+	obj_ptr = 0;
+	i = 0;
+	result_line = 0;
+	oldc = EOF;
+
+	if ((f == stdin) && in_from_keyb) {
+
+	#ifdef EWINDOWS
+		show_console();
+	#endif
+	
+		while (1)
+		{
+			// Move to next location to receive the next input character.
+			next_char_ptr++;
+	
+			if (next_char_ptr == last_char_ptr) {
+				// No room in current buffer, so expand it.
+				bufsize = 64;	// Expansions use this value.
+				i = last_char_ptr - line_ptr;
+				line_ptr = (object_ptr)ERealloc((char *)line_ptr, (i + bufsize + 2) * sizeof(object));
+				next_char_ptr = line_ptr + i;
+				last_char_ptr = next_char_ptr + bufsize; // Leave room for final NL and NOVALUE
+			}
+			
+			/* read a character */
+			c = getKBchar();
+			if (c == EOF) {
+				break;
+			}
+	
+			// Save the current character.
+			oldc = c;
+			
+			if (c == '\n') {
+				screen_col = 1;
+				break;
+			}
+						
+				
+			*next_char_ptr = c;
+
+		}	// end while
+	}
+	else {
+		do
+		{
+			// Move to next location to receive the next input character.
+			next_char_ptr++;
+
+			if (next_char_ptr == last_char_ptr) {
+				// No room in current buffer, so expand it.
+				bufsize = 64;	// Expansions use this value.
+				i = last_char_ptr - line_ptr;
+				line_ptr = (object_ptr)ERealloc((char *)line_ptr, (i + bufsize + 2) * sizeof(object));
+				next_char_ptr = line_ptr + i;
+				last_char_ptr = next_char_ptr + bufsize;
+			}
+
+			/* read a character */
+			c = getc(f);
+
+			if (c == EOF) {
+				break;
+			}	
+			// Save the current character.
+			oldc = c;
+
+			if (c == '\n') {
+				break;
+			}
+
+			*next_char_ptr = c;
+
+		} while(TRUE);
+		
+	} // end if
+	
+	
+	if (oldc == EOF) {
+		// No input characters where actually read.
+		return (object)ATOM_M1;
+	}
+
+	if (oldc == '\r') {
+		// Remove trailing CR.
+		next_char_ptr--;
+	}
+		
+	// Every line will end with a NL character.
+	(*next_char_ptr) = (object)'\n';
+	
+	// Calc number of characters in buffer; includes NL and NOVALUE spots.
+	i = (next_char_ptr - line_ptr) + 2;
+		
+
+	// Shrink buffer
+	line_ptr = (object_ptr)ERealloc((char *)line_ptr, i * sizeof(object));
+
+	// Create the new sequence.
+	return NewPreallocSeq(i, line_ptr);
+
+}
+
+object oldEGets(object file_no)
 /* reads a line from a file for the user (GETS) */
 {
 	int i, c;
@@ -4772,11 +4909,11 @@ void eu_startup(struct routine_list *rl, struct ns_list *nl, unsigned char **ip,
 		if (Comctl32 == NULL) {
 			RTFatal("Unable to initialize Common Windows Controls.");
 		}		
-		if (initCommonControlsPtr = (VfP_t)GetProcAddress(Comctl32, "InitCommonControlsEx")) {
+		if (!(0 == (initCommonControlsPtr = (VfP_t)GetProcAddress(Comctl32, "InitCommonControlsEx")))) {
 			initcc.dwSize = sizeof( INITCOMMONCONTROLSEX );
 			initcc.dwICC  = 0;
 			(*initCommonControlsPtr)( (void*)&initcc );
-		} else if (initCommonControls95Ptr = (VfP_t)GetProcAddress(Comctl32, "InitCommonControls")) {
+		} else if (!(0 == (initCommonControls95Ptr = (Vf_t)GetProcAddress(Comctl32, "InitCommonControls")))) {
 			(*initCommonControls95Ptr)();
 		} else {
 			RTFatal("Unable to initialize Common Windows Controls.");
@@ -5849,8 +5986,9 @@ long find_from(object a, object bobj, object c)
 		while (TRUE) {
 			bv = *(++bp);
 			if (IS_ATOM_INT(bv)) {
-				if (a == bv)
+				if (a == bv) {
 					return bp - (object_ptr)b->base;
+				}
 			}
 			else if (IS_SEQUENCE(bv)) {
 				continue;  // can't be equal so skip it.
