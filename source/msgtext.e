@@ -370,7 +370,7 @@ constant StdErrMsgs = {
 	{348, "User supplied library does not exist:\n    [1]"},
 	{349, "Resource file does not exist:\n    [1]"},
 	{350, "Unable to compile resource file: [1]"},
-	{351, "Use the -mno-cygwin flag with MinGW"},
+	{351, "Create MinGW binaries in a Cygwin environment"},
 	{352, "There is no watcom instalation under specified Watom Path [1]"},
 	{MISSING_CMD_PARAMETER, "Command line argument [1] requires a parameter"},
 	$
