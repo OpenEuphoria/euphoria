@@ -437,6 +437,7 @@ function setup_build()
 			l_exe = "gcc"
 			obj_ext = "o"
 
+			-- compiling object flags
 			if debug_option then
 				c_flags &= " -g3"
 			else
@@ -450,16 +451,13 @@ function setup_build()
 			c_flags &= sprintf(" -c -w -fsigned-char -O2 -m32 -I%s -ffast-math",
 				{adjust_for_build_file(get_eucompiledir())})
 
-			if TWINDOWS then
-				if mno_cygwin then
-					c_flags &= " -mno-cygwin"
-				end if
-
-				if not con_option then
-					c_flags &= " -mwindows"
-				end if
+			if TWINDOWS and mno_cygwin then
+				-- we must use this compile flag here to ensure that we load the MINGW include
+				-- files when compiling under a cygwin environment.
+				c_flags &= " -mno-cygwin"
 			end if
-
+			
+			-- linker flags
 			l_flags = sprintf( "%s -m32 ", { adjust_for_build_file(user_library) })
 
 			if dll_option then
@@ -474,7 +472,13 @@ function setup_build()
 				l_flags &= " -lresolv"
 			elsif TWINDOWS then
 				if mno_cygwin then
+					-- we must use this option to avoid linking to the cygwin dll.
 					l_flags &= " -mno-cygwin"
+				end if				
+				if not con_option then
+					-- we must use this flag to prevent a new console from appearing
+					-- when running this program from explorer (the GUI)
+					l_flags &= " -mwindows"
 				end if
 			end if
 			
