@@ -46,13 +46,11 @@
 
 #include <string.h>
 #ifdef EWINDOWS
-	#if defined(EMINGW) && INTPTR_MAX == INT32_MAX
-		// some versions of MinGW don't define this
-		#if __GNUC__ < 5 && __GNUC_MINOR__ < 6
-			#define _WIN32_IE 0x0400
-		#endif
-	#endif
+	/* Ensure we set this to 0x400 whether or not it is set. */
 	#include <windows.h>
+	#ifndef _WIN32_IE
+		#define _WIN32_IE WINVER
+	#endif
 	#include <commctrl.h>
 #endif
 
