@@ -275,7 +275,6 @@ export procedure transoptions()
 		show_banner()
 		ShowMsg(2, 203)
 		-- translator_help()
-		show_help(tranopts,, Argv)
 
 		abort(1)
 	end if

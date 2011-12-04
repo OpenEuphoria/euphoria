@@ -1846,7 +1846,6 @@ export procedure emit_op(integer op)
 		emit_opcode( MEMSTRUCT_ACCESS )
 		emit_addr( a )
 		emit_addr( Pop() )
-		
 		for i = 1 to length( members ) do
 			emit_addr( members[i] )
 		end for
@@ -1854,7 +1853,15 @@ export procedure emit_op(integer op)
 		Push( c )
 		emit_addr( c )
 		assignable = FALSE
+	case REF_TEMP then
+		-- Used by the Translator to save temps
+		emit_opcode( REF_TEMP )
+		emit_addr( Pop() )
 	
+	case DEREF_TEMP then
+		emit_opcode( DEREF_TEMP )
+		emit_addr( Pop() )
+		
 	case MEMSTRUCT_ASSIGN, MEMSTRUCT_PLUS, MEMSTRUCT_MINUS, 
 			MEMSTRUCT_DIVIDE, MEMSTRUCT_MULTIPLY then
 		c = Pop() -- new value

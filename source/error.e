@@ -22,6 +22,10 @@ include msgtext.e
 include coverage.e
 include scanner.e
 
+ifdef CRASH_ON_ERROR then
+	include std/console.e
+	include euphoria/debug/debug.e
+end ifdef
 integer Errors = 0 -- number of errors detected during compile
 
 export integer TempErrFile = -2

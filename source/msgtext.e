@@ -23,6 +23,7 @@ export enum
 	EXPECTED_PRIMITIVE_MEMSTRUCT_TYPE,
 	MSG_CC_PREFIX = 600,
 	NONSTANDARD_LIBRARY,
+	DUPLICATE_MULTI_ASSIGN,
 	MISSING_CMD_PARAMETER = 353,
 	$
 
@@ -380,7 +381,7 @@ constant StdErrMsgs = {
 	{348, "User supplied library does not exist:\n    [1]"},
 	{349, "Resource file does not exist:\n    [1]"},
 	{350, "Unable to compile resource file: [1]"},
-	{351, "Use the -mno-cygwin flag with MinGW"},
+	{351, "Create MinGW binaries in a Cygwin environment"},
 	{352, "There is no watcom instalation under specified Watom Path [1]"},
 	{NONSTANDARD_LIBRARY, "Use a non-standard library when building a shared object"},
 	{354, "External debugger"},
@@ -397,6 +398,7 @@ constant StdErrMsgs = {
 	{CANNOT_ASSIGN_NONPRIMATIVE, "Cannot assign to a non-primitive, non-pointer memstruct" },
 	{EXPECTED_PRIMITIVE_MEMSTRUCT_TYPE, "Expected to see a valid primitive memory structure type" },
 	{ MSG_CC_PREFIX, "Prefix for compiler and related binaries"},
+	{DUPLICATE_MULTI_ASSIGN, "duplicate variables in left hand side of multiple assignment"},
 	{MISSING_CMD_PARAMETER, "Command line argument [1] requires a parameter"},
 	$
 }
