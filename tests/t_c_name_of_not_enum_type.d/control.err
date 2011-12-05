@@ -1,0 +1,19 @@
+/home/shawn/Documents/development/modified/euphoria/657/tests/t_c_name_of_not_enum_type.e:10
+<0361>:: Compiler Error: Supplied value is not of an enumerated type
+s = name_of(x)
+             ^
+
+
+--- Defined Words ---
+EU4
+EU4_1
+EU4_1_0
+CONSOLE
+UNIX
+LINUX
+X86
+BITS32
+LONG32
+E32
+EUI
+-------------------

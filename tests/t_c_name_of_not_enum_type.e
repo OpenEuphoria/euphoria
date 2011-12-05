@@ -6,11 +6,8 @@ type boolean(integer x)
 end type
 
 boolean x = false
+sequence s
+s = name_of(x)
 
-x = name_of(x)
-
-
-
-
-test_fail()
+test_fail("Shouldn't be able to call name_of() on a non-enumerated type.")
 test_report()
