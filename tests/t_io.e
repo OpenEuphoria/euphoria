@@ -20,7 +20,8 @@ in fact be nothing wrong with them.
 Thank You!
 
 `
-
+constant data_length = length(test_file_data)
+constant new_line_count = 9
 write_file("file.txt", test_file_data, DOS_TEXT)
 
 data = read_lines("file.txt")
@@ -42,29 +43,29 @@ test_equal("read_lines() #8", "Thank You!", data[9])
 close(tmp)
 
 data = read_file("file.txt")
-test_equal("read_file() #1", 262, length(data))
+test_equal("read_file() #1", data_length+new_line_count, length(data))
 test_equal("read_file() #2", "alter this file", data[52..66])
 
 tmp = open("file.txt", "rb")
 test_equal("where() #1", 0, where(tmp))
 data = read_file(tmp)
-test_equal("read_file() #1a", 262, length(data))
+test_equal("read_file() #1a", data_length+new_line_count, length(data))
 test_equal("read_file() #2a", "alter this file", data[52..66])
-test_equal("where() #2", 262, where(tmp))
+test_equal("where() #2", data_length+new_line_count, where(tmp))
 close(tmp)
 
 tmp = open("file.txt", "r")
 test_equal("where() #1b", 0, where(tmp))
 data = read_file(tmp) -- BINARY_MODE even though file was opened in 'text' mode.
 ifdef WINDOWS then
-	test_equal("read_file() #1b", 253, length(data))
+	test_equal("read_file() #1b", data_length, length(data))
 	test_equal("read_file() #2b", "alter this file", data[51..65])
 elsedef
-	test_equal("read_file() #1b", 262, length(data))
+	test_equal("read_file() #1b", data_length+new_line_count, length(data))
 	test_equal("read_file() #2b", "alter this file", data[52..66])
 end ifdef
 
-test_equal("where() #2b", 262, where(tmp))
+test_equal("where() #2b", data_length+new_line_count, where(tmp))
 close(tmp)
 
 test_equal("write_file() filename", 1, write_file("fileb.txt", "Hello World"))
@@ -204,6 +205,20 @@ test_equal( "Seek opened file", 0, seek(fh, -1))
 close(fh)
 test_equal( "Seek closed file", 1, seek(fh, -1))
 
+fh = open("file.txt", "ab")
+test_equal( "Where on append mode file should be its length (binary)", data_length+new_line_count, where(fh))
+close(fh)
+fh = open("file.txt", "a")
+test_equal( "Where on append mode file should be its length", data_length+new_line_count, where(fh))
+close(fh)
+
+fh = open("file.txt", "u")
+test_equal( "Where on update mode file should be 0", 0, where(fh))
+close(fh)
+
+fh = open("file.txt", "ub")
+test_equal( "Where on update mode file should be 0 (binary)", 0, where(fh))
+close(fh)
 
 delete_file("file.txt")
 delete_file("filea.txt")
