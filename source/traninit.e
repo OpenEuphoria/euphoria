@@ -105,21 +105,13 @@ add_options( trans_opt_def )
 --**
 -- Process the translator command-line options
 
-include std/console.e
 export procedure transoptions()
 	sequence tranopts = get_options()
 	
-	sequence argv_to_parse = Argv[1..2]
-	if length(Argv) > 2 then
-		argv_to_parse &= merge_parameters(GetDefaultArgs(), Argv[3..$], tranopts)
-	else
-		argv_to_parse &= GetDefaultArgs()
-	end if
-
-	Argv = expand_config_options(argv_to_parse)
+	Argv = expand_config_options( Argv )
 	Argc = length(Argv)
 	
-	map:map opts = cmd_parse( tranopts, , Argv)
+	map:map opts = cmd_parse( tranopts, NO_HELP_ON_ERROR, Argv)
 
 	handle_common_options(opts)
 
@@ -267,7 +259,9 @@ export procedure transoptions()
 	if compiler_type != COMPILER_GCC and not equal(user_library,"") then
 		if not file_exists(canonical_path(user_library)) then
 			ShowMsg(2, 348, { user_library })
-			abort(1)
+			if force_build or build_system_type = BUILD_DIRECT then
+				abort(1)
+			end if
 		else
 			user_library = canonical_path(user_library)
 		end if
@@ -351,15 +345,16 @@ end procedure
 --**
 -- Initialize special stuff for the translator
 procedure InitBackEnd(integer c)
-	init_opcodes()
-	transoptions()
-
+	
 	if c = 1 then
 		OpenCFiles()
 
 		return
 	end if
-
+	
+	init_opcodes()
+	transoptions()
+	
 	if compiler_type = COMPILER_UNKNOWN then
 		if TWINDOWS then
 			compiler_type = COMPILER_WATCOM

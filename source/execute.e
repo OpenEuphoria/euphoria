@@ -2634,7 +2634,6 @@ function RTLookup(sequence name, integer file, symtab_index proc, integer stlen 
 		s = SymTab[TopLevelSub][S_NEXT]
 		while s != 0 and (s <= stlen or SymTab[s][S_SCOPE] = SC_PRIVATE) do
 			integer scope = SymTab[s][S_SCOPE]
-
 			if (((scope = SC_PUBLIC) and
 					(SymTab[s][S_FILE_NO] = ns_file
 					 or ( and_bits( PUBLIC_INCLUDE, include_matrix[ns_file][SymTab[s][S_FILE_NO]] ) and
@@ -2646,14 +2645,16 @@ function RTLookup(sequence name, integer file, symtab_index proc, integer stlen 
 				(scope = SC_GLOBAL) and
 					(SymTab[s][S_FILE_NO] = ns_file
 					 or ( include_matrix[ns_file][SymTab[s][S_FILE_NO]] and
-					      and_bits( DIRECT_OR_PUBLIC_INCLUDE, include_matrix[file][ns_file] ) ) ))
+					      and_bits( DIRECT_OR_PUBLIC_INCLUDE, include_matrix[file][ns_file] ) ) )
+				or
+				(scope = SC_LOCAL and ns_file = file))
 			and equal( SymTab[s][S_NAME], name )
 			then
 				return s
 			end if
 			s = SymTab[s][S_NEXT]
 		end while
-
+		
 		return 0 -- couldn't find name in ns file
 
 	else

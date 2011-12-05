@@ -63,6 +63,7 @@ constant cmdopts = {
 	{ "coverage-pp",      0, "Coverage post-processor (eucoverage?)", { HAS_PARAMETER, "filename"} },
 	{ "coverage-exclude", 0, "Pattern for files to exclude from coverage", { MULTIPLE, HAS_PARAMETER, "pattern"}},
 	{ "v",        "version", "Display the version number", { VERSIONING, "eutest v" & APP_VERSION } },
+	{ "n",        "nocheck", "Don't check the supplied interpreter, translator, binder", {} },
 	$
 }
 
@@ -73,6 +74,7 @@ integer ctcfh = 0
 sequence error_list = repeat({},4)
 sequence eub_path = ""
 sequence exclude_patterns = {}
+integer no_check = 0
 
 -- moved from do_test:
 integer logging_activated = 0
@@ -1153,6 +1155,8 @@ procedure main()
 
 	map opts = cmd_parse( cmdopts )
 	sequence keys = map:keys( opts )
+	
+	no_check = map:has( opts, "n") or map:has( opts, "nocheck" )
 	for i = 1 to length( keys ) do
 		sequence param = keys[i]
 		object val = map:get(opts, param)
@@ -1172,21 +1176,27 @@ procedure main()
 				executable = canonical_path(val)
 				if not file_exists(executable) then
 					printf(1, "Specified interpreter via -eui parameter was not found\n")
-					abort(1)
+					if not no_check then
+						abort(1)
+					end if
 				end if
 				
 			case "eubind", "bind" then
 				binder = canonical_path(val)
 				if not file_exists(binder) then
 					printf(1, "Specified binder via -eubind parameter was not found\n")
-					abort(1)
+					if not no_check then
+						abort(1)
+					end if
 				end if
 				
 			case "eub" then
 				sequence tmp = canonical_path(val)
 				if not file_exists(tmp) then
 					printf(1, "Specified backend via -eub parameter was not found\n")
-					abort(1)
+					if not no_check then
+						abort(1)
+					end if
 				end if
 
 				eub_path = "-eub " & tmp
@@ -1195,7 +1205,9 @@ procedure main()
 				translator = canonical_path(val)
 				if not file_exists(translator) then
 					printf(1, "Specified translator via -euc parameter was not found\n")
-					abort(1)
+					if not no_check then
+						abort(1)
+					end if
 				end if
 				
 			case "trans" then
@@ -1210,7 +1222,9 @@ procedure main()
 				sequence tmp = canonical_path(val)
 				if not file_exists(tmp) then
 					printf(1, "Specified library via -lib parameter was not found\n")
-					abort(1)
+					if not no_check then
+						abort(1)
+					end if
 				end if
 
 				library = "-lib " & tmp
@@ -1293,7 +1307,8 @@ procedure main()
 					files = remove(files,first_counter,last_counter) 
 						& files[first_counter..last_counter]
 				end if
-				
+			case "n", "nocheck" then
+				no_check = 1
 		end switch
 	end for
 	

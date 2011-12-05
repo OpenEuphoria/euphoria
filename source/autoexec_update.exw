@@ -190,7 +190,9 @@ procedure install()
 
     if edit_status = FAILURE then
 	ok = message_box("To complete the installation you must edit AUTOEXEC.BAT manually.\n" &
-			 "See DOC\\INSTALL.DOC - How To Manually Edit AUTOEXEC.BAT",
+			 "See the sections " &
+			 "\'How to manually modify the environment in Windows (ME/98/95/3.1)\' " &
+			 "and \'Modifying the Registry\' in HTML\\installing_euphoria.html.\n.",
 			 "AUTOEXEC.BAT",
 			 MB_OK
 			 )

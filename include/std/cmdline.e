@@ -111,6 +111,10 @@ public enum
 	-- Disable the automatic inclusion of -h, -? and ~--help as help switches.
 	NO_HELP,
 	
+	--**
+	-- Disable the automatic display of all of the possible options on error.
+	NO_HELP_ON_ERROR,
+	
 	$
 
 public enum
@@ -161,66 +165,27 @@ procedure local_abort(integer lvl)
 	abort(lvl)
 end procedure
 
-procedure check_for_bad_combos( sequence opts, integer opt1, integer opt2, sequence error_message )
-	-- Checks for illegal combinations of options, and crashes if found
-	if find( opt1, opts[OPTIONS]) then
-		if find( opt2, opts[OPTIONS]) then
-			error:crash( error_message )
-		end if
-	end if
-end procedure
-
-function has_duplicate( sequence opts, sequence opt, integer name_type, integer start_from )
-	if sequence( opt[name_type] ) then
-		sequence opt_name = opt[name_type]
-		for i = start_from + 1 to length( opts ) do
-			if equal( opt_name, opts[i][name_type] ) then
-				return 1
-			end if
-		end for
-	end if
-	return 0
-end function
-
-procedure check_for_duplicates( sequence opts )
-	-- Check for duplicate option records.
-	for i = 1 to length(opts) do
-		sequence opt
-		opt = opts[i]
-		if has_duplicate( opts, opt, SHORTNAME, i ) then
-			
-			error:crash("cmd_opts: Duplicate Short Names (%s) are not allowed in an option record.\n",
-				{ opt[SHORTNAME]})
-			
-		elsif has_duplicate( opts, opt, LONGNAME, i ) then
-			
-			error:crash("cmd_opts: Duplicate Long Names (%s) are not allowed in an option record.\n",
-				{opt[LONGNAME]})
-		end if
-	end for
-
-end procedure
-
-function update_opts( sequence opts )
-	-- Cleans up the options, making sure they're appropriate size,
-	-- adds default values where appropriate, and checks for 
-	-- some illegal combinations.
-	
+-- Local routine to validate and reformat option records if they are not in the standard format.
+function standardize_opts(sequence opts, integer auto_help_switches)
 	integer lExtras = 0 -- Ensure that there is zero or one 'extras' record only.
+
 	for i = 1 to length(opts) do
 		sequence opt = opts[i]
-		opts[i] = 0
+		integer updated = 0
 
 		if length(opt) < MAPNAME then
 			opt &= repeat(-1, MAPNAME - length(opt))
+			updated = 1
 		end if
 
 		if sequence(opt[SHORTNAME]) and length(opt[SHORTNAME]) = 0 then
 			opt[SHORTNAME] = 0
+			updated = 1
 		end if
 
 		if sequence(opt[LONGNAME]) and length(opt[LONGNAME]) = 0 then
 			opt[LONGNAME] = 0
+			updated = 1
 		end if
 
 		if atom(opt[LONGNAME]) and atom(opt[SHORTNAME]) then
@@ -230,12 +195,14 @@ function update_opts( sequence opts )
 				lExtras = i
 				if atom(opt[MAPNAME]) then
 					opt[MAPNAME] = EXTRAS
+					updated = 1
 				end if
 			end if
 		end if
 
 		if atom(opt[DESCRIPTION]) then
 			opt[DESCRIPTION] = ""
+			updated = 1
 		end if
 
 
@@ -245,6 +212,7 @@ function update_opts( sequence opts )
 			else
 				opt[OPTIONS] = {}
 			end if
+			updated = 1
 		else
 			for j = 1 to length(opt[OPTIONS]) do
 				if find(opt[OPTIONS][j], opt[OPTIONS], j + 1) != 0 then
@@ -252,30 +220,46 @@ function update_opts( sequence opts )
 				end if
 			end for
 
-			check_for_bad_combos( opt, HAS_PARAMETER, NO_PARAMETER, 
-				"cmd_opts: Cannot have both HAS_PARAMETER and NO_PARAMETER in an option record.\n")
-			
-			check_for_bad_combos( opt, HAS_CASE, NO_CASE, 
-				"cmd_opts: Cannot have both HAS_CASE and NO_CASE in an option record.\n")
-			
-			check_for_bad_combos( opt, MANDATORY, OPTIONAL, 
-				"cmd_opts: Cannot have both MANDATORY and OPTIONAL in an option record.\n")
-			
-			check_for_bad_combos( opt, ONCE, MULTIPLE, 
-				"cmd_opts: Cannot have both ONCE and MULTIPLE in an option record.\n")
-			
+			if find(HAS_PARAMETER, opt[OPTIONS]) then
+				if find(NO_PARAMETER, opt[OPTIONS]) then
+					error:crash("cmd_opts: Cannot have both HAS_PARAMETER and NO_PARAMETER in an option record.\n")
+				end if
+			end if
+
+			if find(HAS_CASE, opt[OPTIONS]) then
+				if find(NO_CASE, opt[OPTIONS]) then
+					error:crash("cmd_opts: Cannot have both HAS_CASE and NO_CASE in an option record.\n")
+				end if
+			end if
+
+			if find(MANDATORY, opt[OPTIONS]) then
+				if find(OPTIONAL, opt[OPTIONS]) then
+					error:crash("cmd_opts: Cannot have both MANDATORY and OPTIONAL in an option record.\n")
+				end if
+			end if
+
+			if find(ONCE, opt[OPTIONS]) then
+				if find(MULTIPLE, opt[OPTIONS]) then
+					error:crash("cmd_opts: Cannot have both ONCE and MULTIPLE in an option record.\n")
+				end if
+			end if
+
 		end if
 
 		if sequence(opt[CALLBACK]) then
 			opt[CALLBACK] = -1
+			updated = 1
 		elsif not integer(opt[CALLBACK]) then
 			opt[CALLBACK] = -1
+			updated = 1
 		elsif opt[CALLBACK] < 0 then
 			opt[CALLBACK] = -1
+			updated = 1
 		end if
 
 		if sequence(opt[MAPNAME]) and length(opt[MAPNAME]) = 0 then
 			opt[MAPNAME] = 0
+			updated = 1
 		end if
 
 		if atom(opt[MAPNAME]) then
@@ -286,15 +270,37 @@ function update_opts( sequence opts )
 			else
 				opt[MAPNAME] = EXTRAS
 			end if
+			updated = 1
 		end if
 
-		opts[i] = opt
+		if updated then
+			opts[i] = opt
+		end if
 	end for
-	return opts
-end function
 
-function standardize_help_options( sequence opts, integer auto_help_switches )
-	
+	-- Check for duplicate option records.
+	for i = 1 to length(opts) do
+		sequence opt
+		opt = opts[i]
+		if sequence(opt[SHORTNAME]) then
+			for j = i + 1 to length(opts) do
+				if equal(opt[SHORTNAME], opts[j][SHORTNAME]) then
+					error:crash("cmd_opts: Duplicate Short Names (%s) are not allowed in an option record.\n",
+						{ opt[SHORTNAME]})
+				end if
+			end for
+		end if
+
+		if sequence(opt[LONGNAME]) then
+			for j = i + 1 to length(opts) do
+				if equal(opt[LONGNAME], opts[j][LONGNAME]) then
+					error:crash("cmd_opts: Duplicate Long Names (%s) are not allowed in an option record.\n",
+						{opt[LONGNAME]})
+				end if
+			end for
+		end if
+	end for
+
 	-- Insert the default 'help' options if one is not already being used.
 	integer has_h = 0, has_help = 0, has_question = 0
 	for i = 1 to length(opts) do
@@ -335,16 +341,6 @@ function standardize_help_options( sequence opts, integer auto_help_switches )
 			opts = standardize_opts(opts, 0)
 		end if
 	end if
-	return opts
-end function
--- Local routine to validate and reformat option records if they are not in the standard format.
-function standardize_opts(sequence opts, integer auto_help_switches)
-	
-	opts = update_opts( opts )
-	
-	check_for_duplicates( opts )
-	
-	opts = standardize_help_options( opts, auto_help_switches )
 	
 	-- Patch a few either/or cases
 	for i = 1 to length(opts) do
@@ -364,16 +360,49 @@ function standardize_opts(sequence opts, integer auto_help_switches)
 	return opts
 end function
 
-function print_help( sequence opts, sequence cmds )
-	-- Calculate the size of the padding required to keep option text aligned.
-	-- Prints help for each option and the extras.
-	integer pad_size = 0
+procedure local_help(sequence opts, object add_help_rid = -1, sequence cmds = command_line(), integer std = 0, object parse_options = {})
+	integer pad_size
 	integer this_size
-	integer extras_mandatory = 0
-	integer extras_opt = 0
+	sequence cmd
 	sequence param_name
 	integer has_param
+	integer is_mandatory
+	integer extras_mandatory = 0
+	integer extras_opt = 0
+	integer auto_help = 1
+
+	integer po = 1
+	if atom(parse_options) then
+		parse_options = {parse_options}
+	end if
+
+	while po <= length(parse_options) do
+		switch parse_options[po] do
+				
+			case HELP_RID then
+				if po < length(parse_options) then
+					po += 1
+					add_help_rid = parse_options[po]
+				else
+					error:crash("HELP_RID was given to cmd_parse with no routine_id")
+				end if
+			
+			case NO_HELP then
+				auto_help = 0
+		
+			case else
+			-- do nothing as we don't care about other options at this point.
+				
+		end switch
+		po += 1
+	end while
 	
+	if std = 0 then
+		opts = standardize_opts(opts, auto_help)
+	end if
+
+	-- Calculate the size of the padding required to keep option text aligned.
+	pad_size = 0
 	for i = 1 to length(opts) do
 		this_size = 0
 		param_name = ""
@@ -426,20 +455,71 @@ function print_help( sequence opts, sequence cmds )
 		end if
 	end for
 	pad_size += 3 -- Allow for minimum gap between cmd and its description
-	
+
 	printf(1, "%s options:\n", {cmds[2]})
 
 	for i = 1 to length(opts) do
-		print_option_help( opts[i], pad_size )
-	end for
-	
-	print_extras_help( opts, extras_mandatory, extras_opt )
-	
-	return pad_size
-end function
+		if atom(opts[i][SHORTNAME]) and atom(opts[i][LONGNAME]) then
+			-- Ignore 'extras' record
+			continue
+		end if
 
-procedure print_extras_help( sequence opts, integer extras_mandatory, integer extras_opt )
-	-- Print help about the extras
+		has_param    = find(HAS_PARAMETER, opts[i][OPTIONS])
+		if has_param != 0 then
+			if has_param < length(opts[i][OPTIONS]) then
+				has_param += 1
+				if sequence(opts[i][OPTIONS][has_param]) then
+					param_name = opts[i][OPTIONS][has_param]
+				else
+					param_name = "x"
+				end if
+			else
+				param_name = "x"
+			end if
+		end if
+		is_mandatory = (find(MANDATORY,     opts[i][OPTIONS]) != 0)
+		cmd = ""
+
+		if sequence(opts[i][SHORTNAME]) then
+			if not is_mandatory then
+				cmd &= '['
+			end if
+			cmd &= '-' & opts[i][SHORTNAME]
+			if has_param != 0 then
+				cmd &= ' ' & param_name
+			end if
+			if not is_mandatory then
+				cmd &= ']'
+			end if
+		end if
+
+		if sequence(opts[i][LONGNAME]) then
+			if length(cmd) > 0 then cmd &= ", " end if
+			if not is_mandatory then
+				cmd &= '['
+			end if
+			cmd &= "--" & opts[i][LONGNAME]
+			if has_param != 0 then
+				cmd &= '=' & param_name
+			end if
+			if not is_mandatory then
+				cmd &= ']'
+			end if
+		end if
+		
+		-- If command is longer than the pad_size, display the command and it's 
+		-- description on seperate lines
+		
+		if length(cmd) > pad_size then
+			puts(1, "   " & cmd & '\n')
+			puts(1, repeat(' ', pad_size + 3))
+		else
+			puts(1, "   " & stdseq:pad_tail(cmd, pad_size))
+		end if
+		
+		puts(1, opts[i][DESCRIPTION] & '\n')
+	end for
+
 	if extras_mandatory != 0 then
 		if length(opts[extras_opt][DESCRIPTION]) > 0 then
 			puts(1, "\n" & opts[extras_opt][DESCRIPTION])
@@ -455,53 +535,7 @@ procedure print_extras_help( sequence opts, integer extras_mandatory, integer ex
 			puts(1, "One or more additional arguments can be supplied.\n")
 		end if
 	end if
-end procedure
 
-procedure local_help(sequence opts, object add_help_rid = -1, sequence cmds = command_line(), 
-		integer std = 0, object parse_options = {})
-	
-	sequence cmd
-	integer is_mandatory
-	integer extras_mandatory = 0
-	integer extras_opt = 0
-	integer auto_help = 1
-
-	integer po = 1
-	if atom(parse_options) then
-		parse_options = {parse_options}
-	end if
-
-	while po <= length(parse_options) do
-		switch parse_options[po] do
-			case HELP_RID then
-				if po < length(parse_options) then
-					po += 1
-					add_help_rid = parse_options[po]
-				else
-					error:crash("HELP_RID was given to cmd_parse with no routine_id")
-				end if
-			
-			case NO_HELP then
-				auto_help = 0
-		
-			case else
-			-- do nothing as we don't care about other options at this point.
-				
-		end switch
-		po += 1
-	end while
-	
-	if std = 0 then
-		opts = standardize_opts(opts, auto_help)
-	end if
-
-	integer pad_size = print_help( opts, cmds )
-	
-	call_user_help( add_help_rid )
-	
-end procedure
-
-procedure call_user_help( object add_help_rid )
 	if atom(add_help_rid) then
 		if add_help_rid >= 0 then
 			puts(1, "\n")
@@ -525,69 +559,6 @@ procedure call_user_help( object add_help_rid )
 			puts(1, "\n")
 		end if
 	end if
-end procedure
-
-procedure print_option_help( sequence opt, integer pad_size )
-	if atom(opt[SHORTNAME]) and atom(opt[LONGNAME]) then
-		-- Ignore 'extras' record
-		return
-	end if
-
-	integer has_param = find(HAS_PARAMETER, opt[OPTIONS])
-	sequence param_name
-	if has_param != 0 then
-		if has_param < length(opt[OPTIONS]) then
-			has_param += 1
-			if sequence(opt[OPTIONS][has_param]) then
-				param_name = opt[OPTIONS][has_param]
-			else
-				param_name = "x"
-			end if
-		else
-			param_name = "x"
-		end if
-	end if
-	integer is_mandatory = (find(MANDATORY, opt[OPTIONS]) != 0)
-	sequence cmd = ""
-
-	if sequence(opt[SHORTNAME]) then
-		if not is_mandatory then
-			cmd &= '['
-		end if
-		cmd &= '-' & opt[SHORTNAME]
-		if has_param != 0 then
-			cmd &= ' ' & param_name
-		end if
-		if not is_mandatory then
-			cmd &= ']'
-		end if
-	end if
-
-	if sequence(opt[LONGNAME]) then
-		if length(cmd) > 0 then cmd &= ", " end if
-		if not is_mandatory then
-			cmd &= '['
-		end if
-		cmd &= "--" & opt[LONGNAME]
-		if has_param != 0 then
-			cmd &= '=' & param_name
-		end if
-		if not is_mandatory then
-			cmd &= ']'
-		end if
-	end if
-	
-	-- If command is longer than the pad_size, display the command and it's 
-	-- description on seperate lines
-	
-	if length(cmd) > pad_size then
-		puts(1, "   " & cmd & '\n')
-		puts(1, repeat(' ', pad_size + 3))
-	else
-		puts(1, "   " & stdseq:pad_tail(cmd, pad_size))
-	end if
-	
-	puts(1, opt[DESCRIPTION] & '\n')
 end procedure
 
 --****
@@ -757,7 +728,7 @@ end procedure
 --
 
 public procedure show_help(sequence opts, object add_help_rid=-1, sequence cmds = command_line(), object parse_options = {})
-	local_help(opts, add_help_rid, cmds, 0, parse_options)
+    local_help(opts, add_help_rid, cmds, 0, parse_options)
 end procedure
 
 function find_opt(sequence opts, sequence opt_style, object cmd_text)
@@ -850,289 +821,6 @@ function find_opt(sequence opts, sequence opt_style, object cmd_text)
 	return {0, "Unrecognised"}
 end function
 
-function get_help_options( sequence opts )
-	sequence help_opts = {}
-	
-	for i = 1 to length(opts) do
-		if find(HELP, opts[i][OPTIONS]) then
-			if sequence(opts[i][SHORTNAME]) then
-				help_opts = append(help_opts, opts[i][SHORTNAME])
-			end if
-			
-			if sequence(opts[i][LONGNAME]) then
-				help_opts = append(help_opts, opts[i][LONGNAME])
-			end if
-			
-			if find(NO_CASE, opts[i][OPTIONS]) then
-				help_opts = text:lower(help_opts)
-				for j = 1 to length(help_opts) do
-					help_opts = append( help_opts, text:upper(help_opts[j]) )
-				end for
-			end if
-		end if
-	end for
-	return help_opts
-end function
-
-function parse_at_cmds( sequence cmd, sequence cmds, sequence opts, integer arg_idx, object add_help_rid, object parse_options )
-	-- Called to parse out a command option that's an @file
-	-- returns the new list of commands after expansion
-	
-	object at_cmds
-	integer j
-
-	if length(cmd) > 2 and cmd[2] = '@' then
-		-- Read in the lines from the optional file.
-		at_cmds = io:read_lines(cmd[3..$])
-		if equal(at_cmds, -1) then
-			-- File didn't exist but this is not an error, so just
-			-- remove it from the commands.
-			cmds = eu:remove(cmds, arg_idx)
-			return cmds
-		end if
-	else
-		-- Read in the lines from the file.
-		at_cmds = io:read_lines(cmd[2..$])
-		if equal(at_cmds, -1) then
-			printf(2, "Cannot access '@' argument file '%s'\n", {cmd[2..$]})
-			local_help(opts, add_help_rid, cmds, 1, parse_options)
-			local_abort(1)
-		end if
-	end if
-	-- Parse the 'at' commands removing comment lines and empty lines,
-	-- and stripping off any enclosing quotes from lines.
-	j = 0
-	while j < length(at_cmds) do
-		j += 1
-		at_cmds[j] = text:trim(at_cmds[j])
-		if length(at_cmds[j]) = 0 then
-			at_cmds = at_cmds[1 .. j-1] & at_cmds[j+1 ..$]
-			j -= 1
-
-		elsif at_cmds[j][1] = '#' then
-			at_cmds = at_cmds[1 .. j-1] & at_cmds[j+1 ..$]
-			j -= 1
-
-		elsif at_cmds[j][1] = '"' and at_cmds[j][$] = '"' and length(at_cmds[j]) >= 2 then
-			at_cmds[j] = at_cmds[j][2 .. $-1]
-
-		elsif at_cmds[j][1] = '\'' and at_cmds[j][$] = '\'' and length(at_cmds[j]) >= 2 then
-			sequence cmdex = stdseq:split(at_cmds[j][2 .. $-1],' ', 1) -- Empty words removed.
-
-			at_cmds = replace(at_cmds, cmdex, j)
-			j = j + length(cmdex) - 1
-
-		end if
-	end while
-
-	-- Replace the '@' argument with the contents of the file.
-	cmds = replace(cmds, at_cmds, arg_idx)
-	return cmds
-end function
-
-
-procedure check_mandatory( sequence opts, map parsed_opts, object add_help_rid, sequence cmds, object parse_options )
-	-- Check options to make sure all the manadory options are covered
-	for i = 1 to length(opts) do
-		if find(MANDATORY, opts[i][OPTIONS]) then
-			if atom(opts[i][SHORTNAME]) and atom(opts[i][LONGNAME]) then
-				if length(map:get(parsed_opts, opts[i][MAPNAME])) = 0 then
-					puts(1, "Additional arguments were expected.\n\n")
-					local_help(opts, add_help_rid, cmds, 1, parse_options)
-					local_abort(1)
-				end if
-			else
-				if not map:has(parsed_opts, opts[i][MAPNAME]) then
-					printf(1, "option '%s' is mandatory but was not supplied.\n\n", {opts[i][MAPNAME]})
-					local_help(opts, add_help_rid, cmds, 1, parse_options)
-					local_abort(1)
-				end if
-			end if
-		end if
-	end for
-end procedure
-
-procedure parse_abort( sequence format_msg, sequence msg_data,
-		sequence opts, object add_help_rid, sequence cmds, object parse_options )
--- something is wrong with the option
-	printf(1, format_msg, msg_data)
-	local_help(opts, add_help_rid, cmds, 1, parse_options)
-	local_abort(1)
-end procedure
-
-function parse_commands( sequence cmds, sequence opts, map parsed_opts, sequence help_opts, 
-		object add_help_rid, object parse_options, integer use_at, integer validation, 
-		integer has_extra, sequence call_count )
-	-- Parses the actual command line vs the options
-	-- Returns a two element sequence:
-	--  1: the list of command line options (may be altered due to @file expansion)
-	--  2: the option call_count tally
-	
-	integer arg_idx = 2
-	integer opts_done = 0
-	sequence find_result
-	sequence type_
-	integer from_
-	sequence cmd
-	
-	while arg_idx < length(cmds) do
-		arg_idx += 1
-
-		cmd = cmds[arg_idx]
-		if length(cmd) = 0 then
-			continue
-		end if
-
-		if cmd[1] = '@' and use_at then
-			cmds = parse_at_cmds( cmd, cmds, opts, arg_idx, add_help_rid, parse_options )
-			arg_idx -= 1
-			continue
-		end if
-
-		if (opts_done or find(cmd[1], os:CMD_SWITCHES) = 0 or length(cmd) = 1)
-		then
-			map:put(parsed_opts, EXTRAS, cmd, map:APPEND)
-			has_extra = 1
-			if validation = NO_VALIDATION_AFTER_FIRST_EXTRA then
-				for i = arg_idx + 1 to length(cmds) do
-					map:put(parsed_opts, EXTRAS, cmds[i], map:APPEND)
-				end for
-				
-				exit
-			else
-				continue
-			end if
-		end if
-
-		if equal(cmd, "--") then
-			opts_done = 1
-			continue
-		end if
-
-		if equal(cmd[1..2], "--") then	  -- found --opt-name
-			type_ = {LONGNAME, "--"}
-			from_ = 3
-		elsif cmd[1] = '-' then -- found -opt
-			type_ = {SHORTNAME, "-"}
-			from_ = 2
-		else  -- found /opt
-			type_ = {SHORTNAME, "/"}
-			from_ = 2
-		end if
-
-		if find(cmd[from_..$], help_opts) then
-			local_help(opts, add_help_rid, cmds, 1, parse_options)
-			ifdef UNITTEST then
-				return 0
-			end ifdef
-			local_abort(0)
-		end if
-
-		find_result = find_opt(opts, type_, cmd[from_..$])
-
-		if find_result[1] < 0 then
-			continue -- Couldn't use this command argument for anything.
-		end if
-
-		if find_result[1] = 0 then
-			if validation = VALIDATE_ALL or
-				(validation = NO_VALIDATION_AFTER_FIRST_EXTRA and has_extra = 0)
-			then
-				-- something is wrong with the option
-				parse_abort( "option '%s': %s\n\n", {cmd, find_result[2]}, 
-					opts, add_help_rid, cmds, parse_options)
-			end if
-
-			continue
-		end if
-
-		sequence handle_result = handle_opt( find_result, arg_idx, opts, parsed_opts, cmds, add_help_rid,
-			parse_options, call_count, validation )
-		arg_idx     = handle_result[1]
-		call_count = handle_result[2]
-	end while
-	return { cmds, call_count }
-end function
-
-function handle_opt( sequence find_result, integer arg_idx, sequence opts, map parsed_opts,
-		sequence cmds, object add_help_rid, object parse_options, sequence call_count,
-		integer validation )
-	-- Called to deal with an option found on the command line
-	-- Returns 2 element sequence:
-	--  1: the new arg_idx
-	--  2: the call_count tally
-	
-	integer map_add_operation = map:ADD
-	sequence opt = opts[find_result[1]]
-	object param
-	
-	if find(HAS_PARAMETER, opt[OPTIONS]) != 0 then
-		map_add_operation = map:APPEND
-		if length(find_result) < 4 then
-			arg_idx += 1
-			if arg_idx <= length(cmds) then
-				param = cmds[arg_idx]
-				if length(param) = 2 and find(param[1], "-/") then
-					param = ""
-				end if
-			else
-				param = ""
-			end if
-
-			if length(param) = 0 and (validation = VALIDATE_ALL or (
-				validation = NO_VALIDATION_AFTER_FIRST_EXTRA))
-			then
-				parse_abort( "option '%s' must have a parameter\n\n", {find_result[2]}, 
-					opts, add_help_rid, cmds, parse_options)
-			end if
-		else
-			param = find_result[4]
-		end if
-	else
-		param = find_result[4]
-	end if
-
-	if opt[CALLBACK] >= 0 then
-		integer pos = find_result[1]
-		call_count[pos] += 1
-		--                              OPT_IDX        OPT_CNT         OPT_VAL  OPT_REV
-		if call_func(opt[CALLBACK], {{find_result[1], call_count[pos], param,  find_result[3]}}) = 0 then
-			return { arg_idx, call_count }
-		end if
-	end if
-
-	if find_result[3] = 1 then
-		map:remove(parsed_opts, opt[MAPNAME])
-	else
-		if find(MULTIPLE, opt[OPTIONS]) = 0 then
-			if map:has(parsed_opts, opt[MAPNAME]) and (validation = VALIDATE_ALL or
-				(validation = NO_VALIDATION_AFTER_FIRST_EXTRA))
-			then
-				if find(HAS_PARAMETER, opt[OPTIONS]) or find(ONCE, opt[OPTIONS]) then
-					parse_abort( "option '%s' must not occur more than once in the command line.\n\n", 
-						{find_result[2]}, opts, add_help_rid, cmds, parse_options)
-				end if
-			else
-				map:put(parsed_opts, opt[MAPNAME], param)
-			end if
-		else
-			map:put(parsed_opts, opt[MAPNAME], param, map_add_operation)
-		end if
-	end if
-
-	if find(VERSIONING, opt[OPTIONS]) then
-		integer ver_pos = find(VERSIONING, opt[OPTIONS]) + 1
-		if length(opt[OPTIONS]) >= ver_pos then
-			printf(1, "%s\n", { opt[OPTIONS][ver_pos] })
-			abort(0)
-		else
-			error:crash("help options are incorrect,\n" &
-				"VERSIONING was used with no version string supplied")
-		end if
-	end if
-	return {arg_idx, call_count}
-end function
-
 --**
 -- Parse command line options, and optionally call procedures that relate to these options
 --
@@ -1177,6 +865,7 @@ end function
 --   routine_id of a procedure that accepts no parameters, or a sequence containing
 --   lines of text (one line per element).  The procedure is expected
 --   to write text to the stdout device.
+-- # ##NO_HELP_ON_ERROR## ~-- Do not show a list of options on a command line error.
 -- # ##NO_HELP## ~-- Do not automatically add the switches '-h', '-?', and '--help'
 --   to display the help text (if any).
 -- # ##NO_AT_EXPANSION## ~-- Do not expand arguments that begin with '@.'
@@ -1350,7 +1039,12 @@ end function
 --   [[:show_help]], [[:command_line]]
 
 public function cmd_parse(sequence opts, object parse_options = {}, sequence cmds = command_line())
+	integer arg_idx, opts_done
 	sequence cmd
+	object param
+	sequence find_result
+	sequence type_
+	integer from_
 	sequence help_opts
 	sequence call_count
 	object add_help_rid = -1
@@ -1358,23 +1052,15 @@ public function cmd_parse(sequence opts, object parse_options = {}, sequence cmd
 	integer has_extra = 0
 	integer use_at = 1
 	integer auto_help = 1
+	integer help_on_error = 1
 
 	integer po = 1
 	if atom(parse_options) then
 		parse_options = {parse_options}
 	end if
 	
-	-- set flags based on the parse options
 	while po <= length(parse_options) do
 		switch parse_options[po] do
-		
-			case NO_HELP then                         auto_help = 0
-			case VALIDATE_ALL then                    validation = VALIDATE_ALL
-			case NO_VALIDATION then                   validation = NO_VALIDATION
-			case NO_VALIDATION_AFTER_FIRST_EXTRA then validation = NO_VALIDATION_AFTER_FIRST_EXTRA
-			case NO_AT_EXPANSION then                 use_at = 0
-			case AT_EXPANSION then                    use_at = 1
-			
 			case HELP_RID then
 				if po < length(parse_options) then
 					po += 1
@@ -1383,12 +1069,34 @@ public function cmd_parse(sequence opts, object parse_options = {}, sequence cmd
 					error:crash("HELP_RID was given to cmd_parse with no routine_id")
 				end if
 			
+			case NO_HELP then
+				auto_help = 0
+
+			case NO_HELP_ON_ERROR then
+				-- if this is not from show_
+				help_on_error = 0
+
+			case VALIDATE_ALL then
+				validation = VALIDATE_ALL
+
+			case NO_VALIDATION then
+				validation = NO_VALIDATION
+
+			case NO_VALIDATION_AFTER_FIRST_EXTRA then
+				validation = NO_VALIDATION_AFTER_FIRST_EXTRA
+
+			case NO_AT_EXPANSION then
+				use_at = 0
+
+			case AT_EXPANSION then
+				use_at = 1
+
 			case PAUSE_MSG then
 				if po < length(parse_options) then
 					po += 1
 					pause_msg = parse_options[po]
 				else
-					error:crash("PAUSE_MSG was given to cmd_parse with no actual message text")
+					error:crash("PAUSE_MSG was given to cmd_parse with no actually message text")
 				end if
 				
 			case else
@@ -1405,22 +1113,271 @@ public function cmd_parse(sequence opts, object parse_options = {}, sequence cmd
 	map:put(parsed_opts, EXTRAS, {})
 
 	-- Find if there are any help options.
-	help_opts = get_help_options( opts )
-	
-	object cmds_ok = parse_commands( cmds, opts, parsed_opts, help_opts, add_help_rid, parse_options, 
-		use_at, validation, has_extra, call_count )
-	if atom( cmds_ok ) then
-		return 0
-	end if
-	cmds       = cmds_ok[1]
-	call_count = cmds_ok[2]
-	
-	-- Check that all mandatory options have been supplied. (may abort)
-	check_mandatory( opts, parsed_opts, add_help_rid, cmds, parse_options )
-	
+	help_opts = {}
+	for i = 1 to length(opts) do
+		if find(HELP, opts[i][OPTIONS]) then
+			if sequence(opts[i][SHORTNAME]) then
+				help_opts = append(help_opts, opts[i][SHORTNAME])
+			end if
+			
+			if sequence(opts[i][LONGNAME]) then
+				help_opts = append(help_opts, opts[i][LONGNAME])
+			end if
+			
+			if find(NO_CASE, opts[i][OPTIONS]) then
+				help_opts = text:lower(help_opts)
+				arg_idx = length(help_opts)
+				for j = 1 to arg_idx do
+					help_opts = append( help_opts, text:upper(help_opts[j]) )
+				end for
+			end if
+		end if
+	end for
+
+	arg_idx = 2
+	opts_done = 0
+
+	while arg_idx < length(cmds) do
+		arg_idx += 1
+
+		cmd = cmds[arg_idx]
+		if length(cmd) = 0 then
+			continue
+		end if
+
+		if cmd[1] = '@' and use_at then
+			object at_cmds
+			integer j
+
+			if length(cmd) > 2 and cmd[2] = '@' then
+				-- Read in the lines from the optional file.
+				at_cmds = io:read_lines(cmd[3..$])
+				if equal(at_cmds, -1) then
+					-- File didn't exist but this is not an error, so just
+					-- remove it from the commands.
+					cmds = eu:remove(cmds, arg_idx)
+					arg_idx -= 1
+					continue
+				end if
+			else
+				-- Read in the lines from the file.
+				at_cmds = io:read_lines(cmd[2..$])
+				if equal(at_cmds, -1) then
+					printf(2, "Cannot access '@' argument file '%s'\n", {cmd[2..$]})
+					if help_on_error then
+						local_help(opts, add_help_rid, cmds, 1, parse_options)
+					elsif auto_help then
+						printf(2,"Try '--help' for more information.\n",{})
+					end if                
+					local_abort(1)
+				end if
+			end if
+			-- Parse the 'at' commands removing comment lines and empty lines,
+			-- and stripping off any enclosing quotes from lines.
+			j = 0
+			while j < length(at_cmds) do
+				j += 1
+				at_cmds[j] = text:trim(at_cmds[j])
+				if length(at_cmds[j]) = 0 then
+					at_cmds = at_cmds[1 .. j-1] & at_cmds[j+1 ..$]
+					j -= 1
+
+				elsif at_cmds[j][1] = '#' then
+					at_cmds = at_cmds[1 .. j-1] & at_cmds[j+1 ..$]
+					j -= 1
+
+				elsif at_cmds[j][1] = '"' and at_cmds[j][$] = '"' and length(at_cmds[j]) >= 2 then
+					at_cmds[j] = at_cmds[j][2 .. $-1]
+
+				elsif at_cmds[j][1] = '\'' and at_cmds[j][$] = '\'' and length(at_cmds[j]) >= 2 then
+					sequence cmdex = stdseq:split(at_cmds[j][2 .. $-1],' ', 1) -- Empty words removed.
+
+					at_cmds = replace(at_cmds, cmdex, j)
+					j = j + length(cmdex) - 1
+
+				end if
+			end while
+
+			-- Replace the '@' argument with the contents of the file.
+			cmds = replace(cmds, at_cmds, arg_idx)
+			arg_idx -= 1
+			continue
+		end if
+
+		if (opts_done or find(cmd[1], os:CMD_SWITCHES) = 0 or length(cmd) = 1)
+		then
+			map:put(parsed_opts, EXTRAS, cmd, map:APPEND)
+			has_extra = 1
+			if validation = NO_VALIDATION_AFTER_FIRST_EXTRA then
+				for i = arg_idx + 1 to length(cmds) do
+					map:put(parsed_opts, EXTRAS, cmds[i], map:APPEND)
+				end for
+				
+				exit
+			else
+				continue
+			end if
+		end if
+
+		if equal(cmd, "--") then
+			opts_done = 1
+			continue
+		end if
+
+		if equal(cmd[1..2], "--") then	  -- found --opt-name
+			type_ = {LONGNAME, "--"}
+			from_ = 3
+		elsif cmd[1] = '-' then -- found -opt
+			type_ = {SHORTNAME, "-"}
+			from_ = 2
+		else  -- found /opt
+			type_ = {SHORTNAME, "/"}
+			from_ = 2
+		end if
+
+		if find(cmd[from_..$], help_opts) then
+				local_help(opts, add_help_rid, cmds, 1, parse_options)
+			ifdef UNITTEST then
+				return 0
+			end ifdef
+			local_abort(0)
+		end if
+
+		find_result = find_opt(opts, type_, cmd[from_..$])
+
+		if find_result[1] < 0 then
+			continue -- Couldn't use this command argument for anything.
+		end if
+
+		if find_result[1] = 0 then
+			if validation = VALIDATE_ALL or
+				(validation = NO_VALIDATION_AFTER_FIRST_EXTRA and has_extra = 0)
+			then
+				-- something is wrong with the option
+				printf(1, "option '%s': %s\n", {cmd, find_result[2]})
+				if help_on_error then
+					puts(2,10)
+					local_help(opts, add_help_rid, cmds, 1, parse_options)
+				elsif auto_help then
+					printf(2,"Try '--help' for more information.\n",{})               
+				end if
+				local_abort(1)
+			end if
+
+			continue
+		end if
+
+		sequence opt = opts[find_result[1]]
+		integer map_add_operation = map:ADD
+
+		if find(HAS_PARAMETER, opt[OPTIONS]) != 0 then
+			map_add_operation = map:APPEND
+			if length(find_result) < 4 then
+				arg_idx += 1
+				if arg_idx <= length(cmds) then
+					param = cmds[arg_idx]
+					if length(param) = 2 and find(param[1], "-/") then
+						param = ""
+					end if
+				else
+					param = ""
+				end if
+
+				if length(param) = 0 and (validation = VALIDATE_ALL or (
+					validation = NO_VALIDATION_AFTER_FIRST_EXTRA))
+				then
+					printf(1, "option '%s' must have a parameter\n", {find_result[2]})
+					if help_on_error then
+						local_help(opts, add_help_rid, cmds, 1, parse_options)
+					elsif auto_help then
+						printf(2,"Try '--help' for more information.\n",{})          
+					end if
+					local_abort(1)
+				end if
+			else
+				param = find_result[4]
+			end if
+		else
+			param = find_result[4]
+		end if
+
+		if opt[CALLBACK] >= 0 then
+			integer pos = find_result[1]
+			call_count[pos] += 1
+			--                              OPT_IDX        OPT_CNT         OPT_VAL  OPT_REV
+			if call_func(opt[CALLBACK], {{find_result[1], call_count[pos], param,  find_result[3]}}) = 0 then
+				continue
+			end if
+		end if
+
+		if find_result[3] = 1 then
+			map:remove(parsed_opts, opt[MAPNAME])
+		else
+			if find(MULTIPLE, opt[OPTIONS]) = 0 then
+				if map:has(parsed_opts, opt[MAPNAME]) and (validation = VALIDATE_ALL or
+					(validation = NO_VALIDATION_AFTER_FIRST_EXTRA))
+				then
+					if find(HAS_PARAMETER, opt[OPTIONS]) or find(ONCE, opt[OPTIONS]) then
+						printf(1, "option '%s' must not occur more than once in the command line.\n", {find_result[2]})
+						if help_on_error then
+							puts(2,10)
+							local_help(opts, add_help_rid, cmds, 1, parse_options)
+						elsif auto_help then
+							printf(2,"Try '--help' for more information.\n",{})          
+						end if
+						local_abort(1)
+					end if
+				else
+					map:put(parsed_opts, opt[MAPNAME], param)
+				end if
+			else
+				map:put(parsed_opts, opt[MAPNAME], param, map_add_operation)
+			end if
+		end if
+
+        if find(VERSIONING, opt[OPTIONS]) then
+            integer ver_pos = find(VERSIONING, opt[OPTIONS]) + 1
+            if length(opt[OPTIONS]) >= ver_pos then
+                printf(1, "%s\n", { opt[OPTIONS][ver_pos] })
+                abort(0)
+            else
+                error:crash("help options are incorrect,\n" &
+                    "VERSIONING was used with no version string supplied")
+            end if
+        end if
+	end while
+
+	-- Check that all mandatory options have been supplied.
+	for i = 1 to length(opts) do
+		if find(MANDATORY, opts[i][OPTIONS]) then
+			if atom(opts[i][SHORTNAME]) and atom(opts[i][LONGNAME]) then
+				if length(map:get(parsed_opts, opts[i][MAPNAME])) = 0 then
+					puts(1, "Additional arguments were expected.\n")
+					if help_on_error then
+						puts(2,10)
+						local_help(opts, add_help_rid, cmds, 1, parse_options)
+					elsif auto_help then
+						printf(2,"Try '--help' for more information.\n",{})          
+					end if
+					local_abort(1)
+				end if
+			else
+				if not map:has(parsed_opts, opts[i][MAPNAME]) then
+					printf(1, "option '%s' is mandatory but was not supplied.\n", {opts[i][MAPNAME]})
+					if help_on_error then
+						puts(2,10)
+						local_help(opts, add_help_rid, cmds, 1, parse_options)
+					elsif auto_help then
+						printf(2,"Try '--help' for more information.\n",{})          
+					end if
+					local_abort(1)
+				end if
+			end if
+		end if
+	end for
+
 	return parsed_opts
 end function
-
 
 --**
 -- Returns a text string based on the set of supplied strings. Typically, this

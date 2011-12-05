@@ -501,7 +501,7 @@ $(TRUNKDIR)\tests\ecp.dat : $(BUILDDIR)\ecp.dat
 testeu : .SYMBOLIC  $(TRUNKDIR)\tests\ecp.dat
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR)
-	-$(EUTEST) -i ..\include $(TEST_EXTRA) -eui "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\eu.ex" -euc "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\ec.ex" $(LIST) $(TESTFILE)
+	-$(EUTEST) -i ..\include $(TEST_EXTRA) --nocheck -eui "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\eu.ex" -euc "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\ec.ex" $(LIST) $(TESTFILE)
 	cd ..\source
 
 !endif #EUPHORIA
