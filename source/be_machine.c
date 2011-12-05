@@ -222,9 +222,10 @@ IFILE long_iopen(char *name, char *mode)
 {
 	IFILE f = iopen(name, mode);
 #	if defined(__GNUC__) && defined(_WIN32)
-		/* On MinGW we must do a seek
-		 * in order to ensure that or tell's value
-		 * will be correct.  Ticket: #733 */
+		/* On MinGW and append mode we must do a seek
+		 * in order to ensure that a later call to
+		 * tell() in Where() will be a correct value.
+		 * See ticket: #733 */
 		while (*mode)
 			if (*(mode++) == 'a')
 				fseek(f, 0, SEEK_END);
