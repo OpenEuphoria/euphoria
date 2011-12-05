@@ -233,13 +233,28 @@ uintptr_t get_pos_int(char *where, object x)
 IFILE long_iopen(char *name, char *mode)
 /* iopen a file. Has support for Windows 95 long filenames */
 {
-	return iopen(name, mode);
+	IFILE f = iopen(name, mode);
+#	if defined(__GNUC__) && defined(_WIN32)
+		/* On MinGW and append mode we must do a seek
+		 * in order to ensure that a later call to
+		 * tell() in Where() will be a correct value.
+		 * See ticket: #733 */
+		while (*mode)
+			if (*(mode++) == 'a')
+				fseek(f, 0, SEEK_END);
+#	endif
+	return f;
 }
 
 int long_open(char *name, int mode)
 /* open a file. Has support for Windows 95 long filenames */
 {
-	return open(name, mode);
+	int f = open(name, mode);
+#	if defined(__GNUC__) && defined(_WIN32)
+//		if (mode & O_APPEND)
+//			lseek(f, 0, SEEK_END);
+#	endif
+	return f;
 }
 
 
@@ -864,13 +879,13 @@ static object Where(object x)
 	// if (user_file[file_no].mode & EF_APPEND)
 		iflush(f);  // This fixes a bug in Watcom 10.6 that is fixed in 11.0
 #endif
-	result = itell(f);
+	result = (IOFF)itell(f);
 	if (result == (IOFF)-1)
 	{
 		RTFatal("where() failed on this file");
 	}
-	if (result > (IOFF)MAXINT || result < (IOFF)MININT)
-		pos = NewDouble((eudouble)result);  // maximum 2 billion
+	if ((result > (IOFF)MAXINT) || (result < (IOFF)MININT))
+		pos = (object)NewDouble((eudouble)result);  // maximum 8 quintillion
 	else
 		pos = (object) result;
 	
