@@ -846,7 +846,6 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 					exit
 				end if
 				
-				putback( tok )
 				-- make it look like the IGNORED token
 				tok= { IGNORED, SymTab[tok[T_SYM]][S_NAME] }
 				fallthru
