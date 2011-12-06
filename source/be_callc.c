@@ -823,11 +823,11 @@ int64_t icall_x86_64( intptr_t func, double* xmm, int64_t *r, int args, int sign
 	switch( signature ){
 		case 0:
 			switch( args ){
-				case 0: ((int64_t (*)())func)();
-				case 1: ((int64_t (*)())func)( r[0] );
-				case 2: ((int64_t (*)())func)( r[0], r[1] );
-				case 3: ((int64_t (*)())func)( r[0], r[1], r[2] );
-				case 4: ((int64_t (*)())func)( r[0], r[1], r[2], r[3] );
+				case 0: return ((int64_t (*)())func)();
+				case 1: return ((int64_t (*)())func)( r[0] );
+				case 2: return ((int64_t (*)())func)( r[0], r[1] );
+				case 3: return ((int64_t (*)())func)( r[0], r[1], r[2] );
+				case 4: return ((int64_t (*)())func)( r[0], r[1], r[2], r[3] );
 				default:
 				return ((int64_t (*)())func)(
 						r[0], r[1], r[2], r[3], r[4], 
