@@ -729,9 +729,8 @@ procedure ascii_out(sequence data)
 		case "summary" then
 			puts(1, repeat('-', 76) & "\n")
 
-			if find(data[2], unsummarized_files) then
-				unsummarized_files = unsummarized_files[1..find(data[2], unsummarized_files)-1] 
-					& unsummarized_files[find(data[2], unsummarized_files)+1..$]
+			if length(unsummarized_files) then
+				unsummarized_files = unsummarized_files[1..$-1]
 			end if
 
 			sequence status
