@@ -679,7 +679,9 @@ test :
 		-ec "$(CYPBUILDDIR)/$(EECU)" \
 		-eubind "$(CYPBUILDDIR)/$(EUBIND)" -eub $(CYPBUILDDIR)/$(EBACKENDC) \
 		-lib "$(CYPBUILDDIR)/$(LIBRARY_NAME)" \
-		$(TESTFILE)
+		-log $(TESTFILE) ; \
+	$(EXE) -i ../include ../source/eutest.ex -process-log > $(CYPBUILDDIR)/test-report.txt ; \
+	$(EXE) -i ../include ../source/eutest.ex -process-log -html > $(CYPBUILDDIR)/test-report.html	
 	cd ../tests && sh check_diffs.sh
 
 testeu : 
