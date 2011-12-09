@@ -116,9 +116,9 @@ ifeq "$(EMINGW)" "1"
 		endif
 	else
 		ifeq "$(ALIGN4)" "1"
-			MEM_FLAGS=-DEALIGN4 -DESIMPLE_MALLOC
+			MEM_FLAGS=-DEALIGN4 
 		else
-			MEM_FLAGS=-DESIMPLE_MALLOC
+			MEM_FLAGS=
 		endif
 	endif
 	PCRE_CC=gcc
@@ -136,7 +136,7 @@ else
 	else
 		LIBRARY_NAME=eu.a
 	endif
-	MEM_FLAGS=-DESIMPLE_MALLOC
+	MEM_FLAGS=
 endif
 
 MKVER=$(BUILDDIR)/mkver$(EXE_EXT)
@@ -674,12 +674,14 @@ test : LIBRARY_PATH=$(%LIBRARY_PATH)
 test : 
 test :  
 	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
-		$(EXE) -i ../include ../source/eutest.ex -i ../include -cc gcc $(VERBOSE_TESTS) \
+		eutest -i ../include -cc gcc $(VERBOSE_TESTS) \
 		-exe "$(CYPBUILDDIR)/$(EEXU)" \
 		-ec "$(CYPBUILDDIR)/$(EECU)" \
 		-eubind "$(CYPBUILDDIR)/$(EUBIND)" -eub $(CYPBUILDDIR)/$(EBACKENDC) \
 		-lib "$(CYPBUILDDIR)/$(LIBRARY_NAME)" \
-		$(TESTFILE)
+		-log $(TESTFILE)
+	cd ../tests && eutest -process-log -html > $(CYPBUILDDIR)/test-report.html && \
+	eui -i ../include ../source/eutest.ex -process-log > $(CYPBUILDDIR)/test-report.txt
 	cd ../tests && sh check_diffs.sh
 
 testeu : 
