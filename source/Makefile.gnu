@@ -54,6 +54,13 @@ PCRE_CC=$(CC)
 include $(CONFIG)
 include $(TRUNKDIR)/source/pcre/objects.mak
 
+ifeq "$(EHOST)" "$(ETARGET)"
+HOSTCC=$(CC)
+else
+# so far this is all we support
+HOSTCC=gcc
+endif
+
 ifeq "$(RELEASE)" "1"
 RELEASE_FLAG = -D EU_FULL_RELEASE
 endif
@@ -162,7 +169,7 @@ else
 	MEM_FLAGS=-DESIMPLE_MALLOC
 endif
 
-MKVER=$(BUILDDIR)/mkver$(EXE_EXT)
+MKVER=$(BUILDDIR)/mkver$(HOST_EXE_EXT)
 EBACKENDU=eub$(EXE_EXT)
 EBACKENDC=eub$(EXE_EXT)
 EECU=euc$(EXE_EXT)
@@ -592,10 +599,10 @@ endif
 
 .PHONY: update-version-cache
 update-version-cache : $(MKVER)
-	$(WINE) $(MKVER) "$(HG)" "$(BUILDDIR)/ver.cache" "$(BUILDDIR)/include/be_ver.h" $(EREL_TYPE)$(RELEASE)
+	$(MKVER) "$(HG)" "$(BUILDDIR)/ver.cache" "$(BUILDDIR)/include/be_ver.h" $(EREL_TYPE)$(RELEASE)
 
 $(MKVER): mkver.c
-	$(CC) -o $@ $<
+	$(HOSTCC) -o $@ $<
 
 
 $(BUILDDIR)/ver.cache : update-version-cache

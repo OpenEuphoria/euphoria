@@ -884,8 +884,8 @@ static object Where(object x)
 	{
 		RTFatal("where() failed on this file");
 	}
-	if ((result > (IOFF)MAXINT) || (result < (IOFF)MININT))
-		pos = (object)NewDouble((eudouble)result);  // maximum 8 quintillion
+	if (result > (IOFF)MAXINT || result < (IOFF)MININT)
+		pos = NewDouble((eudouble)result);  // maximum 8 quintillion
 	else
 		pos = (object) result;
 	
