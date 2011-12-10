@@ -77,7 +77,7 @@
 #                                 either the test target or the testeu target.
 #
 # ex:
-# 	wmake testeu I_EXTRA="-D ETYPE_CHECK" TEST_EXTRA="-log"
+# 	wmake testeu I_EXTRA="-D ETYPE_CHECK" 
 #
 #       This tests using the interpreter with type checking on and writes the results to a log
 #       file.
