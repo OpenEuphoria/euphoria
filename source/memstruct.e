@@ -5,6 +5,7 @@ include fwdref.e
 include global.e
 include msgtext.e
 include parser.e
+include platform.e
 include reswords.e
 include scanner.e
 include symtab.e
@@ -503,6 +504,78 @@ procedure add_recalc( symtab_index parent_struct, symtab_index dependent_struct 
 end procedure
 
 --**
+-- Return the alignment required for the memstruct passed.
+-- Returs 0 if the alignment cannot yet be determined.
+function calculate_alignment( symtab_index member_sym )
+	integer alignment = 0
+	
+	if SymTab[member_sym][S_MEM_STRUCT] then
+		member_sym = SymTab[member_sym][S_MEM_STRUCT]
+	end if
+	
+	integer sym = member_sym
+	if SymTab[sym][S_MEM_SIZE] = -1 then
+		-- we haven't determined the size yet for this
+		return -1
+	end if
+	
+	integer sub_alignment = 0
+	while sym with entry do
+		if sym_token( sym ) = MS_MEMBER then
+			sub_alignment = calculate_alignment( sym )
+			if not sub_alignment then
+				return -1
+			end if
+		else
+			-- 32-bit *nix aligns double on 4-byte boundary
+			if IX86 and IUNIX and sym_token( sym ) = MS_DOUBLE then
+				sub_alignment = 4
+			else
+				if SymTab[sym][S_MEM_ARRAY] then
+					sub_alignment /= SymTab[sym][S_MEM_ARRAY]
+				else
+					sub_alignment = SymTab[sym][S_MEM_SIZE]
+				end if
+			end if
+		end if
+		
+		if sub_alignment > alignment then
+			alignment = sub_alignment
+		end if
+	entry
+		sym = SymTab[sym][S_MEM_NEXT]
+	end while
+	return alignment
+end function
+
+--**
+-- Calculates how much padding is needed
+function calculate_padding( symtab_index member_sym, integer size, integer mem_size )
+	integer padding = 0
+	
+	if sym_token( member_sym ) = MS_MEMBER then
+		integer alignment = calculate_alignment( member_sym )
+		if alignment = -1 then
+			return -1
+		else
+			padding = remainder( size, alignment )
+		end if
+	else
+		if SymTab[member_sym][S_MEM_ARRAY] then
+			mem_size /= SymTab[member_sym][S_MEM_ARRAY]
+		end if
+		
+		-- 32-bit *nix aligns double on 4-byte boundary
+		if sym_token( member_sym ) = MS_DOUBLE and IX86 and IUNIX then
+			padding = remainder( size, 4 )
+		else
+			padding = remainder( size, mem_size )
+		end if
+	end if
+	return padding
+end function
+
+--**
 -- Returns the size and offsets for the memstruct, or -1 if all
 -- sizes have not been determined yet.
 function calculate_size()
@@ -515,7 +588,7 @@ function calculate_size()
 	
 	integer size = 0
 	integer indeterminate = 0
-	while member_sym with entry do
+	while member_sym and not indeterminate with entry do
 		integer mem_size = SymTab[member_sym][S_MEM_SIZE]
 		if mem_size < 1 then
 			-- might be a struct that's been recalculated
@@ -527,29 +600,25 @@ function calculate_size()
 						mem_size = recalculate_size( struct_type )
 					end if
 					if mem_size < 1 then
-						SymTab[mem_struct][S_MEM_SIZE] = 0
 						indeterminate = 1
 						add_recalc( struct_type, mem_struct )
 					end if
 				end if
 			else
-				SymTab[mem_struct][S_MEM_SIZE] = 0
+				
 				indeterminate = 1
-				add_recalc( struct_type, mem_struct )
+				
 			end if
 		end if
 		if not indeterminate then
 			if not is_union then
 				-- make sure we're properly aligned
-				integer padding
-				if sym_token( member_sym ) = MS_MEMBER then
-					padding = remainder( size, sizeof( C_POINTER ) )
-				else
-					padding = remainder( size, mem_size )
-				end if
+				integer padding = calculate_padding( member_sym, size, mem_size )
 				
-				if padding then
-					size += mem_size - padding
+				if padding < 0 then
+					indeterminate = 1
+				elsif padding then
+					size += padding
 				end if
 				
 				SymTab[member_sym][S_MEM_OFFSET] = size
@@ -565,11 +634,14 @@ function calculate_size()
 	end while
 	
 	if indeterminate then
+		SymTab[mem_struct][S_MEM_SIZE] = 0
 		return 0
 	else
-		-- need to pad it out...
-		integer padding = remainder( size, sizeof( C_POINTER ) )
-		SymTab[mem_struct][S_MEM_SIZE] = size + padding
+		SymTab[mem_struct][S_MEM_SIZE] = size
+		integer alignment = calculate_alignment( mem_struct )
+		integer padding = remainder( size, alignment )
+		size += padding
+		SymTab[mem_struct][S_MEM_SIZE] = size
 		return size
 	end if
 end function
@@ -646,7 +718,6 @@ procedure add_member( integer type_sym, token name_tok, object mem_type, integer
 	if type_sym < 0 then
 		register_forward_type( sym, -type_sym )
 	end if
-	
 	last_sym = sym
 end procedure
 

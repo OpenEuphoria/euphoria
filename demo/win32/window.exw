@@ -12,6 +12,8 @@ include std/math.e
 include std/error.e
 include std/console.e
 
+include std/memstruct/windows.e
+
 --****
 -- === Windows Data Type constants for function/procedure calls
 
@@ -34,71 +36,7 @@ public constant C_LONG_PTR = C_POINTER
 
 public constant C_LRESULT = C_LONG_PTR
 
---****
--- === Windows Type constants for structs
 
-public memtype
-	char as BYTE,
-	int as BOOL,
-	int as INT,
-	unsigned int as UINT,
-	long as LONG,
-	unsigned long as ULONG,
-	double as DOUBLE,
-	short as WORD,
-	long as DWORD,
-	object as HANDLE,
-	object as HWND,
-	object as LPSTR,
-	object as WNDPROC,
-	object as WPARAM,
-	object as LPARAM,
-	$
-
-memstruct WNDCLASSEX
-	UINT cbSize
-	UINT style
-	WNDPROC lpfnWndProc  	--WNDPROC
-	INT cbClsExtra
-	INT cbWndExtra
-	HANDLE hInstance  	--HINSTANCE
-	HANDLE hIcon   		--HICON
-	HANDLE hCursor  	--HCURSOR
-	HANDLE hbrBackground 	--HBRUSH
-	LPSTR lpszMenuName  	--LPCSTR
-	LPSTR lpszClassName	--LPCSTR
-	HANDLE hIconSm		--HICON
-end memstruct
-
-memstruct POINT
-	LONG x
-	LONG y
-end memstruct
-
-memstruct RECT
-	LONG left
-	LONG top
-	LONG right
-	LONG bottom
-end memstruct
-
-memstruct PAINTSTRUCT
-	HANDLE hdc		--HDC
-	BOOL fErase
-	RECT rcPaint		--RECT
-	BOOL fRestore
-	BOOL fIncUpdate
-	BYTE rgbReserved[32]	--BYTE,32
-end memstruct
-
-memstruct MSG
-	HWND hwnd
-	UINT message
-	WPARAM wParam
-	LPARAM lParam
-	DWORD time
-	POINT pt
-end memstruct
 
 
 constant CS_HREDRAW = 2,
