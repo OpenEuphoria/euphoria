@@ -4153,8 +4153,11 @@ may contain many different, distinct elements, while a memunion (just like a uni
 is a way to refer to the same locations in memory in different ways (e.g., either as an
 integer or as a floating point number).
 
-Within a memstruct or memunion, different elements are defined using names for data types
-along with some data type modifiers.
+Within a memstruct or memunion, different members are defined using names for data types
+along with some data type modifiers. 
+
+It is also possible to declare fixed-length arrays of a member by adding the element count
+inside square brackets after the member name.
 
 ==== Assigning memstruct values
 
@@ -4162,9 +4165,10 @@ Assigning a value to a memstruct is an alternative to using one of the ##[[:poke
 procedures.  The big advantage to using a ##[[:memstruct]]## over ##[[:poke]]## is that
 euphoria handles data conversion and the calculation of offsets.
 
-The sytax for assigning a value to memory is the pointer to the memory,
+The syntax for assigning a value to memory is the pointer to the memory,
 followed by a dot, then the name of the memstruct, optionally followed by a dot and
-then a member of the memstruct:
+then a member of the memstruct. If that member is an array and you wish to reference
+a specific array element, then a 1-based index inside square brackets is also required.
 
 <eucode>
 memstruct POINT
@@ -4172,9 +4176,24 @@ memstruct POINT
 	int y
 end memstruct
 
+memstruct BUFFER
+    char name[12]  -- 'name' uses 12 bytes of space.
+    int  next_element
+    int  element[200] -- element uses 200 * 4 = 800 bytes of space.
+end memstruct
+   
 atom point = allocate( sizeof( POINT ) )
 point.POINT.x = 1
 point.POINT.y = 2
+
+atom buf = allocate( sizeof( BUFFER ) )
+
+buf.BUFFER.name = "testname" -- assigns first 8 byte to string and zeros the remainder.
+buf.BUFFER.element[1] = 543
+buf.BUFFER.element[2] = 210
+buf.BUFFER.element[3] = 987
+buf.BUFFER.next_element = 4
+
 </eucode>
 
 When a member is itself a memstruct, the dot notation may be continued to access the 
@@ -4241,6 +4260,7 @@ based on their sizes, Euphoria may add some space in between members, just like 
 C compiler would.
 
 The size of a ##memstruct## may be determined at runtime using ##[[:sizeof]]()##.
+It is the sum of the sizes of its members.
 
 ##memstructs## may contain other ##memstructs## or pointers to other ##memstructs##.
 
@@ -4248,7 +4268,8 @@ The size of a ##memstruct## may be determined at runtime using ##[[:sizeof]]()##
 ==== memunion
 
 A ##memunion## is like a ##[[:memstruct]]##, except that the various data members
-of a ##memunion## are all located in the same place.  A ##memunion##, like a union in C,
+of a ##memunion## are all located at offset zero, which means that they all start
+at the same RAM address.  A ##memunion##, like a union in C,
 provides different ways to interpret the same location in memory.
 
 <eucode>
@@ -4259,7 +4280,8 @@ memunion conversion
 end memunion
 </eucode>
 
-The size of a ##memunion## may be determined at runtime using ##[[:sizeof]]()##.
+The size of a ##memunion## may be determined at runtime using ##[[:sizeof]]()##. 
+It is the size of the largest member.
 
 @[memtype|]
 ==== memtype
@@ -4419,21 +4441,101 @@ end memstruct
 
 atom my_rect = allocate( sizeof( rect ) )
 
-my_rect.upper_left.x = 50
-my_rect.upper_left.y = 100
+my_rect.rect.upper_left.x = 50
+my_rect.rect.upper_left.y = 100
 
-my_rect.lower_right.x = 125
-my_rect.lower_right.y = 150
+my_rect.rect.lower_right.x = 125
+my_rect.rect.lower_right.y = 150
 
-? my_rect.lower_right.x  -- outputs 125
+? my_rect.rect.lower_right.x  -- outputs 125
 </eucode>
+It is possible to //abuse// the memstruct functionality because there is no type
+information associated with the address pointer. For example ...
+
+<eucode>
+include std/machine.e
+
+memstruct point
+    int x
+    int y
+end memstruct
+
+memstruct rect
+    point upper_left
+    point lower_right
+end memstruct
+
+atom my_rect = allocate( sizeof( rect ) )
+
+my_rect.rect.upper_left.x = 20
+my_rect.rect.upper_left.y = 200
+? my_rect.rect.upper_left.x  -- outputs 20
+
+my_rect.point.x = 50
+my_rect.point.y = 100
+
+? my_rect.rect.upper_left.x  -- outputs 50
+</eucode>
+
 
 @[addressof|]
 ==== addressof
 
-Returns the pointer to a memstruct member.
+A function that returns the address of a memstruct member. You must supply the
+variable that contains the starting RAM address, the memstruct name, and
+member name sing the dot notation described above.
+
+Example:
+<eucode>
+include std/machine.e
+
+memstruct point
+    int x
+    int y
+end memstruct
+
+memstruct rect
+    point upper_left
+    point lower_right
+end memstruct
+
+atom pa = allocate( sizeof( point ) )
+
+? addressof(pa.point.x) = pa      -- outputs 1 (true)
+? addressof(pa.point.y) = pa + 4  -- outputs 1 (true)
+
+? addressof(pa.rect.lower_right.y) = pa + 12  -- outputs 1 (true)
+
+</eucode>
 
 @[offsetof|]
 ==== offsetof
 
-Returns the offset in bytes of a member inside of its memstruct.
+Returns the offset in bytes of a member inside of its memstruct. You can optionally
+omit the address pointer variable when calling this, just the memstruct name
+and member is required.
+
+Example:
+<eucode>
+include std/machine.e
+
+memstruct point
+    int x
+    int y
+end memstruct
+
+memstruct rect
+    point upper_left
+    point lower_right
+end memstruct
+
+atom pa = allocate( sizeof( point ) )
+
+? offsetof(point.x)    -- outputs 0
+? offsetof(pa.point.x) -- outputs 0
+? offsetof(point.y)    -- outputs 4
+? offsetof(pa.point.y) -- outputs 4
+
+? offsetof(rect.lower_right.y) -- outputs 12
+
+</eucode>
