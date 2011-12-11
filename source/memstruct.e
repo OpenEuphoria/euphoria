@@ -532,7 +532,7 @@ function calculate_alignment( symtab_index member_sym )
 				sub_alignment = 4
 			else
 				if SymTab[sym][S_MEM_ARRAY] then
-					sub_alignment /= SymTab[sym][S_MEM_ARRAY]
+					sub_alignment = SymTab[sym][S_MEM_SIZE] / SymTab[sym][S_MEM_ARRAY]
 				else
 					sub_alignment = SymTab[sym][S_MEM_SIZE]
 				end if
