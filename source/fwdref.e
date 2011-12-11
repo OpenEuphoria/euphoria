@@ -408,7 +408,7 @@ procedure patch_forward_msmember( token tok, integer ref )
 				SymTab[member][S_MEM_STRUCT] = real_type_sym
 				
 			case else
-				-- ?? not handled...leave it unreferenced
+				-- ?? not handled...leave it unreferenced 
 				return
 		end switch
 		
@@ -420,6 +420,9 @@ procedure patch_forward_msmember( token tok, integer ref )
 			recalculate_size( parent_sym )
 		end if
 		resolved_reference( ref )
+	else
+		
+		InternalErr( sprintf("Unhandled memstruct member fwd ref op: %d", tok[T_ID] ) )
 	end if
 	
 end procedure
@@ -467,6 +470,8 @@ procedure patch_forward_memstruct( token tok, integer ref )
 						Code[rx] = m_sym
 						resolved_reference( m_ref )
 					end if
+				else
+					resolved_reference( m_ref )
 				end if
 			end for
 			reset_code()
@@ -901,7 +906,6 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 		end if
 		fwdref_count += 1
 	end if
-	
 	return ref
 end function
 

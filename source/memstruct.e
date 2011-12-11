@@ -198,6 +198,19 @@ export function parse_sizeof()
 end function
 
 --**
+-- Parse a memstruct access for a memstruct base function
+-- like offsetof, addressof
+export procedure parse_memstruct_func( integer op )
+	tok_match( LEFT_ROUND )
+	-- The funcs eat this, so it doesn't need to be real
+	Push( 0 )
+	enter_memstruct( 1 )
+	MemStruct_access( 1, FALSE )
+	leave_memstruct()
+	tok_match( RIGHT_ROUND )
+end procedure
+
+--**
 -- Parses one memtype declaration.
 procedure parse_memtype( integer scope )
 	token mem_type = next_token()

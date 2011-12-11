@@ -1174,17 +1174,23 @@ procedure Function_call( token tok )
 		-- to warn if not in include tree
 		UndefinedVar( tok[T_SYM] )
 		
-		if SIZEOF = SymTab[tok[T_SYM]][S_OPCODE] then
-			if parse_sizeof() then
-				-- special parsing for multi-part memstruct types
-				tok_match( RIGHT_ROUND )
+		switch SymTab[tok[T_SYM]][S_OPCODE] do
+			case SIZEOF then
+				if parse_sizeof() then
+					-- special parsing for multi-part memstruct types
+					tok_match( RIGHT_ROUND )
+					scope = SymTab[tok[T_SYM]][S_SCOPE]
+					opcode = SymTab[tok[T_SYM]][S_OPCODE]
+					goto "args_parsed"
+				else
+					goto "after left round"
+				end if
+			case ADDRESSOF, OFFSETOF then
+				parse_memstruct_func( SymTab[tok[T_SYM]][S_OPCODE] )
 				scope = SymTab[tok[T_SYM]][S_SCOPE]
 				opcode = SymTab[tok[T_SYM]][S_OPCODE]
 				goto "args_parsed"
-			else
-				goto "after left round"
-			end if
-		end if
+		end switch
 	end if
 	
 

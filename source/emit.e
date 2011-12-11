@@ -23,6 +23,7 @@ include c_out.e
 include block.e
 include shift.e
 include coverage.e
+include msgtext.e
 
 export integer op_info1, op_info2
 export integer optimized_while
@@ -1430,9 +1431,12 @@ export procedure emit_op(integer op)
 
 	case ADDRESSOF, OFFSETOF then
 		-- last OP should have been PEEK_MEMBER
-		if Code[$-3] != PEEK_MEMBER then
-			InternalErr("Expected to replace PEEK_MEMBER")
+		if length( Code ) < 4 then
+			CompileErr( MISSING_MEMSTRUCT_MEMBER )
+		elsif Code[$-3] != PEEK_MEMBER and Code[$-1] != MEMSTRUCT_READ then
+			InternalErr("Expected to replace PEEK_MEMBER or MEMSTRUCT_READ")
 		end if
+		
 		-- We'll replace PEEK_MEMBER with ADDRESSOF
 		Pop()
 		if op = ADDRESSOF then
