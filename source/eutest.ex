@@ -259,20 +259,20 @@ function check_errors( sequence filename, sequence fail_list )
 	
 	expected_err = prepare_error_file( find_error_file( filename ) )
 	if atom(expected_err) then
-		error(filename, E_INTERPRET, "No valid control file was supplied.", {})
+		error(filename, E_INTERPRET, No_valid_control_file_was_supplied, {})
 		some_error = 1
 	elsif length(expected_err) = 0 then
-		error(filename, E_INTERPRET, "Unexpected empty control file.", {})
+		error(filename, E_INTERPRET, Unexpected_empty_control_file, {})
 		some_error = 1
 	end if
 	
 	if not some_error then
 		actual_err = prepare_error_file("ex.err")
 		if atom(actual_err) then
-			error(filename, E_INTERPRET, "No valid ex.err has been generated.", {})
+			error(filename, E_INTERPRET, No_valid_exerr_has_been_generated, {})
 			some_error = 1
 		elsif length(actual_err) = 0 then
-			error(filename, E_INTERPRET, "Unexpected empty ex.err.", {})
+			error(filename, E_INTERPRET, Unexpected_empty_exerr, {})
 			some_error = 1
 		end if
 	
@@ -281,8 +281,7 @@ function check_errors( sequence filename, sequence fail_list )
 			-- information which can vary from system to system.			
 			if not equal(actual_err[2..$], expected_err[2..$]) then
 		
-				error(filename, E_INTERPRET, "Unexpected ex.err.  Expected:\n----\n" &
-						"%s\n----\nbut got\n----\n%s\n----\n",
+				error(filename, E_INTERPRET, differing_ex_err_format,
 						{join(expected_err,"\n"), join(actual_err, "\n")}, "ex.err")
 				some_error = 1
 			end if
@@ -600,7 +599,6 @@ procedure do_test( sequence files )
 	atom score
 	integer first_counter = length(files)+1
 	integer log_fd = 0
-	sequence silent = ""
 	sequence respc
 	
 	total = length(files)
@@ -766,6 +764,8 @@ function text2html(sequence t)
 	return t
 end function
 
+constant no_error_color = "#aaffaa"
+constant error_color =  "#ffaaaa"
 sequence html_table_head = `
 <table width=100%%>
 <tr bgcolor=#dddddd>
@@ -778,7 +778,32 @@ sequence html_table_head = `
 <th>outcome</th>
 </tr>`
 
-sequence html_table_error_row = `
+constant html_error_table_begin = `
+</P><table width='100%%'>
+<tr bgcolor="` & error_color & `">
+<th width='78%%' align='left'><a name='%s'>%s</a></th>
+<td bgcolor="` & no_error_color & `" align='left'><a href='#summary'>all file summary</a></td></tr>
+</table>
+<table width='100%%'>`
+
+constant No_valid_control_file_was_supplied = "No valid control file was supplied."
+constant Unexpected_empty_control_file = "Unexpected empty control file."
+constant No_valid_exerr_has_been_generated = "No valid ex.err has been generated."
+constant Unexpected_empty_exerr = "Unexpected empty ex.err."
+constant differing_ex_err_format = "Unexpected ex.err.  Expected:\n----\n%s\n----\nbut got\n----\n%s\n----\n"
+constant differing_ex_err_pattern = regex:new(sprintf(differing_ex_err_format,{"(.*)","(.*)"}), regex:DOTALL)
+constant html_unexpected_exerr_table_begin = 
+html_error_table_begin &
+`
+<tr><th width="50%%" colspan='1' bgcolor="#dddddd">expected ex.err</th><th colspan='1' bgcolor="` & error_color & `">outcome ex.err</th></tr>`
+constant html_unexpected_exerr_row_format = "<tr><td bgcolor=\"#dddddd\" colspan='1' ><pre>%s</pre></td><td bgcolor=\"" & error_color & "\" bcolspan='1' ><pre>%s</pre></td></tr>"
+
+constant html_unexpected_exerr_table_end = `
+</table>
+`
+
+constant html_error_table_end = html_unexpected_exerr_table_end
+constant html_table_error_row = `
 <tr bgcolor="%s">
 <th align="left" width="50%%">%s</td>
 <td colspan="3">%s</td>
@@ -857,29 +882,47 @@ sequence html_table_final_summary = `
 procedure html_out(sequence data)
 	switch data[1] do
 		case "file" then
-			unsummarized_files = append(unsummarized_files, data[2])
-			printf(html_fn, html_table_head, { data[2], data[2] })
 
 			integer err = find(data[2], error_list[1])
 			if err then
 				sequence color
 				if error_list[3][err] = E_NOERROR then
-					color = "#aaffaa"
+					color = no_error_color
 				else
-					color = "#ffaaaa"
+					color = error_color
 				end if
-
-				printf(html_fn, html_table_error_row, { color, data[2], error_list[2][err] })
 				
-				if sequence(error_list[4][err]) then
-					puts(html_fn, html_table_error_content_begin)
+				object ex_err = regex:matches(differing_ex_err_pattern, error_list[2][err])
+				if sequence(ex_err) then
+					printf(html_fn, html_unexpected_exerr_table_begin, {data[2], data[2]} )
+					printf(html_fn, html_unexpected_exerr_row_format, ex_err[2..3])
+					printf(html_fn, html_unexpected_exerr_table_end, {} )			
+				elsif find(error_list[2][err], {No_valid_control_file_was_supplied, Unexpected_empty_control_file, No_valid_exerr_has_been_generated, Unexpected_empty_control_file}) then
+					printf(html_fn, html_error_table_begin, {data[2], data[2]} )
+					printf(html_fn, html_table_error_row, {color, "", error_list[2][err]} )
+					printf(html_fn, html_error_table_end, {} )
+					unsummarized_files = append(unsummarized_files, data[2])
+				else
+					printf(html_fn, html_error_table_begin, { data[2], data[2] })
+					printf(html_fn, html_table_error_row, { color, "", error_list[2][err] })
+					
+					if sequence(error_list[4][err]) then
+						puts(html_fn, html_table_error_content_begin)
+	
+						for i = 1 to length(error_list[4][err]) do
+							printf(html_fn,"%s\n", { text2html(error_list[4][err][i]) })
+						end for
+	
+						puts(html_fn, html_table_error_content_end)
+					end if
+					unsummarized_files = append(unsummarized_files, data[2])
 
-					for i = 1 to length(error_list[4][err]) do
-						printf(html_fn,"%s\n", { text2html(error_list[4][err][i]) })
-					end for
-
-					puts(html_fn, html_table_error_content_end)
 				end if
+				
+			else
+				printf(html_fn, html_table_head, { data[2], data[2] })
+				unsummarized_files = append(unsummarized_files, data[2])
+
 			end if
 
 		case "failed" then
@@ -905,7 +948,7 @@ procedure html_out(sequence data)
 			if length(unsummarized_files) then
 				unsummarized_files = unsummarized_files[1..$-1] 
 			end if
-
+			
 			printf(html_fn, html_table_summary, {
 				data[2],
 				data[3],
@@ -914,6 +957,7 @@ procedure html_out(sequence data)
 			})
 	end switch
 end procedure
+
 
 procedure summarize_error(sequence message, error_class e, integer html)
 	if find(e, error_list[3]) then
@@ -942,10 +986,8 @@ procedure summarize_error(sequence message, error_class e, integer html)
 end procedure
 
 procedure do_process_log( sequence cmds, integer html)
-	sequence summary = {}
 	object other_files = {}
 	integer total_failed=0, total_passed=0
-	integer test_files=0
 	integer out_r
 	atom total_time = 0
 	object ctc
@@ -969,9 +1011,7 @@ procedure do_process_log( sequence cmds, integer html)
 			error_list = ctc
 
 			ctc = stdget:get(ctcfh)
-			if ctc[1] = GET_SUCCESS then
-				test_files = ctc[2]
-			else
+			if ctc[1] != GET_SUCCESS then
 				ctc = 0
 			end if
 		else
