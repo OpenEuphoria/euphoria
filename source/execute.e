@@ -3226,15 +3226,7 @@ procedure opMEMSTRUCT_ARRAY()
 	pc += 5
 end procedure
 
-procedure poke_member( atom pointer, integer sym, atom value )
-	integer data_type = SymTab[sym][S_TOKEN]
-	integer signed    = SymTab[sym][S_MEM_SIGNED]
-	
-	if SymTab[sym][S_MEM_POINTER] then
-		data_type = MS_OBJECT
-		signed    = 0
-	end if
-	
+procedure poke_member_value( atom pointer, integer data_type, object value )
 	switch data_type do
 		case MS_CHAR then
 			poke( pointer, value )
@@ -3268,6 +3260,36 @@ procedure poke_member( atom pointer, integer sym, atom value )
 			-- just return the struct in bytes
 			RTFatal( "Error assigning to a memstruct -- can only assign primitive data members" )
 	end switch
+end procedure
+
+procedure poke_member( atom pointer, integer sym, object value )
+	integer data_type = SymTab[sym][S_TOKEN]
+	integer signed    = SymTab[sym][S_MEM_SIGNED]
+	
+	if SymTab[sym][S_MEM_POINTER] then
+		data_type = MS_OBJECT
+		signed    = 0
+	end if
+	
+	if SymTab[sym][S_MEM_ARRAY] then
+		integer array_length = SymTab[sym][S_MEM_ARRAY]
+		integer max = array_length
+		integer size = SymTab[sym][S_MEM_SIZE] / array_length
+		if array_length < length( value ) then
+			max = length( value )
+		end if
+		for i = 1 to max do
+			poke_member_value( pointer, data_type, value[i] )
+			pointer += size
+		end for
+		for i = max + 1 to array_length do
+			poke_member_value( pointer, data_type, 0 )
+			pointer += size
+		end for
+	else
+		poke_member_value( pointer, data_type, value )
+	end if
+	
 end procedure
 
 procedure write_memstruct( atom pointer, integer sym, object value )
@@ -3306,12 +3328,13 @@ function peek_member( atom pointer, integer sym, integer array_index = -1 )
 		signed    = 0
 	
 	elsif array_index != -1 then
-		pointer += SymTab[sym][S_MEM_SIZE] * array_index
+		integer element_size = SymTab[sym][S_MEM_SIZE] / SymTab[sym][S_MEM_ARRAY]
+		pointer += element_size * array_index
 	
 	elsif SymTab[sym][S_MEM_ARRAY] then
 		sequence s = repeat( 0, SymTab[sym][S_MEM_ARRAY] )
 		for i = 1 to SymTab[sym][S_MEM_ARRAY] do
-			s[i] = peek_member( pointer, sym, i )
+			s[i] = peek_member( pointer, sym, i-1)
 		end for
 		return s
 	end if
