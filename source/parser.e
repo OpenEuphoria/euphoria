@@ -1185,7 +1185,7 @@ procedure Function_call( token tok )
 				else
 					goto "after left round"
 				end if
-			case ADDRESSOF, OFFSETOF then
+			case OFFSETOF then
 				parse_memstruct_func( SymTab[tok[T_SYM]][S_OPCODE] )
 				scope = SymTab[tok[T_SYM]][S_SCOPE]
 				opcode = SymTab[tok[T_SYM]][S_OPCODE]
