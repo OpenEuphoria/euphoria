@@ -3226,6 +3226,20 @@ procedure opMEMSTRUCT_ARRAY()
 	pc += 5
 end procedure
 
+procedure opPEEK_ARRAY()
+	-- pc+1 pointer
+	-- pc+2 member sym
+	-- pc+3 subscript
+	-- pc+4 target
+	atom 
+		ptr        = val[Code[pc+1]],
+		member_sym = Code[pc+2],
+		subscript  = val[Code[pc+3]]
+	
+	val[Code[pc+4]] = peek_member( ptr, member_sym, subscript )
+	pc += 5
+end procedure
+
 procedure poke_member_value( atom pointer, integer data_type, object value )
 	switch data_type do
 		case MS_CHAR then
@@ -4817,6 +4831,8 @@ procedure do_exec()
 			case MEMSTRUCT_ARRAY then
 				opMEMSTRUCT_ARRAY()
 			
+			case PEEK_ARRAY then
+				opPEEK_ARRAY()
 			case PEEK_MEMBER then
 				opPEEK_MEMBER()
 			

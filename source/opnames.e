@@ -239,5 +239,6 @@ export constant opnames = {
 	"MEM_TYPE_CHECK",
 	"ADDRESSOF",
 	"OFFSETOF",
+	"PEEK_ARRAY",
 	$
 }

@@ -239,7 +239,8 @@ export constant
 	MEM_TYPE_CHECK      = 228,
 	ADDRESSOF           = 229,
 	OFFSETOF            = 230,
-	MAX_OPCODE          = 230
+	PEEK_ARRAY          = 231,
+	MAX_OPCODE          = 231
 
 
 -- adding new opcodes possibly affects reswords.h (C-coded backend),

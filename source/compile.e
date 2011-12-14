@@ -6706,6 +6706,9 @@ export procedure init_opcodes()
 			case "MEMSTRUCT_ACCESS" then
 				operation[i] = routine_id("opMEMSTRUCT_ACCESS")
 				
+			case "PEEK_ARRAY" then
+				operation[i] = routine_id("opPEEK_ARRAY")
+			
 			case "MEMSTRUCT_ARRAY" then
 				operation[i] = routine_id("opMEMSTRUCT_ARRAY")
 				

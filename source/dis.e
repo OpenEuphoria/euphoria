@@ -1423,6 +1423,10 @@ procedure opMEMSTRUCT_ARRAY()
 	trinary()
 end procedure
 
+procedure opPEEK_ARRAY()
+	trinary()
+end procedure
+
 procedure opMEMSTRUCT_READ()
 	binary()
 end procedure
@@ -1855,7 +1859,7 @@ procedure InitBackEnd( object ignore )
 			name = "GREATEREQ_IFW"
 		elsif equal(name, "LESSEQ_IFW_I") then
 			name = "LESSEQ_IFW"
-		elsif match( "PEEK", name ) and not match( "_MEMBER", name ) then
+		elsif match( "PEEK", name ) and not match( "_MEMBER", name ) and not match( "_ARRAY", name ) then
 			name = "PEEK"
 		elsif match( "POKE", name ) then
 			name = "POKE"

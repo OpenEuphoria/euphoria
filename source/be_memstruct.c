@@ -22,32 +22,7 @@ static object box_int( intptr_t x )
 		return (object)NewDouble((eudouble)x);
 }	
 
-object peek_member( object_ptr source, symtab_ptr memsym, int array_index, void *pointer ){
-	int data_type;
-	char is_signed;
-	s1_ptr s;
-	int i;
-	
-	data_type  = memsym->token;
-	is_signed = memsym->u.memstruct.is_signed;
-	if( pointer == 0 ){
-		pointer = (void*) get_pos_int( "peek member", *source );
-	}
-	
-	if( memsym->u.memstruct.pointer ){
-		data_type = MS_OBJECT;
-		is_signed = 0;
-	}
-	else if( array_index != -1 ){
-		pointer = (void*) (((intptr_t)pointer) + (array_index * memsym->u.memstruct.size));
-	}
-	else if( memsym->u.memstruct.array ){
-		s = NewS1( memsym->u.memstruct.array );
-		for( i = 0; i < memsym->u.memstruct.array; ++i ){
-			s->base[i+1] = peek_member( 0, memsym, i, pointer );
-		}
-		return MAKE_SEQ( s );
-	}
+object peek_member_value( void *pointer, int data_type, int is_signed, symtab_ptr memsym ){
 	switch( data_type ){
 		case MS_CHAR:
 			if( is_signed ) return *(char*) pointer;
@@ -76,6 +51,60 @@ object peek_member( object_ptr source, symtab_ptr memsym, int array_index, void 
 		default:
 			return read_member( pointer, memsym );
 	}
+}
+
+object peek_array( object_ptr source, symtab_ptr memsym, object_ptr subscript ){
+	uintptr_t pointer;
+	int array_index;
+	int data_type;
+	char is_signed;
+	
+	pointer = get_pos_int( "memstruct array", *source );
+	array_index = get_pos_int( "memstruct array subscript", *subscript );
+	
+	pointer += memsym->u.memstruct.size / memsym->u.memstruct.array * array_index;
+	data_type = memsym->token;
+	is_signed = memsym->u.memstruct.is_signed;
+	if( pointer == 0 ){
+		pointer = get_pos_int( "peek member", *source );
+	}
+	
+	if( memsym->u.memstruct.pointer ){
+		data_type = MS_OBJECT;
+		is_signed = 0;
+	}
+	
+	return peek_member_value( (void*) pointer, data_type, is_signed, memsym );
+}
+
+object peek_member( object_ptr source, symtab_ptr memsym, int array_index, void *pointer ){
+	int data_type;
+	char is_signed;
+	s1_ptr s;
+	int i;
+	
+	data_type  = memsym->token;
+	is_signed = memsym->u.memstruct.is_signed;
+	if( pointer == 0 ){
+		pointer = (void*) get_pos_int( "peek member", *source );
+	}
+	
+	if( memsym->u.memstruct.pointer ){
+		data_type = MS_OBJECT;
+		is_signed = 0;
+	}
+	else if( array_index != -1 ){
+		pointer = (void*) (((intptr_t)pointer) + (array_index * memsym->u.memstruct.size));
+	}
+	else if( memsym->u.memstruct.array ){
+		s = NewS1( memsym->u.memstruct.array );
+		for( i = 0; i < memsym->u.memstruct.array; ++i ){
+			s->base[i+1] = peek_member( 0, memsym, i, pointer );
+		}
+		return MAKE_SEQ( s );
+	}
+	return peek_member_value( (void*)pointer, data_type, is_signed, memsym );
+	
 }
 
 static object read_member( void *pointer, symtab_ptr member_sym ){
@@ -195,7 +224,7 @@ void write_member( object_ptr source, symtab_ptr sym, object_ptr val ){
 		#if INTPTR_MAX == INT32_MAX
 		if( IS_ATOM_INT( (intptr_t)pointer ) )
 		#endif
-			poke_member( &pointer, member, src->base + i );
+			poke_member( (object_ptr)&pointer, member, src->base + i );
 		#if INTPTR_MAX == INT32_MAX
 		else{
 			dbl.dbl = (eudouble) pointer;
@@ -211,7 +240,7 @@ void write_member( object_ptr source, symtab_ptr sym, object_ptr val ){
 		#if INTPTR_MAX == INT32_MAX
 		if( IS_ATOM_INT( (intptr_t)pointer ) )
 		#endif
-			poke_member( &pointer, member, &zero);
+			poke_member( (object_ptr)&pointer, member, &zero);
 		#if INTPTR_MAX == INT32_MAX
 		else{
 			dbl.dbl = (eudouble) pointer;
@@ -284,21 +313,8 @@ object memstruct_array( object_ptr source, symtab_ptr sym, object_ptr subscript 
 	return box_int( pointer );
 }
 
-void poke_member( object_ptr source, symtab_ptr sym, object_ptr val ){
-	int data_type;
-	int is_signed;
+static void poke_member_value( void *pointer, int data_type, object_ptr val, int is_signed ){
 	eudouble d;
-	void *pointer;
-	
-	data_type = sym->token;
-	is_signed = sym->u.memstruct.is_signed;
-	
-	if( sym->u.memstruct.pointer ){
-		data_type = MS_OBJECT;
-		is_signed = 0;
-	}
-	
-	pointer = (void*) get_pos_int( "storing memory data", *source );
 	switch( data_type ){
 		case MS_CHAR:
 			if( is_signed) *(char*)pointer = (char) get_pos_int( "store char data", *val );
@@ -357,6 +373,52 @@ void poke_member( object_ptr source, symtab_ptr sym, object_ptr val ){
 		default:
 			RTFatal( "Error assigning to a memstruct -- can only assign primitive data members" );
 	}
+}
+
+
+void poke_member( object_ptr source, symtab_ptr sym, object_ptr val ){
+	int data_type;
+	int is_signed;
+	
+	uintptr_t pointer;
+	
+	data_type = sym->token;
+	is_signed = sym->u.memstruct.is_signed;
+	
+	if( sym->u.memstruct.pointer ){
+		data_type = MS_OBJECT;
+		is_signed = 0;
+	}
+	
+	pointer = get_pos_int( "storing memory data", *source );
+	if( sym->u.memstruct.array ){
+		int i, array_length, max, size;
+		s1_ptr v;
+		intptr_t zero = 0;
+		array_length =  sym->u.memstruct.array;
+		size = sym->u.memstruct.size / array_length;
+		if( IS_ATOM( *val ) ){
+			RTFatal( "expected a sequence to assign to the array" );
+		}
+		v = SEQ_PTR( *val );
+		max = v->length;
+		if( max > array_length ){
+			max = array_length;
+		}
+		
+		for( i = 0; i < max; ++i ){
+			poke_member_value( (void*)pointer, data_type, v->base + i + 1, is_signed );
+			pointer += size;
+		}
+		for( ; i < array_length; ++i ){
+			poke_member_value( (void*)pointer, data_type, (object_ptr)&zero, is_signed );
+			pointer += size;
+		}
+	}
+	else{
+		poke_member_value( (void*)pointer, data_type, val, is_signed );
+	}
+	
 }
 
 #define CALCULATE( type ) \

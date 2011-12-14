@@ -113,8 +113,6 @@ export procedure opMEMSTRUCT_ARRAY()
 		target    = Code[pc+4]
 	
 	get_pointer( pointer, target )
-	
-	
 	sequence type_name
 	integer data_type = sym_token( member )
 	switch data_type do
@@ -149,6 +147,56 @@ export procedure opMEMSTRUCT_ARRAY()
 	
 	dispose_temp( subscript, compile:DISCARD_TEMP, REMOVE_FROM_MAP )
 	c_stmt( sprintf( "@ = (intptr_t) &(((%s*)@)[_1]);\n", { type_name } ), { target, target }, target )
+	
+	pc += 5
+end procedure
+
+export procedure opPEEK_ARRAY()
+	integer
+		pointer   = Code[pc+1],
+		sym       = Code[pc+2],
+		subscript = Code[pc+3],
+		target    = Code[pc+4]
+	
+	integer data_type  = SymTab[sym][S_TOKEN]
+	integer signed     = SymTab[sym][S_MEM_SIGNED]
+	integer is_pointer = SymTab[sym][S_MEM_POINTER]
+	sequence type_name
+	
+	get_pointer( pointer, target )
+	
+	switch data_type do
+		case MS_MEMBER then
+			sym = SymTab[sym][S_MEM_STRUCT]
+			fallthru
+			
+		case MEMSTRUCT, MEMUNION then
+			sequence tag
+			if data_type = MEMSTRUCT then
+				tag = "struct"
+			else
+				tag = "union"
+			end if
+			type_name = sprintf( "%s %s", { tag, decorated_name( sym ) } )
+		case else
+			type_name = mem_name( data_type )
+	end switch
+	
+	sequence array_modifier = "[_1]"
+	integer index_is_int = TypeIs( subscript, TYPE_INTEGER)
+	if not index_is_int then
+		c_stmt("if( !IS_ATOM_INT( @ ) && IS_ATOM( @ ) ){\n", { subscript, subscript}, subscript )
+			c_stmt("_1 = (intptr_t)DBL_PTR( @)->dbl;\n", { subscript })
+		c_stmt0("}\n")
+		c_stmt0("else{\n")
+	end if
+	c_stmt( "_1 = @;\n", { subscript } )
+	if not index_is_int then
+		c_stmt0("}\n")
+	end if
+	peek_member_value( pointer, sym, data_type, 0, is_pointer, array_modifier, type_name, signed, target )
+	remove_pointer( pointer )
+	remove_pointer( target )
 	
 	pc += 5
 end procedure
@@ -190,17 +238,23 @@ procedure peek_member( integer pointer, integer sym, integer target, integer ind
 	
 	if array_index != -1 then
 		array_modifier = sprintf("[%d]", array_index )
-		
 	elsif SymTab[sym][S_MEM_ARRAY] then
 		c_stmt0( sprintf( "_2 = NewS1( %d );\n", SymTab[sym][S_MEM_ARRAY] ) )
 		for i = 1 to SymTab[sym][S_MEM_ARRAY] do
 			peek_member( pointer, sym, 0, indirect, i-1 )
 			c_stmt0( sprintf( "((s1_ptr)_2)->base[%d] = _0;\n", i ) )
 		end for
-		c_stmt0( "_0 = MAKE_SEQ( _2 );\n" )
+		c_stmt( "@ = MAKE_SEQ( _2 );\n", target )
 		return
 	end if
 	
+	peek_member_value( pointer, sym, data_type, indirect, is_pointer, array_modifier, type_name, signed, target )
+	
+end procedure
+
+procedure peek_member_value( integer pointer, integer sym, integer data_type,
+							 integer indirect, integer is_pointer, sequence array_modifier,
+							 sequence type_name, integer signed, integer target )
 	integer parent
 	switch data_type do
 		case MS_FLOAT, MS_DOUBLE, MS_LONGDOUBLE, MS_EUDOUBLE then
@@ -272,7 +326,7 @@ procedure peek_member( integer pointer, integer sym, integer target, integer ind
 							end if
 						end ifdef
 						
-						if data_type = MS_INT or is_pointer then
+						if data_type = MS_INT /*or is_pointer*/ then
 							-- these are always safe under 64-bit arch
 							break "convert"
 						end if
@@ -289,7 +343,6 @@ procedure peek_member( integer pointer, integer sym, integer target, integer ind
 			end if
 			
 	end switch
-	
 end procedure
 
 export procedure opPEEK_MEMBER()
@@ -420,6 +473,68 @@ export procedure opMEMSTRUCT_READ()
 	pc += 4
 end procedure
 
+procedure poke_member_value( symtab_index target, symtab_index val, integer data_type, sequence type_name, integer array_index )
+	if array_index != -1 then
+		c_stmt( sprintf( "_1 = SEQ_PTR( @ )->base[%d];\n", array_index + 1), val )
+	end if
+	switch data_type do
+		case MS_FLOAT, MS_DOUBLE, MS_LONGDOUBLE, MS_EUDOUBLE then
+			integer is_double = TypeIs( val, TYPE_DOUBLE )
+			if not is_double then
+				
+				if array_index = -1 then
+					c_stmt( "if( IS_ATOM_INT( @ ) ){\n", val )
+					c_stmt( sprintf("*(%s)@ = (%s)@;\n", {type_name, type_name}), { target, val }, target )
+				else
+					c_stmt0( "if( IS_ATOM_INT( _1 ) ){\n" )
+					c_stmt( sprintf("((%s)@)[%d] = (%s)_1;\n", {type_name, array_index, type_name}), { target }, target )
+				end if
+				c_stmt0( "}\n" )
+				c_stmt0( "else{\n")
+			end if
+			if array_index = -1 then
+				c_stmt( sprintf("*(%s)@ = (%s)DBL_PTR( @ )->dbl;\n", {type_name, type_name}), { target, val }, target )
+			else
+				c_stmt( sprintf("((%s)@)[%d] = (%s)DBL_PTR( _1 )->dbl;\n", {type_name, array_index, type_name}), { target }, target )
+			end if
+			
+			if not is_double then
+				c_stmt0( "}\n")
+			end if
+		
+		case MEMUNION then
+			-- TODO
+		case MEMSTRUCT then
+			-- TODO
+		case else
+			integer is_integer = TypeIs( val, TYPE_INTEGER )
+			if not is_integer then
+				if array_index = -1 then
+					c_stmt( "if( IS_ATOM_INT( @ ) ){\n", val )
+				else
+					c_stmt0( "if( IS_ATOM_INT( _1 ) ){\n" )
+				end if
+			end if
+			
+			if array_index = -1 then
+				c_stmt( sprintf("*(%s*) @ = (%s) @;\n", {type_name, type_name}), {target, val}, target )
+			else
+				c_stmt( sprintf("((%s*) @)[%d] = (%s) _1;\n", {type_name, array_index, type_name}), {target }, target )
+			end if
+			
+			if not is_integer then
+				c_stmt0("}\n" )
+				c_stmt0( "else{\n")
+				if array_index = -1 then
+					c_stmt( sprintf("*(%s*) @ = (%s) DBL_PTR( @ )->dbl;\n", {type_name, type_name}), {target, val}, target )
+				else
+					c_stmt( sprintf("((%s*) @)[%d] = (%s) DBL_PTR( _1 )->dbl;\n", {type_name, array_index, type_name}), {target }, target )
+				end if
+				c_stmt0("}\n" )
+			end if
+	end switch
+end procedure
+
 --**
 -- Stores the value into the memory pointed to by _0
 procedure poke_member( symtab_index target, symtab_index member, symtab_index val )
@@ -444,41 +559,18 @@ procedure poke_member( symtab_index target, symtab_index member, symtab_index va
 		end if
 	end if
 	
-	switch data_type do
-		case MS_FLOAT, MS_DOUBLE, MS_LONGDOUBLE, MS_EUDOUBLE then
-			integer is_double = TypeIs( val, TYPE_DOUBLE )
-			if not is_double then
-				c_stmt( "if( IS_ATOM_INT( @ ) ){\n", val )
-					c_stmt( sprintf("*(%s)@ = (%s)@;\n", {type_name, type_name}), { target, val }, target )
-				c_stmt0( "}\n" )
-				c_stmt0( "else{\n")
-			end if
-			
-			c_stmt( sprintf("*(%s)@ = (%s)DBL_PTR( @ )->dbl;\n", {type_name, type_name}), { target, val }, target )
-			
-			if not is_double then
-				c_stmt0( "}\n")
-			end if
-		
-		case MEMUNION then
-			-- TODO
-		case MEMSTRUCT then
-			-- TODO
-		case else
-			integer is_integer = TypeIs( val, TYPE_INTEGER )
-			if not is_integer then
-				c_stmt( "if( IS_ATOM_INT( @ ) ){\n", val )
-			end if
-			
-			c_stmt( sprintf("*(%s*) @ = (%s) @;\n", {type_name, type_name}), {target, val}, target )
-			
-			if not is_integer then
-				c_stmt0("}\n" )
-				c_stmt0( "else{\n")
-				c_stmt( sprintf("*(%s*) @ = (%s) DBL_PTR( @ )->dbl;\n", {type_name, type_name}), {target, val}, target )
-				c_stmt0("}\n" )
-			end if
-	end switch
+	if SymTab[member][S_MEM_ARRAY] then
+		c_stmt("switch( SEQ_PTR( @ )->length ){\n", val )
+		c_stmt0("default:\n")
+		for i = SymTab[member][S_MEM_ARRAY] to 1 by -1 do
+			c_stmt0( sprintf("case %d:\n", i ) )
+			poke_member_value( target, val, data_type, type_name, i-1 )
+		end for
+		c_stmt0("case 0: ;\n")
+		c_stmt0("}\n")
+	else
+		poke_member_value( target, val, data_type, type_name, -1 )
+	end if
 end procedure
 
 procedure poke_memstruct( symtab_index target, symtab_index struct_sym, symtab_index member, integer subscript )

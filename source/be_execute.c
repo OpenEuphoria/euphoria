@@ -1229,6 +1229,7 @@ void code_set_pointers(intptr_t **code)
 			case REMOVE:
 			case OPEN:
 			case MEMSTRUCT_ARRAY:
+			case PEEK_ARRAY:
 				// 4 operands follow
 				code[i+1] = SET_OPERAND(code[i+1]);
 				code[i+2] = SET_OPERAND(code[i+2]);
@@ -1853,8 +1854,8 @@ void do_exec(intptr_t *start_pc)
   &&L_MEMSTRUCT_ACCESS, &&L_MEMSTRUCT_ARRAY, &&L_PEEK_MEMBER,
   &&L_MEMSTRUCT_READ, &&L_MEMSTRUCT_ASSIGN, &&L_MEMSTRUCT_PLUS,
   &&L_MEMSTRUCT_MINUS, &&L_MEMSTRUCT_MULTIPLY, &&L_MEMSTRUCT_DIVIDE,
-  &&L_MEM_TYPE_CHECK, &&L_ADDRESSOF, &&L_OFFSETOF
-/* 230 (previous) */
+  &&L_MEM_TYPE_CHECK, &&L_ADDRESSOF, &&L_OFFSETOF, &&L_PEEK_ARRAY
+/* 231 (previous) */
   
 
 	};
@@ -5480,6 +5481,17 @@ void do_exec(intptr_t *start_pc)
 				obj_ptr = (object_ptr) pc[4];
 				DeRef( *obj_ptr );
 				*obj_ptr = a;
+				thread5();
+				BREAK;
+			case L_PEEK_ARRAY:
+				deprintf("case L_PEEK_ARRAY");
+				
+				tpc = pc;
+				a = peek_array( (object_ptr)pc[1], (symtab_ptr)pc[2], (object_ptr)pc[3] );
+				obj_ptr = (object_ptr) pc[4];
+				DeRef( *obj_ptr );
+				*obj_ptr = a;
+				
 				thread5();
 				BREAK;
 			default:

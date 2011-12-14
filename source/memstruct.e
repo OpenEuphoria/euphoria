@@ -1028,6 +1028,25 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 				end if
 				has_dot = 1
 				
+			case LEFT_SQUARE then
+				-- array...
+				if has_dot then
+					-- can't do this...
+				end if
+				Expr()
+				tok_match( RIGHT_SQUARE )
+				
+				tok = next_token()
+				putback( tok )
+				if tok[T_ID] != DOT then
+					-- update to this member
+-- 					emit_member( member, ref, MEMSTRUCT_ARRAY, names )
+					emit_op( PEEK_ARRAY )
+					exit
+				end if
+				
+				emit_op( MEMSTRUCT_ARRAY )
+				
 			case else
 				peek_member( members, member, ref, lhs, names )
 				putback( tok )

@@ -222,3 +222,4 @@
 #define L_MEM_TYPE_CHECK      MEM_TYPE_CHECK
 #define L_ADDRESSOF           ADDRESSOF
 #define L_OFFSETOF            OFFSETOF
+#define L_PEEK_ARRAY          PEEK_ARRAY

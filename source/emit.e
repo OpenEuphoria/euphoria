@@ -1486,7 +1486,8 @@ export procedure emit_op(integer op)
 		assignable = FALSE
 
 	-- 3 inputs, 1 output
-	case RHS_SLICE, FIND, MATCH, FIND_FROM, MATCH_FROM, SPLICE, INSERT, REMOVE, OPEN, MEMSTRUCT_ARRAY then
+	case RHS_SLICE, FIND, MATCH, FIND_FROM, MATCH_FROM, SPLICE, INSERT, REMOVE, OPEN,
+		MEMSTRUCT_ARRAY, PEEK_ARRAY then
 		emit_opcode(op)
 		c = Pop()
 		b = Pop()

@@ -241,7 +241,8 @@
 #define MEM_TYPE_CHECK      228
 #define ADDRESSOF           229
 #define OFFSETOF            230
-#define MAX_OPCODE          230
+#define PEEK_ARRAY          231
+#define MAX_OPCODE          231
 
 /* remember to update reswords.e, opnames.e,
    opnames.h, optable[], localjumptab[]
