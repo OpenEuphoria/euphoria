@@ -151,19 +151,19 @@ typedef struct block_list * block_list_ptr;
 	#endif
 #endif
 
+#ifdef EUNIX
+#include <stdlib.h>
+#endif
 #if defined( ESIMPLE_MALLOC )
 	#ifdef EUNIX
 	#include <stdlib.h>
 	#endif
-	#define EMalloc(size) malloc( (size_t)size)
 	#define EFree(ptr) free(ptr)
-	#define ERealloc(orig, newsize) realloc(orig, newsize)
 #else
-	extern char *EMalloc(uintptr_t size);
 	extern void EFree(char *ptr);
-	extern char *ERealloc(char *orig, uintptr_t newsize);
 #endif
-
+extern char *EMalloc(intptr_t size);
+extern char *ERealloc(char *orig, intptr_t newsize);
 #if defined(__GNU_LIBRARY__) || defined(__GLIBC__) \
 	|| (defined(__DJGPP__) && __DJGPP__ <= 2 && __DJGPP_MINOR__ < 4)
 size_t strlcpy(char *dest, char *src, size_t maxlen);

@@ -1008,3 +1008,35 @@ object NewDouble(eudouble d)
 	return MAKE_DBL(new_dbl);
 }
 
+#ifdef ESIMPLE_MALLOC
+char *ERealloc(char *orig, unsigned long newsize)
+/* Enlarge or shrink a malloc'd block.
+   orig must not be NULL - not supported.
+   Return a pointer to a storage area of the desired size
+   containing all the original data.
+   I don't think a shrink could ever become an expansion + copy
+   by accident, but newsize might be less than the current size! */
+{
+	char *q;
+
+	// make a smaller block
+	q = realloc(orig, newsize);
+
+	if (q == NULL) {
+		SpaceMessage();
+	}
+
+	return q;
+}
+
+char *EMalloc(unsigned long nbytes)
+/* storage allocator */
+/* Always returns a pointer that has 8-byte alignment (essential for our
+   internal representation of an object). */
+{
+	char * p = malloc(nbytes);
+	if (p == NULL)
+		SpaceMessage();
+	return p;
+}
+#endif
