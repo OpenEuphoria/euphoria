@@ -455,58 +455,6 @@ static void LocateFail()
 	Cleanup(1);
 }
 
-#ifndef BACKEND
-static void ClearSlot(int i)
-/* mark a display slot as available */
-{
-	display_list[i].sym = NULL;
-	display_list[i].time_stamp = 0;
-	display_list[i].value_on_screen = NOVALUE - 1; // looks like a sequence
-}
-
-
-static void screen_blank(IFILE f, int nblanks)
-/* output a string of blanks */
-{
-	while (nblanks >= BLANK_SIZE) {
-		screen_output(f, blanks);
-		nblanks -= BLANK_SIZE;
-	}
-	while (nblanks > 0) {
-		screen_output(f, " ");
-		nblanks--;
-	}
-}
-
-static void SetVarPosition(int slot, int offset)
-/* set cursor position to start of variable display slot */
-{
-	int var_line, var_pos;
-	struct EuViewPort vp;
-
-	GetViewPort( &vp );
-	
-	var_line = slot / vp.vars_per_line;
-	var_pos = (slot - var_line * vp.vars_per_line) * VAR_WIDTH; 
-	SetPosition(vp.num_trace_lines + BASE_TRACE_LINE + NUM_PROMPT_LINES 
-				+ var_line + 1, var_pos + 1 + offset);
-}
-
-void ErasePrivates(symtab_ptr proc_ptr)
-/* blank out any names on debug screen
-   that match any privates of this proc/fn */
-{
-	register symtab_ptr sym;
-	
-	if( external_debugger ){
-		ExternalErasePrivates( proc_ptr );
-	}
-	sym = proc_ptr->next;
-	while (sym && (sym->scope == S_PRIVATE || sym->scope == S_LOOP_VAR)) {
-		EraseSymbol(sym);
-		sym = sym->next;
-	}
-}
 
 /* Copies the alternative literal for s_ptr into val_string up to max_len characters are copied
  * including the null character, which is appended at the end.  The function returns the number
@@ -593,6 +541,60 @@ unsigned int CopyLiteral(symtab_ptr s_ptr, char * val_string, unsigned int max_l
 		} else {
 			return 0;
 		}
+}
+
+
+#ifndef BACKEND
+static void ClearSlot(int i)
+/* mark a display slot as available */
+{
+	display_list[i].sym = NULL;
+	display_list[i].time_stamp = 0;
+	display_list[i].value_on_screen = NOVALUE - 1; // looks like a sequence
+}
+
+
+static void screen_blank(IFILE f, int nblanks)
+/* output a string of blanks */
+{
+	while (nblanks >= BLANK_SIZE) {
+		screen_output(f, blanks);
+		nblanks -= BLANK_SIZE;
+	}
+	while (nblanks > 0) {
+		screen_output(f, " ");
+		nblanks--;
+	}
+}
+
+static void SetVarPosition(int slot, int offset)
+/* set cursor position to start of variable display slot */
+{
+	int var_line, var_pos;
+	struct EuViewPort vp;
+
+	GetViewPort( &vp );
+	
+	var_line = slot / vp.vars_per_line;
+	var_pos = (slot - var_line * vp.vars_per_line) * VAR_WIDTH; 
+	SetPosition(vp.num_trace_lines + BASE_TRACE_LINE + NUM_PROMPT_LINES 
+				+ var_line + 1, var_pos + 1 + offset);
+}
+
+void ErasePrivates(symtab_ptr proc_ptr)
+/* blank out any names on debug screen
+   that match any privates of this proc/fn */
+{
+	register symtab_ptr sym;
+	
+	if( external_debugger ){
+		ExternalErasePrivates( proc_ptr );
+	}
+	sym = proc_ptr->next;
+	while (sym && (sym->scope == S_PRIVATE || sym->scope == S_LOOP_VAR)) {
+		EraseSymbol(sym);
+		sym = sym->next;
+	}
 }
 
 void DisplayVar(symtab_ptr s_ptr, int user_requested)
