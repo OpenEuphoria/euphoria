@@ -200,6 +200,7 @@ extern void InitEMalloc();
 extern object NewSequence(char *data, int len);
 extern object NewString(char *s);
 extern s1_ptr NewS1(intptr_t size);
+extern s1_ptr ReNewS1(register s1_ptr s1, intptr_t size);
 extern s1_ptr SequenceCopy(register s1_ptr a);
 
 extern object NewDouble(eudouble d);

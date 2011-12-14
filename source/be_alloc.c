@@ -834,6 +834,26 @@ s1_ptr NewS1(intptr_t size)
 	return(s1);
 }
 
+s1_ptr ReNewS1(s1_ptr old_s1, intptr_t size)
+/* resize the amount of data allocated to s1, such that it can hold size objects.
+ * The postfill is updated to reflect the number of objects that can go after
+ * base[object].  It also updates the base pointer which points to within the 
+ * same allocated block that gets resized here.   
+ * All other data members remain unchanged. */ 
+{
+	s1_ptr s1;
+	object_ptr old_base = old_s1->base;
+	if ((unsigned long)size > MAX_SEQ_LEN) {
+		// Ensure it doesn't overflow
+		SpaceMessage();
+	}
+	old_s1->postfill = size - (old_base+old_s1->length+2 - (object_ptr)&old_s1[1]);
+	s1 = (s1_ptr)ERealloc(old_s1, sizeof(struct s1) + (size+1) * sizeof(object));
+	s1->base = (object_ptr)s1 +
+				 ((object_ptr)old_base - (object_ptr)old_s1);
+	return s1;
+}
+
 object NewSequence(char *data, int len)
 /* create a new sequence that may contain binary data */
 {

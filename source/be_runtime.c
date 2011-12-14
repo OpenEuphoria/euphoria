@@ -722,22 +722,9 @@ void Append(object_ptr target, object s1, object a)
 			/* make some more postfill space */
 			new_len = EXTRA_EXPAND(len);
 			base = s1p->base;
-			/* allow 1*4 for end marker */
-			/* base + new_len + 2 could overflow 32-bits??? */
-			new_s1p = (s1_ptr)ERealloc((char *)s1p,
-							   (char *)(base + new_len + 2) - (char *)s1p);
-			new_s1p->base = (object_ptr)new_s1p +
-							 ((object_ptr)base - (object_ptr)s1p);
-
+			new_s1p = ReNewS1(s1p, new_len+1);
 			s1p = new_s1p;
-			s1p->postfill = new_len - len;
-
 			*target = MAKE_SEQ(s1p);
-		/* OPTIMIZE: we may have more space in the current allocation
-		   than we think, due to power of 2 round up etc. Can
-		   we find out what we have and increment postfill
-		   accordingly? Then we can usually avoid memcopying too much
-		   in Realloc. */
 		}
 		s1p->postfill--;
 		s1p->length++;
@@ -783,14 +770,10 @@ s1_ptr Add_internal_space(object a,int at,int len)
 	int nseq = seq->length;
 	if (seq->ref == 1 ){
 		if( len >= seq->postfill ){
-			int base_offset;
 			new_len = EXTRA_EXPAND(nseq + len);
-			base_offset = (object_ptr)seq->base - (object_ptr)seq;
-			new_seq = (s1_ptr)ERealloc((char *)seq, (new_len + 1)*sizeof(s1_ptr) + sizeof( struct s1 ));
-			new_seq->base = (object_ptr)(new_seq) + base_offset;
+			new_seq = ReNewS1(seq, new_len);
+			new_seq->postfill -= len;
 			seq = new_seq;
-			seq->postfill = new_len - (len + nseq) - 1;
-
 		}
 		else{
 			seq->postfill -= len;
@@ -4014,9 +3997,28 @@ static void indent()
 		the_end();
 	}
 }
+s1_ptr sprint_sequence = NULL;
+
+s1_ptr concatonate_s1_with_string(s1_ptr s1,  char * poke_addr, int i )
+/* append the string poke_addr to the end of s1.  i is the maximum number of elements in the
+  string */
+{
+	object_ptr obj_ptr;
+	obj_ptr = &s1->base[s1->length];
+	s1 = ReNewS1(s1, s1->length += i);
+	while (--i >= 0 && *poke_addr != 0) {
+		obj_ptr++;
+		*obj_ptr = (unsigned char)*poke_addr;
+		poke_addr++;
+	}
+	*++obj_ptr = NOVALUE;	
+	return s1;
+}
 
 static void rPrint(object a)
-/* print any object in default numeric format */
+/* print any object in default numeric format either to the screen and if
+ * the s1 struct sprint_sequence is a not NULL, it concatonates to the end of
+ * sprint_sequence.  */
 {
 	int length;
 	int multi_line;
@@ -4029,7 +4031,7 @@ static void rPrint(object a)
 	if (IS_ATOM(a)) {
 		if (IS_ATOM_INT(a)) {
 			snprintf(sbuff, NUM_SIZE, "%" PRIdPTR, a);
-			sbuff[NUM_SIZE-1] = 0; // ensure NULL
+			sbuff[NUM_SIZE-1] = 0; // ensure NULL			
 			screen_output(print_file, sbuff);
 			print_chars += strlen(sbuff);
 			if (show_ascii && a >= ' ' &&
@@ -4054,6 +4056,9 @@ static void rPrint(object a)
 			screen_output(print_file, sbuff);
 			print_chars += strlen(sbuff);
 		}
+		if (sprint_sequence) 
+			sprint_sequence = concatonate_s1_with_string( sprint_sequence, 
+			sbuff, strlen(sbuff));
 	}
 	else {
 		/* a is a SEQUENCE */
@@ -4078,6 +4083,9 @@ static void rPrint(object a)
 		}
 
 		screen_output(print_file, "{");
+		if (sprint_sequence) 
+			sprint_sequence = concatonate_s1_with_string( sprint_sequence, 
+				"{", 1);
 		print_chars++;
 
 		elem = ((s1_ptr)a)->base+1;
@@ -4091,6 +4099,10 @@ static void rPrint(object a)
 				if (print_chars == -1)
 					return;
 				screen_output(print_file, ",");
+				if (sprint_sequence) 
+					sprint_sequence = concatonate_s1_with_string( sprint_sequence, 
+					",", 1);
+
 				print_chars++;
 				cut_line(6);
 				if (print_chars == -1)
@@ -4108,6 +4120,9 @@ static void rPrint(object a)
 		if (print_chars == -1)
 			return;
 		screen_output(print_file, "}");
+		if (sprint_sequence) 
+			sprint_sequence = concatonate_s1_with_string( sprint_sequence, 
+			"}", 1);
 		print_chars++;
 	}
 }
@@ -4122,6 +4137,17 @@ void Print(IFILE f, object a, int lines, int width, int init_chars, int pretty)
 	print_start = print_chars+1;
 	print_pretty = pretty;
 	print_level = 0;
+	if (sprint_sequence != NULL) {		
+		DeRef(MAKE_SEQ(sprint_sequence))
+		sprint_sequence = NULL;
+	}
+	if (f == (IFILE)DOING_SPRINTF) {
+		sprint_sequence = NewS1(NUM_SIZE);
+		sprint_sequence->postfill = NUM_SIZE;
+		sprint_sequence->length = 0;
+	} else {
+		sprint_sequence = NULL;
+	}
 	if (f == stderr)
 		show_ascii = FALSE; /* don't bother showing for type-check failure */
 	else

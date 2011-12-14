@@ -100,7 +100,7 @@ object system_exec_call(object command, object wait);
 
 int might_go_screen(object file_no);
 void set_text_color(int c);
-
+extern s1_ptr sprint_sequence;
 void Append(object_ptr target, object s1, object a);
 void Prepend(object_ptr target, object s1, object a);
 void Replace( replace_ptr rb );

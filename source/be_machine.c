@@ -2702,6 +2702,8 @@ void Machine_Handler(int sig_no)
 }
 
 #ifndef ERUNTIME
+int sprint_ptr;
+
 extern struct IL fe;
 int in_backend = 0;
 object start_backend(object x)
@@ -2718,8 +2720,8 @@ object start_backend(object x)
 
 	x_ptr = SEQ_PTR(x);
 
-	if (IS_ATOM(x) || x_ptr->length != 12)
-		RTFatal("BACKEND requires a sequence of length 12");
+	if (IS_ATOM(x) || x_ptr->length != 13)
+		RTFatal("BACKEND requires a sequence of length 13");
 
 	fe.st = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
 	fe.sl = (struct sline *) get_pos_int(w, *(x_ptr->base+2));
@@ -2736,6 +2738,7 @@ object start_backend(object x)
 	syncolor          = get_pos_int(w, *(x_ptr->base+11));
 	
 	set_debugger( (char*) get_pos_int(w, *(x_ptr->base+12)) );
+	sprint_ptr        = get_pos_int(w, *(x_ptr->base+13));
 	
 	// This is checked when we try to write coverage to make sure
 	// we need to output an error message.
@@ -2785,6 +2788,10 @@ object machine(object opcode, object x)
 	char *src;
 	eudouble d;
 	int temp;
+#	ifndef ERUNTIME	
+		intptr_t (*fn_ptr)();
+		fn_ptr = rt00[sprint_ptr].addr;
+#	endif
 
 	while (TRUE) {
 		switch(opcode) {  /* tricky - could be atom or sequence */
@@ -3249,6 +3256,20 @@ object machine(object opcode, object x)
 				// translated code doesn't do anything
 				return 0;
 #endif
+	        case M_SPRINT:
+#			ifndef ERUNTIME
+		        	return (*fn_ptr)(x);
+#			else
+				sprint_sequence = NULL;
+				Print((IFILE)DOING_SPRINTF, x, 100, 80, 0, 0);
+				if (sprint_sequence == NULL) 
+					RTInternal("Creation of sprint_sequence failed.\n");
+				x = MAKE_SEQ(sprint_sequence);
+				Ref(x);				
+				return x;
+#			endif
+			
+		
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:
 				/* could be out-of-range int, or double, or sequence */
