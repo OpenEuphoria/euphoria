@@ -61,7 +61,7 @@ object peek_array( object_ptr source, symtab_ptr memsym, object_ptr subscript ){
 	
 	pointer = get_pos_int( "memstruct array", *source );
 	array_index = get_pos_int( "memstruct array subscript", *subscript );
-	
+	pointer += memsym->u.memstruct.offset;
 	pointer += memsym->u.memstruct.size / memsym->u.memstruct.array * array_index;
 	data_type = memsym->token;
 	is_signed = memsym->u.memstruct.is_signed;

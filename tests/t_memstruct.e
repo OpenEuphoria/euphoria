@@ -231,8 +231,8 @@ procedure arrays()
 	ptr.ARRAYS.ten_longs[9] = -1
 	test_equal( "array assign and peek element longs", -1, ptr.ARRAYS.ten_longs[9] )
 	
-	ptr.ARRAYS.three_floats = {1.1, 1.2, 1.3 }
-	test_equal( "array bulk assign and peek floats", {1.1, 1.2, 1.3 }, ptr.ARRAYS.three_floats )
+	ptr.ARRAYS.three_floats = {1.25, 1.5, 1.375 }
+	test_equal( "array bulk assign and peek floats", {1.25, 1.5, 1.375 }, ptr.ARRAYS.three_floats )
 	ptr.ARRAYS.three_floats[1] = -1
 	test_equal( "array assign and peek element floats", -1, ptr.ARRAYS.three_floats[1] )
 	

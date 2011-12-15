@@ -169,19 +169,37 @@ export procedure opMEMSTRUCT_ARRAY()
 	pc += 5
 end procedure
 
+function get_tagged_name( symtab_index sym )
+	sequence tag
+	
+	while sym_token( sym ) = MEMTYPE do
+		sym = SymTab[S_MEM_PARENT]
+	end while
+	
+	if SymTab[sym][S_TOKEN] = MEMSTRUCT then
+		tag = "struct"
+	else
+		tag = "union"
+	end if
+	return sprintf( "%s %s", { tag, decorated_name( sym ) } )
+end function
+
 export procedure opPEEK_ARRAY()
 	integer
 		pointer   = Code[pc+1],
 		sym       = Code[pc+2],
 		subscript = Code[pc+3],
-		target    = Code[pc+4]
+		target    = Code[pc+4],
+		parent    = SymTab[sym][S_MEM_PARENT]
 	
 	integer data_type  = SymTab[sym][S_TOKEN]
 	integer signed     = SymTab[sym][S_MEM_SIGNED]
 	integer is_pointer = SymTab[sym][S_MEM_POINTER]
-	sequence type_name
+	sequence type_name, struct_name
 	
 	get_pointer( pointer, target )
+	
+	struct_name = get_tagged_name( parent )
 	
 	switch data_type do
 		case MS_MEMBER then
@@ -189,13 +207,7 @@ export procedure opPEEK_ARRAY()
 			fallthru
 			
 		case MEMSTRUCT, MEMUNION then
-			sequence tag
-			if data_type = MEMSTRUCT then
-				tag = "struct"
-			else
-				tag = "union"
-			end if
-			type_name = sprintf( "%s %s", { tag, decorated_name( sym ) } )
+			type_name = struct_name
 		case else
 			type_name = mem_name( data_type )
 	end switch
@@ -212,7 +224,10 @@ export procedure opPEEK_ARRAY()
 	if not index_is_int then
 		c_stmt0("}\n")
 	end if
-	peek_member_value( pointer, sym, data_type, 0, is_pointer, array_modifier, type_name, signed, target )
+	
+	c_stmt( sprintf("@ = (intptr_t)&((%s *)@)->%s;\n", {struct_name, decorated_name( sym ) }), { target, target } )
+	
+	peek_member_value( target, sym, data_type, is_pointer, array_modifier, type_name, signed, target )
 	remove_pointer( pointer )
 	remove_pointer( target )
 	
@@ -223,7 +238,7 @@ end procedure
 -- Stores the value pointed to by _0 into the target.  If target is 0,
 -- then the caller has already emitted the LHS, and peek_member will
 -- only print the RHS.
-procedure peek_member( integer pointer, integer sym, integer target, integer indirect = 0, integer array_index = -1 )
+procedure peek_member( integer pointer, integer sym, integer target, integer array_index = -1 )
 	integer data_type  = SymTab[sym][S_TOKEN]
 	integer signed     = SymTab[sym][S_MEM_SIGNED]
 	integer is_pointer = SymTab[sym][S_MEM_POINTER]
@@ -243,11 +258,14 @@ procedure peek_member( integer pointer, integer sym, integer target, integer ind
 	end if
 	
 	if not signed then
-		if data_type = MS_OBJECT then
-			type_name = "uintptr_t"
-		else
-			type_name = "unsigned " & type_name
-		end if
+		switch data_type do
+			case MS_OBJECT then
+				type_name = "uintptr_t"
+			case MS_FLOAT, MS_DOUBLE, MS_LONGDOUBLE, MS_EUDOUBLE then
+				-- nothing
+			case else
+				type_name = "unsigned " & type_name
+		end switch
 	end if
 	
 	if data_type = MS_MEMBER then
@@ -260,7 +278,7 @@ procedure peek_member( integer pointer, integer sym, integer target, integer ind
 	
 		c_stmt0( sprintf( "_2 = NewS1( %d );\n", SymTab[sym][S_MEM_ARRAY] ) )
 		for i = 1 to SymTab[sym][S_MEM_ARRAY] do
-			peek_member( pointer, sym, 0, indirect, i-1 )
+			peek_member( pointer, sym, 0, i-1 )
 			c_stmt0( sprintf( "((s1_ptr)_2)->base[%d] = _0;\n", i ) )
 		end for
 		if target then
@@ -272,22 +290,25 @@ procedure peek_member( integer pointer, integer sym, integer target, integer ind
 		
 	end if
 	
-	peek_member_value( pointer, sym, data_type, indirect, is_pointer, array_modifier, type_name, signed, target )
+	
+	peek_member_value( pointer, sym, data_type, is_pointer, array_modifier, type_name, signed, target )
 	memaccess = MEMSTRUCT_ACCESS
 end procedure
 
 procedure peek_member_value( integer pointer, integer sym, integer data_type,
-							 integer indirect, integer is_pointer, sequence array_modifier,
+							 integer is_pointer, sequence array_modifier,
 							 sequence type_name, integer signed, integer target )
 	integer parent
 	switch data_type do
 		case MS_FLOAT, MS_DOUBLE, MS_LONGDOUBLE, MS_EUDOUBLE then
+			sequence indirect_float = ""
+			if not length( array_modifier ) then
+				indirect_float = "*"
+			end if
 			if target then
-				if length( array_modifier ) then
-					c_stmt( sprintf("@ = NewDouble( (eudouble) ((%s*)@)%s );\n", {type_name, array_modifier}), { target, pointer }, target )
-				else
-					c_stmt( sprintf("@ = NewDouble( (eudouble) *(%s*)@ );\n", {type_name}), { target, pointer }, target )
-				end if
+				c_stmt( sprintf("@ = NewDouble( (eudouble) %s((%s*)@)%s );\n",
+								{indirect_float, type_name, array_modifier}),
+								{ target, pointer }, target )
 			else
 				parent =  SymTab[sym][S_MEM_PARENT]
 				sequence parent_struct
@@ -299,11 +320,10 @@ procedure peek_member_value( integer pointer, integer sym, integer data_type,
 				end switch
 				
 				c_stmt( 
-						sprintf("_0 = NewDouble( (eudouble) (((%s %s*)@)->%s%s) );\n", 
+						sprintf("_0 = NewDouble( (eudouble) %s(((%s*)@)%s) );\n", 
 							{
-								mem_name( sym_token( parent ) ),
-								parent_struct, 
-								decorated_name( sym ),
+								indirect_float,
+								type_name,
 								array_modifier
 							}
 						), 
@@ -313,7 +333,7 @@ procedure peek_member_value( integer pointer, integer sym, integer data_type,
 			end if
 		
 		case MEMUNION then
-			read_memunion( pointer, sym, indirect )
+			read_memunion( pointer, sym )
 			if target then
 				c_stmt( "@ = _0;\n", target, target )
 			end if
@@ -323,20 +343,18 @@ procedure peek_member_value( integer pointer, integer sym, integer data_type,
 				c_stmt( "@ = _0;\n", target, target )
 			end if
 		case else
+			sequence indirect_read = ""
+			if not length( array_modifier ) then
+				indirect_read = "*"
+			end if
 			if target then
-				if length( array_modifier ) then
-					c_stmt( sprintf("@ = ((%s*)@)%s;\n", {type_name, array_modifier}), { target, pointer }, target )
-				else
-					c_stmt( sprintf("@ = *(%s*)@;\n", {type_name}), { target, pointer }, target )
-				end if
+				c_stmt( sprintf("@ = %s((%s*)@)%s;\n", {indirect_read, type_name, array_modifier}), { target, pointer }, target )
 			else
-				parent        = SymTab[sym][S_MEM_PARENT]
 				c_stmt( 
-						sprintf("_0 = ((%s %s*)@)->%s%s;\n", 
+						sprintf("_0 = %s((%s*)@)%s;\n", 
 							{
-								mem_name( sym_token( parent ) ),
-								decorated_name( parent ), 
-								decorated_name( sym ),
+								indirect_read,
+								type_name,
 								array_modifier
 							}
 						),  { pointer } )
@@ -408,10 +426,15 @@ procedure read_memstruct( integer pointer, symtab_pointer member_sym )
 	c_stmt0( "{\n" )
 	c_stmt0( sprintf("s1_ptr serialize_%d;\n", serialize_level ) )
 	c_stmt0( sprintf("serialize_%d = NewS1( %d );\n", { serialize_level, size } ) )
-	
+	c_stmt( "_1 = @;\n", pointer )
 	integer ix = 0
+	sequence parent = get_tagged_name( member_sym )
 	while member_sym with entry do
-		peek_member( pointer, member_sym, 0, 1 )
+		ifdef DEBUG then
+			c_stmt0( sprintf("// peek member: %s.%s\n", {decorated_name( SymTab[member_sym][S_MEM_PARENT] ),  decorated_name( member_sym ) }))
+		end ifdef
+		c_stmt( sprintf("@ = (intptr_t) & ((%s*)_1)->%s;\n",  { parent, decorated_name( member_sym )}), pointer )
+		peek_member( pointer, member_sym, 0  )
 		ix += 1
 		c_stmt0( sprintf( "serialize_%d->base[%d] = _0;\n", { serialize_level, ix } ) )
 		
@@ -420,7 +443,7 @@ procedure read_memstruct( integer pointer, symtab_pointer member_sym )
 	end while
 	
 	c_stmt0( sprintf( "_0 = MAKE_SEQ( serialize_%d );\n", serialize_level ) )
-	
+	c_stmt( "@ = _1;\n", pointer, pointer )
 	c_stmt0( "}\n" )
 	serialize_level -= 1
 end procedure
@@ -428,20 +451,13 @@ end procedure
 --**
 -- Serialize the specified memunion into a sequence and store the object in _0.
 -- Also uses _1.
-procedure read_memunion( integer pointer, symtab_pointer member_sym, integer indirect = 0 )
+procedure read_memunion( integer pointer, symtab_pointer member_sym )
 	integer size = SymTab[member_sym][S_MEM_SIZE]
 	
 	c_stmt0( sprintf( "_1 = NewS1( %d );\n", size ) )
 	
 	for i = 1 to size do
-		if indirect then
-			c_stmt( 
-				sprintf( "((s1_ptr)_1)->base[%d] = ((unsigned char *) &(((%s*)@ )->%s))[%d];\n",
-						{i, struct_type( member_sym ) , decorated_name( member_sym ), i-1} ),
-				pointer )
-		else
-			c_stmt( sprintf( "((s1_ptr)_1)->base[%d] = ((unsigned char *) @)[%d];\n", {i, i-1} ), pointer )
-		end if
+		c_stmt( sprintf( "((s1_ptr)_1)->base[%d] = ((unsigned char *) @)[%d];\n", {i, i-1} ), pointer )
 	end for
 	c_stmt0( "_0 = MAKE_SEQ( _1 );\n" )
 end procedure
@@ -482,10 +498,11 @@ export procedure opMEMSTRUCT_READ()
 		member  = Code[pc+2],
 		target  = Code[pc+3]
 	
-	get_pointer( pointer, pointer )
-	
-	integer is_sequence = read_member( pointer, member )
 	CDeRef( target )
+	get_pointer( pointer, target )
+	
+	integer is_sequence = read_member( target, member )
+	
 	c_stmt( "@ = _0;\n", target, target )
 	if is_sequence then
 		SetBBType( target, TYPE_SEQUENCE, {MININT, MAXINT}, TYPE_OBJECT, 0 )
@@ -508,18 +525,18 @@ procedure poke_member_value( symtab_index target, symtab_index val, integer data
 				
 				if array_index = -1 then
 					c_stmt( "if( IS_ATOM_INT( @ ) ){\n", val )
-					c_stmt( sprintf("*(%s)@ = (%s)@;\n", {type_name, type_name}), { target, val }, target )
+					c_stmt( sprintf("*(%s*)@ = (%s)@;\n", {type_name, type_name}), { target, val }, target )
 				else
 					c_stmt0( "if( IS_ATOM_INT( _1 ) ){\n" )
-					c_stmt( sprintf("((%s)@)[%d] = (%s)_1;\n", {type_name, array_index, type_name}), { target }, target )
+					c_stmt( sprintf("((%s*)@)[%d] = (%s)_1;\n", {type_name, array_index, type_name}), { target }, target )
 				end if
 				c_stmt0( "}\n" )
 				c_stmt0( "else{\n")
 			end if
 			if array_index = -1 then
-				c_stmt( sprintf("*(%s)@ = (%s)DBL_PTR( @ )->dbl;\n", {type_name, type_name}), { target, val }, target )
+				c_stmt( sprintf("*(%s*)@ = (%s)DBL_PTR( @ )->dbl;\n", {type_name, type_name}), { target, val }, target )
 			else
-				c_stmt( sprintf("((%s)@)[%d] = (%s)DBL_PTR( _1 )->dbl;\n", {type_name, array_index, type_name}), { target }, target )
+				c_stmt( sprintf("((%s*)@)[%d] = (%s)DBL_PTR( _1 )->dbl;\n", {type_name, array_index, type_name}), { target }, target )
 			end if
 			
 			if not is_double then
@@ -576,11 +593,13 @@ procedure poke_member( symtab_index target, symtab_index member, symtab_index va
 	end if
 	
 	if not signed then
-		if data_type = MS_OBJECT then
-			type_name = "uintptr_t"
-		else
-			type_name = "unsigned " & type_name
-		end if
+		switch data_type do
+			case MS_OBJECT then
+				type_name = "uintptr_t"
+			case MS_FLOAT, MS_DOUBLE, MS_LONGDOUBLE, MS_EUDOUBLE then
+			case else
+				type_name = "unsigned " & type_name
+		end switch
 	end if
 	
 	if SymTab[member][S_MEM_ARRAY] and memaccess = MEMSTRUCT_ACCESS then

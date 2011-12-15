@@ -3262,10 +3262,9 @@ procedure opPEEK_ARRAY()
 	-- pc+3 subscript
 	-- pc+4 target
 	atom 
-		ptr        = val[Code[pc+1]],
 		member_sym = Code[pc+2],
+		ptr        = val[Code[pc+1]] + SymTab[member_sym][S_MEM_OFFSET],
 		subscript  = val[Code[pc+3]]
-	
 	val[Code[pc+4]] = peek_member( ptr, member_sym, subscript )
 	pc += 5
 end procedure
