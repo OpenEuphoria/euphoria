@@ -11,7 +11,7 @@ include scanner.e
 include symtab.e
 
 include std/dll.e
-
+with trace
 integer is_union = 0
 symtab_pointer last_sym = 0
 symtab_index mem_struct
@@ -499,8 +499,8 @@ export function recalculate_size( symtab_index sym )
 	is_union = 0
 	if size > 0 then
 		for i = 2 to length( SymTab[sym][S_MEM_RECALC] ) do
-			symtab_index recalc_sym =  SymTab[sym][S_MEM_RECALC][i]
 			
+			symtab_index recalc_sym =  SymTab[sym][S_MEM_RECALC][i]
 			SymTab[recalc_sym][S_MEM_SIZE] = recalculate_size( recalc_sym )
 			
 		end for
@@ -534,7 +534,9 @@ function calculate_alignment( symtab_index member_sym )
 	
 	integer sub_alignment = 0
 	while sym with entry do
-		if sym_token( sym ) = MS_MEMBER then
+		if SymTab[sym][S_MEM_POINTER] then
+			sub_alignment = sizeof( C_POINTER )
+		elsif sym_token( sym ) = MS_MEMBER then
 			sub_alignment = calculate_alignment( sym )
 			if not sub_alignment then
 				return -1
@@ -566,7 +568,9 @@ end function
 function calculate_padding( symtab_index member_sym, integer size, integer mem_size )
 	integer padding = 0
 	
-	if sym_token( member_sym ) = MS_MEMBER then
+	if SymTab[member_sym][S_MEM_POINTER] then
+		padding = remainder( size, sizeof( C_POINTER ) )
+	elsif sym_token( member_sym ) = MS_MEMBER then
 		integer alignment = calculate_alignment( member_sym )
 		if alignment = -1 then
 			return -1
@@ -592,10 +596,12 @@ end function
 -- Returns the size and offsets for the memstruct, or -1 if all
 -- sizes have not been determined yet.
 function calculate_size()
-	
 	symtab_pointer member_sym = mem_struct
-	
+
 	if sym_token( member_sym ) = MEMTYPE then
+		if SymTab[SymTab[member_sym][S_MEM_PARENT]][S_MEM_SIZE] < 1 then
+			SymTab[SymTab[member_sym][S_MEM_PARENT]][S_MEM_SIZE] = recalculate_size( SymTab[member_sym][S_MEM_PARENT] )
+		end if
 		return SymTab[SymTab[member_sym][S_MEM_PARENT]][S_MEM_SIZE]
 	end if
 	
@@ -609,7 +615,7 @@ function calculate_size()
 			if struct_type then
 				mem_size = SymTab[struct_type][S_MEM_SIZE]
 				if mem_size < 1 then
-					if length( struct_type ) >= SIZEOF_MEMSTRUCT_ENTRY then
+					if length( SymTab[struct_type] ) >= SIZEOF_MEMSTRUCT_ENTRY then
 						mem_size = recalculate_size( struct_type )
 					end if
 					if mem_size < 1 then
@@ -618,9 +624,7 @@ function calculate_size()
 					end if
 				end if
 			else
-				
 				indeterminate = 1
-				
 			end if
 		end if
 		if not indeterminate then
