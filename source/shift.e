@@ -276,6 +276,7 @@ procedure init_op_info()
 	op_info[PROC_TAIL           ] = op_info[PROC]
 	
 	op_info[MEMSTRUCT_ACCESS    ] = { VARIABLE_SIZE, 0, {}, {}, {} } -- TARGET: [pc+1] + 2
+	op_info[ARRAY_ACCESS        ] = { VARIABLE_SIZE, 0, {}, {}, {} } -- TARGET: [pc+1] + 3
 end procedure
 
 init_op_info()
@@ -305,6 +306,9 @@ function op_size( integer pc, sequence code = Code )
 			case MEMSTRUCT_ACCESS then
 				int = code[pc+1]
 				int += 4
+			case ARRAY_ACCESS then
+				int = code[pc+1]
+				int += 5
 			case else
 				InternalErr( 269, {op} )
 		end switch
@@ -525,6 +529,9 @@ export function get_target_sym( sequence opseq )
 
 			case RIGHT_BRACE_N, CONCAT_N, MEMSTRUCT_ACCESS then
 				return opseq[opseq[2]+2]
+				
+			case ARRAY_ACCESS then
+				return opseq[opseq[2]+3]
 
 		end switch
 	end if

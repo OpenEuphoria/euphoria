@@ -223,3 +223,4 @@
 #define L_ADDRESSOF           ADDRESSOF
 #define L_OFFSETOF            OFFSETOF
 #define L_PEEK_ARRAY          PEEK_ARRAY
+#define L_ARRAY_ACCESS        ARRAY_ACCESS

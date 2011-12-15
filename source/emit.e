@@ -507,6 +507,7 @@ op_result[HEAD] = T_SEQUENCE
 op_result[TAIL] = T_SEQUENCE
 op_result[REMOVE] = T_SEQUENCE
 op_result[REPLACE] = T_SEQUENCE
+op_result[PEEK_ARRAY] = T_SEQUENCE
 
 sequence op_temp_ref = repeat( NO_REFERENCE, MAX_OPCODE )
 op_temp_ref[RIGHT_BRACE_N]    = NEW_REFERENCE
@@ -597,6 +598,9 @@ op_temp_ref[LOG]              = NEW_REFERENCE
 op_temp_ref[GETS]             = NEW_REFERENCE
 op_temp_ref[GETENV]           = NEW_REFERENCE
 op_temp_ref[RAND]             = NEW_REFERENCE
+op_temp_ref[PEEK_ARRAY]       = NEW_REFERENCE
+op_temp_ref[PEEK_MEMBER]      = NEW_REFERENCE
+op_temp_ref[MEMSTRUCT_READ]   = NEW_REFERENCE
 
 procedure cont11ii(integer op, boolean ii)
 -- if ii is TRUE then integer arg always produces integer result
@@ -1842,18 +1846,27 @@ export procedure emit_op(integer op)
 		end if
 		assignable = FALSE
 	
-	case MEMSTRUCT_ACCESS then
+	case MEMSTRUCT_ACCESS, ARRAY_ACCESS then
 		a = Pop() -- number of elements
+		if op = ARRAY_ACCESS then
+			-- subscript:
+			b = Pop()
+		end if
 		sequence members = repeat( 0, a )
 		for i = a to 1 by -1 do
 			members[i] = Pop()
 		end for
-		emit_opcode( MEMSTRUCT_ACCESS )
+		
+		emit_opcode( op )
 		emit_addr( a )
 		emit_addr( Pop() )
 		for i = 1 to length( members ) do
 			emit_addr( members[i] )
 		end for
+		if op = ARRAY_ACCESS then
+			-- subscript:
+			emit_addr( b )
+		end if
 		c = NewTempSym()
 		Push( c )
 		emit_addr( c )

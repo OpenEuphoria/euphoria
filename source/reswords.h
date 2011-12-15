@@ -242,7 +242,8 @@
 #define ADDRESSOF           229
 #define OFFSETOF            230
 #define PEEK_ARRAY          231
-#define MAX_OPCODE          231
+#define ARRAY_ACCESS        232
+#define MAX_OPCODE          232
 
 /* remember to update reswords.e, opnames.e,
    opnames.h, optable[], localjumptab[]

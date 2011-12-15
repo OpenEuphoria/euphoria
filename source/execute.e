@@ -3194,24 +3194,54 @@ procedure opADDRESSOF()
 	pc += 3
 end procedure
 
-procedure opMEMSTRUCT_ACCESS()
-	-- pc+1 number of accesses
-	-- pc+2 pointer to memstruct
-	-- pc+2 .. pc+n+1 member syms for access
-	-- pc+n+2 target for pointer
+function mem_access( integer member_count, atom ptr )
 	
-	a = Code[pc + 1]
-	b = pc + 2 + a -- the last member
+	b = pc + 2 + member_count -- the last member
 	
-	atom ptr = val[Code[pc+2]]
 	for i = pc+3 to b do
 		ptr += SymTab[Code[i]][S_MEM_OFFSET]
 		if SymTab[Code[i]][S_MEM_POINTER] and i < b then
 			ptr = peek_pointer( ptr )
 		end if
 	end for
-	val[Code[b+1]] = ptr
-	pc = b + 2
+	return ptr
+end function
+
+integer memaccess = 0
+procedure opARRAY_ACCESS()
+	-- pc+1 number of accesses
+	-- pc+2 pointer to memstruct
+	-- pc+2 .. pc+n+2 member syms for access
+	-- pc+n+3 subscript sym
+	-- pc+n+4 target for pointer
+	memaccess = ARRAY_ACCESS
+	integer
+		member_count  = Code[pc+1],
+		subscript_sym = Code[pc + member_count + 3],
+		array_sym     = Code[pc + member_count + 2]
+	atom ptr = mem_access( member_count, val[Code[pc+2]] )
+	
+	integer element_size = SymTab[array_sym][S_MEM_SIZE]
+	if SymTab[array_sym][S_MEM_ARRAY] then
+		element_size /= SymTab[array_sym][S_MEM_ARRAY]
+	end if
+	ptr += val[subscript_sym] * element_size
+	val[Code[pc + member_count + 4]] = ptr
+	
+	pc += member_count + 5
+end procedure
+
+procedure opMEMSTRUCT_ACCESS()
+	-- pc+1 number of accesses
+	-- pc+2 pointer to memstruct
+	-- pc+2 .. pc+n+2 member syms for access
+	-- pc+n+3 target for pointer
+	memaccess = MEMSTRUCT_ACCESS
+	integer
+		member_count  = Code[pc+1]
+	atom ptr = mem_access( member_count, val[Code[pc+2]] )
+	val[Code[pc + member_count + 3]] = ptr
+	pc += member_count + 4
 end procedure
 
 procedure opMEMSTRUCT_ARRAY()
@@ -3289,17 +3319,21 @@ procedure poke_member( atom pointer, integer sym, object value )
 		integer array_length = SymTab[sym][S_MEM_ARRAY]
 		integer max = array_length
 		integer size = SymTab[sym][S_MEM_SIZE] / array_length
-		if array_length < length( value ) then
-			max = length( value )
+		if memaccess = ARRAY_ACCESS then
+			poke_member_value( pointer, data_type, value )
+		else
+			if array_length < length( value ) then
+				max = length( value )
+			end if
+			for i = 1 to max do
+				poke_member_value( pointer, data_type, value[i] )
+				pointer += size
+			end for
+			for i = max + 1 to array_length do
+				poke_member_value( pointer, data_type, 0 )
+				pointer += size
+			end for
 		end if
-		for i = 1 to max do
-			poke_member_value( pointer, data_type, value[i] )
-			pointer += size
-		end for
-		for i = max + 1 to array_length do
-			poke_member_value( pointer, data_type, 0 )
-			pointer += size
-		end for
 	else
 		poke_member_value( pointer, data_type, value )
 	end if
@@ -4827,6 +4861,9 @@ procedure do_exec()
 				
 			case MEMSTRUCT_ACCESS then
 				opMEMSTRUCT_ACCESS()
+			
+			case ARRAY_ACCESS then
+				opARRAY_ACCESS()
 			
 			case MEMSTRUCT_ARRAY then
 				opMEMSTRUCT_ARRAY()

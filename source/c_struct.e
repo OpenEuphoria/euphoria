@@ -13,6 +13,7 @@ include symtab.e
 -- pointers into doubles.
 sequence target_is_pointer = {}
 
+integer memaccess = 0
 
 function is_pointer( integer pointer )
 	return find( pointer, target_is_pointer )
@@ -74,14 +75,8 @@ procedure get_pointer( integer pointer, integer target )
 	
 end procedure
 
-export procedure opMEMSTRUCT_ACCESS()
-	integer 
-		access_count = Code[pc+1],
-		pointer      = Code[pc+2],
-		target       = Code[pc+ 3 + access_count]
-	
+procedure mem_access( integer access_count, integer pointer, integer target )
 	get_pointer( pointer, target )
-	
 	symtab_index sym = Code[pc+3]
 	
 	c_stmt( sprintf("@ = (intptr_t) &(((%s*)@)",{struct_type(sym)}), { target, target }, target )
@@ -101,7 +96,30 @@ export procedure opMEMSTRUCT_ACCESS()
 		was_pointer = SymTab[Code[i]][S_MEM_POINTER]
 	end for
 	c_puts( ");\n")
+end procedure
+
+export procedure opARRAY_ACCESS()
+	integer 
+		access_count = Code[pc+1],
+		pointer      = Code[pc+2],
+		subscript    = Code[pc + 3 + access_count],
+		target       = Code[pc + 4 + access_count]
+	mem_access( access_count, pointer, target )
+	memaccess = ARRAY_ACCESS
+	symtab_index sym = Code[pc + 2 + access_count]
+	c_stmt( sprintf("@ = (intptr_t) (((%s *)@) + @);\n",{get_data_type(sym)}), { target, target, subscript }, target )
 	
+	pc += access_count + 5
+end procedure
+
+export procedure opMEMSTRUCT_ACCESS()
+	integer 
+		access_count = Code[pc+1],
+		pointer      = Code[pc+2],
+		target       = Code[pc+ 3 + access_count]
+	
+	mem_access( access_count, pointer, target )
+	memaccess = MEMSTRUCT_ACCESS
 	pc += access_count + 4
 end procedure
 
@@ -238,18 +256,24 @@ procedure peek_member( integer pointer, integer sym, integer target, integer ind
 	
 	if array_index != -1 then
 		array_modifier = sprintf("[%d]", array_index )
-	elsif SymTab[sym][S_MEM_ARRAY] then
+	elsif SymTab[sym][S_MEM_ARRAY] and memaccess = MEMSTRUCT_ACCESS then
+	
 		c_stmt0( sprintf( "_2 = NewS1( %d );\n", SymTab[sym][S_MEM_ARRAY] ) )
 		for i = 1 to SymTab[sym][S_MEM_ARRAY] do
 			peek_member( pointer, sym, 0, indirect, i-1 )
 			c_stmt0( sprintf( "((s1_ptr)_2)->base[%d] = _0;\n", i ) )
 		end for
-		c_stmt( "@ = MAKE_SEQ( _2 );\n", target )
+		if target then
+			c_stmt( "@ = MAKE_SEQ( _2 );\n", target )
+		else
+			c_stmt0( "_0 = MAKE_SEQ( _2 );\n" )
+		end if
 		return
+		
 	end if
 	
 	peek_member_value( pointer, sym, data_type, indirect, is_pointer, array_modifier, type_name, signed, target )
-	
+	memaccess = MEMSTRUCT_ACCESS
 end procedure
 
 procedure peek_member_value( integer pointer, integer sym, integer data_type,
@@ -559,7 +583,7 @@ procedure poke_member( symtab_index target, symtab_index member, symtab_index va
 		end if
 	end if
 	
-	if SymTab[member][S_MEM_ARRAY] then
+	if SymTab[member][S_MEM_ARRAY] and memaccess = MEMSTRUCT_ACCESS then
 		c_stmt("switch( SEQ_PTR( @ )->length ){\n", val )
 		c_stmt0("default:\n")
 		for i = SymTab[member][S_MEM_ARRAY] to 1 by -1 do
@@ -571,6 +595,7 @@ procedure poke_member( symtab_index target, symtab_index member, symtab_index va
 	else
 		poke_member_value( target, val, data_type, type_name, -1 )
 	end if
+	memaccess = MEMSTRUCT_ACCESS
 end procedure
 
 procedure poke_memstruct( symtab_index target, symtab_index struct_sym, symtab_index member, integer subscript )
@@ -937,9 +962,9 @@ function mem_name( integer tid )
 	end switch
 end function
 
-procedure write_data_type( atom struct_h, symtab_index member )
-	
+function get_data_type( symtab_index member )
 	integer data_type = SymTab[member][S_TOKEN]
+	sequence name = ""
 	
 -- 	printf(1, "Writing data type for: %s - %s\n", { sym_name(member), LexName( data_type )})
 	-- signed / unsigned
@@ -952,29 +977,33 @@ procedure write_data_type( atom struct_h, symtab_index member )
 	and data_type != MS_EUDOUBLE
 	then
 		-- floating points are always marked signed
-		puts( struct_h, "unsigned " )
+		name &= "unsigned "
 	end if
 	
 	if data_type = MS_OBJECT and not SymTab[member][S_MEM_SIGNED] then
 		-- this one can't just take an unsigned
-		puts( struct_h, "uintptr_t " )
+		name &= "uintptr_t "
 	elsif data_type != MS_MEMBER then
-		printf( struct_h, "%s ", { mem_name( data_type )})
+		name &= sprintf( "%s ", { mem_name( data_type )})
 	else
 		data_type = SymTab[SymTab[member][S_MEM_STRUCT]][S_TOKEN]
 		if data_type = MEMUNION then
 			-- embedded union
-			printf( struct_h, "union %s ", {decorated_name( SymTab[member][S_MEM_STRUCT] ) } )
+			name &= sprintf( "union %s ", {decorated_name( SymTab[member][S_MEM_STRUCT] ) } )
 		else
 			-- embedded struct
-			printf( struct_h, "struct %s ", {decorated_name( SymTab[member][S_MEM_STRUCT] ) } )
+			name &= sprintf( "struct %s ", {decorated_name( SymTab[member][S_MEM_STRUCT] ) } )
 		end if
 	end if
 	
 	if SymTab[member][S_MEM_POINTER] then
-		puts( struct_h, "*" )
+		name &= "*"
 	end if
-	
+	return name
+end function
+
+procedure write_data_type( atom struct_h, symtab_index member )
+	puts( struct_h, get_data_type( member ) )
 end procedure
 
 procedure write_memstruct( atom struct_h, symtab_index sym )

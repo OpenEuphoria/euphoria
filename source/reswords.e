@@ -240,7 +240,8 @@ export constant
 	ADDRESSOF           = 229,
 	OFFSETOF            = 230,
 	PEEK_ARRAY          = 231,
-	MAX_OPCODE          = 231
+	ARRAY_ACCESS        = 232,
+	MAX_OPCODE          = 232
 
 
 -- adding new opcodes possibly affects reswords.h (C-coded backend),

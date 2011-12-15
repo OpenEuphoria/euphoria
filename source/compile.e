@@ -7055,6 +7055,8 @@ export procedure init_opcodes()
 				operation[i] = routine_id("opDEREF_TEMP")
 			case "REF_TEMP" then
 				operation[i] = routine_id("opREF_TEMP")
+			case "ARRAY_ACCESS" then
+				operation[i] = routine_id("opARRAY_ACCESS")
 			case else
 				operation[i] = -1
 		end switch

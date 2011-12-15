@@ -12,7 +12,7 @@
 
 static object read_member( void *pointer, symtab_ptr member_sym );
 static object read_memunion( void *pointer, symtab_ptr member_sym );
-
+static int memaccess = 0;
 
 static object box_int( intptr_t x )
 {
@@ -94,7 +94,11 @@ object peek_member( object_ptr source, symtab_ptr memsym, int array_index, void 
 		is_signed = 0;
 	}
 	else if( array_index != -1 ){
-		pointer = (void*) (((intptr_t)pointer) + (array_index * memsym->u.memstruct.size));
+		uintptr_t size = memsym->u.memstruct.size;
+		if( memsym->u.memstruct.array ){
+			size /= memsym->u.memstruct.array;
+		}
+		pointer = (void*) (((intptr_t)pointer) + (array_index * size));
 	}
 	else if( memsym->u.memstruct.array ){
 		s = NewS1( memsym->u.memstruct.array );
@@ -287,7 +291,7 @@ void write_union( object_ptr source, symtab_ptr sym, object_ptr val ){
 	}
 }
 
-object memstruct_access( int access_count, object_ptr source, symtab_ptr *access_sym ){
+static uintptr_t mem_access(  int access_count, object_ptr source, symtab_ptr *access_sym ){
 	uintptr_t pointer;
 	int i;
 	
@@ -298,7 +302,27 @@ object memstruct_access( int access_count, object_ptr source, symtab_ptr *access
 			pointer = *(uintptr_t*)pointer;
 		}
 	}
-	
+	return pointer;
+}
+object memstruct_access( int access_count, object_ptr source, symtab_ptr *access_sym ){
+	uintptr_t pointer;
+	memaccess = MEMSTRUCT_ACCESS;
+	pointer = mem_access( access_count, source, access_sym );
+	return box_int( pointer );
+}
+
+object array_access( int access_count, object_ptr source, symtab_ptr *access_sym, symtab_ptr subscript ){
+	uintptr_t pointer;
+	uintptr_t element_size;
+	intptr_t sub_val;
+	memaccess = ARRAY_ACCESS;
+	pointer = mem_access( access_count, source, access_sym );
+	element_size = access_sym[access_count-1]->u.memstruct.size;
+	if( access_sym[access_count-1]->u.memstruct.array ){
+		element_size /= access_sym[access_count-1]->u.memstruct.array;
+	}
+	sub_val = get_pos_int( "array access subscript", subscript->obj);
+	pointer += sub_val * element_size;
 	return box_int( pointer );
 }
 
@@ -392,27 +416,34 @@ void poke_member( object_ptr source, symtab_ptr sym, object_ptr val ){
 	
 	pointer = get_pos_int( "storing memory data", *source );
 	if( sym->u.memstruct.array ){
-		int i, array_length, max, size;
-		s1_ptr v;
-		intptr_t zero = 0;
-		array_length =  sym->u.memstruct.array;
-		size = sym->u.memstruct.size / array_length;
-		if( IS_ATOM( *val ) ){
-			RTFatal( "expected a sequence to assign to the array" );
-		}
-		v = SEQ_PTR( *val );
-		max = v->length;
-		if( max > array_length ){
-			max = array_length;
-		}
 		
-		for( i = 0; i < max; ++i ){
-			poke_member_value( (void*)pointer, data_type, v->base + i + 1, is_signed );
-			pointer += size;
+		
+		if( memaccess == ARRAY_ACCESS ){
+			poke_member_value( (void*)pointer, data_type, val, is_signed );
 		}
-		for( ; i < array_length; ++i ){
-			poke_member_value( (void*)pointer, data_type, (object_ptr)&zero, is_signed );
-			pointer += size;
+		else{
+			int i, array_length, max, size;
+			s1_ptr v;
+			intptr_t zero = 0;
+			array_length =  sym->u.memstruct.array;
+			size = sym->u.memstruct.size / array_length;
+			if( IS_ATOM( *val ) ){
+				RTFatal( "expected a sequence to assign to the array" );
+			}
+			v = SEQ_PTR( *val );
+			max = v->length;
+			if( max > array_length ){
+				max = array_length;
+			}
+			
+			for( i = 0; i < max; ++i ){
+				poke_member_value( (void*)pointer, data_type, v->base + i + 1, is_signed );
+				pointer += size;
+			}
+			for( ; i < array_length; ++i ){
+				poke_member_value( (void*)pointer, data_type, (object_ptr)&zero, is_signed );
+				pointer += size;
+			}
 		}
 	}
 	else{

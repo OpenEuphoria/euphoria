@@ -1039,9 +1039,11 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 				tok = next_token()
 				putback( tok )
 				if tok[T_ID] != DOT then
-					-- update to this member
--- 					emit_member( member, ref, MEMSTRUCT_ARRAY, names )
-					emit_op( PEEK_ARRAY )
+					if lhs then
+						peek_member( members, member, ref, lhs, names, ARRAY_ACCESS )
+					else
+						emit_op( PEEK_ARRAY )
+					end if
 					exit
 				end if
 				
@@ -1058,12 +1060,12 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 	No_new_entry = 0
 end procedure
 
-procedure peek_member( integer members, symtab_index member, integer ref, integer lhs, sequence names )
+procedure peek_member( integer members, symtab_index member, integer ref, integer lhs, sequence names, integer op = MEMSTRUCT_ACCESS )
 	
 	emit_opnd( members )
-	emit_op( MEMSTRUCT_ACCESS )
+	emit_op( op )
 	if lhs then
-		emit_member( member, ref, MEMSTRUCT_ACCESS, names )
+		emit_member( member, ref, op, names )
 	else
 		-- geting the value...peek it
 		emit_member( member, ref, PEEK_MEMBER, names )

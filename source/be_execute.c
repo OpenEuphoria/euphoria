@@ -960,7 +960,7 @@ struct IL fe;
 void code_set_pointers(intptr_t **code)
 /* adjust code pointers, changing some indexes into pointers */
 {
-	intptr_t len, i, j, n, sub, word;
+	intptr_t len, i, j, n, sub, word, array;
 
 	len = (intptr_t) code[0];
 	i = 1;
@@ -1342,15 +1342,23 @@ void code_set_pointers(intptr_t **code)
 				i += n + 3;
 				break;
 			case MEMSTRUCT_ACCESS:
+			case ARRAY_ACCESS:
 				n = (intptr_t)code[i+1] + 1;
+				array = (word == ARRAY_ACCESS);
 				for (j = 1; j <= n; j++) {
 					word = (intptr_t)code[i+1+j];
 					code[i+1+j] = SET_OPERAND(word);
 				}
+				
 				word = (intptr_t)code[i+n+2];
+				
 				code[i+n+2] = SET_OPERAND(word);
-
-				i += n + 3;
+				if( array ){
+					word = code[i+n+3];
+					code[i+n+3] = SET_OPERAND( word );
+				}
+				
+				i += n + 3 + array;
 				break;
 			default:
 				RTFatal("UNKNOWN IL OPCODE");
@@ -1854,8 +1862,9 @@ void do_exec(intptr_t *start_pc)
   &&L_MEMSTRUCT_ACCESS, &&L_MEMSTRUCT_ARRAY, &&L_PEEK_MEMBER,
   &&L_MEMSTRUCT_READ, &&L_MEMSTRUCT_ASSIGN, &&L_MEMSTRUCT_PLUS,
   &&L_MEMSTRUCT_MINUS, &&L_MEMSTRUCT_MULTIPLY, &&L_MEMSTRUCT_DIVIDE,
-  &&L_MEM_TYPE_CHECK, &&L_ADDRESSOF, &&L_OFFSETOF, &&L_PEEK_ARRAY
-/* 231 (previous) */
+  &&L_MEM_TYPE_CHECK, &&L_ADDRESSOF, &&L_OFFSETOF, &&L_PEEK_ARRAY,
+  &&L_ARRAY_ACCESS
+/* 232 (previous) */
   
 
 	};
@@ -5473,7 +5482,17 @@ void do_exec(intptr_t *start_pc)
 				pc += b + 4;
 				thread();
 				BREAK;
-				
+			case L_ARRAY_ACCESS:
+				deprintf("case L_ARRAY_ACCESS");
+				tpc = pc;
+				b = pc[1];
+				a = array_access( b, (object_ptr) pc[2], (symtab_ptr *) pc + 3,  (symtab_ptr) pc[4]);
+				obj_ptr = (object_ptr) pc[b+4];
+				DeRef( *obj_ptr );
+				*obj_ptr = a;
+				pc += b + 5;
+				thread();
+				BREAK;
 			case L_MEMSTRUCT_ARRAY:
 				deprintf("case L_MEMSTRUCT_ARRAY");
 				tpc = pc;

@@ -1404,19 +1404,40 @@ procedure opEXIT_BLOCK()
 	punary()
 end procedure
 
-procedure opMEMSTRUCT_ACCESS()
+procedure mem_access()
 	-- pc+1 number of accesses
 	-- pc+2 pointer to memstruct
 	-- pc+3 .. pc+n+1 member syms for access
+	
+	-- MEMSTRUCT_ACCESS:
 	-- pc+n+2 target for pointer
+	
+	-- ARRAY_ACCESS
+	-- pc+n+2: subscript
+	-- pc+n+3 target for pointer
+	
+	integer op = Code[pc]
+	integer is_array = (op= ARRAY_ACCESS)
 	integer members = Code[pc+1]
-	sequence text = sprintf("MEMSTRUCT_ACCESS %s %s(", names( {Code[pc+2], SymTab[Code[pc+3]][S_MEM_PARENT]} ) )
+	sequence text = sprintf("%s %s %s(", {opnames[op]} & names( {Code[pc+2], SymTab[Code[pc+3]][S_MEM_PARENT]} ) )
 	for i = pc+3 to pc+2+members do
 		text &= sprintf(" %s", names( Code[i] ) )
 	end for
-	text &= sprintf(" ) => %s", names( Code[pc+members+3] ) )
-	il( text, members + 3 )
-	pc += members + 4
+	text &= " )"
+	if is_array then
+		text &= sprintf( "[%s]", {name_or_literal( Code[pc+members+3] )} )
+	end if
+	text &= sprintf(" => %s", names( Code[pc+members+3 + is_array] ) )
+	il( text, members + 3 + is_array )
+	pc += members + 4 + is_array
+end procedure
+
+procedure opARRAY_ACCESS()
+	mem_access()
+end procedure
+
+procedure opMEMSTRUCT_ACCESS()
+	mem_access()
 end procedure
 
 procedure opMEMSTRUCT_ARRAY()

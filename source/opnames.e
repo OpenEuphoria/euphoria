@@ -240,5 +240,6 @@ export constant opnames = {
 	"ADDRESSOF",
 	"OFFSETOF",
 	"PEEK_ARRAY",
+	"ARRAY_ACCESS",
 	$
 }
