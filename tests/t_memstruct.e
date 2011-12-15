@@ -211,4 +211,36 @@ end ifdef
 
 test_equal( "sizeof( pointer ) = sizeof( object )", sizeof( pointer ), sizeof( object ) )
 
+memstruct ARRAYS
+	int   five_ints[5]
+	long  ten_longs[10]
+	float three_floats[3]
+	double four_doubles[4]
+end memstruct
+
+procedure arrays()
+	atom ptr = allocate( sizeof( ARRAYS ), 1 )
+	
+	ptr.ARRAYS.five_ints = { 1, 2, 3, 4, 5 }
+	test_equal( "array bulk assign and peek ints", {1,2,3,4,5}, ptr.ARRAYS.five_ints )
+	ptr.ARRAYS.five_ints[0] = -1
+	test_equal( "array assign and peek element ints", -1, ptr.ARRAYS.five_ints[0] )
+	
+	ptr.ARRAYS.ten_longs = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }
+	test_equal( "array bulk assign and peek longs", { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, ptr.ARRAYS.ten_longs )
+	ptr.ARRAYS.ten_longs[9] = -1
+	test_equal( "array assign and peek element longs", -1, ptr.ARRAYS.ten_longs[9] )
+	
+	ptr.ARRAYS.three_floats = {1.1, 1.2, 1.3 }
+	test_equal( "array bulk assign and peek floats", {1.1, 1.2, 1.3 }, ptr.ARRAYS.three_floats )
+	ptr.ARRAYS.three_floats[1] = -1
+	test_equal( "array assign and peek element floats", -1, ptr.ARRAYS.three_floats[1] )
+	
+	ptr.ARRAYS.four_doubles = {1.1, 1.2, 1.3, 4.1 }
+	test_equal( "array bulk assign and peek doubles", {1.1, 1.2, 1.3, 4.1 }, ptr.ARRAYS.four_doubles )
+	ptr.ARRAYS.four_doubles[2] = 8.6
+	test_equal( "array assign and peek element doubles", 8.6, ptr.ARRAYS.four_doubles[2] )
+	
+end procedure
+arrays()
 test_report()
