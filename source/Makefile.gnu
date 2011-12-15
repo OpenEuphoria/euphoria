@@ -289,6 +289,7 @@ EU_TRANSLATOR_FILES = \
 	buildsys.e \
 	c_decl.e \
 	c_out.e \
+	c_struct.e \
 	cominit.e \
 	compile.e \
 	compress.e \
