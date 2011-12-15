@@ -159,7 +159,7 @@ procedure init_op_info()
 	op_info[PASSIGN_OP_SUBS     ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[PASSIGN_SLICE       ] = { FIXED_SIZE, 5, {}, {1}, {} }
 	op_info[PASSIGN_SUBS        ] = { FIXED_SIZE, 4, {}, {1}, {} }
-	op_info[PEEK_ARRAY          ] = { FIXED_SIZE, 4, {}, {3}, {} }
+	op_info[PEEK_ARRAY          ] = { FIXED_SIZE, 5, {}, {3}, {} }
 	op_info[PEEK_MEMBER         ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[PEEK_STRING         ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[PEEK8U              ] = { FIXED_SIZE, 3, {}, {2}, {} }
