@@ -224,7 +224,7 @@ procedure OutputSymTab(file f)
 			case MS_CHAR, MS_SHORT, MS_INT, MS_LONG, MS_LONGLONG,
 				MS_FLOAT, MS_DOUBLE, MS_LONGDOUBLE, MS_EUDOUBLE,
 				MS_OBJECT, MS_MEMBER, MEMSTRUCT, MEMUNION,
-				MEMSTRUCT_DECL, MEMUNION_DECL
+				MEMSTRUCT_DECL, MEMUNION_DECL, MEMTYPE
 			then
 				if length( SymTab[i] ) = SIZEOF_MEMSTRUCT_ENTRY then
 					SymTab[i] = SymTab[i][1..4] & 
@@ -235,7 +235,7 @@ procedure OutputSymTab(file f)
 									SymTab[i][S_TOKEN],
 									$
 								} &
-								SymTab[i][S_MEM_SIZE..S_MEM_PARENT]
+								SymTab[i][S_MEM_SIZE..S_MEM_RECALC]
 				end if
 			
 			case else
@@ -256,6 +256,7 @@ procedure OutputSymTab(file f)
 								SymTab[i][S_NAME],
 								SymTab[i][S_TOKEN],{},
 								SymTab[i][S_BLOCK]}
+								
 				end if
 			end switch
 
