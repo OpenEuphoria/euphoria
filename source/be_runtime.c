@@ -2490,7 +2490,7 @@ object calc_MD5(object a)
 		}
 	}
 #endif
-	return 0;
+	return a ^ a;
 }
 
 object calc_SHA256(object a)
@@ -2544,7 +2544,7 @@ object calc_SHA256(object a)
 		}
 	}
 #endif
-	return 0;
+	return a ^ a;
 }
 
 

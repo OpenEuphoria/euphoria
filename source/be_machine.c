@@ -495,11 +495,14 @@ static object Cursor(object x)
 								  100;
 	c.bVisible = (style != 0x02000);
 	SetConsoleCursorInfo(console_output, &c);
+	return ATOM_1;
 #endif
 #ifdef EUNIX
 	// leaveok(stdscr, style != 0x02000); doesn't work very well
+	x = 1;
+	return x;
 #endif
-	return ATOM_1;
+	
 }
 
 static object TextRows(object x)
@@ -2228,7 +2231,7 @@ object CallBack(object x)
    */
 {
 	static unsigned char *page_addr = NULL;
-	static unsigned int page_offset = 0;
+	static long page_offset = 0;
 	static long call_increment = 0;
 	static long last_block_offset = 0;
 	unsigned addr;
@@ -2498,9 +2501,9 @@ void Machine_Handler(int sig_no)
 	is_batch = console_application();
 #endif
 #ifdef ERUNTIME
-	RTFatal("A machine-level exception occurred during execution of your program");
+	RTFatal("A machine-level exception occurred during execution of your program (signal %d)", sig_no);
 #else
-	RTFatal("A machine-level exception occurred during execution of this statement");
+	RTFatal("A machine-level exception occurred during execution of this statement (signal %d)", sig_no);
 #endif
 }
 
