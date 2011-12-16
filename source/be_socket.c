@@ -2073,7 +2073,7 @@ object eusock_getsockopt(object x)
 	SOCKET s;
 	object level, optname;
 	int optval;
-	size_t optlen;
+	socklen_t optlen;
 	
 	if (!IS_SOCKET(SEQ_PTR(x)->base[1]))
 		RTFatal("first argument to get_option must be a socket");

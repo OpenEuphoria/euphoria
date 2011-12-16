@@ -4815,7 +4815,7 @@ void eu_startup(struct routine_list *rl, struct ns_list *nl, unsigned char **ip,
 	#endif
 	rt00 = rl;
 	rt01 = nl;
-	rt02 = ip;
+	rt02 = (char**)ip;
 	clocks_per_sec = cps;
 	clk_tck = clk;
 	xstdin = (void *)stdin;

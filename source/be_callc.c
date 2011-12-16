@@ -1303,15 +1303,18 @@ object call_c(int func, object proc_ad, object arg_list)
 	float fresult = 0;
 	uintptr_t size;
 	intptr_t proc_index;
-	int cdecl_call;
 	intptr_t long_proc_address;
 	uintptr_t return_type;
 	char NameBuff[100];
 	uint64_t arg;
 
 	intptr_t arg_op[16];
-	intptr_t arg_len;
 	intptr_t arg_i = 0;
+	#if INTPTR_MAX == INT32_MAX
+	intptr_t arg_len;
+	int cdecl_call;
+	#endif
+	
 	
 #if INTPTR_MAX == INT64_MAX
 #ifdef EWINDOWS
@@ -1337,10 +1340,12 @@ object call_c(int func, object proc_ad, object arg_list)
 	}
 	
 	long_proc_address = (intptr_t)(c_routine[proc_index].address);
+#if INTPTR_MAX == INT32_MAX
 #if defined(EWINDOWS) && !defined(__WATCOMC__)
 	cdecl_call = c_routine[proc_index].convention;
 #else
 	cdecl_call = 1;
+#endif
 #endif
 	if (IS_ATOM(arg_list)) {
 		RTFatal("c_proc/c_func: argument list must be a sequence");
@@ -1356,7 +1361,9 @@ object call_c(int func, object proc_ad, object arg_list)
 	
 	return_type = c_routine[proc_index].return_size; // will be INT
 
+	#if INTPTR_MAX == INT32_MAX
 	arg_len = arg_list_ptr->length;
+	#endif
 	
 	if ( (func && return_type == 0) || (!func && return_type != 0) ) {
 		if (c_routine[proc_index].name->length < 100)
