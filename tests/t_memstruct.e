@@ -211,6 +211,17 @@ end ifdef
 
 test_equal( "sizeof( pointer ) = sizeof( object )", sizeof( pointer ), sizeof( object ) )
 
+test_equal( "sizeof( signed int) = sizeof( sint )", sizeof( signed int ), sizeof( sint ) )
+test_equal( "sizeof( unsigned int) = sizeof( uint )", sizeof( unsigned int ), sizeof( uint ) )
+
+test_equal( "sizeof( long int) = sizeof( lint )", sizeof( long int ), sizeof( lint ) )
+test_equal( "sizeof( signed long int) = sizeof( slint )", sizeof( signed long int ), sizeof( slint ) )
+test_equal( "sizeof( unsigned long int) = sizeof( ulint )", sizeof( unsigned long int ), sizeof( ulint ) )
+
+test_equal( "sizeof( long long ) = sizeof( llong )", sizeof( long long ), sizeof( llong ) )
+test_equal( "sizeof( signed long long ) = sizeof( sllong )", sizeof( signed long long ), sizeof( sllong ) )
+test_equal( "sizeof( unsigned long long ) = sizeof( ullong )", sizeof( unsigned long long ), sizeof( ullong ) )
+
 memstruct ARRAYS
 	int   five_ints[5]
 	long  ten_longs[10]
