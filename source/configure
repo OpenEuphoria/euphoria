@@ -109,7 +109,7 @@ export EC="eui ec.ex"
 export BUILDDIR=build
 export XLTTARGETCC=gcc
 export CC=gcc
-
+export EDEBUG=
 SCP="scp -C"
 SSH="ssh -C"
 HG="hg"
@@ -181,7 +181,7 @@ while [ "$1" != "" ]; do
 		;;
 
 	--debug )
-		echo EDEBUG=1 >> "$PREFIX"${CONFIG_FILE}
+		export EDEBUG=1
 		;;
 
 	--prefix*)
@@ -314,6 +314,9 @@ while [ "$1" != "" ]; do
 	shift
 done
 
+if [ "x$EDEBUG" = "x1" ]; then
+	echo EDEBUG=1 >> "$PREFIX"${CONFIG_FILE}
+fi
 # if eui doesn't exist the error message goes into
 # the device file /dev/null. [works on Mingw too.]
 if [ "x$EUBIN" = "x" ]; then
@@ -412,7 +415,11 @@ fi
 echo "-$XLTTARGETCC " >> $BUILDDIR/eu.cfg
 echo "-con " >> $BUILDDIR/eu.cfg
 echo "-com" $CYPTRUNKDIR >> $BUILDDIR/eu.cfg
-echo "-lib" $CYPBUILDDIR/eu.a >> $BUILDDIR/eu.cfg
+if [ "x$EDEBUG" = "x1" ]; then
+	echo "-lib" $CYPBUILDDIR/eudbg.a >> $BUILDDIR/eu.cfg
+else
+	echo "-lib" $CYPBUILDDIR/eu.a >> $BUILDDIR/eu.cfg
+fi
 echo "[bind]"  >> $BUILDDIR/eu.cfg
 echo "-eub" $CYPBUILDDIR/eub >> $BUILDDIR/eu.cfg
 
