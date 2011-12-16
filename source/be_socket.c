@@ -2066,9 +2066,7 @@ object eusock_getsockopt(object x)
 	object level, optname;
 	int optval;
 	size_t optlen;
-	object_ptr base;
 	
-	base = SEQ_PTR(x)->base;
 	if (!IS_SOCKET(SEQ_PTR(x)->base[1]))
 		RTFatal("first argument to get_option must be a socket");
 	if (!IS_ATOM_INT(level = ATOM_TO_ATOM_INT(SEQ_PTR(x)->base[2])))

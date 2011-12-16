@@ -484,12 +484,11 @@ static object Video_config()
 static object Cursor(object x)
 /* set style of cursor */
 {
+	
+#ifdef EWINDOWS
 	short style;
-#ifdef EWINDOWS
 	CONSOLE_CURSOR_INFO c;
-#endif
 	style = get_int(x);
-#ifdef EWINDOWS
 	c.dwSize = (style == 0x0607) ? 12 :
 			   (style == 0x0507) ? 25 :
 			   (style == 0x0407) ? 50 :
