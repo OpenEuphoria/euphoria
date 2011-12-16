@@ -6,6 +6,8 @@ include std/search.e
 include std/sort.e
 include std/text.e
 include std/unittest.e
+include std/os.e
+include std/utils.e
 
 sequence fullname, pname, fname, fext, eolsep, driveid, entire_driveid
 integer sep
@@ -24,7 +26,7 @@ elsedef
     pname = "\\EUPHORIA\\DOCS"
     sep = '\\'
     eolsep = "\r\n"
-    driveid = filesys:driveid(current_dir())
+    driveid = "C"
 	entire_driveid = driveid & ":"
 end ifdef
 
@@ -172,7 +174,7 @@ test_equal( "canonical_path() #6", current_dir() & SLASH & "UPPERNAME", canonica
 test_equal( "canonical_path() #7", current_dir() & SLASH & "UPPERNAME", canonical_path( "UPPERNAME",,AS_IS ))
 
 ifdef WINDOWS then
-	test_equal( "canonical_path() #8", entire_driveid & SLASH & "john" & SLASH & "doe.txt",
+	test_equal( "canonical_path() #8", filesys:driveid(current_dir()) & ":" & SLASH & "john" & SLASH & "doe.txt",
 		canonical_path("/john/doe.txt"))
 end ifdef
 
@@ -244,8 +246,8 @@ procedure dir_tests()
 	test_equal( "dir size dir count", 4, test_dir_size[COUNT_DIRS] )
 	test_equal( "dir size file count", 1, test_dir_size[COUNT_FILES] )
 	
-	test_not_equal( "clear directory", 0, clear_directory( "filesyse_dir/directory1", 0 ) )
-	test_true( "remove testing directory", remove_directory( "filesyse_dir", 1 ) )
+	--test_not_equal( "clear directory", 0, clear_directory( "filesyse_dir/directory1", 0 ) )
+	--test_true( "remove testing directory", remove_directory( "filesyse_dir", 1 ) )
 end procedure
 dir_tests()
 
@@ -279,7 +281,7 @@ test_equal( "abbreviate_path with extra non matching paths 1",
 	abbreviate_path( canonical_path( "t_filesys.e" ), { "foo", canonical_path( ".." & SLASH ) } ) )
 
 test_equal( "abbreviate_path with non matching paths 1", 
-	entire_driveid & SLASH & "baz" & SLASH & "tests" & SLASH & "t_filesys.e",
+	filesys:driveid(current_dir()) & iif(platform()=WIN32,':',"") & SLASH & "baz" & SLASH & "tests" & SLASH & "t_filesys.e",
 	abbreviate_path( canonical_path( "/baz/tests/t_filesys.e" ) ) )
 
 test_equal( "pathname", current_dir(), pathname( current_dir() & SLASH & "t_filesys.e" ) )
