@@ -7,6 +7,7 @@ ifdef ETYPE_CHECK then
 elsedef
 	without type_check
 end ifdef
+include std/dll.e
 
 include global.e
 include reswords.e
@@ -21,7 +22,8 @@ export enum
 	K_EFFECT,    -- side effects
 	-- optional fields
 	K_CODE,
-	K_DEF_ARGS
+	K_DEF_ARGS,
+	K_MEM_SIZE
 
 -- N.B. order and number of keywords and builtins
 -- is assumed by scanner.e, euphoria\bin\keywords.e, and others
@@ -174,23 +176,24 @@ export sequence keylist = {
 	{"sizeof",           SC_PREDEF, FUNC, SIZEOF,           1, E_PURE},
 	{"memstruct",        SC_KEYWORD, MEMSTRUCT_DECL,        0, 0, 0 },
 	{"memunion",         SC_KEYWORD, MEMUNION_DECL,         0, 0, 0 },
-	{"pointer",          SC_MEMSTRUCT, MS_POINTER,          0, 0, 0 },
+	{"pointer",          SC_MEMSTRUCT, MS_POINTER,          0, 0, 0, 0, 0, sizeof( C_POINTER ) },
 	{"unsigned",         SC_MEMSTRUCT, MS_UNSIGNED,         0, 0, 0 },
 	{"signed",           SC_MEMSTRUCT, MS_SIGNED,           0, 0, 0 },
-	{"char",             SC_MEMSTRUCT, MS_CHAR,             0, 0, 0 },
-	{"short",            SC_MEMSTRUCT, MS_SHORT,            0, 0, 0 },
-	{"int",              SC_MEMSTRUCT, MS_INT,              0, 0, 0 },
-	{"long",             SC_MEMSTRUCT, MS_LONG,             0, 0, 0 },
-	{"float",            SC_MEMSTRUCT, MS_FLOAT,            0, 0, 0 },
-	{"double",           SC_MEMSTRUCT, MS_DOUBLE,           0, 0, 0 },
-	{"eudouble",         SC_MEMSTRUCT, MS_EUDOUBLE,         0, 0, 0 },
-	{"object",           SC_MEMSTRUCT, MS_OBJECT,           0, 0, 0 },
+	{"char",             SC_MEMSTRUCT, MS_CHAR,             0, 0, 0, 0, 0, sizeof( C_CHAR ) },
+	{"short",            SC_MEMSTRUCT, MS_SHORT,            0, 0, 0, 0, 0, sizeof( C_SHORT ) },
+	{"int",              SC_MEMSTRUCT, MS_INT,              0, 0, 0, 0, 0, sizeof( C_INT ) },
+	{"long",             SC_MEMSTRUCT, MS_LONG,             0, 0, 0, 0, 0, sizeof( C_LONG ) },
+	{"float",            SC_MEMSTRUCT, MS_FLOAT,            0, 0, 0, 0, 0, sizeof( C_FLOAT ) },
+	{"double",           SC_MEMSTRUCT, MS_DOUBLE,           0, 0, 0, 0, 0, sizeof( C_DOUBLE ) },
+	{"eudouble",         SC_MEMSTRUCT, MS_EUDOUBLE,         0, 0, 0, 0, 0, sizeof( C_POINTER ) * 2 },
+	{"object",           SC_MEMSTRUCT, MS_OBJECT,           0, 0, 0, 0, 0, sizeof( C_POINTER ) },
 	{"as",               SC_MEMSTRUCT, MS_AS,               0, 0, 0 },
 	{"addressof",        SC_PREDEF, FUNC, ADDRESSOF,        1, E_PURE},
 	{"offsetof",         SC_PREDEF, FUNC, OFFSETOF,         1, E_PURE},
 	{"deprecate",        SC_KEYWORD, DEPRECATE, 0, 0, 0},
 	{"memtype",          SC_KEYWORD, MEMTYPE,               0, 0, 0 },
-	{"long double",      SC_MEMSTRUCT, MS_LONGDOUBLE,       0, 0, 0 },
+	{"long double",      SC_MEMSTRUCT, MS_LONGDOUBLE,       0, 0, 0, 0, 0, 16 },
+	{"long long",    SC_MEMSTRUCT, MS_LONGLONG,         0, 0, 0, 0, 0, sizeof( C_LONGLONG ) },
 	$
 
 }

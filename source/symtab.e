@@ -30,6 +30,19 @@ export symtab_index atom_type         -- s.t. index of atom type
 export symtab_index sequence_type     -- s.t. index of sequence type
 export symtab_index integer_type      -- s.t. index of integer type
 
+export symtab_index ms_char_sym
+export symtab_index ms_short_sym
+export symtab_index ms_int_sym
+export symtab_index ms_long_sym
+export symtab_index ms_longlong_sym
+export symtab_index ms_object_sym
+export symtab_index ms_pointer_sym
+export symtab_index ms_float_sym
+export symtab_index ms_double_sym
+export symtab_index ms_longdouble_sym
+export symtab_index ms_eudouble_sym
+
+
 ifdef EUDIS then
 export sequence bucket_hits = repeat( 0, NBUCKETS ) -- count how many times we look at each bucket
 end ifdef
@@ -436,6 +449,26 @@ export function NewTempSym( integer inlining = 0)
 	return p
 end function
 
+procedure set_memsize( symtab_index sym, integer kx )
+	sequence key = keylist[kx]
+	if length( key ) >= K_MEM_SIZE then
+		SymTab[sym][S_MEM_SIZE] = key[K_MEM_SIZE]
+	end if
+	switch key[K_NAME] do
+		case "char"        then ms_char_sym       = sym
+		case "short"       then ms_short_sym      = sym
+		case "int"         then ms_int_sym        = sym
+		case "long"        then ms_long_sym       = sym
+		case "long long"   then ms_longlong_sym   = sym
+		case "object"      then ms_object_sym     = sym
+		case "float"       then ms_float_sym      = sym
+		case "double"      then ms_double_sym     = sym
+		case "long double" then ms_longdouble_sym = sym
+		case "eudouble"    then ms_eudouble_sym   = sym
+		case "pointer"     then ms_pointer_sym    = sym
+	end switch
+end procedure
+
 export procedure InitSymTab()
 -- Initialize the Symbol Table
 	integer hashval, len
@@ -460,6 +493,7 @@ export procedure InitSymTab()
 			SymTab[st_index][S_OPCODE] = keylist[k][K_OPCODE]
 			SymTab[st_index][S_EFFECT] = keylist[k][K_EFFECT]
 			SymTab[st_index][S_REFLIST] = {}
+			
 			if length(keylist[k]) > K_EFFECT then
 			    SymTab[st_index][S_CODE] = keylist[k][K_CODE]
 			    SymTab[st_index][S_DEF_ARGS] = keylist[k][K_DEF_ARGS]
@@ -480,6 +514,8 @@ export procedure InitSymTab()
 			elsif equal(kname, "sequence") then
 				sequence_type = st_index
 			end if
+		elsif keylist[k][K_SCOPE] = SC_MEMSTRUCT then
+			set_memsize( st_index, k )
 		end if
 		if buckets[hashval] = 0 then
 			buckets[hashval] = st_index

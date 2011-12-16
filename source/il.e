@@ -121,7 +121,7 @@ procedure OutputSymTab(file f)
 		for i = length(SymTab) to 1 by -1 do
 			if length(SymTab[i]) >= S_NREFS then
 				-- not temp or literal or constant, and not deleted yet
-				if SymTab[i][S_SCOPE] = SC_MEMSTRUCT and
+				if 0 and  SymTab[i][S_SCOPE] = SC_MEMSTRUCT and
 				   length(SymTab[i]) != SIZEOF_MEMSTRUCT_ENTRY then
 				   
 				   SymTab[i] = {0, SymTab[i][S_NEXT]} -- delete it
@@ -236,6 +236,18 @@ procedure OutputSymTab(file f)
 									$
 								} &
 								SymTab[i][S_MEM_SIZE..S_MEM_RECALC]
+				elsif SymTab[i][S_SCOPE] = SC_MEMSTRUCT then
+					-- We keep the primitive memstruct entries for their sizes
+					SymTab[i] = SymTab[i][1..4] & 
+								{
+									SymTab[i][S_NEXT_IN_BLOCK],
+									SymTab[i][S_FILE_NO],
+									SymTab[i][S_NAME],
+									SymTab[i][S_TOKEN],
+									SymTab[i][S_MEM_SIZE],
+									$
+								}
+								
 				end if
 			
 			case else

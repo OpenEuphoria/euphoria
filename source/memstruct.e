@@ -124,23 +124,20 @@ function multi_part_memtype( token tok, integer terminator = MS_AS )
 	
 	-- validate...
 	switch parts do
-		case MULTI_CHAR, MULTI_SHORT, MULTI_INT, MULTI_LONG, MULTI_LONG_INT then
+		case MULTI_CHAR, MULTI_SHORT, MULTI_INT then
 			tid = parts[$]
+		
+		case MULTI_LONG, MULTI_LONG_INT then
+			tok = MS_LONG
 			
 		case MULTI_LONG_LONG, MULTI_LONG_LONG_INT then
 			tid = MS_LONGLONG
+			sym = ms_longlong_sym
 			
 		case MULTI_LONG_DOUBLE then
 			if not sign_specified then
 				tid = MS_LONGDOUBLE
-				ifdef EU_EX then
-					-- some extra stuff gets put in the eu backend
-					-- at the beginning of the SymTab
-					sym = 163
-				elsedef
-					-- WARNING: Magic number from the keylist!
-					sym = 158
-				end ifdef
+				sym = ms_longdouble_sym
 			else
 				-- error!
 				CompileErr( FP_NOT_SIGNED )
@@ -218,9 +215,11 @@ procedure parse_memtype( integer scope )
 		return
 	end if
 	
-	symtab_index type_sym = mem_type[T_SYM]
+	
 	
 	sequence signed_type = multi_part_memtype( mem_type )
+	
+	symtab_index type_sym = signed_type[MULTI_PARSE_SYM]
 	
 	tok_match( MS_AS )
 	
@@ -235,7 +234,8 @@ procedure parse_memtype( integer scope )
 	SymTab[sym][S_MEM_SIGNED] = signed_type[MULTI_PARSE_SIGNED]
 	
 	switch signed_type[MULTI_PARSE_ID] do
-		case MS_SIGNED, MS_UNSIGNED, MS_LONG, 
+		case MS_SIGNED, MS_UNSIGNED, 
+			MS_LONG, MS_LONGLONG,
 			MS_CHAR, MS_SHORT, MS_INT, 
 			MS_FLOAT, MS_DOUBLE, MS_EUDOUBLE, 
 			MS_OBJECT
