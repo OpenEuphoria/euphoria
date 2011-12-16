@@ -1044,9 +1044,9 @@ void *start_task( void *task ){
  * Creates the thread where the new task will run.
  */
 
+
 static void init_task( intptr_t tx ){
-	int ret;
-	ret = pthread_create( &tcb[tx].impl.translated.task, NULL, &start_task, (void*)tx );
+	pthread_create( &tcb[tx].impl.translated.task, NULL, &start_task, (void*)tx );
 	// TODO error handling
 }
 
@@ -1066,15 +1066,11 @@ static void run_current_task( int task ){
 void scheduler(double now)
 // pick the next task to run
 {
-	volatile int stack_top;  // magic variable set/read via ASM code
-							 // force it to not be kept in a register
 	double earliest_time, start_time;
 	int ts_found;
 	struct tcb *tp;
 	int p;
 
-	// first check the real-time tasks
-	stack_top = 0; // so the compiler thinks it's used.
 	
 	// find the task with the earliest MAX_TIME
 	earliest_task = rt_first;

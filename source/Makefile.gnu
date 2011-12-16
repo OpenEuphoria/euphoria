@@ -54,6 +54,13 @@ PCRE_CC=$(CC)
 include $(CONFIG)
 include $(TRUNKDIR)/source/pcre/objects.mak
 
+ifeq "$(EHOST)" "$(ETARGET)"
+HOSTCC=$(CC)
+else
+# so far this is all we support
+HOSTCC=gcc
+endif
+
 ifeq "$(RELEASE)" "1"
 RELEASE_FLAG = -D EU_FULL_RELEASE
 endif
@@ -162,7 +169,7 @@ else
 	MEM_FLAGS=-DESIMPLE_MALLOC
 endif
 
-MKVER=$(BUILDDIR)/mkver$(EXE_EXT)
+MKVER=$(BUILDDIR)/mkver$(HOST_EXE_EXT)
 EBACKENDU=eub$(EXE_EXT)
 EBACKENDC=eub$(EXE_EXT)
 EECU=euc$(EXE_EXT)
@@ -595,10 +602,10 @@ endif
 
 .PHONY: update-version-cache
 update-version-cache : $(MKVER)
-	$(WINE) $(MKVER) "$(HG)" "$(BUILDDIR)/ver.cache" "$(BUILDDIR)/include/be_ver.h" $(EREL_TYPE)$(RELEASE)
+	$(MKVER) "$(HG)" "$(BUILDDIR)/ver.cache" "$(BUILDDIR)/include/be_ver.h" $(EREL_TYPE)$(RELEASE)
 
 $(MKVER): mkver.c
-	$(CC) -o $@ $<
+	$(HOSTCC) -o $@ $<
 
 
 $(BUILDDIR)/ver.cache : update-version-cache
@@ -711,7 +718,9 @@ test :
 		-ec "$(CYPBUILDDIR)/$(EECU)" \
 		-eubind "$(CYPBUILDDIR)/$(EUBIND)" -eub $(CYPBUILDDIR)/$(EBACKENDC) \
 		-lib "$(CYPBUILDDIR)/$(LIBRARY_NAME)" \
-		$(TESTFILE)
+		-log $(TESTFILE) ; \
+	$(EXE) -i ../include ../source/eutest.ex -process-log > $(CYPBUILDDIR)/test-report.txt ; \
+	$(EXE) -i ../include ../source/eutest.ex -process-log -html > $(CYPBUILDDIR)/test-report.html	
 	cd ../tests && sh check_diffs.sh
 
 testeu : 
@@ -1035,9 +1044,8 @@ $(BUILDDIR)/intobj/back/be_main.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/intobj/back/be_main.o: be_execute.h be_alloc.h be_rterror.h
 $(BUILDDIR)/intobj/back/be_main.o: be_w.h
 $(BUILDDIR)/intobj/back/be_memstruct.o: execute.h global.h object.h symtab.h
-$(BUILDDIR)/intobj/back/be_memstruct.o: reswords.h redef.h be_alloc.h
-$(BUILDDIR)/intobj/back/be_memstruct.o: be_machine.h be_memstruct.h
-$(BUILDDIR)/intobj/back/be_memstruct.o: be_runtime.h
+$(BUILDDIR)/intobj/back/be_memstruct.o: reswords.h be_alloc.h be_machine.h
+$(BUILDDIR)/intobj/back/be_memstruct.o: be_memstruct.h be_runtime.h
 $(BUILDDIR)/intobj/back/be_pcre.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/intobj/back/be_pcre.o: execute.h reswords.h be_alloc.h
 $(BUILDDIR)/intobj/back/be_pcre.o: be_runtime.h be_pcre.h pcre/pcre.h
@@ -1108,9 +1116,9 @@ $(BUILDDIR)/transobj/back/be_main.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/transobj/back/be_main.o: be_execute.h be_alloc.h be_rterror.h
 $(BUILDDIR)/transobj/back/be_main.o: be_w.h
 $(BUILDDIR)/transobj/back/be_memstruct.o: execute.h global.h object.h
-$(BUILDDIR)/transobj/back/be_memstruct.o: symtab.h reswords.h redef.h
-$(BUILDDIR)/transobj/back/be_memstruct.o: be_alloc.h be_machine.h
-$(BUILDDIR)/transobj/back/be_memstruct.o: be_memstruct.h be_runtime.h
+$(BUILDDIR)/transobj/back/be_memstruct.o: symtab.h reswords.h be_alloc.h
+$(BUILDDIR)/transobj/back/be_memstruct.o: be_machine.h be_memstruct.h
+$(BUILDDIR)/transobj/back/be_memstruct.o: be_runtime.h
 $(BUILDDIR)/transobj/back/be_pcre.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/transobj/back/be_pcre.o: execute.h reswords.h be_alloc.h
 $(BUILDDIR)/transobj/back/be_pcre.o: be_runtime.h be_pcre.h pcre/pcre.h
@@ -1181,9 +1189,8 @@ $(BUILDDIR)/backobj/back/be_main.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/backobj/back/be_main.o: be_execute.h be_alloc.h be_rterror.h
 $(BUILDDIR)/backobj/back/be_main.o: be_w.h
 $(BUILDDIR)/backobj/back/be_memstruct.o: execute.h global.h object.h symtab.h
-$(BUILDDIR)/backobj/back/be_memstruct.o: reswords.h redef.h be_alloc.h
-$(BUILDDIR)/backobj/back/be_memstruct.o: be_machine.h be_memstruct.h
-$(BUILDDIR)/backobj/back/be_memstruct.o: be_runtime.h
+$(BUILDDIR)/backobj/back/be_memstruct.o: reswords.h be_alloc.h be_machine.h
+$(BUILDDIR)/backobj/back/be_memstruct.o: be_memstruct.h be_runtime.h
 $(BUILDDIR)/backobj/back/be_pcre.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/backobj/back/be_pcre.o: execute.h reswords.h be_alloc.h
 $(BUILDDIR)/backobj/back/be_pcre.o: be_runtime.h be_pcre.h pcre/pcre.h
@@ -1253,9 +1260,8 @@ $(BUILDDIR)/libobj/back/be_main.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/libobj/back/be_main.o: be_execute.h be_alloc.h be_rterror.h
 $(BUILDDIR)/libobj/back/be_main.o: be_w.h
 $(BUILDDIR)/libobj/back/be_memstruct.o: execute.h global.h object.h symtab.h
-$(BUILDDIR)/libobj/back/be_memstruct.o: reswords.h redef.h be_alloc.h
-$(BUILDDIR)/libobj/back/be_memstruct.o: be_machine.h be_memstruct.h
-$(BUILDDIR)/libobj/back/be_memstruct.o: be_runtime.h
+$(BUILDDIR)/libobj/back/be_memstruct.o: reswords.h be_alloc.h be_machine.h
+$(BUILDDIR)/libobj/back/be_memstruct.o: be_memstruct.h be_runtime.h
 $(BUILDDIR)/libobj/back/be_pcre.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/libobj/back/be_pcre.o: execute.h reswords.h be_alloc.h
 $(BUILDDIR)/libobj/back/be_pcre.o: be_runtime.h be_pcre.h pcre/pcre.h

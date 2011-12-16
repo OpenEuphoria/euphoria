@@ -307,7 +307,7 @@ int CRoutineId(int, int, object);
 object e_sqrt(object);
 object e_arctan(object);
 void AssignSlice(object, object, object);
-void StdPrint(int, object, int);
+void StdPrint(object, object, int);
 void ClearScreen();
 void Position(int, int);
 object CommandLine(void);

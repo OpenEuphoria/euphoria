@@ -112,7 +112,7 @@ void Concat_N(object_ptr target, object_ptr  source, int n);
 object EGetEnv(object name);
 
 object EPrintf(object file_no, object format_obj, object values);
-void StdPrint(int fn, object a, int new_lines);
+void StdPrint(object fn, object a, int new_lines);
 void EPuts(object file_no, object obj);
 void Print(IFILE f, object a, int lines, int width, int init_chars, int pretty);
 int show_ascii_char(IFILE print_file, int iv);

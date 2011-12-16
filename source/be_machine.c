@@ -497,23 +497,25 @@ static object Video_config()
 static object Cursor(object x)
 /* set style of cursor */
 {
+	
+#ifdef EWINDOWS
 	short style;
-#ifdef EWINDOWS
 	CONSOLE_CURSOR_INFO c;
-#endif
 	style = get_int(x);
-#ifdef EWINDOWS
 	c.dwSize = (style == 0x0607) ? 12 :
 			   (style == 0x0507) ? 25 :
 			   (style == 0x0407) ? 50 :
 								  100;
 	c.bVisible = (style != 0x02000);
 	SetConsoleCursorInfo(console_output, &c);
+	return ATOM_1;
 #endif
 #ifdef EUNIX
 	// leaveok(stdscr, style != 0x02000); doesn't work very well
+	x = 1;
+	return x;
 #endif
-	return ATOM_1;
+	
 }
 
 static object TextRows(object x)
@@ -2333,7 +2335,7 @@ object CallBack(object x)
    */
 {
 	static unsigned char *page_addr = NULL;
-	static unsigned int page_offset = 0;
+	static long page_offset = 0;
 	static long call_increment = 0;
 	static long last_block_offset = 0;
 	uintptr_t addr;

@@ -429,7 +429,7 @@ fi
 if [ "$EC" != "" ]; then
 	echo "TRANSLATE=$EC" >> "$PREFIX"${CONFIG_FILE}
 fi
-
+echo "ETARGET=$TARGET" >> "$PREFIX"${CONFIG_FILE}
 echo "ARCH=$ARCH" >> "$PREFIX"${CONFIG_FILE}
 echo "MSIZE=$MFLAG" >> "$PREFIX"${CONFIG_FILE}
 echo "EFLAG=-d $EFLAG" >> "$PREFIX"${CONFIG_FILE}

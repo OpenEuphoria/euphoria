@@ -2447,6 +2447,8 @@ if( !IS_ATOM_INT( X ) && IS_ATOM( X ) ){ \
 
 object calc_MD5(object a)
 {
+#if 0
+// TODO: MD5 Unimplemented!
 	object lTempResult;
 	long lSLen;
 	int tfi;
@@ -2492,12 +2494,14 @@ object calc_MD5(object a)
 			lSLen--;
 		}
 	}
-
-	return 0;
+#endif
+	return a ^ a;
 }
 
 object calc_SHA256(object a)
 {
+#if 0
+// TODO: SHA256 Unimplemented!
 	object lTempResult;
 	long lSLen;
 	int tfi;
@@ -2544,8 +2548,8 @@ object calc_SHA256(object a)
 			lSLen--;
 		}
 	}
-
-	return 0;
+#endif
+	return a ^ a;
 }
 
 
@@ -3176,7 +3180,6 @@ object compare(object a, object b)
 object find(object a, s1_ptr b)
 /* find object a as an element of sequence b */
 {
-	int length;
 	object_ptr bp;
 	object bv;
 
@@ -3237,7 +3240,6 @@ object find(object a, s1_ptr b)
 
 		int a_len;
 
-		length = b->length;
 		a_len = SEQ_PTR(a)->length;
 		while (TRUE) {
 			bv = *(++bp);
@@ -3654,7 +3656,7 @@ object EOpen(object filename, object mode_obj, object cleanup)
 	IFILE fp;
 	long length;
 	int i;
-	int mode, text_mode;
+	int mode;
 	cleanup_ptr cup;
 
 	if (IS_ATOM(mode_obj))
@@ -3673,14 +3675,12 @@ object EOpen(object filename, object mode_obj, object cleanup)
 	MakeCString(cmode, mode_obj, EOpen_cmode_len );
 
 	length = strlen(cmode);
-	text_mode = 1;  /* assume text file */
 	if (strcmp(cmode, "r") == 0) {
 		mode = EF_READ;
 	}
 
 	else if (strcmp(cmode, "rb") == 0) {
 		mode = EF_READ;
-		text_mode = 0;
 	}
 
 	else if (strcmp(cmode, "w") == 0) {
@@ -3689,7 +3689,6 @@ object EOpen(object filename, object mode_obj, object cleanup)
 
 	else if (strcmp(cmode, "wb") == 0) {
 		mode = EF_WRITE;
-		text_mode = 0;
 	}
 
 	else if (strcmp(cmode, "a") == 0) {
@@ -3698,12 +3697,10 @@ object EOpen(object filename, object mode_obj, object cleanup)
 
 	else if (strcmp(cmode, "ab") == 0) {
 		mode = EF_WRITE | EF_APPEND;
-		text_mode = 0;
 	}
 
 	else if (strcmp(cmode, "ub") == 0) {
 		mode = EF_READ | EF_WRITE;
-		text_mode = 0;
 		copy_string(cmode, "r+b", EOpen_cmode_len);
 	}
 
@@ -4136,7 +4133,7 @@ void Print(IFILE f, object a, int lines, int width, int init_chars, int pretty)
 	flush_screen();
 }
 
-void StdPrint(int fn, object a, int new_lines)
+void StdPrint(object fn, object a, int new_lines)
 /* standard Print - lets us have <= 3 args in do_exec() */
 {
 	if (new_lines) {
@@ -4818,7 +4815,7 @@ void eu_startup(struct routine_list *rl, struct ns_list *nl, unsigned char **ip,
 	#endif
 	rt00 = rl;
 	rt01 = nl;
-	rt02 = ip;
+	rt02 = (char**)ip;
 	clocks_per_sec = cps;
 	clk_tck = clk;
 	xstdin = (void *)stdin;
@@ -5084,10 +5081,14 @@ object system_exec_call(object command, object wait)
 	}
 	if (w != 2)
 		RestoreConfig();
+	#if INTPTR_MAX == INT32_MAX
 	if (exit_code >= MININT && exit_code <= MAXINT)
+	#endif
 		return (object)exit_code;
+	#if INTPTR_MAX == INT32_MAX
 	else
 		return NewDouble((eudouble)exit_code);
+	#endif
 }
 
 object EGetEnv(object name)
