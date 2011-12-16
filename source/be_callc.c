@@ -1253,8 +1253,8 @@ union xmm_param {
  */
 #define MAX_INT_PARAM_REGISTERS 6
 #define MAX_FP_PARAM_REGISTERS 5
-#define INCREMENT_FP_ARGS;
-#define INCREMENT_INT_ARGS;
+#define INCREMENT_FP_ARGS ;
+#define INCREMENT_INT_ARGS ;
 #define SIGNATURE_PARAM
 #define UPDATE_SIGNATURE
 #endif // Platform defines for argument pushes

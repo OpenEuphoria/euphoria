@@ -77,7 +77,7 @@ typedef unsigned int uint128_t __attribute__((mode(TI)));
 
 #define MAKE_UINT(x) ((object)((uintptr_t)x < (uintptr_t)TOO_BIG_INT \
                           ? (uintptr_t)x : \
-                            NewDouble((eudouble)(uintptr_t)x)))
+                            (uintptr_t)NewDouble((eudouble)(uintptr_t)x)))
 
 /* these are obsolete */
 #define INT_VAL(x)        ((intptr_t)(x))
