@@ -1915,7 +1915,7 @@ object eusock_recvfrom(object x)
 {
 	SOCKET s;
 	struct sockaddr_in addr;
-	int flags, result;
+	intptr_t flags, result;
 	socklen_t addr_size;
 	char buf[BUFF_SIZE];
 
@@ -1963,7 +1963,7 @@ object eusock_bind(object x)
 	SOCKET s;
 	s1_ptr address_s;
 	char *address;
-	int port, result;
+	intptr_t port, result;
 
 	struct sockaddr_in *service;
 

@@ -4133,7 +4133,7 @@ void Print(IFILE f, object a, int lines, int width, int init_chars, int pretty)
 	flush_screen();
 }
 
-void StdPrint(int fn, object a, int new_lines)
+void StdPrint(object fn, object a, int new_lines)
 /* standard Print - lets us have <= 3 args in do_exec() */
 {
 	if (new_lines) {
@@ -5081,10 +5081,14 @@ object system_exec_call(object command, object wait)
 	}
 	if (w != 2)
 		RestoreConfig();
+	#if INTPTR_MAX == INT32_MAX
 	if (exit_code >= MININT && exit_code <= MAXINT)
+	#endif
 		return (object)exit_code;
+	#if INTPTR_MAX == INT32_MAX
 	else
 		return NewDouble((eudouble)exit_code);
+	#endif
 }
 
 object EGetEnv(object name)
