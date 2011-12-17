@@ -63,7 +63,7 @@ void DisplayColorLine(char *pline, int string_color)
 	if (syncolor != -1)
 	{
 		internal_general_call_back(syncolor,
-		line,string_color,0, 0,0,0, 0,0,0);
+		line,scolor,0, 0,0,0, 0,0,0);
 	}
 	else
 	{

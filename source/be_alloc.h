@@ -155,6 +155,7 @@ typedef struct block_list * block_list_ptr;
 #include <stdlib.h>
 #endif
 #if defined( ESIMPLE_MALLOC )
+
 	#define EFree(ptr) free(ptr)
 #else
 	extern void EFree(char *ptr);
