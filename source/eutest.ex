@@ -771,8 +771,9 @@ sequence html_table_head = `
 <tr bgcolor=#dddddd>
 <th colspan=3 align=left><a name='%s'>%s</a></th>
 <td><a href='#summary'>all file summary</a></th>
-</tr>
-<tr><th>test name</th>
+</tr>`
+
+constant html_table_headers = `<tr bgcolor=#dddddd><th>test name</th>
 <th>test time</th>
 <th>expected</th>
 <th>outcome</th>
@@ -897,14 +898,15 @@ procedure html_out(sequence data)
 					printf(html_fn, html_unexpected_exerr_table_begin, {data[2], data[2]} )
 					printf(html_fn, html_unexpected_exerr_row_format, ex_err[2..3])
 					printf(html_fn, html_unexpected_exerr_table_end, {} )			
-				elsif find(error_list[2][err], {No_valid_control_file_was_supplied, Unexpected_empty_control_file, No_valid_exerr_has_been_generated, Unexpected_empty_control_file}) then
+				elsif find(error_list[2][err], {No_valid_control_file_was_supplied, Unexpected_empty_control_file, No_valid_exerr_has_been_generated, Unexpected_empty_exerr}) then
 					printf(html_fn, html_error_table_begin, {data[2], data[2]} )
 					printf(html_fn, html_table_error_row, {color, "", error_list[2][err]} )
 					printf(html_fn, html_error_table_end, {} )
 					unsummarized_files = append(unsummarized_files, data[2])
 				else
-					printf(html_fn, html_error_table_begin, { data[2], data[2] })
+					printf(html_fn, html_table_head, { data[2], data[2] })
 					printf(html_fn, html_table_error_row, { color, "", error_list[2][err] })
+					puts(html_fn, html_table_headers )
 					
 					if sequence(error_list[4][err]) then
 						puts(html_fn, html_table_error_content_begin)
