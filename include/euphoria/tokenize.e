@@ -1020,7 +1020,7 @@ procedure next_token(atom state = g_state)
 				Token[TDATA] &= Look
 
 				scan_char(state)
-			else
+			elsif find( Look, "0123456789" )  then
 				-- .number
 				Token[TTYPE] = T_NUMBER
 				Token[TDATA] = scan_fraction(0, state)
@@ -1038,6 +1038,9 @@ procedure next_token(atom state = g_state)
 						Token[TDATA] = sprintf("%g",{Token[TDATA]})
 					end if
 				end if
+			else
+				-- memstruct
+				scan_identifier( state )
 			end if
 
 		elsif (Look = '-') and (Token[TTYPE] = T_MINUS) then

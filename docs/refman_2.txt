@@ -4258,7 +4258,7 @@ ptr.PTR_TO_INT.a = allocate( sizeof( int ) )
 ptr.PTR_TO_INT.a.* = 5
 ptr.PTR_TO_INT.a.* += 5
 
-? a -- prints 10
+? ptr.PTR_TO_INT.a.* -- prints 10
 </eucode>
 
 @[memstruct|]
