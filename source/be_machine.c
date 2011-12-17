@@ -1302,11 +1302,6 @@ static object CurrentDir()
 	if (cwd == NULL)
 		RTFatal("current directory not available");
 	else {
-#ifdef EWINDOWS
-		/* Fix potential problem with lowercase drive letter */
-		if (cwd[0] >= 97 && cwd[0] <= 122)
-			cwd[0] -= 32;
-#endif
 		result = NewString(cwd);
 		EFree(buff);
 	}

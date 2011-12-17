@@ -182,8 +182,6 @@ test_equal( "canonical_path() #9", lower(current_dir() & SLASH & "UPPERNAME"), c
 test_equal( "canonical_path() #10",current_dir() & SLASH & lower("UPPERNAME"),  canonical_path( "UPPERNAME",,or_bits(TO_LOWER,CORRECT)))
 test_equal( "canonical_path() #11",current_dir() & SLASH, canonical_path(lower(current_dir()), 1, CORRECT)) 
 
-test_equal( "canonical_path() #12", current_dir() & SLASH & "*.txt", canonical_path( "*.txt" ) )
-test_equal( "canonical_path() #13", current_dir() & SLASH & "*.txt", canonical_path( "../tests/*.txt" ) )
 
 ifdef WINDOWS then
 	object program_files = getenv("ProgramFiles")
@@ -194,6 +192,16 @@ ifdef WINDOWS then
 		test_equal( "canonical_path() #12", shortened, filebase(canonical_path(program_files,,TO_SHORT)))
 	end if
 end ifdef
+
+test_equal( "canonical_path() #13", current_dir() & SLASH & "*.txt", canonical_path( "*.txt" ) )
+test_equal( "canonical_path() #14", current_dir() & SLASH & "*.txt", canonical_path( "../tests/*.txt" ) )
+
+-- one of these two tests below will change the case of the drive letter and CORRECT should restore it.
+test_equal( "canonical_path #15 can change lower case version to the original version",
+	current_dir(), canonical_path(lower(current_dir()),, CORRECT) )
+
+test_equal( "canonical_path #16 can change upper case version to the original version",
+	current_dir(), canonical_path(upper(current_dir()),, CORRECT) )
 
 sequence walk_data = {}
 function test_walk( sequence path_name, sequence item )
