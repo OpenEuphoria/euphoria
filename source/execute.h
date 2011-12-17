@@ -40,9 +40,9 @@
 #define IS_ATOM_INT(ob)       (((long)(ob)) > NOVALUE)
 #define IS_ATOM_INT_NV(ob)    ((long)(ob) >= NOVALUE)
 
-#define MAKE_UINT(x) ((object)((unsigned long)x <= (unsigned long)0x3FFFFFFFL \
+#define MAKE_UINT(x) ((object)(( ((unsigned long)x) <= ((unsigned long)0x3FFFFFFFL)) \
                           ? (unsigned long)x : \
-                            NewDouble((double)(unsigned long)x)))
+                            (unsigned long)NewDouble((double)(unsigned long)x)))
 
 /* these are obsolete */
 #define INT_VAL(x)        ((int)(x))

@@ -2442,6 +2442,8 @@ if( !IS_ATOM_INT( X ) && IS_ATOM( X ) ){ \
 
 object calc_MD5(object a)
 {
+#if 0
+// TODO: MD5 Unimplemented!
 	object lTempResult;
 	long lSLen;
 	int tfi;
@@ -2487,12 +2489,14 @@ object calc_MD5(object a)
 			lSLen--;
 		}
 	}
-
-	return 0;
+#endif
+	return a ^ a;
 }
 
 object calc_SHA256(object a)
 {
+#if 0
+// TODO: SHA256 Unimplemented!
 	object lTempResult;
 	long lSLen;
 	int tfi;
@@ -2539,8 +2543,8 @@ object calc_SHA256(object a)
 			lSLen--;
 		}
 	}
-
-	return 0;
+#endif
+	return a ^ a;
 }
 
 
@@ -3171,7 +3175,6 @@ int compare(object a, object b)
 long find(object a, s1_ptr b)
 /* find object a as an element of sequence b */
 {
-	long length;
 	object_ptr bp;
 	object bv;
 
@@ -3232,7 +3235,6 @@ long find(object a, s1_ptr b)
 
 		long a_len;
 
-		length = b->length;
 		a_len = SEQ_PTR(a)->length;
 		while (TRUE) {
 			bv = *(++bp);
@@ -3649,7 +3651,7 @@ object EOpen(object filename, object mode_obj, object cleanup)
 	IFILE fp;
 	long length;
 	int i;
-	long mode, text_mode;
+	long mode;
 	cleanup_ptr cup;
 
 	if (IS_ATOM(mode_obj))
@@ -3668,14 +3670,12 @@ object EOpen(object filename, object mode_obj, object cleanup)
 	MakeCString(cmode, mode_obj, EOpen_cmode_len );
 
 	length = strlen(cmode);
-	text_mode = 1;  /* assume text file */
 	if (strcmp(cmode, "r") == 0) {
 		mode = EF_READ;
 	}
 
 	else if (strcmp(cmode, "rb") == 0) {
 		mode = EF_READ;
-		text_mode = 0;
 	}
 
 	else if (strcmp(cmode, "w") == 0) {
@@ -3684,7 +3684,6 @@ object EOpen(object filename, object mode_obj, object cleanup)
 
 	else if (strcmp(cmode, "wb") == 0) {
 		mode = EF_WRITE;
-		text_mode = 0;
 	}
 
 	else if (strcmp(cmode, "a") == 0) {
@@ -3693,12 +3692,10 @@ object EOpen(object filename, object mode_obj, object cleanup)
 
 	else if (strcmp(cmode, "ab") == 0) {
 		mode = EF_WRITE | EF_APPEND;
-		text_mode = 0;
 	}
 
 	else if (strcmp(cmode, "ub") == 0) {
 		mode = EF_READ | EF_WRITE;
-		text_mode = 0;
 		copy_string(cmode, "r+b", EOpen_cmode_len);
 	}
 
