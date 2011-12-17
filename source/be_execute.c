@@ -1169,20 +1169,31 @@ void code_set_pointers(intptr_t **code)
 			case TAIL:
 			case DELETE_ROUTINE:
 			case RETURNF:
-			case MEMSTRUCT_ASSIGN:
-			case MEMSTRUCT_PLUS:
-			case MEMSTRUCT_MINUS:
-			case MEMSTRUCT_DIVIDE:
-			case MEMSTRUCT_MULTIPLY:
 			case MEMSTRUCT_READ:
-			case PEEK_MEMBER:
 				// 3 operands follow
 				code[i+1] = SET_OPERAND(code[i+1]);
 				code[i+2] = SET_OPERAND(code[i+2]);
 				code[i+3] = SET_OPERAND(code[i+3]);
 				i += 4;
 				break;
-
+			case MEMSTRUCT_PLUS:
+			case MEMSTRUCT_MINUS:
+			case MEMSTRUCT_DIVIDE:
+			case MEMSTRUCT_MULTIPLY:
+			case MEMSTRUCT_ASSIGN:
+				// 3 operands follow
+				code[i+1] = SET_OPERAND(code[i+1]);
+				code[i+2] = SET_OPERAND(code[i+2]);
+				code[i+3] = SET_OPERAND(code[i+3]);
+				i += 5;
+				break;
+			case PEEK_MEMBER:
+				// 3 operands follow
+				code[i+1] = SET_OPERAND(code[i+1]);
+				code[i+2] = SET_OPERAND(code[i+2]);
+				code[i+4] = SET_OPERAND(code[i+4]);
+				i += 5;
+				break;
 			case SC1_AND_IF:
 			case SC1_OR_IF:
 			case SC1_AND:
@@ -1354,7 +1365,7 @@ void code_set_pointers(intptr_t **code)
 				
 				code[i+n+2] = SET_OPERAND(word);
 				if( array ){
-					word = code[i+n+3];
+					word = (intptr_t)code[i+n+3];
 					code[i+n+3] = SET_OPERAND( word );
 				}
 				
@@ -5412,19 +5423,19 @@ void do_exec(intptr_t *start_pc)
 				tpc = pc;
 				
 				sym = (symtab_ptr) pc[2];
-				if( sym->u.memstruct.pointer ){
-					poke_member( (object_ptr) pc[1], sym, (object_ptr) pc[3] );
+				if( sym->u.memstruct.pointer && !pc[4] ){
+					poke_member( (object_ptr) pc[1], sym, (object_ptr) pc[3], 0 );
 				}
 				else if( sym->token == MEMSTRUCT ){
-					write_member( (object_ptr) pc[1], sym, (object_ptr) pc[3] );
+					write_member( (object_ptr) pc[1], sym, (object_ptr) pc[3], pc[4] );
 				}
 				else if( sym->token == MEMUNION ){
-					write_union( (object_ptr) pc[1], sym, (object_ptr) pc[3] );
+					write_union( (object_ptr) pc[1], sym, (object_ptr) pc[3], pc[4] );
 				}
 				else{
-					poke_member( (object_ptr) pc[1], (symtab_ptr) pc[2], (object_ptr) pc[3] );
+					poke_member( (object_ptr) pc[1], sym, (object_ptr) pc[3], pc[4] );
 				}
-				thread4();
+				thread5();
 				BREAK;
 				
 			case L_MEMSTRUCT_PLUS:
@@ -5448,8 +5459,8 @@ void do_exec(intptr_t *start_pc)
 				
 				mem_assign_op:
 				tpc = pc;
-				memstruct_assignop( a, (object_ptr)pc[1], (symtab_ptr) pc[2], (object_ptr) pc[3] );
-				thread4();
+				memstruct_assignop( a, (object_ptr)pc[1], (symtab_ptr) pc[2], (object_ptr) pc[3], pc[4] );
+				thread5();
 				BREAK;
 				
 			case L_MEMSTRUCT_READ:
@@ -5464,11 +5475,11 @@ void do_exec(intptr_t *start_pc)
 			case L_PEEK_MEMBER:
 				deprintf("case L_PEEK_MEMBER");
 				tpc = pc;
-				a = peek_member( (object_ptr) pc[1], (symtab_ptr) pc[2], -1, 0 );
-				obj_ptr = (object_ptr) pc[3];
+				a = peek_member( (object_ptr) pc[1], (symtab_ptr) pc[2], -1, 0, pc[3] );
+				obj_ptr = (object_ptr) pc[4];
 				DeRef( *obj_ptr );
 				*obj_ptr = a;
-				thread4();
+				thread5();
 				BREAK;
 				
 			case L_MEMSTRUCT_ACCESS:

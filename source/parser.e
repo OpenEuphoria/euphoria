@@ -1572,6 +1572,9 @@ procedure MemTypeCheck( symtab_index var, symtab_index member_sym, symtab_index 
 		-- TODO: need to handle fwd refs here
 		return
 	end if
+	if length( SymTab[member_sym] ) != SIZEOF_MEMSTRUCT_ENTRY then
+		InternalErr( sprintf("Error on typechecking %s", { sym_name( member_sym ) }) )
+	end if
 	integer type_sym = SymTab[member_sym][S_MEM_TYPE]
 	if 0 = type_sym then
 		-- no type for this member
@@ -1811,7 +1814,7 @@ procedure Assignment(token left_var)
 				Expr()
 				integer top = length( Code )
 				emit_op( assign_op )
-				MemTypeCheck( Code[$], Code[$-1], Code[top], assign_op )
+				MemTypeCheck( Code[$], Code[$-2], Code[top], assign_op )
 				break "subs_if"
 			case else
 				InitCheck(left_sym, TRUE)

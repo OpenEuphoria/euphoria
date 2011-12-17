@@ -238,19 +238,18 @@ end procedure
 -- Stores the value pointed to by _0 into the target.  If target is 0,
 -- then the caller has already emitted the LHS, and peek_member will
 -- only print the RHS.
-procedure peek_member( integer pointer, integer sym, integer target, integer array_index = -1 )
+procedure peek_member( integer pointer, integer sym, integer target, integer array_index = -1, integer deref_ptr = 0 )
 	integer data_type  = SymTab[sym][S_TOKEN]
 	integer signed     = SymTab[sym][S_MEM_SIGNED]
 	integer is_pointer = SymTab[sym][S_MEM_POINTER]
 	sequence type_name
 	sequence array_modifier = ""
 	
-	if is_pointer then
+	type_name = mem_name( sym_token( sym ) )
+	if is_pointer and not deref_ptr then
 		data_type = MS_OBJECT
 		signed    = 0
 		type_name = "object"
-	else
-		type_name = mem_name( sym_token( sym ) )
 	end if
 	
 	if target then
@@ -290,7 +289,9 @@ procedure peek_member( integer pointer, integer sym, integer target, integer arr
 		
 	end if
 	
-	
+	if deref_ptr then
+		c_stmt( "@ = *(intptr_t*)@;\n", { pointer, pointer }, pointer )
+	end if
 	peek_member_value( pointer, sym, data_type, is_pointer, array_modifier, type_name, signed, target )
 	memaccess = MEMSTRUCT_ACCESS
 end procedure
@@ -391,15 +392,16 @@ export procedure opPEEK_MEMBER()
 	integer
 		pointer = Code[pc+1],
 		member  = Code[pc+2],
-		target  = Code[pc+3]
+		deref   = Code[pc+3],
+		target  = Code[pc+4]
 	
 	get_pointer( pointer, target )
 	
-	peek_member( pointer, member, target )
+	peek_member( pointer, member, target, /* array index */, deref )
 	
 	remove_pointer( pointer )
 	remove_pointer( target )
-	pc += 4
+	pc += 5
 end procedure
 
 integer serialize_level = 0
@@ -578,18 +580,16 @@ end procedure
 
 --**
 -- Stores the value into the memory pointed to by _0
-procedure poke_member( symtab_index target, symtab_index member, symtab_index val )
+procedure poke_member( symtab_index target, symtab_index member, symtab_index val, integer deref_ptr )
 	integer data_type = SymTab[member][S_TOKEN]
 	integer signed    = SymTab[member][S_MEM_SIGNED]
 	
-	sequence type_name
+	sequence type_name = mem_name( sym_token( member ) )
 	
-	if SymTab[member][S_MEM_POINTER] then
+	if SymTab[member][S_MEM_POINTER] and not deref_ptr then
 		data_type = MS_OBJECT
 		signed    = 0
 		type_name = "object"
-	else
-		type_name = mem_name( sym_token( member ) )
 	end if
 	
 	if not signed then
@@ -820,17 +820,20 @@ end procedure
 
 export procedure opMEMSTRUCT_ASSIGN()
 	integer
-		pointer = Code[pc+1],
-		member  = Code[pc+2],
-		val     = Code[pc+3]
+		pointer   = Code[pc+1],
+		member    = Code[pc+2],
+		val       = Code[pc+3],
+		deref_ptr = Code[pc+4]
 	
 	get_pointer( pointer, pointer )
 	
-	integer tok
+	integer tok = sym_token( member )
 	if SymTab[member][S_MEM_POINTER] then
-		tok = MS_MEMBER
-	else
-		tok = sym_token( member )
+		if deref_ptr then
+			c_stmt( "@ = *(intptr_t*)@;\n", { pointer, pointer }, pointer )
+		else
+			tok = MS_MEMBER
+		end if
 	end if
 	
 	switch tok do
@@ -839,26 +842,30 @@ export procedure opMEMSTRUCT_ASSIGN()
 		case MEMUNION then
 			assign_memunion( pointer, member, val )
 		case else
-			poke_member( pointer, member, val )
+			poke_member( pointer, member, val, deref_ptr )
 	end switch
 	
 	
 	dispose_temp( val, compile:DISCARD_TEMP, REMOVE_FROM_MAP )
 	remove_pointer( pointer )
 	
-	pc += 4
+	pc += 5
 end procedure
 
 
 export procedure opMEMSTRUCT_ASSIGNOP()
 	integer
-		op      = Code[pc],
-		pointer = Code[pc+1],
-		member  = Code[pc+2],
-		val     = Code[pc+3]
+		op        = Code[pc],
+		pointer   = Code[pc+1],
+		member    = Code[pc+2],
+		val       = Code[pc+3],
+		deref_ptr = Code[pc+4]
 	
 	get_pointer( pointer, pointer )
 	
+	if deref_ptr then
+		c_stmt( "@ = *(intptr_t**) @;\n", { pointer, pointer }, pointer )
+	end if
 	sequence optext
 	switch op do
 		case MEMSTRUCT_PLUS then
@@ -878,12 +885,12 @@ export procedure opMEMSTRUCT_ASSIGNOP()
 			integer is_double = TypeIs( val, TYPE_DOUBLE )
 			if not is_double then
 				c_stmt( "if( IS_ATOM_INT( @ ) ){\n", val )
-					c_stmt( sprintf("*(%s)@ %s= (%s)@;\n", {type_name, optext, type_name}), { pointer, val }, pointer )
+					c_stmt( sprintf("*(%s*)@ %s= (%s)@;\n", {type_name, optext, type_name}), { pointer, val }, pointer )
 				c_stmt0( "}\n" )
 				c_stmt0( "else{\n")
 			end if
 			
-			c_stmt( sprintf("*(%s)@ %s= (%s)DBL_PTR( @ )->dbl;\n", {type_name, optext, type_name}), { pointer, val }, pointer )
+			c_stmt( sprintf("*(%s*)@ %s= (%s)DBL_PTR( @ )->dbl;\n", {type_name, optext, type_name}), { pointer, val }, pointer )
 			
 			if not is_double then
 				c_stmt0( "}\n")
@@ -910,7 +917,7 @@ export procedure opMEMSTRUCT_ASSIGNOP()
 	end switch
 	dispose_temp( val, compile:DISCARD_TEMP, REMOVE_FROM_MAP )
 	remove_pointer( pointer )
-	pc += 4
+	pc += 5
 end procedure
 
 export procedure opADDRESSOF()

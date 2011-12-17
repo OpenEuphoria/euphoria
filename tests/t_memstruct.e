@@ -254,4 +254,48 @@ procedure arrays()
 	
 end procedure
 arrays()
+
+memstruct POINTERS
+	pointer int a
+	pointer object b
+	pointer unsigned long c
+	pointer float d
+	pointer double dbl
+end memstruct
+
+procedure pointers()
+	atom ptr = allocate( sizeof( POINTERS ), 1 )
+	atom secondary = allocate( 1024 )
+	ptr.POINTERS = repeat( secondary, 5 )
+	
+	ptr.POINTERS.a.* = 1234
+	test_equal( "dereferenced pointer assign / read int", 1234, ptr.POINTERS.a.* )
+	
+	ptr.POINTERS.a.* += 5
+	test_equal( "dereferenced pointer += int", 1239, ptr.POINTERS.a.* )
+	
+	ptr.POINTERS.b.* = 123456
+	test_equal( "dereferenced pointer assign / read object", 123456, ptr.POINTERS.b.* )
+	
+	ptr.POINTERS.b.* -= 4
+	test_equal( "dereferenced pointer -= object", 123452, ptr.POINTERS.b.* )
+	
+	ptr.POINTERS.c.* = 51234
+	test_equal( "dereferenced pointer assign / read unsigned long", 51234, ptr.POINTERS.c.* )
+	
+	ptr.POINTERS.c.* *= 2
+	test_equal( "dereferenced pointer *= unsigned long", 51234 * 2, ptr.POINTERS.c.* )
+	
+	ptr.POINTERS.d.* = 3.5
+	test_equal( "dereferenced pointer assign / read float", 3.5, ptr.POINTERS.d.* )
+	
+	ptr.POINTERS.d.* /= 2
+	test_equal( "dereferenced pointer /= float", 1.75, ptr.POINTERS.d.* )
+	
+	ptr.POINTERS.dbl.* = 9.75
+	test_equal( "dereferenced pointer assign / read double", 9.75, ptr.POINTERS.dbl.* )
+	
+end procedure
+pointers()
+
 test_report()

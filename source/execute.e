@@ -22,6 +22,7 @@ end ifdef
 
 include std/convert.e
 include std/dll.e
+include std/error.e
 include std/io.e
 include std/os.e
 include std/pretty.e
@@ -601,7 +602,12 @@ end procedure
 
 procedure quit_after_error()
 -- final termination
+puts(1, "quit!\n")
 	write_coverage_db()
+	
+	ifdef CRASH_ON_ERROR then
+		crash("crashing on error")
+	end ifdef
 	
 	ifdef WINDOWS then
 		if not batch_job and not test_only then
@@ -609,7 +615,7 @@ procedure quit_after_error()
 			getc(0)
 		end if
 	end ifdef
-
+	
 	abort(1)
 end procedure
 
@@ -1473,11 +1479,14 @@ procedure opMEMSTRUCT_ASSIGN()
 	atom pointer = val[Code[pc+1]]
 	integer struct_sym = Code[pc+2]
 	object source_val = val[Code[pc+3]]
-	integer tok
+	integer deref_ptr = Code[pc+4]
+	integer tok = sym_token( struct_sym )
 	if SymTab[struct_sym][S_MEM_POINTER] then
-		tok = MS_MEMBER
-	else
-		tok = sym_token( struct_sym )
+		if deref_ptr then
+			pointer = peek_pointer( pointer )
+		else
+			tok = MS_MEMBER
+		end if
 	end if
 	
 	switch tok do
@@ -1486,9 +1495,9 @@ procedure opMEMSTRUCT_ASSIGN()
 		case MEMUNION then
 			poke( pointer, source_val & repeat( 0, SymTab[struct_sym][S_MEM_SIZE] - length( source_val ) ) )
 		case else
-			poke_member( pointer, struct_sym, source_val )
+			poke_member( pointer, struct_sym, source_val, deref_ptr )
 	end switch
-	pc += 4
+	pc += 5
 end procedure
 
 procedure opELSE()
@@ -2267,8 +2276,12 @@ end procedure
 
 procedure opMEMSTRUCT_ASSIGN_OP()
 	atom pointer = val[Code[pc+1]]
-	atom v = peek_member( pointer, Code[pc+2] )
+	if Code[pc+4] then
+		pointer = peek_pointer( pointer )
+	end if
+	atom v = peek_member( pointer, Code[pc+2], , -1 )
 	atom x = val[Code[pc+3]]
+	
 	switch Code[pc] do
 		case MEMSTRUCT_PLUS then
 			v += x
@@ -2279,8 +2292,9 @@ procedure opMEMSTRUCT_ASSIGN_OP()
 		case MEMSTRUCT_MULTIPLY then
 			v *= x
 	end switch
-	poke_member( pointer, Code[pc+2], v )
-	pc += 4
+	
+	poke_member( pointer, Code[pc+2], v, -1 )
+	pc += 5
 end procedure
 
 procedure opPLUS()
@@ -3256,19 +3270,6 @@ procedure opMEMSTRUCT_ARRAY()
 	pc += 5
 end procedure
 
-procedure opPEEK_ARRAY()
-	-- pc+1 pointer
-	-- pc+2 member sym
-	-- pc+3 subscript
-	-- pc+4 target
-	atom 
-		member_sym = Code[pc+2],
-		ptr        = val[Code[pc+1]] + SymTab[member_sym][S_MEM_OFFSET],
-		subscript  = val[Code[pc+3]]
-	val[Code[pc+4]] = peek_member( ptr, member_sym, subscript )
-	pc += 5
-end procedure
-
 procedure poke_member_value( atom pointer, integer data_type, object value )
 	switch data_type do
 		case MS_CHAR then
@@ -3305,11 +3306,11 @@ procedure poke_member_value( atom pointer, integer data_type, object value )
 	end switch
 end procedure
 
-procedure poke_member( atom pointer, integer sym, object value )
+procedure poke_member( atom pointer, integer sym, object value, integer deref_ptr = 0 )
 	integer data_type = SymTab[sym][S_TOKEN]
 	integer signed    = SymTab[sym][S_MEM_SIGNED]
 	
-	if SymTab[sym][S_MEM_POINTER] then
+	if SymTab[sym][S_MEM_POINTER] and not deref_ptr then
 		data_type = MS_OBJECT
 		signed    = 0
 	end if
@@ -3366,13 +3367,27 @@ procedure write_memstruct( atom pointer, integer sym, object value )
 	end while
 end procedure
 
-function peek_member( atom pointer, integer sym, integer array_index = -1 )
+--**
+-- Peek a member value.
+--
+-- deref_ptr: Identifies if the pointer needs to be dereferenced if the member is a pointer.
+-- If deref_ptr is 0, then the pointer value is assigned.
+-- If deref_ptr is 1, then the pointer is dereferenced and the assignment of the actual type is done.
+-- If deref_ptr is anything else, the pointer is assumed to already be dereferenced, and the
+-- value is assigned as the member's data type, since the caller has already dereferenced the pointer.
+function peek_member( atom pointer, integer sym, integer array_index = -1, integer deref_ptr = 0 )
 	integer data_type = SymTab[sym][S_TOKEN]
 	integer signed    = SymTab[sym][S_MEM_SIGNED]
 	
 	if SymTab[sym][S_MEM_POINTER] then
-		data_type = MS_OBJECT
-		signed    = 0
+		if deref_ptr = 1 then
+			-- result of ptr.MEMSTRUCT.member.*
+			pointer = peek_pointer( pointer )
+		elsif deref_ptr = 0 then
+			-- just return the pointer itself
+			data_type = MS_OBJECT
+			signed    = 0
+		end if
 	
 	elsif array_index != -1 then
 		integer element_size = SymTab[sym][S_MEM_SIZE] / SymTab[sym][S_MEM_ARRAY]
@@ -3518,18 +3533,32 @@ procedure opMEMSTRUCT_READ()
 	pc += 4
 end procedure
 
+procedure opPEEK_ARRAY()
+	-- pc+1 pointer
+	-- pc+2 member sym
+	-- pc+3 subscript
+	-- pc+4 target
+	atom 
+		member_sym = Code[pc+2],
+		ptr        = val[Code[pc+1]] + SymTab[member_sym][S_MEM_OFFSET],
+		subscript  = val[Code[pc+3]]
+	val[Code[pc+4]] = peek_member( ptr, member_sym, subscript )
+	pc += 5
+end procedure
+
 procedure opPEEK_MEMBER()
 	-- pc+1 pointer
 	-- pc+2 member
-	-- pc+3 target
+	-- pc+3 deref ptr
+	-- pc+4 target
 	
 	atom pointer = val[Code[pc+1]]
 	a = Code[pc+2]
-	target = Code[pc+3]
+	target = Code[pc+4]
 	
-	val[target] = peek_member( pointer, a )
+	val[target] = peek_member( pointer, a, , Code[pc+3] )
 	
-	pc += 4
+	pc += 5
 end procedure
 
 procedure opPOKE()

@@ -22,6 +22,7 @@ export enum
 	CANNOT_ASSIGN_NONPRIMATIVE,
 	EXPECTED_PRIMITIVE_MEMSTRUCT_TYPE,
 	MISSING_MEMSTRUCT_MEMBER,
+	DEREFERENCING_NONPOINTER,
 	MSG_CC_PREFIX = 600,
 	NONSTANDARD_LIBRARY,
 	DUPLICATE_MULTI_ASSIGN,
@@ -402,6 +403,7 @@ constant StdErrMsgs = {
 	{DUPLICATE_MULTI_ASSIGN, "duplicate variables in left hand side of multiple assignment"},
 	{MISSING_CMD_PARAMETER, "Command line argument [1] requires a parameter"},
 	{MISSING_MEMSTRUCT_MEMBER, "Expected a valid memstruct and member expression"},
+	{DEREFERENCING_NONPOINTER, "Cannot dereference a non-pointer memstruct member"},
 	$
 }
 

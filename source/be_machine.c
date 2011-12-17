@@ -224,7 +224,7 @@ uintptr_t get_pos_int(char *where, object x)
 	if (IS_ATOM_INT(x))
 		return INT_VAL(x);
 	else if (IS_ATOM(x))
-		return (unsigned long)(DBL_PTR(x)->dbl);
+		return (uintptr_t)(DBL_PTR(x)->dbl);
 	else {
 		RTFatal("%s: an integer was expected, not a sequence", where);
 	}

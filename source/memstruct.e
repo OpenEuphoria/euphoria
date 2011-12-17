@@ -909,6 +909,7 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 		if lhs then
 			emit_opnd( sym )
 			emit_symstruct( struct_sym, ref )
+			emit_opnd( 0 ) -- don't deref
 			return
 		else
 			emit_symstruct( struct_sym, ref )
@@ -979,56 +980,19 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 				
 			case MULTIPLY then
 				-- ptr.struct.ptr_to_something.*  fetch the value pointed to
-				-- TODO: this is serializing, not dereferencing:
-				if member then
-					tid = sym_token( member )
-					if tid >= MS_SIGNED and tid <= MS_OBJECT then
-						if SymTab[member][S_MEM_POINTER] then
-							tok_match( MULTIPLY )
-						else
-							CompileErr( ONLY_INT_LONG_LONG )
-						end if
-					elsif lhs then
-						-- assignment of primitives only!
-						CompileErr( NOT_A_MEMBER )
+				if not ref then
+					-- make sure it's actually a pointer...
+					if not SymTab[member][S_MEM_POINTER] then
+						CompileErr( DEREFERENCING_NONPOINTER )
 					end if
-					peek_member( members, member, ref, lhs, names )
-					-- re-emit the last member for serialization
-					emit_member( member, ref, PEEK_MEMBER, names )
-					emit_op( MEMSTRUCT_READ )
-					exit
-				else
-					emit_symstruct( struct_sym, ref )
-					emit_op( MEMSTRUCT_READ )
-					exit
 				end if
-			
-			
+				peek_member( members, member, ref, lhs, names, /* op */ , 1 )
+				exit
 				
 			case DOT then
 				-- another layer...
 				if not member then
 					CompileErr( 68, {"a member name", LexName( tid )} )
-				end if
-				
-				if ref then
-					-- we don't know if this is a structure yet
-					
--- 					CompileErr("Forward referenced memstruct ops not implemented")
-				else
-					tid = sym_token( member )
-					if tid >= MS_SIGNED and tid <= MS_OBJECT then
-						-- must be a pointer, because we've found a primitive
-						if SymTab[member][S_MEM_POINTER] then
-							tok_match( MULTIPLY )
-							emit_opnd( 0 )
-							members += 1
-							peek_member( members, member, ref, lhs, names )
-							exit -- DONE!
-						else
-							CompileErr( NOT_A_POINTER_OR_MEMSTRUCT )
-						end if
-					end if
 				end if
 				has_dot = 1
 				
@@ -1064,15 +1028,20 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 	No_new_entry = 0
 end procedure
 
-procedure peek_member( integer members, symtab_index member, integer ref, integer lhs, sequence names, integer op = MEMSTRUCT_ACCESS )
+procedure peek_member( integer members, symtab_index member, integer ref, 
+					   integer lhs, sequence names, integer op = MEMSTRUCT_ACCESS,
+					   integer deref_ptr = 0
+ 					)
 	
 	emit_opnd( members )
 	emit_op( op )
 	if lhs then
 		emit_member( member, ref, op, names )
+		emit_opnd( deref_ptr )
 	else
 		-- geting the value...peek it
 		emit_member( member, ref, PEEK_MEMBER, names )
+		emit_opnd( deref_ptr )
 		emit_op( PEEK_MEMBER )
 	end if
 end procedure

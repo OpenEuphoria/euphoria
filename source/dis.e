@@ -481,8 +481,21 @@ procedure opMEMSTRUCT_ASSIGN()  -- or opASSIGN_I or SEQUENCE_COPY
     a = Code[pc+1]  -- pointer
     b = Code[pc+2]  -- member sym
     c = Code[pc+3]  -- new value
-    il( sprintf("MEMSTRUCT_ASSIGN %s.%s = %s", names( {a, b, c} )), 3 )
-    pc += 4
+    sequence deref
+    if Code[pc+4] then
+		deref = ".*"
+	else
+		deref = ""
+	end if
+	sequence operator = ""
+	switch Code[pc] do
+		case MEMSTRUCT_PLUS     then   operator = "+"
+		case MEMSTRUCT_MINUS    then   operator = "-"
+		case MEMSTRUCT_MULTIPLY then   operator = "*"
+		case MEMSTRUCT_DIVIDE   then   operator = "/"
+	end switch
+    il( sprintf("%s %s.%s%s %s= %s", {opnames[Code[pc]]} & names( {a, b } ) & {deref, operator} & names( {c} ) ), 4 )
+    pc += 5
 end procedure
 
 procedure opELSE()  -- or EXIT, ENDWHILE}) then
@@ -906,19 +919,19 @@ procedure opPLUS() -- or opPLUS_I then
 end procedure
 
 procedure opMEMSTRUCT_PLUS()
-	binary()
+	opMEMSTRUCT_ASSIGN()
 end procedure
 
 procedure opMEMSTRUCT_MINUS()
-	binary()
+	opMEMSTRUCT_ASSIGN()
 end procedure
 
 procedure opMEMSTRUCT_MULTIPLY()
-	binary()
+	opMEMSTRUCT_ASSIGN()
 end procedure
 
 procedure opMEMSTRUCT_DIVIDE()
-	binary()
+	opMEMSTRUCT_ASSIGN()
 end procedure
 
 procedure opMINUS() -- or opMINUS_I then
@@ -1444,16 +1457,29 @@ procedure opMEMSTRUCT_ARRAY()
 	trinary()
 end procedure
 
-procedure opPEEK_ARRAY()
-	trinary()
-end procedure
 
 procedure opMEMSTRUCT_READ()
 	binary()
 end procedure
 
+procedure opPEEK_ARRAY()
+	trinary()
+end procedure
+include std/console.e
 procedure opPEEK_MEMBER()
-	binary()
+	sequence deref
+	if Code[pc+3] then
+		deref = "DEREFERENCE POINTER"
+	else
+		deref = "VALUE"
+	end if
+	il( sprintf( "%s: %s, %s  [%s] => %s",
+				 {opnames[Code[pc]]} &
+				 names(Code[pc+1..pc+2]) &
+				 {deref} &
+				 names( {Code[pc+4]}) ), 
+		4)
+	pc += 5
 end procedure
 
 function strip_path( sequence file )

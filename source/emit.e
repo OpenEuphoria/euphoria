@@ -1430,24 +1430,24 @@ export procedure emit_op(integer op)
 	case MINUS, rw:APPEND, PREPEND, COMPARE, EQUAL,
 					SYSTEM_EXEC, rw:CONCAT, REPEAT, MACHINE_FUNC, C_FUNC,
 					SPRINTF, TASK_CREATE, HASH, HEAD, TAIL, DELETE_ROUTINE,
-					PEEK_MEMBER, MEMSTRUCT_READ  then
+					MEMSTRUCT_READ  then
 		cont21ii(op, FALSE)
 
 	case ADDRESSOF, OFFSETOF then
 		-- last OP should have been PEEK_MEMBER
 		if length( Code ) < 4 then
 			CompileErr( MISSING_MEMSTRUCT_MEMBER )
-		elsif Code[$-3] != PEEK_MEMBER and Code[$-1] != MEMSTRUCT_READ then
+		elsif Code[$-4] != PEEK_MEMBER and Code[$-1] != MEMSTRUCT_READ then
 			InternalErr("Expected to replace PEEK_MEMBER or MEMSTRUCT_READ")
 		end if
 		
 		-- We'll replace PEEK_MEMBER with ADDRESSOF
 		Pop()
 		if op = ADDRESSOF then
-			Push( Code[$-2] )
-			Code = remove( Code, length( Code ) - 3, length( Code ) )
+			Push( Code[$-3] )
+			Code = remove( Code, length( Code ) - 4, length( Code ) )
 		else
-			Push( Code[$-1] )
+			Push( Code[$-2] )
 			for pc = length( Code ) - 8 to 1 by -1 do
 				if Code[pc] = MEMSTRUCT_ACCESS then
 					Code = remove( Code, pc, length( Code ) )
@@ -1491,7 +1491,7 @@ export procedure emit_op(integer op)
 
 	-- 3 inputs, 1 output
 	case RHS_SLICE, FIND, MATCH, FIND_FROM, MATCH_FROM, SPLICE, INSERT, REMOVE, OPEN,
-		MEMSTRUCT_ARRAY, PEEK_ARRAY then
+		MEMSTRUCT_ARRAY, PEEK_ARRAY, PEEK_MEMBER then
 		emit_opcode(op)
 		c = Pop()
 		b = Pop()
@@ -1879,10 +1879,12 @@ export procedure emit_op(integer op)
 	case DEREF_TEMP then
 		emit_opcode( DEREF_TEMP )
 		emit_addr( Pop() )
-		
+	
 	case MEMSTRUCT_ASSIGN, MEMSTRUCT_PLUS, MEMSTRUCT_MINUS, 
 			MEMSTRUCT_DIVIDE, MEMSTRUCT_MULTIPLY then
+		
 		c = Pop() -- new value
+		integer deref_ptr = Pop()
 		b = Pop() -- member sym
 		a = Pop() -- pointer
 		
@@ -1890,6 +1892,7 @@ export procedure emit_op(integer op)
 		emit_addr( a )
 		emit_addr( b )
 		emit_addr( c )
+		emit_addr( deref_ptr )
 		assignable = FALSE
 	
 	case else
