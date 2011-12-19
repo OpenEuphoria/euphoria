@@ -162,8 +162,8 @@ typedef struct block_list * block_list_ptr;
 #else
 	extern void EFree(char *ptr);
 #endif
-extern char *EMalloc(intptr_t size);
-extern char *ERealloc(char *orig, intptr_t newsize);
+extern char *EMalloc(uintptr_t size);
+extern char *ERealloc(char *orig, uintptr_t newsize);
 #if defined(__GNU_LIBRARY__) || defined(__GLIBC__) \
 	|| (defined(__DJGPP__) && __DJGPP__ <= 2 && __DJGPP_MINOR__ < 4)
 size_t strlcpy(char *dest, char *src, size_t maxlen);
