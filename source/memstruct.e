@@ -557,7 +557,6 @@ function calculate_alignment( symtab_index member_sym )
 		if sub_alignment > alignment then
 			alignment = sub_alignment
 		end if
-	entry
 		sym = SymTab[sym][S_MEM_NEXT]
 	end while
 	return alignment
@@ -574,7 +573,7 @@ function calculate_padding( symtab_index member_sym, integer size, integer mem_s
 		integer alignment = calculate_alignment( member_sym )
 		if alignment = -1 then
 			return -1
-		else
+		elsif alignment then
 			padding = remainder( size, alignment )
 		end if
 	else
@@ -656,8 +655,10 @@ function calculate_size()
 	else
 		SymTab[mem_struct][S_MEM_SIZE] = size
 		integer alignment = calculate_alignment( mem_struct )
-		integer padding = remainder( size, alignment )
-		size += padding
+		if alignment then
+			integer padding = remainder( size, alignment )
+			size += padding
+		end if
 		SymTab[mem_struct][S_MEM_SIZE] = size
 		return size
 	end if

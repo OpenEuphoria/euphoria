@@ -451,6 +451,9 @@ end function
 
 procedure set_memsize( symtab_index sym, integer kx )
 	sequence key = keylist[kx]
+	if length( SymTab[sym] ) < SIZEOF_MEMSTRUCT_ENTRY then
+		SymTab[sym] &= repeat( 0, SIZEOF_MEMSTRUCT_ENTRY - length( SymTab[sym] ) )
+	end if
 	if length( key ) >= K_MEM_SIZE then
 		SymTab[sym][S_MEM_SIZE] = key[K_MEM_SIZE]
 	end if
