@@ -30,6 +30,8 @@ public memtype
 	object as LPOFNHOOKPROC,
 	object as BFFCALLBACK,
 	unsigned short as USHORT,
+	object as LPCCHOOKPROC,
+	long as COLORREF,
 	$
 	
 --****
@@ -170,4 +172,16 @@ public memstruct BROWSEINFO
 	BFFCALLBACK       lpfn
 	LPARAM            lParam
 	int               iImage
+end memstruct
+
+public memstruct CHOOSECOLOR
+	DWORD        lStructSize
+	HWND         hwndOwner
+	HWND         hInstance
+	COLORREF     rgbResult
+	pointer COLORREF     lpCustColors
+	DWORD        Flags
+	LPARAM       lCustData
+	LPCCHOOKPROC lpfnHook
+	LPCTSTR      lpTemplateName
 end memstruct
