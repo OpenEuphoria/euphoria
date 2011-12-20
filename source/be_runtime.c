@@ -4590,6 +4590,7 @@ int get_key(int wait)
 
 static int trace_line = 0;
 static IFILE trace_file;
+int trace_lines = 500;
 
 static void one_trace_line(char *line)
 /* write a line to the ctrace.out file */
@@ -4615,7 +4616,7 @@ void ctrace(char *line)
 		}
 		if (trace_file != NULL) {
 			trace_line++;
-			if (trace_line >= 500) {
+			if (trace_line >= trace_lines) {
 				one_trace_line("");
 				one_trace_line("               "); // erase THE END
 				trace_line = 0;

@@ -13,10 +13,12 @@ include std/text.e
 include common.e
 
 export enum
+	MISSING_CMD_PARAMETER = 353,
 	MSG_CC_PREFIX = 600,
 	NONSTANDARD_LIBRARY,
 	DUPLICATE_MULTI_ASSIGN,
-	MISSING_CMD_PARAMETER = 353,
+	TRACE_LINES_CMD,
+	BAD_TRACE_LINES,
 	$
 
 -- don't change this please, but please look for -deleted- items before adding new options
@@ -383,6 +385,8 @@ constant StdErrMsgs = {
 	{ MSG_CC_PREFIX, "Prefix for compiler and related binaries"},
 	{DUPLICATE_MULTI_ASSIGN, "duplicate variables in left hand side of multiple assignment"},
 	{MISSING_CMD_PARAMETER, "Command line argument [1] requires a parameter"},
+	{TRACE_LINES_CMD, "Specify the number of lines to use in ctrace.out"},
+	{BAD_TRACE_LINES, "the -trace-lines option requires a valid number\n"},
 	$
 }
 
