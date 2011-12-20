@@ -32,6 +32,7 @@ public memtype
 	unsigned short as USHORT,
 	object as LPCCHOOKPROC,
 	long as COLORREF,
+	object as INT_PTR,
 	$
 	
 --****
@@ -184,4 +185,16 @@ public memstruct CHOOSECOLOR
 	LPARAM       lCustData
 	LPCCHOOKPROC lpfnHook
 	LPCTSTR      lpTemplateName
+end memstruct
+
+public memstruct COMBOBOXEXITEM
+	UINT    mask
+	INT_PTR iItem
+	LPTSTR  pszText
+	int     cchTextMax
+	int     iImage
+	int     iSelectedImage
+	int     iOverlay
+	int     iIndent
+	LPARAM  lParam
 end memstruct
