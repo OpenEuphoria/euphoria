@@ -33,6 +33,7 @@ public memtype
 	object as LPCCHOOKPROC,
 	long as COLORREF,
 	object as INT_PTR,
+	object as UINT_PTR,
 	$
 	
 --****
@@ -85,7 +86,7 @@ end memstruct
 
 public memstruct NMHDR
 	HWND hwndFrom
-	UINT idFrom
+	UINT_PTR idFrom
 	UINT code
 end memstruct
 
@@ -197,4 +198,15 @@ public memstruct COMBOBOXEXITEM
 	int     iOverlay
 	int     iIndent
 	LPARAM  lParam
+end memstruct
+
+public memstruct NMLISTVIEW
+	NMHDR  hdr
+	int    iItem
+	int    iSubItem
+	UINT   uNewState
+	UINT   uOldState
+	UINT   uChanged
+	POINT  ptAction
+	LPARAM lParam
 end memstruct
