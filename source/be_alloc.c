@@ -651,10 +651,10 @@ void EFree(char *p)
 	free(p);
 }
 
-char *ERealloc(char *orig, unsigned long newsize)
+char *ERealloc(char *orig, uintptr_t newsize)
 {
 	char *newadr;
-	unsigned long oldsize;
+	uintptr_t oldsize;
 	int res;
 
 	newadr = EMalloc(newsize);
@@ -1009,7 +1009,7 @@ object NewDouble(eudouble d)
 }
 
 #ifdef ESIMPLE_MALLOC
-char *ERealloc(char *orig, intptr_t newsize)
+char *ERealloc(char *orig, uintptr_t newsize)
 /* Enlarge or shrink a malloc'd block.
    orig must not be NULL - not supported.
    Return a pointer to a storage area of the desired size
@@ -1029,7 +1029,7 @@ char *ERealloc(char *orig, intptr_t newsize)
 	return q;
 }
 
-char *EMalloc(intptr_t nbytes)
+char *EMalloc(uintptr_t nbytes)
 /* storage allocator */
 /* Always returns a pointer that has 8-byte alignment (essential for our
    internal representation of an object). */
