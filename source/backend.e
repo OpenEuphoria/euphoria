@@ -305,6 +305,7 @@ procedure BackEnd(integer il_file)
 			routine_id( "write_coverage_db" ),
 			routine_id( "DisplayColorLine" ),
 			external_debugger_ptr,
+			trace_lines,
 			$
 		})
 end procedure

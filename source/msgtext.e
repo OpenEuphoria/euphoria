@@ -23,10 +23,12 @@ export enum
 	EXPECTED_PRIMITIVE_MEMSTRUCT_TYPE,
 	MISSING_MEMSTRUCT_MEMBER,
 	DEREFERENCING_NONPOINTER,
+	MISSING_CMD_PARAMETER = 353,
 	MSG_CC_PREFIX = 600,
 	NONSTANDARD_LIBRARY,
 	DUPLICATE_MULTI_ASSIGN,
-	MISSING_CMD_PARAMETER = 353,
+	TRACE_LINES_CMD,
+	BAD_TRACE_LINES,
 	$
 
 -- don't change this please, but please look for -deleted- items before adding new options
@@ -404,6 +406,8 @@ constant StdErrMsgs = {
 	{MISSING_CMD_PARAMETER, "Command line argument [1] requires a parameter"},
 	{MISSING_MEMSTRUCT_MEMBER, "Expected a valid memstruct and member expression"},
 	{DEREFERENCING_NONPOINTER, "Cannot dereference a non-pointer memstruct member"},
+	{TRACE_LINES_CMD, "Specify the number of lines to use in ctrace.out"},
+	{BAD_TRACE_LINES, "the -trace-lines option requires a valid number\n"},
 	$
 }
 

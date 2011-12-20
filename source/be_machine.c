@@ -2767,8 +2767,8 @@ object start_backend(object x)
 
 	x_ptr = SEQ_PTR(x);
 
-	if (IS_ATOM(x) || x_ptr->length != 12)
-		RTFatal("BACKEND requires a sequence of length 12");
+	if (IS_ATOM(x) || x_ptr->length != 13)
+		RTFatal("BACKEND requires a sequence of length 13");
 
 	fe.st = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
 	fe.sl = (struct sline *) get_pos_int(w, *(x_ptr->base+2));
@@ -2786,6 +2786,7 @@ object start_backend(object x)
 	
 	set_debugger( (char*) get_pos_int(w, *(x_ptr->base+12)) );
 	
+	trace_lines = get_pos_int(w, *(x_ptr->base+13));
 	// This is checked when we try to write coverage to make sure
 	// we need to output an error message.
 	in_backend = 1;

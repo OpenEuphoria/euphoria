@@ -7451,6 +7451,8 @@ procedure BackEnd(atom ignore)
 		c_stmt0("eu_startup(_00, _01, _02, (object)CLOCKS_PER_SEC, (object)sysconf(_SC_CLK_TCK));\n")
 		c_puts("#endif\n")
 	end if
+	
+	c_stmt0( sprintf( "trace_lines = %d;\n", trace_lines ) )
 
 	-- options_switch initialization
 	switches = get_switches()
