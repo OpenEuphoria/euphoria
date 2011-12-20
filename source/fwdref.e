@@ -445,7 +445,7 @@ procedure patch_forward_memstruct( token tok, integer ref )
 		case VARIABLE then
 			patch_var_use( ref, fr, sym, 1 )
 		
-		case MEMSTRUCT_ACCESS, SIZEOF then
+		case MEMSTRUCT_ACCESS, SIZEOF, OFFSETOF, ADDRESSOF then
 			integer pc = fr[FR_PC]
 			set_code( ref )
 			integer rx = find( -ref, Code, pc )

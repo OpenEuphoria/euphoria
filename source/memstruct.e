@@ -824,7 +824,7 @@ export function resolve_members( sequence names, symtab_index struct_sym )
 		if not sym then
 			return 0
 		end if
-		parent = SymTab[sym][S_MEM_PARENT]
+		parent = SymTab[sym][S_MEM_STRUCT]
 	end for
 	return sym
 end function

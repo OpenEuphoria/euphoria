@@ -260,7 +260,7 @@ void write_member( object_ptr source, symtab_ptr sym, object_ptr val, intptr_t d
 	}
 	
 	if( free_src ){
-		EFree( src );
+		EFree( (char*)src );
 	}
 }
 
@@ -296,7 +296,7 @@ void write_union( object_ptr source, symtab_ptr sym, object_ptr val, intptr_t de
 	}
 	
 	if( free_src ){
-		EFree( src );
+		EFree( (char*)src );
 	}
 }
 
@@ -404,7 +404,7 @@ static void poke_member_value( void *pointer, int data_type, object_ptr val, int
 			}
 			break;
 		default:
-			RTFatal( "Error assigning to a memstruct -- can only assign primitive data members" );
+			RTFatal( "Error assigning to a memstruct (%s) -- can only assign primitive data members" );
 	}
 }
 
@@ -412,10 +412,13 @@ static void poke_member_value( void *pointer, int data_type, object_ptr val, int
 void poke_member( object_ptr source, symtab_ptr sym, object_ptr val, intptr_t deref_ptr ){
 	int data_type;
 	int is_signed;
-	
 	uintptr_t pointer;
 	
 	data_type = sym->token;
+	while( data_type == MEMTYPE ){
+		sym = sym->u.memstruct.parent;
+		data_type = sym->token;
+	}
 	is_signed = sym->u.memstruct.is_signed;
 	
 	
@@ -428,6 +431,7 @@ void poke_member( object_ptr source, symtab_ptr sym, object_ptr val, intptr_t de
 		data_type = MS_OBJECT;
 		is_signed = 0;
 	}
+	
 	if( sym->u.memstruct.array ){
 		
 		
