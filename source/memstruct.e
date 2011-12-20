@@ -553,10 +553,10 @@ function calculate_alignment( symtab_index member_sym )
 				end if
 			end if
 		end if
-		
 		if sub_alignment > alignment then
 			alignment = sub_alignment
 		end if
+	entry
 		sym = SymTab[sym][S_MEM_NEXT]
 	end while
 	return alignment
