@@ -396,17 +396,15 @@ procedure patch_forward_msmember( token tok, integer ref )
 	
 	if fr[FR_OP] = MEMSTRUCT_DECL then
 		symtab_index member = fr[FR_DATA]
-		
 		switch tok[T_ID] do
 			case MEMSTRUCT_DECL, MEMSTRUCT then
 				-- a forward reference inside a declaration
 				SymTab[member][S_MEM_STRUCT] = sym
-			
 			case  MEMTYPE then
 				-- memtype alias
 				integer real_type_sym = SymTab[sym][S_MEM_PARENT]
 				SymTab[member][S_MEM_STRUCT] = real_type_sym
-				
+				SymTab[member][S_TOKEN]      = sym_token( real_type_sym )
 			case else
 				-- ?? not handled...leave it unreferenced 
 				return
