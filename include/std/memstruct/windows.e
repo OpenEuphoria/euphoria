@@ -34,6 +34,8 @@ public memtype
 	long as COLORREF,
 	object as INT_PTR,
 	object as UINT_PTR,
+	char as TCHAR,
+	object as HICON,
 	$
 	
 --****
@@ -209,4 +211,12 @@ public memstruct NMLISTVIEW
 	UINT   uChanged
 	POINT  ptAction
 	LPARAM lParam
+end memstruct
+
+public memstruct SHFILEINFO
+  HICON hIcon
+  int   iIcon
+  DWORD dwAttributes
+  TCHAR szDisplayName[260]
+  TCHAR szTypeName[80]
 end memstruct
