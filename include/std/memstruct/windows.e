@@ -40,6 +40,9 @@ public memtype
 	object as LPFRHOOKPROC,
 	object as EDITSTREAMCALLBACK,
 	object as DWORD_PTR,
+	object as HGLOBAL,
+	object as LPPAGEPAINTHOOK,
+	object as LPPAGESETUPHOOK,
 	$
 	
 --****
@@ -344,3 +347,25 @@ public memstruct EDITSTREAM
 	EDITSTREAMCALLBACK pfnCallback
 end memstruct
 end ifdef
+
+public memstruct PAGESETUPDLG
+	DWORD           lStructSize
+	HWND            hwndOwner
+	HGLOBAL         hDevMode
+	HGLOBAL         hDevNames
+	DWORD           Flags
+	POINT           ptPaperSize
+	RECT            rtMinMargin
+	RECT            rtMargin
+	HINSTANCE       hInstance
+	LPARAM          lCustData
+	LPPAGESETUPHOOK lpfnPageSetupHook
+	LPPAGEPAINTHOOK lpfnPagePaintHook
+	LPCTSTR         lpPageSetupTemplateName
+	HGLOBAL         hPageSetupTemplate
+end memstruct
+
+
+public memstruct DEVMODE
+
+end memstruct
