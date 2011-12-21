@@ -1313,7 +1313,9 @@ static object PutScreenChar(object x)
 {
 	unsigned attr, len;
 	unsigned line, column;
+#ifdef EUNIX
 	unsigned fg, bg;
+#endif
 	s1_ptr args;
 	object_ptr p;
 #ifdef EUNIX
@@ -1786,11 +1788,14 @@ object tick_rate(object x)
 
 static object float_to_atom(object x, int flen)
 /* convert a sequence of 4 or 8 bytes in IEEE format to an atom */
+/* must avoid type casts from floating point values that may not be 8-byte aligned. */
 {
 	int len, i;
 	object_ptr obj_ptr;
-	char fbuff[8];
-	double d;
+	union {
+		char fbuff[8];
+		double d;
+	} out;
 	s1_ptr s;
 
 	s = SEQ_PTR(x);
@@ -1799,13 +1804,11 @@ static object float_to_atom(object x, int flen)
 		RTFatal("sequence has wrong length");
 	obj_ptr = s->base+1;
 	for (i = 0; i < len; i++) {
-		fbuff[i] = (char)obj_ptr[i];
+		out.fbuff[i] = (char)obj_ptr[i];
 	}
 	if (flen == 4)
-		d = (double)*((float *)&fbuff);
-	else
-		d = *((double *)&fbuff);
-	return NewDouble(d);
+		out.d = (double)*((float *)&out.d);
+	return NewDouble(out.d);
 }
 
 static object fpsequence(unsigned char *fp, int len)
