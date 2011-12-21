@@ -3280,7 +3280,7 @@ procedure poke_member_value( atom pointer, integer data_type, object value )
 			poke4( pointer, value )
 		case MS_LONG then
 			ifdef WINDOWS then
-				poke4( pointer )
+				poke4( pointer, value )
 			elsedef
 				poke_pointer( pointer, value )
 			end ifdef
