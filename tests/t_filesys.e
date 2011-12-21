@@ -254,8 +254,8 @@ procedure dir_tests()
 	test_equal( "dir size dir count", 4, test_dir_size[COUNT_DIRS] )
 	test_equal( "dir size file count", 1, test_dir_size[COUNT_FILES] )
 	
-	--test_not_equal( "clear directory", 0, clear_directory( "filesyse_dir/directory1", 0 ) )
-	--test_true( "remove testing directory", remove_directory( "filesyse_dir", 1 ) )
+	test_not_equal( "clear directory", 0, clear_directory( "filesyse_dir/directory1", 0 ) )
+	test_true( "remove testing directory", remove_directory( "filesyse_dir", 1 ) )
 end procedure
 dir_tests()
 
