@@ -36,6 +36,8 @@ public memtype
 	object as UINT_PTR,
 	char as TCHAR,
 	object as HICON,
+	object as HTREEITEM,
+	object as LPFRHOOKPROC,
 	$
 	
 --****
@@ -219,4 +221,98 @@ public memstruct SHFILEINFO
   DWORD dwAttributes
   TCHAR szDisplayName[260]
   TCHAR szTypeName[80]
+end memstruct
+
+public memstruct TVITEM
+	UINT      mask
+	HTREEITEM hItem
+	UINT      state
+	UINT      stateMask
+	LPTSTR    pszText
+	int       cchTextMax
+	int       iImage
+	int       iSelectedImage
+	int       cChildren
+	LPARAM    lParam
+end memstruct
+
+public memstruct TVITEMEX
+	UINT      mask
+	HTREEITEM hItem
+	UINT      state
+	UINT      stateMask
+	LPTSTR    pszText
+	int       cchTextMax
+	int       iImage
+	int       iSelectedImage
+	int       cChildren
+	LPARAM    lParam
+	int       iIntegral
+-- 	#if (_WIN32_IE >= 0x0600)
+	UINT      uStateEx
+	HWND      hwnd
+	int       iExpandedImage
+-- -- 	#endif 
+-- -- 	#if (NTDDI_VERSION >= NTDDI_WIN7)
+	int       iReserved
+-- 	#endif 
+end memstruct
+
+public memunion TVINSERTUNION
+	TVITEMEX itemex
+	TVITEM   item
+end memunion
+
+public memstruct TVINSERTSTRUCT
+	HTREEITEM hParent
+	HTREEITEM hInsertAfter
+-- 	#if (_WIN32_IE >= 0x0400)
+	TVINSERTUNION u
+end memstruct
+
+public memstruct NMTVDISPINFO
+	NMHDR hdr
+	TVITEM item
+end memstruct
+
+public memstruct NMTREEVIEW
+	NMHDR  hdr
+	UINT   action
+	TVITEM itemOld
+	TVITEM itemNew
+	POINT  ptDrag
+end memstruct
+
+public memstruct TVHITTESTINFO
+	POINT     pt
+	UINT      flags
+	HTREEITEM hItem
+end memstruct
+
+public memstruct NMCBEENDEDIT
+	NMHDR hdr
+	BOOL  fChanged
+	int   iNewSelection
+	TCHAR szText
+	int   iWhy
+end memstruct
+
+public memstruct NMUPDOWN
+	NMHDR hdr
+	int   iPos
+	int   iDelta
+end memstruct
+
+public memstruct FINDREPLACE
+	DWORD        lStructSize
+	HWND         hwndOwner
+	HINSTANCE    hInstance
+	DWORD        Flags
+	LPTSTR       lpstrFindWhat
+	LPTSTR       lpstrReplaceWith
+	WORD         wFindWhatLen
+	WORD         wReplaceWithLen
+	LPARAM       lCustData
+	LPFRHOOKPROC lpfnHook
+	LPCTSTR      lpTemplateName
 end memstruct
