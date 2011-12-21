@@ -38,6 +38,8 @@ public memtype
 	object as HICON,
 	object as HTREEITEM,
 	object as LPFRHOOKPROC,
+	object as EDITSTREAMCALLBACK,
+	object as DWORD_PTR,
 	$
 	
 --****
@@ -324,3 +326,21 @@ public memstruct LVHITTESTINFO
 	int   iSubItem
 	int   iGroup
 end memstruct
+
+ifdef BITS64 then
+-- TODO: make some way to direct euphoria to pack this correctly
+public memstruct EDITSTREAM
+	DWORD_PTR          dwCookie
+	DWORD              dwError
+	-- richedit structs are aligned on 4 bytes
+	-- there is currently no way to handle this nicely
+	long pfnCallback
+	long reserved
+end memstruct
+elsedef
+public memstruct EDITSTREAM
+	DWORD_PTR          dwCookie
+	DWORD              dwError
+	EDITSTREAMCALLBACK pfnCallback
+end memstruct
+end ifdef
