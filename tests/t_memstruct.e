@@ -298,4 +298,15 @@ procedure pointers()
 end procedure
 pointers()
 
+memstruct ESTRUCT
+	int e
+end memstruct
+procedure not_scientific_notation()
+	atom ptr = allocate( sizeof( ESTRUCT ), 1 )
+	test_equal("offsetof not scientific notation", 0, offsetof( ESTRUCT.e ) )
+	test_equal("addressof not scientific notation", ptr, addressof( ptr.ESTRUCT.e ) )
+end procedure
+not_scientific_notation()
+
+
 test_report()

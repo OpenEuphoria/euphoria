@@ -1731,7 +1731,10 @@ export function Scanner()
 				if ch = '-' or ch = '+' or char_class[ch] = DIGIT then
 					yytext &= ch
 				else
-					CompileErr(86)
+					-- memstruct dot notation
+					ungetch()
+					ungetch()
+					return { DOT, 0 }
 				end if
 				ch = getch()
 				while char_class[ch] = DIGIT do
