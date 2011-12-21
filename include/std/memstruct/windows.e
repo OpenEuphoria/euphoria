@@ -316,3 +316,11 @@ public memstruct FINDREPLACE
 	LPFRHOOKPROC lpfnHook
 	LPCTSTR      lpTemplateName
 end memstruct
+
+public memstruct LVHITTESTINFO
+	POINT pt
+	UINT  flags
+	int   iItem
+	int   iSubItem
+	int   iGroup
+end memstruct
