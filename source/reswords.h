@@ -229,7 +229,8 @@
 #define PEEK_POINTER        216
 #define SIZEOF              217
 #define STARTLINE_BREAK     218
-#define MAX_OPCODE          218
+#define NAME_OF             219
+#define MAX_OPCODE          219
 
 /* remember to update reswords.e, opnames.e,
    opnames.h, optable[], localjumptab[]

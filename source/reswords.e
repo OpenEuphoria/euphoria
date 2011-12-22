@@ -227,6 +227,7 @@ export constant
 	PEEK_POINTER        = 216,
 	SIZEOF              = 217,
 	STARTLINE_BREAK     = 218,
+	NAME_OF             = 219,
 	MAX_OPCODE          = 218
 
 

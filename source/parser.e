@@ -37,6 +37,7 @@ include block.e
 include keylist.e
 include coverage.e
 
+constant M_SPRINT = 105
 constant UNDEFINED = -999
 constant DEFAULT_SAMPLE_SIZE = 25000  -- for time profile
 constant ASSIGN_OPS = {EQUALS, PLUS_EQUALS, MINUS_EQUALS, MULTIPLY_EQUALS,
@@ -115,6 +116,7 @@ sequence_of_tokens canned_tokens = {}   -- recording stack when parser is in rec
 integer canned_index = 0      -- previous playback position
 
 token zero, one, two  -- constants we often need.  Initialized on the first declaration of a type enum.
+token m_sprint_tok, machine_func_tok 
 
 procedure EndLineTable()
 -- put marker at end of current line number table
@@ -245,7 +247,9 @@ export procedure InitParser()
 	SymTab[one[2]][S_OBJ] = 1
 	two = {VARIABLE,NewIntSym(2)}
 	SymTab[two[2]][S_OBJ] = 2
-	
+	m_sprint_tok = {VARIABLE,NewIntSym(M_SPRINT)}
+	SymTab[m_sprint_tok[2]][S_OBJ] = M_SPRINT
+	machine_func_tok = {BUILTIN,keyfind("eu:machine_func",-1)}
 end procedure
 
 sequence switch_stack = {}
@@ -1168,35 +1172,41 @@ end procedure
 
 
 -- parse a name_of call...
-procedure Name_of_call( token tok )
+function Name_of_call( token tok )
 	object ls
 	integer i
-	object argument_tok = next_token(), argument, argument_type
+	object argument_tok = next_token(), argument, argument_type, round_tok
 	sequence name_of_type_of_argument
 	
 	if find(argument_tok[T_ID],{
 		VARIABLE, QUALIFIED_VARIABLE})=0  then
-			CompileErr( ERRMSG_NAME_OF_NOT_VARIABLE )
+		goto "handle error"
+		-- CompileErr( ERRMSG_NAME_OF_NOT_VARIABLE )
 	end if
-	tok_match( RIGHT_ROUND )
+	round_tok = next_token()
+	if round_tok[T_ID] != RIGHT_ROUND then
+		goto "handle errors 2"
+	end if
 	UndefinedVar( argument_tok[T_SYM] )
 	-- must set name_of_type_of_argument to the name of the type.
 	if symtab_index( argument_tok[T_SYM] ) then
 		argument = SymTab[argument_tok[T_SYM]]
 		if length(argument) >= S_VTYPE then
 			if argument[S_VTYPE] = 0 or find(argument[S_VTYPE],{object_type,sequence_type,atom_type,integer_type}) then
-				CompileErr( ERRMSG_NAME_OF_NOT_UDT )
+				goto "handle errors 2"
 			end if
 			argument_type = SymTab[argument[S_VTYPE]]
 			name_of_type_of_argument = argument_type[S_NAME]
 		end if
 	end if
 	if not object(argument_type) then
-		CompileErr(ERRMSG_FWD_REF_NOTSUPPORTED,{"name_of"})
+		goto "handle errors 2"
+--		CompileErr(ERRMSG_FWD_REF_NOTSUPPORTED,{"name_of"})
 	end if
 	i = find(argument[S_VTYPE],literal_sets[1])
 	if not i then
-		CompileErr( ERRMSG_NAME_OF_NOT_ENUM_TYPE )
+		goto "handle errors 2"
+--		CompileErr( ERRMSG_NAME_OF_NOT_ENUM_TYPE )
 	end if
 	ls = literal_sets[2][i]
 	if (literal_set:get_access_method(ls) = SEQUENCE_PAIR) then
@@ -1242,8 +1252,15 @@ procedure Name_of_call( token tok )
 		emit_op(RHS_SUBS)
 		
 	end if
-end procedure
-
+	
+	return 1	
+	
+	label "handle errors 2"
+		putback(round_tok)
+	label "handle error"
+		putback(argument_tok)
+		return 0	
+end function
 
 procedure Function_call( token tok )
 --	token tok2, tok3
@@ -1273,17 +1290,31 @@ procedure Function_call( token tok )
 				{abbreviate_path(known_files[current_file_no]), line_number,SymTab[tok[T_SYM]][S_NAME]})
 		end if
 	end if
+	delete(e)
+	delete(tok)
+	
 	tok_match(LEFT_ROUND)
+	trace(object(tok)!=0)
+	sequence routine_name = SymTab[routine_sym][S_NAME]
 	scope = SymTab[routine_sym][S_SCOPE]
 	opcode = SymTab[routine_sym][S_OPCODE]
+	sequence token_name = SymTab[tok[T_SYM]][S_NAME]
 	if scope = SC_PREDEF then
-		switch SymTab[tok[T_SYM]][S_NAME] do
+		switch SymTab[routine_sym][S_NAME] do
 			case "object" then
 				-- handled specially to check for uninitialized variables
 				Object_call( tok )
-			case "nameof", "name_of" then
-				Name_of_call( tok )
-				return
+			case "name_of" then
+				if Name_of_call( tok ) then
+					return
+				end if
+				tok = keyfind("machine_func",-1)
+				routine_sym = tok[T_SYM]
+				routine_name = SymTab[routine_sym][S_NAME]
+				opcode = SymTab[routine_sym][S_OPCODE]
+				putback({COMMA,0})
+				putback(m_sprint_tok)
+				fallthru
 			case else
 				ParseArgs(tok[T_SYM])
 		end switch

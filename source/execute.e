@@ -55,7 +55,8 @@ constant M_CALL_BACK = 52,
 		 M_CRASH_MESSAGE = 37,
 		 M_CRASH_FILE = 57,
 		 M_TICK_RATE = 38,
-		 M_WARNING_FILE	= 72
+		 M_WARNING_FILE	= 72,
+		 M_SPRINT = 105
 
 constant C_MY_ROUTINE = 1,
 		 C_USER_ROUTINE = 2,
@@ -3646,7 +3647,9 @@ procedure opMACHINE_FUNC()
 
 	pc += 4
 	-- handle CALL_BACK specially
-	if val[a] = M_CALL_BACK then
+	if val[a] = M_SPRINT then
+		val[target] = sprint(val[b])	
+	elsif val[a] = M_CALL_BACK then
 		-- routine id's must be handled at our level
 		do_callback(b)
 	else
