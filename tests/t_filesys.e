@@ -196,13 +196,18 @@ end ifdef
 test_equal( "canonical_path() #13", current_dir() & SLASH & "*.txt", canonical_path( "*.txt" ) )
 test_equal( "canonical_path() #14", current_dir() & SLASH & "*.txt", canonical_path( "../tests/*.txt" ) )
 
--- one of these two tests below will change the case of the drive letter and CORRECT should restore it.
-test_equal( "canonical_path #15 can change lower case version to the original version",
-	current_dir(), canonical_path(lower(current_dir()),, CORRECT) )
+ifdef WINDOWS then
+	-- These tests only make sense on a case insensitive file system.
+	-- Technically, that doesn't necessarily mean windows, but in 
+	-- general Windows is where this happens.
+	
+	-- one of these two tests below will change the case of the drive letter and CORRECT should restore it.
+	test_equal( "canonical_path #15 can change lower case version to the original version",
+		current_dir(), canonical_path(lower(current_dir()),, CORRECT) )
 
-test_equal( "canonical_path #16 can change upper case version to the original version",
-	current_dir(), canonical_path(upper(current_dir()),, CORRECT) )
-
+	test_equal( "canonical_path #16 can change upper case version to the original version",
+		current_dir(), canonical_path(upper(current_dir()),, CORRECT) )
+end ifdef
 sequence walk_data = {}
 function test_walk( sequence path_name, sequence item )
 	walk_data = append( walk_data, { path_name, item[D_NAME] } )
