@@ -848,7 +848,7 @@ s1_ptr ReNewS1(s1_ptr old_s1, intptr_t size)
 		SpaceMessage();
 	}
 	old_s1->postfill = size - (old_base+old_s1->length+2 - (object_ptr)&old_s1[1]);
-	s1 = (s1_ptr)ERealloc(old_s1, sizeof(struct s1) + (size+1) * sizeof(object));
+	s1 = (s1_ptr)ERealloc( (char*)old_s1, sizeof(struct s1) + (size+1) * sizeof(object));
 	s1->base = (object_ptr)s1 +
 				 ((object_ptr)old_base - (object_ptr)old_s1);
 	return s1;

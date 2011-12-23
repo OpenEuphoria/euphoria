@@ -43,7 +43,8 @@
 #
 
 CONFIG_FILE = config.gnu
-
+CC=$(CC_PREFIX)$(CC_SUFFIX)
+RC=$(CC_PREFIX)$(RC_SUFFIX)
 ifndef CONFIG
 CONFIG = $(CONFIG_FILE)
 endif
@@ -52,6 +53,13 @@ PCRE_CC=$(CC)
 
 include $(CONFIG)
 include $(TRUNKDIR)/source/pcre/objects.mak
+
+ifeq "$(EHOST)" "$(ETARGET)"
+HOSTCC=$(CC)
+else
+# so far this is all we support
+HOSTCC=gcc
+endif
 
 ifeq "$(RELEASE)" "1"
 RELEASE_FLAG = -D EU_FULL_RELEASE
@@ -87,6 +95,8 @@ endif
 ifeq "$(EMINGW)" "1"
 	EXE_EXT=.exe
 	ifeq "$(EHOST)" "EWIN"
+		# In Windows Ming, all code is position independent.  There is no need to 
+		# to rebuild with a -fPIC flag.
 		HOST_EXE_EXT=.exe
 	endif
 	EPTHREAD=
@@ -97,24 +107,10 @@ ifeq "$(EMINGW)" "1"
 	EOSFLAGS=$(NO_CYGWIN) -mwindows
 	EOSFLAGSCONSOLE=$(NO_CYGWIN)
 	EOSPCREFLAGS=$(NO_CYGWIN)
-	EECUA=eu.a
-	EECUDBGA=eudbg.a
-	EECUSOA=euso.a
-	EECUSODBGA=eusodbg.a
 	ifdef EDEBUG
 		EOSMING=
-		ifdef FPIC
-			LIBRARY_NAME=eusodbg.a
-		else
-			LIBRARY_NAME=eudbg.a
-		endif
 	else
 		EOSMING=-ffast-math -O3 -Os
-		ifdef FPIC
-			LIBRARY_NAME=euso.a
-		else
-			LIBRARY_NAME=eu.a
-		endif
 	endif
 	EUBW_RES=$(BUILDDIR)/eubw.res
 	EUB_RES=$(BUILDDIR)/eub.res
@@ -141,27 +137,22 @@ else
 	EOSFLAGS=
 	EOSFLAGSCONSOLE=
 	EOSPCREFLAGS=
-	EECUA=eu.a
-	EECUDBGA=eudbg.a
-	EECUSOA=euso.a
-	EECUSODBGA=eusodbg.a
-	ifdef EDEBUG
-		ifdef FPIC
-			LIBRARY_NAME=eusodbg.a
-		else
-			LIBRARY_NAME=eudbg.a
-		endif
-	else
-		ifdef FPIC
-			LIBRARY_NAME=euso.a
-		else
-			LIBRARY_NAME=eu.a
-		endif
-	endif
 	MEM_FLAGS=-DESIMPLE_MALLOC
 endif
+EECUA=eu.a
+EECUDBGA=eudbg.a
+EECUSOA=euso.a
+EECUSODBGA=eusodbg.a		
 
-MKVER=$(BUILDDIR)/mkver$(EXE_EXT)
+
+ifndef LIBRARY_NAME
+	ifeq "$(EDEBUG)" "1"
+		LIBRARY_NAME=eudbg.a
+	else
+		LIBRARY_NAME=eu.a
+	endif
+endif
+MKVER=$(BUILDDIR)/mkver$(HOST_EXE_EXT)
 EBACKENDU=eub$(EXE_EXT)
 EBACKENDC=eub$(EXE_EXT)
 EECU=euc$(EXE_EXT)
@@ -198,6 +189,7 @@ endif
 
 ifndef TESTFILE
 COVERAGE_ERASE=-coverage-erase
+TESTFILE=-log
 endif
 
 ifeq  "$(ELINUX)" "1"
@@ -364,7 +356,7 @@ EU_BACKEND_RUNNER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/backobj/*.
 EU_INTERPRETER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/intobj/*.c))
 
 all : 
-	$(MAKE) interpreter translator library debug-library backend shared-library debug-shared-library
+	$(MAKE) library debug-library shared-library debug-shared-library backend interpreter translator  
 	$(MAKE) tools
 
 
@@ -427,16 +419,16 @@ endif
 .PHONY : clean distclean clobber all htmldoc manual
 
 debug-library : builddirs
-	$(MAKE) $(BUILDDIR)/$(EECUDBGA) OBJDIR=libobjdbg ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE)
+	$(MAKE) $(BUILDDIR)/$(EECUDBGA) OBJDIR=libobjdbg ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE) LIBRARY_NAME=$(EECUDBGA)
 
 library : builddirs
-	$(MAKE) $(BUILDDIR)/$(LIBRARY_NAME) OBJDIR=libobj ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+	$(MAKE) $(BUILDDIR)/$(EECUA) OBJDIR=libobj ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG= EPROFILE=$(EPROFILE) LIBRARY_NAME=$(EECUA)
 
 shared-library :
-	$(MAKE) $(BUILDDIR)/$(EECUSOA) OBJDIR=libobj-fPIC ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE) FPIC=-fPIC
+	$(MAKE) $(BUILDDIR)/$(EECUSOA) OBJDIR=libobj-fPIC ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG= EPROFILE=$(EPROFILE) FPIC=-fPIC LIBRARY_NAME=$(EECUSOA)
 
 debug-shared-library : builddirs
-	$(MAKE) $(BUILDDIR)/$(EECUSODBGA) OBJDIR=libobjdbg-fPIC ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE) FPIC=-fPIC
+	$(MAKE) $(BUILDDIR)/$(EECUSODBGA) OBJDIR=libobjdbg-fPIC ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE) FPIC=-fPIC LIBRARY_NAME=$(EECUSODBGA)
 
 $(BUILDDIR)/$(LIBRARY_NAME) : $(EU_LIB_OBJECTS)
 	ar -rc $(BUILDDIR)/$(LIBRARY_NAME) $(EU_LIB_OBJECTS)
@@ -592,10 +584,10 @@ endif
 
 .PHONY: update-version-cache
 update-version-cache : $(MKVER)
-	$(WINE) $(MKVER) "$(HG)" "$(BUILDDIR)/ver.cache" "$(BUILDDIR)/include/be_ver.h" $(EREL_TYPE)$(RELEASE)
+	$(MKVER) "$(HG)" "$(BUILDDIR)/ver.cache" "$(BUILDDIR)/include/be_ver.h" $(EREL_TYPE)$(RELEASE)
 
 $(MKVER): mkver.c
-	$(CC) -o $@ $<
+	$(HOSTCC) -o $@ $<
 
 
 $(BUILDDIR)/ver.cache : update-version-cache
@@ -685,7 +677,7 @@ pdfdoc-initial : $(BUILDDIR)/euphoria.pdf
 # Test <eucode>...</eucode> blocks found in our API reference docs
 #
 
-.PHONY: test-eucode
+.PHONY: test-eucode report
 
 test-eucode : 
 	$(EUDOC) --single --verbose --test-eucode --work-dir=$(BUILDDIR)/eudoc_test -o $(BUILDDIR)/test_eucode.txt $(EU_STD_INC)
@@ -694,6 +686,18 @@ test-eucode :
 #
 # Unit Testing
 #
+
+report : $(CYPBUILDDIR)\test-report.html
+
+..\tests\unittest.log ..\tests\ctc.log :  $(BUILDDIR)/$(EECUSODBGA) $(BUILDDIR)/$(EBACKENDU)  $(BUILDDIR)/$(EECUA) $(BUILDDIR)/$(EECUDBGA) $(BUILDDIR)/$(EECUSOA)  $(BUILDDIR)/$(EEXU)  $(BUILDDIR)/$(EECU)  $(BUILDDIR)/$(EUBIND) $(BUILDDIR)/$(EUSHROUD) $(BUILDDIR)/$(EUTEST)  $(BUILDDIR)/$(EUDIS)  $(BUILDDIR)/$(EUDIST)  $(BUILDDIR)/$(EUCOVERAGE)
+	$(MAKE) TESTFILE=-log
+
+$(CYPBUILDDIR)\test-report.html: ..\tests\unittest.log ..\tests\ctc.log 
+	cd ../tests && cp *.log $(CYPBUILDDIR) && \
+		$(EXE) -i ../include ../source/eutest.ex \
+		-process-log -html > $(CYPBUILDDIR)/test-report.html
+	
+
 
 test : EUDIR=$(TRUNKDIR)
 test : EUCOMPILEDIR=$(TRUNKDIR)
@@ -776,6 +780,10 @@ install :
 	install $(BUILDDIR)/$(EBACKENDU) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EUBIND) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EUSHROUD) $(DESTDIR)$(PREFIX)/bin
+	install $(BUILDDIR)/$(EUTEST) $(DESTDIR)$(PREFIX)/bin
+	install $(BUILDDIR)/$(EUDIS) $(DESTDIR)$(PREFIX)/bin
+	install $(BUILDDIR)/$(EUDIST) $(DESTDIR)$(PREFIX)/bin
+	install $(BUILDDIR)/$(EUCOVERAGE) $(DESTDIR)$(PREFIX)/bin
 ifeq "$(EMINGW)" "1"
 	install $(BUILDDIR)/$(EBACKENDC) $(DESTDIR)$(PREFIX)/bin
 endif
