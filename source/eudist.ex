@@ -182,9 +182,6 @@ function trimer(sequence s)
 	if s[$] = '\n' then
 		s = remove( s, length(s) )
 	end if
-	if s[$] = '\r' then
-		s = remove( s, length(s) )
-	end if
     return s
 end function
 

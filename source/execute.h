@@ -380,6 +380,7 @@ struct char_cell {
 #define M_PCRE_GET_OVECTOR_SIZE 97
 #define M_GET_RAND           98
 #define M_HAS_CONSOLE        99
+#define M_KEY_CODES          100
 
 enum CLEANUP_TYPES {
 	CLEAN_UDT,

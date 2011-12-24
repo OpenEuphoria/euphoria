@@ -5945,7 +5945,7 @@ procedure opGETC()
 			c_stmt("@ = getc((FILE*)xstdin);\n", Code[pc+2])   -- echo the character
 		end if
 	else
-		c_stmt("@ = wingetch();\n", Code[pc+2])
+		c_stmt("@ = getKBchar();\n", Code[pc+2])
 	end if
 	c_stmt0("}\n")
 	c_stmt0("else\n")

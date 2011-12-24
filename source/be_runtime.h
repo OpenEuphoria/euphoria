@@ -121,7 +121,7 @@ object EGets(object file_no);
 void EClose(object a);
 int CheckFileNumber(object a);
 int NumberOpen();
-void key_gets(char *input_string);
+void key_gets(char *input_string, int buffsize);
 
 IFILE which_file(object a, int mode);
 void MakeCString(char *s, object pobj, int slen);
@@ -221,5 +221,7 @@ object DRandom(d_ptr a);
 object e_floor(long a);  // not used anymore
 
 int memcopy( void *dest, size_t avail, void *src, size_t len);
+
+int getKBchar();
 
 #endif /* BE_RUNTIME_H */
