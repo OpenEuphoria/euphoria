@@ -689,7 +689,7 @@ test-eucode :
 
 report : $(CYPBUILDDIR)\test-report.html
 
-..\tests\unittest.log ..\tests\ctc.log :  $(BUILDDIR)/$(EECUSODBGA) $(BUILDDIR)/$(EBACKENDU)  $(BUILDDIR)/$(EECUA) $(BUILDDIR)/$(EECUDBGA) $(BUILDDIR)/$(EECUSOA)  $(BUILDDIR)/$(EEXU)  $(BUILDDIR)/$(EECU)  $(BUILDDIR)/$(EUBIND) $(BUILDDIR)/$(EUSHROUD) $(BUILDDIR)/$(EUTEST)  $(BUILDDIR)/$(EUDIS)  $(BUILDDIR)/$(EUDIST)  $(BUILDDIR)/$(EUCOVERAGE)
+..\tests\unittest.log ..\tests\ctc.log : 
 	$(MAKE) TESTFILE=-log
 
 $(CYPBUILDDIR)\test-report.html: ..\tests\unittest.log ..\tests\ctc.log 
