@@ -1468,10 +1468,18 @@ end function
 --   your programs from globing *, ?.  And it is not specied here what happens if you
 --   pass redirection or piping characters.
 --
+--   When passing a result from with build_commandline to [[:system_exec]],
+--   file arguments will benefit from using [[:canonical_path]] with the [[:TO_SHORT]].
+--   On Windows, this is required for file arguments to always work.  There is a complication
+--   with files that contain spaces.  On other platforms, 
+--   this call will also return a useable filename. 
+--
+--   Alternatively, you can leave out calls to [[:canonical_path]] and use [[:system]] instead.
+--
 -- Example 1:
 -- <eucode>
--- s = build_commandline( { "-d", "/usr/my docs/"} )
--- -- s now contains '-d "/usr/my docs/"'
+-- s = build_commandline( { "-d", canonical_path("/usr/my docs/",,TO_SHORT)} )
+-- -- s now contains a short name equivalent to '-d "/usr/my docs/"'
 -- </eucode>
 --
 -- Example 2:
@@ -1485,7 +1493,8 @@ end function
 -- </eucode>
 --
 -- See Also:
---   [[:parse_commandline]], [[:system]], [[:system_exec]], [[:command_line]]
+--   [[:parse_commandline]], [[:system]], [[:system_exec]], [[:command_line]], 
+--   [[:canonical_path]],  [[:TO_SHORT]] 
 
 public function build_commandline(sequence cmds)
 	return stdseq:flatten( text:quote( cmds,,'\\'," " ), " ")

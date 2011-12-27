@@ -1488,6 +1488,10 @@ end function
 public enum
 	AS_IS = 0, TO_LOWER = 1, CORRECT = 2, TO_SHORT = 4
 
+ifdef WINDOWS then
+	constant starting_current_dir = machine_func(M_CURRENT_DIR)
+	constant system_drive_case = and_bits(and_bits('a',not_bits('A')),starting_current_dir[1]) -- 32 if lower case, 0 if upper case.
+end ifdef
 
 public type case_flagset_type(integer x)
 	return x >= AS_IS and x < 2*TO_SHORT
@@ -1509,7 +1513,7 @@ end type
 --            CORRECT    =  If passed will correct the parts of the filepath that
 --                          exist in the current filesystem in parts of the filesystem
 --                          that is case insensitive.  This should  work on WINDOWS
---                          or SMB mounted volumes on UNIX or certain Mac OS filesystems.
+--                          or SMB mounted volumes on UNIX and all Mac OS filesystems.
 --
 --           TO_LOWER    =  If passed alone the entire path is converted to lowercase.
 --           or_bits(TO_LOWER,CORRECT) = If these flags are passed together the the part that
@@ -1541,6 +1545,7 @@ end type
 -- <eucode>
 -- -- res is "C:\Program Files" on systems that have that directory.
 -- res = canonical_path("c:\pRoGrAm FiLeS", CORRECT)
+-- -- on Windows Vista this would be "c:\Program Files" for Vista uses lowercase for its drives.
 -- </eucode>
 public function canonical_path(sequence path_in, integer directory_given = 0, case_flagset_type case_flags = AS_IS)
 	
@@ -1664,10 +1669,6 @@ public function canonical_path(sequence path_in, integer directory_given = 0, ca
 		lPosA = match(lLevel, lPath, lPosB )
 	end while
 	
-	ifdef WINDOWS then
-		lPath = lDrive & lPath
-	end ifdef
-	
 	if case_flags = TO_LOWER then
 		lPath = lower( lPath )
 	
@@ -1730,10 +1731,21 @@ public function canonical_path(sequence path_in, integer directory_given = 0, ca
 		if and_bits(case_flags,or_bits(CORRECT,TO_LOWER))=TO_LOWER and length(lPath) then
 			lPath = lower(lPath)
 		end if
-		if correct_name and length(lPath) then
-			lPath[1] = upper(lPath[1])
-		end if
 	end if
+	
+	ifdef WINDOWS then
+		if and_bits(CORRECT,case_flags) then
+			-- must use if-block to handle non-ASCII correctly...
+			if or_bits(system_drive_case,'A') = 'a' then
+				lDrive = lower(lDrive)
+			else
+				lDrive = upper(lDrive)
+			end if
+		elsif and_bits(TO_LOWER,case_flags) then
+			lDrive = lower(lDrive)
+		end if
+		lPath = lDrive & lPath
+	end ifdef
 	
 	return lPath & wildcard_suffix
 end function

@@ -155,9 +155,7 @@ typedef struct block_list * block_list_ptr;
 #include <stdlib.h>
 #endif
 #if defined( ESIMPLE_MALLOC )
-	#ifdef EUNIX
-	#include <stdlib.h>
-	#endif
+
 	#define EFree(ptr) free(ptr)
 #else
 	extern void EFree(char *ptr);
@@ -201,8 +199,8 @@ extern object NewSequence(char *data, int len);
 extern object NewString(char *s);
 extern s1_ptr NewS1(intptr_t size);
 extern s1_ptr SequenceCopy(register s1_ptr a);
-
 extern object NewDouble(eudouble d);
+extern object NewPreallocSeq(intptr_t size, object_ptr Objset);
 extern long copy_string(char *dest, char *src, size_t bufflen);
 extern long append_string(char *dest, char *src, size_t bufflen);
 

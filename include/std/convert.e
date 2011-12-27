@@ -16,8 +16,9 @@ constant
 	M_F64_TO_A = 47,
 	M_A_TO_F32 = 48,
 	M_F32_TO_A = 49,
-	M_A_TO_F80 = 100,
-	M_F80_TO_A = 101
+	M_F80_TO_A = 101,
+	M_A_TO_F80 = 105
+
 
 constant M_ALLOC = 16
 atom mem  = machine_func(M_ALLOC,8)
