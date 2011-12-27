@@ -4261,6 +4261,40 @@ ptr.PTR_TO_INT.a.* += 5
 ? ptr.PTR_TO_INT.a.* -- prints 10
 </eucode>
 
+==== Data member size and alignment
+
+In general, euphoria memstructs are sized and aligned the same way as C compilers do on the 
+respective platform.  Data elements are usually aligned on their size or the sign of a pointer.
+There are exceptions, such as double floating point values on 32-bit Linux, which is 4-byte 
+aligned.
+
+In some cases, a different alignment may be required, especially on Windows.  C compilers use
+special pragma directives to tell the compiler to pack structures differently than normal.
+Euphoria uses ##with pack## directives when declaring a memstruct to define non-standard
+packing:
+
+<eucode>
+memstruct PACK1 with pack 1
+	char a
+	int b
+end memstruct
+</eucode>
+
+In this example, an ##int## would normally be aligned on a 4-byte boundary, and would have
+an offset of 4, leaving 3 additional bytes between ##a## and #b##.  However since ##with pack 1##
+is used in the declaration, ##b## comes immediately after ##a## with no extra bytes.  The size of
+the memstruct is 5.  Normally, extra padding would be added to the end of the memstruct to ensure
+that the memstruct's alignment was based on the largest member's size.
+
+<eucode>
+memstruct PACK2 with pack 2
+	char a
+	int b
+end memstruct
+</eucode>
+
+In this example, ##b## is placed at offset 2, and the overall size of the memstruct is 6.
+
 @[memstruct|]
 ==== memstruct
 

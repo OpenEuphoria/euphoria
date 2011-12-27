@@ -330,23 +330,12 @@ public memstruct LVHITTESTINFO
 	int   iGroup
 end memstruct
 
-ifdef BITS64 then
--- TODO: make some way to direct euphoria to pack this correctly
-public memstruct EDITSTREAM
+public memstruct EDITSTREAM with pack 4
 	DWORD_PTR          dwCookie
 	DWORD              dwError
 	-- richedit structs are aligned on 4 bytes
-	-- there is currently no way to handle this nicely
-	long pfnCallback
-	long reserved
-end memstruct
-elsedef
-public memstruct EDITSTREAM
-	DWORD_PTR          dwCookie
-	DWORD              dwError
 	EDITSTREAMCALLBACK pfnCallback
 end memstruct
-end ifdef
 
 public memstruct PAGESETUPDLG
 	DWORD           lStructSize

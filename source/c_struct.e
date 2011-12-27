@@ -1072,6 +1072,9 @@ export procedure write_struct_header()
 	
 	for i = 1 to length( structs ) do
 		integer tok = sym_token( structs[i] )
+		if SymTab[structs[i]][S_MEM_PACK] then
+			printf( struct_h, "#pragma pack( push, %d )\n", SymTab[structs[i]][S_MEM_PACK] )
+		end if
 		if tok = MEMSTRUCT then
 			printf( struct_h, "struct %s{\n", { decorated_name( structs[i] )} )
 			write_memstruct( struct_h, structs[i] )
@@ -1079,6 +1082,10 @@ export procedure write_struct_header()
 			printf( struct_h, "union %s{\n", { decorated_name( structs[i])} )
 			write_memstruct( struct_h, structs[i] )
 		end if
+		if SymTab[structs[i]][S_MEM_PACK] then
+			printf( struct_h, "#pragma pack( pop )\n" )
+		end if
+		
 	end for
 	
 	puts( struct_h, "#endif\n" )

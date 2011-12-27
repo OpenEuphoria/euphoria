@@ -308,5 +308,23 @@ procedure not_scientific_notation()
 end procedure
 not_scientific_notation()
 
+memstruct PACK1 with pack 1
+	char a
+	int b
+end memstruct
+
+memstruct PACK2 with pack 2
+	char a
+	int b
+end memstruct
+
+procedure pack_test()
+	test_equal( "PACK1 size", 5, sizeof( PACK1 ) )
+	test_equal( "PACK1.b offset", 1, offsetof( PACK1.b ) )
+	
+	test_equal( "PACK2 size", 6, sizeof( PACK2 ) )
+	test_equal( "PACK2.b offste", 2, offsetof( PACK2.b ) )
+end procedure
+pack_test()
 
 test_report()

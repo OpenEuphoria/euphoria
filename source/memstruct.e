@@ -11,10 +11,14 @@ include scanner.e
 include symtab.e
 
 include std/dll.e
-with trace
+include std/stack.e
+
 integer is_union = 0
 symtab_pointer last_sym = 0
 symtab_index mem_struct
+
+integer mem_pack = 0
+stack pack_stack = stack:new()
 
 export procedure MemUnion_declaration( integer scope )
 	is_union = 1
@@ -305,6 +309,32 @@ export procedure MemStruct_declaration( integer scope )
 	end if
 	SymTab[mem_struct][S_SCOPE] = scope
 	
+	mem_pack = 0
+	tok = next_token()
+	if tok[T_ID] = WITH then
+		No_new_entry = 1
+		tok = next_token()
+		if compare( tok[T_SYM], "pack" ) then
+			sequence actual
+			if sequence( tok[T_SYM] ) then
+				actual = tok[T_SYM]
+			else
+				actual = sym_name( tok[T_SYM] )
+			end if
+			CompileErr(68, {"pack", actual })
+		end if
+		
+		No_new_entry = 0
+		tok = next_token()
+		if tok[T_ID] != ATOM then
+			CompileErr(68, {"atom", LexName( tok[T_ID] )} )
+		end if
+		mem_pack = sym_obj( tok[T_SYM] )
+		SymTab[mem_struct][S_MEM_PACK] = mem_pack
+	else
+		putback( tok )
+	end if
+	
 	integer pointer = 0
 	integer signed  = -1
 	integer long    = 0
@@ -559,6 +589,10 @@ function calculate_alignment( symtab_index member_sym )
 	entry
 		sym = SymTab[sym][S_MEM_NEXT]
 	end while
+	
+	if mem_pack and alignment > mem_pack then
+		alignment = mem_pack
+	end if
 	return alignment
 end function
 
@@ -568,7 +602,11 @@ function calculate_padding( symtab_index member_sym, integer size, integer mem_s
 	integer padding = 0
 	
 	if SymTab[member_sym][S_MEM_POINTER] then
-		padding = remainder( size, sizeof( C_POINTER ) )
+		if mem_pack and mem_pack < sizeof( C_POINTER ) then
+			padding = remainder( size, mem_pack )
+		else
+			padding = remainder( size, sizeof( C_POINTER ) )
+		end if
 	elsif sym_token( member_sym ) = MS_MEMBER then
 		integer alignment = calculate_alignment( member_sym )
 		if alignment = -1 then
@@ -583,13 +621,25 @@ function calculate_padding( symtab_index member_sym, integer size, integer mem_s
 		
 		-- 32-bit *nix aligns double on 4-byte boundary
 		if sym_token( member_sym ) = MS_DOUBLE and IX86 and IUNIX then
-			padding = remainder( size, 4 )
+			if mem_pack and mem_pack < 4 then
+				padding = remainder( size, mem_pack )
+			else
+				padding = remainder( size, 4 )
+			end if
 		else
-			padding = remainder( size, mem_size )
+			if mem_pack and mem_pack < mem_size then
+				padding = remainder( size, mem_pack )
+			else
+				padding = remainder( size, mem_size )
+			end if
 		end if
 	end if
 	return padding
 end function
+
+procedure pop_pack_stack( object x )
+	mem_pack = stack:pop( pack_stack )
+end procedure
 
 --**
 -- Returns the size and offsets for the memstruct, or -1 if all
@@ -603,6 +653,12 @@ function calculate_size()
 		end if
 		return SymTab[SymTab[member_sym][S_MEM_PARENT]][S_MEM_SIZE]
 	end if
+	
+	stack:push( pack_stack, mem_pack )
+	mem_pack = SymTab[member_sym][S_MEM_PACK]
+	
+	-- clean up the stack...
+	atom current_pack = delete_routine( mem_pack, routine_id( "pop_pack_stack" ) )
 	
 	integer size = 0
 	integer indeterminate = 0

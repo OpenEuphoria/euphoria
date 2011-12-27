@@ -235,7 +235,7 @@ procedure OutputSymTab(file f)
 									SymTab[i][S_TOKEN],
 									$
 								} &
-								SymTab[i][S_MEM_SIZE..S_MEM_RECALC]
+								SymTab[i][S_MEM_SIZE..S_MEM_PACK]
 				elsif SymTab[i][S_SCOPE] = SC_MEMSTRUCT then
 					-- We keep the primitive memstruct entries for their sizes
 					SymTab[i] = SymTab[i][1..4] & 
