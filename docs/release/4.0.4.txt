@@ -27,6 +27,7 @@
 * [[ticket:683]] [[ticket:685]] fixes for building the interpreter itself 
   for MinGW 
 * [[ticket:732]] fixes in building console less programs using MinGW
+* [[ticket:721]] fixes drive letter case descrepency between various functions defined in sys/filesys.e
 
 === Enhancements
 

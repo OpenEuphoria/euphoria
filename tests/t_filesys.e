@@ -6,6 +6,8 @@ include std/search.e
 include std/sort.e
 include std/text.e
 include std/unittest.e
+include std/os.e
+include std/utils.e
 
 sequence fullname, pname, fname, fext, eolsep, driveid, entire_driveid
 integer sep
@@ -24,7 +26,7 @@ elsedef
     pname = "\\EUPHORIA\\DOCS"
     sep = '\\'
     eolsep = "\r\n"
-    driveid = filesys:driveid(current_dir())
+    driveid = "C"
 	entire_driveid = driveid & ":"
 end ifdef
 
@@ -173,7 +175,7 @@ test_equal( "canonical_path() #6", current_dir() & SLASH & "UPPERNAME", canonica
 test_equal( "canonical_path() #7", current_dir() & SLASH & "UPPERNAME", canonical_path( "UPPERNAME",,AS_IS ))
 
 ifdef WINDOWS then
-	test_equal( "canonical_path() #8", entire_driveid & SLASH & "john" & SLASH & "doe.txt",
+	test_equal( "canonical_path() #8", filesys:driveid(current_dir()) & ":" & SLASH & "john" & SLASH & "doe.txt",
 		canonical_path("/john/doe.txt"))
 end ifdef
 
@@ -181,8 +183,6 @@ test_equal( "canonical_path() #9", lower(current_dir() & SLASH & "UPPERNAME"), c
 test_equal( "canonical_path() #10",current_dir() & SLASH & lower("UPPERNAME"),  canonical_path( "UPPERNAME",,or_bits(TO_LOWER,CORRECT)))
 test_equal( "canonical_path() #11",current_dir() & SLASH, canonical_path(lower(current_dir()), 1, CORRECT)) 
 
-test_equal( "canonical_path() #12", current_dir() & SLASH & "*.txt", canonical_path( "*.txt" ) )
-test_equal( "canonical_path() #13", current_dir() & SLASH & "*.txt", canonical_path( "../tests/*.txt" ) )
 
 ifdef WINDOWS then
 	object program_files = getenv("ProgramFiles")
@@ -194,6 +194,21 @@ ifdef WINDOWS then
 	end if
 end ifdef
 
+test_equal( "canonical_path() #13", current_dir() & SLASH & "*.txt", canonical_path( "*.txt" ) )
+test_equal( "canonical_path() #14", current_dir() & SLASH & "*.txt", canonical_path( "../tests/*.txt" ) )
+
+ifdef WINDOWS then
+	-- These tests only make sense on a case insensitive file system.
+	-- Technically, that doesn't necessarily mean windows, but in 
+	-- general Windows is where this happens.
+	
+	-- one of these two tests below will change the case of the drive letter and CORRECT should restore it.
+	test_equal( "canonical_path #15 can change lower case version to the original version",
+		current_dir(), canonical_path(lower(current_dir()),, CORRECT) )
+
+	test_equal( "canonical_path #16 can change upper case version to the original version",
+		current_dir(), canonical_path(upper(current_dir()),, CORRECT) )
+end ifdef
 sequence walk_data = {}
 function test_walk( sequence path_name, sequence item )
 	walk_data = append( walk_data, { path_name, item[D_NAME] } )
@@ -280,7 +295,7 @@ test_equal( "abbreviate_path with extra non matching paths 1",
 	abbreviate_path( canonical_path( "t_filesys.e" ), { "foo", canonical_path( ".." & SLASH ) } ) )
 
 test_equal( "abbreviate_path with non matching paths 1", 
-	entire_driveid & SLASH & "baz" & SLASH & "tests" & SLASH & "t_filesys.e",
+	filesys:driveid(current_dir()) & iif(platform()=WIN32,':',"") & SLASH & "baz" & SLASH & "tests" & SLASH & "t_filesys.e",
 	abbreviate_path( canonical_path( "/baz/tests/t_filesys.e" ) ) )
 
 test_equal( "pathname", current_dir(), pathname( current_dir() & SLASH & "t_filesys.e" ) )

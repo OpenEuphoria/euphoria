@@ -5,13 +5,25 @@
 --
 -- ==== Usage
 -- {{{
--- eui key
+-- eui key [keybindfile]
 -- }}}
---
+-- If you supply a valid file containing key bindings, they will be set prior to
+-- testing the keycodes returned.
 
 include std/os.e
+include std/console.e
+include std/io.e
 
-printf(1, "Testing keyboard codes on %s\n", uname())
+sequence cmd
+cmd = command_line()
+
+if length(cmd) >= 3 then
+  set_keycodes(cmd[3])
+  writefln("Testing keyboard codes on [1] using bindings from [2]", {uname(), cmd[3]})
+else
+  writefln("Testing keyboard codes on [1]", {uname()})
+end if
+
 
 puts(1, "Press any key. I'll show you the key code. Press q to quit\n")
 while 1 do

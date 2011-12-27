@@ -859,6 +859,30 @@ object NewString(char *s)
 	return NewSequence(s, strlen(s));
 }
 
+object NewPreallocSeq(intptr_t size, object_ptr Objset)
+/* make a new sequence with a single reference count with the data preallocated.*/
+/* size is number of elements already in 'Objset'.
+   Note: The last element in Objset is given the value NOVALUE as an end marker. */
+{
+	register s1_ptr s1;
+
+	assert(size >= 0);
+	if ((unsigned long)size > MAX_SEQ_LEN) {
+		// Ensure it doesn't overflow
+		SpaceMessage();
+	}
+	s1 = (s1_ptr)EMalloc(sizeof(struct s1));
+	s1->ref = 1;
+	s1->base = Objset;
+	s1->length = size-1;
+	s1->postfill = 0; /* there may be some available but don't waste time */
+					  /* prepend assumes this is set to 0 */
+	s1->cleanup = 0;
+	s1->base[s1->length] = NOVALUE; // Ensure end marker is present.
+	s1->base--;  // point to "0th" element
+	return MAKE_SEQ(s1);
+}
+
 s1_ptr SequenceCopy(register s1_ptr a)
 /* take a single-ref copy of sequence 'a' */
 {
