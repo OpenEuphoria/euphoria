@@ -56,7 +56,7 @@ constant M_CALL_BACK = 52,
 		 M_CRASH_FILE = 57,
 		 M_TICK_RATE = 38,
 		 M_WARNING_FILE	= 72,
-		 M_SPRINT = 105
+		 M_SPRINT = 106
 
 constant C_MY_ROUTINE = 1,
 		 C_USER_ROUTINE = 2,

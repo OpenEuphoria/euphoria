@@ -112,7 +112,7 @@ void Concat_N(object_ptr target, object_ptr  source, int n);
 object EGetEnv(object name);
 
 object EPrintf(object file_no, object format_obj, object values);
-void StdPrint(int fn, object a, int new_lines);
+void StdPrint(object fn, object a, int new_lines);
 void EPuts(object file_no, object obj);
 void Print(IFILE f, object a, int lines, int width, int init_chars, int pretty);
 int show_ascii_char(IFILE print_file, int iv);
@@ -122,7 +122,7 @@ object EGets(object file_no);
 void EClose(object a);
 int CheckFileNumber(object a);
 int NumberOpen();
-void key_gets(char *input_string);
+void key_gets(char *input_string, int buffsize);
 
 IFILE which_file(object a, int mode);
 void MakeCString(char *s, object pobj, int slen);
@@ -224,6 +224,7 @@ object e_floor(object a);  // not used anymore
 int memcopy( void *dest, size_t avail, void *src, size_t len);
 
 object eu_sizeof( object data_type );
+int getKBchar();
 
 #if INTPTR_MAX == INT32_MAX
 #define CALLBACK_POINTER 0x12345678

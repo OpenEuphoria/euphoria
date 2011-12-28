@@ -82,7 +82,6 @@ export procedure intoptions()
 	if length(m:get(opts, cmdline:EXTRAS)) = 0 and not repl then
 		show_banner()
 		ShowMsg(2, 249)
-		show_help( opts_array )
 
 		if not batch_job and not test_only then
 			maybe_any_key(pause_msg)

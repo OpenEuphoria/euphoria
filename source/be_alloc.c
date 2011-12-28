@@ -22,6 +22,11 @@
 /******************/
 /* Included files */
 /******************/
+#include <stdint.h>
+#if defined(EWINDOWS) && INTPTR_MAX == INT64_MAX
+// MSVCRT doesn't handle long double output correctly
+#define __USE_MINGW_ANSI_STDIO 1
+#endif
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -646,10 +651,10 @@ void EFree(char *p)
 	free(p);
 }
 
-char *ERealloc(char *orig, unsigned long newsize)
+char *ERealloc(char *orig, uintptr_t newsize)
 {
 	char *newadr;
-	unsigned long oldsize;
+	uintptr_t oldsize;
 	int res;
 
 	newadr = EMalloc(newsize);
@@ -874,6 +879,30 @@ object NewString(char *s)
 	return NewSequence(s, strlen(s));
 }
 
+object NewPreallocSeq(intptr_t size, object_ptr Objset)
+/* make a new sequence with a single reference count with the data preallocated.*/
+/* size is number of elements already in 'Objset'.
+   Note: The last element in Objset is given the value NOVALUE as an end marker. */
+{
+	register s1_ptr s1;
+
+	assert(size >= 0);
+	if ((unsigned long)size > MAX_SEQ_LEN) {
+		// Ensure it doesn't overflow
+		SpaceMessage();
+	}
+	s1 = (s1_ptr)EMalloc(sizeof(struct s1));
+	s1->ref = 1;
+	s1->base = Objset;
+	s1->length = size-1;
+	s1->postfill = 0; /* there may be some available but don't waste time */
+					  /* prepend assumes this is set to 0 */
+	s1->cleanup = 0;
+	s1->base[s1->length] = NOVALUE; // Ensure end marker is present.
+	s1->base--;  // point to "0th" element
+	return MAKE_SEQ(s1);
+}
+
 s1_ptr SequenceCopy(register s1_ptr a)
 /* take a single-ref copy of sequence 'a' */
 {
@@ -1023,3 +1052,35 @@ object NewDouble(eudouble d)
 	return MAKE_DBL(new_dbl);
 }
 
+#ifdef ESIMPLE_MALLOC
+char *ERealloc(char *orig, uintptr_t newsize)
+/* Enlarge or shrink a malloc'd block.
+   orig must not be NULL - not supported.
+   Return a pointer to a storage area of the desired size
+   containing all the original data.
+   I don't think a shrink could ever become an expansion + copy
+   by accident, but newsize might be less than the current size! */
+{
+	char *q;
+
+	// make a smaller block
+	q = realloc(orig, newsize);
+
+	if (q == NULL) {
+		SpaceMessage();
+	}
+
+	return q;
+}
+
+char *EMalloc(uintptr_t nbytes)
+/* storage allocator */
+/* Always returns a pointer that has 8-byte alignment (essential for our
+   internal representation of an object). */
+{
+	char * p = malloc(nbytes);
+	if (p == NULL)
+		SpaceMessage();
+	return p;
+}
+#endif

@@ -1,6 +1,11 @@
+
+#include <stdint.h>
+#if defined(EWINDOWS) && INTPTR_MAX == INT64_MAX
+// MSVCRT doesn't handle long double output correctly
+#define __USE_MINGW_ANSI_STDIO 1
+#endif
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 
 #ifdef EWINDOWS
 
@@ -69,11 +74,11 @@ void ExternalDebugScreen(){
 }
 
 void ExternalEraseSymbol( symtab_ptr sym ){
-	((void (*)())UserEraseSymbol)( box_ptr( sym ) );
+	((void (*)())UserEraseSymbol)( box_ptr( (uintptr_t)sym ) );
 }
 
 void ExternalErasePrivates( symtab_ptr proc_sym ){
-	((void (*)())UserErasePrivates)( box_ptr( proc_sym ) );
+	((void (*)())UserErasePrivates)( box_ptr( (uintptr_t)proc_sym ) );
 }
 
 // debugger interface

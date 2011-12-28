@@ -152,6 +152,7 @@ ifndef LIBRARY_NAME
 		LIBRARY_NAME=eu.a
 	endif
 endif
+
 MKVER=$(BUILDDIR)/mkver$(HOST_EXE_EXT)
 EBACKENDU=eub$(EXE_EXT)
 EBACKENDC=eub$(EXE_EXT)
@@ -431,7 +432,7 @@ debug-shared-library : builddirs
 	$(MAKE) $(BUILDDIR)/$(EECUSODBGA) OBJDIR=libobjdbg-fPIC ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE) FPIC=-fPIC LIBRARY_NAME=$(EECUSODBGA)
 
 $(BUILDDIR)/$(LIBRARY_NAME) : $(EU_LIB_OBJECTS)
-	ar -rc $(BUILDDIR)/$(LIBRARY_NAME) $(EU_LIB_OBJECTS)
+	$(CC_PREFIX)ar -rc $(BUILDDIR)/$(LIBRARY_NAME) $(EU_LIB_OBJECTS)
 	$(ECHO) $(MAKEARGS)
 
 builddirs : $(BUILD_DIRS)
@@ -712,7 +713,9 @@ test :
 		-ec "$(CYPBUILDDIR)/$(EECU)" \
 		-eubind "$(CYPBUILDDIR)/$(EUBIND)" -eub $(CYPBUILDDIR)/$(EBACKENDC) \
 		-lib "$(CYPBUILDDIR)/$(LIBRARY_NAME)" \
-		$(TESTFILE)
+		-log $(TESTFILE) ; \
+	$(EXE) -i ../include ../source/eutest.ex -process-log > $(CYPBUILDDIR)/test-report.txt ; \
+	$(EXE) -i ../include ../source/eutest.ex -process-log -html > $(CYPBUILDDIR)/test-report.html	
 	cd ../tests && sh check_diffs.sh
 
 testeu : 
@@ -758,6 +761,7 @@ endif
 
 install :
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria
+	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria/debug
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/std/win32
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/std/net
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/langwar
@@ -791,7 +795,8 @@ endif
 	install ../include/std/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std
 	install ../include/std/net/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std/net
 	install ../include/std/win32/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std/win32
-	install ../include/euphoria/*  $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria
+	install ../include/euphoria/*.e  $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria
+	install ../include/euphoria/debug/*.e  $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria
 	install ../include/euphoria.h $(DESTDIR)$(PREFIX)/share/euphoria/include
 	install ../demo/*.e* $(DESTDIR)$(PREFIX)/share/euphoria/demo
 	install ../demo/bench/* $(DESTDIR)$(PREFIX)/share/euphoria/demo/bench 
@@ -998,9 +1003,9 @@ depend :
 # The dependencies below are automatically generated using the depend target above.
 # DO NOT DELETE
 
-$(BUILDDIR)/intobj/back/be_alloc.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/intobj/back/be_alloc.o: execute.h reswords.h be_runtime.h
-$(BUILDDIR)/intobj/back/be_alloc.o: be_alloc.h
+$(BUILDDIR)/intobj/back/be_alloc.o: be_alloc.h  alldefs.h global.h object.h symtab.h
+$(BUILDDIR)/intobj/back/be_alloc.o: be_alloc.h  execute.h reswords.h be_runtime.h
+$(BUILDDIR)/intobj/back/be_alloc.o: be_alloc.h  be_alloc.h
 $(BUILDDIR)/intobj/back/be_callc.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/intobj/back/be_callc.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/intobj/back/be_callc.o: be_machine.h be_alloc.h
@@ -1032,9 +1037,9 @@ $(BUILDDIR)/intobj/back/be_main.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/intobj/back/be_main.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/intobj/back/be_main.o: be_execute.h be_alloc.h be_rterror.h
 $(BUILDDIR)/intobj/back/be_main.o: be_w.h
-$(BUILDDIR)/intobj/back/be_pcre.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/intobj/back/be_pcre.o: execute.h reswords.h be_alloc.h
-$(BUILDDIR)/intobj/back/be_pcre.o: be_runtime.h be_pcre.h pcre/pcre.h
+$(BUILDDIR)/intobj/back/be_pcre.o: be_alloc.h  alldefs.h global.h object.h symtab.h
+$(BUILDDIR)/intobj/back/be_pcre.o: be_alloc.h  execute.h reswords.h be_alloc.h
+$(BUILDDIR)/intobj/back/be_pcre.o: be_alloc.h  be_runtime.h be_pcre.h pcre/pcre.h
 $(BUILDDIR)/intobj/back/be_pcre.o: be_machine.h
 $(BUILDDIR)/intobj/back/be_rterror.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/intobj/back/be_rterror.o: execute.h reswords.h be_rterror.h
@@ -1060,14 +1065,14 @@ $(BUILDDIR)/intobj/back/be_task.o: global.h object.h symtab.h execute.h
 $(BUILDDIR)/intobj/back/be_task.o: reswords.h be_runtime.h be_task.h
 $(BUILDDIR)/intobj/back/be_task.o: be_alloc.h be_machine.h be_execute.h
 $(BUILDDIR)/intobj/back/be_task.o: be_symtab.h alldefs.h
-$(BUILDDIR)/intobj/back/be_w.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/intobj/back/be_w.o: execute.h reswords.h be_w.h be_machine.h
-$(BUILDDIR)/intobj/back/be_w.o: be_runtime.h be_rterror.h be_alloc.h
+$(BUILDDIR)/intobj/back/be_w.o: be_alloc.h  alldefs.h global.h object.h symtab.h
+$(BUILDDIR)/intobj/back/be_w.o: be_alloc.h  execute.h reswords.h be_w.h be_machine.h
+$(BUILDDIR)/intobj/back/be_w.o: be_alloc.h  be_runtime.h be_rterror.h be_alloc.h
 $(BUILDDIR)/intobj/back/rbt.o: rbt.h
 
-$(BUILDDIR)/transobj/back/be_alloc.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/transobj/back/be_alloc.o: execute.h reswords.h be_runtime.h
-$(BUILDDIR)/transobj/back/be_alloc.o: be_alloc.h
+$(BUILDDIR)/transobj/back/be_alloc.o: be_alloc.h  alldefs.h global.h object.h symtab.h
+$(BUILDDIR)/transobj/back/be_alloc.o: be_alloc.h  execute.h reswords.h be_runtime.h
+$(BUILDDIR)/transobj/back/be_alloc.o: be_alloc.h  be_alloc.h
 $(BUILDDIR)/transobj/back/be_callc.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/transobj/back/be_callc.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/transobj/back/be_callc.o: be_machine.h be_alloc.h
@@ -1100,9 +1105,9 @@ $(BUILDDIR)/transobj/back/be_main.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/transobj/back/be_main.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/transobj/back/be_main.o: be_execute.h be_alloc.h be_rterror.h
 $(BUILDDIR)/transobj/back/be_main.o: be_w.h
-$(BUILDDIR)/transobj/back/be_pcre.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/transobj/back/be_pcre.o: execute.h reswords.h be_alloc.h
-$(BUILDDIR)/transobj/back/be_pcre.o: be_runtime.h be_pcre.h pcre/pcre.h
+$(BUILDDIR)/transobj/back/be_pcre.o: be_alloc.h  alldefs.h global.h object.h symtab.h
+$(BUILDDIR)/transobj/back/be_pcre.o: be_alloc.h  execute.h reswords.h be_alloc.h
+$(BUILDDIR)/transobj/back/be_pcre.o: be_alloc.h  be_runtime.h be_pcre.h pcre/pcre.h
 $(BUILDDIR)/transobj/back/be_pcre.o: be_machine.h
 $(BUILDDIR)/transobj/back/be_rterror.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/transobj/back/be_rterror.o: execute.h reswords.h be_rterror.h
@@ -1129,14 +1134,14 @@ $(BUILDDIR)/transobj/back/be_task.o: global.h object.h symtab.h execute.h
 $(BUILDDIR)/transobj/back/be_task.o: reswords.h be_runtime.h be_task.h
 $(BUILDDIR)/transobj/back/be_task.o: be_alloc.h be_machine.h be_execute.h
 $(BUILDDIR)/transobj/back/be_task.o: be_symtab.h alldefs.h
-$(BUILDDIR)/transobj/back/be_w.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/transobj/back/be_w.o: execute.h reswords.h be_w.h be_machine.h
-$(BUILDDIR)/transobj/back/be_w.o: be_runtime.h be_rterror.h be_alloc.h
+$(BUILDDIR)/transobj/back/be_w.o: be_alloc.h  alldefs.h global.h object.h symtab.h
+$(BUILDDIR)/transobj/back/be_w.o: be_alloc.h  execute.h reswords.h be_w.h be_machine.h
+$(BUILDDIR)/transobj/back/be_w.o: be_alloc.h  be_runtime.h be_rterror.h be_alloc.h
 $(BUILDDIR)/transobj/back/rbt.o: rbt.h
 
-$(BUILDDIR)/backobj/back/be_alloc.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/backobj/back/be_alloc.o: execute.h reswords.h be_runtime.h
-$(BUILDDIR)/backobj/back/be_alloc.o: be_alloc.h
+$(BUILDDIR)/backobj/back/be_alloc.o: be_alloc.h  alldefs.h global.h object.h symtab.h
+$(BUILDDIR)/backobj/back/be_alloc.o: be_alloc.h  execute.h reswords.h be_runtime.h
+$(BUILDDIR)/backobj/back/be_alloc.o: be_alloc.h  be_alloc.h
 $(BUILDDIR)/backobj/back/be_callc.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/backobj/back/be_callc.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/backobj/back/be_callc.o: be_machine.h be_alloc.h
@@ -1168,9 +1173,9 @@ $(BUILDDIR)/backobj/back/be_main.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/backobj/back/be_main.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/backobj/back/be_main.o: be_execute.h be_alloc.h be_rterror.h
 $(BUILDDIR)/backobj/back/be_main.o: be_w.h
-$(BUILDDIR)/backobj/back/be_pcre.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/backobj/back/be_pcre.o: execute.h reswords.h be_alloc.h
-$(BUILDDIR)/backobj/back/be_pcre.o: be_runtime.h be_pcre.h pcre/pcre.h
+$(BUILDDIR)/backobj/back/be_pcre.o: be_alloc.h  alldefs.h global.h object.h symtab.h
+$(BUILDDIR)/backobj/back/be_pcre.o: be_alloc.h  execute.h reswords.h be_alloc.h
+$(BUILDDIR)/backobj/back/be_pcre.o: be_alloc.h  be_runtime.h be_pcre.h pcre/pcre.h
 $(BUILDDIR)/backobj/back/be_pcre.o: be_machine.h
 $(BUILDDIR)/backobj/back/be_rterror.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/backobj/back/be_rterror.o: execute.h reswords.h be_rterror.h
@@ -1196,14 +1201,14 @@ $(BUILDDIR)/backobj/back/be_task.o: global.h object.h symtab.h execute.h
 $(BUILDDIR)/backobj/back/be_task.o: reswords.h be_runtime.h be_task.h
 $(BUILDDIR)/backobj/back/be_task.o: be_alloc.h be_machine.h be_execute.h
 $(BUILDDIR)/backobj/back/be_task.o: be_symtab.h alldefs.h
-$(BUILDDIR)/backobj/back/be_w.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/backobj/back/be_w.o: execute.h reswords.h be_w.h be_machine.h
-$(BUILDDIR)/backobj/back/be_w.o: be_runtime.h be_rterror.h be_alloc.h
+$(BUILDDIR)/backobj/back/be_w.o: be_alloc.h  alldefs.h global.h object.h symtab.h
+$(BUILDDIR)/backobj/back/be_w.o: be_alloc.h  execute.h reswords.h be_w.h be_machine.h
+$(BUILDDIR)/backobj/back/be_w.o: be_alloc.h  be_runtime.h be_rterror.h be_alloc.h
 $(BUILDDIR)/backobj/back/rbt.o: rbt.h
 
-$(BUILDDIR)/libobj/back/be_alloc.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/libobj/back/be_alloc.o: execute.h reswords.h be_runtime.h
-$(BUILDDIR)/libobj/back/be_alloc.o: be_alloc.h
+$(BUILDDIR)/libobj/back/be_alloc.o: be_alloc.h  alldefs.h global.h object.h symtab.h
+$(BUILDDIR)/libobj/back/be_alloc.o: be_alloc.h  execute.h reswords.h be_runtime.h
+$(BUILDDIR)/libobj/back/be_alloc.o: be_alloc.h  be_alloc.h
 $(BUILDDIR)/libobj/back/be_callc.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/libobj/back/be_callc.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/libobj/back/be_callc.o: be_machine.h be_alloc.h
@@ -1235,9 +1240,9 @@ $(BUILDDIR)/libobj/back/be_main.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/libobj/back/be_main.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/libobj/back/be_main.o: be_execute.h be_alloc.h be_rterror.h
 $(BUILDDIR)/libobj/back/be_main.o: be_w.h
-$(BUILDDIR)/libobj/back/be_pcre.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/libobj/back/be_pcre.o: execute.h reswords.h be_alloc.h
-$(BUILDDIR)/libobj/back/be_pcre.o: be_runtime.h be_pcre.h pcre/pcre.h
+$(BUILDDIR)/libobj/back/be_pcre.o: be_alloc.h  alldefs.h global.h object.h symtab.h
+$(BUILDDIR)/libobj/back/be_pcre.o: be_alloc.h  execute.h reswords.h be_alloc.h
+$(BUILDDIR)/libobj/back/be_pcre.o: be_alloc.h  be_runtime.h be_pcre.h pcre/pcre.h
 $(BUILDDIR)/libobj/back/be_pcre.o: be_machine.h
 $(BUILDDIR)/libobj/back/be_rterror.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/libobj/back/be_rterror.o: execute.h reswords.h be_rterror.h
@@ -1263,7 +1268,7 @@ $(BUILDDIR)/libobj/back/be_task.o: global.h object.h symtab.h execute.h
 $(BUILDDIR)/libobj/back/be_task.o: reswords.h be_runtime.h be_task.h
 $(BUILDDIR)/libobj/back/be_task.o: be_alloc.h be_machine.h be_execute.h
 $(BUILDDIR)/libobj/back/be_task.o: be_symtab.h alldefs.h
-$(BUILDDIR)/libobj/back/be_w.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/libobj/back/be_w.o: execute.h reswords.h be_w.h be_machine.h
-$(BUILDDIR)/libobj/back/be_w.o: be_runtime.h be_rterror.h be_alloc.h
+$(BUILDDIR)/libobj/back/be_w.o: be_alloc.h  alldefs.h global.h object.h symtab.h
+$(BUILDDIR)/libobj/back/be_w.o: be_alloc.h  execute.h reswords.h be_w.h be_machine.h
+$(BUILDDIR)/libobj/back/be_w.o: be_alloc.h  be_runtime.h be_rterror.h be_alloc.h
 $(BUILDDIR)/libobj/back/rbt.o: rbt.h

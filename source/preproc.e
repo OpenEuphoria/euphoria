@@ -10,6 +10,7 @@ include std/filesys.e
 include std/sequence.e
 include std/datetime.e as dt
 include std/dll.e
+include std/cmdline.e as cmdline
 
 include global.e
 include common.e
@@ -107,12 +108,11 @@ public function maybe_preprocess(sequence fname)
 		end if
 	end if
 	
-	sequence cmd = pp[PP_COMMAND]
 
-	if equal(fileext(cmd), SHARED_LIB_EXT) then
+	if equal(fileext(pp[PP_COMMAND]), SHARED_LIB_EXT) then
 		integer rid = pp[PP_RID]
 		if rid = -1 then
-			integer dll_id = open_dll(cmd)
+			integer dll_id = open_dll(pp[PP_COMMAND])
 			if dll_id = -1 then
 				CompileErr(sprintf("Preprocessor shared library '%s' could not be loaded\n",
 					{ pp[PP_COMMAND] }),,1)
@@ -135,15 +135,21 @@ public function maybe_preprocess(sequence fname)
 			Cleanup(1)
 		end if
 	else
-		if equal(fileext(cmd), "ex") then
-			cmd = "eui " & cmd
+		sequence public_cmd_args = {pp[PP_COMMAND]}
+		sequence cmd_args = {canonical_path(pp[PP_COMMAND],,TO_SHORT)}
+		
+		if equal(fileext(pp[PP_COMMAND]), "ex") then
+			public_cmd_args = { "eui" } & public_cmd_args
+			cmd_args = { "eui" } & cmd_args
 		end if
 
-		cmd &= sprintf(" -i %s -o %s %s", { fname, post_fname, pp[PP_PARAMS] })
-			
+		cmd_args &= { "-i", canonical_path(fname,,TO_SHORT), "-o", canonical_path(post_fname,,TO_SHORT) }
+		public_cmd_args &= { "-i", fname, "-o", post_fname }
+		sequence cmd = build_commandline( cmd_args ) & pp[PP_PARAMS]
+		sequence pcmd = build_commandline(public_cmd_args) & pp[PP_PARAMS]
 		integer result = system_exec(cmd, 2)
 		if result != 0 then
-			CompileErr(sprintf("Preprocessor command failed (%d): %s\n", { result, cmd } ),,1)
+			CompileErr(sprintf("Preprocessor command failed (%d): %s\n", { result, pcmd } ),,1)
 
 			Cleanup(1)
 		end if

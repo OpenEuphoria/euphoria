@@ -1,0 +1,179 @@
+t_c_good_err_file.e:3
+attempt to divide by 0 
+
+
+Global & Local Variables
+
+ /usr/share/euphoria/include/std/convert.e:
+    mem = 140791944
+    decimal_mark = 46'.'
+
+ /usr/share/euphoria/include/std/types.e:
+    Defined_Sets = {
+                     {98'b',99'c',100'd',102'f',103'g',104'h',106'j',107'k',
+108'l',109'm',110'n',112'p',113'q',114'r',115's',116't',118'v',119'w',120'x',
+121'y',122'z',66'B',67'C',68'D',70'F',71'G',72'H',74'J',75'K',76'L',77'M',
+78'N',80'P',81'Q',82'R',83'S',84'T',86'V',87'W',88'X',89'Y',90'Z'},
+                     {97'a',101'e',105'i',111'o',117'u',65'A',69'E',73'I',
+79'O',85'U'},
+                     {
+                       {48'0',57'9'},
+                       {65'A',70'F'},
+                       {97'a',102'f'}
+                     },
+                     {32' ',9,10,13,11,160},
+                     {
+                       {32' ',47'/'},
+                       {58':',63'?'},
+                       {91'[',96'`'},
+                       {123'{',126'~'}
+                     },
+                     {
+                       {32' ',126'~'}
+                     },
+                     {
+                       {32' ',126'~'},
+                       {32' ',32' '},
+                       {9,9},
+                       {10,10},
+                       {13,13},
+                       {8,8},
+                       {7,7}
+                     },
+                     {
+                       {97'a',122'z'}
+                     },
+                     {
+                       {65'A',90'Z'}
+                     },
+                     {
+                       {48'0',57'9'},
+                       {97'a',122'z'},
+                       {65'A',90'Z'}
+                     },
+                     {
+                       {48'0',57'9'},
+                       {97'a',122'z'},
+                       {65'A',90'Z'},
+                       {95'_',95'_'}
+                     },
+                     {
+                       {97'a',122'z'},
+                       {65'A',90'Z'}
+                     },
+                     {
+                       {0,127}
+                     },
+                     {
+                       {0,31},
+                       {127,127}
+                     },
+                     {
+                       {48'0',57'9'}
+                     },
+                     {
+                       {33'!',126'~'}
+                     },
+                     {
+                       {0,255}
+                     },
+                     {95'_'},
+                     {1,0}
+                   }
+
+ /usr/share/euphoria/include/std/machine.e:
+    FREE_ARRAY_RID = 1
+
+ /usr/share/euphoria/include/std/get.e:
+    input_file = <no value>
+    input_string = <no value>
+    string_next = <no value>
+    ch = <no value>
+    leading_whitespace = <no value>
+
+ /usr/share/euphoria/include/std/filesys.e:
+    InitCurDir = {47'/',104'h',111'o',109'm',101'e',47'/',109'm',97'a',116't',
+116't',47'/',101'e',117'u',47'/',114'r',100'd',115's',47'/',116't',101'e',
+115's',116't',115's',47'/',101'e',117'u',116't',101'e',115's',116't',47'/'}
+    file_counters = {}
+
+ /usr/share/euphoria/include/std/serialize.e:
+    mem0 = 140151840
+    mem1 = 140151841
+    mem2 = 140151842
+    mem3 = 140151843
+
+ /usr/share/euphoria/include/std/pretty.e:
+    pretty_end_col = <no value>
+    pretty_chars = <no value>
+    pretty_start_col = <no value>
+    pretty_level = <no value>
+    pretty_file = <no value>
+    pretty_ascii = <no value>
+    pretty_indent = <no value>
+    pretty_ascii_min = <no value>
+    pretty_ascii_max = <no value>
+    pretty_line_count = <no value>
+    pretty_line_max = <no value>
+    pretty_dots = <no value>
+    pretty_line_breaks = <no value>
+    pretty_printing = <no value>
+    pretty_fp_format = <no value>
+    pretty_int_format = <no value>
+    pretty_line = <no value>
+
+ /usr/share/euphoria/include/std/eds.e:
+    current_db = -1
+    current_table_pos = -1
+    current_table_name = {}
+    db_names = {}
+    db_file_nums = {}
+    db_lock_methods = {}
+    current_lock = 0
+    key_pointers = {}
+    key_cache = {}
+    cache_index = {}
+    caching_option = 1
+    void = <no value>
+    vLastErrors = {}
+    mem0 = 141361672
+    mem1 = 141361673
+    mem2 = 141361674
+    mem3 = 141361675
+    memseq = {141361672,4}
+
+ /usr/share/euphoria/include/std/text.e:
+    lower_case_SET = {}
+    upper_case_SET = {}
+    encoding_NAME = {65'A',83'S',67'C',73'I',73'I'}
+
+ /usr/share/euphoria/include/std/io.e:
+    mem0 = 142023112
+    mem1 = 142023113
+    mem2 = 142023114
+    mem3 = 142023115
+
+ /usr/share/euphoria/include/std/unittest.e:
+    time_start = 77851.59
+    time_test = 77851.59
+    test_count = 0
+    tests_passed = 0
+    tests_failed = 0
+    filename = {116't',95'_',99'c',95'_',103'g',111'o',111'o',100'd',95'_',
+101'e',114'r',114'r',95'_',102'f',105'i',108'l',101'e',46'.',101'e'}
+    verbose = 1
+    abort_on_fail = 0
+    wait_on_summary = 0
+    accumulate_on_summary = 0
+    logging = 0
+    log_fh = 0
+    cmd = {
+            {47'/',117'u',115's',114'r',47'/',98'b',105'i',110'n',47'/',
+101'e',117'u',105'i'},
+            {116't',95'_',99'c',95'_',103'g',111'o',111'o',100'd',95'_',
+101'e',114'r',114'r',95'_',102'f',105'i',108'l',101'e',46'.',101'e'}
+          }
+    i = 3
+    func (from inlined routine 'crash_routine') = <no value>
+
+

@@ -77,7 +77,7 @@
 #                                 either the test target or the testeu target.
 #
 # ex:
-# 	wmake testeu I_EXTRA="-D ETYPE_CHECK" TEST_EXTRA="-log"
+# 	wmake testeu I_EXTRA="-D ETYPE_CHECK" 
 #
 #       This tests using the interpreter with type checking on and writes the results to a log
 #       file.
@@ -428,7 +428,7 @@ OSFLAG=EWINDOWS
 LIBTARGET=$(BUILDDIR)\$(LIBRARY_NAME).lib
 CC = wcc386
 .ERASE
-COMMON_FLAGS = $(DEBUGFLAG) 
+COMMON_FLAGS = $(DEBUGFLAG) -DARCH=ix86
 FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s  /I$(TRUNKDIR) $(EREL_TYPE)
 BE_FLAGS = /ol /zp4 /d$(OSFLAG) /5r /dEWATCOM  /dEOW $(SETALIGN4) $(NOASSERT) $(HEAPCHECKFLAG) $(%ERUNTIME) $(EXTRACHECKFLAG) $(EXTRASTATSFLAG)  $(MEMFLAG) $(EREL_TYPE)
 
@@ -501,7 +501,7 @@ $(TRUNKDIR)\tests\ecp.dat : $(BUILDDIR)\ecp.dat
 testeu : .SYMBOLIC  $(TRUNKDIR)\tests\ecp.dat
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR)
-	-$(EUTEST) -i ..\include $(TEST_EXTRA) --nocheck -eui "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\eu.ex" -euc "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\ec.ex" $(TESTFILE)
+	-$(EUTEST) -i ..\include $(TEST_EXTRA) --nocheck -eui "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\eu.ex" -euc "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\ec.ex" $(LIST) $(TESTFILE)
 	cd ..\source
 
 !endif #EUPHORIA
@@ -509,7 +509,9 @@ testeu : .SYMBOLIC  $(TRUNKDIR)\tests\ecp.dat
 test : .SYMBOLIC $(TRUNKDIR)\tests\ecp.dat $(BUILDDIR)\eubind.exe $(FULLBUILDDIR)\eu.$(LIBEXT) $(BUILDDIR)\eub.exe
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR) 
-	$(EUTEST) $(TEST_EXTRA) $(VERBOSE_TESTS) -i ..\include -cc wat -eui $(FULLBUILDDIR)\eui.exe -euc $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -bind $(FULLBUILDDIR)\eubind.exe -eub $(BUILDDIR)\eub.exe $(TESTFILE)
+	-$(EUTEST) $(TEST_EXTRA) $(VERBOSE_TESTS) -i ..\include -cc wat -eui $(FULLBUILDDIR)\eui.exe -euc $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -bind $(FULLBUILDDIR)\eubind.exe -eub $(BUILDDIR)\eub.exe -log $(LIST) $(TESTFILE)
+	$(EUTEST) -process-log > $(BUILDDIR)/test-report.txt
+	$(EUTEST) -process-log -html > $(BUILDDIR)/test-report.html	
 	cd ..\source
 
 coverage : .SYMBOLIC code-page-db

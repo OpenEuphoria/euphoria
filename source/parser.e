@@ -20,6 +20,7 @@ include std/text.e
 include std/search.e
 include std/convert.e
 include std/filesys.e
+include std/sort.e
 
 include literal_set.e as literal_set
 include global.e
@@ -36,8 +37,9 @@ include c_out.e
 include block.e
 include keylist.e
 include coverage.e
+include msgtext.e
 
-constant M_SPRINT = 105
+constant M_SPRINT = 106
 constant UNDEFINED = -999
 constant DEFAULT_SAMPLE_SIZE = 25000  -- for time profile
 constant ASSIGN_OPS = {EQUALS, PLUS_EQUALS, MINUS_EQUALS, MULTIPLY_EQUALS,
@@ -885,8 +887,19 @@ procedure ParseArgs(symtab_index subsym)
 
 	  	tok = next_token()
 
-		if tok[T_ID] = COMMA then
+		if tok[T_ID] = QUESTION_MARK or tok[T_ID] = COMMA then
 			-- defaulted arg
+			
+			if tok[T_ID] = QUESTION_MARK then
+				tok = next_token()
+				if tok[T_ID] != RIGHT_ROUND and tok[T_ID] != COMMA then
+					CompileErr( 41 )
+				elsif tok[T_ID] = RIGHT_ROUND then
+					putback( tok )
+				end if
+			else
+				-- TODO: warning here?
+			end if
 			if SymTab[subsym][S_OPCODE] then
 				if atom(SymTab[subsym][S_CODE]) then
 					var_code = 0
@@ -915,6 +928,7 @@ procedure ParseArgs(symtab_index subsym)
 			private_list = append(private_list,name)
 			private_sym &= Top()
 			backed_up_tok = {tok} -- ????
+			
 
 		elsif tok[T_ID] != RIGHT_ROUND then
 			-- It's a real arg
@@ -938,7 +952,7 @@ procedure ParseArgs(symtab_index subsym)
 				putback( tok )
 			end if
 			tok = next_token()
-			if tok[T_ID] != COMMA then
+			if tok[T_ID] != COMMA and tok[T_ID] != QUESTION_MARK then
 				--
 		  		if tok[T_ID] = RIGHT_ROUND then
 		  			-- not as many actual args as formal args
@@ -1958,6 +1972,94 @@ procedure Assignment(token left_var)
 		end if
 	end if
 end procedure
+
+--**
+-- Automatic handling of returning multiple items.
+-- Only handles simple assignment.  No subs assignment!
+procedure Multi_assign()
+	
+	sequence lhs_syms = {}
+	sequence lhs_list = {} -- make sure we don't repeat anything
+	token tok
+	integer need_comma = 0
+	while tok[T_ID] != RIGHT_BRACE with entry do
+		
+		if need_comma then
+			putback( tok )
+			tok_match( COMMA )
+			tok = next_token()
+		end if
+		
+		if tok[T_ID] = QUESTION_MARK then
+			-- these will be ignored
+			lhs_syms &= 0
+		elsif tok[T_ID] = VARIABLE or tok[T_ID] = QUALIFIED_VARIABLE then
+			lhs_syms &= tok[T_SYM]
+			if SymTab[lhs_syms[$]][S_SCOPE] = SC_UNDEFINED then
+				lhs_list = append( lhs_list, sym_name( lhs_syms[$] ) )
+			else
+				lhs_list &= lhs_syms[$]
+			end if
+		else
+			CompileErr( 24 )
+		end if
+		
+		need_comma = 1
+	entry
+		tok = next_token()
+	end while
+	
+	-- make sure we have no duplicates in the LHS
+	if length( lhs_list ) != length( remove_dups( sort( lhs_list ) ) ) then
+		CompileErr( DUPLICATE_MULTI_ASSIGN )
+	end if
+	tok_match( EQUALS )
+	
+	-- Get the RHS:
+	Expr()
+	
+	symtab_index temp_sym = Pop()
+	sequence temps = pop_temps()
+	if TRANSLATE then
+		emit_opnd( temp_sym )
+		emit_op( REF_TEMP )
+	end if
+	-- super simple...explicit subscript and assign...
+	for i = 1 to length( lhs_syms ) do
+		if lhs_syms[i] then
+			if SymTab[lhs_syms[i]][S_SCOPE] = SC_UNDEFINED then
+				Forward_var( { VARIABLE, lhs_syms[i]}, ,ASSIGN )
+				lhs_syms[i] = Pop()
+			else
+				SymTab[lhs_syms[i]][S_USAGE] = or_bits(SymTab[lhs_syms[i]][S_USAGE], U_WRITTEN)
+				
+			end if
+			emit_opnd( lhs_syms[i] )
+			
+			emit_opnd( temp_sym )
+			emit_opnd( NewIntSym( i ) )
+			emit_op( RHS_SUBS )
+			integer len = length( Code )
+			if Code[len] = temp_sym then
+				-- RHS_SUBS may try to NOVALUE_TEMP our temp_sym...we don't want that
+				Code = remove( Code, len - 1, len )
+			end if
+			emit_op( ASSIGN )
+			
+			TypeCheck( lhs_syms[i] )
+			
+		end if
+	end for
+	
+	push_temps( temps )
+	flush_temps()
+	
+	if TRANSLATE then
+		emit_opnd( temp_sym )
+		emit_op( DEREF_TEMP )
+	end if
+end procedure
+
 
 procedure Return_statement()
 -- Parse a return statement
@@ -4046,9 +4148,10 @@ procedure Statement_list()
 					Global_declaration( tok[T_SYM], SC_LOCAL )
 				end if
 			end if
-
-
-
+		elsif id = LEFT_BRACE then
+			StartSourceLine( TRUE )
+			Multi_assign()
+			
 		else
 			if id = ELSE then
 				if length(if_stack) = 0 then
@@ -5077,6 +5180,10 @@ export procedure real_parser(integer nested)
 		elsif id = SWITCH then
 			StartSourceLine(TRUE)
 			Switch_statement()
+		
+		elsif id = LEFT_BRACE then
+			StartSourceLine( TRUE )
+			Multi_assign()
 
 		elsif id = ILLEGAL_CHAR then
 			CompileErr(102)

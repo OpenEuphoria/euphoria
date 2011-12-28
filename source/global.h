@@ -22,9 +22,14 @@ typedef signed   char   schar;
 #include <stdarg.h>
 
 #define _LARGEFILE64_SOURCE
-
-#include <stdio.h>
 #include <stdint.h>
+
+#if defined(EWINDOWS) && INTPTR_MAX == INT64_MAX
+// MSVCRT doesn't handle long double output correctly
+#define __USE_MINGW_ANSI_STDIO 1
+#endif
+#include <stdio.h>
+
 
 #include "object.h"
 #include "symtab.h"
@@ -184,11 +189,18 @@ struct videoconfig {
 #  define _BROWN 3
 #  define _CYAN 6
 #  define _YELLOW 11
-struct rccoord {
+#endif
+
+struct eu_rccoord {
 	int row;
 	int col;
+	int winwidth;
+	int winheight;
+	int bufwidth;
+	int bufheight;
+	short attrs;
 };
-#endif
+
 
 struct videoconfigEx {
 	int screenrows;
@@ -252,11 +264,5 @@ struct EuViewPort
 	int vars_per_line;  	/* number of variables slots per line */
 	int display_size;   	/* number of slots for variables */
 };
-
-#ifdef EWINDOWS
-	int wingetch();
-	int MyReadConsoleChar();
-	void EClearLines(int first_line, int last_line, int len, WORD attributes);
-#endif
 
 #endif // H_GLOBAL

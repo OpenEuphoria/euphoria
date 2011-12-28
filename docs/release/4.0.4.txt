@@ -18,7 +18,22 @@
 * When there is a user supplied library, the translator does not abort when the library doesn't exist and one of 
   ##-nobuild##, ##-makefile## or ##-makefile-partial## is used
 * [[ticket:728]] Fix sequence slice error when invalid command line arguments are passed to euphoria. 
+* [[ticket:730]] Fixed initialization of private variables.  The translator incorrectly assumed that all
+  variables started as integers to prevent them from being dereferenced.
+* [[ticket:722]] Use backslashes for the filesystem seperator when passing 
+  to Watcom even if the supplied data uses forward slashes.
+* [[ticket:611]] an no-longer existing install.doc was being referenced by a
+  an install script.  This has been updated.
+* [[ticket:683]] [[ticket:685]] fixes for building the interpreter itself 
+  for MinGW 
+* [[ticket:732]] fixes in building console less programs using MinGW
+* [[ticket:721]] fixes drive letter case descrepency between various functions defined in sys/filesys.e
 
 === Enhancements
 
+* [[ticket:611]] A more complete explaination of how to install has been added to the documentation.
+* [[ticekt:727]] The interpreter and translator no longer show you all of their options when you make
+ a mistake at the command line.
+* [[ticket:727]] cmd_parse() can take a new option NO_HELP_ON_ERROR, which means it will not display all
+  of the options on error.
 

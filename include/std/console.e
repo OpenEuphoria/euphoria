@@ -9,6 +9,7 @@ include std/get.e
 include std/pretty.e
 include std/text.e
 include std/types.e
+include std/map.e
 
 public include std/graphcst.e
 
@@ -23,6 +24,7 @@ constant
 	M_GET_SCREEN_CHAR = 58,
 	M_PUT_SCREEN_CHAR = 59,
 	M_HAS_CONSOLE = 99,
+	M_KEY_CODES   = 100,
 	$
 
 
@@ -51,7 +53,662 @@ constant
 --
 
 public function has_console()
-	return machine_func(M_HAS_CONSOLE)
+	return machine_func(M_HAS_CONSOLE, 0)
+end function
+
+
+--**
+-- Gets and sets the keyboard codes used internally by Euphoria.
+--
+-- Parameters:
+--  # ##codes## : Either a sequence of exactly 256 integers or an atom (the default).
+--
+-- Returns:
+--   A sequence of the current 256 keyboard codes, prior to any changes that
+--   this function might make.
+--
+-- Comments:
+--   When ##codes## is a atom then no change to the existing codes is made, otherwise
+--   the set of 256 integers in ##codes## completely replaces the existing codes.
+--
+-- Examples:
+-- <eucode>
+-- include std/console.e
+-- sequence kc
+-- kc = key_codes() -- Get existing set.
+-- kc[KC_LEFT] = 263 -- Change the code for the left-arrow press.
+-- key_codes(kc) -- Set the new codes.
+-- </eucode>
+--
+
+public function key_codes(object codes = 0)
+	return machine_func(M_KEY_CODES, codes)
+end function
+
+
+--****
+-- === Key Code names.
+--  These are the names of the index values for each of the 256 key code values.
+-- 
+--
+-- See Also:
+--   [[:key_codes]]
+public constant
+	KC_LBUTTON  = #01 + 1, --  Left mouse button
+	KC_RBUTTON  = #02 + 1, --  Right mouse button
+	KC_CANCEL  = #03 + 1, --  Control-break processing
+	KC_MBUTTON  = #04 + 1, --  Middle mouse button (three-button mouse)
+	KC_XBUTTON1  = #05 + 1, --  Windows 2000/XP: X1 mouse button
+	KC_XBUTTON2  = #06 + 1, --  Windows 2000/XP: X2 mouse button
+	KC_BACK  = #08 + 1, --  BACKSPACE key
+	KC_TAB  = #09 + 1, --  TAB key
+	KC_CLEAR  = #0C + 1, --  CLEAR key NUMPAD-5
+	KC_RETURN  = #0D + 1, --  ENTER key NUMPAD-ENTER
+	KC_SHIFT  = #10 + 1, --  SHIFT key
+	KC_CONTROL  = #11 + 1, --  CTRL key
+	KC_MENU  = #12 + 1, --  ALT key
+	KC_PAUSE  = #13 + 1, --  PAUSE key
+	KC_CAPITAL  = #14 + 1, --  CAPS LOCK key
+	KC_KANA  = #15 + 1, --  Input Method Editor (IME)  Kana mode
+	KC_JUNJA  = #17 + 1, --  IME Junja mode
+	KC_FINAL  = #18 + 1, --  IME final mode
+	KC_HANJA  = #19 + 1, --  IME Hanja mode
+	KC_ESCAPE  = #1B + 1, --  ESC key
+	KC_CONVERT  = #1C + 1, --  IME convert
+	KC_NONCONVERT  = #1D + 1, --  IME nonconvert
+	KC_ACCEPT  = #1E + 1, --  IME accept
+	KC_MODECHANGE  = #1F + 1, --  IME mode change request
+	KC_SPACE  = #20 + 1, --  SPACEBAR
+	KC_PRIOR  = #21 + 1, --  PAGE UP key
+	KC_NEXT  = #22 + 1, --  PAGE DOWN key
+	KC_END  = #23 + 1, --  END key
+	KC_HOME  = #24 + 1, --  HOME key
+	KC_LEFT  = #25 + 1, --  LEFT ARROW key
+	KC_UP  = #26 + 1, --  UP ARROW key
+	KC_RIGHT  = #27 + 1, --  RIGHT ARROW key
+	KC_DOWN  = #28 + 1, --  DOWN ARROW key
+	KC_SELECT  = #29 + 1, --  SELECT key
+	KC_PRINT  = #2A + 1, --  PRINT key
+	KC_EXECUTE  = #2B + 1, --  EXECUTE key
+	KC_SNAPSHOT  = #2C + 1, --  PRINT SCREEN key
+	KC_INSERT  = #2D + 1, --  INS key
+	KC_DELETE  = #2E + 1, --  DEL key
+	KC_HELP  = #2F + 1, --  HELP key
+	KC_LWIN  = #5B + 1, --  Left Windows key (Microsoft Natural keyboard)
+	KC_RWIN  = #5C + 1, --  Right Windows key (Natural keyboard)
+	KC_APPS  = #5D + 1, --  Applications key (Natural keyboard)
+	KC_SLEEP  = #5F + 1, --  Computer Sleep key
+	KC_NUMPAD0  = #60 + 1, --  Numeric keypad 0 key
+	KC_NUMPAD1  = #61 + 1, --  Numeric keypad 1 key
+	KC_NUMPAD2  = #62 + 1, --  Numeric keypad 2 key
+	KC_NUMPAD3  = #63 + 1, --  Numeric keypad 3 key
+	KC_NUMPAD4  = #64 + 1, --  Numeric keypad 4 key
+	KC_NUMPAD5  = #65 + 1, --  Numeric keypad 5 key
+	KC_NUMPAD6  = #66 + 1, --  Numeric keypad 6 key
+	KC_NUMPAD7  = #67 + 1, --  Numeric keypad 7 key
+	KC_NUMPAD8  = #68 + 1, --  Numeric keypad 8 key
+	KC_NUMPAD9  = #69 + 1, --  Numeric keypad 9 key
+	KC_MULTIPLY  = #6A + 1, --  Multiply key NUMPAD
+	KC_ADD  = #6B + 1, --  Add key NUMPAD
+	KC_SEPARATOR  = #6C + 1, --  Separator key
+	KC_SUBTRACT  = #6D + 1, --  Subtract key NUMPAD
+	KC_DECIMAL  = #6E + 1, --  Decimal key NUMPAD
+	KC_DIVIDE  = #6F + 1, --  Divide key NUMPAD
+	KC_F1  = #70 + 1, --  F1 key
+	KC_F2  = #71 + 1, --  F2 key
+	KC_F3  = #72 + 1, --  F3 key
+	KC_F4  = #73 + 1, --  F4 key
+	KC_F5  = #74 + 1, --  F5 key
+	KC_F6  = #75 + 1, --  F6 key
+	KC_F7  = #76 + 1, --  F7 key
+	KC_F8  = #77 + 1, --  F8 key
+	KC_F9  = #78 + 1, --  F9 key
+	KC_F10  = #79 + 1, --  F10 key
+	KC_F11  = #7A + 1, --  F11 key
+	KC_F12  = #7B + 1, --  F12 key
+	KC_F13  = #7C + 1, --  F13 key
+	KC_F14  = #7D + 1, --  F14 key
+	KC_F15  = #7E + 1, --  F15 key
+	KC_F16  = #7F + 1, --  F16 key
+	KC_F17  = #80 + 1, --  F17 key
+	KC_F18  = #81 + 1, --  F18 key
+	KC_F19  = #82 + 1, --  F19 key
+	KC_F20  = #83 + 1, --  F20 key
+	KC_F21  = #84 + 1, --  F21 key
+	KC_F22  = #85 + 1, --  F22 key
+	KC_F23  = #86 + 1, --  F23 key
+	KC_F24  = #87 + 1, --  F24 key
+	KC_NUMLOCK  = #90 + 1, --  NUM LOCK key
+	KC_SCROLL  = #91 + 1, --  SCROLL LOCK key
+	KC_LSHIFT  = #A0 + 1, --  Left SHIFT key
+	KC_RSHIFT  = #A1 + 1, --  Right SHIFT key
+	KC_LCONTROL  = #A2 + 1, --  Left CONTROL key
+	KC_RCONTROL  = #A3 + 1, --  Right CONTROL key
+	KC_LMENU  = #A4 + 1, --  Left MENU key
+	KC_RMENU  = #A5 + 1, --  Right MENU key
+	KC_BROWSER_BACK  = #A6 + 1, --  Windows 2000/XP: Browser Back key
+	KC_BROWSER_FORWARD  = #A7 + 1, --  Windows 2000/XP: Browser Forward key
+	KC_BROWSER_REFRESH  = #A8 + 1, --  Windows 2000/XP: Browser Refresh key
+	KC_BROWSER_STOP  = #A9 + 1, --  Windows 2000/XP: Browser Stop key
+	KC_BROWSER_SEARCH  = #AA + 1, --  Windows 2000/XP: Browser Search key 
+	KC_BROWSER_FAVORITES  = #AB + 1, --  Windows 2000/XP: Browser Favorites key
+	KC_BROWSER_HOME  = #AC + 1, --  Windows 2000/XP: Browser Start and Home key
+	KC_VOLUME_MUTE  = #AD + 1, --  Windows 2000/XP: Volume Mute key
+	KC_VOLUME_DOWN  = #AE + 1, --  Windows 2000/XP: Volume Down key
+	KC_VOLUME_UP  = #AF + 1, --  Windows 2000/XP: Volume Up key
+	KC_MEDIA_NEXT_TRACK  = #B0 + 1, --  Windows 2000/XP: Next Track key
+	KC_MEDIA_PREV_TRACK  = #B1 + 1, --  Windows 2000/XP: Previous Track key
+	KC_MEDIA_STOP  = #B2 + 1, --  Windows 2000/XP: Stop Media key
+	KC_MEDIA_PLAY_PAUSE  = #B3 + 1, --  Windows 2000/XP: Play/Pause Media key
+	KC_LAUNCH_MAIL  = #B4 + 1, --  Windows 2000/XP: Start Mail key
+	KC_LAUNCH_MEDIA_SELECT  = #B5 + 1, --  Windows 2000/XP: Select Media key
+	KC_LAUNCH_APP1  = #B6 + 1, --  Windows 2000/XP: Start Application 1 key
+	KC_LAUNCH_APP2  = #B7 + 1, --  Windows 2000/XP: Start Application 2 key
+	KC_OEM_1  = #BA + 1, --  Used for miscellaneous characters; it can vary by keyboard. Windows 2000/XP: For the US standard keyboard, the ';:' key 
+	KC_OEM_PLUS  = #BB + 1, --  Windows 2000/XP: For any country/region, the '+' key
+	KC_OEM_COMMA  = #BC + 1, --  Windows 2000/XP: For any country/region, the ',' key
+	KC_OEM_MINUS  = #BD + 1, --  Windows 2000/XP: For any country/region, the '-' key
+	KC_OEM_PERIOD  = #BE + 1, --  Windows 2000/XP: For any country/region, the '.' key
+	KC_OEM_2  = #BF + 1, --  Used for miscellaneous characters; it can vary by keyboard. Windows 2000/XP: For the US standard keyboard, the '/-1' key 
+	KC_OEM_3  = #C0 + 1, --  Used for miscellaneous characters; it can vary by keyboard. Windows 2000/XP: For the US standard keyboard, the '`~' key 
+	KC_OEM_4  = #DB + 1, --  Used for miscellaneous characters; it can vary by keyboard. Windows 2000/XP: For the US standard keyboard, the '[{' key
+	KC_OEM_5  = #DC + 1, --  Used for miscellaneous characters; it can vary by keyboard. Windows 2000/XP: For the US standard keyboard, the '\|' key
+	KC_OEM_6  = #DD + 1, --  Used for miscellaneous characters; it can vary by keyboard. Windows 2000/XP: For the US standard keyboard, the ']}' key
+	KC_OEM_7  = #DE + 1, --  Used for miscellaneous characters; it can vary by keyboard. Windows 2000/XP: For the US standard keyboard, the 'single-quote/double-quote' key
+	KC_OEM_8  = #DF + 1, --  Used for miscellaneous characters; it can vary by keyboard.
+	KC_OEM_102  = #E2 + 1, --  Windows 2000/XP: Either the angle bracket key or the backslash key on the RT 102-key keyboard
+	KC_PROCESSKEY  = #E5 + 1, --  Windows 95/98/Me, Windows NT 4.0, Windows 2000/XP: IME PROCESS key
+	KC_PACKET  = #E7 + 1, --  Windows 2000/XP: Used to pass Unicode characters as if they were keystrokes. The KC_PACKET key is the low word of a 32-bit Virtual Key value used for non-keyboard input methods. For more information, see Remark in KEYBDINPUT, SendInput, WM_KEYDOWN, and WM_KEYUP
+	KC_ATTN  = #F6 + 1, --  Attn key
+	KC_CRSEL  = #F7 + 1, --  CrSel key
+	KC_EXSEL  = #F8 + 1, --  ExSel key
+	KC_EREOF  = #F9 + 1, --  Erase EOF key
+	KC_PLAY  = #FA + 1, --  Play key
+	KC_ZOOM  = #FB + 1, --  Zoom key
+	KC_NONAME  = #FC + 1, --  Reserved 
+	KC_PA1  = #FD + 1, --  PA1 key
+	KC_OEM_CLEAR  = #FE + 1, --  Clear key
+	KM_CONTROL = #1000, -- Ctrl modifier
+	KM_SHIFT   = #2000, -- Shift modifier
+	KM_ALT     = #4000, -- Alt modifier
+	$
+
+--**
+-- Change the default codes returned by the keyboard.
+--
+-- Parameters:
+--   # ##kcfile## : Either the name of a text file or the handle of an opened (for reading) text file.
+--
+-- Comments:
+--   The text file is expected to contain bindings for one or more keyboard codes.
+-- The format of the files is a set of lines, one line per key binding, in the
+-- form ##KEYNAME = NEWVALUE##. The //keyname// is the same as the constants but without
+-- the "##KC_##" prefix. The key bindings can be in any order.
+--
+-- Returns:
+-- When this function completes without error, zero (0) is returned, otherwise an
+-- error code is returned.
+-- * -1 means that the supplied file could not me loaded in to a [[:map]].
+-- * -2 means that a new key value was not an integer
+-- * -3 means that an unknown key name was found in the file.
+-- 
+-- Example 1:
+-- {{{
+--  -- doskeys.txt file containing some key bindings
+--    F1 = 260
+--    F2 = 261
+--    INSERT = 456
+-- }}}
+-- <eucode>
+--   set_keycodes( "doskeys.txt" )
+-- </eucode>
+--
+-- See Also:
+-- 		[[:key_codes]]
+
+public function set_keycodes( object kcfile )
+
+	object m
+	sequence kcv
+	sequence kc
+	sequence keyname
+	integer  keycode
+	
+	-- Convert the text file containing new key codes into a map.
+	m = map:load_map(kcfile)
+	if not map(m) then
+		return -1 -- The file could not be loaded intoa map.
+	end if
+	
+	-- Get key-value pairs found in the kcfile
+	kcv = map:pairs(m)
+	
+	-- Get the current keycode values.
+	kc = key_codes(0)
+	
+	-- Replace the ones required to be changed.
+	for i = 1 to length(kcv) do
+		if integer(kcv[i][2]) then
+			keyname = upper(kcv[i][1])
+			keycode = kcv[i][2]
+		
+			switch keyname do
+			
+				case "LBUTTON" then
+					kc[KC_LBUTTON] = keycode
+					
+				case "RBUTTON" then
+					kc[KC_RBUTTON] = keycode
+					
+				case "CANCEL" then
+					kc[KC_CANCEL] = keycode
+					
+				case "MBUTTON" then
+					kc[KC_MBUTTON] = keycode
+					
+				case "XBUTTON1" then
+					kc[KC_XBUTTON1] = keycode
+					
+				case "XBUTTON2" then
+					kc[KC_XBUTTON2] = keycode
+					
+				case "BACK" then
+					kc[KC_BACK] = keycode
+					
+				case "TAB" then
+					kc[KC_TAB] = keycode
+					
+				case "CLEAR" then
+					kc[KC_CLEAR] = keycode
+					
+				case "RETURN" then
+					kc[KC_RETURN] = keycode
+					
+				case "SHIFT" then
+					kc[KC_SHIFT] = keycode
+					
+				case "CONTROL" then
+					kc[KC_CONTROL] = keycode
+					
+				case "MENU" then
+					kc[KC_MENU] = keycode
+					
+				case "PAUSE" then
+					kc[KC_PAUSE] = keycode
+					
+				case "CAPITAL" then
+					kc[KC_CAPITAL] = keycode
+					
+				case "KANA" then
+					kc[KC_KANA] = keycode
+					
+				case "JUNJA" then
+					kc[KC_JUNJA] = keycode
+					
+				case "FINAL" then
+					kc[KC_FINAL] = keycode
+					
+				case "HANJA" then
+					kc[KC_HANJA] = keycode
+					
+				case "ESCAPE" then
+					kc[KC_ESCAPE] = keycode
+					
+				case "CONVERT" then
+					kc[KC_CONVERT] = keycode
+					
+				case "NONCONVERT" then
+					kc[KC_NONCONVERT] = keycode
+					
+				case "ACCEPT" then
+					kc[KC_ACCEPT] = keycode
+					
+				case "MODECHANGE" then
+					kc[KC_MODECHANGE] = keycode
+					
+				case "SPACE" then
+					kc[KC_SPACE] = keycode
+					
+				case "PRIOR" then
+					kc[KC_PRIOR] = keycode
+					
+				case "NEXT" then
+					kc[KC_NEXT] = keycode
+					
+				case "END" then
+					kc[KC_END] = keycode
+					
+				case "HOME" then
+					kc[KC_HOME] = keycode
+					
+				case "LEFT" then
+					kc[KC_LEFT] = keycode
+					
+				case "UP" then
+					kc[KC_UP] = keycode
+					
+				case "RIGHT" then
+					kc[KC_RIGHT] = keycode
+					
+				case "DOWN" then
+					kc[KC_DOWN] = keycode
+					
+				case "SELECT" then
+					kc[KC_SELECT] = keycode
+					
+				case "PRINT" then
+					kc[KC_PRINT] = keycode
+					
+				case "EXECUTE" then
+					kc[KC_EXECUTE] = keycode
+					
+				case "SNAPSHOT" then
+					kc[KC_SNAPSHOT] = keycode
+					
+				case "INSERT" then
+					kc[KC_INSERT] = keycode
+					
+				case "DELETE" then
+					kc[KC_DELETE] = keycode
+					
+				case "HELP" then
+					kc[KC_HELP] = keycode
+					
+				case "LWIN" then
+					kc[KC_LWIN] = keycode
+					
+				case "RWIN" then
+					kc[KC_RWIN] = keycode
+					
+				case "APPS" then
+					kc[KC_APPS] = keycode
+					
+				case "SLEEP" then
+					kc[KC_SLEEP] = keycode
+					
+				case "NUMPAD0" then
+					kc[KC_NUMPAD0] = keycode
+					
+				case "NUMPAD1" then
+					kc[KC_NUMPAD1] = keycode
+					
+				case "NUMPAD2" then
+					kc[KC_NUMPAD2] = keycode
+					
+				case "NUMPAD3" then
+					kc[KC_NUMPAD3] = keycode
+					
+				case "NUMPAD4" then
+					kc[KC_NUMPAD4] = keycode
+					
+				case "NUMPAD5" then
+					kc[KC_NUMPAD5] = keycode
+					
+				case "NUMPAD6" then
+					kc[KC_NUMPAD6] = keycode
+					
+				case "NUMPAD7" then
+					kc[KC_NUMPAD7] = keycode
+					
+				case "NUMPAD8" then
+					kc[KC_NUMPAD8] = keycode
+					
+				case "NUMPAD9" then
+					kc[KC_NUMPAD9] = keycode
+					
+				case "MULTIPLY" then
+					kc[KC_MULTIPLY] = keycode
+					
+				case "ADD" then
+					kc[KC_ADD] = keycode
+					
+				case "SEPARATOR" then
+					kc[KC_SEPARATOR] = keycode
+					
+				case "SUBTRACT" then
+					kc[KC_SUBTRACT] = keycode
+					
+				case "DECIMAL" then
+					kc[KC_DECIMAL] = keycode
+					
+				case "DIVIDE" then
+					kc[KC_DIVIDE] = keycode
+					
+				case "F1" then
+					kc[KC_F1] = keycode
+					
+				case "F2" then
+					kc[KC_F2] = keycode
+					
+				case "F3" then
+					kc[KC_F3] = keycode
+					
+				case "F4" then
+					kc[KC_F4] = keycode
+					
+				case "F5" then
+					kc[KC_F5] = keycode
+					
+				case "F6" then
+					kc[KC_F6] = keycode
+					
+				case "F7" then
+					kc[KC_F7] = keycode
+					
+				case "F8" then
+					kc[KC_F8] = keycode
+					
+				case "F9" then
+					kc[KC_F9] = keycode
+					
+				case "F10" then
+					kc[KC_F10] = keycode
+					
+				case "F11" then
+					kc[KC_F11] = keycode
+					
+				case "F12" then
+					kc[KC_F12] = keycode
+					
+				case "F13" then
+					kc[KC_F13] = keycode
+					
+				case "F14" then
+					kc[KC_F14] = keycode
+					
+				case "F15" then
+					kc[KC_F15] = keycode
+					
+				case "F16" then
+					kc[KC_F16] = keycode
+					
+				case "F17" then
+					kc[KC_F17] = keycode
+					
+				case "F18" then
+					kc[KC_F18] = keycode
+					
+				case "F19" then
+					kc[KC_F19] = keycode
+					
+				case "F20" then
+					kc[KC_F20] = keycode
+					
+				case "F21" then
+					kc[KC_F21] = keycode
+					
+				case "F22" then
+					kc[KC_F22] = keycode
+					
+				case "F23" then
+					kc[KC_F23] = keycode
+					
+				case "F24" then
+					kc[KC_F24] = keycode
+					
+				case "NUMLOCK" then
+					kc[KC_NUMLOCK] = keycode
+					
+				case "SCROLL" then
+					kc[KC_SCROLL] = keycode
+					
+				case "LSHIFT" then
+					kc[KC_LSHIFT] = keycode
+					
+				case "RSHIFT" then
+					kc[KC_RSHIFT] = keycode
+					
+				case "LCONTROL" then
+					kc[KC_LCONTROL] = keycode
+					
+				case "RCONTROL" then
+					kc[KC_RCONTROL] = keycode
+					
+				case "LMENU" then
+					kc[KC_LMENU] = keycode
+					
+				case "RMENU" then
+					kc[KC_RMENU] = keycode
+					
+				case "BROWSER_BACK" then
+					kc[KC_BROWSER_BACK] = keycode
+					
+				case "BROWSER_FORWARD" then
+					kc[KC_BROWSER_FORWARD] = keycode
+					
+				case "BROWSER_REFRESH" then
+					kc[KC_BROWSER_REFRESH] = keycode
+					
+				case "BROWSER_STOP" then
+					kc[KC_BROWSER_STOP] = keycode
+					
+				case "BROWSER_SEARCH" then
+					kc[KC_BROWSER_SEARCH] = keycode
+					
+				case "BROWSER_FAVORITES" then
+					kc[KC_BROWSER_FAVORITES] = keycode
+					
+				case "BROWSER_HOME" then
+					kc[KC_BROWSER_HOME] = keycode
+					
+				case "VOLUME_MUTE" then
+					kc[KC_VOLUME_MUTE] = keycode
+					
+				case "VOLUME_DOWN" then
+					kc[KC_VOLUME_DOWN] = keycode
+					
+				case "VOLUME_UP" then
+					kc[KC_VOLUME_UP] = keycode
+					
+				case "MEDIA_NEXT_TRACK" then
+					kc[KC_MEDIA_NEXT_TRACK] = keycode
+					
+				case "MEDIA_PREV_TRACK" then
+					kc[KC_MEDIA_PREV_TRACK] = keycode
+					
+				case "MEDIA_STOP" then
+					kc[KC_MEDIA_STOP] = keycode
+					
+				case "MEDIA_PLAY_PAUSE" then
+					kc[KC_MEDIA_PLAY_PAUSE] = keycode
+					
+				case "LAUNCH_MAIL" then
+					kc[KC_LAUNCH_MAIL] = keycode
+					
+				case "LAUNCH_MEDIA_SELECT" then
+					kc[KC_LAUNCH_MEDIA_SELECT] = keycode
+					
+				case "LAUNCH_APP1" then
+					kc[KC_LAUNCH_APP1] = keycode
+					
+				case "LAUNCH_APP2" then
+					kc[KC_LAUNCH_APP2] = keycode
+					
+				case "OEM_1" then
+					kc[KC_OEM_1] = keycode
+					
+				case "OEM_PLUS" then
+					kc[KC_OEM_PLUS] = keycode
+					
+				case "OEM_COMMA" then
+					kc[KC_OEM_COMMA] = keycode
+					
+				case "OEM_MINUS" then
+					kc[KC_OEM_MINUS] = keycode
+					
+				case "OEM_PERIOD" then
+					kc[KC_OEM_PERIOD] = keycode
+					
+				case "OEM_2" then
+					kc[KC_OEM_2] = keycode
+					
+				case "OEM_3" then
+					kc[KC_OEM_3] = keycode
+					
+				case "OEM_4" then
+					kc[KC_OEM_4] = keycode
+					
+				case "OEM_5" then
+					kc[KC_OEM_5] = keycode
+					
+				case "OEM_6" then
+					kc[KC_OEM_6] = keycode
+					
+				case "OEM_7" then
+					kc[KC_OEM_7] = keycode
+					
+				case "OEM_8" then
+					kc[KC_OEM_8] = keycode
+					
+				case "OEM_102" then
+					kc[KC_OEM_102] = keycode
+					
+				case "PROCESSKEY" then
+					kc[KC_PROCESSKEY] = keycode
+					
+				case "PACKET" then
+					kc[KC_PACKET] = keycode
+					
+				case "ATTN" then
+					kc[KC_ATTN] = keycode
+					
+				case "CRSEL" then
+					kc[KC_CRSEL] = keycode
+					
+				case "EXSEL" then
+					kc[KC_EXSEL] = keycode
+					
+				case "EREOF" then
+					kc[KC_EREOF] = keycode
+					
+				case "PLAY" then
+					kc[KC_PLAY] = keycode
+					
+				case "ZOOM" then
+					kc[KC_ZOOM] = keycode
+					
+				case "NONAME" then
+					kc[KC_NONAME] = keycode
+					
+				case "PA1" then
+					kc[KC_PA1] = keycode
+					
+				case "OEM_CLEAR" then
+					kc[KC_OEM_CLEAR] = keycode
+					
+				case else
+					return -3 -- Unknown keyname used.
+					
+			end switch
+		else
+			return -2 -- New key value is not an integer
+		end if		
+	end for
+	
+	-- Set the new keycode values
+	key_codes(kc)
+  
+  return 0 -- All done okay
 end function
 
 --****

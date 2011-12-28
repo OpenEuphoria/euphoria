@@ -290,4 +290,13 @@ test_equal("smaller_of #3", 6,      smaller_of("cat", 6))
 test_equal("smaller_of #4", "apes", smaller_of("apple", "apes"))
 test_equal("smaller_of #5", 10,     smaller_of(10, 10))
 
+ifdef EUC then
+without inline
+function ticket_730()
+	sequence s = {1,2,3} + 1
+	return s[1]
+end function
+test_equal( "privates not initialized in BB when set to novalue", 2, ticket_730() )
+end ifdef
+
 test_report()
