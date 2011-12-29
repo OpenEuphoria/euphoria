@@ -46,6 +46,7 @@ public memtype
 	object as LPPRINTHOOKPROC,
 	object as LPSETUPHOOKPROC,
 	object as HDC,
+	object as HBITMAP,
 	$
 	
 --****
@@ -472,4 +473,49 @@ public memstruct FORMATRANGE
 	RECT      rc
 	RECT      rcPage
 	CHARRANGE chrg
+end memstruct
+
+public memstruct REBARBANDINFO
+	UINT     cbSize
+	UINT     fMask
+	UINT     fStyle
+	COLORREF clrFore
+	COLORREF clrBack
+	LPTSTR   lpText
+	UINT     cch
+	int      iImage
+	HWND     hwndChild
+	UINT     cxMinChild
+	UINT     cyMinChild
+	UINT     cx
+	HBITMAP  hbmBack
+	UINT     wID
+-- 	#if (_WIN32_IE >= 0x0400)
+	UINT     cyChild
+	UINT     cyMaxChild
+	UINT     cyIntegral
+	UINT     cxIdeal
+	LPARAM   lParam
+	UINT     cxHeader
+-- 	#endif 
+-- 	#if (_WIN32_WINNT >= 0x0600)
+	RECT     rcChevronLocation
+	UINT     uChevronState
+-- 	#endif 
+end memstruct
+
+public memstruct TBBUTTON
+	int       iBitmap
+	int       idCommand
+	BYTE      fsState
+	BYTE      fsStyle
+-- #ifdef _WIN64
+--   BYTE      bReserved[6]
+-- #else 
+-- #if defined(_WIN32)
+--   BYTE      bReserved[2]
+-- #endif 
+-- #endif 
+	DWORD_PTR dwData
+	INT_PTR   iString
 end memstruct
