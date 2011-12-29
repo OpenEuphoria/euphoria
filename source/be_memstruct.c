@@ -238,7 +238,7 @@ void write_member( object_ptr source, symtab_ptr sym, object_ptr val, intptr_t d
 		#if INTPTR_MAX == INT32_MAX
 		else{
 			dbl.dbl = (eudouble) pointer;
-			poke_member( &dbl_ptr, member, src->base + i );
+			poke_member( &dbl_ptr, member, src->base + i, 0 );
 		}
 		#endif
 		
