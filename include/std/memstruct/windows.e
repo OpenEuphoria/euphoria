@@ -460,3 +460,16 @@ public memstruct PRINTDLG
 	HGLOBAL         hPrintTemplate
 	HGLOBAL         hSetupTemplate
 end memstruct
+
+public memstruct CHARRANGE
+	LONG cpMin
+	LONG cpMax
+end memstruct
+
+public memstruct FORMATRANGE
+	HDC       hdc
+	HDC       hdcTarget
+	RECT      rc
+	RECT      rcPage
+	CHARRANGE chrg
+end memstruct
