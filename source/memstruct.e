@@ -600,19 +600,21 @@ end function
 -- Calculates how much padding is needed
 function calculate_padding( symtab_index member_sym, integer size, integer mem_size )
 	integer padding = 0
-	
+	integer r = 0
+	integer alignment = 0
 	if SymTab[member_sym][S_MEM_POINTER] then
 		if mem_pack and mem_pack < sizeof( C_POINTER ) then
-			padding = remainder( size, mem_pack )
+			r = remainder( size, mem_pack )
+			alignment = mem_pack
 		else
-			padding = remainder( size, sizeof( C_POINTER ) )
+			r = remainder( size, sizeof( C_POINTER ) )
 		end if
 	elsif sym_token( member_sym ) = MS_MEMBER then
-		integer alignment = calculate_alignment( member_sym )
+		alignment = calculate_alignment( member_sym )
 		if alignment = -1 then
 			return -1
 		elsif alignment then
-			padding = remainder( size, alignment )
+			r = remainder( size, alignment )
 		end if
 	else
 		if SymTab[member_sym][S_MEM_ARRAY] then
@@ -622,16 +624,29 @@ function calculate_padding( symtab_index member_sym, integer size, integer mem_s
 		-- 32-bit *nix aligns double on 4-byte boundary
 		if sym_token( member_sym ) = MS_DOUBLE and IX86 and IUNIX then
 			if mem_pack and mem_pack < 4 then
-				padding = remainder( size, mem_pack )
+				r = remainder( size, mem_pack )
+				alignment = mem_pack
 			else
-				padding = remainder( size, 4 )
+				r = remainder( size, 4 )
+				alignment = 4
 			end if
 		else
+			
 			if mem_pack and mem_pack < mem_size then
-				padding = remainder( size, mem_pack )
+				r = remainder( size, mem_pack )
+				alignment = mem_pack
 			else
-				padding = remainder( size, mem_size )
+				r = remainder( size, mem_size )
+				alignment = mem_size
 			end if
+			
+			
+		end if
+	end if
+	
+	if alignment then
+		if r then
+			padding = alignment - r
 		end if
 	end if
 	return padding
