@@ -712,8 +712,11 @@ function calculate_size()
 		SymTab[mem_struct][S_MEM_SIZE] = size
 		integer alignment = calculate_alignment( mem_struct )
 		if alignment then
-			integer padding = remainder( size, alignment )
-			size += padding
+			integer r = remainder( size, alignment )
+			if r then
+				integer padding = alignment - r
+				size += padding
+			end if
 		end if
 		SymTab[mem_struct][S_MEM_SIZE] = size
 		return size
