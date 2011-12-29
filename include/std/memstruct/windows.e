@@ -68,6 +68,8 @@ public memstruct POINT
 	LONG y
 end memstruct
 
+public memtype POINT as POINTL
+
 public memstruct RECT
 	LONG left
 	LONG top
@@ -330,10 +332,10 @@ public memstruct LVHITTESTINFO
 	int   iGroup
 end memstruct
 
+-- richedit structs are aligned on 4 byte boundaries
 public memstruct EDITSTREAM with pack 4
 	DWORD_PTR          dwCookie
 	DWORD              dwError
-	-- richedit structs are aligned on 4 bytes
 	EDITSTREAMCALLBACK pfnCallback
 end memstruct
 
@@ -354,7 +356,74 @@ public memstruct PAGESETUPDLG
 	HGLOBAL         hPageSetupTemplate
 end memstruct
 
+-- Stand in for anonymous struct in Windows headers
+public memstruct DEVMODE_PAPER
+	short dmOrientation
+	short dmPaperSize
+	short dmPaperLength
+	short dmPaperWidth
+	short dmScale
+	short dmCopies
+	short dmDefaultSource
+	short dmPrintQuality
+end memstruct
+
+-- Stand in for anonymous struct in Windows headers
+public memstruct DEVMODE_DISPLAY
+	POINTL dmPosition
+	DWORD  dmDisplayOrientation
+	DWORD  dmDisplayFixedOutput
+end memstruct
+
+-- Stand in for an anonymous union in Windows headers.
+public memunion DEVMODE_PAPER_VS_DISPLAY
+	DEVMODE_PAPER paper
+	DEVMODE_DISPLAY display
+end memunion
+
+-- Stand in for anonymous union in Windows headers
+public memunion DEVMODE_FLAGS_VS_NUP
+	DWORD dmDisplayFlags
+	DWORD dmNup
+end memunion
+
+public constant CCHDEVICENAME = 32
+public constant CCHFORMNAME   = 32
 
 public memstruct DEVMODE
-
+	TCHAR dmDeviceName[CCHDEVICENAME]
+	WORD  dmSpecVersion
+	WORD  dmDriverVersion
+	WORD  dmSize
+	WORD  dmDriverExtra
+	DWORD dmFields
+	
+	-- pd is an anonymous union in Windows headers
+	DEVMODE_PAPER_VS_DISPLAY pd
+	short dmColor
+	short dmDuplex
+	short dmYResolution
+	short dmTTOption
+	short dmCollate
+	TCHAR dmFormName[CCHFORMNAME]
+	WORD  dmLogPixels
+	DWORD dmBitsPerPel
+	DWORD dmPelsWidth
+	DWORD dmPelsHeight
+	
+	-- fn is an anonymous union in Windows headers
+	DEVMODE_FLAGS_VS_NUP fn
+	DWORD dmDisplayFrequency
+	-- #if (WINVER >= 0x0400)
+	DWORD dmICMMethod
+	DWORD dmICMIntent
+	DWORD dmMediaType
+	DWORD dmDitherType
+	DWORD dmReserved1
+	DWORD dmReserved2
+	-- #if (WINVER >= 0x0500) || (_WIN32_WINNT >= 0x0400)
+	DWORD dmPanningWidth
+	DWORD dmPanningHeight
+	-- #endif 
+	-- #endif 
 end memstruct
