@@ -38,6 +38,16 @@
 
 #ifdef EWINDOWS
 #  include <windows.h>
+
+// Some MinGW headers don't define these:
+#ifndef ENABLE_EXTENDED_FLAGS
+#define ENABLE_EXTENDED_FLAGS 0x0080
+#endif
+
+#ifndef ENABLE_PROCESSED_INPUT
+#define ENABLE_PROCESSED_INPUT 0x0001
+#endif
+
 #endif
 
 #include "alldefs.h"
