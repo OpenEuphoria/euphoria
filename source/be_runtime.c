@@ -3757,8 +3757,6 @@ object EGets(object file_no)
 	object_ptr line_ptr;
 	object_ptr next_char_ptr;
 	object_ptr last_char_ptr;
-	object_ptr obj_ptr;
-	object result_line;
 	int bufsize;
 	
 	bufsize = 134;	// Initial value. Assumes most line lengths are less than this.
@@ -3780,9 +3778,7 @@ object EGets(object file_no)
 	line_ptr = (object_ptr)EMalloc(bufsize * sizeof(object));
 	next_char_ptr = line_ptr - 1; // Point to the [-1] object.
 	last_char_ptr = line_ptr + (bufsize - 2); // Leave room for final NL and NOVALUE
-	obj_ptr = 0;
 	i = 0;
-	result_line = 0;
 	oldc = EOF;
 
 	if ((f == stdin) && in_from_keyb) {
