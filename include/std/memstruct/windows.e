@@ -43,6 +43,9 @@ public memtype
 	object as HGLOBAL,
 	object as LPPAGEPAINTHOOK,
 	object as LPPAGESETUPHOOK,
+	object as LPPRINTHOOKPROC,
+	object as LPSETUPHOOKPROC,
+	object as HDC,
 	$
 	
 --****
@@ -426,4 +429,34 @@ public memstruct DEVMODE
 	DWORD dmPanningHeight
 	-- #endif 
 	-- #endif 
+end memstruct
+
+public memstruct DOCINFO
+	int     cbSize
+	LPCTSTR lpszDocName
+	LPCTSTR lpszOutput
+	LPCTSTR lpszDatatype
+	DWORD   fwType
+end memstruct
+
+public memstruct PRINTDLG
+	DWORD           lStructSize
+	HWND            hwndOwner
+	HGLOBAL         hDevMode
+	HGLOBAL         hDevNames
+	HDC             hDC
+	DWORD           Flags
+	WORD            nFromPage
+	WORD            nToPage
+	WORD            nMinPage
+	WORD            nMaxPage
+	WORD            nCopies
+	HINSTANCE       hInstance
+	LPARAM          lCustData
+	LPPRINTHOOKPROC lpfnPrintHook
+	LPSETUPHOOKPROC lpfnSetupHook
+	LPCTSTR         lpPrintTemplateName
+	LPCTSTR         lpSetupTemplateName
+	HGLOBAL         hPrintTemplate
+	HGLOBAL         hSetupTemplate
 end memstruct
