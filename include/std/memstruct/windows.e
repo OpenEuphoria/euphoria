@@ -47,6 +47,8 @@ public memtype
 	object as LPSETUPHOOKPROC,
 	object as HDC,
 	object as HBITMAP,
+	object as LPLOGFONT,
+	object as LPCFHOOKPROC,
 	$
 	
 --****
@@ -328,6 +330,7 @@ public memstruct FINDREPLACE
 	LPCTSTR      lpTemplateName
 end memstruct
 
+
 public memstruct LVHITTESTINFO
 	POINT pt
 	UINT  flags
@@ -518,4 +521,46 @@ public memstruct TBBUTTON
 -- #endif 
 	DWORD_PTR dwData
 	INT_PTR   iString
+end memstruct
+
+public constant LF_FACESIZE = 32
+public memstruct LOGFONT
+	LONG  lfHeight
+	LONG  lfWidth
+	LONG  lfEscapement
+	LONG  lfOrientation
+	LONG  lfWeight
+	BYTE  lfItalic
+	BYTE  lfUnderline
+	BYTE  lfStrikeOut
+	BYTE  lfCharSet
+	BYTE  lfOutPrecision
+	BYTE  lfClipPrecision
+	BYTE  lfQuality
+	BYTE  lfPitchAndFamily
+	TCHAR lfFaceName[LF_FACESIZE]
+end memstruct
+
+public memstruct CHOOSEFONT
+	DWORD        lStructSize
+	HWND         hwndOwner
+	HDC          hDC
+	pointer LOGFONT    lpLogFont
+	INT          iPointSize
+	DWORD        Flags
+	COLORREF     rgbColors
+	LPARAM       lCustData
+	LPCFHOOKPROC lpfnHook
+	LPCTSTR      lpTemplateName
+	HINSTANCE    hInstance
+	LPTSTR       lpszStyle
+	WORD         nFontType
+	INT          nSizeMin
+	INT          nSizeMax
+end memstruct
+
+public memstruct FINDTEXTEX
+	CHARRANGE chrg
+	LPCTSTR   lpstrText
+	CHARRANGE chrgText
 end memstruct
