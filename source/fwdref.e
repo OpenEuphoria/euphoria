@@ -24,6 +24,7 @@ include reswords.e
 include block.e
 include emit.e
 include memstruct.e
+include opnames.e
 
 -- Tracking forward references
 sequence 
@@ -418,9 +419,6 @@ procedure patch_forward_msmember( token tok, integer ref )
 			recalculate_size( parent_sym )
 		end if
 		resolved_reference( ref )
-	else
-		
-		InternalErr( sprintf("Unhandled memstruct member fwd ref op: %d", tok[T_ID] ) )
 	end if
 	
 end procedure
