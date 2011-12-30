@@ -130,6 +130,9 @@ procedure basic()
 	sequence SymTab_Serialized = symtab.SymbolTable
 	test_equal( "sizeof arrays of structs", sizeof( symtab_entry ) * 5, sizeof( SymbolTable ) )
 	test_equal( "serialize array length", 5, length( SymTab_Serialized[1] ) )
+	
+	symtab.symtab_entry.obj = 5
+	test_equal( "multiply memstruct values", 25, symtab.symtab_entry.obj * symtab.symtab_entry.obj )
 end procedure
 basic()
 

@@ -1054,6 +1054,12 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 				has_dot = 0
 				
 			case MULTIPLY then
+				if not has_dot then
+					-- multiplying
+					putback( tok )
+					peek_member( members, member, ref, lhs, names, /* op */ , 0 )
+					exit
+				end if
 				-- ptr.struct.ptr_to_something.*  fetch the value pointed to
 				if not ref then
 					-- make sure it's actually a pointer...
