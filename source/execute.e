@@ -602,7 +602,6 @@ end procedure
 
 procedure quit_after_error()
 -- final termination
-puts(1, "quit!\n")
 	write_coverage_db()
 	
 	ifdef CRASH_ON_ERROR then
@@ -3301,8 +3300,8 @@ procedure poke_member_value( atom pointer, integer data_type, object value )
 				poke( pointer, atom_to_float80( value ) )
 			end if
 		case else
-			-- just return the struct in bytes
-			RTFatal( "Error assigning to a memstruct -- can only assign primitive data members" )
+			
+			RTFatal( "Error assigning to a memstruct -- can only assign primitive data members"  )
 	end switch
 end procedure
 
@@ -3334,6 +3333,8 @@ procedure poke_member( atom pointer, integer sym, object value, integer deref_pt
 				pointer += size
 			end for
 		end if
+	elsif data_type = MS_MEMBER then
+		write_memstruct( pointer, SymTab[sym][S_MEM_STRUCT], value )
 	else
 		poke_member_value( pointer, data_type, value )
 	end if
@@ -3341,6 +3342,7 @@ procedure poke_member( atom pointer, integer sym, object value, integer deref_pt
 end procedure
 
 procedure write_memstruct( atom pointer, integer sym, object value )
+
 	if atom( value ) then
 		value = {value}
 	end if
@@ -3352,8 +3354,11 @@ procedure write_memstruct( atom pointer, integer sym, object value )
 		if not member then
 			exit
 		end if
-		poke_member( pointer + SymTab[member][S_MEM_OFFSET], member, value[i] )
-		
+		if atom( value[i] ) then
+			poke_member( pointer + SymTab[member][S_MEM_OFFSET], member, value[i] )
+		else
+			write_memstruct( pointer + SymTab[member][S_MEM_OFFSET], SymTab[member][S_MEM_STRUCT], value[i] )
+		end if
 		member = SymTab[member][S_MEM_NEXT]
 		
 	end for
@@ -3361,6 +3366,7 @@ procedure write_memstruct( atom pointer, integer sym, object value )
 	-- zero out the rest
 	integer ix = length( value ) + 1
 	while member do
+		
 		poke_member( pointer + SymTab[member][S_MEM_OFFSET], member, 0 )
 		
 		member = SymTab[member][S_MEM_NEXT]

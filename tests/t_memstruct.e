@@ -70,6 +70,7 @@ end memstruct
 memtype SymbolTable as SymTab5
 
 integer bits32 = (sizeof( pointer ) = 4)
+
 procedure basic()
 	atom symtab = allocate( sizeof( SymTab5 ) )
 	poke( symtab,  repeat( 0, 5 * sizeof( symtab_entry ) ) )
@@ -329,5 +330,23 @@ procedure pack_test()
 	test_equal( "PACK2.b offste", 2, offsetof( PACK2.b ) )
 end procedure
 pack_test()
+
+include std/memstruct/windows.e
+
+memstruct LINE
+	POINT startPt
+	POINT endPt
+end memstruct
+
+procedure recursive_assignment()
+	atom line = allocate( sizeof( LINE ), 1 )
+	poke( line, repeat( 0, sizeof( LINE ) ) )
+	
+	line.LINE = { {1, 2}, {3, 4} }
+	test_equal( "recursive assignment #1", {{1,2},{3,4}}, line.LINE )
+
+	line.LINE.startPt = {5, 6 }
+	test_equal( "recursive_assignment #2", {{5,6},{3,4}}, line.LINE )
+end procedure
 
 test_report()

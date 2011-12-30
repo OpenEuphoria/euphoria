@@ -231,16 +231,23 @@ void write_member( object_ptr source, symtab_ptr sym, object_ptr val, intptr_t d
 	}
 	for( member = sym->u.memstruct.next, i = 1; member && i <= src->length; ++i, member = member->u.memstruct.next ){
 		pointer = src_pointer + member->u.memstruct.offset;
-		#if INTPTR_MAX == INT32_MAX
-		if( IS_ATOM_INT( (intptr_t)pointer ) )
-		#endif
-			poke_member( (object_ptr)&pointer, member, src->base + i, 0 );
-		#if INTPTR_MAX == INT32_MAX
-		else{
-			dbl.dbl = (eudouble) pointer;
-			poke_member( &dbl_ptr, member, src->base + i, 0 );
+		if( IS_ATOM( src->base[i] ) ){
+			#if INTPTR_MAX == INT32_MAX
+			if( IS_ATOM_INT( (intptr_t)pointer ) )
+			#endif
+				poke_member( (object_ptr)&pointer, member, src->base + i, 0 );
+			#if INTPTR_MAX == INT32_MAX
+			else{
+				dbl.dbl = (eudouble) pointer;
+				poke_member( &dbl_ptr, member, src->base + i, 0 );
+			}
+			#endif
 		}
-		#endif
+		else{
+			object src_ptr;
+			src_ptr = box_int( pointer );
+			write_member( &src_ptr, member->u.memstruct.struct_type, src->base + i, 0 );
+		}
 		
 	}
 	
@@ -404,7 +411,7 @@ static void poke_member_value( void *pointer, int data_type, object_ptr val, int
 			}
 			break;
 		default:
-			RTFatal( "Error assigning to a memstruct (%s) -- can only assign primitive data members" );
+			RTFatal( "Error assigning to a memstruct -- can only assign primitive data members" );
 	}
 }
 
@@ -437,6 +444,9 @@ void poke_member( object_ptr source, symtab_ptr sym, object_ptr val, intptr_t de
 		
 		if( memaccess == ARRAY_ACCESS ){
 			poke_member_value( (void*)pointer, data_type, val, is_signed );
+		}
+		else if( data_type == MS_MEMBER ){
+			write_member( source, sym, val, deref_ptr );
 		}
 		else{
 			int i, array_length, max, size;

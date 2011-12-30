@@ -617,7 +617,9 @@ procedure poke_member( symtab_index target, symtab_index member, symtab_index va
 	memaccess = MEMSTRUCT_ACCESS
 end procedure
 
-procedure poke_memstruct( symtab_index target, symtab_index struct_sym, symtab_index member, integer subscript )
+procedure poke_memstruct( symtab_index target, symtab_index struct_sym, symtab_index member, integer subscript, 
+							integer depth, sequence recursed_members = {} )
+	sequence access_path = build_access_path( recursed_members )
 	integer data_type = SymTab[member][S_TOKEN]
 	integer signed    = SymTab[member][S_MEM_SIGNED]
 	
@@ -633,7 +635,7 @@ procedure poke_memstruct( symtab_index target, symtab_index struct_sym, symtab_i
 	
 	sequence rhs
 	if subscript then
-		rhs = sprintf( "src_s1->base[%d]", subscript )
+		rhs = sprintf( "src_s1_%d->base[%d]", {depth, subscript} )
 	else
 		rhs = "0"
 	end if
@@ -644,13 +646,13 @@ procedure poke_memstruct( symtab_index target, symtab_index struct_sym, symtab_i
 			if subscript then
 				c_stmt0( sprintf( "if( IS_ATOM_INT( %s ) ){\n", { rhs } ) )
 			end if
-				c_stmt( sprintf("((struct %s*)@)->%s = (%s)%s;\n",
-								{ decorated_name( struct_sym), decorated_name( member) ,type_name, rhs}), { target }, target )
+				c_stmt( sprintf("((struct %s*)@)%s%s = (%s)%s;\n",
+								{ decorated_name( struct_sym), access_path, decorated_name( member) ,type_name, rhs}), { target }, target )
 			if subscript then
 				c_stmt0( "}\n" )
 				c_stmt0( "else{\n")
-					c_stmt( sprintf("((struct %s*)@)->%s = (%s)DBL_PTR( %s )->dbl;\n",
-								{decorated_name( struct_sym), decorated_name( member) , type_name, rhs}), { target }, target )
+					c_stmt( sprintf("((struct %s*)@)%s%s = (%s)DBL_PTR( %s )->dbl;\n",
+								{decorated_name( struct_sym), access_path, decorated_name( member) , type_name, rhs}), { target }, target )
 				c_stmt0( "}\n")
 			end if
 		case MEMUNION then
@@ -668,57 +670,89 @@ procedure poke_memstruct( symtab_index target, symtab_index struct_sym, symtab_i
 			if subscript then
 				c_stmt0( sprintf("if( IS_ATOM_INT( %s ) ){\n", {rhs} ) )
 			end if
-				c_stmt( sprintf("((struct %s*) @)->%s = (%s) %s;\n",
-							{decorated_name( struct_sym), decorated_name( member) , type_name, rhs}), {target}, target )
+				c_stmt( sprintf("((struct %s*) @)%s%s = (%s) %s;\n",
+							{decorated_name( struct_sym), access_path, decorated_name( member) , type_name, rhs}), {target}, target )
 			if subscript then
 				c_stmt0("}\n" )
 				c_stmt0( "else{\n")
-				c_stmt( sprintf("((struct %s*) @)->%s = (%s) DBL_PTR( %s )->dbl;\n",
-								{decorated_name( struct_sym), decorated_name( member) , type_name, rhs}), {target}, target )
+				c_stmt( sprintf("((struct %s*) @)%s%s = (%s) DBL_PTR( %s )->dbl;\n",
+								{decorated_name( struct_sym), access_path, decorated_name( member) , type_name, rhs}), {target}, target )
 				c_stmt0("}\n" )
 			end if
 			
 	end switch
 end procedure
 
-function set_up_assign_sequence( integer source_val )
+function set_up_assign_sequence( integer source_val, integer depth )
 	
 	atom seqlen
 	integer is_sequence = TypeIs( source_val, TYPE_SEQUENCE )
 	
+	c_stmt0( sprintf( "s1_ptr src_s1_%d;\n", depth ) )
 	
-	c_stmt0("s1_ptr src_s1;\n")	
-	
-	if is_sequence then
+	if depth = 0 and is_sequence then
 		-- see if we know how big the sequence is:
 		seqlen = SeqLen( source_val )
-		c_stmt("src_s1 = SEQ_PTR( @ );\n", source_val )
+		c_stmt( sprintf("src_s1_%d = SEQ_PTR( @ );\n", depth ), source_val )
 	else
-		c_stmt0("int free_src;\n" )
+		c_stmt0(sprintf("int free_src_%d;\n", depth ) )
 		-- might be an atom
 		seqlen = NOVALUE
-		c_stmt("if( IS_ATOM( @ ) || IS_ATOM_INT( @ ) ){\n", { source_val, source_val } )
-			c_stmt0("free_src = 1;\n")
-			c_stmt0("src_s1 = NewS1( 1 );\n" )
-			c_stmt("src_s1->base[1] = @;\n", source_val )
+		if depth = 0 then
+			c_stmt("if( IS_ATOM( @ ) || IS_ATOM_INT( @ ) ){\n", { source_val, source_val } )
+		else
+			c_stmt0("if( IS_ATOM( _1 ) || IS_ATOM_INT( _1 ) ){\n" )
+		end if
+			c_stmt0(sprintf("free_src_%d = 1;\n", depth ))
+			c_stmt0(sprintf("src_s1_%d = NewS1( 1 );\n", depth ) )
+			if depth = 0 then
+				c_stmt(sprintf("src_s1_%d->base[1] = @;\n", depth ), source_val )
+			else
+				c_stmt0(sprintf("src_s1_%d->base[1] = _1;\n", depth ) )
+			end if
 		c_stmt0("}\n")
 		c_stmt0("else {\n" )
-			c_stmt0("free_src = 0;\n")
-			c_stmt("src_s1 = SEQ_PTR( @ );\n", source_val )
+			c_stmt0(sprintf("free_src_%d = 0;\n", depth ) )
+			if depth = 0 then
+				c_stmt(sprintf("src_s1_%d = SEQ_PTR( @ );\n", depth ), source_val )
+			else
+				c_stmt0(sprintf("src_s1_%d = SEQ_PTR( _1 );\n", depth ) )
+			end if
 		c_stmt0("}\n")
 	end if
 	return is_sequence & seqlen
 end function
 
-procedure assign_memstruct( integer pointer, integer struct_sym, integer source_val )
+function access_type( symtab_index member )
+	if SymTab[member][S_MEM_POINTER] then
+		return "->"
+	else
+		return '.'
+	end if
+end function
+
+function build_access_path( sequence members )
+	sequence path = "->"
+	for i = 1 to length( members ) do
+		path &= decorated_name( members[i] )
+		path &= access_type( members[i] )
+	end for
+	return path
+end function
+
+procedure assign_memstruct( integer pointer, integer struct_sym, integer source_val, sequence recursed_members = {} )
 	-- use a private block
+	integer depth = length( recursed_members )
 	c_stmt0("{\n")
-	sequence seq_len     = set_up_assign_sequence( source_val )
+	sequence seq_len     = set_up_assign_sequence( source_val, depth )
 	integer  is_sequence = seq_len[1]
 	atom     seqlen      = seq_len[2]
 	
 	integer members = 0
 	integer member_sym = struct_sym
+	if length( recursed_members ) then
+		member_sym = SymTab[recursed_members[$]][S_MEM_STRUCT]
+	end if
 	sequence member_list = {}
 	while member_sym with entry do
 		members += 1
@@ -731,33 +765,44 @@ procedure assign_memstruct( integer pointer, integer struct_sym, integer source_
 		integer ix = 1
 		member_sym = SymTab[struct_sym][S_MEM_NEXT]
 		while ix <= seqlen and member_sym do
-			poke_memstruct( pointer, struct_sym, member_sym, ix )
+			if sym_token( member_sym ) = MS_MEMBER then
+				c_stmt0( sprintf( "_1 = src_s1_%d->base[%d];\n", { depth, ix } ) )
+				assign_memstruct( pointer, struct_sym, source_val, recursed_members & member_sym )
+			else
+				poke_memstruct( pointer, struct_sym, member_sym, ix, depth, recursed_members )
+			end if
 			ix += 1
 			member_sym = SymTab[member_sym][S_MEM_NEXT]
 		end while
 		
 		while member_sym do
 			-- zero out the rest
-			poke_memstruct( pointer, struct_sym, member_sym, 0 )
+			poke_memstruct( pointer, struct_sym, member_sym, 0, 0 )
 			member_sym = SymTab[member_sym][S_MEM_NEXT]
 		end while
 	else
 		-- unknown length:
-		c_stmt0( "switch( src_s1->length ){\n" )
+		c_stmt0( sprintf( "switch( src_s1_%d->length ){\n", depth ) )
 			-- the sequence is bigger than the struct:
 			c_stmt0("default:\n")
 			for i = members to 1 by -1 do
 				c_stmt0( sprintf( "case %d:\n", i ) )
-				poke_memstruct( pointer, struct_sym, member_list[i], i )
+				if sym_token( member_list[i] ) = MS_MEMBER then
+					c_stmt0( sprintf( "_1 = src_s1_%d->base[%d];\n", { depth, i } ) )
+					assign_memstruct( pointer, struct_sym, source_val, recursed_members & member_list[i])
+				else
+					poke_memstruct( pointer, struct_sym, member_list[i], i, depth, recursed_members )
+				end if
+				
 			end for
 			c_stmt0( "case 0: break;\n" )
 		c_stmt0("}\n")
 		
-		c_stmt0( "switch( src_s1->length + 1 ){\n" )
+		c_stmt0( sprintf("switch( src_s1_%d->length + 1 ){\n", depth ) )
 			for i = 0 to members do
 				c_stmt0( sprintf( "case %d:\n", i ) )
 				if i then
-					poke_memstruct( pointer, struct_sym, member_list[i], 0 )
+					poke_memstruct( pointer, struct_sym, member_list[i], 0, 0, recursed_members )
 				end if
 			end for
 			c_stmt0("default: break;\n")
@@ -765,19 +810,19 @@ procedure assign_memstruct( integer pointer, integer struct_sym, integer source_
 	end if
 	
 	if not is_sequence then
-		c_stmt0("if( free_src ){\n")
-		c_stmt0("DeRefDS( MAKE_SEQ(src_s1) );\n")
+		c_stmt0( sprintf( "if( free_src_%d ){\n", depth ) )
+		c_stmt0( sprintf( "DeRefDS( MAKE_SEQ(src_s1_%d) );\n", depth ) )
 		c_stmt0("}\n" )
 	end if
 	
 	c_stmt0("}\n")
 end procedure
 
-procedure assign_memunion( integer pointer, integer struct_sym, integer source_val )
+procedure assign_memunion( integer pointer, integer struct_sym, integer source_val, integer depth )
 	c_stmt0("{\n")
 	c_stmt0("unsigned char *ptr;\n")
 	c_stmt0("int i;\n")
-	sequence seq_len     = set_up_assign_sequence( source_val )
+	sequence seq_len     = set_up_assign_sequence( source_val, depth )
 	integer  is_sequence = seq_len[1]
 	atom     seqlen      = seq_len[2]
 	
@@ -786,11 +831,11 @@ procedure assign_memunion( integer pointer, integer struct_sym, integer source_v
 	c_stmt("ptr = (unsigned char *) @;\n", pointer )
 	if seqlen = NOVALUE then
 		-- unknown length
-		c_stmt0(sprintf("for( i = 1; i <= src_s1->length && i <= %d; ++i, ++ptr ){\n", union_size ) )
-			c_stmt0("*ptr = (unsigned char) src_s1->base[i];\n")
+		c_stmt0(sprintf("for( i = 1; i <= src_s1_%d->length && i <= %d; ++i, ++ptr ){\n", {depth, union_size} ) )
+			c_stmt0( sprintf("*ptr = (unsigned char) src_s1_%d->base[i];\n", depth ) )
 		c_stmt0("}\n")
 		
-		c_stmt0(sprintf("for( i = src_s1->length + 1; i <= %d; ++i, ++ptr ){\n", union_size ) )
+		c_stmt0(sprintf("for( i = src_s1_%d->length + 1; i <= %d; ++i, ++ptr ){\n", {depth, union_size} ) )
 			c_stmt0("*ptr = 0;\n")
 		c_stmt0("}\n")
 		
@@ -801,7 +846,7 @@ procedure assign_memunion( integer pointer, integer struct_sym, integer source_v
 		end if
 		
 		for i = 1 to seqlen do
-			c_stmt0( sprintf("*ptr++ = (unsigned char) src_s1->base[%d];\n", i ) )
+			c_stmt0( sprintf("*ptr++ = (unsigned char) src_s1_%d->base[%d];\n", { depth, i} ) )
 		end for
 		
 		for i = seqlen + 1 to union_size do
@@ -810,8 +855,8 @@ procedure assign_memunion( integer pointer, integer struct_sym, integer source_v
 	end if
 	
 	if not is_sequence then
-		c_stmt0("if( free_src ){\n")
-		c_stmt0("DeRefDS( MAKE_SEQ(src_s1) );\n")
+		c_stmt0( sprintf( "if( free_src_%d ){\n", depth ) )
+		c_stmt0( sprintf( "DeRefDS( MAKE_SEQ(src_s1_%d) );\n", depth ) )
 		c_stmt0("}\n" )
 	end if
 	c_stmt0("}\n")
@@ -828,19 +873,22 @@ export procedure opMEMSTRUCT_ASSIGN()
 	get_pointer( pointer, pointer )
 	
 	integer tok = sym_token( member )
-	if SymTab[member][S_MEM_POINTER] then
+	integer is_pointer = SymTab[member][S_MEM_POINTER]
+	if is_pointer then
 		if deref_ptr then
 			c_stmt( "@ = *(intptr_t*)@;\n", { pointer, pointer }, pointer )
 		else
-			tok = MS_MEMBER
+			tok = -1
 		end if
 	end if
 	
 	switch tok do
 		case MEMSTRUCT then
 			assign_memstruct( pointer, member, val )
+		case MS_MEMBER then
+			assign_memstruct( pointer, SymTab[member][S_MEM_STRUCT], val )
 		case MEMUNION then
-			assign_memunion( pointer, member, val )
+			assign_memunion( pointer, member, val, 0 )
 		case else
 			poke_member( pointer, member, val, deref_ptr )
 	end switch

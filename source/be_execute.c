@@ -5424,6 +5424,9 @@ void do_exec(intptr_t *start_pc)
 				else if( sym->token == MEMSTRUCT ){
 					write_member( (object_ptr) pc[1], sym, (object_ptr) pc[3], pc[4] );
 				}
+				else if( sym->token == MS_MEMBER ){
+					write_member( (object_ptr) pc[1], sym->u.memstruct.struct_type, (object_ptr) pc[3], pc[4] );
+				}
 				else if( sym->token == MEMUNION ){
 					write_union( (object_ptr) pc[1], sym, (object_ptr) pc[3], pc[4] );
 				}
