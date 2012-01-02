@@ -145,7 +145,7 @@ procedure main()
 
 	if src_file = -1 then
 		-- too early for normal error processing
-		screen_output(STDERR, GetMsgText(276, 0, {known_files[$]}))
+		screen_output(STDERR, GetMsgText(51, 0, {known_files[$]}))
 		if not batch_job and not test_only then
 			maybe_any_key(GetMsgText(277,0), STDERR)
 		end if
