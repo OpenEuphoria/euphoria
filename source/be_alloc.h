@@ -198,7 +198,7 @@ extern object NewSequence(char *data, int len);
 extern object NewString(char *s);
 extern s1_ptr NewS1(long size);
 extern s1_ptr SequenceCopy(register s1_ptr a);
-
+extern object NewPreallocSeq(long size, object_ptr Objset);
 extern object NewDouble(double d);
 extern long copy_string(char *dest, char *src, size_t bufflen);
 extern long append_string(char *dest, char *src, size_t bufflen);

@@ -221,29 +221,8 @@ IFILE long_iopen(char *name, char *mode)
 /* iopen a file. Has support for Windows 95 long filenames */
 {
 	IFILE f = iopen(name, mode);
-#	if defined(__GNUC__) && defined(_WIN32)
-		/* On MinGW and append mode we must do a seek
-		 * in order to ensure that a later call to
-		 * tell() in Where() will be a correct value.
-		 * See ticket: #733 */
-		while (*mode)
-			if (*(mode++) == 'a')
-				fseek(f, 0, SEEK_END);
-#	endif
 	return f;
 }
-
-int long_open(char *name, int mode)
-/* open a file. Has support for Windows 95 long filenames */
-{
-	int f = open(name, mode);
-#	if defined(__GNUC__) && defined(_WIN32)
-//		if (mode & O_APPEND)
-//			lseek(f, 0, SEEK_END);
-#	endif
-	return f;
-}
-
 
 char *name_ext(char *s)
 /* returns a pointer to the 8.3 file name & extension part of a path */
@@ -325,8 +304,7 @@ void InitGraphics()
 void EndGraphics()
 {
 #ifdef EWINDOWS
-	SetConsoleMode(console_output,
-					ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT); // back to normal
+	SetConsoleMode(console_output, orig_console_mode); // back to normal
 #endif
 #ifdef EUNIX
 	tcsetattr(STDIN_FILENO, TCSANOW, &savetty);
@@ -581,19 +559,17 @@ void do_scroll(int top, int bottom, int amount)
 	show_console();
 	GetConsoleScreenBufferInfo(console_output, &info);
 	src.Left = 0;
-//	src.Right = info.dwMaximumWindowSize.X - 1;
 	src.Right = info.dwSize.X - 1;
 	src.Top = top - 1;
 	src.Bottom = bottom - 1;
 	clip = src;
 	dest.X = 0;
-	dest.Y = src.Top - amount; // for now
-//	GetConsoleScreenBufferInfo(console_output, &info);
+	dest.Y = src.Top - amount;
+
 	fill_char.Char.AsciiChar = ' ';
 	fill_char.Attributes = info.wAttributes;
-	if (abs(amount) > abs(bottom - top)) {
-//		EClearLines(top, bottom, info.dwMaximumWindowSize.X - 1, fill_char.Attributes);
-		EClearLines(top, bottom, info.dwSize.X - 1, fill_char.Attributes);
+	if (abs(amount) > abs(bottom - top + 1)) {
+		EClearLines(top, bottom, info.dwSize.X, fill_char.Attributes);
 	}
 	else {
 		ScrollConsoleScreenBuffer(console_output,
@@ -1313,15 +1289,13 @@ static object PutScreenChar(object x)
 {
 	unsigned attr, len;
 	unsigned line, column;
-#ifdef EUNIX
-	unsigned fg, bg;
-#endif
 	s1_ptr args;
 	object_ptr p;
 #ifdef EUNIX
 	unsigned c;
 	char s1[2];
 	int save_line, save_col;
+	unsigned int fg, bg;
 #endif
 #ifdef EWINDOWS
 	COORD coords;
@@ -1445,30 +1419,83 @@ static object GetScreenChar(object x)
 	return MAKE_SEQ(result);
 }
 
+
+static object key_codes(object x)
+/* x is either a sequence of exactly 256 replacement keycodes or an atom.
+   If an atom, then the existing key codes are not replaced.
+   
+   This function returns the existing 256 key codes as a sequence.
+*/
+{
+	int replacements[256];
+	int current_codes[256];
+	int i;
+	object_ptr elem;
+	object ob;
+	int seqlen;
+	int slen;
+	int *ip = 0;
+	s1_ptr result;
+		
+	// Copy the the existing codes.
+	for (i = 0 ; i < 256; i++)
+		current_codes[i] = VK_to_EuKBCode[i];
+		
+	if (IS_SEQUENCE(x)) {
+		slen = SEQ_PTR(x)->length;
+		if (slen != 256)
+			RTFatal("key code sequence must be exactly 256 integers");
+			
+		elem = SEQ_PTR(x)->base;
+		seqlen = slen;
+		ip = &replacements[0];
+		while (seqlen) {
+			elem++;
+			ob = *(elem);
+			seqlen--;
+			if (IS_ATOM_INT(ob)) {
+				*ip = (int)ob;
+				ip++;
+			}
+			else {
+				RTFatal("key code sequence must only contain integers");
+			}
+		}	
+		// Copy replacement codes to overwrite the current codes.
+		for (i = 0 ; i < 256; i++)
+			VK_to_EuKBCode[i] = replacements[i];
+	}
+	
+	/* start with empty sequence as result */
+	result = NewS1((long)256);
+
+	elem = result->base;
+	for (i = 0 ; i < 256; i++) {
+		elem++;
+		*(elem) = (object)current_codes[i];
+	}
+
+	return MAKE_SEQ(result);
+}
+
 static object GetPosition()
 /* return {line, column} for cursor */
 {
-#ifdef EUNIX
-	struct rccoord pos;
-#endif
+
+	struct eu_rccoord pos;
 	object_ptr obj_ptr;
 	s1_ptr result;
-#ifdef EWINDOWS
-	CONSOLE_SCREEN_BUFFER_INFO console_info;
-#endif
 
 	result = NewS1((long)2);
 	obj_ptr = result->base;
 #ifdef EWINDOWS
 	show_console();
-	GetConsoleScreenBufferInfo(console_output, &console_info);
-	obj_ptr[1] = MAKE_INT(console_info.dwCursorPosition.Y+1);
-	obj_ptr[2] = MAKE_INT(console_info.dwCursorPosition.X+1);
-#else
-	pos = GetTextPositionP();
+#endif
+
+	GetTextPositionP(&pos);
 	obj_ptr[1] = MAKE_INT(pos.row);
 	obj_ptr[2] = MAKE_INT(pos.col);
-#endif
+
 	return MAKE_SEQ(result);
 }
 
@@ -1792,10 +1819,13 @@ static object float_to_atom(object x, int flen)
 {
 	int len, i;
 	object_ptr obj_ptr;
-	union {
+	union udf {
 		char fbuff[8];
-		double d;
-	} out;
+		float ff;
+		double fd;
+	} v;
+
+	double d;
 	s1_ptr s;
 
 	s = SEQ_PTR(x);
@@ -1804,11 +1834,14 @@ static object float_to_atom(object x, int flen)
 		RTFatal("sequence has wrong length");
 	obj_ptr = s->base+1;
 	for (i = 0; i < len; i++) {
-		out.fbuff[i] = (char)obj_ptr[i];
+		v.fbuff[i] = (char)obj_ptr[i];
 	}
 	if (flen == 4)
-		out.d = (double)*((float *)&out.d);
-	return NewDouble(out.d);
+		d = (double)v.ff;
+	else
+		d = v.fd;
+		
+	return NewDouble(d);
 }
 
 static object fpsequence(unsigned char *fp, int len)
@@ -3011,6 +3044,9 @@ object machine(object opcode, object x)
 			case M_HAS_CONSOLE:
 				return has_console();
 
+            case M_KEY_CODES:
+                return key_codes(x);
+	
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:
 				/* could be out-of-range int, or double, or sequence */

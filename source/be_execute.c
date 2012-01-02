@@ -4565,12 +4565,7 @@ void do_exec(int *start_pc)
 					show_console();
 #endif
 					if (in_from_keyb) {
-#ifdef EUNIX
-						echo_wait();
-						b = getc(stdin);
-#else
-						b = wingetch();
-#endif
+						b = getKBchar();
 					}
 					else {
 #ifdef EUNIX

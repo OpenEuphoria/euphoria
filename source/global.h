@@ -181,11 +181,18 @@ struct videoconfig {
 #  define _BROWN 3
 #  define _CYAN 6
 #  define _YELLOW 11
-struct rccoord {
+#endif
+
+struct eu_rccoord {
 	int row;
 	int col;
+	int winwidth;
+	int winheight;
+	int bufwidth;
+	int bufheight;
+	short attrs;
 };
-#endif
+
 
 struct videoconfigEx {
 	int screenrows;
@@ -249,11 +256,5 @@ struct EuViewPort
 	int vars_per_line;  	/* number of variables slots per line */
 	int display_size;   	/* number of slots for variables */
 };
-
-#ifdef EWINDOWS
-	int wingetch();
-	int MyReadConsoleChar();
-	void EClearLines(int first_line, int last_line, int len, WORD attributes);
-#endif
 
 #endif // H_GLOBAL

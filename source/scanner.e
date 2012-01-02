@@ -369,13 +369,13 @@ export procedure read_line()
 	end if
 
 	bp = 1
-	if ThisLine[$] != '\n' then
-		ThisLine = append(ThisLine, '\n') -- add missing \n (might happen at end of file)
-	end if
-	n = find(0, ThisLine)
-	if n != 0 then
-		CompileErr(103, {line_number, n})
-	end if
+-- 	if ThisLine[$] != '\n' then
+-- 		ThisLine = append(ThisLine, '\n') -- add missing \n (might happen at end of file)
+-- 	end if
+-- 	n = find(0, ThisLine)
+-- 	if n != 0 then
+-- 		CompileErr(103, {line_number, n})
+-- 	end if
 	AppendSourceLine()
 end procedure
 
