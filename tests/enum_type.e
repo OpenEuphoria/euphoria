@@ -5,3 +5,5 @@ public enum type architecture
 	X86_64,
 	ARM
 end type
+
+public architecture y = ARM

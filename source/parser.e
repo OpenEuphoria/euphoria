@@ -1206,7 +1206,7 @@ function Name_of_call( token tok )
 	if symtab_index( argument_tok[T_SYM] ) then
 		argument = SymTab[argument_tok[T_SYM]]
 		if length(argument) >= S_VTYPE then
-			if argument[S_VTYPE] = 0 or find(argument[S_VTYPE],{object_type,sequence_type,atom_type,integer_type}) then
+			if argument[S_VTYPE] <= 0 or find(argument[S_VTYPE],{object_type,sequence_type,atom_type,integer_type}) then
 				goto "handle errors 2"
 			end if
 			argument_type = SymTab[argument[S_VTYPE]]
@@ -1308,7 +1308,6 @@ procedure Function_call( token tok )
 	delete(tok)
 	
 	tok_match(LEFT_ROUND)
-	trace(object(tok)!=0)
 	sequence routine_name = SymTab[routine_sym][S_NAME]
 	scope = SymTab[routine_sym][S_SCOPE]
 	opcode = SymTab[routine_sym][S_OPCODE]
