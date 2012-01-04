@@ -583,3 +583,19 @@ public memstruct INITCOMMONCONTROLSEX
 	DWORD dwSize
 	DWORD dwICC
 end memstruct
+
+public memstruct TOOLINFO
+  UINT      cbSize
+  UINT      uFlags
+  HWND      hwnd
+  UINT_PTR  uId
+  RECT      rect
+  HINSTANCE hinst
+  LPTSTR    lpszText
+-- #if (_WIN32_IE >= 0x0300)
+  LPARAM    lParam
+-- #endif 
+-- #if (_WIN32_WINNT >= Ox0501)
+  object lpReserved
+-- #endif 
+end memstruct
