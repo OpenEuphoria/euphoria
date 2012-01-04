@@ -564,3 +564,22 @@ public memstruct FINDTEXTEX
 	LPCTSTR   lpstrText
 	CHARRANGE chrgText
 end memstruct
+
+public memstruct OSVERSIONINFOEX
+	DWORD dwOSVersionInfoSize
+	DWORD dwMajorVersion
+	DWORD dwMinorVersion
+	DWORD dwBuildNumber
+	DWORD dwPlatformId
+	TCHAR szCSDVersion[128]
+	WORD  wServicePackMajor
+	WORD  wServicePackMinor
+	WORD  wSuiteMask
+	BYTE  wProductType
+	BYTE  wReserved
+end memstruct
+
+public memstruct INITCOMMONCONTROLSEX
+	DWORD dwSize
+	DWORD dwICC
+end memstruct
