@@ -49,6 +49,13 @@ public memtype
 	object as HBITMAP,
 	object as LPLOGFONT,
 	object as LPCFHOOKPROC,
+	object as PSTR,
+	object as HMENU,
+	unsigned short as ATOM,
+	object as ULONG_PTR,
+	object as LPVOID,
+	object as LPBOOL,
+	short as SHORT,
 	$
 	
 --****
@@ -598,4 +605,237 @@ public memstruct TOOLINFO
 -- #if (_WIN32_WINNT >= Ox0501)
   object lpReserved
 -- #endif 
+end memstruct
+
+public memstruct WINDOWINFO
+	DWORD cbSize
+	RECT  rcWindow
+	RECT  rcClient
+	DWORD dwStyle
+	DWORD dwExStyle
+	DWORD dwWindowStatus
+	UINT  cxWindowBorders
+	UINT  cyWindowBorders
+	ATOM  atomWindowType
+	WORD  wCreatorVersion
+end memstruct
+
+public memstruct PARAFORMAT
+	UINT  cbSize
+	DWORD dwMask
+	WORD  wNumbering
+	WORD  wReserved
+	LONG  dxStartIndent
+	LONG  dxRightIndent
+	LONG  dxOffset
+	WORD  wAlignment
+	SHORT cTabCount
+	LONG  rgxTabs
+end memstruct
+
+public memstruct PANOSE
+	BYTE bFamilyType
+	BYTE bSerifStyle
+	BYTE bWeight
+	BYTE bProportion
+	BYTE bContrast
+	BYTE bStrokeVariation
+	BYTE bArmStyle
+	BYTE bLetterform
+	BYTE bMidline
+	BYTE bXHeight
+end memstruct
+
+public memstruct OUTLINETEXTMETRIC
+	UINT       otmSize
+	TEXTMETRIC otmTextMetrics
+	BYTE       otmFiller
+	PANOSE     otmPanoseNumber
+	UINT       otmfsSelection
+	UINT       otmfsType
+	int        otmsCharSlopeRise
+	int        otmsCharSlopeRun
+	int        otmItalicAngle
+	UINT       otmEMSquare
+	int        otmAscent
+	int        otmDescent
+	UINT       otmLineGap
+	UINT       otmsCapEmHeight
+	UINT       otmsXHeight
+	RECT       otmrcFontBox
+	int        otmMacAscent
+	int        otmMacDescent
+	UINT       otmMacLineGap
+	UINT       otmusMinimumPPEM
+	POINT      otmptSubscriptSize
+	POINT      otmptSubscriptOffset
+	POINT      otmptSuperscriptSize
+	POINT      otmptSuperscriptOffset
+	UINT       otmsStrikeoutSize
+	int        otmsStrikeoutPosition
+	int        otmsUnderscoreSize
+	int        otmsUnderscorePosition
+	PSTR       otmpFamilyName
+	PSTR       otmpFaceName
+	PSTR       otmpStyleName
+	PSTR       otmpFullName
+end memstruct
+
+public memstruct TEXTMETRIC
+	LONG  tmHeight
+	LONG  tmAscent
+	LONG  tmDescent
+	LONG  tmInternalLeading
+	LONG  tmExternalLeading
+	LONG  tmAveCharWidth
+	LONG  tmMaxCharWidth
+	LONG  tmWeight
+	LONG  tmOverhang
+	LONG  tmDigitizedAspectX
+	LONG  tmDigitizedAspectY
+	TCHAR tmFirstChar
+	TCHAR tmLastChar
+	TCHAR tmDefaultChar
+	TCHAR tmBreakChar
+	BYTE  tmItalic
+	BYTE  tmUnderlined
+	BYTE  tmStruckOut
+	BYTE  tmPitchAndFamily
+	BYTE  tmCharSet
+end memstruct
+
+public memstruct SIZE
+	LONG cx
+	LONG cy
+end memstruct
+
+public memstruct MENUITEMINFO
+	UINT      cbSize
+	UINT      fMask
+	UINT      fType
+	UINT      fState
+	UINT      wID
+	HMENU     hSubMenu
+	HBITMAP   hbmpChecked
+	HBITMAP   hbmpUnchecked
+	ULONG_PTR dwItemData
+	LPTSTR    dwTypeData
+	UINT      cch
+	HBITMAP   hbmpItem
+end memstruct
+
+public memstruct LVBKIMAGE
+	ULONG   ulFlags
+	HBITMAP hbm
+	LPTSTR  pszImage
+	UINT    cchImageMax
+	int     xOffsetPercent
+	int     yOffsetPercent
+end memstruct
+
+public memstruct TCITEM
+	UINT   mask
+-- 	#if (_WIN32_IE >= 0x0300)
+	DWORD  dwState
+	DWORD  dwStateMask
+-- 	#else 
+-- 	UINT   lpReserved1
+-- 	UINT   lpReserved2
+-- 	#endif 
+	LPTSTR pszText
+	int    cchTextMax
+	int    iImage
+	LPARAM lParam
+end memstruct
+
+public memstruct BITMAP
+	int bmType
+	int bmWidth
+	int bmHeight
+	int bmWidthBytes
+	BYTE bmPlanes
+	BYTE bmBitsPixel
+	LPVOID bmBits
+end memstruct
+
+public memstruct BITMAPINFOHEADER
+	DWORD biSize
+	LONG  biWidth
+	LONG  biHeight
+	WORD  biPlanes
+	WORD  biBitCount
+	DWORD biCompression
+	DWORD biSizeImage
+	LONG  biXPelsPerMeter
+	LONG  biYPelsPerMeter
+	DWORD biClrUsed
+	DWORD biClrImportant
+end memstruct
+
+
+public memstruct DRAWTEXTPARAMS
+	UINT cbSize
+	int  iTabLength
+	int  iLeftMargin
+	int  iRightMargin
+	UINT uiLengthDrawn
+end memstruct
+
+public memstruct GETTEXTEX
+	DWORD  cb
+	DWORD  flags
+	UINT   codepage
+	LPCSTR lpDefaultChar
+	LPBOOL lpUsedDefChar
+end memstruct
+
+public memstruct SYSTEMTIME
+	WORD wYear
+	WORD wMonth
+	WORD wDayOfWeek
+	WORD wDay
+	WORD wHour
+	WORD wMinute
+	WORD wSecond
+	WORD wMilliseconds
+end memstruct
+
+public memstruct TEXTRANGE
+	CHARRANGE chrg
+	LPSTR     lpstrText
+end memstruct
+
+public memstruct SCROLLINFO
+	UINT cbSize
+	UINT fMask
+	int  nMin
+	int  nMax
+	UINT nPage
+	int  nPos
+	int  nTrackPos
+end memstruct
+
+public memstruct TTHITTESTINFO
+	HWND     hwnd
+	POINT    pt
+	TOOLINFO ti
+end memstruct
+
+public memstruct NMTTDISPINFO
+	NMHDR     hdr
+	LPTSTR    lpszText
+	TCHAR     szText[80]
+	HINSTANCE hinst
+	UINT      uFlags
+-- 	#if (_WIN32_IE >= 0x0300)
+	LPARAM    lParam
+-- #endif 
+end memstruct
+
+public memstruct LVFINDINFO
+	UINT    flags
+	LPCTSTR psz
+	LPARAM  lParam
+	POINT   pt
+	UINT    vkDirection
 end memstruct
