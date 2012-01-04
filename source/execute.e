@@ -3321,7 +3321,7 @@ procedure poke_member( atom pointer, integer sym, object value, integer deref_pt
 		if memaccess = ARRAY_ACCESS then
 			poke_member_value( pointer, data_type, value )
 		else
-			if array_length < length( value ) then
+			if array_length > length( value ) then
 				max = length( value )
 			end if
 			for i = 1 to max do
@@ -3354,7 +3354,7 @@ procedure write_memstruct( atom pointer, integer sym, object value )
 		if not member then
 			exit
 		end if
-		if atom( value[i] ) then
+		if atom( value[i] ) or SymTab[member][S_MEM_ARRAY] then
 			poke_member( pointer + SymTab[member][S_MEM_OFFSET], member, value[i] )
 		else
 			write_memstruct( pointer + SymTab[member][S_MEM_OFFSET], SymTab[member][S_MEM_STRUCT], value[i] )

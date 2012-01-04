@@ -646,6 +646,29 @@ public memstruct PANOSE
 	BYTE bXHeight
 end memstruct
 
+public memstruct TEXTMETRIC
+	LONG  tmHeight
+	LONG  tmAscent
+	LONG  tmDescent
+	LONG  tmInternalLeading
+	LONG  tmExternalLeading
+	LONG  tmAveCharWidth
+	LONG  tmMaxCharWidth
+	LONG  tmWeight
+	LONG  tmOverhang
+	LONG  tmDigitizedAspectX
+	LONG  tmDigitizedAspectY
+	TCHAR tmFirstChar
+	TCHAR tmLastChar
+	TCHAR tmDefaultChar
+	TCHAR tmBreakChar
+	BYTE  tmItalic
+	BYTE  tmUnderlined
+	BYTE  tmStruckOut
+	BYTE  tmPitchAndFamily
+	BYTE  tmCharSet
+end memstruct
+
 public memstruct OUTLINETEXTMETRIC
 	UINT       otmSize
 	TEXTMETRIC otmTextMetrics
@@ -679,29 +702,6 @@ public memstruct OUTLINETEXTMETRIC
 	PSTR       otmpFaceName
 	PSTR       otmpStyleName
 	PSTR       otmpFullName
-end memstruct
-
-public memstruct TEXTMETRIC
-	LONG  tmHeight
-	LONG  tmAscent
-	LONG  tmDescent
-	LONG  tmInternalLeading
-	LONG  tmExternalLeading
-	LONG  tmAveCharWidth
-	LONG  tmMaxCharWidth
-	LONG  tmWeight
-	LONG  tmOverhang
-	LONG  tmDigitizedAspectX
-	LONG  tmDigitizedAspectY
-	TCHAR tmFirstChar
-	TCHAR tmLastChar
-	TCHAR tmDefaultChar
-	TCHAR tmBreakChar
-	BYTE  tmItalic
-	BYTE  tmUnderlined
-	BYTE  tmStruckOut
-	BYTE  tmPitchAndFamily
-	BYTE  tmCharSet
 end memstruct
 
 public memstruct SIZE

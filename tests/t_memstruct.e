@@ -349,4 +349,17 @@ procedure recursive_assignment()
 	test_equal( "recursive_assignment #2", {{5,6},{3,4}}, line.LINE )
 end procedure
 
+memstruct char_array
+	int size
+	char buffer[256]
+end memstruct
+
+procedure test_char_array()
+	atom ptr = allocate( sizeof( char_array ), 1 )
+	
+	ptr.char_array = { 5, "12345" }
+	test_equal( "assign / read array inside memstruct", "12345", head( ptr.char_array.buffer, 5 ) )
+end procedure
+test_char_array()
+
 test_report()

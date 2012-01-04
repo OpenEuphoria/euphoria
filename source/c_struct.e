@@ -740,6 +740,84 @@ function build_access_path( sequence members )
 	return path
 end function
 
+procedure poke_array_value( integer pointer, integer depth, integer data_type, sequence access_path, sequence type_name, sequence struct_name )
+
+	switch data_type do
+		case MS_FLOAT, MS_DOUBLE, MS_LONGDOUBLE, MS_EUDOUBLE then
+			c_stmt0( "if( IS_ATOM_INT( _1 ) ){\n" )
+			c_stmt( sprintf("((%s*)@)%s[ax%d] = (%s)_1;\n", {struct_name, access_path, depth, type_name}), pointer )
+			c_stmt0( "}\n" )
+			c_stmt0( "else{\n")
+			c_stmt( sprintf("((%s*)@)%s[ax%d] = (%s)DBL_PTR( _1 )->dbl;\n", {struct_name, access_path, depth, type_name}), pointer )
+			c_stmt0( "}\n")
+			
+		case MEMUNION then
+			-- TODO
+		case MEMSTRUCT then
+			-- TODO
+		case else
+			c_stmt0( "if( IS_ATOM_INT( _1 ) ){\n" )
+			c_stmt( sprintf("((%s*)@)%s[ax%d] = (%s) _1;\n", {struct_name, access_path, depth, type_name} ), pointer )
+			c_stmt0("}\n" )
+			c_stmt0( "else{\n")
+			c_stmt( sprintf("((%s*)@)%s[ax%d] = (%s) DBL_PTR( _1 )->dbl;\n", {struct_name, access_path, depth, type_name } ), pointer )
+			c_stmt0("}\n" )
+	end switch
+end procedure
+
+procedure assign_array( integer pointer, integer struct_sym, integer source_val, sequence recursed_members = {} )
+-- use a private block
+	integer depth = length( recursed_members ) + 1
+	
+	c_stmt0("{\n")
+	c_stmt0( sprintf("int ax%d;\n", depth ) )
+	
+	sequence seq_len     = set_up_assign_sequence( source_val, depth )
+	integer  is_sequence = seq_len[1]
+	atom     seqlen      = seq_len[2]
+	
+	integer member_sym = struct_sym
+	if length( recursed_members ) then
+		member_sym = recursed_members[$]
+	end if
+	sequence access_path = build_access_path( recursed_members[1..$-1] ) & decorated_name( member_sym )
+	integer array_length = SymTab[member_sym][S_MEM_ARRAY]
+	integer data_type = sym_token( member_sym )
+	sequence type_name = get_data_type( member_sym )
+	sequence struct_name = get_tagged_name( struct_sym )
+	ifdef DEBUG then
+		c_stmt0( sprintf("// %s: [%d] %s access path: %s\n", { sym_name( member_sym ), array_length, LexName( data_type ), access_path } ) )
+	end ifdef
+	c_stmt0( sprintf( "for( ax%d = 0; ax%d < src_s1_%d->length && ax%d < %d; ++ax%d ){\n", repeat( depth, 4 ) & array_length & depth ) )
+	c_stmt0( sprintf( "_1 = src_s1_%d->base[ax%d+1];\n", depth ) )
+	
+	
+	if data_type = MS_MEMBER then
+		assign_memstruct( pointer, struct_sym, source_val, recursed_members & member_sym)
+	else
+		poke_array_value( pointer, depth, data_type, access_path, type_name, struct_name )
+	end if
+	c_stmt0("}\n")
+	
+	c_stmt0("_1 = 0;\n")
+	c_stmt0( sprintf( "for( ; ax%d < src_s1_%d->length && ax%d < %d; ++ax%d ){\n", repeat( depth, 3 ) & array_length & depth ) )
+	
+	if data_type = MS_MEMBER then
+		assign_memstruct( pointer, struct_sym, source_val, recursed_members & member_sym)
+	else
+		poke_array_value( pointer, depth, data_type, access_path, type_name, struct_name )
+	end if
+	c_stmt0("}\n")
+	
+	if not is_sequence then
+		c_stmt0( sprintf( "if( free_src_%d ){\n", depth ) )
+		c_stmt0( sprintf( "DeRefDS( MAKE_SEQ(src_s1_%d) );\n", depth ) )
+		c_stmt0("}\n" )
+	end if
+	
+	c_stmt0("}\n")
+end procedure
+
 procedure assign_memstruct( integer pointer, integer struct_sym, integer source_val, sequence recursed_members = {} )
 	-- use a private block
 	integer depth = length( recursed_members )
@@ -762,12 +840,21 @@ procedure assign_memstruct( integer pointer, integer struct_sym, integer source_
 	end while
 	
 	if seqlen != NOVALUE then
+		ifdef DEBUG then
+			c_stmt0( sprintf("// known sequence length: %d\n", seqlen ) )
+		end ifdef
 		integer ix = 1
 		member_sym = SymTab[struct_sym][S_MEM_NEXT]
 		while ix <= seqlen and member_sym do
 			if sym_token( member_sym ) = MS_MEMBER then
 				c_stmt0( sprintf( "_1 = src_s1_%d->base[%d];\n", { depth, ix } ) )
 				assign_memstruct( pointer, struct_sym, source_val, recursed_members & member_sym )
+			elsif SymTab[member_sym][S_MEM_ARRAY] then
+				c_stmt0( sprintf( "_1 = src_s1_%d->base[%d];\n", { depth, ix } ) )
+				ifdef DEBUG then
+					c_stmt0( sprintf("// %s is an array (length %d)! now what?\n",{ sym_name( member_sym ), SymTab[member_sym][S_MEM_ARRAY] } ) )
+				end ifdef
+				assign_array( pointer, struct_sym, source_val, recursed_members & member_sym )
 			else
 				poke_memstruct( pointer, struct_sym, member_sym, ix, depth, recursed_members )
 			end if
@@ -882,6 +969,9 @@ export procedure opMEMSTRUCT_ASSIGN()
 		end if
 	end if
 	
+	ifdef DEBUG then
+		c_stmt0(sprintf( "// MEMSTRUCT_ASSIGN %s\n", { LexName( tok ) } ) )
+	end ifdef
 	switch tok do
 		case MEMSTRUCT then
 			assign_memstruct( pointer, member, val )

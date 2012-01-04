@@ -231,7 +231,7 @@ void write_member( object_ptr source, symtab_ptr sym, object_ptr val, intptr_t d
 	}
 	for( member = sym->u.memstruct.next, i = 1; member && i <= src->length; ++i, member = member->u.memstruct.next ){
 		pointer = src_pointer + member->u.memstruct.offset;
-		if( IS_ATOM( src->base[i] ) ){
+		if( IS_ATOM( src->base[i] ) || member->u.memstruct.array ){
 			#if INTPTR_MAX == INT32_MAX
 			if( IS_ATOM_INT( (intptr_t)pointer ) )
 			#endif
