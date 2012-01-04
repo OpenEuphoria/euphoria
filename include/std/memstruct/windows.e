@@ -839,3 +839,15 @@ public memstruct LVFINDINFO
 	POINT   pt
 	UINT    vkDirection
 end memstruct
+
+public memstruct CHARFORMAT
+	UINT     cbSize
+	DWORD    dwMask
+	DWORD    dwEffects
+	LONG     yHeight
+	LONG     yOffset
+	COLORREF crTextColor
+	BYTE     bCharSet
+	BYTE     bPitchAndFamily
+	TCHAR    szFaceName[LF_FACESIZE]
+end memstruct
