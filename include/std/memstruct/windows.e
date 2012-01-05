@@ -851,3 +851,15 @@ public memstruct CHARFORMAT
 	BYTE     bPitchAndFamily
 	TCHAR    szFaceName[LF_FACESIZE]
 end memstruct
+
+public memstruct RGBQUAD
+	BYTE rgbBlue
+	BYTE rgbGreen
+	BYTE rgbRed
+	BYTE rgbReserved
+end memstruct
+
+public memstruct BITMAPINFO
+	BITMAPINFOHEADER bmiHeader
+	RGBQUAD bmiColors[1]
+end memstruct
