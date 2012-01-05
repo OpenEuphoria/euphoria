@@ -26,12 +26,14 @@ including extension, is used as the base for its output.  By default,
 it outputs four files:
 
 * ##.dis## The main disassembly file.  This shows the IL code representation
-both raw and symbolically.
+  both raw and symbolically.
 * ##.sym## The symbol table.  This shows details for the entire symbol table
-for your code.
+  for your code.
 * ##.hash## Details about symbol hashing.
 * ##.line## Line table information.  Unless tracing is enabled, this will be
-blank.
+  blank.
+* ##.fwd## Counts, by name, of the number of forward references by symbol,
+  along with the number of references by file.
 
 === HTML Output
 

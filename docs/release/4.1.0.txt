@@ -28,4 +28,5 @@
 * Use ##?## to stand in for default parameters.
 * [[ticket:735]] The number of lines to be used in ctrace.out by ##trace(3)## can be configured
   using ##-trace-lines n## command line switch. See [[Command line switches -> :command line switches]]
-  for more information.
+  for more information
+* eudis now tabulates counts of forward references
