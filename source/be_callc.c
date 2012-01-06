@@ -1416,8 +1416,9 @@ object call_c(int func, object proc_ad, object arg_list)
 
 			if (size == C_DOUBLE) {
 				#if INTPTR_MAX == INT32_MAX
-					arg_op[arg_i++] = dbl_arg.ints[1];
 					arg_op[arg_i++] = dbl_arg.ints[0];
+					arg_op[arg_i++] = dbl_arg.ints[1];
+					++arg_len;
 				#elif INTPTR_MAX == INT64_MAX
 					if( xmm_i < MAX_FP_PARAM_REGISTERS ){
 						UPDATE_SIGNATURE
