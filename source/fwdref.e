@@ -26,6 +26,10 @@ include emit.e
 include memstruct.e
 include opnames.e
 
+ifdef EUDIS then
+	include dis.e
+end ifdef
+
 -- Tracking forward references
 sequence 
 	forward_references  = {},
@@ -66,6 +70,8 @@ integer fwdref_count = 0
 ifdef EUDIS then
 	include std/map.e
 	export map refs_by_name = map:new()
+	sequence last_ref_name = ""
+	sequence by_name_info = ""
 end ifdef
 
 export procedure clear_fwd_refs()
@@ -909,17 +915,21 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 	end if
 	
 	ifdef EUDIS then
-		sequence name = forward_references[ref][FR_NAME]
-		sequence by_name_info
-		if not map:has( refs_by_name, name ) then
-			by_name_info = { 0, map:new() }
-			map:put( refs_by_name, name, by_name_info )
-		else
-			by_name_info = map:get( refs_by_name, name )
+		if output_fwd then
+			sequence this_name = forward_references[ref][FR_NAME]
+			if compare( this_name, last_ref_name) then
+				-- Variables often get multiple refs due to init checks and type checking,
+				-- so try to avoid some map hashing work if we can
+				last_ref_name = this_name
+				by_name_info = map:get( refs_by_name, last_ref_name, {} )
+				if not length( by_name_info ) then
+					by_name_info = { 0, map:new() }
+				end if
+			end if
+			by_name_info[1] += 1
+			map:put( by_name_info[2], current_file_no, 1, map:ADD )
+			map:put( refs_by_name, last_ref_name, by_name_info )
 		end if
-		by_name_info[1] += 1
-		map:put( by_name_info[2], current_file_no, 1, map:ADD )
-		map:put( refs_by_name, name, by_name_info )
 	end ifdef
 	
 	return ref

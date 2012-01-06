@@ -863,3 +863,26 @@ public memstruct BITMAPINFO
 	BITMAPINFOHEADER bmiHeader
 	RGBQUAD bmiColors[1]
 end memstruct
+
+public memstruct WINDOWPOS
+	HWND hwnd
+	HWND hwndInsertAfter
+	int  x
+	int  y
+	int  cx
+	int  cy
+	UINT flags
+end memstruct
+
+public memstruct MINMAXINFO 
+	POINT ptReserved
+	POINT ptMaxSize
+	POINT ptMaxPosition
+	POINT ptMinTrackSize
+	POINT ptMaxTrackSize
+end memstruct
+
+public memstruct TCHITTESTINFO
+	POINT pt 
+	UINT flags
+end memstruct
