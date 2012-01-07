@@ -1106,7 +1106,7 @@ public enum
 --
 -- Returns:
 -- 		A **sequence**, of length 5. Each of these elements is a string:
--- 		* The path name
+-- 		* The path name. For Windows, this excludes the drive id.
 --		* The full unqualified file name
 --		* the file name, without extension
 --		* the file extension
@@ -1200,7 +1200,7 @@ public function pathinfo(sequence path, integer std_slash = 0)
 		end if
 	end if
 
-	return {dir_name, file_full, file_name, file_ext, lower( drive_id ) }
+	return {dir_name, file_full, file_name, file_ext, drive_id }
 end function
 
 --**
