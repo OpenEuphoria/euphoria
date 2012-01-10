@@ -1073,7 +1073,7 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 	end for
 	if report_errors and length( errors ) then
 		sequence msg = ""
-		sequence errloc
+		sequence errloc = "???"
 		
 		for e = length(errors) to 1 by -1 do
 			sequence ref = forward_references[errors[e]]
@@ -1086,6 +1086,7 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 				object tok = find_reference(ref)
 				integer THIS_SCOPE = 3
 				integer THESE_GLOBALS = 4
+				errloc =""
 				if tok[T_ID] = IGNORED then
 					-- tok is not a token but a sequence of data returned when it cannot find ref
 					switch tok[THIS_SCOPE] do
@@ -1127,14 +1128,17 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 										{find_replace('\\',abbreviate_path(known_files[SymTab[s][S_FILE_NO]]),'/')})
 								end if
 							end for
+	
 						case else 
 							-- anything else okay...
+
 					end switch
+					if length(errloc) and not match(errloc, msg) then
+						msg &= errloc
+						prep_forward_error( errors[e] )
+					end if
 				end if
-				if not match(errloc, msg) then
-					msg &= errloc
-					prep_forward_error( errors[e] )
-				end if
+				
 			end if
 			ThisLine    = ref[FR_THISLINE]
 			bp          = ref[FR_BP]
