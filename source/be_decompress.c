@@ -86,12 +86,13 @@ object decompress(uintptr_t c)
 	}
 	
 	else if (c == F8B) {
-		d = *(double *)string_ptr; 
+		memcpy((void*)&d, (void*)string_ptr, 8); 
 		string_ptr += sizeof( double );
 		return NewDouble((eudouble)d);
 	}
 	else if ( c == F10B ) {
-		ld = *(long double*)string_ptr;
+		memcpy((void*)&ld, (void*)string_ptr, 10); 
+		string_ptr += sizeof( double );
 		string_ptr += 10; // don't use sizeof, because that may include padding
 		return NewDouble( ld );
 	}
