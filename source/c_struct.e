@@ -1,4 +1,5 @@
 -- Translator code for dealing with memstructs
+include std/map.e
 
 include c_decl.e
 include c_out.e
@@ -1186,6 +1187,41 @@ procedure write_memstruct( atom struct_h, symtab_index sym )
 	puts( struct_h, "};\n\n" )
 end procedure
 
+function struct_dependencies( sequence structs, symtab_index sym, map already_declared )
+	if map:get( already_declared, sym, 0 ) then
+		return structs
+	end if
+
+	integer s = sym
+	while s with entry do
+		if not SymTab[s][S_MEM_POINTER] then
+			-- we don't have to worry about pointers
+			integer tok = sym_token( s )
+			integer mt = s
+
+			while tok = MEMTYPE do
+				mt = SymTab[mt][S_MEM_PARENT]
+				tok = sym_token( mt )
+			end while
+			
+			if tok = MS_MEMBER then
+				mt = SymTab[mt][S_MEM_STRUCT]
+				if mt and not map:get( already_declared, mt ) then
+					structs &= mt
+					map:put( already_declared, mt, 1 )
+					
+				end if
+			end if
+		end if
+	entry
+		s = SymTab[s][S_MEM_NEXT]
+	end while
+	if not map:get( already_declared, sym ) then
+		structs &= sym
+	end if
+	return structs
+end function
+
 export procedure write_struct_header()
 	atom struct_h = open( output_dir & "struct.h", "w", 1 )
 	generated_files = append( generated_files, "struct.h" )
@@ -1197,14 +1233,15 @@ export procedure write_struct_header()
 	puts( struct_h, "#include \"include/euphoria.h\"\n\n" )
 	
 	sequence structs = {}
+	map already_declared = map:new()
 	for i = TopLevelSub to length( SymTab ) do
 		integer tok = sym_token( i )
 		if tok = MEMSTRUCT then
 			printf( struct_h, "struct %s %s;\n", repeat( decorated_name( i ), 2 ) )
-			structs &= i
+			structs = struct_dependencies( structs, i, already_declared )
 		elsif tok = MEMUNION then
 			printf( struct_h, "union %s %s;\n", repeat( decorated_name( i ), 2 ) )
-			structs &= i
+			structs = struct_dependencies( structs, i, already_declared )
 		end if
 	end for
 	
