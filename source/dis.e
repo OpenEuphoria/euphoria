@@ -19,6 +19,7 @@ include std/math.e
 
 include cominit.e
 include c_out.e
+include emit.e
 include fwdref.e
 include global.e
 include intinit.e
@@ -1677,7 +1678,10 @@ function format_symbol( sequence symbol )
 	if symbol[S_SCOPE] then
 		symbol[S_SCOPE] = SCOPES[symbol[S_SCOPE]]
 	end if
-	
+
+	if length( symbol ) >= S_TOKEN then
+		symbol[S_TOKEN] = LexName( symbol[S_TOKEN] )
+	end if
 
 	return symbol
 end function
