@@ -259,7 +259,7 @@ procedure parse_memtype( integer scope )
 				
 				integer ref = new_forward_reference( MEMTYPE, sym, MEMSTRUCT_DECL )
 				set_data( ref, sym )
-				add_recalc( type_sym, sym )
+				add_recalc( sym, type_sym )
 				Show( sym ) -- creating a fwdref removes the symbol, but we just want to recalc the size later on
 			end if
 	end switch
@@ -301,6 +301,7 @@ export procedure MemStruct_declaration( integer scope )
 	symtab:DefinedYet( mem_struct )
 	enter_memstruct( mem_struct )
 	last_sym = mem_struct
+	integer declaring_memstruct = mem_struct
 	SymTab[mem_struct] &= repeat( 0, SIZEOF_MEMSTRUCT_ENTRY - length( SymTab[mem_struct] ) )
 	if is_union then
 		SymTab[mem_struct][S_TOKEN] = MEMUNION
@@ -514,6 +515,17 @@ export procedure MemStruct_declaration( integer scope )
 		tok = next_token()
 	end while
 	calculate_size()
+	if not TRANSLATE and SymTab[declaring_memstruct][S_MEM_SIZE] < 1 then
+		-- make sure we come back to this to resize:
+		integer child = declaring_memstruct
+		while child with entry do
+			if SymTab[child][S_MEM_SIZE] <= 0 then
+				add_recalc( SymTab[child][S_MEM_STRUCT], declaring_memstruct )
+			end if
+		entry
+			child = SymTab[child][S_MEM_NEXT]
+		end while
+	end if
 	leave_memstruct()
 end procedure
 
@@ -539,7 +551,8 @@ export function recalculate_size( symtab_index sym )
 end function
 
 procedure add_recalc( symtab_index parent_struct, symtab_index dependent_struct )
-	if length( SymTab[parent_struct] ) >= SIZEOF_MEMSTRUCT_ENTRY
+	if parent_struct != dependent_struct
+	and length( SymTab[parent_struct] ) >= SIZEOF_MEMSTRUCT_ENTRY
 	and (atom( SymTab[parent_struct][S_MEM_RECALC] )
 		or not find( dependent_struct, SymTab[parent_struct][S_MEM_RECALC] )) then
 		SymTab[parent_struct][S_MEM_RECALC] &= dependent_struct
@@ -602,6 +615,7 @@ function calculate_padding( symtab_index member_sym, integer size, integer mem_s
 	integer padding = 0
 	integer r = 0
 	integer alignment = 0
+	
 	if SymTab[member_sym][S_MEM_POINTER] then
 		if mem_pack and mem_pack < sizeof( C_POINTER ) then
 			r = remainder( size, mem_pack )
@@ -690,7 +704,7 @@ function calculate_size()
 					end if
 					if mem_size < 1 then
 						indeterminate = 1
-						add_recalc( struct_type, mem_struct )
+						add_recalc( mem_struct, struct_type )
 					end if
 				end if
 			else
@@ -748,7 +762,7 @@ function read_name()
 			
 			DefinedYet( tok[T_SYM] )
 			
-			symtab_index member = NewBasicEntry( sym_name( tok[T_SYM] ), 0, SC_MEMSTRUCT, MS_MEMBER, 0, 0, 00 )
+			symtab_index member = NewBasicEntry( sym_name( tok[T_SYM] ), 0, SC_MEMSTRUCT, MS_MEMBER, 0, 0, 0 )
 			SymTab[member] &= repeat( 0, SIZEOF_MEMSTRUCT_ENTRY - length( SymTab[member] ) )
 			
 			return { MS_MEMBER, member }
@@ -869,6 +883,8 @@ procedure MemStruct_member( token memstruct_tok, integer pointer, integer fwd = 
 	if fwd then
 		integer ref = new_forward_reference( MS_MEMBER, memstruct_tok[T_SYM], MEMSTRUCT_DECL )
 		set_data( ref, name_tok[T_SYM] )
+		SymTab[memstruct_tok[T_SYM]] &= repeat( 0, SIZEOF_MEMSTRUCT_ENTRY - length( SymTab[memstruct_tok[T_SYM]] ) )
+		SymTab[memstruct_tok[T_SYM]][S_SCOPE] = SC_UNDEFINED
 	else
 		size = SymTab[memstruct_tok[T_SYM]][S_MEM_SIZE]
 	end if
@@ -1028,7 +1044,8 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 				
 				-- just look at it within this memstruct's context...
 				names = append( names, tok[T_SYM] )
-				if ref then
+				
+				if ref label "IGNORED ref" then
 					-- we don't know the memstruct yet!
 					member = NewBasicEntry( tok[T_SYM], 0, SC_MEMSTRUCT, MS_MEMBER, 0, 0, 00 )
 					SymTab[member] &= repeat( 0, SIZEOF_MEMSTRUCT_ENTRY - length( SymTab[member] ) )
@@ -1036,15 +1053,34 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 				else
 					if member then
 						-- going into an embedded / linked struct or union
-						struct_sym = SymTab[member][S_MEM_STRUCT]
+						integer new_struct_sym = SymTab[member][S_MEM_STRUCT]
+						if new_struct_sym then
+							struct_sym = new_struct_sym
+							if SymTab[struct_sym][S_SCOPE] = SC_UNDEFINED then
+								ref = new_forward_reference( MEMSTRUCT, struct_sym, MEMSTRUCT_ACCESS )
+								member = NewBasicEntry( tok[T_SYM], 0, SC_MEMSTRUCT, MS_MEMBER, 0, 0, 00 )
+								SymTab[member] &= repeat( 0, SIZEOF_MEMSTRUCT_ENTRY - length( SymTab[member] ) )
+								emit_member( member, ref, MEMSTRUCT_ACCESS, names )
+								break "IGNORED ref"
+							end if
+
+						else
+							-- unresolved memstruct type!
+							ref = new_forward_reference( MEMSTRUCT, struct_sym, MEMSTRUCT_ACCESS )
+							member = NewBasicEntry( tok[T_SYM], 0, SC_MEMSTRUCT, MS_MEMBER, 0, 0, 00 )
+							SymTab[member] &= repeat( 0, SIZEOF_MEMSTRUCT_ENTRY - length( SymTab[member] ) )
+							emit_member( member, ref, MEMSTRUCT_ACCESS, names )
+							break "IGNORED ref"
+						end if
 					end if
+					
 					if SymTab[struct_sym][S_TOKEN] = MEMTYPE then
 						-- use whatever it really is
 						struct_sym = SymTab[struct_sym][S_MEM_PARENT]
 					end if
+					
 					member = resolve_member( tok[T_SYM], struct_sym )
 					if not member then
-						
 						CompileErr( NOT_A_MEMBER, { tok[T_SYM], sym_name( struct_sym ) } )
 					end if
 					emit_opnd( member )
