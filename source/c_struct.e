@@ -455,13 +455,21 @@ end procedure
 -- Serialize the specified memunion into a sequence and store the object in _0.
 -- Also uses _1.
 procedure read_memunion( integer pointer, symtab_pointer member_sym )
-	integer size = SymTab[member_sym][S_MEM_SIZE]
-	
-	c_stmt0( sprintf( "_1 = NewS1( %d );\n", size ) )
-	
-	for i = 1 to size do
-		c_stmt( sprintf( "((s1_ptr)_1)->base[%d] = ((unsigned char *) @)[%d];\n", {i, i-1} ), pointer )
-	end for
+	integer union_sym
+	if sym_token( member_sym ) = MEMUNION then
+		union_sym = member_sym
+	else
+		union_sym = SymTab[member_sym][S_MEM_STRUCT]
+	end if
+	sequence union_name = get_tagged_name( union_sym )
+	sequence index_var = sprintf("i_%d", pc )
+	c_stmt0("{\n")
+	c_stmt0( sprintf( "intptr_t %s;\n", { index_var } ) )
+	c_stmt0( sprintf( "_1 = NewS1( sizeof( %s ) );\n", { union_name } ) )
+	c_stmt0( sprintf( "for( %s = 0; %s < sizeof( %s ); ++%s){\n", { index_var, index_var, union_name, index_var } ) )
+		c_stmt( sprintf( "((s1_ptr)_1)->base[%s+1] = ((unsigned char *) @)[%s];\n", { index_var, index_var } ), pointer )
+	c_stmt0( "}\n")
+	c_stmt0( "}\n")
 	c_stmt0( "_0 = MAKE_SEQ( _1 );\n" )
 end procedure
 
