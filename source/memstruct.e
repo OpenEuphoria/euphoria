@@ -962,7 +962,7 @@ procedure emit_member( integer member, integer ref, integer op, sequence names )
 		integer m_ref = new_forward_reference( MS_MEMBER, member, op )
 		add_data( ref, m_ref )
 		emit_opnd( -m_ref )
-		set_data( m_ref, names )
+		set_data( m_ref, {names[$]} )
 	else
 		emit_opnd( member )
 	end if
@@ -994,6 +994,7 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 	end if
 	symtab_index struct_sym = sym_ref[1]
 	integer      ref        = sym_ref[2]
+	mem_struct = struct_sym
 	
 	if length( sym_ref ) = 3 then
 		-- just the sym...serialize it
