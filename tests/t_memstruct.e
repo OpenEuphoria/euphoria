@@ -16,7 +16,27 @@ type token_id( object id )
 	return 0
 end type
 
-set_test_verbosity( TEST_SHOW_ALL )
+memunion U
+	Var var
+	Subp subp
+	Block block
+end memunion
+
+
+memstruct symtab_entry
+	object obj
+	pointer symtab_entry next
+	pointer symtab_entry next_in_block
+	char mode
+	char scope
+	unsigned char file_no
+	unsigned char dummy
+	token_id as int token
+	pointer char name
+	U u
+end memstruct
+
+
 memstruct Var
 	pointer symtab_entry declared_in
 end memstruct
@@ -44,30 +64,13 @@ memstruct Subp
 	unsigned int stack_space
 end memstruct
 
-memunion U
-	Var var
-	Subp subp
-	Block block
-end memunion
-
-memstruct symtab_entry
-	object obj
-	pointer symtab_entry next
-	pointer symtab_entry next_in_block
-	char mode
-	char scope
-	unsigned char file_no
-	unsigned char dummy
-	token_id as int token
-	pointer char name
-	U u
-end memstruct
-
 memstruct SymbolTable
 	symtab_entry entries[5]
 end memstruct
 
 memtype SymbolTable as SymTab5
+test_equal( "SymbolTable vs SymTab5", sizeof( SymbolTable ), sizeof( SymTab5 ) )
+test_not_equal("SymbolTable got a size", -1, sizeof( SymbolTable ) )
 
 integer bits32 = (sizeof( pointer ) = 4)
 
@@ -104,13 +107,12 @@ procedure basic()
 	else
 		test_equal( "read / write following pointer (64)", peek8s( symtab + sizeof( symtab_entry)), symtab.symtab_entry.next.obj )
 	end if
-	
 	symtab.symtab_entry.u.var.declared_in = 0x01010101
 	test_equal("read / write union member", 0x01010101, symtab.symtab_entry.u.var.declared_in )
 	
 	object serialized = symtab.symtab_entry.u
 	test_equal( "addressof vs offsetof", symtab + offsetof( symtab_entry.u ), addressof( symtab.symtab_entry.u ) )
-	test_equal("serialize union", {1,1,1,1} & repeat( 0, sizeof( U ) - 4), serialized )
+	test_equal("serialize union 1", {1,1,1,1} & repeat( 0, sizeof( U ) - 4), serialized )
 	serialized = {
 				symtab.symtab_entry.obj,
 				symtab.symtab_entry.next,
@@ -124,7 +126,7 @@ procedure basic()
 				symtab.symtab_entry.u
 			}
 	test_equal("serialize struct", serialized, symtab.symtab_entry )
-	test_equal("serialize union", 
+	test_equal("serialize union 2", 
 			peek( { addressof( symtab.symtab_entry.u ), sizeof( U ) } ),
 			symtab.symtab_entry.u )
 	
