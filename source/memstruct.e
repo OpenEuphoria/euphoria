@@ -219,8 +219,6 @@ procedure parse_memtype( integer scope )
 		return
 	end if
 	
-	
-	
 	sequence signed_type = multi_part_memtype( mem_type )
 	
 	symtab_index type_sym = signed_type[MULTI_PARSE_SYM]
@@ -253,13 +251,13 @@ procedure parse_memtype( integer scope )
 			SymTab[sym][S_MEM_PARENT] = type_sym
 			SymTab[sym][S_MEM_SIZE]   = SymTab[type_sym][S_MEM_SIZE]
 			
-			if not TRANSLATE and not SymTab[sym][S_MEM_SIZE] then
+			if not TRANSLATE and SymTab[sym][S_MEM_SIZE] < 1 then
 				SymTab[sym][S_MEM_SIZE] = recalculate_size( type_sym )
 				-- mark it as a forward reference to have its size recalculated
 				
 				integer ref = new_forward_reference( MEMTYPE, sym, MEMSTRUCT_DECL )
 				set_data( ref, sym )
-				add_recalc( sym, type_sym )
+				add_recalc( type_sym, sym )
 				Show( sym ) -- creating a fwdref removes the symbol, but we just want to recalc the size later on
 			end if
 	end switch
@@ -540,16 +538,30 @@ export function recalculate_size( symtab_index sym )
 	
 	is_union = 0
 	if size > 0 then
+		SymTab[sym][S_MEM_SIZE] = size
+		
 		for i = 2 to length( SymTab[sym][S_MEM_RECALC] ) do
 			
 			symtab_index recalc_sym =  SymTab[sym][S_MEM_RECALC][i]
-			SymTab[recalc_sym][S_MEM_SIZE] = recalculate_size( recalc_sym )
 			
+			if SymTab[recalc_sym][S_MEM_STRUCT] = sym then
+				if SymTab[recalc_sym][S_MEM_ARRAY] then
+					SymTab[recalc_sym][S_MEM_SIZE] = size * SymTab[recalc_sym][S_MEM_ARRAY]
+				else
+					SymTab[recalc_sym][S_MEM_SIZE] = size
+				end if
+				
+			else
+				SymTab[recalc_sym][S_MEM_SIZE] = recalculate_size( recalc_sym )
+			end if
 		end for
 	end if
 	return size
 end function
 
+--**
+-- When parent_struct gets its size definitively calculated,
+-- recalculate dependent_struct.
 procedure add_recalc( symtab_index parent_struct, symtab_index dependent_struct )
 	if parent_struct != dependent_struct
 	and length( SymTab[parent_struct] ) >= SIZEOF_MEMSTRUCT_ENTRY
@@ -824,6 +836,10 @@ procedure add_member( integer type_sym, token name_tok, object mem_type, integer
 	if type_sym < 0 then
 		register_forward_type( sym, -type_sym )
 	end if
+
+	if size < 1 then
+		add_recalc( SymTab[sym][S_MEM_STRUCT], sym )
+	end if
 	last_sym = sym
 end procedure
 
@@ -889,7 +905,6 @@ procedure MemStruct_member( token memstruct_tok, integer pointer, integer fwd = 
 		size = SymTab[memstruct_tok[T_SYM]][S_MEM_SIZE]
 	end if
 	add_member( 0, name_tok, memstruct_tok, size, pointer )
-	
 	
 end procedure
 
