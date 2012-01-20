@@ -13,6 +13,7 @@ without type_check
 include std/filesys.e
 include std/sort.e
 include std/search.e
+include std/sequence.e
 
 include global.e
 include parser.e
@@ -1105,12 +1106,21 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 							else
 								-- unqualified
 								if ref[FR_TYPE] = MEMTYPE then
-									if SymTab[ref[FR_DATA]][S_MEM_SIZE] then
+									if SymTab[ref[FR_DATA]][S_MEM_SIZE] > 0 then
 										continue
 									else
 										errloc = sprintf("\tthe size of \'%s\' (%s:%d) could not be determined.\n", 
 											{ref[FR_NAME], abbreviate_path(known_files[ref[FR_FILE]]), ref[FR_LINE]})
 									end if
+								elsif ref[FR_TYPE] = MS_MEMBER then
+								errloc = sprintf("\t\'%s\' (%s:%d) could not be resolved as a member of %s (%s).\n",
+												 {
+													ref[FR_NAME],
+													abbreviate_path(known_files[ref[FR_FILE]]),
+													ref[FR_LINE],
+													join( ref[FR_DATA], "." ),
+													opnames[ref[FR_OP]]
+												})
 								else
 									errloc = sprintf("\t\'%s\' (%s:%d) has not been declared.\n", 
 										{ref[FR_NAME], abbreviate_path(known_files[ref[FR_FILE]]), ref[FR_LINE]})
