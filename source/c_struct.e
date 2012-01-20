@@ -1218,6 +1218,7 @@ function struct_dependencies( sequence structs, symtab_index sym, map already_de
 	end while
 	if not map:get( already_declared, sym ) then
 		structs &= sym
+		map:put( already_declared, sym, 1 )
 	end if
 	return structs
 end function
