@@ -61,6 +61,11 @@ export constant FORWARD_DEFAULT_PADDING = 5
 integer shifting_sub = 0
 integer fwdref_count = 0
 
+ifdef EUDIS then
+	include std/map.e
+	export map refs_by_name = map:new()
+end ifdef
+
 export procedure clear_fwd_refs()
 	fwdref_count = 0
 end procedure
@@ -769,6 +774,19 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 		fwdref_count += 1
 	end if
 	
+	ifdef EUDIS then
+		sequence name = forward_references[ref][FR_NAME]
+		sequence by_name_info
+		if not map:has( refs_by_name, name ) then
+			by_name_info = { 0, map:new() }
+			map:put( refs_by_name, name, by_name_info )
+		else
+			by_name_info = map:get( refs_by_name, name )
+		end if
+		by_name_info[1] += 1
+		map:put( by_name_info[2], current_file_no, 1, map:ADD )
+		map:put( refs_by_name, name, by_name_info )
+	end ifdef
 	return ref
 end function
 
