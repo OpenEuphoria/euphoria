@@ -37,6 +37,7 @@ include intinit.e
 include coverage.e
 
 include std/machine.e as dep
+include std/dll.e -- for sizeof in 4.0
 without inline
 -- Note: In several places we omit checking for bad arguments to
 -- built-in routines. Those errors will be caught by the underlying
