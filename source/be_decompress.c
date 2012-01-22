@@ -86,13 +86,23 @@ object decompress(uintptr_t c)
 	}
 	
 	else if (c == F8B) {
-		d = *(double *)string_ptr; 
+		memcpy((void*)&d, (void*)string_ptr, sizeof(double)); 
 		string_ptr += sizeof( double );
 		return NewDouble((eudouble)d);
 	}
 	else if ( c == F10B ) {
-		ld = *(long double*)string_ptr;
-		string_ptr += 10; // don't use sizeof, because that may include padding
+		// long doubles may be greater than or less than 10
+		// example: x86-64 GCC Linux  : sizeof(long double) = 16
+		// example: x86-64 GCC Windows: sizeof(long double) = 12
+		// example:    ARM GCC Linux  : sizeof(long double) = 8		
+		// We shouldn't copy more than the data space available to ld,
+		// but we shouldn't advance the string pointer more than 10 as 
+		// the data stored here always only occupies exactly 10 bytes.
+		memcpy((void*)&ld, (void*)string_ptr, 
+			(10 <= sizeof(long double)) ? 10 : sizeof(long double));
+		// FIXME:  Must convert the 80-bit value to 64-bit for versions that do not
+		// have 80-bit long doubles.
+		string_ptr += 10;
 		return NewDouble( ld );
 	}
 	

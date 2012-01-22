@@ -530,18 +530,20 @@ public function call_back(object id)
 end function
 
 ifdef EU4_0 then
-	include std/math.e
+	--**
+	-- @nodoc@
 	public function sizeof(integer x)
-		switch x do
-			case C_CHAR,C_UCHAR then
+		switch x with fallthru do
+			case C_CHAR, C_BYTE, C_UCHAR, C_UBYTE then
 				return 1
-			case C_SHORT, C_USHORT then
+			case C_SHORT, C_WORD, C_USHORT then
 				return 2
-			case C_DOUBLE, C_DWORDLONG then
-				return 8
-			case else
+			-- In 4.0 everything is x86-32
+			case C_INT, C_LONG, C_ULONG then
+			case C_SIZE_T, C_POINTER, C_FLOAT then
 				return 4
+			case C_DOUBLE, C_DWORDLONG, C_LONGLONG then
+				return 8
 		end switch
-		return 0
 	end function
 end ifdef

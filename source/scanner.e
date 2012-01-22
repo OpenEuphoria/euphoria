@@ -31,6 +31,10 @@ include preproc.e
 include coverage.e
 include block.e
 
+ifdef EU4_0 then
+	with define E32
+end ifdef
+
 constant INCLUDE_LIMIT = 30   -- maximum depth of nested includes
 constant MAX_FILE = 256       -- maximum number of source files
 

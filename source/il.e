@@ -90,7 +90,7 @@ procedure fatal(sequence msg)
 -- fatal error during bind
 	puts(2, msg & '\n')
 	if not batch_job and not test_only then
-		ShowMsg(2, 242)
+		ShowMsg(2, 208)
 		getc(0)
 	end if
 
@@ -509,7 +509,7 @@ procedure OutputIL()
 
 	out = open(out_name, "wb")
 	if out = -1 then
-		fatal(GetMsgText(317, , {out_name}))
+		fatal(GetMsgText(301, , {out_name}))
 	end if
 
 	if not shroud_only then
@@ -569,7 +569,7 @@ procedure OutputIL()
 			be = open(backend_name, "rb")
 		end if
 		if be = -1 then
-			fatal(GetMsgText(317, , {backend_name}))
+			fatal(GetMsgText(301, , {backend_name}))
 		end if
 
 		-- copy eub to output file
@@ -609,7 +609,7 @@ procedure OutputIL()
 						end if
 						ic = open(icon, "rb")
 						if ic = -1 then
-							fatal(GetMsgText(317,, {icon}))
+							fatal(GetMsgText(301,, {icon}))
 						end if
 						-- skip icon file header
 						for i = 1 to 22 do
