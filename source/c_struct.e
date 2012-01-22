@@ -1085,17 +1085,36 @@ end procedure
 
 export procedure opOFFSETOF()
 	integer
-		member  = Code[pc+1],
-		target  = Code[pc+2],
-		parent  = SymTab[member][S_MEM_PARENT]
+		count   = Code[pc+1],
+		target  = Code[pc+2+count],
+		parent,
+		member
 	
 	CDeRef( target )
 	sequence 
-		memstruct_name = decorated_name( parent ),
-		member_name    = decorated_name( member )
-	c_stmt( sprintf("@ = offsetof( %s %s, %s);\n", { mem_name( sym_token( parent ) ), memstruct_name, member_name } ), { target }, target )
+		memstruct_name,
+		member_name
 	
-	pc += 3
+	if count = 1 then
+		member  = Code[pc+2]
+		parent  = SymTab[member][S_MEM_PARENT]
+		memstruct_name = decorated_name( parent )
+		member_name    = decorated_name( member )
+		c_stmt( sprintf("@ = offsetof( %s %s, %s);\n", { mem_name( sym_token( parent ) ), memstruct_name, member_name } ), { target }, target )
+	else
+		c_stmt0( "_0 = 0;\n" )
+		for i = 1 to count do
+			member = Code[pc+i+1]
+			parent = SymTab[member][S_MEM_PARENT]
+			
+			memstruct_name = decorated_name( parent )
+			member_name    = decorated_name( member )
+			c_stmt0( sprintf("_0 += offsetof( %s %s, %s);\n", { mem_name( sym_token( parent ) ), memstruct_name, member_name } ) )
+		end for
+		c_stmt( "@ = _0;\n", target, target )
+	end if
+	
+	pc += 3 + count
 end procedure
 
 function decorated_name( symtab_index sym )

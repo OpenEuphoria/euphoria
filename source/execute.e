@@ -3194,10 +3194,17 @@ procedure opSIZEOF()
 end procedure
 
 procedure opOFFSETOF()
-	a = Code[pc+1]
-	b = Code[pc+2]
+	integer len = Code[pc+1]
+	a = Code[pc+2]
+	b = Code[pc+len+2]
+	
 	val[b] = SymTab[a][S_MEM_OFFSET]
-	pc += 3
+	for i = 2 to len do
+		a = Code[pc + i + 1]
+		val[b] += SymTab[a][S_MEM_OFFSET]
+	end for
+	
+	pc += len + 3
 end procedure
 
 procedure opADDRESSOF()

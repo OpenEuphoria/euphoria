@@ -687,13 +687,17 @@ end procedure
 -- sizes have not been determined yet.
 function calculate_size()
 	symtab_pointer member_sym = mem_struct
-
+	
+	
 	if sym_token( member_sym ) = MEMTYPE then
 		if SymTab[SymTab[member_sym][S_MEM_PARENT]][S_MEM_SIZE] < 1 then
 			SymTab[SymTab[member_sym][S_MEM_PARENT]][S_MEM_SIZE] = recalculate_size( SymTab[member_sym][S_MEM_PARENT] )
 		end if
 		return SymTab[SymTab[member_sym][S_MEM_PARENT]][S_MEM_SIZE]
 	end if
+	
+	integer was_union = is_union
+	is_union = sym_token( member_sym ) = MEMUNION
 	
 	stack:push( pack_stack, mem_pack )
 	mem_pack = SymTab[member_sym][S_MEM_PACK]
@@ -745,6 +749,8 @@ function calculate_size()
 	entry
 		member_sym = SymTab[member_sym][S_MEM_NEXT]
 	end while
+	
+	is_union = was_union
 	
 	if indeterminate then
 		SymTab[mem_struct][S_MEM_SIZE] = 0

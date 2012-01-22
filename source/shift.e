@@ -150,7 +150,6 @@ procedure init_op_info()
 	op_info[NOTEQ_IFW_I         ] = { FIXED_SIZE, 4, {3}, {}, {} }
 	op_info[NOT_BITS            ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[NOT_IFW             ] = { FIXED_SIZE, 3, {2}, {}, {} }
-	op_info[OFFSETOF            ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[OPEN                ] = { FIXED_SIZE, 5, {}, {4}, {} }
 	op_info[OPTION_SWITCHES     ] = { FIXED_SIZE, 2, {}, {1}, {} }
 	op_info[OR                  ] = { FIXED_SIZE, 4, {}, {3}, {} }
@@ -277,6 +276,7 @@ procedure init_op_info()
 	
 	op_info[MEMSTRUCT_ACCESS    ] = { VARIABLE_SIZE, 0, {}, {}, {} } -- TARGET: [pc+1] + 2
 	op_info[ARRAY_ACCESS        ] = { VARIABLE_SIZE, 0, {}, {}, {} } -- TARGET: [pc+1] + 3
+	op_info[OFFSETOF            ] = { VARIABLE_SIZE, 0, {}, {}, {} }
 end procedure
 
 init_op_info()
@@ -300,7 +300,7 @@ function op_size( integer pc, sequence code = Code )
 			case FUNC_FORWARD then
 				int = code[pc+2]
 				int += 4
-			case RIGHT_BRACE_N, CONCAT_N then
+			case RIGHT_BRACE_N, CONCAT_N, OFFSETOF then
 				int = code[pc+1]
 				int += 3
 			case MEMSTRUCT_ACCESS then

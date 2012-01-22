@@ -1217,10 +1217,6 @@ procedure opADDRESSOF()
 	unary()
 end procedure
 
-procedure opOFFSETOF()
-	unary()
-end procedure
-
 procedure opMEM_COPY()
 	ptrinary()
 end procedure
@@ -1429,21 +1425,37 @@ procedure mem_access()
 	-- ARRAY_ACCESS
 	-- pc+n+2: subscript
 	-- pc+n+3 target for pointer
+
+	-- OFFSETOF
+	-- pc+1 number of accesses
+	-- pc+2..pc+1+n member syms
 	
 	integer op = Code[pc]
 	integer is_array = (op= ARRAY_ACCESS)
+	integer is_offset = (op = OFFSETOF)
 	integer members = Code[pc+1]
-	sequence text = sprintf("%s %s %s(", {opnames[op]} & names( {Code[pc+2], SymTab[Code[pc+3]][S_MEM_PARENT]} ) )
-	for i = pc+3 to pc+2+members do
+	sequence text
+	integer start, target
+	if op = OFFSETOF then
+		text = sprintf("%s %s(", {opnames[op]} & names( {SymTab[Code[pc+3]][S_MEM_PARENT]} ) )
+		start = pc + 2
+		
+	else
+		text = sprintf("%s %s %s(", {opnames[op]} & names( {Code[pc+2], SymTab[Code[pc+3]][S_MEM_PARENT]} ) )
+		start = pc + 3
+	end if
+	target = start + members
+	
+	for i = start to start + members - 1 do
 		text &= sprintf(" %s", names( Code[i] ) )
 	end for
 	text &= " )"
 	if is_array then
 		text &= sprintf( "[%s]", {name_or_literal( Code[pc+members+3] )} )
 	end if
-	text &= sprintf(" => %s", names( Code[pc+members+3 + is_array] ) )
-	il( text, members + 3 + is_array )
-	pc += members + 4 + is_array
+	text &= sprintf(" => %s", names( Code[pc+members+3 + is_array - is_offset] ) )
+	il( text, members + 3 + is_array - is_offset)
+	pc = target + 1
 end procedure
 
 procedure opARRAY_ACCESS()
@@ -1451,6 +1463,10 @@ procedure opARRAY_ACCESS()
 end procedure
 
 procedure opMEMSTRUCT_ACCESS()
+	mem_access()
+end procedure
+
+procedure opOFFSETOF()
 	mem_access()
 end procedure
 

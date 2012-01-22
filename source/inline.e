@@ -373,8 +373,7 @@ function inline_op( integer pc )
 			case REF_TEMP then
 				inline_code[pc+1] = {INLINE_TARGET}
 				
-			case CONCAT_N then
-			case RIGHT_BRACE_N then
+			case CONCAT_N, RIGHT_BRACE_N, OFFSETOF then
 				
 				if check_for_param( pc + 2 + inline_code[pc+1] ) then
 					-- don't need to do anything here

@@ -88,6 +88,9 @@ procedure basic()
 	test_equal("addressof 1", symtab, addressof( symtab.symtab_entry.obj ) )
 	
 	test_equal("offsetof 1", 0, offsetof( symtab_entry.obj ) )
+	test_equal("offsetof nested",
+			   offsetof( symtab_entry.u ) + offsetof( Block.last_line ),
+			   offsetof( symtab_entry.u.block.last_line ) )
 	
 	symtab.symtab_entry[1].obj = 1
 	symtab.symtab_entry.next = symtab.symtab_entry[1]

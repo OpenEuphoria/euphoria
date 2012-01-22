@@ -1063,7 +1063,6 @@ void code_set_pointers(intptr_t **code)
 			case PEEK:
 			case SIZEOF:
 			case ADDRESSOF:
-			case OFFSETOF:
 			case PEEK_STRING:
 			case PEEKS:
 			case FLOOR:
@@ -1342,6 +1341,7 @@ void code_set_pointers(intptr_t **code)
 				break;
 
 			case CONCAT_N:
+			case OFFSETOF:
 				n = (intptr_t)code[i+1];
 				for (j = 1; j <= n; j++) {
 					word = (intptr_t)code[i+1+j];
@@ -1352,6 +1352,7 @@ void code_set_pointers(intptr_t **code)
 
 				i += n + 3;
 				break;
+			
 			case MEMSTRUCT_ACCESS:
 			case ARRAY_ACCESS:
 				n = (intptr_t)code[i+1] + 1;
@@ -4663,13 +4664,19 @@ void do_exec(intptr_t *start_pc)
 				BREAK;
 				
 			case L_OFFSETOF:
-				deprintf("case L_ADDRESSOF:");
+				deprintf("case L_OFFSETSOF:");
 				tpc = pc;
-				top = *(object_ptr)pc[2];
-				*(object_ptr)pc[2] = ((symtab_ptr)pc[1])->u.memstruct.offset;
-				Ref( *(object_ptr)pc[2] );
+				a = pc[1];
+				b = 0;
+				pc += 2;
+				for( c = 0; c < a; ++c ){
+					b += ((symtab_ptr)pc[c])->u.memstruct.offset;
+				}
+				pc += a;
+				top = *(object_ptr)*pc;
 				DeRef( top );
-				inc3pc();
+				*(object_ptr)*pc = b;
+				++pc;
 				thread();
 				BREAK;
 				

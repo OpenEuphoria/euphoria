@@ -1433,7 +1433,33 @@ export procedure emit_op(integer op)
 					MEMSTRUCT_READ  then
 		cont21ii(op, FALSE)
 
-	case ADDRESSOF, OFFSETOF then
+	case OFFSETOF then
+		-- last OP should have been PEEK_MEMBER
+		if length( Code ) < 4 then
+			CompileErr( MISSING_MEMSTRUCT_MEMBER )
+		elsif Code[$-4] != PEEK_MEMBER and Code[$-1] != MEMSTRUCT_READ then
+			InternalErr("Expected to replace PEEK_MEMBER or MEMSTRUCT_READ")
+		end if
+		
+		Code = remove( Code, length( Code ) - 4, length( Code ) )
+		Pop()
+		Push( Code[$] )
+		for pc = length( Code ) - 2 to 1 by -1 do
+			if Code[pc] = MEMSTRUCT_ACCESS then
+				Code[pc] = OFFSETOF
+				Code = remove( Code, pc + 2 ) -- get rid of the initial pointer
+				exit
+			elsif Code[pc] < 0 then
+				-- ??
+			
+			elsif Code[pc] > TopLevelSub then
+				if SymTab[Code[pc]][S_MEM_POINTER] then
+					CompileErr( "Cannot calculate the offset of a dereferenced pointer" )
+				end if
+			end if
+		end for
+		
+	case ADDRESSOF then
 		-- last OP should have been PEEK_MEMBER
 		if length( Code ) < 4 then
 			CompileErr( MISSING_MEMSTRUCT_MEMBER )
@@ -1443,19 +1469,8 @@ export procedure emit_op(integer op)
 		
 		-- We'll replace PEEK_MEMBER with ADDRESSOF
 		Pop()
-		if op = ADDRESSOF then
-			Push( Code[$-3] )
-			Code = remove( Code, length( Code ) - 4, length( Code ) )
-		else
-			Push( Code[$-2] )
-			for pc = length( Code ) - 8 to 1 by -1 do
-				if Code[pc] = MEMSTRUCT_ACCESS then
-					Code = remove( Code, pc, length( Code ) )
-					exit
-				end if
-			end for
-			
-		end if
+		Push( Code[$-3] )
+		Code = remove( Code, length( Code ) - 4, length( Code ) )
 		
 		cont11ii(op, FALSE)
 		
