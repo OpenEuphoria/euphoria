@@ -1,0 +1,19 @@
+t_c_ms_offset_ptr.e:8
+<0605>:: Cannot calculate the offset of a memstruct member after a dereferenced pointer (foo)
+offsetof( FOO.foo.bar )
+                      ^
+
+
+--- Defined Words ---
+EU4
+EU4_1
+EU4_1_0
+CONSOLE
+UNIX
+LINUX
+X86_64
+BITS64
+LONG64
+E64
+EUI
+-------------------

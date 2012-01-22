@@ -1454,7 +1454,7 @@ export procedure emit_op(integer op)
 			
 			elsif Code[pc] > TopLevelSub then
 				if SymTab[Code[pc]][S_MEM_POINTER] then
-					CompileErr( "Cannot calculate the offset of a dereferenced pointer" )
+					CompileErr( OFFSET_DEREFERENCED_POINTER, { sym_name( Code[pc] ) } )
 				end if
 			end if
 		end for

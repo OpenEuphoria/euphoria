@@ -29,6 +29,7 @@ export enum
 	DUPLICATE_MULTI_ASSIGN,
 	TRACE_LINES_CMD,
 	BAD_TRACE_LINES,
+	OFFSET_DEREFERENCED_POINTER,
 	$
 
 -- don't change this please, but please look for -deleted- items before adding new options
@@ -408,6 +409,7 @@ constant StdErrMsgs = {
 	{DEREFERENCING_NONPOINTER, "Cannot dereference a non-pointer memstruct member"},
 	{TRACE_LINES_CMD, "Specify the number of lines to use in ctrace.out"},
 	{BAD_TRACE_LINES, "the -trace-lines option requires a valid number\n"},
+	{OFFSET_DEREFERENCED_POINTER,"Cannot calculate the offset of a memstruct member after a dereferenced pointer ([1])"},
 	$
 }
 
