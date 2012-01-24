@@ -1,5 +1,5 @@
 --****
--- == Common Windows Memstructs
+7-- == Common Windows Memstructs
 --
 -- <<LEVELTOC level=2 depth=5>>
 --
@@ -54,9 +54,12 @@ public memtype
 	unsigned short as ATOM,
 	object as ULONG_PTR,
 	object as LPVOID,
+	object as PVOID,
 	object as LPBOOL,
 	short as SHORT,
 	object as LPBYTE,
+	object as BSTR,
+	long as SCODE,
 	$
 	
 --****
@@ -914,4 +917,16 @@ public memstruct PROCESS_INFORMATION
 	HANDLE hThread
 	DWORD  dwProcessId
 	DWORD  dwThreadId
+end memstruct
+
+public memstruct EXCEPINFO
+	WORD    wCode
+	WORD    wReserved
+	BSTR    bstrSource
+	BSTR    bstrDescription
+	BSTR    bstrHelpFile
+	DWORD   dwHelpContext
+	PVOID   pvReserved
+	object  pfnDeferredFillIn -- HRESULT (__stdcall *pfnDeferredFillIn)(struct tagEXCEPINFO*)
+	SCODE   scode
 end memstruct
