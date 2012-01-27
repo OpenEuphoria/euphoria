@@ -42,4 +42,4 @@ For an up-to-date listing, see the [[wiki:EuphoriaContributors|EuphoriaContribut
   * Michael Sabal
   * Dave Smith - Graphics
   * Kathy Smith
-  * Yuku (Aku)
+  * Randy Sugianto
