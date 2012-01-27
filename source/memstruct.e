@@ -983,7 +983,7 @@ procedure emit_member( integer member, integer ref, integer op, sequence names )
 		integer m_ref = new_forward_reference( MS_MEMBER, member, op )
 		add_data( ref, m_ref )
 		emit_opnd( -m_ref )
-		set_data( m_ref, {names[$]} )
+		set_data( m_ref, names )
 	else
 		emit_opnd( member )
 	end if
@@ -1104,6 +1104,8 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 					member = resolve_member( tok[T_SYM], struct_sym )
 					if not member then
 						CompileErr( NOT_A_MEMBER, { tok[T_SYM], sym_name( struct_sym ) } )
+					elsif member > 0 then
+						names = {}
 					end if
 					emit_opnd( member )
 				end if
