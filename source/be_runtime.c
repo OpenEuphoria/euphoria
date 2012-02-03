@@ -2241,6 +2241,8 @@ object DRandom(d_ptr a)
 
 	if (a->dbl < 1.0)
 		RTFatal("argument to rand must be >= 1");
+	if ((unsigned)(a->dbl) <= 0)
+		RTFatal("argument to rand is too large");
 	res = (1 + good_rand() % (unsigned)(a->dbl));
 	return MAKE_UINT(res);
 }
