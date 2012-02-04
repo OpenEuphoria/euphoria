@@ -1704,7 +1704,7 @@ procedure test_literal_match(object left_param, symtab_pointer valsym)
 		return
 	end if
 	if symtab_index(lsym) and symtab_index(valsym) and lsym != 0 and valsym != 0 
-		and length(SymTab[lsym]) <= S_VTYPE and length(SymTab[valsym]) <= S_VTYPE then
+		and length(SymTab[lsym]) >= S_VTYPE and length(SymTab[valsym]) >= S_VTYPE then
 		if find(sym_mode(lsym),  {M_CONSTANT, M_NORMAL}) != 0 
 			and find(sym_mode(valsym),  {M_CONSTANT, M_NORMAL}) != 0 then
 			symtab_index valsym_type = sym_type(valsym)
