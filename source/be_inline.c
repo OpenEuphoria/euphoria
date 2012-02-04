@@ -9,6 +9,11 @@
 /******************/
 /* Included files */
 /******************/
+#include <stdint.h>
+#if defined(EWINDOWS) && INTPTR_MAX == INT64_MAX
+// MSVCRT doesn't handle long double output correctly
+#define __USE_MINGW_ANSI_STDIO 1
+#endif
 #include <stdio.h>
 #include <assert.h>
 #ifdef EWINDOWS

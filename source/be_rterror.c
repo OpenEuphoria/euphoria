@@ -11,6 +11,11 @@
 /******************/
 #define _LARGE_FILE_API
 #define _LARGEFILE64_SOURCE
+#include <stdint.h>
+#if defined(EWINDOWS) && INTPTR_MAX == INT64_MAX
+// MSVCRT doesn't handle long double output correctly
+#define __USE_MINGW_ANSI_STDIO 1
+#endif
 #include <stdio.h>
 #include <stdarg.h>
 #include <setjmp.h>
@@ -65,9 +70,9 @@
 
 #else
 
-#define FLIP_TO_MAIN 315  /* F1 */
-#define FLIP_TO_DEBUG 316 /* F2 */
-#define DOWN_ARROW 336
+#define FLIP_TO_MAIN VK_to_EuKBCode[0x70] /* 315  F1 */
+#define FLIP_TO_DEBUG VK_to_EuKBCode[0x71] /* 316  F2 */
+#define DOWN_ARROW VK_to_EuKBCode[0x28] /* 336 */
 #endif
 
 struct display_slot {
@@ -99,7 +104,7 @@ static int MainCol;   /* Main foreground color */
 static int MainBkCol; /* Main background color */
 #endif
 
-static struct rccoord MainPos; /* text position save area */
+static struct eu_rccoord MainPos; /* text position save area */
 static int MainWrap;  /* Main wrap mode */
 static char *DebugScreenSave = NULL;   /* place to save debug screen */
 static int main_screen_line = 1;
@@ -125,7 +130,6 @@ static long trace_line;      /* current traced line */
 static void screen_blank();
 static void SaveDebugImage();
 static void RestoreDebugImage();
-struct rccoord GetTextPositionP();
 static void ShowName();
 #endif
 
@@ -455,6 +459,95 @@ static void LocateFail()
 	Cleanup(1);
 }
 
+
+/* Copies the alternative literal for s_ptr into val_string up to max_len characters are copied
+ * including the null character, which is appended at the end.  The function returns the number
+ * of characters copied.  If there is no alternative literal, it will return 0 for it will not
+ * write to the string.  If there is an error while copying it will write a NULL character to the
+ * first character of the string and return 1.  If the required space is greater than max_len, it
+ * will return max_len and copy that many characters. */
+unsigned int CopyLiteral(symtab_ptr s_ptr, char * val_string, unsigned int max_len)
+{
+		long lsobj;
+		short i;
+		s1_ptr ls, keys, names;
+		symtab_ptr ls_symptr;
+		object val = s_ptr->obj;
+		object lit = MAKE_INT(0);
+		if (max_len <= 4)
+			return 0;
+		if ((lsobj = (long)s_ptr->u.var.ls) &&
+			(ls_symptr = &fe.st[lsobj]) &&
+			(ls_symptr->obj != NOVALUE) &&
+			(ls = SEQ_PTR(ls_symptr->obj)) &&
+			(ls->length == 2) &&
+			(keys = SEQ_PTR(ls->base[1]))  &&
+			(names = SEQ_PTR(ls->base[2])) &&
+			(names->length == keys->length)) {
+				short count = names->length;
+				object_ptr key_base = keys->base;
+				object_ptr data_base = names->base;
+				if (IS_ATOM_INT(val)) {
+					int iv = INT_VAL(val);
+					while (count--) {
+						++data_base;
+						++key_base;
+						if (
+							(iv == *key_base) ||
+								((IS_ATOM(*key_base)) && 
+									(!IS_ATOM_INT(*key_base)) && 
+									(DBL_PTR(*key_base)->dbl == (double)iv))
+							) {
+								lit = *data_base;
+								break;
+						}
+					}
+				} else if (IS_ATOM(val)) {
+					double dv = DBL_PTR(val)->dbl;
+					while (count--) {
+						++data_base;
+						++key_base;
+						if (
+								(IS_ATOM(*key_base) &&
+									(!IS_ATOM_INT(*key_base)) &&
+									(DBL_PTR(*key_base)->dbl == dv)
+									) ||
+								(IS_ATOM_INT(*key_base) && 
+									(dv == (eudouble)INT_VAL(*key_base)))
+							) {
+								lit = *data_base;
+								break;
+							}
+					}
+				}
+		}
+		if (lit != 0) {
+			object_ptr base_ptr;
+			s1_ptr lit_ptr = SEQ_PTR(lit);
+			base_ptr = lit_ptr->base;
+			++base_ptr;
+			for (i = 0; (i < lit_ptr->length) && (i < (max_len-1)); ++i) {
+				if ((!IS_ATOM_INT(val = base_ptr[i]))
+						|| (val < -128)
+						|| (val > 127)) {
+						/* variable and constant names must be ASCII */
+						val_string[0] = '\0';
+						return 1;
+				}
+				val_string[i] = (char)val;
+			}
+			val_string[i] = '\0';
+			if (i == (max_len-1)) {
+				for (i = i - 3; i < (max_len-1); ++i)
+					val_string[i] = '.';
+			}
+			return i+1;
+		} else {
+			return 0;
+		}
+}
+
+
 #ifndef BACKEND
 static void ClearSlot(int i)
 /* mark a display slot as available */
@@ -534,67 +627,11 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 		inc = vp.vars_per_line;
 	}
 	else {
-		short lsobj;
-		s1_ptr ls,keys,names;
-		symtab_ptr ls_symptr;
-		access_method  am;
-		object lit = MAKE_INT(0);
-		if ((lsobj = (long)s_ptr->u.var.ls) &&
-			(ls_symptr = &fe.st[lsobj]) &&
-			(ls_symptr->obj != NOVALUE) &&
-			(ls = SEQ_PTR(ls_symptr->obj)) &&
-			(ls->length == 2) &&
-			(keys = SEQ_PTR(ls->base[1]))  &&
-			(names = SEQ_PTR(ls->base[2])) &&
-			(names->length == keys->length)) {
-				int count = names->length;
-				object_ptr key_base = keys->base;
-				object_ptr data_base = names->base;
-				if (IS_ATOM_INT(val)) {
-					int iv = INT_VAL(val);
-					while (count--) {
-						++data_base;
-						++key_base;
-						if (
-							(iv == *key_base) ||
-								((IS_ATOM(*key_base)) && 
-									(!IS_ATOM_INT(*key_base)) && 
-									(DBL_PTR(*key_base)->dbl == (double)iv))
-							) {
-								lit = *data_base;
-								break;
-						}
-					}
-				} else if (IS_ATOM(val)) {
-					double dv = DBL_PTR(val)->dbl;
-					while (count--) {
-						++data_base;
-						++key_base;
-						if (
-								(IS_ATOM(*key_base) &&
-									(!IS_ATOM_INT(*key_base)) &&
-									(DBL_PTR(*key_base)->dbl == dv)
-									) ||
-								(IS_ATOM_INT(*key_base) && 
-									(dv == (eudouble)INT_VAL(*key_base)))
-							) {
-								lit = *data_base;
-								break;
-							}
-					}
-				}
-		}
-		if (lit != 0) {
-			s1_ptr lit_ptr = SEQ_PTR(lit);
+		if ((i = CopyLiteral(s_ptr, val_string+1, DV_len-15)) > 1) {
 			val_string[0] = '(';
-			for (i = 1; i <= lit_ptr->length && i < DV_len; ++i) {
-				if (!IS_ATOM_INT(lit_ptr->base[i])) {
-						i = 1;
-						break;
-				}
-				val_string[i] = (unsigned char)lit_ptr->base[i];
-			}
-			val_string[i++] = ')';
+			val_string[i] = ')';
+			val_string[i+1] = '\0';
+			++i;
 		} else {
 			i = 0;
 		}
@@ -603,7 +640,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 		else if (IS_ATOM_INT(val)) {
 			iv = INT_VAL(val);
 			snprintf(&val_string[i],  DV_len-i, "%ld", (long)iv);
-			if (lit == 0 && iv >= ' ' && iv <= 127)
+			if (i <= 1 && iv >= ' ' && iv <= 127)
 				add_char = TRUE;
 		}
 		else{ 
@@ -875,18 +912,18 @@ static void DebugCommand()
 		// must handle ANSI codes
 		if (c == 27) {
 			c = get_key(TRUE);
-			if (c == 91) {
+			if (c == '[') {
 				c = get_key(TRUE);
-				if (c == 66) {
+				if (c == 'B') {
 					c = DOWN_ARROW;
 				}
-				else if (c == 49) {
+				else if (c == '1') {
 					c = get_key(TRUE);
-					if (c == 49) {
+					if (c == '1') {
 						c = FLIP_TO_MAIN;
 						get_key(TRUE);  // 126
 					}
-					else if (c == 50) {
+					else if (c == '2') {
 						c = FLIP_TO_DEBUG;
 						get_key(TRUE); // 126
 					}
@@ -1022,7 +1059,7 @@ static void ShowName()
 	
 	SetPosition(prompt, 16); 
 
-	key_gets(name);
+	key_gets(name, sizeof(name));
 	/* ignore leading whitespace */
 	i = 0;
 	while (name[i] == ' ' || name[i] == '\t')
@@ -1092,7 +1129,12 @@ static void DumpPrivates(IFILE f, symtab_ptr proc)
 /* display the local variables and their values for a subprogram */
 {
 	symtab_ptr sym;
-
+	char * lb;
+	unsigned int lb_len;
+	 // must be bigger than 3, should be greater than any expected enummerated constant length
+	unsigned int lb_size = 40; 
+	lb = (char*)malloc(lb_size);
+	
 	/* iprintf(f, " %s()\n", proc->name);*/
 	sym = proc->next; 
 	while (sym != NULL && 
@@ -1103,12 +1145,21 @@ static void DumpPrivates(IFILE f, symtab_ptr proc)
 			}
 			else {
 				iprintf(f, "    %s = ", sym->name);
+				if ((lb_len = CopyLiteral(sym, lb, lb_size)) > 1) {
+					--lb_len; // don't count null char for the length.
+					iprintf(f, "(%s)", lb);
+					lb_len += 2;
+				} else {
+					lb_len = 0;
+				}
 				Print(f, sym->obj, 500, 80 - 3, strlen(sym->name)+6, TRUE);
 				iprintf(f, "\n");
 			}
 		}
 		sym = sym->next;
 	}
+	
+	free(lb);
 }
 
 static void DumpGlobals(IFILE f)
@@ -1116,6 +1167,10 @@ static void DumpGlobals(IFILE f)
 {
 	symtab_ptr sym;
 	int prev_file_no;
+	char * lb;
+	unsigned lb_len;
+	unsigned int lb_size = 40;
+	lb = (char*)malloc(lb_size);
 
 	prev_file_no = -1;
 	sym = TopLevelSub->next;
@@ -1133,13 +1188,22 @@ static void DumpGlobals(IFILE f)
 			iprintf(f, "    %s = ", sym->name);
 			if (sym->obj == NOVALUE)
 				iprintf(f, "<no value>");
-			else 
+			else {
+				if ((lb_len = CopyLiteral(sym, lb, lb_size)) > 1) {
+					--lb_len; // don't count null char for the length.
+					iprintf(f, "(%s)", lb);
+					lb_len += 2; // add () chars
+				} else {
+					lb_len = 0;
+				}
 				Print(f, sym->obj, 500, 80 - 3, strlen(sym->name)+6, TRUE);
+			}
 			iprintf(f, "\n");
 		}
 		sym = sym->next;
 	}
 	iprintf(f, "\n");
+	free(lb);
 }
 
 static int screen_err_out;

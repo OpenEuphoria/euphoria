@@ -21,34 +21,42 @@ ifdef WINDOWS then
 	constant
 		kernel32 = dll:open_dll("kernel32.dll"),
 		--iGetExitCodeProcess=define_c_func(kernel32,"GetExitCodeProcess",{C_UINT,C_POINTER},C_INT),
-		iCreatePipe = dll:define_c_func(kernel32,"CreatePipe",{dll:C_POINTER,dll:C_POINTER,dll:C_POINTER,dll:C_DWORD},dll:C_BOOL),
-		iReadFile = dll:define_c_func(kernel32,"ReadFile",{dll:C_UINT,dll:C_POINTER,dll:C_DWORD,dll:C_POINTER,dll:C_POINTER},dll:C_BOOL),
-		iWriteFile = dll:define_c_func(kernel32,"WriteFile",{dll:C_UINT,dll:C_POINTER,dll:C_DWORD,dll:C_POINTER,dll:C_POINTER},dll:C_BOOL),
-		iCloseHandle = dll:define_c_func(kernel32,"CloseHandle",{dll:C_UINT},dll:C_BOOL),
-		iTerminateProcess=dll:define_c_func(kernel32,"TerminateProcess",{dll:C_UINT,dll:C_UINT},dll:C_BOOL),
+		iCreatePipe = dll:define_c_func(kernel32,"CreatePipe",{dll:C_POINTER, dll:C_POINTER, dll:C_POINTER, dll:C_DWORD},dll:C_BOOL),
+		iReadFile = dll:define_c_func(kernel32,"ReadFile",{dll:C_POINTER, dll:C_POINTER, dll:C_DWORD, dll:C_POINTER, dll:C_POINTER}, dll:C_BOOL),
+		iWriteFile = dll:define_c_func(kernel32,"WriteFile",{dll:C_POINTER, dll:C_POINTER, dll:C_DWORD, dll:C_POINTER, dll:C_POINTER}, dll:C_BOOL),
+		iCloseHandle = dll:define_c_func(kernel32,"CloseHandle",{dll:C_POINTER}, dll:C_BOOL),
+		iTerminateProcess=dll:define_c_func(kernel32,"TerminateProcess",{dll:C_POINTER, dll:C_UINT}, dll:C_BOOL),
 		iGetLastError = dll:define_c_func(kernel32,"GetLastError",{},dll:C_DWORD),
-		iGetStdHandle = dll:define_c_func(kernel32,"GetStdHandle",{dll:C_DWORD},dll:C_UINT),
-		iSetHandleInformation = dll:define_c_func(kernel32,"SetHandleInformation",{dll:C_UINT,dll:C_DWORD,dll:C_DWORD},dll:C_BOOL),
-		iCreateProcess = dll:define_c_func(kernel32,"CreateProcessA",{dll:C_POINTER,dll:C_POINTER,dll:C_POINTER,
-			dll:C_POINTER,dll:C_BOOL,dll:C_DWORD,dll:C_POINTER,dll:C_POINTER,dll:C_POINTER,dll:C_POINTER},dll:C_BOOL)
+		iGetStdHandle = dll:define_c_func(kernel32,"GetStdHandle",{dll:C_DWORD}, dll:C_HANDLE),
+		iSetHandleInformation = dll:define_c_func(kernel32,"SetHandleInformation",{dll:C_POINTER, dll:C_DWORD, dll:C_DWORD}, dll:C_BOOL),
+		iCreateProcess = dll:define_c_func(kernel32,"CreateProcessA",{dll:C_POINTER, dll:C_POINTER, dll:C_POINTER,
+			dll:C_POINTER, dll:C_BOOL, dll:C_DWORD, dll:C_POINTER, dll:C_POINTER, dll:C_POINTER, dll:C_POINTER},dll:C_BOOL)
 	
 	constant
--- 		STD_INPUT_HANDLE = -10,
--- 		STD_OUTPUT_HANDLE = -11,
--- 		STD_ERROR_HANDLE = -12,
--- 		FILE_INVALID_HANDLE = -1,
--- 		ERROR_BROKEN_PIPE = 109,
-		SA_SIZE = 12,
 		PIPE_WRITE_HANDLE = 1, PIPE_READ_HANDLE=2,
 		HANDLE_FLAG_INHERIT=1,
+		STARTF_USESHOWWINDOW = 1,
+		STARTF_USESTDHANDLES = 256,
+		FAIL = 0,
+		$
+ifdef BITS32 then
+	constant
+		SA_SIZE = 12,
 		SUIdwFlags = 44, 
 		SUIhStdInput = 56, 
 		STARTUPINFO_SIZE = 68,
-		STARTF_USESHOWWINDOW = 1,
-		STARTF_USESTDHANDLES = 256,
 		PROCESS_INFORMATION_SIZE = 16,
-		FAIL = 0
+		$
+elsedef
+	constant
+		SA_SIZE = 24,
+		SUIdwFlags = 60, 
+		SUIhStdInput = 80, 
+		STARTUPINFO_SIZE = 104,
+		PROCESS_INFORMATION_SIZE = 24,
+		$
 	
+end ifdef
 elsedef
 	constant
 		STDLIB = dll:open_dll({ "libc.so", "libc.dylib", "" }),
@@ -180,12 +188,16 @@ function os_pipe()
 	ifdef WINDOWS then
 		atom psaAttrib, phWriteToPipe, phReadFromPipe
 		
-		psaAttrib = machine:allocate(SA_SIZE+2*4)
-		poke4(psaAttrib,{SA_SIZE,0,1})
-		phWriteToPipe = psaAttrib+SA_SIZE
-		phReadFromPipe = psaAttrib+SA_SIZE+4
+		psaAttrib = machine:allocate(SA_SIZE + 2 * sizeof( C_POINTER ) )
+		poke4( psaAttrib, SA_SIZE )
+		poke_pointer(psaAttrib + sizeof( C_POINTER),{0,1})
+		
+		phWriteToPipe = psaAttrib + SA_SIZE
+		phReadFromPipe = psaAttrib + SA_SIZE + sizeof( C_POINTER )
+		
 		ret = c_func(iCreatePipe,{phReadFromPipe,phWriteToPipe,psaAttrib,0})
-		handles = peek4u({phWriteToPipe,2})
+		handles = peek_pointer({phWriteToPipe,2})
+		
 		machine:free(psaAttrib)
 	elsedef
 		atom cmd = machine:allocate(8)
@@ -233,7 +245,6 @@ public function read(atom fd, integer bytes)
 		machine:free(pReadCount)
 	elsedef
 		ret = c_func(READ, {fd, buf, bytes})
-		? ret
 		ReadCount=ret
 	end ifdef
 	
@@ -325,23 +336,30 @@ ifdef WINDOWS then
 	atom pPI, pSUI, pCmdLine
 	sequence ProcInfo
 	
-	   pCmdLine = machine:allocate_string(CommandLine)
-	   pPI = machine:allocate(PROCESS_INFORMATION_SIZE)
-	   mem_set(pPI,0,PROCESS_INFORMATION_SIZE)
-	   pSUI = machine:allocate(STARTUPINFO_SIZE)
-	   mem_set(pSUI,0,STARTUPINFO_SIZE)
-	   poke4(pSUI,STARTUPINFO_SIZE)
-	   poke4(pSUI+SUIdwFlags,or_bits(STARTF_USESTDHANDLES,STARTF_USESHOWWINDOW))
-	   poke4(pSUI+SUIhStdInput,StdHandles)
-	   fnVal = c_func(iCreateProcess,{0,pCmdLine,0,0,1,0,0,0,pSUI,pPI})
-	   machine:free(pCmdLine)
-	   machine:free(pSUI)
-	   ProcInfo = peek4u({pPI,4})
-	   machine:free(pPI)
-	   if not fnVal then
-	     return 0
-	   end if
-	   return ProcInfo
+		pCmdLine = machine:allocate_string(CommandLine)
+		
+		pPI = machine:allocate(PROCESS_INFORMATION_SIZE)
+		mem_set(pPI,0,PROCESS_INFORMATION_SIZE)
+		
+		pSUI = machine:allocate(STARTUPINFO_SIZE)
+		mem_set( pSUI, 0, STARTUPINFO_SIZE)
+		poke4( pSUI, STARTUPINFO_SIZE)
+		poke4( pSUI + SUIdwFlags, or_bits( STARTF_USESTDHANDLES, STARTF_USESHOWWINDOW ) )
+		poke_pointer( pSUI + SUIhStdInput, StdHandles)
+		
+		fnVal = c_func(iCreateProcess,{0,pCmdLine,0,0,1,0,0,0,pSUI,pPI})
+		machine:free(pCmdLine)
+		machine:free(pSUI)
+		ifdef BITS32 then
+			ProcInfo = peek4u({pPI,4})
+		elsedef
+			ProcInfo = peek_pointer( {pPI, 2} ) & peek4u( {pPI + 16, 2})
+		end ifdef
+		machine:free(pPI)
+		if not fnVal then
+			return 0
+		end if
+		return ProcInfo
 	end function
 
 	--**

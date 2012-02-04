@@ -127,6 +127,10 @@ export enum
 export integer compiler_type = COMPILER_UNKNOWN
 
 --**
+-- Prefix for the compiler and other related binaries.
+export sequence compiler_prefix = ""
+
+--**
 -- Compiler directory (only used for a few compilers)
 
 export sequence compiler_dir = ""
@@ -449,10 +453,11 @@ function setup_build()
 	
 	switch compiler_type do
 		case COMPILER_GCC then
-			c_exe = "gcc"
-			l_exe = "gcc"
+			c_exe = compiler_prefix & "gcc"
+			l_exe = compiler_prefix & "gcc"
 			obj_ext = "o"
 
+			-- compiling object flags
 			if debug_option then
 				c_flags &= " -g3"
 			else
@@ -463,7 +468,7 @@ function setup_build()
 				c_flags &= " -fPIC"
 			end if
 
-            ifdef EU4_0 then 
+			ifdef EU4_0 then 
 				c_flags &= sprintf(" -c -w -fsigned-char -O2 -m%d -I%s -ffast-math",
 				{ 4 * 8, adjust_for_build_file(get_eucompiledir()) })
 			elsedef
@@ -471,14 +476,10 @@ function setup_build()
 				{ ptr_size * 8, adjust_for_build_file(get_eucompiledir()) })
 			end ifdef
 			
-			if TWINDOWS then
-				if mno_cygwin then
-					c_flags &= " -mno-cygwin"
-				end if
-
-				if not con_option then
-					c_flags &= " -mwindows"
-				end if
+			if TWINDOWS and mno_cygwin then
+				-- we must use this compile flag here to ensure that we load the MINGW include
+				-- files when compiling under a cygwin environment.
+				c_flags &= " -mno-cygwin"
 			end if
 
 			ifdef EU4_0 then
@@ -499,16 +500,22 @@ function setup_build()
 				l_flags &= " -lresolv"
 			elsif TWINDOWS then
 				if mno_cygwin then
+					-- we must use this option to avoid linking to the cygwin dll.
 					l_flags &= " -mno-cygwin"
+				end if				
+				if not con_option then
+					-- we must use this flag to prevent a new console from appearing
+					-- when running this program from explorer (the GUI)
+					l_flags &= " -mwindows"
 				end if
 			end if
 			
 			-- input/output
-			rc_comp = "windres -DSRCDIR=\"" & adjust_for_build_file(current_dir()) & "\" [1] -O coff -o [2]"
+			rc_comp = compiler_prefix & "windres -DSRCDIR=\"" & adjust_for_build_file(current_dir()) & "\" [1] -O coff -o [2]"
 			
 		case COMPILER_WATCOM then
-			c_exe = "wcc386"
-			l_exe = "wlink"
+			c_exe = compiler_prefix & "wcc386"
+			l_exe = compiler_prefix & "wlink"
 			obj_ext = "obj"
 
 			if debug_option then
@@ -537,7 +544,7 @@ function setup_build()
 			
 			
 			-- resource file, executable file
-			rc_comp = "wrc -DSRCDIR=\"" & adjust_for_build_file(current_dir()) & "\" -q -fo=[2] -ad [1] [3]"
+			rc_comp = compiler_prefix &"wrc -DSRCDIR=\"" & adjust_for_build_file(current_dir()) & "\" -q -fo=[2] -ad [1] [3]"
 		case else
 			CompileErr(43)
 	end switch

@@ -14,6 +14,11 @@
 #include <stdlib.h>
 #include "be_w.h"
 
+#include <stdint.h>
+#if defined(EWINDOWS) && INTPTR_MAX == INT64_MAX
+// MSVCRT doesn't handle long double output correctly
+#define __USE_MINGW_ANSI_STDIO 1
+#endif
 #include <stdio.h>
 #include <string.h>
 #ifdef EWINDOWS
@@ -58,7 +63,7 @@ void DisplayColorLine(char *pline, int string_color)
 	if (syncolor != -1)
 	{
 		internal_general_call_back(syncolor,
-		line,string_color,0, 0,0,0, 0,0,0);
+		line,scolor,0, 0,0,0, 0,0,0);
 	}
 	else
 	{

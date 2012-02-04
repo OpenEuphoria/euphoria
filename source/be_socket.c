@@ -2,6 +2,11 @@
 /*      (c) Copyright - See License.txt       */
 /*****************************************************************************/
 
+#include <stdint.h>
+#if defined(EWINDOWS) && INTPTR_MAX == INT64_MAX
+// MSVCRT doesn't handle long double output correctly
+#define __USE_MINGW_ANSI_STDIO 1
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -1908,7 +1913,7 @@ object eusock_recvfrom(object x)
 {
 	SOCKET s;
 	struct sockaddr_in addr;
-	int flags, result;
+	intptr_t flags, result;
 	socklen_t addr_size;
 	char buf[BUFF_SIZE];
 
@@ -1956,7 +1961,7 @@ object eusock_bind(object x)
 	SOCKET s;
 	s1_ptr address_s;
 	char *address;
-	int port, result;
+	intptr_t port, result;
 
 	struct sockaddr_in *service;
 
@@ -2066,10 +2071,8 @@ object eusock_getsockopt(object x)
 	SOCKET s;
 	object level, optname;
 	int optval;
-	size_t optlen;
-	object_ptr base;
+	socklen_t optlen;
 	
-	base = SEQ_PTR(x)->base;
 	if (!IS_SOCKET(SEQ_PTR(x)->base[1]))
 		RTFatal("first argument to get_option must be a socket");
 	if (!IS_ATOM_INT(level = ATOM_TO_ATOM_INT(SEQ_PTR(x)->base[2])))

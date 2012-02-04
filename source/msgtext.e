@@ -12,7 +12,19 @@ include std/text.e
 include global.e
 include common.e
 
-	
+export enum
+	MISSING_CMD_PARAMETER = 353,
+	MSG_CC_PREFIX = 600,
+	NONSTANDARD_LIBRARY,
+	DUPLICATE_MULTI_ASSIGN,
+	ERRMSG_NAME_OF_NOT_VARIABLE,
+	ERRMSG_NAME_OF_NOT_UDT,
+	ERRMSG_FWD_REF_NOTSUPPORTED,
+	ERRMSG_NAME_OF_NOT_ENUM_TYPE,
+	WARNMSG_ENUM_MISMATCH_TYPES_BINOP,
+	WARNMSG_ENUM_MISMATCH_TYPES_FNCALL,
+	$
+
 -- don't change this please, but please look for -deleted- items before adding new options
 -- to the bottom of this list. Re-use -deleted- items.
 constant StdErrMsgs = {
@@ -367,9 +379,9 @@ constant StdErrMsgs = {
 	{348, "User supplied library does not exist:\n    [1]"},
 	{349, "Resource file does not exist:\n    [1]"},
 	{350, "Unable to compile resource file: [1]"},
-	{351, "Use the -mno-cygwin flag with MinGW"},
+	{351, "Create MinGW binaries in a Cygwin environment"},
 	{352, "There is no watcom instalation under specified Watom Path [1]"},
-	{353, "Use a non-standard library when building a shared object"},
+	{NONSTANDARD_LIBRARY, "Use a non-standard library when building a shared object"},
 	{354, "External debugger"},
 	{355, "Use the -mno-cygwin flag with MinGW"},
 	{356, "Specify the target architecture (X86, X86_64, ARM)"},
@@ -380,6 +392,9 @@ constant StdErrMsgs = {
 	{ERRMSG_NAME_OF_NOT_ENUM_TYPE,"Compiler Error: Supplied value is not of an enumerated type"},
 	{WARNMSG_ENUM_MISMATCH_TYPES_BINOP,"The two values have different associated literal sets: [1] is of type [2] but [3] is of type [4]."},
 	{WARNMSG_ENUM_MISMATCH_TYPES_FNCALL,"The value passed to [1] as parameter [2] has different associated literal set than what is expected: It is a [3] and should be a [4]."},
+	{ MSG_CC_PREFIX, "Prefix for compiler and related binaries"},
+	{DUPLICATE_MULTI_ASSIGN, "duplicate variables in left hand side of multiple assignment"},
+	{MISSING_CMD_PARAMETER, "Command line argument [1] requires a parameter"},
 	$
 }
 

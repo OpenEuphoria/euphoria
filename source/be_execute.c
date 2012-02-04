@@ -37,6 +37,11 @@
 /******************/
 /* Included files */
 /******************/
+#include <stdint.h>
+#if defined(EWINDOWS) && INTPTR_MAX == INT64_MAX
+// MSVCRT doesn't handle long double output correctly
+#define __USE_MINGW_ANSI_STDIO 1
+#endif
 #include <stdio.h>
 #include <time.h>
 #ifdef EUNIX
@@ -4785,12 +4790,7 @@ void do_exec(intptr_t *start_pc)
 					show_console();
 #endif
 					if (in_from_keyb) {
-#ifdef EUNIX
-						echo_wait();
-						b = getc(stdin);
-#else
-						b = wingetch();
-#endif
+						b = getKBchar();
 					}
 					else {
 #ifdef EUNIX

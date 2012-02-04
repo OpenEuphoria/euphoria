@@ -73,11 +73,11 @@
 #                    TEST_EXTRA:  Set this to arguments you want to append to the eutest program's 
 #                                 arguments.
 #
-#              TESTFILE or LIST:  Set either of these to set narrow the list of unit test files for
+#                      TESTFILE:  Set either of these to set narrow the list of unit test files for
 #                                 either the test target or the testeu target.
 #
 # ex:
-# 	wmake testeu I_EXTRA="-D ETYPE_CHECK" TEST_EXTRA="-log"
+# 	wmake testeu I_EXTRA="-D ETYPE_CHECK" 
 #
 #       This tests using the interpreter with type checking on and writes the results to a log
 #       file.
@@ -86,7 +86,7 @@
 #
 #       Create a copy of eu.lib with debugging on.
 #
-# ex:   wmake test LIST="t_switch.e t_math.e"
+# ex:   wmake test TESTFILE="t_switch.e t_math.e"
 #
 #       Run eutest on only two unit test files.
 #
@@ -428,7 +428,7 @@ OSFLAG=EWINDOWS
 LIBTARGET=$(BUILDDIR)\$(LIBRARY_NAME).lib
 CC = wcc386
 .ERASE
-COMMON_FLAGS = $(DEBUGFLAG) 
+COMMON_FLAGS = $(DEBUGFLAG) -DARCH=ix86
 FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s  /I$(TRUNKDIR) $(EREL_TYPE)
 BE_FLAGS = /ol /zp4 /d$(OSFLAG) /5r /dEWATCOM  /dEOW $(SETALIGN4) $(NOASSERT) $(HEAPCHECKFLAG) $(%ERUNTIME) $(EXTRACHECKFLAG) $(EXTRASTATSFLAG)  $(MEMFLAG) $(EREL_TYPE)
 
@@ -501,7 +501,7 @@ $(TRUNKDIR)\tests\ecp.dat : $(BUILDDIR)\ecp.dat
 testeu : .SYMBOLIC  $(TRUNKDIR)\tests\ecp.dat
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR)
-	-$(EUTEST) -i ..\include $(TEST_EXTRA) -eui "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\eu.ex" -euc "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\ec.ex" $(LIST) $(TESTFILE)
+	-$(EUTEST) -i ..\include $(TEST_EXTRA) --nocheck -eui "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\eu.ex" -euc "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\ec.ex" $(LIST) $(TESTFILE)
 	cd ..\source
 
 !endif #EUPHORIA
@@ -509,24 +509,33 @@ testeu : .SYMBOLIC  $(TRUNKDIR)\tests\ecp.dat
 test : .SYMBOLIC $(TRUNKDIR)\tests\ecp.dat $(BUILDDIR)\eubind.exe $(FULLBUILDDIR)\eu.$(LIBEXT) $(BUILDDIR)\eub.exe
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR) 
-	$(EUTEST) $(TEST_EXTRA) $(VERBOSE_TESTS) -i ..\include -cc wat -eui $(FULLBUILDDIR)\eui.exe -euc $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -bind $(FULLBUILDDIR)\eubind.exe -eub $(BUILDDIR)\eub.exe $(LIST) $(TESTFILE)
+	-$(EUTEST) $(TEST_EXTRA) $(VERBOSE_TESTS) -i ..\include -cc wat -eui $(FULLBUILDDIR)\eui.exe -euc $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -bind $(FULLBUILDDIR)\eubind.exe -eub $(BUILDDIR)\eub.exe -log $(LIST) $(TESTFILE)
+	$(EUTEST) -process-log > $(BUILDDIR)/test-report.txt
+	$(EUTEST) -process-log -html > $(BUILDDIR)/test-report.html	
 	cd ..\source
 
 coverage : .SYMBOLIC code-page-db
 	cd ..\tests
 	-copy $(BUILDDIR)\ecp.dat .
-	$(EUTEST) $(VERBOSE_TESTS) -i ..\include -eui "$(FULLBUILDDIR)\eui.exe" -coverage-db $(FULLBUILDDIR)\unit-test.edb -coverage $(TRUNKDIR)\include -coverage-pp "$(EXE) -i $(TRUNKDIR)\include $(TRUNKDIR)\bin\eucoverage.ex" -coverage-erase $(LIST)
+	$(EUTEST) $(VERBOSE_TESTS) -i ..\include -eui "$(FULLBUILDDIR)\eui.exe" -coverage-db $(FULLBUILDDIR)\unit-test.edb -coverage $(TRUNKDIR)\include -coverage-pp "$(EXE) -i $(TRUNKDIR)\include $(TRUNKDIR)\bin\eucoverage.ex" -coverage-erase $(TESTFILE)
 	-del ecp.dat
 	cd ..\source
 
 report: .SYMBOLIC
-	$(MAKE) ..\reports\report.html
-	
-..\reports\report.html: $(EU_ALL_FILES)
+	$(MAKE) $(FULLBUILDDIR)\test-report.html
+
+..\tests\unittest.log ..\tests\ctc.log : $(EU_ALL_FILES)
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR) 
-	-$(EUTEST) $(VERBOSE_TESTS) -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -euc $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -log $(LIST)
-	$(EUTEST) -process-log -html > ..\reports\report.html
+	-$(EUTEST) $(VERBOSE_TESTS) -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -euc $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -log $(TESTFILE)
+	cd ..\source
+
+
+$(FULLBUILDDIR)\test-report.html: ..\tests\unittest.log ..\tests\ctc.log 
+	cd ..\tests
+	set EUCOMPILEDIR=$(TRUNKDIR) 
+	$(EUTEST) -process-log -html > $(FULLBUILDDIR)\test-report.html
+	copy *.log $(FULLBUILDDIR)
 	cd ..\source
 
 tester: .SYMBOLIC 

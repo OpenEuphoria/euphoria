@@ -1,4 +1,4 @@
-@ echo off
+@echo off
 
 REM --
 REM -- Ensure that an ISS file was given on the command line
@@ -19,8 +19,9 @@ REM --
 
 CD cleanbranch
 IF %ERRORLEVEL% EQU 1 GOTO CheckOut
+hg pull
+hg update -C -r %2
 CD ..
-hg update -r %2
 GOTO DoBuild
 
 :Checkout
@@ -39,7 +40,17 @@ REM -- Build our installer
 REM --
 
 :DoBuild
+copy ..\..\source\build\eu.lib ..\..\bin
+IF %ERRORLEVEL% EQU 1 GOTO MissingFile
+copy ..\..\source\build\eudbg.lib ..\..\bin
+IF %ERRORLEVEL% EQU 1 GOTO MissingFile
+copy ..\..\source\build\eu.a ..\..\bin
+IF %ERRORLEVEL% EQU 1 GOTO MissingFile
+copy ..\..\source\build\eudbg.a ..\..\bin
+IF %ERRORLEVEL% EQU 1 GOTO MissingFile
+
 echo Ensuring binaries are compressed
+
 copy ..\..\source\build\*.exe ..\..\bin
 upx ..\..\bin\creole.exe
 upx ..\..\bin\eub.exe
@@ -57,6 +68,14 @@ upx ..\..\bin\eutest.exe
 
 echo Building our installer...
 ISCC.exe /Q %1
+
+GOTO Done
+
+:MissingFile
+echo.
+echo ** ERROR **
+echo Mising file
+echo.
 
 GOTO Done
 

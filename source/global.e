@@ -599,12 +599,5 @@ export constant LS_DATA = 2 -- literal set
 export sequence literal_sets = {{} -- keys are symtab indicies of the type
 								,{}} -- data
 				
-export enum ERRMSG_NAME_OF_NOT_VARIABLE = 358,
-	ERRMSG_NAME_OF_NOT_UDT,
-	ERRMSG_FWD_REF_NOTSUPPORTED,
-	ERRMSG_NAME_OF_NOT_ENUM_TYPE,
-    WARNMSG_ENUM_MISMATCH_TYPES_BINOP,
-    WARNMSG_ENUM_MISMATCH_TYPES_FNCALL,
-    $
 	
 

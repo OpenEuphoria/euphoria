@@ -151,19 +151,17 @@ typedef struct block_list * block_list_ptr;
 	#endif
 #endif
 
-#if defined( ESIMPLE_MALLOC )
-	#ifdef EUNIX
-	#include <stdlib.h>
-	#endif
-	#define EMalloc(size) malloc( (size_t)size)
-	#define EFree(ptr) free(ptr)
-	#define ERealloc(orig, newsize) realloc(orig, newsize)
-#else
-	extern char *EMalloc(uintptr_t size);
-	extern void EFree(char *ptr);
-	extern char *ERealloc(char *orig, uintptr_t newsize);
+#ifdef EUNIX
+#include <stdlib.h>
 #endif
+#if defined( ESIMPLE_MALLOC )
 
+	#define EFree(ptr) free(ptr)
+#else
+	extern void EFree(char *ptr);
+#endif
+extern char *EMalloc(uintptr_t size);
+extern char *ERealloc(char *orig, uintptr_t newsize);
 #if defined(__GNU_LIBRARY__) || defined(__GLIBC__) \
 	|| (defined(__DJGPP__) && __DJGPP__ <= 2 && __DJGPP_MINOR__ < 4)
 size_t strlcpy(char *dest, char *src, size_t maxlen);
@@ -200,9 +198,10 @@ extern void InitEMalloc();
 extern object NewSequence(char *data, int len);
 extern object NewString(char *s);
 extern s1_ptr NewS1(intptr_t size);
+extern s1_ptr ReNewS1(register s1_ptr s1, intptr_t size);
 extern s1_ptr SequenceCopy(register s1_ptr a);
-
 extern object NewDouble(eudouble d);
+extern object NewPreallocSeq(intptr_t size, object_ptr Objset);
 extern long copy_string(char *dest, char *src, size_t bufflen);
 extern long append_string(char *dest, char *src, size_t bufflen);
 

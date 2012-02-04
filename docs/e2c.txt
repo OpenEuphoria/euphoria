@@ -93,6 +93,20 @@ euc -gcc pretend.exw
 
 Note: //Watcom// is the default on //Windows// and -wat is assumed.
 
+=== -cc-prefix - Compiler prefix
+
+Some compilers, especially MinGW (the Windows version of gcc) may prefix their
+normal names with platform prefixes.  The -cc-prefix switch allows the developer
+to specify this special prefix.  This can also be useful for having a system
+with both the 32bit and 64bit versions installed.  Cross compilers generally require this.
+
+For example, on Windows, to build with MinGW installed as i6856-w64-mingw32:
+
+{{{
+euc -gcc -cc-prefix i686-w64-mingw32- pretend.exw
+}}}
+
+
 ==== -keep
 
 Normally, after building your ##.exe## file, the translator will delete

@@ -15,6 +15,11 @@
 
 #define _LARGEFILE64_SOURCE
 #include <stdlib.h>
+#include <stdint.h>
+#if defined(EWINDOWS) && INTPTR_MAX == INT64_MAX
+// MSVCRT doesn't handle long double output correctly
+#define __USE_MINGW_ANSI_STDIO 1
+#endif
 #include <stdio.h>
 #include <math.h>
 
@@ -197,7 +202,6 @@ int use_prompt() {
 #define setenv MySetEnv
 static int MySetEnv(const char *name, const char *value, const int overwrite) {
 	int len;
-	int real_len;
 	char *str;
 
 	if (!overwrite && (getenv(name) != NULL))
@@ -207,7 +211,7 @@ static int MySetEnv(const char *name, const char *value, const int overwrite) {
 	str = EMalloc(len + 1); // NOTE: This is deliberately never freed until the application ends.
 	if (! str)
 		return 0;
-	real_len = snprintf(str, len+1, "%s=%s", name, value);
+	snprintf(str, len+1, "%s=%s", name, value);
 	str[len] = '\0'; // ensure NULL
 	len = putenv(str);
 	return len;
@@ -229,15 +233,9 @@ uintptr_t get_pos_int(char *where, object x)
 IFILE long_iopen(char *name, char *mode)
 /* iopen a file. Has support for Windows 95 long filenames */
 {
-	return iopen(name, mode);
+	IFILE f = iopen(name, mode);
+	return f;
 }
-
-int long_open(char *name, int mode)
-/* open a file. Has support for Windows 95 long filenames */
-{
-	return open(name, mode);
-}
-
 
 char *name_ext(char *s)
 /* returns a pointer to the 8.3 file name & extension part of a path */
@@ -319,8 +317,7 @@ void InitGraphics()
 void EndGraphics()
 {
 #ifdef EWINDOWS
-	SetConsoleMode(console_output,
-					ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT); // back to normal
+	SetConsoleMode(console_output, orig_console_mode); // back to normal
 #endif
 #ifdef EUNIX
 	tcsetattr(STDIN_FILENO, TCSANOW, &savetty);
@@ -478,23 +475,25 @@ static object Video_config()
 static object Cursor(object x)
 /* set style of cursor */
 {
+	
+#ifdef EWINDOWS
 	short style;
-#ifdef EWINDOWS
 	CONSOLE_CURSOR_INFO c;
-#endif
 	style = get_int(x);
-#ifdef EWINDOWS
 	c.dwSize = (style == 0x0607) ? 12 :
 			   (style == 0x0507) ? 25 :
 			   (style == 0x0407) ? 50 :
 								  100;
 	c.bVisible = (style != 0x02000);
 	SetConsoleCursorInfo(console_output, &c);
+	return ATOM_1;
 #endif
 #ifdef EUNIX
 	// leaveok(stdscr, style != 0x02000); doesn't work very well
+	x = 1;
+	return x;
 #endif
-	return ATOM_1;
+	
 }
 
 static object TextRows(object x)
@@ -573,19 +572,17 @@ void do_scroll(int top, int bottom, int amount)
 	show_console();
 	GetConsoleScreenBufferInfo(console_output, &info);
 	src.Left = 0;
-//	src.Right = info.dwMaximumWindowSize.X - 1;
 	src.Right = info.dwSize.X - 1;
 	src.Top = top - 1;
 	src.Bottom = bottom - 1;
 	clip = src;
 	dest.X = 0;
-	dest.Y = src.Top - amount; // for now
-//	GetConsoleScreenBufferInfo(console_output, &info);
+	dest.Y = src.Top - amount;
+
 	fill_char.Char.AsciiChar = ' ';
 	fill_char.Attributes = info.wAttributes;
-	if (abs(amount) > abs(bottom - top)) {
-//		EClearLines(top, bottom, info.dwMaximumWindowSize.X - 1, fill_char.Attributes);
-		EClearLines(top, bottom, info.dwSize.X - 1, fill_char.Attributes);
+	if (abs(amount) > abs(bottom - top + 1)) {
+		EClearLines(top, bottom, info.dwSize.X, fill_char.Attributes);
 	}
 	else {
 		ScrollConsoleScreenBuffer(console_output,
@@ -860,13 +857,13 @@ static object Where(object x)
 	// if (user_file[file_no].mode & EF_APPEND)
 		iflush(f);  // This fixes a bug in Watcom 10.6 that is fixed in 11.0
 #endif
-	result = itell(f);
+	result = (IOFF)itell(f);
 	if (result == (IOFF)-1)
 	{
 		RTFatal("where() failed on this file");
 	}
 	if (result > (IOFF)MAXINT || result < (IOFF)MININT)
-		pos = NewDouble((eudouble)result);  // maximum 2 billion
+		pos = NewDouble((eudouble)result);  // maximum 8 quintillion
 	else
 		pos = (object) result;
 	
@@ -1294,11 +1291,6 @@ static object CurrentDir()
 	if (cwd == NULL)
 		RTFatal("current directory not available");
 	else {
-#ifdef EWINDOWS
-		/* Fix potential problem with lowercase drive letter */
-		if (cwd[0] >= 97 && cwd[0] <= 122)
-			cwd[0] -= 32;
-#endif
 		result = NewString(cwd);
 		EFree(buff);
 	}
@@ -1313,10 +1305,10 @@ static object PutScreenChar(object x)
 	s1_ptr args;
 	object_ptr p;
 #ifdef EUNIX
-	unsigned fg, bg;
 	unsigned c;
 	char s1[2];
 	int save_line, save_col;
+	unsigned int fg, bg;
 #endif
 #ifdef EWINDOWS
 	COORD coords;
@@ -1440,30 +1432,83 @@ static object GetScreenChar(object x)
 	return MAKE_SEQ(result);
 }
 
+
+static object key_codes(object x)
+/* x is either a sequence of exactly 256 replacement keycodes or an atom.
+   If an atom, then the existing key codes are not replaced.
+   
+   This function returns the existing 256 key codes as a sequence.
+*/
+{
+	int replacements[256];
+	int current_codes[256];
+	int i;
+	object_ptr elem;
+	object ob;
+	int seqlen;
+	int slen;
+	int *ip = 0;
+	s1_ptr result;
+		
+	// Copy the the existing codes.
+	for (i = 0 ; i < 256; i++)
+		current_codes[i] = VK_to_EuKBCode[i];
+		
+	if (IS_SEQUENCE(x)) {
+		slen = SEQ_PTR(x)->length;
+		if (slen != 256)
+			RTFatal("key code sequence must be exactly 256 integers");
+			
+		elem = SEQ_PTR(x)->base;
+		seqlen = slen;
+		ip = &replacements[0];
+		while (seqlen) {
+			elem++;
+			ob = *(elem);
+			seqlen--;
+			if (IS_ATOM_INT(ob)) {
+				*ip = (int)ob;
+				ip++;
+			}
+			else {
+				RTFatal("key code sequence must only contain integers");
+			}
+		}	
+		// Copy replacement codes to overwrite the current codes.
+		for (i = 0 ; i < 256; i++)
+			VK_to_EuKBCode[i] = replacements[i];
+	}
+	
+	/* start with empty sequence as result */
+	result = NewS1((long)256);
+
+	elem = result->base;
+	for (i = 0 ; i < 256; i++) {
+		elem++;
+		*(elem) = (object)current_codes[i];
+	}
+
+	return MAKE_SEQ(result);
+}
+
 static object GetPosition()
 /* return {line, column} for cursor */
 {
-#ifdef EUNIX
-	struct rccoord pos;
-#endif
+
+	struct eu_rccoord pos;
 	object_ptr obj_ptr;
 	s1_ptr result;
-#ifdef EWINDOWS
-	CONSOLE_SCREEN_BUFFER_INFO console_info;
-#endif
 
 	result = NewS1(2);
 	obj_ptr = result->base;
 #ifdef EWINDOWS
 	show_console();
-	GetConsoleScreenBufferInfo(console_output, &console_info);
-	obj_ptr[1] = MAKE_INT(console_info.dwCursorPosition.Y+1);
-	obj_ptr[2] = MAKE_INT(console_info.dwCursorPosition.X+1);
-#else
-	pos = GetTextPositionP();
+#endif
+
+	GetTextPositionP(&pos);
 	obj_ptr[1] = MAKE_INT(pos.row);
 	obj_ptr[2] = MAKE_INT(pos.col);
-#endif
+
 	return MAKE_SEQ(result);
 }
 
@@ -1814,6 +1859,7 @@ void init_fp_conversions(){
 
 static object float_to_atom(object x, int flen)
 /* convert a sequence of 4, 8 or 10 bytes in IEEE format to an atom */
+/* must avoid type casts from floating point values that may not be 8-byte aligned. */
 {
 	int len, i;
 	object_ptr obj_ptr;
@@ -1823,7 +1869,6 @@ static object float_to_atom(object x, int flen)
 		double fdouble;
 		float  ffloat;
 	} convert;
-
 	eudouble d;
 	s1_ptr s;
 
@@ -1846,7 +1891,6 @@ static object float_to_atom(object x, int flen)
 		#else
 			d = (eudouble)convert.ldouble;
 		#endif
-		
 	}
 	return NewDouble(d);
 }
@@ -2290,7 +2334,13 @@ void set_page_to_read_write_execute(page_ptr page_addr) {
 	mprotect(page_addr, pagesize, PROT_EXEC | PROT_READ | PROT_WRITE );
 #endif
 }
-
+/* addressable version of CALLBACK_POINTER constant for use with memcmp */
+const uintptr_t callback_pointer_magic = (uintptr_t) CALLBACK_POINTER;
+#if defined(EOSX)
+	const uintptr_t general_ptr_magic = 0xF001F001;
+#elif (INTPTR_MAX == INT64_MAX)
+	const uintptr_t general_ptr_magic = 0xabcdefabcdefabcdLL;
+#endif
 object CallBack(object x)
 /* return either a call-back address for routine id x
    x can be the routine id for stdcall, or {'+', routine_id} for cdecl
@@ -2308,11 +2358,12 @@ object CallBack(object x)
    */
 {
 	static unsigned char *page_addr = NULL;
-	static unsigned int page_offset = 0;
+	static long page_offset = 0;
 	static long call_increment = 0;
 	static long last_block_offset = 0;
 	uintptr_t addr;
-	int routine_id, i, num_args;
+	intptr_t routine_id;
+	int i, num_args;
 	unsigned char *copy_addr;
 #ifndef ERUNTIME
 	symtab_ptr routine;
@@ -2322,7 +2373,9 @@ object CallBack(object x)
 	int convention;
 	int res;
 	convention = C_CDECL;
-	not_patched = 1;
+	/* bit 0 set, iff the symtab_ptr has not been patched yet. */
+	not_patched = 1;	
+	
 	/* Handle whether it is {'+', routine_id} or {routine_id}:
 	 * Set flags and extract routine id value. */
 	if (IS_SEQUENCE(x)) {
@@ -2341,6 +2394,11 @@ object CallBack(object x)
 #endif
 	}
 
+#if defined( EWINDOWS ) && INTPTR_MAX == INT64_MAX
+	// For some reason the cdecl callback crashes on windows, but this always works.
+	// We're not really using stdcall or cdecl anyways
+	convention = C_STDCALL;
+#endif
 	/* Check routine_id value and get the number of arguments */
 #ifdef ERUNTIME
 	num_args = rt00[routine_id].num_args;
@@ -2438,28 +2496,42 @@ object CallBack(object x)
 	if (res != 0) {
 		RTFatal("Internal error: CallBack memcopy failed (%d).", res);
 	}
-	
-
+#if defined(EOSX) || (INTPTR_MAX == INT64_MAX)
+	// For platforms that also have 'general_ptr' to patch, 'not_patched' should have another
+	// bit set to be cleared when they patch this value.
+	not_patched = 010 | not_patched;
+#endif
 	// Plug in the symtab pointer
-	// Find 78 56 34 12
-	for (i = 4; i < CALLBACK_SIZE-4; i++) {
-#ifdef EOSX
-		if( (*(uintptr_t*)(addr + i)) == 0xF001F001 ){
-			*(uintptr_t *)(copy_addr+i) = (uintptr_t)general_ptr;
-		}
-#endif
-		if ( *(intptr_t*)(copy_addr + i) == (intptr_t)CALLBACK_POINTER ) {
+	// Find the magic number, CALLBACK_POINTER (callback_pointer_magic)
+	// in memory.
+	for (i = 4; not_patched && (i < CALLBACK_SIZE-4); i++) { 
+		
+		/* ARM cannot do unaligned memory access.
+		 * We cannot compare copy_addr[i..i+sizeof(intptr_t)] as an intptr_t here because this would be
+		 * a misaligned memory access.  The following code however, compares the data byte by byte using
+		 * callback_pointer_magic, which has the same value as CALLBACK_POINTER. */
+		if ((copy_addr[i] == ((intptr_t)CALLBACK_POINTER & 0xff)) &&
+			(memcmp(&copy_addr[i],&callback_pointer_magic,sizeof(intptr_t))==0)) {
+			
+			memcpy(&copy_addr[i],
 #ifdef ERUNTIME
-			*(intptr_t *)(copy_addr+i) = routine_id;
+			&routine_id,
 #else
-			*(intptr_t *)(copy_addr+i) = (intptr_t)e_routine[routine_id];
+			&e_routine[routine_id],
 #endif
-			not_patched = 0;
-			break;
+			sizeof(intptr_t));
+			
+			not_patched &= ~1;
+						
 		}
-#if INTPTR_MAX == INT64_MAX
-		else if( *((uintptr_t*)(copy_addr + i)) == 0xabcdefabcdefabcdLL ){
+#if defined(EOSX) || (INTPTR_MAX == INT64_MAX)
+/* If OS/X ever gets ported to ARM ... */
+#if ARCH == ARM
+#error "misaligned comparison code" 
+#endif
+		else if( *((uintptr_t*)(copy_addr + i)) == general_ptr_magic ){
 			*((uintptr_t*)(copy_addr + i)) = (uintptr_t)general_ptr;
+			not_patched &= ~010;
 		}
 #endif
 	}
@@ -2702,6 +2774,8 @@ void Machine_Handler(int sig_no)
 }
 
 #ifndef ERUNTIME
+int sprint_ptr;
+
 extern struct IL fe;
 int in_backend = 0;
 object start_backend(object x)
@@ -2718,8 +2792,8 @@ object start_backend(object x)
 
 	x_ptr = SEQ_PTR(x);
 
-	if (IS_ATOM(x) || x_ptr->length != 12)
-		RTFatal("BACKEND requires a sequence of length 12");
+	if (IS_ATOM(x) || x_ptr->length != 13)
+		RTFatal("BACKEND requires a sequence of length 13");
 
 	fe.st = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
 	fe.sl = (struct sline *) get_pos_int(w, *(x_ptr->base+2));
@@ -2736,6 +2810,7 @@ object start_backend(object x)
 	syncolor          = get_pos_int(w, *(x_ptr->base+11));
 	
 	set_debugger( (char*) get_pos_int(w, *(x_ptr->base+12)) );
+	sprint_ptr        = get_pos_int(w, *(x_ptr->base+13));
 	
 	// This is checked when we try to write coverage to make sure
 	// we need to output an error message.
@@ -2785,6 +2860,10 @@ object machine(object opcode, object x)
 	char *src;
 	eudouble d;
 	int temp;
+#	ifndef ERUNTIME	
+		intptr_t (*fn_ptr)();
+		fn_ptr = rt00[sprint_ptr].addr;
+#	endif
 
 	while (TRUE) {
 		switch(opcode) {  /* tricky - could be atom or sequence */
@@ -3249,6 +3328,24 @@ object machine(object opcode, object x)
 				// translated code doesn't do anything
 				return 0;
 #endif
+	        case M_SPRINT:
+#			ifndef ERUNTIME
+		        	return (*fn_ptr)(x);
+#			else
+				sprint_sequence = NULL;
+				Print((IFILE)DOING_SPRINTF, x, 100, 80, 0, 0);
+				if (sprint_sequence == NULL) 
+					RTInternal("Creation of sprint_sequence failed.\n");
+				x = MAKE_SEQ(sprint_sequence);
+				Ref(x);				
+				return x;
+#			endif
+			
+		
+
+            case M_KEY_CODES:
+                return key_codes(x);
+	
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:
 				/* could be out-of-range int, or double, or sequence */

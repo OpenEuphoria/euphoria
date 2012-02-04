@@ -1786,7 +1786,16 @@ export procedure emit_op(integer op)
 			end if
 		end if
 		assignable = FALSE
-
+	
+	case REF_TEMP then
+		-- Used by the Translator to save temps
+		emit_opcode( REF_TEMP )
+		emit_addr( Pop() )
+	
+	case DEREF_TEMP then
+		emit_opcode( DEREF_TEMP )
+		emit_addr( Pop() )
+		
 	case else
 		InternalErr(259, {op})
 

@@ -142,4 +142,18 @@ test_equal("name_of works with a variable from a out of order integer (incomplet
 test_equal("name_of works with defining constant from a in order (complete interval) enumerated type","VENUS",name_of(VENUS))
 test_equal("name_of works with a variable from a in order (complete interval) enumerated type","MARS",name_of(mining_target))
 
+-- Test enum types from an included file:
+include enum_type.e
+architecture x = 1
+test_equal( "X86 name_of via local variable", "X86", name_of( x ) )
+test_equal( "ARM name_of via included variable", "ARM", name_of( y ) )
+test_true( "X86 is an ARCHITECTURE", architecture( X86 ) )
+test_true( "X86_64 is an ARCHITECTURE", architecture( X86_64 ) )
+test_true( "ARM is an ARCHITECTURE", architecture( ARM ) )
+
+test_equal( "X86 name_of", "X86", name_of( X86 ) )
+test_equal( "X86_64 name_of", "X86_64", name_of( X86_64 ) )
+test_equal( "ARM name_of", "ARM", name_of( ARM ) )
+
+
 test_report()

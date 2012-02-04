@@ -172,6 +172,8 @@ procedure create_temp( symtab_index sym, integer referenced )
 	end if
 end procedure
 
+sequence saved_temps = {}
+
 --**
 -- Disposes of a temp.  If keep = DISCARD_TEMP, then the temp will be
 -- dereferenced if its reference count was incremented when
@@ -180,6 +182,10 @@ end procedure
 -- temp will be left in the map.
 procedure dispose_temp( symtab_index sym, integer keep, integer remove_from_map )
 	if is_temp( sym ) then
+		if find( sym, saved_temps ) then
+			-- this will be deref'd manually
+			return
+		end if
 		integer referenced = map:get( dead_temp_walking, sym, 0 )
 		if remove_from_map then
 			map:remove( dead_temp_walking, sym )
@@ -199,7 +205,16 @@ end procedure
 -- where a forward procedure call was transformed into a forward function
 -- call.
 procedure opDEREF_TEMP()
+	integer ix = find( Code[pc+1], saved_temps )
+	if ix then
+		saved_temps = remove( saved_temps, ix )
+	end if	
 	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
+	pc += 2
+end procedure
+
+procedure opREF_TEMP()
+	saved_temps &= Code[pc+1]
 	pc += 2
 end procedure
 
@@ -5931,7 +5946,7 @@ procedure opGETC()
 			c_stmt("@ = getc((FILE*)xstdin);\n", Code[pc+2])   -- echo the character
 		end if
 	else
-		c_stmt("@ = wingetch();\n", Code[pc+2])
+		c_stmt("@ = getKBchar();\n", Code[pc+2])
 	end if
 	c_stmt0("}\n")
 	c_stmt0("else{\n")
@@ -6945,7 +6960,6 @@ export procedure init_opcodes()
 			     "PROC_FORWARD",
 			     "FUNC_FORWARD",
 			     "TYPE_CHECK_FORWARD",
-				 "REF_TEMP",
 				 "NOVALUE_TEMP",
 				 "COVERAGE_LINE",
 				 "COVERAGE_ROUTINE" then
@@ -6963,7 +6977,8 @@ export procedure init_opcodes()
 
 			case "DEREF_TEMP" then
 				operation[i] = routine_id("opDEREF_TEMP")
-
+			case "REF_TEMP" then
+				operation[i] = routine_id("opREF_TEMP")
 			case else
 				operation[i] = -1
 		end switch
@@ -7328,7 +7343,13 @@ procedure BackEnd(atom ignore)
 			c_stmt0("argc = 1;\n")
 			c_stmt0("Argc = 1;\n")
 			c_stmt0("argv = make_arg_cv(szCmdLine, &argc);\n")
+			c_stmt0("if( hInstance ){\n")
 			c_stmt0("winInstance = hInstance;\n")
+			c_stmt0("}\n")
+			c_stmt0("else{\n")
+			c_stmt0("winInstance = GetModuleHandle(0);\n")
+			c_stmt0("}\n")
+			
 		end if
 	else --TUNIX
 		if dll_option then

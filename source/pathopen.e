@@ -362,7 +362,7 @@ export function load_euphoria_config( sequence file )
 	return new_args
 end function
 
-export function GetDefaultArgs()
+export function GetDefaultArgs( sequence user_files )
 	object env
 	sequence default_args = {}
 	sequence conf_file = "eu.cfg"
@@ -379,8 +379,16 @@ export function GetDefaultArgs()
 	
 	sequence cmd_options = get_options()
 	
+	default_args = {}
+	
+	-- files specified on the command line come first:
+	for i = 1 to length( user_files ) do
+		sequence user_config = load_euphoria_config( user_files[i] )
+		default_args = merge_parameters( user_config, default_args, cmd_options, 1 )
+	end for
+	
 	-- From current working directory
-	default_args = load_euphoria_config("./" & conf_file)
+	default_args = merge_parameters( load_euphoria_config("./" & conf_file), default_args, cmd_options, 1 )
 	
 	-- From where ever the executable is
 	env = strip_file_from_path( exe_path() )

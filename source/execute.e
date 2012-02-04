@@ -55,7 +55,8 @@ constant M_CALL_BACK = 52,
 		 M_CRASH_MESSAGE = 37,
 		 M_CRASH_FILE = 57,
 		 M_TICK_RATE = 38,
-		 M_WARNING_FILE	= 72
+		 M_WARNING_FILE	= 72,
+		 M_SPRINT = 106
 
 constant C_MY_ROUTINE = 1,
 		 C_USER_ROUTINE = 2,
@@ -2634,7 +2635,6 @@ function RTLookup(sequence name, integer file, symtab_index proc, integer stlen 
 		s = SymTab[TopLevelSub][S_NEXT]
 		while s != 0 and (s <= stlen or SymTab[s][S_SCOPE] = SC_PRIVATE) do
 			integer scope = SymTab[s][S_SCOPE]
-
 			if (((scope = SC_PUBLIC) and
 					(SymTab[s][S_FILE_NO] = ns_file
 					 or ( and_bits( PUBLIC_INCLUDE, include_matrix[ns_file][SymTab[s][S_FILE_NO]] ) and
@@ -2646,14 +2646,16 @@ function RTLookup(sequence name, integer file, symtab_index proc, integer stlen 
 				(scope = SC_GLOBAL) and
 					(SymTab[s][S_FILE_NO] = ns_file
 					 or ( include_matrix[ns_file][SymTab[s][S_FILE_NO]] and
-					      and_bits( DIRECT_OR_PUBLIC_INCLUDE, include_matrix[file][ns_file] ) ) ))
+					      and_bits( DIRECT_OR_PUBLIC_INCLUDE, include_matrix[file][ns_file] ) ) )
+				or
+				(scope = SC_LOCAL and ns_file = file))
 			and equal( SymTab[s][S_NAME], name )
 			then
 				return s
 			end if
 			s = SymTab[s][S_NEXT]
 		end while
-
+		
 		return 0 -- couldn't find name in ns file
 
 	else
@@ -3645,7 +3647,9 @@ procedure opMACHINE_FUNC()
 
 	pc += 4
 	-- handle CALL_BACK specially
-	if val[a] = M_CALL_BACK then
+	if val[a] = M_SPRINT then
+		val[target] = sprint(val[b])	
+	elsif val[a] = M_CALL_BACK then
 		-- routine id's must be handled at our level
 		do_callback(b)
 	else

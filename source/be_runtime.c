@@ -11,6 +11,11 @@
 /******************/
 #define _LARGE_FILE_API
 #define _LARGEFILE64_SOURCE
+#include <stdint.h>
+#if defined(EWINDOWS) && INTPTR_MAX == INT64_MAX
+// MSVCRT doesn't handle long double output correctly
+#define __USE_MINGW_ANSI_STDIO 1
+#endif
 #include <stdio.h>
 
 #include <stdarg.h>
@@ -41,11 +46,11 @@
 
 #include <string.h>
 #ifdef EWINDOWS
-	#if defined(EMINGW) && INTPTR_MAX == INT32_MAX
-		// some versions of MinGW don't define this
-		#define _WIN32_IE 0x0400
-	#endif
+	/* Ensure we set this to 0x400 whether or not it is set. */
 	#include <windows.h>
+	#ifndef _WIN32_IE
+		#define _WIN32_IE WINVER
+	#endif
 	#include <commctrl.h>
 #endif
 
@@ -79,22 +84,14 @@
 /* convert atom to char. *must avoid side effects in elem* */
 #define Char(elem) ((IS_ATOM_INT(elem)) ? ((char)INT_VAL(elem)) : doChar(elem))
 
-#if defined(EMINGW)
-int winkbhit();
-#endif
-
 #define CONTROL_Z 26
-
-#define NAG_DELAY 7
-
-#ifdef EUNIX
-#define LEFT_ARROW 260
-#define BS 263
-#else
-#define LEFT_ARROW 331
+#define CR 13
+#define LF 10
 #define BS 8
-#endif
 
+#ifdef EWINDOWS
+static int winkbhit();
+#endif
 /**********************/
 /* Imported variables */
 /**********************/
@@ -722,22 +719,9 @@ void Append(object_ptr target, object s1, object a)
 			/* make some more postfill space */
 			new_len = EXTRA_EXPAND(len);
 			base = s1p->base;
-			/* allow 1*4 for end marker */
-			/* base + new_len + 2 could overflow 32-bits??? */
-			new_s1p = (s1_ptr)ERealloc((char *)s1p,
-							   (char *)(base + new_len + 2) - (char *)s1p);
-			new_s1p->base = (object_ptr)new_s1p +
-							 ((object_ptr)base - (object_ptr)s1p);
-
+			new_s1p = ReNewS1(s1p, new_len+1);
 			s1p = new_s1p;
-			s1p->postfill = new_len - len;
-
 			*target = MAKE_SEQ(s1p);
-		/* OPTIMIZE: we may have more space in the current allocation
-		   than we think, due to power of 2 round up etc. Can
-		   we find out what we have and increment postfill
-		   accordingly? Then we can usually avoid memcopying too much
-		   in Realloc. */
 		}
 		s1p->postfill--;
 		s1p->length++;
@@ -783,14 +767,10 @@ s1_ptr Add_internal_space(object a,int at,int len)
 	int nseq = seq->length;
 	if (seq->ref == 1 ){
 		if( len >= seq->postfill ){
-			int base_offset;
 			new_len = EXTRA_EXPAND(nseq + len);
-			base_offset = (object_ptr)seq->base - (object_ptr)seq;
-			new_seq = (s1_ptr)ERealloc((char *)seq, (new_len + 1)*sizeof(s1_ptr) + sizeof( struct s1 ));
-			new_seq->base = (object_ptr)(new_seq) + base_offset;
+			new_seq = ReNewS1(seq, new_len);
+			new_seq->postfill -= len;
 			seq = new_seq;
-			seq->postfill = new_len - (len + nseq) - 1;
-
 		}
 		else{
 			seq->postfill -= len;
@@ -2442,6 +2422,8 @@ if( !IS_ATOM_INT( X ) && IS_ATOM( X ) ){ \
 
 object calc_MD5(object a)
 {
+#if 0
+// TODO: MD5 Unimplemented!
 	object lTempResult;
 	long lSLen;
 	int tfi;
@@ -2487,12 +2469,14 @@ object calc_MD5(object a)
 			lSLen--;
 		}
 	}
-
-	return 0;
+#endif
+	return a ^ a;
 }
 
 object calc_SHA256(object a)
 {
+#if 0
+// TODO: SHA256 Unimplemented!
 	object lTempResult;
 	long lSLen;
 	int tfi;
@@ -2539,8 +2523,8 @@ object calc_SHA256(object a)
 			lSLen--;
 		}
 	}
-
-	return 0;
+#endif
+	return a ^ a;
 }
 
 
@@ -2694,6 +2678,7 @@ static uint32_t calc_hsieh32(object a)
  	uint32_t lHashVal;
 	int has_string;
 
+	sp = 0;
 	IS_DOUBLE_AN_INTEGER(a)
 	if (IS_ATOM_INT(a)) {
 	 	tf.integer = a;
@@ -3171,7 +3156,6 @@ object compare(object a, object b)
 object find(object a, s1_ptr b)
 /* find object a as an element of sequence b */
 {
-	int length;
 	object_ptr bp;
 	object bv;
 
@@ -3232,7 +3216,6 @@ object find(object a, s1_ptr b)
 
 		int a_len;
 
-		length = b->length;
 		a_len = SEQ_PTR(a)->length;
 		while (TRUE) {
 			bv = *(++bp);
@@ -3649,7 +3632,7 @@ object EOpen(object filename, object mode_obj, object cleanup)
 	IFILE fp;
 	long length;
 	int i;
-	int mode, text_mode;
+	int mode;
 	cleanup_ptr cup;
 
 	if (IS_ATOM(mode_obj))
@@ -3668,14 +3651,12 @@ object EOpen(object filename, object mode_obj, object cleanup)
 	MakeCString(cmode, mode_obj, EOpen_cmode_len );
 
 	length = strlen(cmode);
-	text_mode = 1;  /* assume text file */
 	if (strcmp(cmode, "r") == 0) {
 		mode = EF_READ;
 	}
 
 	else if (strcmp(cmode, "rb") == 0) {
 		mode = EF_READ;
-		text_mode = 0;
 	}
 
 	else if (strcmp(cmode, "w") == 0) {
@@ -3684,7 +3665,6 @@ object EOpen(object filename, object mode_obj, object cleanup)
 
 	else if (strcmp(cmode, "wb") == 0) {
 		mode = EF_WRITE;
-		text_mode = 0;
 	}
 
 	else if (strcmp(cmode, "a") == 0) {
@@ -3693,12 +3673,10 @@ object EOpen(object filename, object mode_obj, object cleanup)
 
 	else if (strcmp(cmode, "ab") == 0) {
 		mode = EF_WRITE | EF_APPEND;
-		text_mode = 0;
 	}
 
 	else if (strcmp(cmode, "ub") == 0) {
 		mode = EF_READ | EF_WRITE;
-		text_mode = 0;
 		copy_string(cmode, "r+b", EOpen_cmode_len);
 	}
 
@@ -3728,6 +3706,11 @@ object EOpen(object filename, object mode_obj, object cleanup)
 		else {
 			user_file[i].fptr = fp;
 			user_file[i].mode = mode;
+			if (mode & EF_APPEND) {
+				// Ensure that 'append' mode is initially positioned at end of file.
+				fseek(fp, 0, SEEK_END);
+			}
+			
 			if( get_pos_int( "open", cleanup ) ){
 				cup = (cleanup_ptr) EMalloc( sizeof( struct cleanup ) );
 				cup->type = CLEAN_FILE;
@@ -3749,17 +3732,17 @@ object EOpen(object filename, object mode_obj, object cleanup)
 
 
 object EGets(object file_no)
-/* reads a line from a file for the user (GETS) */
+/* reads a line of text from a file for the user (GETS) */
 {
-	int i, c;
+	long i, c;
+	long oldc;
 	IFILE f;
-	char *line_ptr;
-	object_ptr obj_ptr;
-	int len;
-	object result_line;
-
-	if (current_screen != MAIN_SCREEN && might_go_screen(file_no))
-		MainScreen();
+	object_ptr line_ptr;
+	object_ptr next_char_ptr;
+	object_ptr last_char_ptr;
+	int bufsize;
+	
+	bufsize = 134;	// Initial value. Assumes most line lengths are less than this.
 
 	if (file_no == last_r_file_no)
 		f = last_r_file_ptr;
@@ -3772,123 +3755,108 @@ object EGets(object file_no)
 		last_r_file_ptr = f;
 	}
 
-	line_ptr = TempBuff;
+	if (current_screen != MAIN_SCREEN && might_go_screen(last_r_file_no))
+		MainScreen();
 
-	/* read first character */
+	line_ptr = (object_ptr)EMalloc(bufsize * sizeof(object));
+	next_char_ptr = line_ptr - 1; // Point to the [-1] object.
+	last_char_ptr = line_ptr + (bufsize - 2); // Leave room for final NL and NOVALUE
+	i = 0;
+	oldc = EOF;
 
-	if (f == stdin) {
-#ifdef EWINDOWS
-		show_console();
-#endif
-		if (in_from_keyb) {
-#ifdef EUNIX
-			echo_wait();
-			c = getc(stdin);
-#else
-			c = wingetch();
-#endif //EUNIX
-		}
-		else {
-			c = getc(f);
-		}
-	}
-	else
-		c = getc(f);
+	if ((f == stdin) && in_from_keyb) {
 
-	if (c == EOF)
-		result_line = ATOM_M1;
-	else {
-		i = 0;
-		if (f == stdin) {
-			do {
-				TempBuff[i++] = c;
-				if (c <= '\n') {
-					if (c == '\n') {
-#ifdef EWINDOWS
-						if (in_from_keyb)
-							screen_col = 1;
-#endif
-						break;
-					}
-					else if (c == EOF) {
-						i--;
-						break;
-					}
-				}
-				if (i == TEMP_SIZE)
-					break;
-
-				/* read next character */
-				if (in_from_keyb)
-#ifdef EUNIX
-					c = getc(stdin);
-#else
-					c = wingetch();
-#endif
-				else
-					c = getc(f);
-
-			} while (TRUE);
-		}
-
-		else {
-			// not stdin - faster loop
-			do {
-				TempBuff[i++] = c;
-				if (c <= '\n') {
-					if (c == '\n') {
-						break;
-					}
-					else if (c == EOF) {
-						i--;
-						break;
-					}
-				}
-				if (i == TEMP_SIZE)
-					break;
-				c = getc(f);
-			} while (TRUE);
-		}
-
-		/* create a sequence */
-		obj_ptr = (object_ptr)NewS1((long)i);
-		result_line = (object)MAKE_SEQ(obj_ptr);
-		obj_ptr = ((s1_ptr)obj_ptr)->base;
-		len = i;
-
-		do {  // i will be > 0
-			*(++obj_ptr) = (unsigned char)*line_ptr++;
-		} while (--i > 0);
-
-		if (len == TEMP_SIZE && TempBuff[TEMP_SIZE-1] != '\n') {
-			/* long line -- more coming */
-			while (TRUE) {
-				/* read next character */
-				if (f == stdin) {
-					if (in_from_keyb)
-#ifdef EUNIX
-						c = getc(stdin);
-#else
-						c = wingetch();
-#endif
-					else
-						c = getc(f);
-				}
-				else
-					c = getc(f);
-
-				if (c == '\n' || c == EOF)
-					break;
-				Append(&result_line, result_line, (unsigned char)c);
+		while (1)
+		{
+			// Move to next location to receive the next input character.
+			next_char_ptr++;
+	
+			if (next_char_ptr == last_char_ptr) {
+				// No room in current buffer, so expand it.
+				bufsize = 64;	// Expansions use this value.
+				i = last_char_ptr - line_ptr;
+				line_ptr = (object_ptr)ERealloc((char *)line_ptr, (i + bufsize + 2) * sizeof(object));
+				next_char_ptr = line_ptr + i;
+				last_char_ptr = next_char_ptr + bufsize; // Leave room for final NL and NOVALUE
 			}
+			
+			/* read a character */
+			c = getKBchar();
+			if (c == EOF) {
+				break;
+			}
+	
+			// Save the current character.
+			oldc = c;
+			
+			if (c == '\n') {
+				screen_col = 1;
+				break;
+			}
+						
+				
+			*next_char_ptr = c;
+
+		}	// end while
+	}
+	else {
+		do
+		{
+			// Move to next location to receive the next input character.
+			next_char_ptr++;
+
+			if (next_char_ptr == last_char_ptr) {
+				// No room in current buffer, so expand it.
+				bufsize = 64;	// Expansions use this value.
+				i = last_char_ptr - line_ptr;
+				line_ptr = (object_ptr)ERealloc((char *)line_ptr, (i + bufsize + 2) * sizeof(object));
+				next_char_ptr = line_ptr + i;
+				last_char_ptr = next_char_ptr + bufsize;
+			}
+
+			/* read a character */
+			c = getc(f);
+
+			if (c == EOF) {
+				break;
+			}	
+			// Save the current character.
+			oldc = c;
 
 			if (c == '\n') {
-				Append(&result_line, result_line, (unsigned char)'\n');
+				break;
 			}
-		}
+
+			*next_char_ptr = c;
+
+		} while(TRUE);
+		
+	} // end if
+	
+	
+	if (oldc == EOF) {
+		// No input characters where actually read.
+		return (object)ATOM_M1;
 	}
 
-	return result_line;
+	if (oldc == '\r') {
+		// Remove trailing CR.
+		next_char_ptr--;
+	}
+		
+	// Every line will end with a NL character.
+	(*next_char_ptr) = (object)'\n';
+	
+	// Calc number of characters in buffer; includes NL and NOVALUE spots.
+	i = (next_char_ptr - line_ptr) + 2;
+		
+
+	// Shrink buffer
+	line_ptr = (object_ptr)ERealloc((char *)line_ptr, i * sizeof(object));
+
+	// Create the new sequence.
+	return NewPreallocSeq(i, line_ptr);
+
 }
 
 void set_text_color(int c)
@@ -4014,9 +3982,28 @@ static void indent()
 		the_end();
 	}
 }
+s1_ptr sprint_sequence = NULL;
+
+s1_ptr concatonate_s1_with_string(s1_ptr s1,  char * poke_addr, int i )
+/* append the string poke_addr to the end of s1.  i is the maximum number of elements in the
+  string */
+{
+	object_ptr obj_ptr;
+	obj_ptr = &s1->base[s1->length];
+	s1 = ReNewS1(s1, s1->length += i);
+	while (--i >= 0 && *poke_addr != 0) {
+		obj_ptr++;
+		*obj_ptr = (unsigned char)*poke_addr;
+		poke_addr++;
+	}
+	*++obj_ptr = NOVALUE;	
+	return s1;
+}
 
 static void rPrint(object a)
-/* print any object in default numeric format */
+/* print any object in default numeric format either to the screen and if
+ * the s1 struct sprint_sequence is a not NULL, it concatonates to the end of
+ * sprint_sequence.  */
 {
 	int length;
 	int multi_line;
@@ -4029,7 +4016,7 @@ static void rPrint(object a)
 	if (IS_ATOM(a)) {
 		if (IS_ATOM_INT(a)) {
 			snprintf(sbuff, NUM_SIZE, "%" PRIdPTR, a);
-			sbuff[NUM_SIZE-1] = 0; // ensure NULL
+			sbuff[NUM_SIZE-1] = 0; // ensure NULL			
 			screen_output(print_file, sbuff);
 			print_chars += strlen(sbuff);
 			if (show_ascii && a >= ' ' &&
@@ -4054,6 +4041,9 @@ static void rPrint(object a)
 			screen_output(print_file, sbuff);
 			print_chars += strlen(sbuff);
 		}
+		if (sprint_sequence) 
+			sprint_sequence = concatonate_s1_with_string( sprint_sequence, 
+			sbuff, strlen(sbuff));
 	}
 	else {
 		/* a is a SEQUENCE */
@@ -4078,6 +4068,9 @@ static void rPrint(object a)
 		}
 
 		screen_output(print_file, "{");
+		if (sprint_sequence) 
+			sprint_sequence = concatonate_s1_with_string( sprint_sequence, 
+				"{", 1);
 		print_chars++;
 
 		elem = ((s1_ptr)a)->base+1;
@@ -4091,6 +4084,10 @@ static void rPrint(object a)
 				if (print_chars == -1)
 					return;
 				screen_output(print_file, ",");
+				if (sprint_sequence) 
+					sprint_sequence = concatonate_s1_with_string( sprint_sequence, 
+					",", 1);
+
 				print_chars++;
 				cut_line(6);
 				if (print_chars == -1)
@@ -4108,6 +4105,9 @@ static void rPrint(object a)
 		if (print_chars == -1)
 			return;
 		screen_output(print_file, "}");
+		if (sprint_sequence) 
+			sprint_sequence = concatonate_s1_with_string( sprint_sequence, 
+			"}", 1);
 		print_chars++;
 	}
 }
@@ -4122,6 +4122,17 @@ void Print(IFILE f, object a, int lines, int width, int init_chars, int pretty)
 	print_start = print_chars+1;
 	print_pretty = pretty;
 	print_level = 0;
+	if (sprint_sequence != NULL) {		
+		DeRef(MAKE_SEQ(sprint_sequence))
+		sprint_sequence = NULL;
+	}
+	if (f == (IFILE)DOING_SPRINTF) {
+		sprint_sequence = NewS1(NUM_SIZE);
+		sprint_sequence->postfill = NUM_SIZE;
+		sprint_sequence->length = 0;
+	} else {
+		sprint_sequence = NULL;
+	}
 	if (f == stderr)
 		show_ascii = FALSE; /* don't bother showing for type-check failure */
 	else
@@ -4131,7 +4142,7 @@ void Print(IFILE f, object a, int lines, int width, int init_chars, int pretty)
 	flush_screen();
 }
 
-void StdPrint(int fn, object a, int new_lines)
+void StdPrint(object fn, object a, int new_lines)
 /* standard Print - lets us have <= 3 args in do_exec() */
 {
 	if (new_lines) {
@@ -4301,6 +4312,9 @@ object_ptr v_elem;
 			EFree(sval);
 	}
 	else if (c == 'd' || c == 'x' || c == 'o') {
+#if defined( EWINDOWS ) && INTPTR_MAX == INT64_MAX
+		cstring[flen++] = 'l';
+#endif
 		cstring[flen++] = 'l';
 		if (c == 'x')
 			c = 'X';
@@ -4536,43 +4550,14 @@ int get_key(int wait)
 /* Get one key from keyboard, without echo. If wait is TRUE then wait until
    a key is typed, otherwise return -1 if no key is available. */
 {
-	unsigned a;
+	int a;
 
 #ifdef EWINDOWS
-#if defined(EMINGW)
 		if (wait || winkbhit()) {
-			SetConsoleMode(console_input, ENABLE_PROCESSED_INPUT);
-			a = wingetch();
-
-			//if (a == 0) {  // SAFE TO DO THIS?
-				//a = 256 + wingetch();
-			//}
-
-			// return to normal mode
-			SetConsoleMode(console_input, ENABLE_LINE_INPUT |
-									ENABLE_ECHO_INPUT |
-									ENABLE_PROCESSED_INPUT);
+			a = getKBcode();
 
 			return a;
 		}
-#else
-		if (wait || kbhit()) {
-			a = getch();
-			if (a == 0) {
-				a = 256 + getch();
-				if ( 0x8000 & GetAsyncKeyState(VK_CONTROL)) {
-					a += 256;
-				}
-				if ( 0x8000 & GetAsyncKeyState(VK_SHIFT)) {
-					a += 512;
-				}
-				if ( 0x8000 & GetAsyncKeyState(VK_MENU)) {
-					a += 1024;
-				}
-			}
-			return a;
-		}
-#endif
 		return -1;
 #endif
 
@@ -4810,7 +4795,7 @@ void eu_startup(struct routine_list *rl, struct ns_list *nl, unsigned char **ip,
 	#endif
 	rt00 = rl;
 	rt01 = nl;
-	rt02 = ip;
+	rt02 = (char**)ip;
 	clocks_per_sec = cps;
 	clk_tck = clk;
 	xstdin = (void *)stdin;
@@ -4834,12 +4819,12 @@ void eu_startup(struct routine_list *rl, struct ns_list *nl, unsigned char **ip,
 		Comctl32 = LoadLibrary("Comctl32.dll");
 		if (Comctl32 == NULL) {
 			RTFatal("Unable to initialize Common Windows Controls.");
-		}		
-		if (initCommonControlsPtr = (VfP_t)GetProcAddress(Comctl32, "InitCommonControlsEx")) {
-		initcc.dwSize = sizeof( INITCOMMONCONTROLSEX );
-		initcc.dwICC  = 0;
+		}
+		if (!(0 == (initCommonControlsPtr = (VfP_t)GetProcAddress(Comctl32, "InitCommonControlsEx")))) {
+			initcc.dwSize = sizeof( INITCOMMONCONTROLSEX );
+			initcc.dwICC  = 0;
 			(*initCommonControlsPtr)( (void*)&initcc );
-		} else if (initCommonControls95Ptr = (VfP_t)GetProcAddress(Comctl32, "InitCommonControls")) {
+		} else if (!(0 == (initCommonControls95Ptr = (Vf_t)GetProcAddress(Comctl32, "InitCommonControls")))) {
 			(*initCommonControls95Ptr)();
 		} else {
 			RTFatal("Unable to initialize Common Windows Controls.");
@@ -5011,7 +4996,7 @@ void system_call(object command, object wait)
 		EFree(string_ptr);
 
 	if (w == 1) {
-		get_key(TRUE); //getch(); bug: doesn't pick up next byte of F-keys, arrows etc.
+		get_key(TRUE);
 	}
 	if (w != 2)
 		RestoreConfig();
@@ -5061,7 +5046,10 @@ object system_exec_call(object command, object wait)
 	argv = make_arg_cv(string_ptr, &exit_code);
 	exit_code = spawnvp(P_WAIT, argv[0], (char * const *)argv);
 
+	#if INTPTR_MAX == INT32_MAX
+	// This causes a crash on Win64
 	EFree(argv[0]);		// free the 'process' name
+	#endif
 	EFree((char *)argv); // free the list of arg addresses, but not the args themself.
 
 #endif
@@ -5069,14 +5057,18 @@ object system_exec_call(object command, object wait)
 		EFree(string_ptr);
 
 	if (w == 1) {
-		get_key(TRUE); //getch(); bug: doesn't pick up next byte of F-keys, arrows etc.
+		get_key(TRUE);
 	}
 	if (w != 2)
 		RestoreConfig();
+	#if INTPTR_MAX == INT32_MAX
 	if (exit_code >= MININT && exit_code <= MAXINT)
+	#endif
 		return (object)exit_code;
+	#if INTPTR_MAX == INT32_MAX
 	else
 		return NewDouble((eudouble)exit_code);
+	#endif
 }
 
 object EGetEnv(object name)
@@ -5684,11 +5676,7 @@ void Cleanup(int status)
 				screen_output(stderr, warning_list[i]);
 				if (((i+1) % 20) == 0 && use_prompt()) {
 					screen_output(stderr, "\nPress Enter to continue, q to quit\n");
-#ifdef EWINDOWS
-					c = wingetch();
-#else // EWINDOWS
-					c = getc(stdin);
-#endif // EWINDOWS
+					c = getKBchar();
 					if (c == 'q') {
 						break;
 					}
@@ -5709,7 +5697,7 @@ void Cleanup(int status)
 		  		strcmp_ins(xterm, "xterm") == 0))) 
 	{
 		screen_output(stderr, "\n\nPress Enter...\n");
-		getc(stdin);
+		getKBchar();
 	}
 
 #else // EUNIX
@@ -5717,14 +5705,13 @@ void Cleanup(int status)
 	if (use_prompt() && TempWarningName == NULL && display_warnings &&
 		(warning_count || (status && !user_abort)))
 	{
+		DisableControlCHandling();
 		// we will have a console if we showed an error trace back or
 		// if this program was using a console when it called abort(>0)
 		screen_output(stderr, "\n\nPress Enter...\n");
-		DisableControlCHandling();
-		MyReadConsoleChar();
+		getKBchar();
 	}
 #endif // EUNIX
-
 	EndGraphics();
 
 #ifndef ERUNTIME
@@ -5769,14 +5756,23 @@ void UserCleanup(int status)
 	Cleanup(status);
 }
 
-#ifdef EWINDOWS
+#ifdef EUNIX
+int getKBchar()
+{
+	echo_wait();
+	return getc(stdin);
+}
+#endif
 
-#if defined(EMINGW)
-int winkbhit()
+#ifdef EWINDOWS
+static char one_line[300];
+static char *next_char_ptr = NULL;
+
+static int winkbhit()
 /* kbhit for Windows GUI apps */
 {
 	INPUT_RECORD pbuffer;
-	DWORD junk;
+	DWORD junk = 0;
 	int c;
 
 	while (TRUE) {
@@ -5791,25 +5787,14 @@ int winkbhit()
 	}
 }
 
-#else
 
-static char one_line[84];
-static char *next_char_ptr = NULL;
-
-#endif
-
-int wingetch()
+int getKBchar()
 // Windows - read next char from keyboard
 {
-#if defined(EMINGW)
-
-	return MyReadConsoleChar();
-
-#else // defined(EMINGW)
-
 	int c;
+	
 	if (next_char_ptr == NULL) {
-		key_gets(one_line);
+		key_gets(one_line, sizeof(one_line));
 		next_char_ptr = one_line;
 	}
 	c = *next_char_ptr++;
@@ -5817,71 +5802,91 @@ int wingetch()
 		// end of line
 		next_char_ptr = NULL;
 		c = '\n';
+	} else {
+		if (c == CONTROL_Z) {
+			c = -1; // EOF
+			next_char_ptr--; // Move pointer back to EOF char.
+		}
 	}
-	if (c == CONTROL_Z)
-		c = -1; // EOF
 
 	return c;
-#endif // defined(EMINGW)
+
 }
 #endif
 
-void key_gets(char *input_string)
+void key_gets(char *input_string, int buffsize)
 /* return input string from keyboard */
 /* lets us use any color to echo user input in graphics modes */
 {
 	int line, len, init_column, column, c;
-	struct rccoord cursor;
+	struct eu_rccoord cursor;
 	char one_char[2];
+	int maxin;
+	int maxcol;
+	int numpad_enter;
+	int left_arrow;
+	char *ip;
+	
+	numpad_enter = VK_to_EuKBCode[VK_RETURN];
+	left_arrow   = VK_to_EuKBCode[VK_LEFT];
+	
 #ifdef EWINDOWS
-	CONSOLE_SCREEN_BUFFER_INFO console_info;
+	show_console();
+#endif	
+	GetTextPositionP(&cursor);
 
-	GetConsoleScreenBufferInfo(console_output, &console_info);
-	cursor.row = console_info.dwCursorPosition.Y+1;
-	cursor.col = console_info.dwCursorPosition.X+1;
-#else
-
-	cursor = GetTextPositionP();
-
-#endif
 	line = cursor.row;
 	init_column = cursor.col;
+	maxin = cursor.bufwidth - init_column + 1;
+	if (maxin >= buffsize) {
+		maxin = buffsize - 1; // allow for trailing null byte.
+	}
+	maxcol = init_column + maxin - 1;
+	
 	one_char[1] = '\0';
 	column = init_column;
+	
 	input_string[0] = '\0';
+	ip = &input_string[0];
+	len = 0;
+	
 	while (TRUE) {
 		c = get_key(TRUE);
 
-		if (c == '\r' || c == '\n'
-#ifdef EWINDOWS
-			|| c == 284
-#endif
-		)
+		if (c == CR || c == LF || c == numpad_enter)
 			break;
 
-		else if (c == BS || c == LEFT_ARROW
-#ifdef EUNIX   //FOR NOW - must decide what to do about different key codes
-		|| c == 263
-#endif
-) {
-			if (column > init_column) {
-				column = column - 1;
+		if (c == BS || c == left_arrow) {
+			if (len > 0) {
+				// update buffer
+				ip--;
+				*ip = '\0';
+				len--;
+				
+				// update screen display
+				column--;
 				SetPosition(line, column);
 				screen_output(NULL, " ");
 				SetPosition(line, column);
-				input_string[column - init_column] = '\0';
 			}
+			continue;
 		}
-		else if (c >= CONTROL_Z && c <= 255) {
-			if (column < 79) {
-				len = strlen(input_string);
+		
+		if ((c >= ' ' && c <= 255) ||  c == CONTROL_Z) { // Only allow extended ascii byte chars for now.
+			if (column <= maxcol) {
+				// update buffer
+				*ip = c;
+				ip++;
+				*ip = '\0';
+				len++;
+				
+				if (c == CONTROL_Z)
+					break;
+					
+				// update screen display
 				one_char[0] = c;
 				screen_output(NULL, one_char);
-				input_string[column - init_column] = c;
-				column = column + 1;
-				if (column - init_column > len) {
-					input_string[column - init_column] = '\0';
-				}
+				column++;
 			}
 		}
 	}
@@ -5925,8 +5930,9 @@ object find_from(object a, object bobj, object c)
 		while (TRUE) {
 			bv = *(++bp);
 			if (IS_ATOM_INT(bv)) {
-				if (a == bv)
+				if (a == bv) {
 					return bp - (object_ptr)b->base;
+				}
 			}
 			else if (IS_SEQUENCE(bv)) {
 				continue;  // can't be equal so skip it.
