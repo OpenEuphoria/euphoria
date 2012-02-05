@@ -2246,6 +2246,8 @@ object DRandom(d_ptr a)
 
 	if (a->dbl < 1.0)
 		RTFatal("argument to rand must be >= 1");
+	if ((uint32_t)(a->dbl) <= 0)
+		RTFatal("argument to rand is too large");
 	res = (1 + good_rand() % (uint32_t)(a->dbl));
 	return MAKE_UINT(res);
 }
@@ -4838,6 +4840,33 @@ void Position(object line, object col)
 	SetPosition(line_val, col_val);
 }
 
+#ifdef EWINDOWS
+
+char *get_module_name(){
+	int ns, bs;
+	char *name;
+	name = 0;
+	bs = 32;
+	ns = bs;
+	/* If ns equals bs it means that we have not gotten
+		the complete path string yet */
+	while (ns == bs) {
+		bs += 32;
+		if (name != 0){
+			EFree((void *)name);
+		}
+
+		name = (char *)EMalloc(bs + 2);
+		ns = GetModuleFileName(NULL, (LPTSTR)name, bs);
+	}
+	if (ns == 0) {
+		name = (char *)EMalloc(8); // strlen("eui.exe") + 1
+		copy_string(name, "eui.exe", 8);
+	}
+	return name;
+}
+#endif
+
 char **make_arg_cv(char *cmdline, int *argc)
 /* Convert command line string to argc, argv.
    If *argc is 1, then get program name from GetModuleFileName().
@@ -4855,29 +4884,14 @@ char **make_arg_cv(char *cmdline, int *argc)
 	if( cmdline == NULL ){
 		// Windows already did the work for us
 		*argc = __argc;
+		__argv[0] = get_module_name();
 		return __argv;
 	}
 #endif
 	argv = (char **)EMalloc((strlen(cmdline)/2+3) * sizeof(char *));
 #ifdef EWINDOWS
 	if (*argc == 1) {
-		argv[0] = 0;
-		bs = 32;
-		ns = bs;
-		/* If ns equals bs it means that we have not gotten
-		   the complete path string yet */
-		while (ns == bs) {
-			bs += 32;
-			if (argv[0] != 0)
-				EFree((void *)argv[0]);
-
-			argv[0] = (char *)EMalloc(bs + 2);
-			ns = GetModuleFileName(NULL, (LPTSTR)argv[0], bs);
-		}
-		if (ns == 0) {
-			argv[0] = (char *)EMalloc(8); // strlen("eui.exe") + 1
-			copy_string(argv[0], "eui.exe", 8);
-		}
+		argv[0] = get_module_name();
 		w = 1;
 	}
 	else
