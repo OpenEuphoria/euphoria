@@ -72,7 +72,12 @@ export function compress(object x)
 			return I4B & int_to_bytes(x)
 		
 		else
-			return I8B & int_to_bytes(x, 8)
+			ifdef EU4_0 then
+				-- Euphoria 4.0 int_to_bytes doesn't take a size argument
+				return I8B & int_to_bytes(remainder(x,#1_0000_0000)) & int_to_bytes(floor(x/#1_0000_0000))
+			elsedef
+				return I8B & int_to_bytes(x, 8)
+			end ifdef
 		end if
 
 	elsif atom(x) then
@@ -167,8 +172,12 @@ export procedure fcompress(integer f, object x)
 					puts(f, I4B & int_to_bytes(x))
 					
 				else
-					puts(f, I8B & int_to_bytes(x, 8))
-					
+					ifdef not EU4_0 then
+						puts(f, I8B & int_to_bytes(x, 8))
+					elsedef
+						-- Euphoria 4.0 int_to_bytes doesn't take a size argument
+						puts(f, I8B & int_to_bytes(remainder(x,#1_0000_0000)) & int_to_bytes(floor(x/#1_0000_0000)) )
+					end ifdef					
 				end if
 			end if
 		end if

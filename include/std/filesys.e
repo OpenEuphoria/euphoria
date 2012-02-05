@@ -198,7 +198,9 @@ public enum
 --**
 -- Bad path error code. See [[:walk_dir]]
 
-public constant W_BAD_PATH = -1 -- error code
+public constant 
+	W_BAD_PATH = -1, -- error code
+	W_SKIP_DIRECTORY = -975864
 
 function find_first_wildcard( sequence name, integer from = 1 )
 	integer asterisk_at = eu:find('*', name, from)
@@ -509,7 +511,8 @@ public integer my_dir = DEFAULT_DIR_SOURCE
 -- ##path_name## will be walked through recursively in the very same way.
 --
 -- The routine that you supply should accept two sequences, the path name and dir() entry for 
--- each file and subdirectory. It should return 0 to keep going, or non-zero to stop 
+-- each file and subdirectory. It should return 0 to keep going, W_SKIP_DIRECTORY to avoid
+-- scan the contents of the supplied path name (if a directory), or non-zero to stop 
 -- ##walk_dir##(). Returning ##W_BAD_PATH## is taken as denoting some error.
 --
 -- This mechanism allows you to write a simple function that handles one file at a time, 
@@ -532,7 +535,12 @@ public integer my_dir = DEFAULT_DIR_SOURCE
 -- -- this function accepts two sequences as arguments
 -- -- it displays all C/C++ source files and their sizes
 --     if find('d', item[D_ATTRIBUTES]) then
---         return 0 -- Ignore directories
+--         -- Ignore directories
+--         if find('s', item[D_ATTRIBUTES]) then
+--            return W_SKIP_DIRECTORY -- Don't recurse a system directory
+--         else
+--            return 0 -- Keep processing as normal
+--         end if
 --     end if
 --     if not find(fileext(item[D_NAME]), {"c","h","cpp","hpp","cp"}) then
 --         return 0 -- ignore non-C/C++ files
@@ -610,13 +618,13 @@ public function walk_dir(sequence path_name, object your_function, integer scan_
 		
 		user_data[2] = d[i]
 		abort_now = call_func(your_function, user_data)
-		if not equal(abort_now, 0) then
+		if not find(abort_now, {0, W_SKIP_DIRECTORY}) then
 			return abort_now
 		end if
 		
 		if eu:find('d', d[i][D_ATTRIBUTES]) then
 			-- a directory
-			if scan_subdirs then
+			if scan_subdirs and abort_now != W_SKIP_DIRECTORY then
 				abort_now = walk_dir(path_name & SLASH & d[i][D_NAME],
 									 orig_func, scan_subdirs, source_orig_func)
 				
@@ -1098,7 +1106,7 @@ public enum
 --
 -- Returns:
 -- 		A **sequence**, of length 5. Each of these elements is a string:
--- 		* The path name
+-- 		* The path name. For Windows, this excludes the drive id.
 --		* The full unqualified file name
 --		* the file name, without extension
 --		* the file extension
@@ -1192,7 +1200,7 @@ public function pathinfo(sequence path, integer std_slash = 0)
 		end if
 	end if
 
-	return {dir_name, file_full, file_name, file_ext, lower( drive_id ) }
+	return {dir_name, file_full, file_name, file_ext, drive_id }
 end function
 
 --**

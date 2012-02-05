@@ -17,17 +17,17 @@ include std/sort.e
 include std/cmdline.e
 include std/math.e
 
-include mode.e as mode
 include cominit.e
-include intinit.e
-include traninit.e
-include opnames.e
-include global.e
-include reswords.e
-include symtab.e
-include scanner.e
-include fwdref.e
 include c_out.e
+include fwdref.e
+include global.e
+include intinit.e
+include mode.e as mode
+include opnames.e
+include reswords.e
+include scanner.e
+include symtab.e
+include traninit.e
 
 include dox.e as dox
 
@@ -1575,6 +1575,32 @@ procedure write_next_links( symtab_pointer s, integer fn )
 	end while
 end procedure
 
+function sort_refs( sequence a, sequence b )
+	return -compare( a[2], b[2] )
+end function
+constant SORT_REFS = routine_id("sort_refs")
+
+procedure write_fwdref_count( atom fn, sequence count )
+	sequence refname = count[1]
+	printf( fn, "\n%10d: %s\n", { count[2][1], refname } )
+	
+	sequence files = custom_sort( SORT_REFS, map:pairs( count[2][2] ) )
+	
+	for i = 1 to length( files ) do
+		printf( fn, "%15d: %s\n", { files[i][2], known_files[files[i][1]] } )
+	end for
+	
+end procedure
+
+procedure write_fwdref_counts( sequence name )
+	atom fn = open( sprintf("%sfwd", {name} ), "w", 1 )
+	sequence counts = custom_sort(  SORT_REFS, map:pairs( fwd:refs_by_name ) )
+	
+	for i = 1 to length( counts ) do
+		write_fwdref_count( fn, counts[i] )
+	end for
+end procedure
+
 procedure save_il( sequence name )
 	integer st, max_width
 	sequence line_format, pretty_options = PRETTY_DEFAULT
@@ -1721,6 +1747,8 @@ procedure save_il( sequence name )
 	end if
 
 	close( st )
+	
+	write_fwdref_counts( name )
 
 end procedure
 

@@ -42,24 +42,24 @@ public constant
 	C_BOOL    = C_INT,
 	--** unsigned int 32-bits
 	C_UINT    = #02000004,
-	--** size_t 32-bits
-	C_SIZE_T  = C_UINT,
-	--** long 32-bits
+	--** long 32-bits except on 64-bit *nix, where it is 64-bits
 	C_LONG    = #01000008,
-	--** unsigned long 32-bits
+	--** unsigned long 32-bits except on 64-bit *nix, where it is 64-bits
 	C_ULONG   = #02000008,
-	--** any valid pointer 32-bits
+	--** size_t unsigned long 32-bits except on 64-bit *nix, where it is 64-bits
+	C_SIZE_T  = C_ULONG,
+	--** any valid pointer
 	C_POINTER = #03000001,
-	--** handle 32-bits
-	C_HANDLE  = C_UINT,
-	--** hwnd 32-bits
-	C_HWND    = C_UINT,
+	--** handle sizeof pointer
+	C_HANDLE  = C_POINTER,
+	--** hwnd sizeof pointer
+	C_HWND    = C_POINTER,
 	--** dword 32-bits
 	C_DWORD   = C_UINT,
-	--** wparam 32-bits
-	C_WPARAM  = C_LONG,
-	--** lparam 32-bits
-	C_LPARAM  = C_LONG,
+	--** wparam sizeof pointer
+	C_WPARAM  = C_POINTER,
+	--** lparam sizeof pointer
+	C_LPARAM  = C_POINTER,
 	--** hresult 32-bits
 	C_HRESULT = C_LONG,
 	--** float 32-bits
@@ -530,18 +530,20 @@ public function call_back(object id)
 end function
 
 ifdef EU4_0 then
-	include std/math.e
+	--**
+	-- @nodoc@
 	public function sizeof(integer x)
-		switch x do
-			case C_CHAR,C_UCHAR then
+		switch x with fallthru do
+			case C_CHAR, C_BYTE, C_UCHAR, C_UBYTE then
 				return 1
-			case C_SHORT, C_USHORT then
+			case C_SHORT, C_WORD, C_USHORT then
 				return 2
-			case C_DOUBLE, C_DWORDLONG then
-				return 8
-			case else
+			-- In 4.0 everything is x86-32
+			case C_INT, C_LONG, C_ULONG then
+			case C_SIZE_T, C_POINTER, C_FLOAT then
 				return 4
+			case C_DOUBLE, C_DWORDLONG, C_LONGLONG then
+				return 8
 		end switch
-		return 0
 	end function
 end ifdef
