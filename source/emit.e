@@ -387,7 +387,6 @@ procedure check_for_temps()
 	if TRANSLATE or last_op < 1 or last_pc < 1 then
 		return
 	end if
-
 	emit_temp( get_target_sym( current_op( last_pc ) ), op_temp_ref[last_op] )
 
 end procedure
@@ -896,6 +895,20 @@ export procedure emit_op(integer op)
 
 		end if
 
+	case NAMEOF_FORWARD then
+		-- this is simulated with a forward function call,
+		-- with the ref of the name_of() parameter as the function fwd ref
+		last_op = FUNC_FORWARD
+		assignable = TRUE
+		emit_opcode( FUNC_FORWARD )
+		emit_addr( Pop() )
+		emit_addr( 0 )
+		c = NewTempSym() -- put final result in temp
+		Push(c)
+		-- emit location to assign result to
+		emit_addr(c)
+		emit_temp( c, NEW_REFERENCE )
+		
 	case PROC_FORWARD, FUNC_FORWARD then
 		assignable = FALSE -- assume for now
 		integer real_op

@@ -333,7 +333,8 @@ export enum
 	QUALIFIED_FUNC,
 	QUALIFIED_PROC,
 	QUALIFIED_TYPE,
-	NAMESPACE
+	NAMESPACE,
+	NAMEOF_FORWARD
 
 enum -- token category name id
 	TC_ILLCHAR,

@@ -216,6 +216,38 @@ procedure patch_forward_goto( token tok, integer ref )
 	resolved_reference( ref )
 end procedure
 
+procedure patch_forward_nameof( token tok, integer ref )
+	sequence fr = forward_references[ref]
+	
+	set_code( ref )
+	
+	integer start_pc = fr[FR_PC]
+	-- forward call look like:
+	-- OP, REF, # ARGS, ARGS...,[ASSIGN SYM]
+	integer end_pc = start_pc + Code[start_pc + 2] + 3
+	symtab_index assign_sym = Code[end_pc]
+	
+	-- remember what it was, but we'll use an empty Code sequence
+	-- for emiting the name_of() implementation
+	sequence old_code = Code
+	Code = {}
+	
+	-- we have to set up the stack
+	-- already have a return value
+	Push( assign_sym )
+	
+	integer emit_result = emit_name_of( tok[T_SYM], assign_sym )
+	sequence new_code = Code
+	Code = old_code
+	
+	-- On an error, we'll just leave this fwd ref alone
+	if emit_result = 1 then
+		replace_code( new_code, start_pc, end_pc, fr[FR_SUBPROG] )
+		resolved_reference( ref )
+	end if
+	reset_code()
+end procedure
+
 procedure patch_forward_call( token tok, integer ref )
 	-- Format of IL:
 	-- pc   OPCODE
@@ -458,9 +490,24 @@ procedure patch_forward_type( token tok, integer ref )
 	sequence fr = forward_references[ref]
 	sequence syms = fr[FR_DATA]
 	for i = 2 to length( syms ) do
-		SymTab[syms[i]][S_VTYPE] = tok[T_SYM]
+		integer sym, enum_type_ref
+		
+		if sequence( syms[i] ) then
+			-- enum type
+			sym = syms[i][1]
+			enum_type_ref = syms[i][2]
+		else
+			sym = syms[i]
+			enum_type_ref = 0
+		end if
+		
+		SymTab[sym][S_VTYPE] = tok[T_SYM]
 		if TRANSLATE then
-			SymTab[syms[i]][S_GTYPE] = CompileType(tok[T_SYM])
+			SymTab[sym][S_GTYPE] = CompileType(tok[T_SYM])
+		end if
+		
+		if enum_type_ref then
+			patch_forward_nameof( { VARIABLE, sym}, enum_type_ref )
 		end if
 	end for
 	resolved_reference( ref )
@@ -843,6 +890,9 @@ function resolve_file( sequence refs, integer report_errors, integer unincluded_
 			
 			case GOTO then
 				patch_forward_goto( tok, ref )
+				
+			case NAMEOF_FORWARD then
+				patch_forward_nameof( tok, ref )
 				
 			case else
 				-- ?? what is it?

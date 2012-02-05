@@ -1184,42 +1184,52 @@ procedure Object_call( token tok )
 	end if
 end procedure
 
+function forward_name_of( symtab_index sym )
+	integer ref = new_forward_reference( NAMEOF_FORWARD, sym )
+	Push( ref )
+	emit_op( NAMEOF_FORWARD )
+	return ref
+end function
 
--- parse a name_of call...
-function Name_of_call( token tok )
+--**
+-- Emits code to implement name_of() for symtab index sym.
+-- Returns 1 on success, 
+-- returns -1 to indicate that one token should be putback due to an error
+-- returns -2 to indicate that two tokens should be putback due to an error
+export function emit_name_of( symtab_index sym, symtab_pointer use_result = 0 )
+	object argument, argument_type
 	object ls
 	integer i
-	object argument_tok = next_token(), argument, argument_type, round_tok
 	sequence name_of_type_of_argument
-	
-	if find(argument_tok[T_ID],{
-		VARIABLE, QUALIFIED_VARIABLE})=0  then
-		goto "handle error"
-		-- CompileErr( ERRMSG_NAME_OF_NOT_VARIABLE )
-	end if
-	round_tok = next_token()
-	if round_tok[T_ID] != RIGHT_ROUND then
-		goto "handle errors 2"
-	end if
-	UndefinedVar( argument_tok[T_SYM] )
-	-- must set name_of_type_of_argument to the name of the type.
-	if symtab_index( argument_tok[T_SYM] ) then
-		argument = SymTab[argument_tok[T_SYM]]
+	integer pcs = length( Code ) + 1
+	-- must set name_of_type_of_argument to the name of the type.\
+	if symtab_index( sym ) then
+		argument = SymTab[sym]
 		if length(argument) >= S_VTYPE then
-			if argument[S_VTYPE] <= 0 or find(argument[S_VTYPE],{object_type,sequence_type,atom_type,integer_type}) then
-				goto "handle errors 2"
+			
+			if argument[S_VTYPE] <= 0 then
+				if use_result then
+					-- already a fwd ref, but not ready to resolve
+					return -1
+				else
+					-- we can resolve the var, but not its type
+					add_data( -argument[S_VTYPE], { sym, forward_name_of( sym ) } )
+					return 1
+				end if
+			elsif find(argument[S_VTYPE],{object_type,sequence_type,atom_type,integer_type}) then
+				return -2 -- "handle errors putback 2"
 			end if
 			argument_type = SymTab[argument[S_VTYPE]]
 			name_of_type_of_argument = argument_type[S_NAME]
 		end if
 	end if
 	if not object(argument_type) then
-		goto "handle errors 2"
+		return -2 -- "handle errors putback 2"
 --		CompileErr(ERRMSG_FWD_REF_NOTSUPPORTED,{"name_of"})
 	end if
 	i = find(argument[S_VTYPE],literal_sets[1])
 	if not i then
-		goto "handle errors 2"
+		return -2 -- "handle errors putback 2"
 --		CompileErr( ERRMSG_NAME_OF_NOT_ENUM_TYPE )
 	end if
 	ls = literal_sets[2][i]
@@ -1243,37 +1253,75 @@ function Name_of_call( token tok )
 		--            .
 		--            .
 		result = Pop()
-		Push(argument_tok[T_SYM])
-		Push(result)
-		Push(one[T_SYM])
-		emit_op(FIND_FROM)
+		Push( sym )
+		Push( result )
+		Push( one[T_SYM] )
+		emit_op( FIND_FROM )
 		
 		result = Pop()
-		Push(ds)
-		Push(two[T_SYM])
-		emit_op(RHS_SUBS)
+		Push( ds )
+		Push( two[T_SYM] )
+		emit_op( RHS_SUBS )
 		
-		Push(result)
-		emit_op(RHS_SUBS)
+		Push( result )
+		emit_op( RHS_SUBS )
 		
 	elsif (literal_set:get_access_method(ls) = INDEX_MAP) then
 
 		Push(literal_set:emit_literals_data_structure(ls))
-		Push(argument_tok[T_SYM])
-		emit_op(RHS_SUBS)
+		Push( sym )
+		emit_op( RHS_SUBS )
 		
-		Push(two[T_SYM])
-		emit_op(RHS_SUBS)
+		Push( two[T_SYM] )
+		emit_op( RHS_SUBS )
 		
 	end if
+	if use_result != 0  then
+		if Code[$-1] = DEREF_TEMP then
+			Code[$-2] = use_result
+		else
+			Code[$] = use_result
+		end if
+	end if
 	
-	return 1	
+	return 1
+end function
+
+
+-- parse a name_of call...
+function Name_of_call( token tok )
+	object argument_tok = next_token(), round_tok
 	
-	label "handle errors 2"
+	if SymTab[argument_tok[T_SYM]][S_SCOPE] != SC_UNDEFINED
+		and find(argument_tok[T_ID],{
+		VARIABLE, QUALIFIED_VARIABLE})=0  then
+		goto "handle error"
+		-- CompileErr( ERRMSG_NAME_OF_NOT_VARIABLE )
+	end if
+	round_tok = next_token()
+	if round_tok[T_ID] != RIGHT_ROUND then
+		goto "handle errors putback 2"
+	end if
+	if SymTab[argument_tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
+		
+		forward_name_of( argument_tok[T_SYM] )
+		
+		return 1
+	end if
+	integer nameof_result = emit_name_of( argument_tok[T_SYM] )
+	if nameof_result = 1 then
+		return 1
+	elsif nameof_result = -1 then
+		goto "handle error"
+	else
+		goto "handle errors putback 2"
+	end if
+	
+	label "handle errors putback 2"
 		putback(round_tok)
 	label "handle error"
 		putback(argument_tok)
-		return 0	
+		return 0
 end function
 
 procedure Function_call( token tok )
