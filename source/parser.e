@@ -1207,7 +1207,7 @@ export function emit_name_of( symtab_index sym, symtab_pointer use_result = 0 )
 		argument = SymTab[sym]
 		if length(argument) >= S_VTYPE then
 			
-			if argument[S_VTYPE] <= 0 then
+			if argument[S_VTYPE] < 0 then
 				if use_result then
 					-- already a fwd ref, but not ready to resolve
 					return -1
@@ -1216,11 +1216,17 @@ export function emit_name_of( symtab_index sym, symtab_pointer use_result = 0 )
 					add_data( -argument[S_VTYPE], { sym, forward_name_of( sym ) } )
 					return 1
 				end if
+			
+			elsif argument[S_VTYPE] = 0 then
+				-- a regular constant / enum
+				return -2
+			
 			elsif find(argument[S_VTYPE],{object_type,sequence_type,atom_type,integer_type}) then
 				return -2 -- "handle errors putback 2"
 			end if
 			argument_type = SymTab[argument[S_VTYPE]]
 			name_of_type_of_argument = argument_type[S_NAME]
+			
 		end if
 	end if
 	if not object(argument_type) then
