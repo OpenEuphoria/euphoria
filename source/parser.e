@@ -1400,17 +1400,17 @@ procedure Function_call( token tok )
 		end if
 	end for
 	-- test elements against their literal sets
-	for i = n to 2 by -1 do
+	for i = n to 1 by -1 do
 		s = SymTab[s][S_NEXT]
-		test_literal_match({routine_sym,n-i+1,s}, stack_segment[n])
+		test_literal_match({routine_sym,n-i+1,s}, stack_segment[i])
 	end for
+	delete(s)
 	-- put elements back into the stack
 	while length(stack_segment) != 0 do
 		Push(stack_segment[length(stack_segment)])
 		stack_segment = remove(stack_segment,length(stack_segment))
 	end while
 	delete(stack_segment)
-	delete(s)
 	
 	if scope = SC_PREDEF then
 		if find(routine_sym,{compare_builtin,equal_builtin}) != 0 then
@@ -1794,10 +1794,12 @@ end procedure
 
 procedure test_literal_match(object left_param, symtab_pointer valsym)
 	integer lsym
+	integer routine_sym
 	if atom(left_param) then
 		lsym = left_param
 	elsif length(left_param) = 3 then
 		lsym = left_param[3]
+		routine_sym = left_param[1]
 	else
 		return
 	end if
@@ -1816,7 +1818,7 @@ procedure test_literal_match(object left_param, symtab_pointer valsym)
 					Warning(WARNMSG_ENUM_MISMATCH_TYPES_BINOP, enum_mismatch_warning_flag, {sym_name(valsym), sym_name(valsym_type), sym_name(lsym), sym_name(lsym_type)})
 				else
 					Warning(WARNMSG_ENUM_MISMATCH_TYPES_FNCALL, enum_mismatch_warning_flag,
-					{sym_name(left_param[1]), left_param[2], sym_name(valsym_type), sym_name(lsym_type)})
+					{sym_name(routine_sym), left_param[2], sym_name(valsym_type), sym_name(lsym_type)})
 				end if
 			end if
 		end if
