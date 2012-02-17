@@ -1,4 +1,5 @@
 include std/unittest.e
+without inline
 function foo( integer baz ) 
 	return baz - 1 
 end function 
