@@ -1,3 +1,7 @@
+include std/io.e
+include std/machine.e
+include std/search.e
+include std/unicode.e
 
 public enum
 	ANSI,
@@ -145,7 +149,7 @@ public function read_file(object file, integer as_text = BINARY_MODE, integer en
 						ret = ret[4..$]
 					end if
 				end if
-				ret = toUTF(ret, utf_8, utf_32)
+				ret = utf_to_utf(ret, utf_8, utf_32)
 				
 			case UTF_16 then
 				if length(ret) >= 2 then
@@ -192,7 +196,7 @@ public function read_file(object file, integer as_text = BINARY_MODE, integer en
 				poke(adr, ret)
 				ret = peek2u({adr, length(ret) / 2})
 
-				ret = toUTF(ret, utf_16, utf_32)
+				ret = utf_to_utf(ret, utf_16, utf_32)
 				
 			case UTF_32 then
 				if length(ret) >= 4 then
@@ -336,7 +340,7 @@ public function read_file(object file, integer as_text = BINARY_MODE, integer en
 	end if
 
 	-- Convert Windows endings
-	ret = replace_all(ret, {13,10}, {10})
+	ret = find_replace( {13,10}, ret, {10})
 	if length(ret) > 0 then
 		if ret[$] != 10 then
 			ret &= 10
@@ -418,14 +422,14 @@ public function write_file(object file, sequence data, integer as_text = BINARY_
 
 		if as_text = TEXT_MODE then
 			-- Standardize all line endings
-			data = replace_all(data, {13,10}, {10})
+			data = find_replace({13,10}, data, {10})
 
 		elsif as_text = UNIX_TEXT then
-			data = replace_all(data, {13,10}, {10})
+			data = find_replace({13,10}, data, {10})
 
 		elsif as_text = DOS_TEXT then
-			data = replace_all(data, {13,10}, {10})
-			data = replace_all(data, {10}, {13,10})
+			data = find_replace({13,10}, data, {10})
+			data = find_replace({10}, data, {13,10})
 
 		end if
 	end if
@@ -435,14 +439,14 @@ public function write_file(object file, sequence data, integer as_text = BINARY_
 			break
 			
 		case UTF_8 then
-			data = toUTF(data, utf_32, utf_8)
+			data = utf_to_utf(data, utf_32, utf_8)
 			if with_bom = 1 then
 				data = x"ef bb bf" & data
 			end if
 			as_text = BINARY_MODE
 			
 		case UTF_16LE then
-			data = toUTF(data, utf_32, utf_16)
+			data = utf_to_utf(data, utf_32, utf_16)
 			adr = allocate( length(data) * 2, 1)
 			poke2(adr, data)
 			data = peek({adr, length(data) * 2})
@@ -452,7 +456,7 @@ public function write_file(object file, sequence data, integer as_text = BINARY_
 			as_text = BINARY_MODE
 			
 		case UTF_16BE then
-			data = toUTF(data, utf_32, utf_16)
+			data = utf_to_utf(data, utf_32, utf_16)
 			adr = allocate( length(data) * 2, 1)
 			poke2(adr, data)
 			data = peek({adr, length(data) * 2})

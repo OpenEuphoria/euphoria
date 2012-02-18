@@ -31,12 +31,12 @@ namespace unicode
 -- Example:
 -- <eucode>
 -- for i = 1 to length(s) do
---    if not isUChar(s[i]) then
+--    if not is_code_point(s[i]) then
 --       return 0 -- String is not a utf-32 string.
 --    end if
 -- end for
 -- </eucode>
-public function isUChar(object test_char, integer is_strict = 0)
+public function is_code_point(object test_char, integer is_strict = 0)
 -- Valid code points ranges are ...
 --    U+0000 to U+D7FF
 --    U+E000 to U+10FFFF
@@ -145,7 +145,7 @@ public function get_seqlen(sequence input_string, integer from_index, integer en
     		return 0xFF 
     	
     	case utf_32 then
-    		if isUChar(lChar) then return 1 end if
+    		if is_code_point(lChar) then return 1 end if
     		return 0xFF
     		
     	case else
@@ -384,7 +384,7 @@ public function get_char(sequence input_string, integer from_index, integer enco
 			return 6
 	end switch
 	    
-	if not isUChar(lUCS_char, is_strict) then
+	if not is_code_point(lUCS_char, is_strict) then
 		return 5
 	end if
     return {lUCS_char, lNextIdx}
@@ -397,7 +397,7 @@ end function
 --
 -- Parameters:
 -- # ##ucs_char## : An atom. The UCS character, also known as a code point, to encode.
--- # ##encoding_format##: The format at return. One of ##utf_8##, ##utf_16##, or ##utf_32##.
+-- # ##encoding_format##: The format to return. One of ##utf_8##, ##utf_16##, or ##utf_32##.
 --  The default is ##utf_8##.
 --
 -- Returns:
@@ -408,10 +408,10 @@ end function
 -- Example:
 -- <eucode>
 -- atom G_Clef = 0x1d11e
--- ? encode(G_Clef, utf_8)) --> x"f09d849e"
+-- ? to_utf(G_Clef, utf_8)) --> x"f09d849e"
 -- </eucode>
-public function encode(atom ucs_char, integer encoding_format = utf_8)
-	if not isUChar(ucs_char) then
+public function to_utf(atom ucs_char, integer encoding_format = utf_8)
+	if not is_code_point(ucs_char) then
 		return ""
 	end if
 
@@ -478,10 +478,10 @@ end function
 -- Example:
 -- <eucode>
 -- atom G_Clef = 0x1d11e
--- ? encode(G_Clef, utf_8)) --> 4
+-- ? to_utf(G_Clef, utf_8)) --> 4
 -- </eucode>
 public function code_length(atom ucs_char, integer encoding_format = utf_8)
-	if not isUChar(ucs_char) then
+	if not is_code_point(ucs_char) then
 		return 0
 	end if
 
@@ -573,9 +573,9 @@ end function
 --
 -- Example:
 -- <eucode>
--- ? toUTF(x"7a C2A9 E6B0B4 F09d849e", utf_8, utf_16)) --> u"7a A9 6c34 d834 dd1e"
+-- ? utf_to_utf(x"7a C2A9 E6B0B4 F09d849e", utf_8, utf_16)) --> u"7a A9 6c34 d834 dd1e"
 -- </eucode>
-public function toUTF( sequence input_string, integer source_encoding = utf_32, integer result_encoding = utf_8)
+public function utf_to_utf( sequence input_string, integer source_encoding = utf_32, integer result_encoding = utf_8)
 
 	sequence lResult
 	integer lIdx
@@ -597,7 +597,7 @@ public function toUTF( sequence input_string, integer source_encoding = utf_32, 
 	lInChar = {0,1}
 	while lInChar[2] <= length(input_string) do
 		lInChar = get_char(input_string, lInChar[2], source_encoding)
-		lChar = encode(lInChar[1], result_encoding)
+		lChar = to_utf(lInChar[1], result_encoding)
 		lResult[lIdx .. lIdx + length(lChar) - 1] = lChar
 		lIdx += length(lChar)
 	end while

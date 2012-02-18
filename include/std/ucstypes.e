@@ -23,7 +23,6 @@ namespace ucstypes
 
 include std/types.e 
 include std/math.e
-include std/utils.e
 
 -- For Latin1 characters just index into this array to get the index and decomposition
 constant LATIN1_DATA = u"
@@ -669,9 +668,9 @@ constant NON_INTEGER_VALS = {
                                                           --------- 31 types
                                                 ---------           18 directionalities
                                               -                      2 mirrored
-                                  -----------                       56  toupper diffs
-                      -----------                                   48  tolower diffs
-                  ---                                                4 totitlecase diffs
+                                  -----------                       56 upper diffs
+                      -----------                                   48 lower diffs
+                  ---                                                4 title diffs
     -------------                                                   84 numeric values
         ---------                                                   24 mirror char diffs
 */
@@ -930,7 +929,10 @@ function getDirectionality(atom c)
 
 	integer d = and_bits(shift_bits(data, DIRECTION_SHIFT), DIRECTION_MASK)
 
-	return iff( d != DIRECTION_MASK, d , UNDEFINED)
+	if d = DIRECTION_MASK then
+		d = UNDEFINED
+	end if
+	return d
 end function
 
 --**
@@ -943,11 +945,10 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isAlpha(atom ucs_char)
+public function is_alpha(atom ucs_char)
 	if ucs_char <= 0x7F then
 		return t_alpha(ucs_char)
 	end if
-
 	
 	switch getType(ucs_char) do
 		case UPPERCASE_LETTER,
@@ -972,7 +973,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isUpper(atom ucs_char)
+public function is_upper(atom ucs_char)
 	if ucs_char <= 0x7F then
 		return t_upper(ucs_char)
 	end if
@@ -991,7 +992,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isLower(atom ucs_char)
+public function is_lower(atom ucs_char)
 	if ucs_char <= 0x7F then
 		return t_lower(ucs_char)
 	end if
@@ -1009,7 +1010,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isTitle(atom ucs_char)
+public function is_title(atom ucs_char)
 	if ucs_char <= 0x7F then
 		return t_upper(ucs_char)
 	end if
@@ -1027,7 +1028,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isAlphaNum(atom ucs_char)
+public function is_alphanum(atom ucs_char)
 	if ucs_char <= 0x7F then
 		return t_alnum(ucs_char)
 	end if
@@ -1058,7 +1059,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isDigit(atom ucs_char)
+public function is_digit(atom ucs_char)
 	if ucs_char <= 0x7F then
 		return t_digit(ucs_char)
 	end if
@@ -1083,7 +1084,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isNumber(atom ucs_char)
+public function is_number(atom ucs_char)
 	if ucs_char <= 0x7F then
 		return t_digit(ucs_char)
 	end if
@@ -1112,7 +1113,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isSeparator(atom ucs_char)
+public function is_separator(atom ucs_char)
 	if ucs_char <= 0x7F then
 		return t_space(ucs_char)
 	end if
@@ -1140,7 +1141,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isSpace(atom ucs_char)
+public function is_space(atom ucs_char)
 	if ucs_char <= 0x7F then
 		return t_space(ucs_char)
 	end if
@@ -1166,7 +1167,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isLine(atom ucs_char)
+public function is_line_separator(atom ucs_char)
 
 	
 	switch getType(ucs_char) do
@@ -1189,7 +1190,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isParagraph(atom ucs_char)
+public function is_para_separator(atom ucs_char)
 
 	
 	switch getType(ucs_char) do
@@ -1212,7 +1213,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isMark(atom ucs_char)
+public function is_mark(atom ucs_char)
 
 	
 	switch getType(ucs_char) do
@@ -1237,7 +1238,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isNonSpacing(atom ucs_char)
+public function is_non_spacing(atom ucs_char)
 
 	
 	switch getType(ucs_char) do
@@ -1261,7 +1262,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isPunctuation(atom ucs_char)
+public function is_punctuation(atom ucs_char)
 
 	if ucs_char <= 0x7F then
 		return t_punct(ucs_char)
@@ -1295,7 +1296,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isSymbol(atom ucs_char)
+public function is_symbol(atom ucs_char)
 	switch getType(ucs_char) do
 		case
 			MATH_SYMBOL,
@@ -1320,7 +1321,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isCurrency(atom ucs_char)
+public function is_currency(atom ucs_char)
 	return getType(ucs_char) = CURRENCY_SYMBOL
 end function
 
@@ -1335,7 +1336,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isOther(atom ucs_char)
+public function is_functional(atom ucs_char)
 	switch getType(ucs_char) do
 		case
 			CONTROL,
@@ -1361,7 +1362,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isControl(atom ucs_char)
+public function is_control(atom ucs_char)
 	if ucs_char <= 0x7F then
 		return t_cntrl(ucs_char)
 	end if
@@ -1378,7 +1379,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isFormat(atom ucs_char)
+public function is_format(atom ucs_char)
 	return getType(ucs_char) = FORMAT
 end function
 
@@ -1392,7 +1393,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isSurrogate(atom ucs_char)
+public function is_surrogate(atom ucs_char)
 	return getType(ucs_char) = SURROGATE
 end function
 
@@ -1406,7 +1407,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isPrivate(atom ucs_char)
+public function is_private(atom ucs_char)
 	return getType(ucs_char) = PRIVATE_USE
 end function
 
@@ -1420,7 +1421,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isGraph(atom ucs_char)
+public function is_glyph(atom ucs_char)
 	if ucs_char <= 0x7F then
 		return t_graph(ucs_char)
 	end if
@@ -1466,7 +1467,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isPrint(atom ucs_char)
+public function is_print(atom ucs_char)
 	if ucs_char <= 0x7F then
 		return t_print(ucs_char)
 	end if
@@ -1514,7 +1515,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isDirWhiteSpace(atom ucs_char)
+public function is_dir_whitespace(atom ucs_char)
 	return getDirectionality(ucs_char) = WHITESPACE
 end function
 
@@ -1528,7 +1529,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isDirLTR(atom ucs_char)
+public function is_dir_ltr(atom ucs_char)
 	return getDirectionality(ucs_char) = LEFT_TO_RIGHT
 end function
 
@@ -1542,7 +1543,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isDirRTL(atom ucs_char)
+public function is_dir_rtl(atom ucs_char)
 	return getDirectionality(ucs_char) = RIGHT_TO_LEFT
 end function
 
@@ -1556,7 +1557,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isDirStrong(atom ucs_char)
+public function is_dir_strong(atom ucs_char)
 	switch getDirectionality(ucs_char) do
 		case 
 			RIGHT_TO_LEFT,
@@ -1579,7 +1580,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isDirWeak(atom ucs_char)
+public function is_dir_weak(atom ucs_char)
 	switch getDirectionality(ucs_char) do
 		case 
 			EUROPEAN_NUMBER,
@@ -1605,7 +1606,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isDirNeutral(atom ucs_char)
+public function is_dir_neutral(atom ucs_char)
 	switch getDirectionality(ucs_char) do
 		case 
 			BLOCK_SEPARATOR,
@@ -1630,7 +1631,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isDirSeparator(atom ucs_char)
+public function is_dir_separator(atom ucs_char)
 	switch getDirectionality(ucs_char) do
 		case 
 			BLOCK_SEPARATOR,
@@ -1654,7 +1655,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isBlock(atom ucs_char)
+public function is_block(atom ucs_char)
 	return getDirectionality(ucs_char) = BLOCK_SEPARATOR
 end function
 
@@ -1669,7 +1670,7 @@ end function
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isSegment(atom ucs_char)
+public function is_segment(atom ucs_char)
 	return getDirectionality(ucs_char) = SEGMENT_SEPARATOR
 end function
 
@@ -1683,14 +1684,14 @@ end function
 -- Returns:
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
-public function isNonBreaking(atom ucs_char)
+public function is_non_breaking(atom ucs_char)
 	return NOBREAK = and_bits(
 				shift_bits(findCharacterValue(ucs_char), DECOMPOSITION_SHIFT),
 				DECOMPOSITION_MASK)
 end function
 
 --**
--- The code point has a mirror (matching) character, such as parenthesis.
+-- The code point has a mirror (matching) character, such as parenthesis in that '(' matches ')'.
 --
 -- Parameters:
 -- # ##ucs_char##: An atom. The code point to test.
@@ -1698,7 +1699,7 @@ end function
 -- Returns:
 -- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
-public function isMirroring(atom ucs_char)
+public function is_mirroring(atom ucs_char)
 	return and_bits(shift_bits(getPackedData(ucs_char), MIRRORED_SHIFT), MIRRORED_MASK) != 0
 end function
 
@@ -1711,20 +1712,20 @@ end function
 -- Returns:
 -- The converted input.
 --
-public function toLower(object ucs_char)
+public function lower(object ucs_char)
 	if atom(ucs_char) then
 		return ucs_char + LCDIFF[1 + and_bits(shift_bits(getPackedData(ucs_char), TOLOWER_SHIFT), TOLOWER_MASK)]
 	end if
 	
 	for i = 1 to length(ucs_char) do
-		ucs_char[i] = toLower(ucs_char[i])
+		ucs_char[i] = lower(ucs_char[i])
 	end for
 	
 	return ucs_char
 end function
 
 --**
--- Converts the input to upperer case.
+-- Converts the input to upper case.
 --
 -- Parameters:
 -- # ##ucs_char##: An object. Either a single code point to convert or a text string.
@@ -1732,20 +1733,20 @@ end function
 -- Returns:
 -- The converted input.
 --
-public function toUpper(object ucs_char)
+public function upper(object ucs_char)
 	if atom(ucs_char) then
 		return ucs_char + UCDIFF[1 + and_bits(shift_bits(getPackedData(ucs_char), TOUPPER_SHIFT), TOUPPER_MASK)]
 	end if
 	
 	for i = 1 to length(ucs_char) do
-		ucs_char[i] = toUpper(ucs_char[i])
+		ucs_char[i] = upper(ucs_char[i])
 	end for
 	
 	return ucs_char
 end function
 
 --**
--- Converts the input to lower case.
+-- Converts the input to titled case.
 --
 -- Parameters:
 -- # ##ucs_char##: An atom. The code point to convert.
@@ -1753,9 +1754,14 @@ end function
 -- Returns:
 -- The converted input.
 --
-public function toTitle(atom ucs_char)
+public function title(atom ucs_char)
 	integer diff = TCDIFF[1 + and_bits(shift_bits(getPackedData(ucs_char), TOTITLE_SHIFT), TOTITLE_MASK)]
-	return iff( diff != TOTITLE_MASK, ucs_char + diff , toUpper(ucs_char))
+
+	if diff != TOTITLE_MASK then
+		return ucs_char + diff
+	else
+		return upper(ucs_char)
+	end if
 end function
 
 --**
@@ -1768,8 +1774,8 @@ end function
 -- If the code point has no matching value, the code point is returned, otherwise
 -- the matching (mirror) code point is returned.
 --
-public function toMirror(atom ucs_char)
-	if not isMirroring(ucs_char) then
+public function mirror(atom ucs_char)
+	if not is_mirroring(ucs_char) then
 		return ucs_char
 	end if
 
@@ -1786,8 +1792,8 @@ end function
 -- An atom: -1 if the code point has no numerical value,
 -- -2 if the value is not known, otherwise the numerical value of it.
 --
-public function getNumericValue(atom ucs_char)
-	if isMirroring(ucs_char) then
+public function numeric_value(atom ucs_char)
+	if is_mirroring(ucs_char) then
 		return -1
 	end if
 	atom val = NUMERICS[1 + and_bits(shift_bits(getPackedData(ucs_char), NUMERIC_SHIFT), NUMERIC_MASK)]
@@ -1807,38 +1813,40 @@ ifdef UCSTYPE_DEBUG then
 -- DEBUG TESTING
 -- This creates a file containing all the code ranges for each category.
 sequence p = {
-	routine_id("isAlpha"),
-	routine_id("isUpper"),
-	routine_id("isLower"),
-	routine_id("isTitle"),
-	routine_id("isAlphaNum"),
-	routine_id("isDigit"),
-	routine_id("isNumber"),
-	routine_id("isSeparator"),
-	routine_id("isSpace"),
-	routine_id("isLine"),
-	routine_id("isParagraph"),
-	routine_id("isMark"),
-	routine_id("isNonSpacing"),
-	routine_id("isPunctuation"),
-	routine_id("isSymbol"),
-	routine_id("isCurrency"),
-	routine_id("isOther"),
-	routine_id("isControl"),
-	routine_id("isFormat"),
-	routine_id("isSurrogate"),
-	routine_id("isPrivate"),
-	routine_id("isGraph"),
-	routine_id("isPrint"),
-	routine_id("isDirWhiteSpace"),
-	routine_id("isDirLTR"),
-	routine_id("isDirRTL"),
-	routine_id("isDirStrong"),
-	routine_id("isDirWeak"),
-	routine_id("isDirNeutral"),
-	routine_id("isDirSeparator"),
-	routine_id("isNonBreaking"),
-	routine_id("isMirroring"),
+	"is_alpha",
+	"is_upper",
+	"is_lower",
+	"is_title",
+	"is_alphanum",
+	"is_digit",
+	"is_number",
+	"is_separator",
+	"is_space",
+	"is_line_separator",
+	"is_para_separator",
+	"is_mark",
+	"is_non_spacing",
+	"is_punctuation",
+	"is_symbol",
+	"is_currency",
+	"is_functional",
+	"is_control",
+	"is_format",
+	"is_surrogate",
+	"is_private",
+	"is_glyph",
+	"is_print",
+	"is_dir_whitespace",
+	"is_dir_ltr",
+	"is_dir_rtl",
+	"is_dir_strong",
+	"is_dir_weak",
+	"is_dir_neutral",
+	"is_dir_separator",
+	"is_block",
+	"is_segment",
+	"is_non_breaking",
+	"is_mirroring",
 	$
 }
 sequence r
@@ -1846,7 +1854,8 @@ integer ix
 integer c
 integer fh = open("ucstest.txt", "w")
 for k = 1 to length(p) do
-	c = p[k]
+	c = routine_id(p[k])
+	printf(fh, "%s\n", {p[k]})
 	
 	r = {-1,-1}
 	ix = 1
@@ -1863,7 +1872,7 @@ for k = 1 to length(p) do
 				if r[2] = -1 then
 					r[2] = i
 				elsif r[2] != i-1 then
-					printf(fh, "%2d %06x:%06x\n", c & r)
+					printf(fh, " %06x:%06x\n", r)
 					r = {i, -1}
 				else
 					r[2] = i
@@ -1872,9 +1881,9 @@ for k = 1 to length(p) do
 		else
 			if r[1] != -1 then
 				if r[2] != -1 then
-					printf(fh, "%2d %06x:%06x\n", c & r)
+					printf(fh, " %06x:%06x\n", r)
 				else
-					printf(fh, "%2d %06x\n", c & r[1])
+					printf(fh, " %06x\n", r[1])
 				end if
 			end if
 			r = {-1, -1}
@@ -1883,9 +1892,9 @@ for k = 1 to length(p) do
 	end for
 	if r[1] != -1 then
 		if r[2] != -1 then
-			printf(fh, "%2d %06x:%06x\n", c & r)
+			printf(fh, " %06x:%06x\n", r)
 		else
-			printf(fh, "%2d %06x\n", c & r[1])
+			printf(fh, " %06x\n", r[1])
 		end if
 	end if
 	puts(fh, "\n\n")
