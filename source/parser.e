@@ -1791,37 +1791,59 @@ procedure TypeCheck(symtab_index var)
 		end if
 	end if
 end procedure
+with define SAFE
+include std/machine.e
 
-procedure test_literal_match(object left_param, symtab_pointer valsym)
+with trace
+public procedure test_literal_match(object left_param, symtab_pointer valsym)
 	integer lsym
 	integer routine_sym
+	integer parameter, forward_ref = 0
 	if atom(left_param) then
 		lsym = left_param
+		parameter = 0
+		routine_sym = 0
 	elsif length(left_param) = 3 then
 		lsym = left_param[3]
+		parameter = left_param[2]
 		routine_sym = left_param[1]
 	else
 		return
 	end if
-	if symtab_index(lsym) and symtab_index(valsym) and lsym != 0 and valsym != 0 
-		and length(SymTab[lsym]) >= S_VTYPE and length(SymTab[valsym]) >= S_VTYPE then
-		if find(sym_mode(lsym),  {M_CONSTANT, M_NORMAL}) != 0 
+	if symtab_index(lsym) and symtab_index(valsym) and lsym != 0 and valsym != 0 then
+		if length(SymTab[lsym]) >= S_VTYPE and length(SymTab[valsym]) >= S_VTYPE then
+			if find(sym_mode(lsym),  {M_CONSTANT, M_NORMAL}) != 0 
 			and find(sym_mode(valsym),  {M_CONSTANT, M_NORMAL}) != 0 then
-			symtab_index valsym_type = sym_type(valsym)
-			symtab_index lsym_type = sym_type(lsym)
-			integer valsym_ls, lsym_ls
-			valsym_ls = find(valsym_type,literal_sets[LS_KEY])
-			lsym_ls = find(lsym_type,literal_sets[LS_KEY])
-			if valsym_ls != 0 and lsym_ls != 0 and (valsym_ls != lsym_ls) then
-				-- issue warning
-				if atom(left_param) then
-					Warning(WARNMSG_ENUM_MISMATCH_TYPES_BINOP, enum_mismatch_warning_flag, {sym_name(valsym), sym_name(valsym_type), sym_name(lsym), sym_name(lsym_type)})
-				else
-					Warning(WARNMSG_ENUM_MISMATCH_TYPES_FNCALL, enum_mismatch_warning_flag,
-					{sym_name(routine_sym), left_param[2], sym_name(valsym_type), sym_name(lsym_type)})
+				symtab_index valsym_type = sym_type(valsym)
+				symtab_index lsym_type = sym_type(lsym)
+				integer valsym_ls, lsym_ls
+				valsym_ls = find(valsym_type,literal_sets[LS_KEY])
+				lsym_ls = find(lsym_type,literal_sets[LS_KEY])
+				if valsym_ls != 0 and lsym_ls != 0 and (valsym_ls != lsym_ls) then
+					-- issue warning
+					if atom(left_param) then
+						Warning(WARNMSG_ENUM_MISMATCH_TYPES_BINOP, enum_mismatch_warning_flag, {sym_name(valsym), sym_name(valsym_type), sym_name(lsym), sym_name(lsym_type)})
+					else
+						Warning(WARNMSG_ENUM_MISMATCH_TYPES_FNCALL, enum_mismatch_warning_flag,
+						{sym_name(routine_sym), left_param[2], sym_name(valsym_type), sym_name(lsym_type)})
+					end if
 				end if
 			end if
+		else
+			-- cannot determine the type(s)
+			forward_ref = 1
 		end if
+	end if
+	if lsym < 0 or valsym < 0 or routine_sym < 0 or forward_ref then
+		atom match_data_pointer = allocate( 4 * 4, 1 )
+		poke4(match_data_pointer, {routine_sym, parameter, lsym, valsym})
+		if lsym < 0 then
+			add_property( -lsym, "test_literal_match",  match_data_pointer )
+		end if
+		if valsym < 0 then
+			add_property( -valsym, "test_literal_match",  match_data_pointer )
+		end if
+		return
 	end if
 end procedure
 

@@ -47,9 +47,10 @@ enum
 	FR_OP,
 	FR_HASHVAL,
 --	FR_PRIVATE_LIST, -- not used yet
-	FR_DATA  -- extra info
+	FR_DATA,  -- extra info
+    FR_PROPERTIES
 
-constant FR_SIZE = FR_DATA
+constant FR_SIZE = FR_PROPERTIES
 
 -- # extra default parameters to leave space when
 -- emitting a forward call
@@ -179,11 +180,36 @@ export procedure add_data( integer ref, object data )
 	forward_references[ref][FR_DATA] = append( forward_references[ref][FR_DATA], data )
 end procedure
 
+export function get_property( integer ref, sequence key )
+	sequence pairs = forward_references[ref][FR_PROPERTIES]
+	integer i1 = find(key,pairs[1])
+	if i1 = 0 then
+		return 0
+	end if
+	return pairs[2][i1]
+end function
+
+export procedure del_property( integer ref, sequence key )
+	sequence pair = forward_references[ref][FR_PROPERTIES]
+	integer loc = find( key, pair[1] )
+	forward_references[ref][FR_PROPERTIES] = 0
+	pair[1] = remove(pair[1],loc)
+	pair[2] = remove(pair[2],loc)
+	forward_references[ref][FR_PROPERTIES] = pair
+end procedure
+	
+export procedure add_property( integer ref, sequence key, object data )
+	sequence pair = forward_references[ref][FR_PROPERTIES]
+	forward_references[ref][FR_PROPERTIES] = 0
+	pair[1] = append( pair[1], key )
+	pair[2] = append( pair[2], data )
+	forward_references[ref][FR_PROPERTIES] = pair
+end procedure
+
 export procedure set_line( integer ref, integer line_no, sequence this_line, integer bp )
 	forward_references[ref][FR_LINE] = line_no
 	forward_references[ref][FR_THISLINE] = this_line
-	forward_references[ref][FR_BP] = bp
-	
+	forward_references[ref][FR_BP] = bp	
 end procedure
 
 sequence fwd_private_sym  = {}
@@ -456,6 +482,24 @@ procedure patch_forward_variable( token tok, integer ref )
 			Code[vx] = sym
 			vx = find( -ref, Code, vx )
 		end while
+		atom test_parameters_ptr = get_property( ref, "test_literal_match" )
+		if equal(test_parameters_ptr,0)=0 then
+			sequence test_parameters = peek4s(test_parameters_ptr & 4)
+			integer ref_location = find( -ref, test_parameters )
+			if ref_location != 0 then
+				test_parameters[ref_location] = tok[T_SYM]
+				poke4( test_parameters_ptr + 4 * (ref_location-1), tok[T_SYM])
+				if find(1, test_parameters < 0) = 0 then
+					-- there are no more negative values
+					if test_parameters[1] = 0 then
+						test_literal_match( test_parameters[3], test_parameters[4])
+					else
+						test_literal_match( test_parameters[1..3], test_parameters[4])
+					end if
+					del_property( ref, "test_literal_match" )
+				end if				
+			end if
+		end if
 		resolved_reference( ref )
 	end if
 	reset_code()
@@ -748,6 +792,7 @@ export type forward_reference( integer ref )
 	end if
 end type
 
+constant EMPTY_PROPERTIES = {{}, {}}
 export function new_forward_reference( integer fwd_op, symtab_index sym, integer op = fwd_op  )
 	integer 
 		ref, 
@@ -795,6 +840,7 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 		forward_references[ref][FR_DATA] = { sym }
 	end if
 	
+	forward_references[ref][FR_PROPERTIES] = EMPTY_PROPERTIES
 	-- If we're recording tokens (for a default parameter), this ref will never 
 	-- get resolved.  So ignore it for now, and when someone actually calls
 	-- the routine, it will be resolved normally then.
