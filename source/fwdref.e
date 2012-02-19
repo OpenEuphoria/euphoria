@@ -48,7 +48,7 @@ enum
 	FR_HASHVAL,
 --	FR_PRIVATE_LIST, -- not used yet
 	FR_DATA,  -- extra info
-    FR_PROPERTIES
+	FR_PROPERTIES
 
 constant FR_SIZE = FR_PROPERTIES
 
@@ -180,7 +180,16 @@ export procedure add_data( integer ref, object data )
 	forward_references[ref][FR_DATA] = append( forward_references[ref][FR_DATA], data )
 end procedure
 
-export function get_property( integer ref, sequence key )
+atom property_value = 1999
+constant property_multiplier = 1993
+public integer property_count = 0
+export function new_property_type()
+	property_value *= property_multiplier
+	property_value = remainder( property_value, #7FFF_FFFF)
+	return property_value
+end function
+
+export function get_property( integer ref, atom key )
 	sequence pairs = forward_references[ref][FR_PROPERTIES]
 	integer i1 = find(key,pairs[1])
 	if i1 = 0 then
@@ -189,23 +198,31 @@ export function get_property( integer ref, sequence key )
 	return pairs[2][i1]
 end function
 
-export procedure del_property( integer ref, sequence key )
+export procedure del_property( integer ref, atom key )
 	sequence pair = forward_references[ref][FR_PROPERTIES]
 	integer loc = find( key, pair[1] )
 	forward_references[ref][FR_PROPERTIES] = 0
 	pair[1] = remove(pair[1],loc)
 	pair[2] = remove(pair[2],loc)
+	property_count -= 1
 	forward_references[ref][FR_PROPERTIES] = pair
 end procedure
 	
-export procedure add_property( integer ref, sequence key, object data )
+export procedure set_property( integer ref, atom key, object data )
 	sequence pair = forward_references[ref][FR_PROPERTIES]
 	forward_references[ref][FR_PROPERTIES] = 0
-	pair[1] = append( pair[1], key )
-	pair[2] = append( pair[2], data )
+	integer loc = find(key, pair[1])
+	if loc then
+		pair[2][loc] = data
+	else
+		property_count+=1
+		pair[1] = append( pair[1], key )
+		pair[2] = append( pair[2], data )
+	end if
 	forward_references[ref][FR_PROPERTIES] = pair
 end procedure
 
+export constant test_literal_match_key = new_property_type()
 export procedure set_line( integer ref, integer line_no, sequence this_line, integer bp )
 	forward_references[ref][FR_LINE] = line_no
 	forward_references[ref][FR_THISLINE] = this_line
@@ -448,10 +465,63 @@ procedure set_error_info( integer ref )
 	current_file_no = fr[FR_FILE]
 end procedure
 
+procedure patch_type_mismatch_warning( token tok, integer ref )
+	atom test_parameters_ptr = get_property( ref, test_literal_match_key )
+	if equal(test_parameters_ptr,0) then
+		return
+	end if
+	sequence test_parameters = peek4s(test_parameters_ptr & 6)
+	integer ref_location = find( -ref, test_parameters )
+	if ref_location = 0 then
+		return
+	end if
+	test_parameters[ref_location] = tok[T_SYM]
+	integer	lsym = test_parameters[1]
+	integer rsym = test_parameters[4]
+	integer lsym_type = 0
+	integer rsym_type = 0
+	if test_parameters[5] = 0 and symtab_index(lsym) and lsym != 0 then
+		-- not a forward reference yet it may not have its type worked out....
+		if length(SymTab[lsym]) >= S_VTYPE then
+			lsym_type = SymTab[lsym][S_VTYPE]
+			test_parameters[5] = lsym_type
+		else
+			-- TODO: handle this case.  Why is this too short?
+		end if
+	end if
+	if test_parameters[6] = 0 and symtab_index(rsym) and rsym != 0 then
+		if length(SymTab[rsym]) >= S_VTYPE then
+			rsym_type = SymTab[rsym][S_VTYPE]
+			test_parameters[6] = rsym_type
+		else
+			-- TODO: handle this case
+		end if
+	end if
+	
+	poke4(test_parameters_ptr, test_parameters)
+	if lsym_type < 0 then
+		set_property(-lsym_type, test_literal_match_key, test_parameters_ptr)
+	end if
+	if rsym_type < 0 then
+		set_property(-rsym_type, test_literal_match_key, test_parameters_ptr)
+	end if
+	
+	del_property( ref, test_literal_match_key )
+	if not find(1, test_parameters < 0) then
+		-- there are no more negative values
+		if test_parameters[1] = 0 then
+			test_literal_match( test_parameters[3], test_parameters[4])
+		else
+			test_literal_match( test_parameters[1..3], test_parameters[4])
+		end if
+	end if		
+end procedure
+
 procedure patch_forward_variable( token tok, integer ref )
 -- forward reference for a variable
 	sequence fr = forward_references[ref]
 	symtab_index sym = tok[T_SYM]
+	patch_type_mismatch_warning( tok, ref )
 	
 	if SymTab[sym][S_FILE_NO] = fr[FR_FILE] 
 	and fr[FR_SUBPROG] = TopLevelSub then
@@ -469,6 +539,7 @@ procedure patch_forward_variable( token tok, integer ref )
 		SymTab[sym][S_USAGE] = or_bits( U_READ, SymTab[sym][S_USAGE] )
 	end if
 	
+
 	set_code( ref )
 	integer pc = fr[FR_PC]
 	if pc < 1 then
@@ -482,24 +553,6 @@ procedure patch_forward_variable( token tok, integer ref )
 			Code[vx] = sym
 			vx = find( -ref, Code, vx )
 		end while
-		atom test_parameters_ptr = get_property( ref, "test_literal_match" )
-		if equal(test_parameters_ptr,0)=0 then
-			sequence test_parameters = peek4s(test_parameters_ptr & 4)
-			integer ref_location = find( -ref, test_parameters )
-			if ref_location != 0 then
-				test_parameters[ref_location] = tok[T_SYM]
-				poke4( test_parameters_ptr + 4 * (ref_location-1), tok[T_SYM])
-				if find(1, test_parameters < 0) = 0 then
-					-- there are no more negative values
-					if test_parameters[1] = 0 then
-						test_literal_match( test_parameters[3], test_parameters[4])
-					else
-						test_literal_match( test_parameters[1..3], test_parameters[4])
-					end if
-					del_property( ref, "test_literal_match" )
-				end if				
-			end if
-		end if
 		resolved_reference( ref )
 	end if
 	reset_code()
@@ -538,6 +591,7 @@ end function
 procedure patch_forward_type( token tok, integer ref )
 	sequence fr = forward_references[ref]
 	sequence syms = fr[FR_DATA]
+
 	for i = 2 to length( syms ) do
 		integer sym, enum_type_ref
 		
@@ -559,6 +613,7 @@ procedure patch_forward_type( token tok, integer ref )
 			patch_forward_nameof( { VARIABLE, sym}, enum_type_ref )
 		end if
 	end for
+	patch_type_mismatch_warning(tok, ref)
 	resolved_reference( ref )
 end procedure
 

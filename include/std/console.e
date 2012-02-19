@@ -722,13 +722,13 @@ end function
 -- See Also:
 --   [[:cursor]]
 
-public constant
+public type enum style_t
 	NO_CURSOR              = #2000,
 	UNDERLINE_CURSOR       = #0607,
 	THICK_UNDERLINE_CURSOR = #0507,
 	HALF_BLOCK_CURSOR      = #0407,
 	BLOCK_CURSOR           = #0007
-
+end type
 --****
 -- === Keyboard related routines
 
@@ -1100,7 +1100,7 @@ end type
 -- See Also:
 --   [[:put_screen_char]], [[:save_text_image]]
 
-public function get_screen_char(positive_atom line, positive_atom column, integer fgbg = 0)
+public function get_screen_char(positive_atom line, positive_atom column, types:boolean fgbg = 0)
 	sequence ca
 	
 	ca = machine_func(M_GET_SCREEN_CHAR, {line, column})
@@ -1187,7 +1187,7 @@ end function
 -- See Also:
 --   [[:get_screen_char]], [[:put_screen_char]], [[:attr_to_colors]]
 
-public function colors_to_attr(object fgbg, integer bg = 0)
+public function colors_to_attr(object fgbg, types:boolean bg = 0)
 	if sequence(fgbg) then
 		return fgbg[1] + fgbg[2] * 16
 	else
@@ -1355,7 +1355,7 @@ end function
 --   [[:graphics_mode]], [[:text_rows]]
 --
 
-public procedure cursor(integer style)
+public procedure cursor(style_t style)
 	machine_proc(M_CURSOR, style)
 end procedure
 

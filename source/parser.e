@@ -1415,7 +1415,7 @@ procedure Function_call( token tok )
 	if scope = SC_PREDEF then
 		if find(routine_sym,{compare_builtin,equal_builtin}) != 0 then
 			integer last = Pop()
-			test_literal_match(Top(),last)
+			test_literal_match(last,Top())
 			Push(last)
 		end if
 		emit_op(opcode)
@@ -1791,14 +1791,14 @@ procedure TypeCheck(symtab_index var)
 		end if
 	end if
 end procedure
-with define SAFE
+
 include std/machine.e
 
-with trace
 public procedure test_literal_match(object left_param, symtab_pointer valsym)
 	integer lsym
 	integer routine_sym
 	integer parameter, forward_ref = 0
+	sequence lparameter_name = "", rparameter_name = "", routine_name = ""
 	if atom(left_param) then
 		lsym = left_param
 		parameter = 0
@@ -1807,43 +1807,68 @@ public procedure test_literal_match(object left_param, symtab_pointer valsym)
 		lsym = left_param[3]
 		parameter = left_param[2]
 		routine_sym = left_param[1]
+		ifdef DEBUG then
+			if routine_sym > 0 and length(SymTab[routine_sym]) >= S_NAME then
+				routine_name = SymTab[routine_sym][S_NAME]
+			else
+				routine_name = sprintf("forward reference? (%d)", routine_sym)
+			end if
+		end ifdef
 	else
 		return
 	end if
-	if symtab_index(lsym) and symtab_index(valsym) and lsym != 0 and valsym != 0 then
+	if lsym < 0 or valsym < 0 then
+		forward_ref = 1
+	end if
+	symtab_index valsym_type = 0, lsym_type = 0
+	if (not forward_ref) and lsym != 0 and valsym != 0 then
+		ifdef DEBUG then
+			if find(0, (length(SymTab[lsym]) & length(SymTab[valsym])) >= S_NAME) = 0 then
+				lparameter_name = SymTab[lsym][S_NAME]
+				rparameter_name = SymTab[valsym][S_NAME]
+				trace(find(lparameter_name, {"z", "s88999", "t", "MB_OKCANCEL", "MB_OKCANCELRETRY"}) != 0)
+				trace(find(rparameter_name, {"ARM", "ID_CANCEL", "s88999", "y", "X86_64", "z", "ID_OK", "MB_OK", "ID_RETRY"}) != 0)
+			end if
+		end ifdef
 		if length(SymTab[lsym]) >= S_VTYPE and length(SymTab[valsym]) >= S_VTYPE then
 			if find(sym_mode(lsym),  {M_CONSTANT, M_NORMAL}) != 0 
 			and find(sym_mode(valsym),  {M_CONSTANT, M_NORMAL}) != 0 then
-				symtab_index valsym_type = sym_type(valsym)
-				symtab_index lsym_type = sym_type(lsym)
+				valsym_type = sym_type(valsym)
+				lsym_type = sym_type(lsym)
 				integer valsym_ls, lsym_ls
-				valsym_ls = find(valsym_type,literal_sets[LS_KEY])
-				lsym_ls = find(lsym_type,literal_sets[LS_KEY])
-				if valsym_ls != 0 and lsym_ls != 0 and (valsym_ls != lsym_ls) then
-					-- issue warning
-					if atom(left_param) then
-						Warning(WARNMSG_ENUM_MISMATCH_TYPES_BINOP, enum_mismatch_warning_flag, {sym_name(valsym), sym_name(valsym_type), sym_name(lsym), sym_name(lsym_type)})
-					else
-						Warning(WARNMSG_ENUM_MISMATCH_TYPES_FNCALL, enum_mismatch_warning_flag,
-						{sym_name(routine_sym), left_param[2], sym_name(valsym_type), sym_name(lsym_type)})
+				if valsym_type < 0 or lsym_type < 0 then
+					forward_ref = 1
+				else
+					valsym_ls = find(valsym_type,literal_sets[LS_KEY])
+					lsym_ls = find(lsym_type,literal_sets[LS_KEY])
+					if valsym_ls != 0 and lsym_ls != 0 and (valsym_ls != lsym_ls) then
+						-- issue warning
+						if atom(left_param) then
+							Warning(WARNMSG_ENUM_MISMATCH_TYPES_BINOP, enum_mismatch_warning_flag, {sym_name(valsym), sym_name(valsym_type), sym_name(lsym), sym_name(lsym_type)})
+						else
+							Warning(WARNMSG_ENUM_MISMATCH_TYPES_FNCALL, enum_mismatch_warning_flag,
+							{sym_name(routine_sym), left_param[2], sym_name(valsym_type), sym_name(lsym_type)})
+						end if
 					end if
 				end if
 			end if
-		else
-			-- cannot determine the type(s)
-			forward_ref = 1
 		end if
 	end if
-	if lsym < 0 or valsym < 0 or routine_sym < 0 or forward_ref then
-		atom match_data_pointer = allocate( 4 * 4, 1 )
-		poke4(match_data_pointer, {routine_sym, parameter, lsym, valsym})
+	if forward_ref or routine_sym < 0 then
+		atom match_data_pointer = allocate( 4 * 6, 1 )
+		poke4(match_data_pointer, {routine_sym, parameter, lsym, valsym, lsym_type, valsym_type})
 		if lsym < 0 then
-			add_property( -lsym, "test_literal_match",  match_data_pointer )
+			set_property( -lsym, test_literal_match_key,  match_data_pointer )
 		end if
 		if valsym < 0 then
-			add_property( -valsym, "test_literal_match",  match_data_pointer )
+			set_property( -valsym, test_literal_match_key,  match_data_pointer )
 		end if
-		return
+		if lsym_type < 0 then
+			set_property( -lsym_type,  test_literal_match_key,  match_data_pointer )
+		end if
+		if valsym_type < 0 then
+			set_property( -valsym_type,  test_literal_match_key,  match_data_pointer )
+		end if
 	end if
 end procedure
 
@@ -5322,6 +5347,11 @@ export procedure parser()
 	Code = {}
 	LineTable = {}
 	end if
+	ifdef DEBUG then
+		if property_count then
+			printf(1, "There are %d outstanding properties still set on forward references.\n", { property_count } )
+		end if
+	end ifdef
 end procedure
 
 export procedure nested_parser()

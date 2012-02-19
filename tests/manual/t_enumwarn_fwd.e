@@ -16,7 +16,10 @@ end procedure
 include ../enum_type.e
 include enum_type_fwd.e
 
+-- assigning an architecture to an architecture
+-- well, this one is okay. ;)
 public architecture z = ARM
+
 -- warns here
 -- assigning an architecture to a status
 status s888999 = ARM
@@ -25,12 +28,12 @@ status s888999 = ARM
 -- assigning an architecture to a status
 button_type t = y
 
--- warns here
+-- does not warn here but should
 -- comparing an architecture to a status
 if equal(s888999,X86_64) then
 end if
 
--- warns here
+-- does not warn here but should
 -- comparing a button_type to an architecture
 if compare(MB_OKCANCELRETRY,z) then
 end if
@@ -40,16 +43,16 @@ end if
 if MB_OKCANCELRETRY < X86 then
 end if
 
--- warns here
+-- does not warn here but should
 -- comparing a button_type to an architecture
 if t = z then
 end if
 
--- warns here
+-- does not warn here but should
 -- assigning a status to an architecture
 z = ID_OK 
 
--- warns here                             : third argument should be a boolean not an architecture
+-- does not warn here but should          : third argument should be a boolean not an architecture
 -- spec parameters  : status, button_type, boolean
 -- passed parameters: status, boolean, architecture
 good_result( ID_OK, MB_OK, X86 )
