@@ -58,29 +58,29 @@ e1 = u"0041 2262 0391 002E" -- "A<NOT IDENTICAL TO><ALPHA>."
 e2 = u"D55C AD6D C5B4" -- "hangugo" in Hangul
 e3 = u"65E5 672C 8A9E" -- "nihongo" in Kanji
 
-f1 = toUTF(e1, utf_16, utf_8)
-f2 = toUTF(e2, utf_16, utf_8)
-f3 = toUTF(e3, utf_16, utf_8)
+f1 = utf_to_utf(e1, utf_16, utf_8)
+f2 = utf_to_utf(e2, utf_16, utf_8)
+f3 = utf_to_utf(e3, utf_16, utf_8)
 
 test_equal("utf8_encode#1", x"41E289A2CE912E", f1)
 test_equal("utf8_encode#2", x"ED959CEAB5ADEC96B4", f2)
 test_equal("utf8_encode#3", x"E697A5E69CACE8AA9E", f3)
 
-g1 = toUTF(f1, utf_8, utf_16)
-g2 = toUTF(f2, utf_8, utf_16)
-g3 = toUTF(f3, utf_8, utf_16)
+g1 = utf_to_utf(f1, utf_8, utf_16)
+g2 = utf_to_utf(f2, utf_8, utf_16)
+g3 = utf_to_utf(f3, utf_8, utf_16)
 
 test_equal("utf8_decode#1", e1, g1)
 test_equal("utf8_decode#2", e2, g2)
 test_equal("utf8_decode#3", e3, g3)
 
 
-test_true(`isUChar('a')`, isUChar('a'))
-test_false(`isUChar(0x1FFFFF)`, isUChar(0x1FFFFF))
-test_true(`isUChar(0xFFFF)`, isUChar(0xFFFF))
-test_false(`isUChar(0xFFFF, strict)`, isUChar(0xFFFF, 1))
-test_true(`isUChar(0x1FFFF)`, isUChar(0x1FFFF))
-test_false(`isUChar(0x1FFFF, strict)`, isUChar(0x1FFFF, 1))
+test_true(`is_code_point('a')`, is_code_point('a'))
+test_false(`is_code_point(0x1FFFFF)`, is_code_point(0x1FFFFF))
+test_true(`is_code_point(0xFFFF)`, is_code_point(0xFFFF))
+test_false(`is_code_point(0xFFFF, strict)`, is_code_point(0xFFFF, 1))
+test_true(`is_code_point(0x1FFFF)`, is_code_point(0x1FFFF))
+test_false(`is_code_point(0x1FFFF, strict)`, is_code_point(0x1FFFF, 1))
 
 test_equal( "chars_before utf8",  3, chars_before(x"7a C2A9 E6B0B4 F09d849e 0 F09d849e E6B0B4 C2A9 7a", 7, utf_8))
 test_equal( "chars_before utf16", 4, chars_before(u"7a A9 6c34 d834dd1e 0 d834dd1e 6c34 a9 7a", 6, utf_16))
@@ -181,20 +181,20 @@ procedure ut3()
 end procedure
 ut3()
 
-test_equal("encode utf_8 z", x"7a", encode(0x7a, utf_8))
-test_equal("encode utf_8 copyright", x"c2a9", encode(0xa9, utf_8))
-test_equal("encode utf_8 water", x"e6b0b4", encode(0x6c34, utf_8))
-test_equal("encode utf_8 G-Clef", x"f09d849e", encode(0x1d11e, utf_8))
+test_equal("to_utf utf_8 z", x"7a", to_utf(0x7a, utf_8))
+test_equal("to_utf utf_8 copyright", x"c2a9", to_utf(0xa9, utf_8))
+test_equal("to_utf utf_8 water", x"e6b0b4", to_utf(0x6c34, utf_8))
+test_equal("to_utf utf_8 G-Clef", x"f09d849e", to_utf(0x1d11e, utf_8))
 
-test_equal("encode utf_16 z", u"7a", encode(0x7a, utf_16))
-test_equal("encode utf_16 copyright", u"a9", encode(0xa9, utf_16))
-test_equal("encode utf_16 water", u"6c34", encode(0x6c34, utf_16))
-test_equal("encode utf_16 G-Clef", u"d834 dd1e", encode(0x1d11e, utf_16))
+test_equal("to_utf utf_16 z", u"7a", to_utf(0x7a, utf_16))
+test_equal("to_utf utf_16 copyright", u"a9", to_utf(0xa9, utf_16))
+test_equal("to_utf utf_16 water", u"6c34", to_utf(0x6c34, utf_16))
+test_equal("to_utf utf_16 G-Clef", u"d834 dd1e", to_utf(0x1d11e, utf_16))
 
-test_equal("encode utf_32 z", U"7a", encode(0x7a, utf_32))
-test_equal("encode utf_32 copyright", U"a9", encode(0xa9, utf_32))
-test_equal("encode utf_32 water", U"6c34", encode(0x6c34, utf_32))
-test_equal("encode utf_32 G-Clef", U"1d11e", encode(0x1d11e, utf_32))
+test_equal("to_utf utf_32 z", U"7a", to_utf(0x7a, utf_32))
+test_equal("to_utf utf_32 copyright", U"a9", to_utf(0xa9, utf_32))
+test_equal("to_utf utf_32 water", U"6c34", to_utf(0x6c34, utf_32))
+test_equal("to_utf utf_32 G-Clef", U"1d11e", to_utf(0x1d11e, utf_32))
 
 test_equal("code_length utf_8 z", 1, code_length(0x7a, utf_8))
 test_equal("code_length utf_8 copyright", 2, code_length(0xa9, utf_8))
@@ -231,24 +231,24 @@ test_equal("validate utf_32 3", 2, validate(U"7a D8FF", utf_32))
 test_equal("validate utf_32 4", 0, validate(U"7a 7a 4FFFF", utf_32, 0))
 test_equal("validate utf_32 4", 3, validate(U"7a 7a 4FFFF", utf_32, 1))
 
-test_equal("utf8 to utf8",   x"7a C2A9 E6B0B4 F09d849e", toUTF(x"7a C2A9 E6B0B4 F09d849e", utf_8, utf_8))
-test_equal("utf8 to utf16",  u"7a A9 6c34 d834 dd1e",    toUTF(x"7a C2A9 E6B0B4 F09d849e", utf_8, utf_16))
-test_equal("utf8 to utf32",  U"7a A9 6c34 1d11e",        toUTF(x"7a C2A9 E6B0B4 F09d849e", utf_8, utf_32))
+test_equal("utf8 to utf8",   x"7a C2A9 E6B0B4 F09d849e", utf_to_utf(x"7a C2A9 E6B0B4 F09d849e", utf_8, utf_8))
+test_equal("utf8 to utf16",  u"7a A9 6c34 d834 dd1e",    utf_to_utf(x"7a C2A9 E6B0B4 F09d849e", utf_8, utf_16))
+test_equal("utf8 to utf32",  U"7a A9 6c34 1d11e",        utf_to_utf(x"7a C2A9 E6B0B4 F09d849e", utf_8, utf_32))
 
-test_equal("utf16 to utf8",  x"7a C2A9 E6B0B4 F09d849e", toUTF(u"7a A9 6c34 d834 dd1e", utf_16, utf_8))
-test_equal("utf16 to utf16", u"7a A9 6c34 d834 dd1e",    toUTF(u"7a A9 6c34 d834 dd1e", utf_16, utf_16))
-test_equal("utf16 to utf32", U"7a A9 6c34 1d11e",        toUTF(u"7a A9 6c34 d834 dd1e", utf_16, utf_32))
+test_equal("utf16 to utf8",  x"7a C2A9 E6B0B4 F09d849e", utf_to_utf(u"7a A9 6c34 d834 dd1e", utf_16, utf_8))
+test_equal("utf16 to utf16", u"7a A9 6c34 d834 dd1e",    utf_to_utf(u"7a A9 6c34 d834 dd1e", utf_16, utf_16))
+test_equal("utf16 to utf32", U"7a A9 6c34 1d11e",        utf_to_utf(u"7a A9 6c34 d834 dd1e", utf_16, utf_32))
 
-test_equal("utf32 to utf8",  x"7a C2A9 E6B0B4 F09d849e", toUTF(U"7a A9 6c34 1d11e", utf_32, utf_8))
-test_equal("utf32 to utf16", u"7a A9 6c34 d834 dd1e",    toUTF(U"7a A9 6c34 1d11e", utf_32, utf_16))
-test_equal("utf32 to utf32", U"7a A9 6c34 1d11e",        toUTF(U"7a A9 6c34 1d11e", utf_32, utf_32))
+test_equal("utf32 to utf8",  x"7a C2A9 E6B0B4 F09d849e", utf_to_utf(U"7a A9 6c34 1d11e", utf_32, utf_8))
+test_equal("utf32 to utf16", u"7a A9 6c34 d834 dd1e",    utf_to_utf(U"7a A9 6c34 1d11e", utf_32, utf_16))
+test_equal("utf32 to utf32", U"7a A9 6c34 1d11e",        utf_to_utf(U"7a A9 6c34 1d11e", utf_32, utf_32))
 
 sequence sc = x"7a C2A9 E6B0B4 F09d849e"
 sequence sr 
-sr = toUTF(sc, utf_8, utf_16)
-sr = toUTF(sr, utf_16, utf_32)
-sr = toUTF(sr, utf_32, utf_8)
-test_equal("toUTF round trip", sc, sr)
+sr = utf_to_utf(sc, utf_8, utf_16)
+sr = utf_to_utf(sr, utf_16, utf_32)
+sr = utf_to_utf(sr, utf_32, utf_8)
+test_equal("utf_to_utf round trip", sc, sr)
 
 
 test_report()
