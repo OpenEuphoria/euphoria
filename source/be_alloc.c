@@ -852,21 +852,19 @@ object NewString(char *s)
 	return NewSequence(s, strlen(s));
 }
 
-object NewPreallocSeq(long size, object_ptr Objset)
-/* make a new sequence with a single reference count with the data preallocated.*/
-/* size is number of elements already in 'Objset'.
-   Note: The last element in Objset is given the value NOVALUE as an end marker. */
+object NewPreallocSeq(long size, s1_ptr s1)
+/* fill in bookkeeping data for a new sequence with a single reference count with the data preallocated.*/
+/* size is number of elements already in the data, which must start imediately after the s1 struct data.
+   Note: The last element in the sequence is given the value NOVALUE as an end marker. */
 {
-	register s1_ptr s1;
 
 	assert(size >= 0);
 	if ((unsigned long)size > MAX_SEQ_LEN) {
 		// Ensure it doesn't overflow
 		SpaceMessage();
 	}
-	s1 = (s1_ptr)EMalloc(sizeof(struct s1));
 	s1->ref = 1;
-	s1->base = Objset;
+	s1->base = (object_ptr) (s1 + 1);
 	s1->length = size-1;
 	s1->postfill = 0; /* there may be some available but don't waste time */
 					  /* prepend assumes this is set to 0 */
