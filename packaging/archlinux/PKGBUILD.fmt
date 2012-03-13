@@ -1,12 +1,12 @@
 # Contributor: Jeremy Cowgar <jeremy@cowgar.com>
 pkgname=euphoria
-pkgver=4.0.0.RC2
+pkgver=VERSION
 pkgrel=1
 pkgdesc="Fast interpreted or compiled general purpose programming language"
 url="http://openeuphoria.org"
 license=('custom:"OpenEuphoria License"')
 source=(http://openeuphoria.org/dist/Linux/$pkgname-$pkgver.tar.gz)
-md5sums=('c446f94a94035881c5c101deb9d194b8')
+md5sums=('SUM')
 arch=('i686' 'x86_64')
 
 if [ "$CARCH" = "x86_64" ]; then

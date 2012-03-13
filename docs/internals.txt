@@ -90,10 +90,11 @@ when we say Euphoria integer we mean it actually is a C integer in the legal
 Euphoria integer range.
 
 
-=== The C Representations of a Euphoria Sequence and a Euphoria Double =====
+=== The C Representations of a Euphoria Sequence and a Euphoria Atom =====
 
-struct s1
 {{{
+// Sequence Header 
+struct s1
 {
  object_ptr base;     // base is such that base[1] is the first element
  long length;         // this is the sequence length
@@ -101,11 +102,45 @@ struct s1
  long postfill;       // is how many extra objects could fit at the end of base
  cleanup_ptr cleanup; // this is a pointer to a Euphoria routine that is run 
 		              // just before the sequence is freed.
+ byte seqdata[];      // Start of the sequence's element storage.
 }
 }}}
 
-struct d
+By their nature, sequences are variable length, dynamic entities and so the C structure needs to
+cater for this. When a sequence is created, we allocate enough RAM for the combined header and the
+initial storage from the elements. 
+
+|= Field    |= Description |
+|  base     | This contains the address of the first element less the
+              length of one element. Thus ##base[1]## points to the first
+              element and ##base[0]## points to a fictitious element just
+              before the first one, which is never used.\\
+              Initially, ##base## contains the address of ##seqdata## but
+              as the sequence is resized, it can point to anywhere after
+              ##seqdata##.
+|  length   | Contains the current number of elements in the sequence.
+|  ref      | Contains the count of references to this sequence. Only when
+              this is zero, can the RAM used by the sequence be returned to
+              the system for reuse. 
+|  postfill | Contains the number of element spaces that exist after the last
+              element in the sequence. If this is non-zero, we can append to
+              the sequence with at least ##postfill## new elements before needing
+              to reallocate RAM.\\
+              It is a measure of the free space at the end of
+              the sequence's allocation. We can calculate the free space
+              at the front of a sequence by ##(&s1.seqdata - s1.base)/sizeof(object)##\\
+              When elements are removed from the front of a sequence, we simply
+              adjust the address in ##base## to point to the new //first// element
+              and reduce the ##length## count.
+|  cleanup  | If not null, it points to a routine that is called immediately before
+              the sequence is deleted.
+|  seqdata  | The start of a sequence's storage area.
+
+
+
 {{{
+// Atom Header
+struct d
 {
  double dbl;          // the actual value of a double number.
  long ref;            // ref is the number of virtual copies of this double
@@ -410,40 +445,66 @@ between MININT and MAXINT, c+HIGH_BITS will be non-negative.
         
 ==== Parser
 
-Inserting tokens into the token buffer is the easiest way to add features to the EUPHORIA parser.  The tokens are two-element sequences one of the class of token and the other the token's value:
+Inserting tokens into the token buffer is the easiest way to add features to the EUPHORIA parser.
+The tokens are two-element sequences one of the class of token and the other the token's value:
  
  {<class>,<value>}
  
-Each of the class values are capitalized words for some keyword or VARIABLE.  The list of constants is in reswords.e.  Often it is enough to only examin the class.  In the case of variables, it is important to know which variable.  In this case the second element, comes into play.
+Each of the class values are capitalized words for some keyword or VARIABLE.  
+The list of constants is in reswords.e.  Often it is enough to only examin the class.
+In the case of variables, it is important to know which variable.
+In this case the second element, comes into play.
 
-You can use putback() to put tokens into the token buffer.  The tokens will be pulled out by the parser in a filo manner, like a stack.  
+You can use putback() to put tokens into the token buffer.  The tokens will be pulled out
+by the parser in a filo manner, like a stack.  
 
 ==== Backend Instructions
 
-After the Parser processes the instructions.  It creates Backend instructions that are easily translated or interpreted.  The system uses opcodes and some parameters which are put on a stack.  This backend language is similar to assembler.  You have opcodes (instructions) and parameters.  These parameters must be integers themselves but some may serve as pointers to arbitrary EUPHORIA objects.  As a developer of EUPHORIA itself, rather than a developer that users EUPHORIA, it is important to know exactly what these opcodes do and what they are for.  In this section we will document what they are for, and how they manipulate the instruction pointer, and stack.
+After the Parser processes the instructions.  It creates Backend instructions that
+are easily translated or interpreted.  The system uses opcodes and some parameters which
+are put on a stack.  This backend language is similar to assembler.  You have
+opcodes (instructions) and parameters.  These parameters must be integers themselves but
+some may serve as pointers to arbitrary EUPHORIA objects.  As a developer of EUPHORIA itself,
+rather than a developer that uses EUPHORIA, it is important to know exactly what these
+opcodes do and what they are for.  In this section we will document what they are for,
+and how they manipulate the instruction pointer, and stack.
 
 
 IF instruction:
 
-The IF instruction is used for making runtime branch statements.  The IF instruction takes the top of the stack as the condition value, if the condition is 0, it passes control to the address stored just below the top of the stack.  If the condition is non-zero and an atom the instruction pointer just past the failure address.
+The IF instruction is used for making runtime branch statements.  The IF instruction takes
+the top of the stack as the condition value, if the condition is 0, it passes control to
+the address stored just below the top of the stack.  If the condition is non-zero and
+an atom the instruction pointer just past the failure address.
 
 [ IF instruction ] [ test value ] [ failure address ]
 
 
 INTEGER_CHECK instruction:
 
-The INTEGER_CHECK is used to ensure that something has a value considered to be 'integer' to the EUPHORIA language definition.  The instruction takes the next argument as a pointer to a value and determines whether this value is in the legal integer range, regardless of how that number is represented.  If not in legal range, then the program ends execution in a type-check failure error message.
+The INTEGER_CHECK is used to ensure that something has a value considered to be
+'integer' to the EUPHORIA language definition.  The instruction takes the next argument as
+a pointer to a value and determines whether this value is in the legal integer range,
+regardless of how that number is represented.  If not in legal range, then 
+the program ends execution in a type-check failure error message.
 
 [ INTEGER_CHECK instruction ] [ test pointer ]
 
 ATOM_CHECK instruction:
 
-The ATOM_CHECK is used to determine whether something has a numeric value rather than a sequence.  The instruction takes an argument as a pointer to a value and determines whether the value is an atom.  If it is not an atom, then the program ends execution in a type-check failure error message.
+The ATOM_CHECK is used to determine whether something has a numeric value rather than
+a sequence.  The instruction takes an argument as a pointer to a value and
+determines whether the value is an atom.  If it is not an atom, then the program
+ends execution in a type-check failure error message.
 
 [ ATOM_CHECK instruction ] [ test pointer ]
 
 IS_AN_INTEGER instruction:
 
-The IS_AN_INTEGER instruction is used to determine whether something has a value considered to be 'integer' to the EUPHORIA language definition.  The instruction takes the argument as a pointer to a value and determines whether this value is in the legal integer range, regardless of how that number is represented.  If it is in the 'integer' range the the value pointed by the second argument will be 1.  Otherwise, 0.
+The IS_AN_INTEGER instruction is used to determine whether something has a value considered to
+be 'integer' to the EUPHORIA language definition.  The instruction takes the argument as 
+a pointer to a value and determines whether this value is in the legal integer range, 
+regardless of how that number is represented.  If it is in the 'integer' range then 
+the value pointed by the second argument will be 1 otherwise it will be 0.
 
 [ IS_AN_INTEGER instruction ] [ test pointer ][ return value pointer ]
