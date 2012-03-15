@@ -101,41 +101,64 @@ struct s1
  long ref;            // ref is the number of as virtual copies of this sequence
  long postfill;       // is how many extra objects could fit at the end of base
  cleanup_ptr cleanup; // this is a pointer to a Euphoria routine that is run 
-		              // just before the sequence is freed.
- byte seqdata[];      // Start of the sequence's element storage.
+                      // just before the sequence is freed.
 }
+
 }}}
+
+However, we allocate more than this structure.  Inside the allocated data but past the structure,
+there also is 
+an area of 'pre free space'; sequence data pointed to by base[1] to base[$], $ being the length;
+a NOVALUE terminator for the sequence, 
+and an area of post fill space.  In memory, immediately following the structure there is the following data stored:
+
+{{{
+ object pre_fill_space[]; // could have 0 (not exist) or more elements before used data
+ object base[1..$];       // sequence members pointed to by base
+ object base[$+1];        // a magic number terminating the sequence members (NOVALUE)
+ object post_fill_space[];// could have 0 (not exist) or more elements after used data
+}}} 
+
+Taken together these are what get represented in memory.
+|  base  | length |   ref  |postfill| cleanup|  pre fill space | base[1..$] | ##NOVALUE## | post fill space  |
 
 By their nature, sequences are variable length, dynamic entities and so the C structure needs to
 cater for this. When a sequence is created, we allocate enough RAM for the combined header and the
-initial storage from the elements. 
+initial storage for the elements. 
 
 |= Field    |= Description |
 |  base     | This contains the address of the first element less the
               length of one element. Thus ##base[1]## points to the first
               element and ##base[0]## points to a fictitious element just
               before the first one, which is never used.\\
-              Initially, ##base## contains the address of ##seqdata## but
-              as the sequence is resized, it can point to anywhere after
-              ##seqdata##.
+              Initially, ##base## contains the address of the last member of
+              the sequence header but 
+              as the sequence is resized, it can point to the last member or anywhere after.
 |  length   | Contains the current number of elements in the sequence.
 |  ref      | Contains the count of references to this sequence. Only when
               this is zero, can the RAM used by the sequence be returned to
               the system for reuse. 
-|  postfill | Contains the number of element spaces that exist after the last
-              element in the sequence. If this is non-zero, we can append to
-              the sequence with at least ##postfill## new elements before needing
+|  postfill | The size of 'post fill space' in element spaces.  Rather than using bytes,
+              postfill is measured in objects which are each address wide elements.  
+              If this is non-zero, we can append to
+              the sequence with at most ##postfill## new elements before needing
               to reallocate RAM.\\
-              It is a measure of the free space at the end of
-              the sequence's allocation. We can calculate the free space
-              at the front of a sequence by ##(&s1.seqdata - s1.base)/sizeof(object)##\\
+|  cleanup  | If not null, it points to a routine that is called immediately before
+              the sequence is deleted.\\
+| pre fill space | There are 0 or more spaces before base[1].  We can calculate
+              the free space in *objects* at the front of a sequence, s1, in C by\\ 
+              ##(&s1.base[1] - (object_ptr)(1+&s1))##.\\  
+              In EUPHORIA, you will have to divide by the size of a C_POINTER on the difference.
               When elements are removed from the front of a sequence, we simply
               adjust the address in ##base## to point to the new //first// element
-              and reduce the ##length## count.
-|  cleanup  | If not null, it points to a routine that is called immediately before
-              the sequence is deleted.
-|  seqdata  | The start of a sequence's storage area.
-
+              and reduce the ##length## count.  
+              If we want to prepend and this pre fill space has some positive size, then we make room by decrementing ##base## and increment the ##length##.  The new data is then assigned to ##base##[1].
+| base[1]..base[length] sequence data |      This is actual data.
+| base[$+1]  |      This is always set to ##NOVALUE##.
+| post fill space | There are 0 or more spaces after ##base##[##length##+1].  The number of spaces is stored in 
+                    ##postfill##.  If ##postfill## is non-zero we can append by incrementing the ##length##, decrementing ##postfill## and assigning the new data to ##base##[$].
+                    When we remove from the end of the sequence, we increment ##postfill## and
+                    decrement the ##length##.
 
 
 {{{
@@ -145,13 +168,13 @@ struct d
  double dbl;          // the actual value of a double number.
  long ref;            // ref is the number of virtual copies of this double
  cleanup_ptr cleanup; // this is a pointer to a Euphoria routine that is run 
-		              // just before the sequence is freed.
+                      // just before the sequence is freed.
 }
 }}}
 
 
 Now offset of the 'ref' in struct d must be the same as the offset of the 'ref' 
-in struct s1.  A 64bit implementation would have to reorder these members.
+in struct s1.  To this end, the 64bit implementation of 4.1 has these members in a different order.
 
 === The Euphoria Object Macros and Functions ===
 
@@ -394,7 +417,7 @@ Indicates that a variable has not been assigned and also terminates a sequence.
 <internal> signed int MININT
 </eucode>
 
-The minimal Euphoria integer.  This is -(2^^30).
+The minimal Euphoria integer.  This is -(2^^30^^).
 
 
 @[:internals:MAXINT|]
@@ -403,9 +426,9 @@ The minimal Euphoria integer.  This is -(2^^30).
 <internal> signed int MAXINT
 </eucode>
 
-The maximal Euphoria integer.  This is 2^30.
+The maximal Euphoria integer.  This is 2^^30^^-1.
 
-@[:internals:HIGH_BITS]
+@[:internals:HIGH_BITS|]
 ==== HIGH_BITS
 <eucode>
 <internal> signed int HIGH_BITS
@@ -440,8 +463,8 @@ between MININT and MAXINT, c+HIGH_BITS will be non-negative.
    
 ===== Testing for Overflow:
     There are two ways to test for overflow:
-    	1. (c > MAXINT) || (c < MININT)
-        2. (c + HIGH_BITS) >= 0
+    	# (c > MAXINT) || (c < MININT)
+        # (c + HIGH_BITS) >= 0
         
 ==== Parser
 
