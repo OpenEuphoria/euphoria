@@ -1886,7 +1886,7 @@ public procedure db_rename_table(sequence name, sequence new_name)
 
 	io:seek(current_db, table)
 	put4(table_ptr)
-	if current_table_name = name then
+	if equal(current_table_name, name) then
 		current_table_name = new_name
 	end if
 end procedure
