@@ -282,6 +282,7 @@ LIBRARY_NAME=eudbg
 
 !else
 LIBRARY_NAME=eu
+NOASSERT = /dNDEBUG
 !endif
 
 !ifndef EXTRA_STATS
@@ -333,14 +334,14 @@ CREOLE=creole.exe
 VARS=DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM) CONFIG=$(CONFIG)
 all :  .SYMBOLIC core
     @echo ------- ALL/OTHERS -----------
-	wmake -h library DEBUG=1 MANAGED_MEM=$(MANAGED_MEM) CONFIG=$(CONFIG)
 	wmake -h backend $(VARS)
 	wmake -h binder $(VARS)
 	wmake -h shrouder $(VARS)
 
 core : .SYMBOLIC
     @echo ------- CORE -----------
-	wmake -h library $(VARS)
+	wmake -h library DEBUG=1 MANAGED_MEM=$(MANAGED_MEM) CONFIG=$(CONFIG)
+	wmake -h library DEBUG=  MANAGED_MEM=$(MANAGED_MEM) CONFIG=$(CONFIG)
 	wmake -h interpreter $(VARS)
 	wmake -h translator $(VARS)
 
@@ -540,12 +541,12 @@ tester: .SYMBOLIC
 binder : .SYMBOLIC $(BUILDDIR)\eubind.exe
 
 $(BUILDDIR)\eubind.exe : $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib
-	$(BUILDDIR)\euc -con -lib $(BUILDDIR)\eu.lib -i $(TRUNKDIR)\include -o $(BUILDDIR)\eubind.exe $(TRUNKDIR)\source\bind.ex
+	$(BUILDDIR)\euc -con $(TRANSDEBUG) -lib $(LIBTARGET) -i $(TRUNKDIR)\include -o $(BUILDDIR)\eubind.exe $(TRUNKDIR)\source\bind.ex
 
 shrouder : .SYMBOLIC $(BUILDDIR)\eushroud.exe
 
 $(BUILDDIR)\eushroud.exe :  $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib
-	$(BUILDDIR)\euc -con -lib $(BUILDDIR)\eu.lib -i $(TRUNKDIR)\include -o $(BUILDDIR)\eushroud.exe $(TRUNKDIR)\source\shroud.ex
+	$(BUILDDIR)\euc -con $(TRANSDEBUG) -lib $(LIBTARGET) -i $(TRUNKDIR)\include -o $(BUILDDIR)\eushroud.exe $(TRUNKDIR)\source\shroud.ex
 
 tools: .SYMBOLIC
     @echo ------- TOOLS -----------
@@ -687,7 +688,7 @@ $(BUILDDIR)\euc.exe : .always .recheck
     @echo ------- TRANSLATOR -----------
 	wmake -h $(BUILDDIR)\transobj\main-.c EX=$(EUBIN)\eui.exe EU_TARGET=ec. OBJDIR=transobj  $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 	wmake -h objlist OBJDIR=transobj EU_NAME_OBJECT=EU_TRANSLATOR_OBJECTS $(VARS)
-	wmake -h $(BUILDDIR)\euc.exe EX=$(EUBIN)\eui.exe EU_TARGET=ec. OBJDIR=transobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+	wmake -h $(BUILDDIR)\euc.exe EX=$(EUBIN)\eui.exe EU_TARGET=ec. OBJDIR=transobj $(VARS)
 
 !endif
 

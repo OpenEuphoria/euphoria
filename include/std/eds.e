@@ -1427,6 +1427,8 @@ public procedure db_close()
 			key_cache = remove(key_cache, i)
 		end if
 	end for
+	current_table_pos = -1
+	current_table_name = ""	
 	current_db = -1
 	key_pointers = {}
 end procedure
@@ -1885,6 +1887,9 @@ public procedure db_rename_table(sequence name, sequence new_name)
 
 	io:seek(current_db, table)
 	put4(table_ptr)
+	if equal(current_table_name, name) then
+		current_table_name = new_name
+	end if
 end procedure
 
 --**

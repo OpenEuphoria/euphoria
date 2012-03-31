@@ -6,8 +6,8 @@
 --
 
 include std/os.e
-include std/machine.e
 include std/dll.e
+include std/machine.e
 include std/math.e
 include std/error.e
 include std/console.e
@@ -54,8 +54,6 @@ constant SND_FILENAME = #00020000,
 constant DT_SINGLELINE = #0020,
 	DT_CENTER     = #0001,
 	DT_VCENTER    = #0004
-	
-
 
 constant WS_OVERLAPPED  = #00000000,
 	WS_CAPTION     = #00C00000,
@@ -88,7 +86,6 @@ constant
 	DEVICE_DEFAULT_FONT = 14,
 	DEFAULT_PALETTE = 15,
 	SYSTEM_FIXED_FONT = 16,
-
 	STOCK_LAST = 16,
 
 	COLOR_SCROLLBAR = 0,
@@ -198,12 +195,13 @@ integer LoadIcon, LoadCursor, GetStockObject, RegisterClassEx,
     GetDeviceCaps, CreateFont, MulDiv
 
 procedure not_found(sequence name)
-	crash( "Couldn't find " & name )
+	crash("Couldn't find " & name)
 end procedure
+
 
 -- dynamically link a C routine as a Euphoria function
 function link_c_func(atom dll, sequence name, sequence args, atom result)
-	integer handle
+    integer handle
 
 	handle = define_c_func(dll, name, args, result)
 	if handle = -1 then
@@ -213,7 +211,7 @@ function link_c_func(atom dll, sequence name, sequence args, atom result)
 	end if
 end function
 
--- dynamically link a C routine as a Euphoria function
+-- dynamically link a C routine as a Euphoria procedure
 function link_c_proc(atom dll, sequence name, sequence args)
 	integer handle
 
@@ -229,6 +227,7 @@ end function
 procedure link_dll_routines()
 	atom user32, gdi32, winmm, kernel32
 	
+	-- open the .DLL files
 	user32 = open_dll("user32.dll")
 	if user32 = NULL then
 		not_found("user32.dll")
@@ -239,7 +238,7 @@ procedure link_dll_routines()
 	end if
 	winmm = open_dll("winmm.dll")
 	if winmm = NULL then
-	not_found("winmm.dll")
+		not_found("winmm.dll")
 	end if
 	
 	kernel32 = open_dll( "kernel32.dll")
@@ -247,7 +246,8 @@ procedure link_dll_routines()
 		not_found("kernel32.dll")
 	end if
 
-	--new code would use LoadImage
+	-- link the C routines
+	--new code would use LoadImage    
 	LoadIcon = link_c_func(user32, "LoadIconA", {C_HANDLE, C_LPSTR}, C_HANDLE)
 	LoadCursor = link_c_func(user32, "LoadCursorA", {C_HANDLE, C_LPSTR}, C_HANDLE)
 
@@ -261,6 +261,7 @@ procedure link_dll_routines()
 	UpdateWindow = link_c_proc(user32, "UpdateWindow", {C_HWND}) --BOOL
 	GetMessage = link_c_func(user32, "GetMessageA",
 				{C_LPSTR, C_HWND, C_UINT, C_UINT}, C_BOOL)
+
 	TranslateMessage = link_c_proc(user32, "TranslateMessage", {C_LPSTR}) --BOOL
 	DispatchMessage = link_c_proc(user32, "DispatchMessageA", {C_LPSTR}) --LRESULT
 	PlaySound = link_c_proc(winmm, "PlaySound", {C_LPSTR, C_HANDLE, C_DWORD}) --BOOL
@@ -272,9 +273,7 @@ procedure link_dll_routines()
 	PostQuitMessage = link_c_proc(user32, "PostQuitMessage", {C_INT})
 	DefWindowProc = link_c_func(user32, "DefWindowProcA",
 				{C_HWND, C_UINT, C_WPARAM, C_LPARAM}, C_LRESULT)
-
     GetSysColor = link_c_func(user32, "GetSysColor", {C_INT}, C_DWORD)
-
     SelectObject = link_c_func(gdi32, "SelectObject", {C_HANDLE, C_HANDLE}, C_HANDLE)
     SetTextColor = link_c_func(gdi32, "SetTextColor", {C_HANDLE, C_COLORREF}, C_COLORREF)
     SetBkColor = link_c_func(gdi32, "SetBkColor", {C_HANDLE, C_COLORREF}, C_COLORREF)
@@ -332,6 +331,7 @@ public function create_font(atom hdc, sequence fontname="Veranda",
 	return hfont
 end function
 
+
 -- callback routine to handle Window class
 public function WndProc(atom hwnd, atom iMsg, atom wParam, atom lParam)
 	
@@ -362,7 +362,20 @@ public function WndProc(atom hwnd, atom iMsg, atom wParam, atom lParam)
 				or_all({DT_SINGLELINE, DT_CENTER, DT_VCENTER})})
 		c_proc(EndPaint, {hwnd, ps})
 	return 0
-	
+	if iMsg = WM_CREATE then
+		c_proc(PlaySound, {wav_file,
+				   NULL,
+				   or_bits(SND_FILENAME, SND_ASYNC)})
+		return 0
+
+	elsif iMsg = WM_PAINT then
+		hdc = c_func(BeginPaint, {hwnd, ps})
+		c_proc(GetClientRect, {hwnd, rect})
+		c_proc(DrawText, {hdc, Euphoria, -1, rect, 
+				  or_all({DT_SINGLELINE, DT_CENTER, DT_VCENTER})})
+		c_proc(EndPaint, {hwnd, ps})
+		return 0
+
 	elsif iMsg = WM_DESTROY then
 		c_proc(PostQuitMessage, {0})
 		return 0
@@ -389,10 +402,10 @@ procedure WinMain()
 
 	id = routine_id("WndProc")
 	if id = -1 then
-		crash( "routine_id failed!")
+		crash("routine_id failed!")
 	end if
 	WndProcAddress = call_back(id) -- get address for callback
-	
+
 	wndclass.WNDCLASSEX.cbSize      = sizeof(WNDCLASSEX)
 	wndclass.WNDCLASSEX.style       = or_bits(CS_HREDRAW, CS_VREDRAW)
 	wndclass.WNDCLASSEX.lpfnWndProc = WndProcAddress
@@ -413,7 +426,6 @@ procedure WinMain()
 	-- dynamically using:
 	-- sendMessage(YourWindow, WM_SETICON, 1, icon_handle)
 	-- where WM_SETICON is 128
-	
 	wndclass.WNDCLASSEX.hCursor       = c_func(LoadCursor, {NULL, IDC_ARROW})
 	wndclass.WNDCLASSEX.hbrBackground = c_func(GetStockObject, {WHITE_BRUSH})
 	wndclass.WNDCLASSEX.lpszMenuName  = NULL
@@ -436,12 +448,14 @@ procedure WinMain()
 			NULL,                    -- window menu handle
 			0 ,                 --hInstance // program instance handle
 			NULL})              -- creation parameters
+
 	if hwnd = 0 then
 		crash("Couldn't CreateWindow")
 	end if
 	c_proc(ShowWindow, {hwnd, SW_SHOWNORMAL})
 	c_proc(UpdateWindow, {hwnd})
 
+	-- message loop
 	while c_func(GetMessage, {msg, NULL, 0, 0}) do
 		c_proc(TranslateMessage, {msg})
 		c_proc(DispatchMessage, {msg})

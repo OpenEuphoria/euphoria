@@ -1,3 +1,9 @@
+euphoria (4.0.4) stable; urgency=low
+
+ * 4.0.4 Release: bug fixes and enhancements
+
+ -- Matt Lewis <mattlewis@openeuphoria.org>  Wed, 14 Mar 2012 04:53:05 -0500
+
 euphoria (4.0.3) stable; urgency=low
 
   * 4.0.3 Release: bug fixes and enhancements

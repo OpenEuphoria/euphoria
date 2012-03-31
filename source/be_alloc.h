@@ -200,7 +200,7 @@ extern object NewString(char *s);
 extern s1_ptr NewS1(intptr_t size);
 extern s1_ptr SequenceCopy(register s1_ptr a);
 extern object NewDouble(eudouble d);
-extern object NewPreallocSeq(intptr_t size, object_ptr Objset);
+extern object NewPreallocSeq(intptr_t size, s1_ptr s1);
 extern long copy_string(char *dest, char *src, size_t bufflen);
 extern long append_string(char *dest, char *src, size_t bufflen);
 
