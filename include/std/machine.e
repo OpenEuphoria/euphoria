@@ -998,7 +998,7 @@ end function
 
 --****
 -- Signature:
--- <built-in> procedure peek_string(atom addr)
+-- <built-in> function peek_string(atom addr)
 --
 -- Description:
 -- Read an ASCII string in RAM, starting from a supplied address.

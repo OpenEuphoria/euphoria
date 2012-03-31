@@ -177,6 +177,7 @@ end for
 
 db_close()
 test_equal("current db #5", "", db_current())
+test_equal("current table after close", "", db_current_table())
 
 -- Attempt to get record data after the database is closed.
 rec = db_record_data(rid2)
@@ -290,18 +291,31 @@ procedure test_dump()
 	test_equal( "check for dump.edb #1", {"table 1"}, db_table_list() )
 	
 	test_equal( "create dump.edb table 2", DB_OK, db_create_table( "table-2" ) )
-	test_equal( "check for dump.edb #2", {"table 1", "table-2"}, db_table_list() )
+	test_equal( "check for dump.edb #2", {"table 1", "table-2"}, sort(db_table_list()) )
 	
 	db_rename_table( "Table 1", "table-1")
 	test_not_equal( "rename table fail #1 check error msg", "", get_db_error() )
-	test_equal( "rename table fail #1 check table list", {"table 1", "table-2"}, db_table_list() )
+	test_equal( "rename table fail #1 check table list", {"table 1", "table-2"}, sort(db_table_list()) )
 	
 	db_rename_table( "table 1", "table-2")
 	test_not_equal( "rename table fail #2 check error msg", "", get_db_error() )
-	test_equal( "rename table fail #2", {"table 1", "table-2"}, db_table_list() )
+	test_equal( "rename table fail #2", {"table 1", "table-2"}, sort(db_table_list()) )
 	
+	db_select_table( "table-2" )
+	test_equal("current table before rename #1", "table-2", db_current_table())
 	db_rename_table( "table 1", "table-1")
-	test_equal( "renamed table", {"table-1", "table-2"}, db_table_list() )
+	test_equal( "renamed table #1", {"table-1", "table-2"}, sort(db_table_list()) )
+	test_equal("current table after rename #1", "table-2", db_current_table())
+	
+	test_equal("current table before rename #2", "table-2", db_current_table())
+	db_rename_table( "table-2", "table-3")
+	test_equal( "renamed table #2", {"table-1", "table-3"}, sort(db_table_list()) )
+	test_equal("current table after rename #2", "table-3", db_current_table())
+	
+	test_equal("current table before rename #3", "table-3", db_current_table())
+	db_rename_table( "table-3", "table-2")
+	test_equal( "renamed table #3", {"table-1", "table-2"}, sort(db_table_list()) )
+	test_equal("current table after rename #3", "table-2", db_current_table())
 	
 	db_select_table( "table-1" )
 	db_insert( 1, 1 )
