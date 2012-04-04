@@ -39,70 +39,6 @@ else
 	PREFIX=./
 fi
 
-echo "# File generated from configure" > ${CONFIG_FILE}
-
-if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
-	echo ARCH=ix86 >> "$PREFIX"${CONFIG_FILE}
-elif echo "$UNAME_MACHINE" | grep "x86_64" > /dev/null; then
-	echo ARCH=ix86 >> "$PREFIX"${CONFIG_FILE}
-elif echo "$UNAME_MACHINE" | grep ARM > /dev/null; then
-	echo ARCH=ARM >> "$PREFIX"${CONFIG_FILE}
-fi
-
-if test $UNAME_SYSTEM = "Linux"; then
-	echo EBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
-	echo ELINUX=1 >> "$PREFIX"${CONFIG_FILE}
-	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
-	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
-elif test $UNAME_SYSTEM = "MS-DOS"; then
-	echo EBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
-	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
-	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
-	echo EDJGPP=1 >> "$PREFIX"${CONFIG_FILE}
-	echo SHELL=bash >> "$PREFIX"${CONFIG_FILE}
-	cp Makefile.gnu "$PREFIX"../tests/Makefile.gnu
-elif test $UNAME_SYSTEM = "WINDOWS"; then
-	echo EBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
-	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
-	echo EMINGW=1 >> "$PREFIX"${CONFIG_FILE}
-	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
-elif test $UNAME_SYSTEM = "OpenBSD"; then
-	echo EBSD=1 >> "$PREFIX"${CONFIG_FILE}
-	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOPENBSD=1 >> "$PREFIX"${CONFIG_FILE}
-	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
-	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
-	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
-	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
-elif test $UNAME_SYSTEM = "NetBSD"; then
-	echo EBSD=1 >> "$PREFIX"${CONFIG_FILE}
-	echo ENETBSD=1 >> "$PREFIX"${CONFIG_FILE}
-	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
-	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
-	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
-	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
-else
-	echo EBSD=1 >> "$PREFIX"${CONFIG_FILE}
-	if test $UNAME_SYSTEM = "Darwin"; then
-		echo EOSX=1 >> "$PREFIX"${CONFIG_FILE}
-	else
-		echo EOSX= >> "$PREFIX"${CONFIG_FILE}
-	fi
-	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
-	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
-	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
-fi
 
 # default use source
 export EC="eui ec.ex"
@@ -313,6 +249,83 @@ while [ "$1" != "" ]; do
 	esac
 	shift
 done
+
+echo "# File generated from configure" > ${CONFIG_FILE}
+
+if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
+	echo ARCH=ix86 >> "$PREFIX"${CONFIG_FILE}
+elif echo "$UNAME_MACHINE" | grep "x86_64" > /dev/null; then
+	echo ARCH=ix86 >> "$PREFIX"${CONFIG_FILE}
+elif echo "$UNAME_MACHINE" | grep ARM > /dev/null; then
+	echo ARCH=ARM >> "$PREFIX"${CONFIG_FILE}
+fi
+
+if test $PLAT = "LINUX"; then
+	UNAME_SYSTEM="Linux"
+elif test $PLAT = "OSX"; then
+	UNAME_SYSTEM="Darwin"
+elif test $PLAT = "OPENBSD"; then
+	UNAME_SYSTEM="OpenBSD"
+elif test $PLAT = "NETBSD"; then
+	UNAME_SYSTEM="NetBSD"
+elif test $PLAT = "WINDOWS"; then
+	UNAME_SYSTEM="WINDOWS"
+fi
+
+if test $UNAME_SYSTEM = "Linux"; then
+	echo EBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
+	echo ELINUX=1 >> "$PREFIX"${CONFIG_FILE}
+	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
+	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
+elif test $UNAME_SYSTEM = "MS-DOS"; then
+	echo EBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
+	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
+	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
+	echo EDJGPP=1 >> "$PREFIX"${CONFIG_FILE}
+	echo SHELL=bash >> "$PREFIX"${CONFIG_FILE}
+	cp Makefile.gnu "$PREFIX"../tests/Makefile.gnu
+elif test $UNAME_SYSTEM = "WINDOWS"; then
+	echo EBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
+	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
+	echo EMINGW=1 >> "$PREFIX"${CONFIG_FILE}
+	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
+elif test $UNAME_SYSTEM = "OpenBSD"; then
+	echo EBSD=1 >> "$PREFIX"${CONFIG_FILE}
+	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EOPENBSD=1 >> "$PREFIX"${CONFIG_FILE}
+	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
+	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
+	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
+	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
+elif test $UNAME_SYSTEM = "NetBSD"; then
+	echo EBSD=1 >> "$PREFIX"${CONFIG_FILE}
+	echo ENETBSD=1 >> "$PREFIX"${CONFIG_FILE}
+	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
+	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
+	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
+	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
+else
+	echo EBSD=1 >> "$PREFIX"${CONFIG_FILE}
+	if test $UNAME_SYSTEM = "Darwin"; then
+		echo EOSX=1 >> "$PREFIX"${CONFIG_FILE}
+	else
+		echo EOSX= >> "$PREFIX"${CONFIG_FILE}
+	fi
+	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
+	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
+	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
+fi
 
 if [ "x$EDEBUG" = "x1" ]; then
 	echo EDEBUG=1 >> "$PREFIX"${CONFIG_FILE}

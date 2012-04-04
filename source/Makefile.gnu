@@ -190,6 +190,18 @@ ifndef CYPBUILDDIR
 CYPBUILDDIR=$(BUILDDIR)
 endif
 
+ifeq "$(ELINUX)" "1"
+PLAT=LINUX
+else ifeq "$(EOPENBSD)" "1"
+PLAT=OPENBSD
+else ifeq "$(ENETBSD)" "1"
+PLAT=NETBSD
+else ifeq "$(EOSX)" "1"
+PLAT=OSX
+else ifeq "$(EMINGW)" "1"
+PLAT=WINDOWS
+endif
+
 ifeq  "$(EUBIN)" ""
 EXE=$(EEXU)
 else
@@ -482,11 +494,11 @@ source-tarball :
 	hg archive $(BUILDDIR)/$(SOURCEDIR)
 	cd $(BUILDDIR)/$(SOURCEDIR)/source && ./configure $(CONFIGURE_PARAMS)
 	$(MAKE) -C $(BUILDDIR)/$(SOURCEDIR)/source source
-	rm $(BUILDDIR)/$(SOURCEDIR)/source/config.gnu
-	rm $(BUILDDIR)/$(SOURCEDIR)/source/build/mkver$(EXE_EXT)
-	cd $(BUILDDIR) && tar -zcf $(SOURCEDIR).tar.gz $(SOURCEDIR)
+	-rm $(BUILDDIR)/$(SOURCEDIR)/source/config.gnu
+	-rm $(BUILDDIR)/$(SOURCEDIR)/source/build/mkver$(EXE_EXT)
+	cd $(BUILDDIR) && tar -zcf $(SOURCEDIR)-$(PLAT).tar.gz $(SOURCEDIR)
 ifneq "$(VERSION)" ""
-	cd $(BUILDDIR) && mkdir -p $(PLAT) && mv $(SOURCEDIR).tar.gz $(PLAT)
+	cd $(BUILDDIR) && mkdir -p $(PLAT) && mv $(SOURCEDIR)-$(PLAT).tar.gz $(PLAT)
 endif
 
 .PHONY : euisource
