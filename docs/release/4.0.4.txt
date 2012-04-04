@@ -1,4 +1,4 @@
-== Version 4.0.4 March 14, 2012
+== Version 4.0.4 April 4, 2012
 
 === Bug Fixes
 
