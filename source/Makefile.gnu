@@ -196,6 +196,8 @@ else ifeq "$(EOPENBSD)" "1"
 PLAT=OPENBSD
 else ifeq "$(ENETBSD)" "1"
 PLAT=NETBSD
+else ifeq "$(EFREEBSD)" "1"
+PLAT=FREEBSD
 else ifeq "$(EOSX)" "1"
 PLAT=OSX
 else ifeq "$(EMINGW)" "1"
@@ -498,7 +500,7 @@ source-tarball :
 	-rm $(BUILDDIR)/$(SOURCEDIR)/source/build/mkver$(EXE_EXT)
 	cd $(BUILDDIR) && tar -zcf $(SOURCEDIR)-$(PLAT).tar.gz $(SOURCEDIR)
 ifneq "$(VERSION)" ""
-	cd $(BUILDDIR) && mkdir -p $(PLAT) && mv $(SOURCEDIR)-$(PLAT).tar.gz $(PLAT)
+	cd $(BUILDDIR) && mkdir -p $(PLAT) && mv $(SOURCEDIR)-$(PLAT)-src.tar.gz $(PLAT)
 endif
 
 .PHONY : euisource
