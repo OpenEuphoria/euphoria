@@ -170,7 +170,6 @@ struct replace_block {
 
 typedef struct replace_block *replace_ptr;
 
-int wingetch();
 int call_c();
 int Command_Line();
 void show_console();
