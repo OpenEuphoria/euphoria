@@ -52,6 +52,7 @@ SCP="scp -C"
 SSH="ssh -C"
 HG="hg"
 
+echo "# File generated from configure" > ${CONFIG_FILE}
 echo CONFIGURE_PARAMS=$@ >> "$PREFIX"${CONFIG_FILE}
 PLAT=""
 # parameters
@@ -251,8 +252,6 @@ while [ "$1" != "" ]; do
 	esac
 	shift
 done
-
-echo "# File generated from configure" > ${CONFIG_FILE}
 
 if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
 	echo ARCH=ix86 >> "$PREFIX"${CONFIG_FILE}
