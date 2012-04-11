@@ -476,9 +476,8 @@ source : builddirs
 	$(MAKE) backendsource OBJDIR=backobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 
 ifneq "$(VERSION)" ""
-SOURCEDIR=euphoria-$(VERSION)
+SOURCEDIR=euphoria-$(PLAT)-$(VERSION)
 else
-
 ifeq "$(REV)" ""
 REV := $(shell hg parents --template '{node|short}')
 endif
@@ -492,15 +491,16 @@ endif
 endif
 
 source-tarball :
+	echo building source-tarball for $(PLAT)
 	rm -rf $(BUILDDIR)/$(SOURCEDIR)
 	hg archive $(BUILDDIR)/$(SOURCEDIR)
 	cd $(BUILDDIR)/$(SOURCEDIR)/source && ./configure $(CONFIGURE_PARAMS)
 	$(MAKE) -C $(BUILDDIR)/$(SOURCEDIR)/source source
 	-rm $(BUILDDIR)/$(SOURCEDIR)/source/config.gnu
 	-rm $(BUILDDIR)/$(SOURCEDIR)/source/build/mkver$(EXE_EXT)
-	cd $(BUILDDIR) && tar -zcf $(SOURCEDIR)-$(PLAT).tar.gz $(SOURCEDIR)
+	cd $(BUILDDIR) && tar -zcf $(SOURCEDIR)-src.tar.gz $(SOURCEDIR)
 ifneq "$(VERSION)" ""
-	cd $(BUILDDIR) && mkdir -p $(PLAT) && mv $(SOURCEDIR)-$(PLAT)-src.tar.gz $(PLAT)
+	cd $(BUILDDIR) && mkdir -p $(PLAT) && mv $(SOURCEDIR)-src.tar.gz $(PLAT)
 endif
 
 .PHONY : euisource

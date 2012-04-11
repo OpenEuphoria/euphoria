@@ -25,10 +25,12 @@ if echo "$UNAME_SYSTEM" | grep CYGWIN > /dev/null; then
 	# CYPPATH on
 	USECYPPATH="true"
 	PWDARG=
+	EXE=.exe
 
 elif echo "$UNAME_SYSTEM" | grep MINGW > /dev/null; then
 	UNAME_SYSTEM=WINDOWS
 	PWDARG=-W
+	EXE=.exe
 else
 	PWDARG=
 fi
@@ -260,17 +262,17 @@ elif echo "$UNAME_MACHINE" | grep ARM > /dev/null; then
 	echo ARCH=ARM >> "$PREFIX"${CONFIG_FILE}
 fi
 
-if test $PLAT = "LINUX"; then
+if test $PLAT="LINUX"; then
 	UNAME_SYSTEM="Linux"
-elif test $PLAT = "OSX"; then
+elif test $PLAT="OSX"; then
 	UNAME_SYSTEM="Darwin"
-elif test $PLAT = "OPENBSD"; then
+elif test $PLAT="OPENBSD"; then
 	UNAME_SYSTEM="OpenBSD"
-elif test $PLAT = "NETBSD"; then
+elif test $PLAT="NETBSD"; then
 	UNAME_SYSTEM="NetBSD"
 elif test $PLAT="FREEBSD"; then
-	UNAME_SYSTEM="FreeBSD"
-elif test $PLAT = "WINDOWS"; then
+	UNAME_SYSTEM = "FreeBSD"
+elif test $PLAT="WINDOWS"; then
 	UNAME_SYSTEM="WINDOWS"
 fi
 
@@ -423,6 +425,9 @@ echo CYPBUILDDIR=$CYPBUILDDIR >> "$PREFIX"${CONFIG_FILE}
 
 echo XLTTARGETCC=$XLTTARGETCC >> "$PREFIX"${CONFIG_FILE}
 echo NO_CYGWIN=$NO_CYGWIN >> "$PREFIX"${CONFIG_FILE}
+
+$CC -o $BUILDDIR/echoversion$EXE echoversion.c
+echo VERSION=`$BUILDDIR/echoversion$EXE` >> "$PREFIX"${CONFIG_FILE}
 
 # Make a generic Makefile that simply includes Makefile.gnu
 echo include Makefile.gnu > Makefile

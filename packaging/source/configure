@@ -1,0 +1,30 @@
+#!/bin/sh
+
+echo "# Configuration for building pretranslated source packages" > Makefile.eu
+
+ROOTDIR=`cd ../..; pwd` >> Makefile.eu
+
+HAS_CONFIG=""
+
+echo "CONFIG=$*" >> "$PREFIX"Makefile.eu
+
+# while [ "$1" != "" ]; do
+#     case $1 in
+#     	--config )
+# 		echo "CONFIG=$2 --rootdir \"$ROOTDIR\"" >> "$PREFIX"Makefile.eu
+# 		HAS_CONFIG="YES"
+# 		shift
+# 	;;
+# 		* )
+# 			echo "Unknown option '$1'"
+# 			echo "Configures and prepares the euphoria source for building a Debian package"
+# 			echo
+#  			echo "configure [options]"
+# 			echo
+# 			echo "Options:"
+# 			echo "    --config options   supply options that will be passed to the"
+# 			echo "                       normal configure script when building euphoria"
+# 	esac
+# 	shift
+# done
+
