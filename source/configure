@@ -262,19 +262,21 @@ elif echo "$UNAME_MACHINE" | grep ARM > /dev/null; then
 	echo ARCH=ARM >> "$PREFIX"${CONFIG_FILE}
 fi
 
-if test $PLAT="LINUX"; then
+if test $PLAT = "LINUX"; then
 	UNAME_SYSTEM="Linux"
-elif test $PLAT="OSX"; then
+elif test $PLAT = "OSX"; then
 	UNAME_SYSTEM="Darwin"
-elif test $PLAT="OPENBSD"; then
+elif test $PLAT = "OPENBSD"; then
 	UNAME_SYSTEM="OpenBSD"
-elif test $PLAT="NETBSD"; then
+elif test $PLAT = "NETBSD"; then
 	UNAME_SYSTEM="NetBSD"
-elif test $PLAT="FREEBSD"; then
-	UNAME_SYSTEM = "FreeBSD"
-elif test $PLAT="WINDOWS"; then
+elif test $PLAT = "FREEBSD"; then
+	UNAME_SYSTEM="FreeBSD"
+elif test $PLAT = "WINDOWS"; then
 	UNAME_SYSTEM="WINDOWS"
 fi
+
+echo Configuring to build for target: $UNAME_SYSTEM / $PLAT
 
 if test $UNAME_SYSTEM = "Linux"; then
 	echo EBSD= >> "$PREFIX"${CONFIG_FILE}

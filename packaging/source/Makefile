@@ -4,31 +4,31 @@ ROOTDIR := $(shell pwd)
 
 all : linux windows osx freebsd openbsd netbsd
 
-linux : PLATFORM=LINUX
-linux : source-tarball
+linux : 
+	$(MAKE) source-tarball PLATFORM=LINUX
 
-windows : PLATFORM=WINDOWSasdss
-windows : source-tarball
+windows :
+	$(MAKE) source-tarball PLATFORM=WINDOWS
 
-osx : PLATFORM=OSX
-osx : source-tarball
+osx :
+	$(MAKE) source-tarball PLATFORM=OSX
 
-freebsd : PLATFORM=FREEBSD
-freebsd : source-tarball
+freebsd :
+	$(MAKE) source-tarball PLATFORM=FREEBSD
 
-openbsd : PLATFORM=OPENBSD
-openbsd : source-tarball
+openbsd :
+	$(MAKE) source-tarball PLATFORM=OPENBSD
 
-netbsd : PLATFORM=NETBSD
-netbsd : source-tarball
+netbsd :
+	$(MAKE) source-tarball PLATFORM=NETBSD
 
 clean :
 	-rm -r build
 
-source-tarball :
+source-tarball : 
 	echo Making source-tarball for $(PLATFORM)
 	cd ../../source/ && ./configure $(CONFIG) --plat $(PLATFORM) --build $(ROOTDIR)/build
-# 	make -C ../../source clean
-# 	make -C ../../source source-tarball -j2 VERSION=$(VERSION)
+	make -C ../../source clean
+	make -C ../../source source-tarball -j2 VERSION=$(VERSION)
 
-.PHONY : linux windows osx freebsd openbsd netbsd source-tarball all clean
+.PHONY : linux windows osx freebsd openbsd netbsds all clean
