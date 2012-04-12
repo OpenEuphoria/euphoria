@@ -241,7 +241,6 @@ struct replace_block {
 
 typedef struct replace_block *replace_ptr;
 
-int wingetch();
 object call_c(int,object,object);
 object Command_Line();
 void show_console();

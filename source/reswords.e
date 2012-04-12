@@ -1,3 +1,4 @@
+namespace reserved
 -- (c) Copyright - See License.txt
 --
 -- IL opcodes, scanner tokens etc.

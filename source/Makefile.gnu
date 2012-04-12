@@ -221,6 +221,20 @@ ifndef CYPBUILDDIR
 CYPBUILDDIR=$(BUILDDIR)
 endif
 
+ifeq "$(ELINUX)" "1"
+PLAT=LINUX
+else ifeq "$(EOPENBSD)" "1"
+PLAT=OPENBSD
+else ifeq "$(ENETBSD)" "1"
+PLAT=NETBSD
+else ifeq "$(EFREEBSD)" "1"
+PLAT=FREEBSD
+else ifeq "$(EOSX)" "1"
+PLAT=OSX
+else ifeq "$(EMINGW)" "1"
+PLAT=WINDOWS
+endif
+
 ifeq  "$(EUBIN)" ""
 EXE=$(EEXU)
 HOST_EXE=$(HOST_EEXU)
@@ -509,9 +523,8 @@ source : builddirs
 	$(MAKE) backendsource OBJDIR=backobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 
 ifneq "$(VERSION)" ""
-SOURCEDIR=euphoria-$(VERSION)
+SOURCEDIR=euphoria-$(PLAT)-$(VERSION)
 else
-
 ifeq "$(REV)" ""
 REV := $(shell hg parents --template '{node|short}')
 endif
@@ -526,15 +539,16 @@ endif
 endif
 
 source-tarball :
+	echo building source-tarball for $(PLAT)
 	rm -rf $(BUILDDIR)/$(SOURCEDIR)
 	hg archive $(BUILDDIR)/$(SOURCEDIR)
 	cd $(BUILDDIR)/$(SOURCEDIR)/source && ./configure $(CONFIGURE_PARAMS)
 	$(MAKE) -C $(BUILDDIR)/$(SOURCEDIR)/source source
-	rm $(BUILDDIR)/$(SOURCEDIR)/source/config.gnu
-	rm $(BUILDDIR)/$(SOURCEDIR)/source/build/mkver$(EXE_EXT)
-	cd $(BUILDDIR) && tar -zcf $(SOURCEDIR).tar.gz $(SOURCEDIR)
+	-rm $(BUILDDIR)/$(SOURCEDIR)/source/config.gnu
+	-rm $(BUILDDIR)/$(SOURCEDIR)/source/build/mkver$(EXE_EXT)
+	cd $(BUILDDIR) && tar -zcf $(SOURCEDIR)-src.tar.gz $(SOURCEDIR)
 ifneq "$(VERSION)" ""
-	cd $(BUILDDIR) && mkdir -p $(PLAT) && mv $(SOURCEDIR).tar.gz $(PLAT)
+	cd $(BUILDDIR) && mkdir -p $(PLAT) && mv $(SOURCEDIR)-src.tar.gz $(PLAT)
 endif
 
 .PHONY : euisource

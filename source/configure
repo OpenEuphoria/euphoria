@@ -27,10 +27,12 @@ if echo "$UNAME_SYSTEM" | grep CYGWIN > /dev/null; then
 	# CYPPATH on
 	USECYPPATH="true"
 	PWDARG=
+	EXE=.exe
 
 elif echo "$UNAME_SYSTEM" | grep MINGW > /dev/null; then
 	UNAME_SYSTEM=WINDOWS
 	PWDARG=-W
+	EXE=.exe
 else
 	PWDARG=
 fi
@@ -80,6 +82,10 @@ elif test $UNAME_SYSTEM = "NetBSD"; then
 	EHOST=NETBSD
 	TARGET=EBSD
 	EBSD=1
+elif test $UNAME_SYSTEM = "FreeBSD"; then
+	EHOST=FREEBSD
+	TARGET=EFREEBSD
+	EBSD=1
 else
 	EBSD=1
 	if test $UNAME_SYSTEM = "Darwin"; then
@@ -103,6 +109,7 @@ SCP="scp -C"
 SSH="ssh -C"
 HG="hg"
 
+echo "# File generated from configure" > ${CONFIG_FILE}
 echo CONFIGURE_PARAMS=$@ >> "$PREFIX"${CONFIG_FILE}
 PLAT=""
 # parameters
@@ -371,6 +378,8 @@ if [ "$TARGET" = "EBSD" ]; then
 	EBSD=1
 elif [ "$TARGET" = "EOPENBSD" ]; then
 	EOPENBSD=1
+elif [ "$TARGET" = "EFREEBSD" ]; then
+	EFREEBSD=1
 elif [ "$TARGET" = "EOSX" ]; then
 	EOSX=1
 elif [ "$TARGET" = "LINUX" ]; then
@@ -477,6 +486,9 @@ echo CYPBUILDDIR=$CYPBUILDDIR >> "$PREFIX"${CONFIG_FILE}
 
 echo XLTTARGETCC=$XLTTARGETCC >> "$PREFIX"${CONFIG_FILE}
 echo NO_CYGWIN=$NO_CYGWIN >> "$PREFIX"${CONFIG_FILE}
+
+$CC -o $BUILDDIR/echoversion$EXE echoversion.c
+echo VERSION=`$BUILDDIR/echoversion$EXE` >> "$PREFIX"${CONFIG_FILE}
 
 # Make a generic Makefile that simply includes Makefile.gnu
 echo include Makefile.gnu > Makefile
