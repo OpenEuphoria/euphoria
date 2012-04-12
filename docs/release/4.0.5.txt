@@ -1,0 +1,8 @@
+== Version 4.0.5 Date TBD
+
+=== Bug Fixes
+
+* [[ticket:749]] Fix init checks for while-entry and goto
+
+=== Enhancements
+

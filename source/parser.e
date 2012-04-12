@@ -10,11 +10,12 @@ end ifdef
 
 include euphoria/info.e
 
-include std/sequence.e
-include std/text.e
-include std/search.e
 include std/convert.e
 include std/filesys.e
+include std/map.e
+include std/search.e
+include std/sequence.e
+include std/text.e
 
 include global.e
 include platform.e
@@ -66,6 +67,7 @@ sequence goto_addr
 sequence goto_stack
 sequence goto_ref
 sequence label_block
+map goto_init
 
 -- flow control management
 sequence break_list        -- back-patch list for end if label
@@ -75,6 +77,8 @@ sequence exit_delay        -- delay list for end for/while/until
 sequence continue_list     -- stack of exits to back-patch
 sequence continue_delay    -- stack of exits to back-patch
 sequence entry_addr, continue_addr, retry_addr -- lists of Code indexes for the entry, continue and retry keywords
+
+sequence while_stack       -- stack for keeping track of uninitialized vars in case of entry
 
 -- block headers
 sequence loop_labels       -- sequence of loop labels, 0 for unlabelled loops
@@ -141,7 +145,7 @@ procedure CheckForUndefinedGotoLabels()
 end procedure
 
 procedure PushGoto()
-	goto_stack = append(goto_stack, {goto_addr, goto_list, goto_labels, goto_delay, goto_line, goto_ref, label_block })
+	goto_stack = append(goto_stack, {goto_addr, goto_list, goto_labels, goto_delay, goto_line, goto_ref, label_block, goto_init })
 	goto_addr = {}
 	goto_list = {}
 	goto_labels = {}
@@ -149,18 +153,22 @@ procedure PushGoto()
 	goto_line = {}
 	goto_ref = {}
 	label_block = {}
+	goto_init = map:new()
 end procedure
 
 procedure PopGoto()
 	CheckForUndefinedGotoLabels()
-	goto_addr = goto_stack[$][1]
-	goto_list = goto_stack[$][2]
+	goto_addr   = goto_stack[$][1]
+	goto_list   = goto_stack[$][2]
 	goto_labels = goto_stack[$][3]
-	goto_delay = goto_stack[$][4]
-	goto_line = goto_stack[$][5]
-	goto_ref = goto_stack[$][6]
+	goto_delay  = goto_stack[$][4]
+	goto_line   = goto_stack[$][5]
+	goto_ref    = goto_stack[$][6]
 	label_block = goto_stack[$][7]
-	goto_stack = goto_stack[1..$-1]
+	goto_init   = goto_stack[$][8]
+	
+	goto_stack = remove( goto_stack, length( goto_stack ) )
+	
 end procedure
 
 procedure EnterTopLevel( integer end_line_table = 1 )
@@ -231,6 +239,8 @@ export procedure InitParser()
 	block_list = {}
 	block_index = 0
 	param_num = -1
+	while_stack = {}
+	goto_init = map:new()
 end procedure
 
 sequence switch_stack = {}
@@ -1340,7 +1350,7 @@ function Term()
 
 	UFactor()
 	tok = next_token()
-	while tok[T_ID] = MULTIPLY or tok[T_ID] = DIVIDE do
+	while tok[T_ID] = reserved:MULTIPLY or tok[T_ID] = reserved:DIVIDE do
 		UFactor()
 		emit_op(tok[T_ID])
 		tok = next_token()
@@ -1369,13 +1379,13 @@ function cexpr()
 
 	tok = aexpr()
 	concat_count = 0
-	while tok[T_ID] = CONCAT do
+	while tok[T_ID] = reserved:CONCAT do
 		tok = aexpr()
 		concat_count += 1
 	end while
 
 	if concat_count = 1 then
-		emit_op(CONCAT)
+		emit_op( reserved:CONCAT )
 
 	elsif concat_count > 1 then
 		op_info1 = concat_count+1
@@ -1884,6 +1894,8 @@ procedure GLabel_statement()
 		n = find(labbel, goto_delay)
 	end while
 
+	force_uninitialize( map:get( goto_init, labbel, {} ) )
+	
 	if TRANSLATE then
 		emit_op(GLABEL)
 		emit_addr(laddr)
@@ -1906,6 +1918,7 @@ procedure Goto_statement()
 			goto_list &= length(Code)+2 --not 1???
 			goto_line &= {{line_number,ThisLine}}
 			goto_ref &= new_forward_reference( GOTO, top_block() )
+			map:put( goto_init, SymTab[tok[T_SYM]][S_OBJ], get_private_uninitialized() )
 			add_data( goto_ref[$], sym_obj( tok[T_SYM] ) )
 			set_line( goto_ref[$], line_number, ThisLine, bp )
 		else
@@ -2649,12 +2662,31 @@ procedure Switch_statement()
 	pop_switch( break_base )
 end procedure
 
+function get_private_uninitialized()
+	sequence uninitialized = {}
+	if CurrentSub != TopLevelSub then
+		symtab_pointer s = SymTab[CurrentSub][S_NEXT]
+		sequence pu = { SC_PRIVATE, SC_UNDEFINED }
+		while s and find( SymTab[s][S_SCOPE], pu ) do
+			if SymTab[s][S_SCOPE] = SC_PRIVATE and SymTab[s][S_INITLEVEL] = -1 then
+				uninitialized &= s
+			end if
+			s = SymTab[s][S_NEXT]
+		end while
+	end if
+	return uninitialized
+end function
+
 procedure While_statement()
 -- Parse a while loop
 	integer bp1
 	integer bp2
 	integer exit_base, next_base
 
+	sequence uninitialized = get_private_uninitialized()
+	
+	while_stack = append( while_stack, uninitialized )
+	
 	Start_block( WHILE )
 
 	exit_base = length(exit_list)
@@ -2722,6 +2754,7 @@ procedure While_statement()
 		backpatch(bp2, length(Code)+1)
 	end if
 	exit_loop(exit_base)
+	while_stack = remove( while_stack, length( while_stack ) )
 	push_temps( temps )
 end procedure
 
@@ -3259,11 +3292,11 @@ function Global_declaration(integer type_ptr, integer scope)
 			integer negate = 0
 			ptok = next_token()
 			switch ptok[T_ID] do
-				case MULTIPLY then
+				case reserved:MULTIPLY then
 					deltafunc = '*'
 					ptok = next_token()
 
-				case DIVIDE then
+				case reserved:DIVIDE then
 					deltafunc = '/'
 					ptok = next_token()
 
@@ -3680,6 +3713,18 @@ procedure Entry_statement()
 	if TRANSLATE then
 	    emit_op(NOP1)
 	end if
+	
+	force_uninitialize( while_stack[$] )
+
+end procedure
+
+--*
+-- Make sure these symbols are marked uninitialized.  An entry or goto
+-- may require extra init checks after a variable may have been initialized.
+procedure force_uninitialize( sequence uninitialized )
+	for i = 1 to length( uninitialized ) do
+		SymTab[uninitialized[i]][S_INITLEVEL] = -1
+	end for
 end procedure
 
 procedure Statement_list()
