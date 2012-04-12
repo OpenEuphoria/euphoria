@@ -282,7 +282,6 @@ function check_errors( sequence filename, sequence fail_list )
 			-- N.B. Do not compare the first line as it contains PATH 
 			-- information which can vary from system to system.			
 			if not equal(actual_err[2..$], expected_err[2..$]) then
-		
 				error(filename, E_INTERPRET, differing_ex_err_format,
 						{join(expected_err,"\n"), join(actual_err, "\n")}, "ex.err")
 				some_error = 1
