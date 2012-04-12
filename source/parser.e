@@ -81,7 +81,7 @@ sequence continue_list     -- stack of exits to back-patch
 sequence continue_delay    -- stack of exits to back-patch
 sequence entry_addr, continue_addr, retry_addr -- lists of Code indexes for the entry, continue and retry keywords
 
-sequence while_stack       -- stack for keeping track of uninitialized vars in case of entry
+sequence entry_stack       -- stack for keeping track of uninitialized vars in case of entry
 
 -- block headers
 sequence loop_labels       -- sequence of loop labels, 0 for unlabelled loops
@@ -242,7 +242,7 @@ export procedure InitParser()
 	block_list = {}
 	block_index = 0
 	param_num = -1
-	while_stack = {}
+	entry_stack = {}
 	goto_init = map:new()
 end procedure
 
@@ -2788,7 +2788,7 @@ procedure While_statement()
 
 	sequence uninitialized = get_private_uninitialized()
 	
-	while_stack = append( while_stack, uninitialized )
+	entry_stack = append( entry_stack, uninitialized )
 	
 	Start_block( WHILE )
 
@@ -2857,7 +2857,7 @@ procedure While_statement()
 		backpatch(bp2, length(Code)+1)
 	end if
 	exit_loop(exit_base)
-	while_stack = remove( while_stack, length( while_stack ) )
+	entry_stack = remove( entry_stack, length( entry_stack ) )
 	push_temps( temps )
 end procedure
 
@@ -2868,6 +2868,9 @@ procedure Loop_statement()
 	token t
 
 	Start_block( LOOP )
+
+	sequence uninitialized = get_private_uninitialized()
+	entry_stack = append( entry_stack, uninitialized )
 
 	exit_base = length(exit_list)
 	next_base = length(continue_list)
@@ -3817,7 +3820,7 @@ procedure Entry_statement()
 	    emit_op(NOP1)
 	end if
 	
-	force_uninitialize( while_stack[$] )
+	force_uninitialize( entry_stack[$] )
 
 end procedure
 
