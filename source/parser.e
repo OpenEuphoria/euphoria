@@ -560,9 +560,9 @@ enum -- struct parseargs_states record
 	PS_ON_ARG
 
 sequence private_list = {}
-integer lock_scanner = 0
+export integer lock_scanner = 0
 integer on_arg = 0
-sequence nested_calls = {}
+export sequence nested_calls = {}
 
 procedure restore_parseargs_states()
 	sequence s

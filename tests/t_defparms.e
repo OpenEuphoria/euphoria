@@ -103,9 +103,12 @@ function t_563( sequence a = s )
 	return a
 end function
 
+include defparam1.e
 procedure test_563()
 	sequence s = "def"
 	test_equal( "resolve default parameter in its parsing context", defparams:s, t_563() )
+	test_equal( "resolve default parameters as forward references from their parsing contexts",
+				3, defparams() )
 end procedure
 test_563()
 
