@@ -1,3 +1,5 @@
+namespace defparams
+
 include std/unittest.e
 
 sequence s s={1,2,3}
@@ -101,6 +103,20 @@ function nested_functions_in_default_param( sequence a, sequence b = repeat(a,(l
 	return { a, b }
 end function
 test_equal( "nested functions in default parameters",{"ab" ,{"ab","ab" }} , nested_functions_in_default_param("ab"))
+
+s = "abc"
+function t_563( sequence a = s )
+	return a
+end function
+
+include defparam1.e
+procedure test_563()
+	sequence s = "def"
+	test_equal( "resolve default parameter in its parsing context", defparams:s, t_563() )
+	test_equal( "resolve default parameters as forward references from their parsing contexts",
+				3, defparams() )
+end procedure
+test_563()
 
 test_report()
 

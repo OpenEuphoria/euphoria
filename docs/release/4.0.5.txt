@@ -3,6 +3,9 @@
 === Bug Fixes
 
 * [[ticket:749]] Fix init checks for while-entry and goto
+* [[ticket:563]] Default values for arguments are always parsed and resolved as though they
+  were being evaluated from the point of the routine declaration, not the point where the
+  routine is called
 
 === Enhancements
 

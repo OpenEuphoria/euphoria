@@ -563,9 +563,9 @@ enum -- struct parseargs_states record
 	PS_ON_ARG
 
 sequence private_list = {}
-integer lock_scanner = 0
+export integer lock_scanner = 0
 integer on_arg = 0
-sequence nested_calls = {}
+export sequence nested_calls = {}
 
 procedure restore_parseargs_states()
 	sequence s
@@ -585,7 +585,7 @@ end procedure
 function read_recorded_token(integer n)
 	token t
 	integer p, prev_Nne
-	if atom(Ns_recorded[n]) then
+	if atom(Ns_recorded[n]) label "top if" then
 		if use_private_list then
 			p = find( Recorded[n], private_list)
 			if p > 0 then -- the value of this parameter is known, use it
@@ -606,8 +606,15 @@ function read_recorded_token(integer n)
 
 			end if
 		end if
+
 		prev_Nne = No_new_entry
 		No_new_entry = 1
+		
+		if Recorded_sym[n] > 0 and  sym_scope( Recorded_sym[n] ) != SC_UNDEFINED then
+			t = { sym_token( Recorded_sym[n] ), Recorded_sym[n] }
+			break "top if"
+		end if
+		
 		t = keyfind(Recorded[n],-1)
 		if t[T_ID] = IGNORED then
 	        p = Recorded_sym[n]
