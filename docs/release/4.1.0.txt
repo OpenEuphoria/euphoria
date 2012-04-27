@@ -27,3 +27,4 @@
 * Can [[assign to multiple variables -> :Multiple Assignment]] with one statement using sequence semantics.
 * Use ##?## to stand in for default parameters.
 * eudis now tabulates counts of forward references
+* Added [[:poke_long]], [[:peek_longu]] and [[:peek_longs]]

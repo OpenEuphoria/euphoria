@@ -1198,6 +1198,24 @@ export procedure emit_op(integer op)
 		current_sequence = append(current_sequence, lhs_target_temp)
 		assignable = FALSE  -- need to update current_sequence like in RHS_SUBS
 
+	case PEEK_LONGS then
+		if IWINDOWS or TWINDOWS or not (IX86_64 or TX86_64) then
+			op = PEEK4S
+		else
+			op = PEEK8S
+		end if
+		last_op = op
+		cont11ii(op, TRUE )
+		
+	case PEEK_LONGU then
+		if IWINDOWS or TWINDOWS or not (IX86_64 or TX86_64) then
+			op = PEEK4U
+		else
+			op = PEEK8U
+		end if
+		last_op = op
+		cont11ii(op, TRUE )
+	
 	-- 1 input, 1 output
 	case RAND, PEEK, PEEK4S, PEEK4U, NOT_BITS, NOT, PEEK8U, PEEK8S, SIZEOF,
 		TASK_STATUS, PEEK2U, PEEK2S, PEEKS, PEEK_STRING, PEEK_POINTER then
@@ -1294,6 +1312,15 @@ export procedure emit_op(integer op)
 		-- jump address to follow
 
 	-- 2 inputs, 0 outputs
+	case POKE_LONG then
+		if IWINDOWS or TWINDOWS or not (IX86_64 or TX86_64) then
+			op = POKE4
+		else
+			op = POKE8
+		end if
+		last_op = op
+		fallthru
+	
 	case SYSTEM, PUTS, PRINT, QPRINT, POSITION, MACHINE_PROC,
 		C_PROC, POKE, POKE4, TASK_SCHEDULE, POKE2, POKE8, POKE_POINTER then
 		emit_opcode(op)

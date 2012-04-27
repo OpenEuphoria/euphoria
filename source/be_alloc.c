@@ -859,7 +859,7 @@ object NewString(char *s)
 	return NewSequence(s, strlen(s));
 }
 
-object NewPreallocSeq(long size, s1_ptr s1)
+object NewPreallocSeq(intptr_t size, s1_ptr s1)
 /* fill in bookkeeping data for a new sequence with a single reference count with the data preallocated.*/
 /* size is number of elements already in the data, which must start imediately after the s1 struct data.
    Note: The last element in the sequence is given the value NOVALUE as an end marker. */
