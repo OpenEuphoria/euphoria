@@ -191,6 +191,10 @@ export sequence keylist = {
 	{"addressof",        SC_PREDEF, FUNC, ADDRESSOF,        1, E_PURE},
 	{"offsetof",         SC_PREDEF, FUNC, OFFSETOF,         1, E_PURE},
 	{"deprecate",        SC_KEYWORD, DEPRECATE, 0, 0, 0},
+	{"poke_long",        SC_PREDEF, PROC, POKE_LONG,        2, E_OTHER_EFFECT},
+	{"peek_longs",       SC_PREDEF, FUNC, PEEK_LONGS,       1, E_PURE},
+	{"peek_longu",       SC_PREDEF, FUNC, PEEK_LONGU,       1, E_PURE},
+
 	{"memtype",          SC_KEYWORD, MEMTYPE,               0, 0, 0 },
 	{"long double",      SC_MEMSTRUCT, MS_LONGDOUBLE,       0, 0, 0, 0, 0, 16 },
 	{"long long",    SC_MEMSTRUCT, MS_LONGLONG,         0, 0, 0, 0, 0, sizeof( C_LONGLONG ) },

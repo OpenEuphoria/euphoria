@@ -258,14 +258,14 @@
 #define TYPE              504
 
 
-#define MEMTYPE              436
+#define MEMTYPE              439
 
 #define MEMSTRUCT            524
-#define QUALIFIED_MEMSTRUCT  523
+#define QUALIFIED_MEMSTRUCT  525
 #define MEMUNION             526
 #define QUALIFIED_MEMUNION   527
 #define MS_SIGNED            528
-#define MS_UNSIGNED          528
+#define MS_UNSIGNED          529
 #define MS_POINTER           530
 #define MS_CHAR              531
 #define MS_SHORT             532

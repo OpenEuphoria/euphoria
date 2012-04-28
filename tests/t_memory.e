@@ -57,4 +57,24 @@ test_equal( "sizeof dbl", 8, sizeof( C_DOUBLE ) )
 poke( p, "abc" )
 test_equal( "peek sequence", "abc", peek( p & 3 ) )
 
+free( p )
+p = allocate( sizeof( C_LONG ) * 10 )
+poke( p, repeat( 0, sizeof( C_LONG ) ) )
+poke_long( p, {-1, 0, 1} )
+
+ifdef LONG32 then
+	test_equal("poke_long", { -1, 0, 1 }, peek4s( p & 3 ) )
+elsedef
+	test_equal("poke_long", { -1, 0, 1 }, peek8s( p & 3 ) )
+end ifdef
+
+test_equal("peek_longs", {-1, 0, 1}, peek_longs( p & 3 ) )
+
+ifdef LONG32 then
+	test_equal("peek_longu", { #FFFFFFFF, 0, 1 }, peek_longu( p & 3 ) )
+elsedef
+	test_equal("peek_longu", { #FFFFFFFF_FFFFFFFF, 0, 1 }, peek_longu( p & 3 ) )
+end ifdef
+free( p )
+
 test_report()

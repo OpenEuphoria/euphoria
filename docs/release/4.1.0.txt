@@ -30,3 +30,4 @@
   using ##-trace-lines n## command line switch. See [[Command line switches -> :command line switches]]
   for more information
 * eudis now tabulates counts of forward references
+* Added [[:poke_long]], [[:peek_longu]] and [[:peek_longs]]

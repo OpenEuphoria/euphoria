@@ -130,6 +130,25 @@ ifdef EU4_0 then
 		return peek4u(x)
 	end function
 
+	--**
+	-- @nodoc@
+	public function poke_long(atom address, object x)
+		poke4( address, x )
+	end function
+
+	--**
+	-- @nodoc
+	public function peek_longs(object x)
+		return peek4s( x )
+	end function
+
+	--**
+	-- @nodoc@
+	public function peek_longu(object x)
+		return peek4u( x )
+	end function
+
+		
 end ifdef
 
 
@@ -406,14 +425,55 @@ end ifdef
 --****
 -- ==== Using Data Double Words
 -- 
--- Double words are 32-bit integers.  In C, they are declared as int, or long, or DWORD.  They
--- are big enough to hold pointers to other values in memory.
+-- Double words are 32-bit integers.  In C, they are typically declared as int, or long
+-- (on Windows and other 32-bit architectures), or DWORD.  They
+-- are big enough to hold pointers to other values in memory on 32-bit architectures.
 --
 -- Use [[:allocate_data]] to allocate data and return its address.
 -- Use [[:poke4]] to write to the data at an address.
 -- Use [[:peek4]] or [[:peek4s]] to read from an address.
 -- Use [[:free]] to free or use [[:delete]] if you enabled ##cleanup## in [[:allocate_data]].
+
+--****
+-- ==== Using Data Quad Words
 --
+-- Quad words are 64-bit integers.  In C, they are typically declared as long long int,
+-- or long int (on 64-bit architectures other than Windows).  They
+-- are big enough to hold pointers to other values in memory on 64-bit architectures.
+--
+-- Use [[:allocate_data]] to allocate data and return its address.
+-- Use [[:poke8]] to write to the data at an address.
+-- Use [[:peek8u]] or [[:peek8s]] to read from an address.
+-- Use [[:free]] to free or use [[:delete]] if you enabled ##cleanup## in [[:allocate_data]].
+--
+
+--****
+-- ==== Using Pointers
+--
+-- A Euphoria atom should be used to store pointer values.  On 32-bit architectures,
+-- pointers may be larger than a Euphoria integer.  On 64-bit architectures, a
+-- Euphoria integer is large enough to hold pointer values, since current 64-bit
+-- architectures use only a 48-bit memory space
+--
+-- To portably peek and poke pointers, you should use [[:peek_pointer]] and
+-- [[:poke_pointer]].  These routines automatically detect the architecture
+-- and use the correct size for a pointer.
+
+--****
+-- ==== Using Long Integers
+--
+-- When interfacing with C code, some data will be defined as ##long## or ##long int##.
+-- This data type can be tricky to use in a portable manner, due to the way that different
+-- architectures and operating systems define it.
+--
+-- On all 32-bit architectures on which Euphoria runs, a ##long int## is defined as 32-bits.
+-- On 64-bit Windows, a ##long int## is also 32-bits.  However, on other 64-bit operating
+-- systems, a ##long int## is defined as 64-bits.
+--
+-- To portably peek and poke ##long int## data, you should use [[:peek_longs]], [[:peek_longu]]
+-- and [[:poke_long]].  You can also use ##sizeof( C_LONG )## to determine the size (in bytes)
+-- of a native ##long int##.
+
 
 --****
 -- ====  Using Strings
@@ -688,7 +748,7 @@ end function
 --
 -- Comments:
 --
--- Since addresses are 32-bit numbers, they can be larger than the largest
+-- Since addresses are 32-bit numbers on 32-bit architectures, they can be larger than the largest
 -- value of type integer (31-bits). Variables that hold an address should 
 -- therefore be declared as atoms.
 --
@@ -741,7 +801,7 @@ end function
 --
 -- Comments: 
 --
--- Since addresses are 32-bit numbers, they can be larger than the largest
+-- Since addresses are 32-bit numbers on 32-bit architectures, they can be larger than the largest
 -- value of type integer (31-bits). Variables that hold an address should
 -- therefore be declared as atoms.
 --
@@ -794,7 +854,7 @@ end function
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
 -- Comments: 
--- Since addresses are 32-bit numbers, they can be larger than the largest
+-- Since addresses are 32-bit numbers on 32-bit architectures, they can be larger than the largest
 -- value of type integer (31-bits). Variables that hold an address should
 -- therefore be declared as atoms.
 --
@@ -852,7 +912,7 @@ end function
 --
 -- Comments: 
 --
--- Since addresses are 32-bit numbers, they can be larger than the largest
+-- Since addresses are 32-bit numbers on 32-bit architectures, they can be larger than the largest
 -- value of type integer (31-bits). Variables that hold an address should
 -- therefore be declared as atoms.
 --
@@ -910,7 +970,7 @@ end function
 --
 -- Comments: 
 --
--- Since addresses are 32-bit numbers, they can be larger than the largest
+-- Since addresses are 32-bit numbers on 32-bit architectures, they can be larger than the largest
 -- value of type integer (31-bits). Variables that hold an address should
 -- therefore be declared as atoms.
 --
@@ -942,6 +1002,121 @@ end function
 
 --****
 -- Signature:
+-- <built-in> function peek8s(object addr_n_length)
+--
+-- Description:
+-- Fetches a //signed// quad words, or some //signed// quad words,
+-- from an address in memory.
+--
+-- Parameters:
+--   # ##addr_n_length## : an object, either of
+--   ** an atom ##addr## ~-- to fetch one double word at ##addr##, or
+--   ** a pair ##{ addr, len }## ~-- to fetch ##len## quad words at ##addr##
+--
+-- Returns:
+-- An **object**, either an atom if the input was a single address, or a
+-- sequence of atoms if a sequence was passed. In both cases, atoms returned
+-- are quad words, in the range -power(2,63)..power(2,63)-1.
+--
+-- Errors:
+-- Peeking in memory you don't own may be blocked by the OS, and cause a
+-- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
+--
+-- When supplying a {address, count} sequence, the count must not be negative.
+--
+-- Comments:
+--
+-- Since addresses are 32-bit numbers on 32-bit architectures, they can be larger than the largest
+-- value of type integer (31-bits). Variables that hold an address should
+-- therefore be declared as atoms.
+--
+-- It is faster to read several quad words at once using the second form
+-- of ##peek##() than it is to read one quad word at a time in a loop. The
+-- returned sequence has the length you asked for on input.
+--
+-- Remember that ##peek8s##() takes just one argument, which in the second
+-- form is actually a 2-element sequence.
+--
+-- The only difference between ##peek8s##() and [[:peek8u]]() is how quad
+-- words with the highest bit set are returned. ##peek4s##() assumes them to
+-- be negative, while [[:peek4u]]() just assumes them to be large and positive.
+--
+-- Example 1:
+-- <eucode>
+-- -- The following are equivalent:
+-- -- method 1
+-- s = {peek8s(100), peek8s(108), peek8s(116), peek8s(124)}
+--
+-- -- method 2
+-- s = peek8s({100, 4})
+-- </eucode>
+--
+-- See Also:
+-- [[:Using Data Double Words]], [[:poke4]], [[:peeks]], [[:peek4u]], [[:allocate]], [[:free]],
+-- [[:peek2s]]
+--
+
+--****
+-- Signature:
+-- <built-in> function peek_longs(object addr_n_length)
+--
+-- Description:
+-- Fetches a //signed// integer, or some //signed// integers,
+-- from an address in memory.
+--
+-- Parameters:
+--   # ##addr_n_length## : an object, either of
+--   ** an atom ##addr## ~-- to fetch one double word at ##addr##, or
+--   ** a pair ##{ addr, len }## ~-- to fetch ##len## double words at ##addr##
+--
+-- Returns:
+-- An **object**, either an atom if the input was a single address, or a
+-- sequence of atoms if a sequence was passed. In both cases, atoms returned
+-- are based on the native size of a "long int."  On Windows and all other 32-bit
+-- architectures, the number will be in the range -power(2,31)..power(2,31)-1.
+-- On other 64-bit architectures, the number will be in the range of
+-- -power(2,63)..power(2,63)-1.
+--
+-- Errors:
+-- Peeking in memory you don't own may be blocked by the OS, and cause a
+-- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
+--
+-- When supplying a {address, count} sequence, the count must not be negative.
+--
+-- Comments:
+--
+-- Since addresses are 32-bit numbers on 32-bit architectures, they can be larger than the largest
+-- value of type integer (31-bits). Variables that hold an address should
+-- therefore be declared as atoms.
+--
+-- It is faster to read several double words at once using the second form
+-- of ##peek##() than it is to read one double word at a time in a loop. The
+-- returned sequence has the length you asked for on input.
+--
+-- Remember that ##peek_longs##() takes just one argument, which in the second
+-- form is actually a 2-element sequence.
+--
+-- The only difference between ##peek_long##() and [[:peek_longu]]() is how
+-- integers with the highest bit set are returned. ##peek_longs##() assumes them to
+-- be negative, while [[:peek_longu]]() just assumes them to be large and positive.
+--
+-- Example 1:
+-- <eucode>
+-- -- The following are equivalent (on a 32-bit architecture, or Windows):
+-- -- method 1
+-- s = {peek_longs(100), peek_longs(104), peek_longs(108), peek_longs(112)}
+--
+-- -- method 2
+-- s = peek_longs({100, 4})
+-- </eucode>
+--
+-- See Also:
+--  [[:Using Data Double Words]], [[:poke4]], [[:peek]], [[:peek4s]], [[:allocate]], [[:free]], [[:peek2u]],
+--  [[:peek2s]], [[:peek8u]], [[:peek8s]], [[:peek_longu]], [[:poke_long]]
+--
+
+--****
+-- Signature:
 -- <built-in> function peek4u(object addr_n_length)
 --
 -- Description:
@@ -966,7 +1141,7 @@ end function
 --
 -- Comments: 
 --
--- Since addresses are 32-bit numbers, they can be larger than the largest
+-- Since addresses are 32-bit numbers on 32-bit architectures, they can be larger than the largest
 -- value of type integer (31-bits). Variables that hold an address should
 -- therefore be declared as atoms.
 --
@@ -995,6 +1170,121 @@ end function
 -- See Also: 
 --  [[:Using Data Double Words]], [[:poke4]], [[:peek]], [[:peek4s]], [[:allocate]], [[:free]], [[:peek2u]]
 --
+
+--****
+-- Signature:
+-- <built-in> function peek8u(object addr_n_length)
+--
+-- Description:
+-- Fetches an //unsigned// quad word, or some //unsigned// quad words,
+-- from an address in memory.
+--
+-- Parameters:
+--              # ##addr_n_length## : an object, either of
+--              ** an atom ##addr## ~-- to fetch one double word at ##addr##, or
+--              ** a pair {##addr,len}## ~-- to fetch ##len## double words at ##addr##
+--
+-- Returns:
+--              An **object**, either an atom if the input was a single address, or
+-- a sequence of atoms if a sequence was passed. In both cases, atoms
+-- returned are quad words, in the range 0..power(2,64)-1.
+--
+-- Errors:
+--      Peek() in memory you don't own may be blocked by the OS, and cause
+-- a machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
+--
+-- When supplying a {address, count} sequence, the count must not be negative.
+--
+-- Comments:
+--
+-- Since addresses are 32-bit numbers on 32-bit architectures, they can be larger than the largest
+-- value of type integer (31-bits). Variables that hold an address should
+-- therefore be declared as atoms.
+--
+-- It is faster to read several quad words at once using the second form
+-- of ##peek##() than it is to read one quad word at a time in a loop. The
+-- returned sequence has the length you asked for on input.
+--
+-- Remember that ##peek8u##() takes just one argument, which in the second
+-- form is actually a 2-element sequence.
+--
+-- The only difference between ##peek8s##() and ##peek8u##() is how quad
+-- words with the highest bit set are returned. ##peek8s##() assumes them
+-- to be negative, while ##peek8u##() just assumes them to be large and
+-- positive.
+--
+-- Example 1:
+-- <eucode>
+-- -- The following are equivalent:
+-- -- method 1
+-- s = {peek8u(100), peek8u(108), peek8u(116), peek8u(124)}
+--
+-- -- method 2
+-- s = peek8u({100, 4})
+-- </eucode>
+--
+-- See Also:
+--  [[:Using Data Double Words]], [[:poke4]], [[:peek]], [[:peek4s]], [[:allocate]], [[:free]], [[:peek2u]]
+--
+
+--****
+-- Signature:
+-- <built-in> function peek_longu(object addr_n_length)
+--
+-- Description:
+-- Fetches an //unsigned// integer, or some //unsigned// integers,
+-- from an address in memory.
+--
+-- Parameters:
+--              # ##addr_n_length## : an object, either of
+--              ** an atom ##addr## ~-- to fetch one double word at ##addr##, or
+--              ** a pair {##addr,len}## ~-- to fetch ##len## double words at ##addr##
+--
+-- Returns:
+-- An **object**, either an atom if the input was a single address, or a
+-- sequence of atoms if a sequence was passed. In both cases, atoms returned
+-- are based on the native size of a "long int."  On Windows and all other 32-bit
+-- architectures, the number will be in the range 0..power(2,32)-1.
+-- On other 64-bit architectures, the number will be in the range of
+-- 0..power(2,64)-1.
+--
+-- Errors:
+--      Peek() in memory you don't own may be blocked by the OS, and cause
+-- a machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
+--
+-- When supplying a {address, count} sequence, the count must not be negative.
+--
+-- Comments:
+--
+-- Since addresses are 32-bit numbers on 32-bit architectures, they can be larger than the largest
+-- value of type integer (31-bits). Variables that hold an address should
+-- therefore be declared as atoms.
+--
+-- It is faster to read several integers at once using the second form
+-- of ##peek##() than it is to read one integer at a time in a loop. The
+-- returned sequence has the length you asked for on input.
+--
+-- Remember that ##peek_longu##() takes just one argument, which in the second
+-- form is actually a 2-element sequence.
+--
+-- The only difference between ##peek_longs##() and ##peek_longu##() is how double
+-- words with the highest bit set are returned. ##peek4s##() assumes them
+-- to be negative, while ##peek_longu##() just assumes them to be large and
+-- positive.
+--
+-- Example 1:
+-- <eucode>
+-- -- The following are equivalent (on a 32-bit architecture, or Windows):
+-- -- method 1
+-- s = {peek_longu(100), peek4u(104), peek4u(108), peek4u(112)}
+--
+-- -- method 2
+-- s = peek_longu({100, 4})
+-- </eucode>
+--
+-- See Also:
+--  [[:Using Data Double Words]], [[:poke4]], [[:peek]], [[:peek4s]], [[:allocate]], [[:free]], [[:peek2u]],
+--  [[:peek2s]], [[:peek8u]], [[:peek8s]], [[:peek_longs]], [[:poke_long]]
 
 --****
 -- Signature:
@@ -1197,6 +1487,106 @@ end function
 -- poke4(a, {9712345, #FF00FF00, -12345})
 -- </eucode>
 -- 
+-- See Also:
+--     [[:Using Data Double Words]], [[:peek4s]], [[:peek4u]], [[:poke]], [[:poke2]], [[:allocate]], [[:free]], [[:call]]
+--
+
+--****
+-- Signature:
+-- <built-in> procedure poke8(atom addr, object x)
+--
+-- Description:
+-- Stores one or more quad words, starting at a memory location.
+--
+-- Parameters:
+--              # ##addr## : an atom, the address at which to store
+--              # ##x## : an object, either a quad word or a non empty sequence of
+-- double words.
+--
+-- Errors:
+--      Poke() in memory you don't own may be blocked by the OS, and cause a
+-- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
+--
+-- Comments:
+--
+-- There is no point in having poke8s() or poke8u(). For example, both
+-- +power(2,63) and -power(2,63) are stored as #F000000000000000. It's up to whoever
+-- reads the value to figure it out.
+--
+-- It is faster to write several quad words at once by poking a sequence
+-- of values, than it is to write one quad words at a time in a loop.
+--
+-- The 8-byte values to be stored can be negative or positive. You can read
+-- them back with either ##peek8s##() or ##peek8u##(). However, the results
+-- are unpredictable if you want to store values with a fractional part or a
+-- magnitude greater than power(2,64), even though Euphoria represents them
+-- all as atoms.
+--
+-- Example 1:
+-- <eucode>
+--  a = allocate(100)   -- allocate 100 bytes in memory
+--
+-- -- poke one 8-byte value at a time:
+-- poke8(a, 9712345)
+-- poke8(a+8, #FF00FF00)
+-- poke8(a+16, -12345)
+--
+-- -- poke 3 8-byte values at once:
+-- poke8(a, {9712345, #FF00FF00, -12345})
+-- </eucode>
+--
+-- See Also:
+--     [[:Using Data Double Words]], [[:peek4s]], [[:peek4u]], [[:poke]], [[:poke2]], [[:allocate]], [[:free]], [[:call]]
+--
+
+--****
+-- Signature:
+-- <built-in> procedure poke_long(atom addr, object x)
+--
+-- Description:
+-- Stores one or more integers, starting at a memory location.
+--
+-- Parameters:
+--              # ##addr## : an atom, the address at which to store
+--              # ##x## : an object, either an integer or a non empty sequence of
+-- double words.
+--
+-- Errors:
+--      Poke() in memory you don't own may be blocked by the OS, and cause a
+-- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
+--
+-- Comments:
+--
+-- There is no point in having poke_longs() or poke_longu(). For example, both
+-- +power(2,31) and -power(2,31) are stored as #F0000000 on a 32-bit
+-- architecture. It's up to whoever reads the value to figure it out.
+--
+-- On all Windows and other 32-bit operating systems, the ##poke_long()##
+-- uses 4-byte integers.  On 64-bit architectures using operating systems
+-- other than Windows, ##poke_long()## uses 8-byte integers.
+--
+-- It is faster to write several integers at once by poking a sequence
+-- of values, than it is to write one double words at a time in a loop.
+--
+-- The 4-byte (or 8-byte) values to be stored can be negative or positive. You can read
+-- them back with either ##peek_longs##() or ##peek_longu##(). However, the results
+-- are unpredictable if you want to store values with a fractional part or a
+-- magnitude greater than the size of a native ##long int##, even though Euphoria represents them
+-- all as atoms.
+--
+-- Example 1:
+-- <eucode>
+--  a = allocate(100)   -- allocate 100 bytes in memory
+--
+-- -- poke one 4-byte value at a time (on Windows or other 32-bit operating system):
+-- poke_long(a, 9712345)
+-- poke_long(a+4, #FF00FF00)
+-- poke_long(a+8, -12345)
+--
+-- -- poke 3 long int values at once:
+-- poke_long(a, {9712345, #FF00FF00, -12345})
+-- </eucode>
+--
 -- See Also:
 --     [[:Using Data Double Words]], [[:peek4s]], [[:peek4u]], [[:poke]], [[:poke2]], [[:allocate]], [[:free]], [[:call]]
 --
