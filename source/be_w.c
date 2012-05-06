@@ -311,11 +311,19 @@ static int _has_console = 1;
 
 typedef int (WINAPI *GCPLA)(LPDWORD, DWORD);
 
+/* sets _has_console appropriately. 
+ * Windows XP, 2003 and newer: 1 if there is another process attached (that is, run from a shell)
+ * Windows earlier than XP or earlier than 2003: always returns 0.  As if it is never run from  a
+   shell.
+ * Unix : always returns 1 as if always run from a shell.(This may not be the case if run via KDE)
+ */
 void check_has_console() {
 	GCPLA gCPLA;
 	HMODULE kernel32;
 
 	kernel32 = LoadLibrary("kernel32.dll");
+	/* Windows XP and newer and Windows 2003 and newer is required for this
+	 * to work. */
 	gCPLA = (GCPLA) GetProcAddress(kernel32, "GetConsoleProcessList");
 
 	if (gCPLA == NULL) {

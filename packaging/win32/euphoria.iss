@@ -33,6 +33,9 @@ ChangesAssociations=yes
 ChangesEnvironment=yes
 InfoBeforeFile=before.txt
 InfoAfterFile=after.txt
+; set the minimum environment required to 
+; Windows 95 Original Equipment Manufacterer Service Release 2.5 (see ticket 665)
+MinVersion=4.0.1212,
 
 [Types]
 Name: "full"; Description: "Full installation";

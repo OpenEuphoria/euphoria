@@ -1,0 +1,3 @@
+* [[ticket:665]] documented minimal requirements for various features in EUPHORIA on various platforms.
+* [[ticket:665]] set minimal version for Windows in its installer to avoid installing on computers that it wont work on.
+
