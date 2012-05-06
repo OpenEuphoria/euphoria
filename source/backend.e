@@ -307,8 +307,10 @@ function BackEndify(integer il_file)
 	
 	include_info = alloc_include_matrix()
 
+	if length(Argv) = Argc then -- if this is false, we're in multithread backend
 	if Argc > 2 then
 		Argv = {Argv[1]} & Argv[3 .. Argc]
+	end if
 	end if
 
 	return

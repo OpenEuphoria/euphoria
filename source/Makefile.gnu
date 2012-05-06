@@ -418,8 +418,12 @@ backend-library : builddirs
 
 $(BUILDDIR)/$(BACKENDLIB_NAME) : $(EU_BACKEND_OBJECTS)
 	ar -rc $(BUILDDIR)/$(BACKENDLIB_NAME) $(EU_BACKEND_OBJECTS)
-	gcc -shared -fPIC -o $(BUILDDIR)/$(DBACKENDLIB_NAME) $(EU_BACKEND_OBJECTS)
+	gcc -c -o $(BUILDDIR)/be_bighack.o $(EBSDFLAG) $(FE_FLAGS) -I/usr/share/euphoria be_bighack.c
+	gcc -shared -fPIC -o $(BUILDDIR)/$(DBACKENDLIB_NAME) $(BUILDDIR)/be_bighack.o $(EU_BACKEND_OBJECTS)
+	#$(BUILDDIR)/$(OBJDIR)/$*.c
+	#-o$(BUILDDIR)/$(OBJDIR)/$*.o
 	$(ECHO) $(MAKEARGS)
+	#gcc -o $(BUILDDIR)/$(DBACKENDLIB_NAME).aout $(BUILDDIR)/be_bighack.o $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG)
 
 builddirs : $(BUILD_DIRS)
 

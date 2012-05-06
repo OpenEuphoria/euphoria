@@ -37,6 +37,7 @@
 #include "be_socket.h"
 #include "be_coverage.h"
 #include "be_syncolor.h"
+#include "be_bighack.h"
 
 #ifdef ELINUX
 #include <malloc.h>
@@ -2399,8 +2400,8 @@ object CallBack(object x)
 	return MAKE_UINT(addr);
 }
 
-uintptr_t internal_general_call_back_basement(
-		  intptr_t cb_routine,
+uintptr_t internal_general_call_back_sp(
+		  intptr_t cb_routine, int type,
 						   uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 						   uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
 						   uintptr_t arg7, uintptr_t arg8, uintptr_t arg9)
@@ -2509,6 +2510,9 @@ uintptr_t internal_general_call_back_basement(
 	}
 
 	// Don't do get_pos_int() for crash handler
+	if (type)
+	return (uintptr_t)call_back_result->obj;
+	else
 	return (uintptr_t)get_pos_int("internal-call-back", call_back_result->obj);
 }
 uintptr_t internal_general_call_back(
@@ -2518,18 +2522,28 @@ uintptr_t internal_general_call_back(
 						   uintptr_t arg7, uintptr_t arg8, uintptr_t arg9)
 /* general call-back routine: 0 to 9 args */
 {
+	return internal_general_call_back_sp(cb_routine, 0, arg1, arg2, arg3, arg4, arg5, arg6,
+	arg7, arg8, arg9);
+}
+uintptr_t internal_general_call_back_th(
+		  intptr_t cb_routine,
+						   uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+						   uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
+						   uintptr_t arg7, uintptr_t arg8, uintptr_t arg9)
+/* general call-back routine: 0 to 9 args */
+{
 #ifdef ERUNTIME
 	// TODO
 	// implement dso-multithreaded runtime library copying for translated apps
-	return internal_general_call_back_basement(cb_routine, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+	return internal_general_call_back_sp(cb_routine, 1, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
 #else
-	uintptr_t (*f)(intptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t) =
-		(uintptr_t (*)(intptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)) backendify_ptr;
+	uintptr_t (*f)(intptr_t, int, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t) =
+		(uintptr_t (*)(intptr_t, int, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)) backendify_ptr;
 	
 #ifdef EUNIX
 	pthread_mutex_lock(internal_general_call_back_mutex);
 #endif
-	uintptr_t ret = f(cb_routine, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+	uintptr_t ret = f(cb_routine, 1, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
 #ifdef EUNIX
 	pthread_mutex_unlock(internal_general_call_back_mutex);
 #endif
@@ -2694,7 +2708,7 @@ object start_backend(object x)
 	backendify_ptr          = get_pos_int(w, *(x_ptr->base+13));
 	if (backendify_ptr == 0)
 	{
-		backendify_ptr = (uintptr_t)internal_general_call_back_basement;
+		backendify_ptr = (uintptr_t)internal_general_call_back_sp;
 	} else {
 		// start_backend() called from a new thread
 		// notify new_thread() later so it doesn't loop
@@ -2778,6 +2792,7 @@ void * thread_start_backend(void * arg)
 {
 #ifdef EUNIX
 	object (*new_start_backend)(object);
+	void (*pre_init_backend_lib)(struct routine_list *, int, char **);
 	void * newbackend;
 	object x;
 	ssize_t count = 1024;
@@ -2825,11 +2840,16 @@ void * thread_start_backend(void * arg)
 	new_start_backend = (object (*)(object))
 		dlsym(newbackend, "start_backend");
 	if (new_start_backend == NULL) return NULL;
+	pre_init_backend_lib = (void (*)(struct routine_list *, int, char **))
+		dlsym(newbackend, "pre_init_backend_lib");
+	if (pre_init_backend_lib == NULL) return NULL;
+
+	pre_init_backend_lib(_00, Argc, Argv);
 
 	// now entering thread unsafe area, time to lock the mutex
 	pthread_mutex_lock(new_thread_mutex);
 
-	x = internal_general_call_back(backendify, 1, // il_file == 1
+	x = internal_general_call_back_th(backendify, 1, // il_file == 1
 	0,0,0,0, 0,0,0,0);
 
 	s1_ptr x_ptr;
