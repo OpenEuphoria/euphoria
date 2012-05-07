@@ -1822,7 +1822,7 @@ public function gcd(atom p, atom q)
 		q=r
 	end if
 	if q<=1 then
-		return q
+		return p
 	end if
 
     while 1 do
