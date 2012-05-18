@@ -41,6 +41,8 @@ constant
 --
 -- Notes:
 --   Method always returns 1 on *nix systems.
+--   On Windows client systems earlier than Windows XP the method always returns 0.
+--   On Windows server systems earlier than Windows Server 2003 the method always returns 0.
 --
 -- Examples:
 -- <eucode>
@@ -889,6 +891,9 @@ end procedure
 -- Comments:
 -- This wraps [[:wait_key]] by giving a clue that the user should press a key, and
 -- perhaps do some other things as well.
+-- Requires Windows XP or later or Windows 2003 or later to work.  Earlier versions of Windows
+-- or O/S will always pause even when not needed.
+-- On the other hand, on Unix like Operating Systems this wont pause even when needed.
 --
 -- Example 1:
 -- <eucode>

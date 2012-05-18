@@ -2,8 +2,18 @@ include std/machine.e
 include std/math.e
 include std/unittest.e
 include std/convert.e
-test_equal("gcd", 17, gcd(1999*3*17,1993*17*7))
-test_equal("gcd 1c ", 1,  gcd(-4, -1)  )
+test_equal("gcd #1", 17, gcd(1999*3*17,1993*17*7))
+test_equal("gcd #2", 1,  gcd(-4, -1)  )
+test_equal("gcd #3", 38, gcd(76.3, -114))
+test_equal("gcd #4", 114,gcd(0, -114))
+test_equal("gcd #5", 0,  gcd(0, 0))
+
+sequence rgcd
+rgcd = {}
+for i = 0 to 13 do
+	rgcd &= gcd(i, 12)
+end for
+test_equal("gcd #6", {12,1,2,3,4,1,6,1,4,3,2,1,12,1}, rgcd)
 
 test_equal("is_even #1", 1, is_even(12) )
 test_equal("is_even #2", 0, is_even(7) )

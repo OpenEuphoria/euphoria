@@ -1,11 +1,14 @@
 == Version 4.0.5 Date TBD
 
 === Bug Fixes
-
 * [[ticket:749]] Fix init checks for while-entry and goto
 * [[ticket:563]] Default values for arguments are always parsed and resolved as though they
   were being evaluated from the point of the routine declaration, not the point where the
   routine is called
+* [[ticket:763]] In some cases, the translator did not keep potential [[:routine_id]] targets
+  when dynamic routine names were used
+* [[ticket:665]] documented minimal requirements for various features in EUPHORIA on various platforms.
+* [[ticket:665]] set minimal version for Windows in its installer to avoid installing on computers that it wont work on.
 
 === Enhancements
 

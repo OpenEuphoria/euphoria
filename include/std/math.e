@@ -1786,56 +1786,67 @@ end function
 --		# ##q## : the other atom.
 --
 -- Returns:
--- A positive **atom**, without a fractional part, evenly dividing both parameters, and is the 
--- greatest value with those properties.
+-- A positive **integer**, which is the largest value that evenly divides
+-- into both parameters.
 --
 -- Comments:
 --
--- Signs are ignored. Atoms are rounded down to integers.
---
--- Any zero parameter causes 0 to be returned.
+-- * Signs are ignored. Atoms are rounded down to integers.
+-- * If both parameters are zero, 0 is returned.
+-- * If one parameter is zero, the other parameter is returned.
 --
 -- Parameters and return value are atoms so as to take mathematical integers up to ##power(2,53)##.
 --
 -- Example 1:
 -- <eucode>
--- ? gcd(76.3, -114) -- prints out gcd(76,114), which is 38
+-- ? gcd(76.3, -114) --> 38
+-- ? gcd(0, -114) --> 114
+-- ? gcd(0, 0) --> 0 (This is often regarded as an error condition)
 -- </eucode>
 --
 
 public function gcd(atom p, atom q)
 	atom r
+
+	-- Both arguments must be positive.	
+	if p < 0 then
+		p = -p
+	end if
+	if q < 0 then
+		q = -q
+	end if
 	
-	if p<0 then
-		p=floor(-p)
-	else
-		p=floor(p)
+	-- Strip off any fractional part.
+	p = floor(p)
+	q = floor(q)
+	
+	-- Ensure that 'p' is not smaller than 'q'
+	if p < q then
+		r = p
+		p = q
+		q = r
 	end if
-	if q<0 then
-		q=floor(-q)
-	else
-		q=floor(q)
-	end if
-	if p<q then
-		r=p
-		p=q
-		q=r
-	end if
-	if q<=1 then
+	
+	-- Special case.
+	if q = 0 then
 		return p
 	end if
 
-    while 1 do
-		r=remainder(p,q)
-		if r=1 then
-			return r
-		elsif r=0 then
-			return q
-		else
-			p=q
-			q=r
-		end if
+	-- repeat until I get a remainder less than 2.
+    while r > 1 with entry do
+    	-- set up next cycle using denominator and remainder from previous cycle.
+		p = q
+		q = r
+	entry
+		-- get remainder after dividing p by q
+		r = remainder(p, q)
     end while
+    
+	if r = 1 then
+		return 1
+	else
+		return q
+	end if
 end function
 
 

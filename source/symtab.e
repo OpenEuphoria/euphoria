@@ -656,6 +656,9 @@ export function MarkTargets(symtab_index s, integer attribute)
 		end if
 		return found
 	else
+		if not just_mark_everything_from then
+			just_mark_everything_from = TopLevelSub
+		end if
 		mark_all( attribute )
 		return 1
 	end if
