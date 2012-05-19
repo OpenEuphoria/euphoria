@@ -115,6 +115,14 @@ test_equal("retain_all 1c", {}, retain_all( {1,3,5}, {} ))
 test_equal("insert() integer sequence", {1,2,3}, insert({1,3}, 2, 2))
 test_equal("insert() string", {'J','o',"h",'n'}, insert("Jon", "h", 3))
 
+procedure test_ticket_767(atom x)
+    sequence objs = {}
+    integer k = 1
+    objs = insert(objs, x, k)
+	test_equal( "insert an atom doesn't treat it like a double - ticket 767", {x}, objs )
+end procedure
+test_ticket_767( 1 )
+
 test_equal("splice() integer sequence", {1,2,3}, splice({1,3}, 2, 2))
 test_equal("splice() string", "John", splice("Jon", "h", 3))
 test_equal("splice() string", "Johhhhhhhhhhn", splice("Jon", "hhhhhhhhhh", 3))
