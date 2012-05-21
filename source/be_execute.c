@@ -1403,6 +1403,39 @@ void symtab_set_pointers()
 	}
 }
 
+
+// routine ids to euphoria std/map routines:
+int map_new;
+int map_put;
+int map_get;
+
+/**
+ * Call's the front end's map:new() function
+ */
+object call_map_new(){
+	return internal_general_call_back( map_new, 690, 0, 0, 0, 0, 0, 0, 0, 0 );
+}
+
+/**
+ * Calls the front end's map:put procedure
+ */
+void call_map_put( object map, object key, object value, object operation ){
+	RefDS( map );
+	Ref( key );
+	Ref( value );
+	internal_general_call_back( map_put, map, key, value, operation, 23 /* default threshold */, 0, 0, 0, 0 );
+}
+
+/**
+ * Calls the front end's map:get function
+ */
+object call_map_get( object map, object key, object default_value ){
+	RefDS( map );
+	Ref( key );
+	Ref( default_value );
+	return internal_general_call_back( map_get, map, key, default_value, 0, 0, 0, 0, 0, 0 );
+}
+
 void analyze_switch()
 // changes a SWITCH_RT to a real switch statement
 {
@@ -1429,6 +1462,18 @@ void analyze_switch()
 	s1_ptr lookup;
 	int i;
 	object top;
+	object unique_jumps;
+	s1_ptr unique_values;
+	object unique_values_obj;
+	object empty_sequence;
+	object check_map;
+
+	unique_jumps = call_map_new();
+	unique_values = NewS1( values->length );
+	unique_values->postfill = unique_values->length;
+	unique_values->length = 0;
+	unique_values_obj = MAKE_SEQ( unique_values );
+	empty_sequence = MAKE_SEQ( NewS1(0) );
 	for( i = 1; i <= values->length; ++i ){
 		negative = 0;
 		sym = values->base[i];
@@ -1439,7 +1484,7 @@ void analyze_switch()
 		top = fe.st[sym].obj;
 
 		if( top == NOVALUE ){
-			NoValue( (symtab_ptr)sym );
+			NoValue( &fe.st[sym] );
 		}
 
 		// int check
@@ -1478,7 +1523,66 @@ void analyze_switch()
 
 			new_values->base[i] = fe.st[sym].obj;
 		}
+		Ref( new_values->base[i] );
+		
+		// Use a std;map just like in the front end to check for duplicate case values:
+		check_map = call_map_get( unique_jumps, jump->base[i], empty_sequence );
+		if( find_from( new_values->base[i], check_map, 1 ) ){
+			// duplicate value in the same case..ok
+		}
+		else if( find_from( new_values->base[i], unique_values_obj, 1 ) ){
+			// error!
+			// TODO: report correct line, value
+			// Currently points to top of the switch, and reports
+			// the offending symbol or symbols, but not a value, as
+			// there is currently no way to pretty sprint into a buffer
+			symtab_ptr first, second;
+			object second_val;
+			first = 0;
+			second_val = new_values->base[i];
+			second = fe.st + sym;
+			while( --i ){
+				int c = 0;
+				if( new_values->base[i] == second_val ){
+					c = 1;
+				}
+				else if( !IS_ATOM_INT( new_values->base[i] ) || IS_ATOM_INT( second_val ) ){
+					c = (0 == compare( new_values->base[i], second_val ) );
+				}
+				if( c ){
+					sym = values->base[i];
+					if( sym < 0 ){
+						sym = -sym;
+					}
+					first = fe.st + sym;
+					break;
+				}
+			}
+			if( first->name && second->name ){
+				RTFatal("duplicate values in a switch: %s and %s", first->name, second->name );
+			}
+			else if( first->name ){
+				RTFatal("duplicate values in a switch: %s and a literal value", first->name );
+			}
+			else if( second->name ){
+				RTFatal("duplicate values in a switch: %s and a literal value", second->name );
+			}
+			else{
+				// this shouldn't happen
+				RTFatal("duplicate values in a switch" );
+			}
+		}
+		else{
+			// new value...
+			call_map_put( unique_jumps, jump->base[i], new_values->base[i], 6 /* map:APPEND */ );
+			Append( &unique_values_obj, unique_values_obj, new_values->base[i] );
+			unique_values = SEQ_PTR( unique_values_obj );
+		}
+		DeRefDS( check_map );
 	}
+	DeRefDS( unique_jumps );
+	DeRefDS( empty_sequence );
+	DeRefDS( unique_values_obj );
 
 	DeRefDS( MAKE_SEQ( values ) );
 	if( all_ints &&  max - min < 1024){

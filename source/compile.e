@@ -2587,6 +2587,13 @@ end procedure
 
 sequence switch_stack = {}
 
+enum
+	SWITCH_OP,
+	SWITCH_PC,
+	SWITCH_VAR_TYPE,
+	SWITCH_VALUES,
+	$
+
 procedure opSWITCH_I()
 	-- pc+1 = switch value
 	-- pc+2 = cases seq
@@ -2595,12 +2602,12 @@ procedure opSWITCH_I()
 
 	integer var_type = GType( Code[pc+1] )
 
-	switch_stack = append( switch_stack, { Code[pc], pc, var_type } )
+	switch_stack = append( switch_stack, { Code[pc], pc, var_type, {} } )
 	if var_type != TYPE_INTEGER then
 
 		if var_type = TYPE_SEQUENCE then
 			-- it will never work
-			switch_stack[$][3] = -1
+			switch_stack[$][SWITCH_VAR_TYPE] = -1
 
 			-- The commented code below is meant to avoid emitting the switch
 			-- block, since we know it won't work.  The problem occurs if
@@ -2658,7 +2665,7 @@ procedure opSWITCH()
 	-- pc+2 = cases seq
 	-- pc+3 = jump table  (ignored)
 	-- pc+4 = else offset (ignored)
-	switch_stack = append( switch_stack, { Code[pc], pc, 0 } )
+	switch_stack = append( switch_stack, { Code[pc], pc, 0, {} } )
 	c_stmt("_1 = find(@, @);\n", { Code[pc+1], Code[pc+2]})
 	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 	c_stmt0("switch ( _1 ){ \n" )
@@ -2731,12 +2738,12 @@ end procedure
 procedure opCASE()
 	integer caseval = Code[pc+1]
 	integer stmt = 1
-	if find( switch_stack[$][1], {SWITCH_I, SWITCH_SPI}) then
+	if find( switch_stack[$][SWITCH_OP], {SWITCH_I, SWITCH_SPI}) then
 		-- Get the actual value from the case sequence
 		if caseval = 0 then
-			if switch_stack[$][3] != -1 then
+			if switch_stack[$][SWITCH_VAR_TYPE] != -1 then
 				c_stmt0( "default:\n" )
-				if switch_stack[$][3] != TYPE_SEQUENCE then
+				if switch_stack[$][SWITCH_VAR_TYPE] != TYPE_SEQUENCE then
 					-- this label might throw off the optimization
 					-- and emit needless code
 					Label( pc )
@@ -2750,30 +2757,40 @@ procedure opCASE()
 			end if
 
 		else
-			if switch_stack[$][3] = -1 then
+			if switch_stack[$][SWITCH_VAR_TYPE] = -1 then
 				-- the switch has been optimized away, so don't emit the case
 				stmt = 0
 			else
-				integer sym = Code[switch_stack[$][2] + 2]
+				integer sym = Code[switch_stack[$][SWITCH_PC] + 2]
 				caseval = SymTab[sym][S_OBJ][Code[pc+1]]
 			end if
 		end if
 
 	end if
+
+	if Code[pc-2] = CASE then
+		if find( caseval, switch_stack[$][SWITCH_VALUES] ) then
+			stmt = 0
+		end if
+	else
+		switch_stack[$][SWITCH_VALUES] = {}
+	end if
+	
 	if stmt then
 		c_stmt0( sprintf("case %d:\n", caseval) )
+		switch_stack[$][SWITCH_VALUES] = append( switch_stack[$][SWITCH_VALUES], caseval )
 	end if
 	NewBB(0, E_ALL_EFFECT, 0)
 	pc += 2
 end procedure
 
 procedure opNOPSWITCH()
-	if switch_stack[$][3] != -1 then
+	if switch_stack[$][SWITCH_VAR_TYPE] != -1 then
 		c_stmt0( ";}" )
 	end if
 
 	Label( pc + 1 )
-	switch_stack = switch_stack[1..$-1]
+	switch_stack = head( switch_stack, length( switch_stack ) -1 )
 	pc += 1
 end procedure
 

@@ -254,7 +254,15 @@ enum
 	SWITCH_ELSE,
 	SWITCH_PC,
 	SWITCH_FALLTHRU,
-	SWITCH_VALUE
+	SWITCH_VALUE,
+	SWITCH_CASE_MAP,
+	SWITCH_CASE_VALUES,
+	SWITCH_JUMP_OFFSET,
+	SWITCH_THISLINE,
+	SWITCH_BP,
+	SWITCH_LINE_NUMBER,
+	SWITCH_CURRENT_FILE_NO,
+	$
 
 procedure NotReached(integer tok, sequence keyword)
 -- Issue warning about code that can't be executed
@@ -2403,7 +2411,23 @@ end procedure
 
 procedure push_switch()
 	if_stack &= SWITCH
-	switch_stack = append( switch_stack, { {}, {}, 0, 0, 0, 0 })
+	switch_stack = append( switch_stack,
+			{
+				{},          -- SWITCH_CASES
+				{},          -- SWITCH_JUMP_TABLE
+				0,           -- SWITCH_ELSE
+				0,           -- SWITCH_PC
+				0,           -- SWITCH_FALLTHRU
+				0,           -- SWITCH_VALUE
+				map:new(),   -- SWITCH_CASE_MAP
+				{},          -- SWITCH_CASE_VALUES
+				0,           -- SWITCH_JUMP_OFFSET
+				{},          -- SWITCH_THISLINE
+				{},          -- SWTICH_BP
+				{},          -- SWITCH_LINE_NUMBER
+				{},          -- SWITCH_CURRENT_FILE_NO
+				$
+			})
 end procedure
 
 procedure pop_switch( integer break_base )
@@ -2426,8 +2450,12 @@ procedure add_case( object sym, integer sign )
 	end if
 
 	if find(sym, switch_stack[$][SWITCH_CASES] ) = 0 then
-		switch_stack[$][SWITCH_CASES]       = append( switch_stack[$][SWITCH_CASES], sym )
-		switch_stack[$][SWITCH_JUMP_TABLE] &= length(Code) + 1
+		switch_stack[$][SWITCH_CASES]            = append( switch_stack[$][SWITCH_CASES], sym )
+		switch_stack[$][SWITCH_JUMP_TABLE]      &= length(Code) + 1
+		switch_stack[$][SWITCH_THISLINE]        &= {ThisLine}
+		switch_stack[$][SWITCH_BP]              &= bp
+		switch_stack[$][SWITCH_LINE_NUMBER]     &= line_number
+		switch_stack[$][SWITCH_CURRENT_FILE_NO] &= current_file_no
 
 		if TRANSLATE then
 			emit_addr( CASE )
@@ -2617,6 +2645,11 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 	integer has_sequence   = 0
 	integer has_unassigned = 0
 	integer has_fwdref     = 0
+	sequence unique_values = {}
+	map unique_jumps = map:new()
+	
+	sequence jump = switch_stack[$][SWITCH_JUMP_TABLE]
+	integer jump_offset = 0
 	for i = 1 to length( values ) do
 		if sequence( values[i] ) then
 			has_fwdref = 1
@@ -2624,6 +2657,7 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 		end if
 		integer sym = values[i]
 		integer sign
+		
 		if sym < 0 then
 			sign = -1
 			sym = -sym
@@ -2631,23 +2665,56 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 			sign = 1
 		end if
 		if not equal(SymTab[sym][S_OBJ], NOVALUE) then
-			values[i] = sign * SymTab[sym][S_OBJ]
-			if not is_integer( values[i] ) then
-				all_ints = 0
-				if atom( values[i] ) then
-					has_atom = 1
+			object value_i = sign * SymTab[sym][S_OBJ]
+			values[i] = value_i
+			if TRANSLATE then
+				if Code[jump[i]-2] = CASE then
+					jump_offset -=2
 				else
-					has_sequence = 1
+					jump_offset = 0
 				end if
+			end if
+			
+			if find( value_i, map:get( unique_jumps, jump[i] + jump_offset, {}) ) then
+				-- do nothing...duplicate value for the same jump target...warning?
+				
+			elsif find( value_i, unique_values ) then
+				-- error!
+				-- TODO: need to identify line, plus duplicate sym
+				object v = ""
+				if length( SymTab[sym] ) > S_NAME and sequence( sym_name( sym ) ) then
+					v = sym_name( sym ) & " = " 
+				end if
+				
+				v &= sprint( value_i )
+				ThisLine        = switch_stack[$][SWITCH_THISLINE][i]
+				bp              = switch_stack[$][SWITCH_BP][i]
+				line_number     = switch_stack[$][SWITCH_LINE_NUMBER][i]
+				current_file_no = switch_stack[$][SWITCH_CURRENT_FILE_NO][i]
+				
+				CompileErr("duplicate case value used in switch: [1]", {v})
 			else
-				has_integer = 1
+				
+				unique_values   &= value_i
+				map:put( unique_jumps, jump[i] + jump_offset, value_i, map:APPEND )
+				
+				if not is_integer( value_i ) then
+					all_ints = 0
+					if atom( value_i ) then
+						has_atom = 1
+					else
+						has_sequence = 1
+					end if
+				else
+					has_integer = 1
 
-				if values[i] < min then
-					min = values[i]
-				end if
+					if value_i < min then
+						min = value_i
+					end if
 
-				if values[i] > max then
-					max = values[i]
+					if value_i > max then
+						max = value_i
+					end if
 				end if
 			end if
 		else
@@ -2685,7 +2752,7 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 		atom delta = max - min
 		if not TRANSLATE and  delta < 1024 and delta >= 0 then
 			opcode = SWITCH_SPI
-			sequence jump = switch_stack[$][SWITCH_JUMP_TABLE]
+-- 			sequence jump = switch_stack[$][SWITCH_JUMP_TABLE]
 			sequence switch_table = repeat( else_target, delta + 1 )
 			integer offset = min - 1
 			for i = 1 to length( values ) do

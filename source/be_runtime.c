@@ -4008,6 +4008,7 @@ static void indent()
 	}
 }
 
+
 static void rPrint(object a)
 /* print any object in default numeric format */
 {
@@ -5894,9 +5895,9 @@ object find_from(object a, object bobj, object c)
 	object bv;
 	s1_ptr b;
 
-	if (!IS_SEQUENCE(bobj))
+	if (!IS_SEQUENCE(bobj)){
 		RTFatal("second argument of find_from() must be a sequence");
-
+	}
 	b = SEQ_PTR(bobj);
 	length = b->length;
 

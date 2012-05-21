@@ -3,6 +3,8 @@
 == Bug Fixes
 
 * [[ticket:665]] Fixed to load socket routines from its DLL only when needed.
+* [[ticket:744]] Detect duplicate ##case## values in a ##[[:switch statement]] and throw
+  an error at compile or parse time
 
 == Enhancements
 

@@ -1,0 +1,259 @@
+/home/matt/eu/oe/tests/t_c_switch_rt_dup.e:6 in procedure foo() 
+duplicate values in a switch: A and D 
+
+... called from /home/matt/eu/oe/tests/t_c_switch_rt_dup.e:16 
+
+
+Public & Export & Global & Local Variables
+
+ /home/matt/eu/oe/include/std/memconst.e:
+    DEP_really_works = 0
+    use_DEP = 1
+    FREE_RID = 2
+    kernel_dll = <no value>
+    memDLL_id = <no value>
+    VirtualAlloc_rid = <no value>
+    VirtualLock_rid = <no value>
+    VirtualUnlock_rid = <no value>
+    VirtualProtect_rid = <no value>
+    GetLastError_rid = <no value>
+    GetSystemInfo_rid = <no value>
+
+ /home/matt/eu/oe/include/std/memory.e:
+    edges_only = <no value>
+    check_calls = 1
+    VirtualFree_rid = <no value>
+
+ /home/matt/eu/oe/include/std/types.e:
+    Defined_Sets = {
+                     {98'b',99'c',100'd',102'f',103'g',104'h',106'j',107'k',
+108'l',109'm',110'n',112'p',113'q',114'r',115's',116't',118'v',119'w',120'x',
+121'y',122'z',66'B',67'C',68'D',70'F',71'G',72'H',74'J',75'K',76'L',77'M',
+78'N',80'P',81'Q',82'R',83'S',84'T',86'V',87'W',88'X',89'Y',90'Z'},
+                     {97'a',101'e',105'i',111'o',117'u',65'A',69'E',73'I',
+79'O',85'U'},
+                     {
+                       {48'0',57'9'},
+                       {65'A',70'F'},
+                       {97'a',102'f'}
+                     },
+                     {32' ',9,10,13,11,160},
+                     {
+                       {32' ',47'/'},
+                       {58':',63'?'},
+                       {91'[',96'`'},
+                       {123'{',126'~'}
+                     },
+                     {
+                       {32' ',126'~'}
+                     },
+                     {
+                       {32' ',126'~'},
+                       {32' ',32' '},
+                       {9,9},
+                       {10,10},
+                       {13,13},
+                       {8,8},
+                       {7,7}
+                     },
+                     {
+                       {97'a',122'z'}
+                     },
+                     {
+                       {65'A',90'Z'}
+                     },
+                     {
+                       {48'0',57'9'},
+                       {97'a',122'z'},
+                       {65'A',90'Z'}
+                     },
+                     {
+                       {48'0',57'9'},
+                       {97'a',122'z'},
+                       {65'A',90'Z'},
+                       {95'_',95'_'}
+                     },
+                     {
+                       {97'a',122'z'},
+                       {65'A',90'Z'}
+                     },
+                     {
+                       {0,127}
+                     },
+                     {
+                       {0,31},
+                       {127,127}
+                     },
+                     {
+                       {48'0',57'9'}
+                     },
+                     {
+                       {33'!',126'~'}
+                     },
+                     {
+                       {0,255}
+                     },
+                     {95'_'},
+                     {1,0}
+                   }
+
+ /home/matt/eu/oe/include/std/machine.e:
+    FREE_ARRAY_RID = 1
+    page_size = 4096
+
+ /home/matt/eu/oe/include/std/convert.e:
+    mem = 40579072
+    decimal_mark = 46'.'
+
+ /home/matt/eu/oe/include/std/datetime.e:
+    yydiff = 80'P'
+    month_names = {
+                    {74'J',97'a',110'n',117'u',97'a',114'r',121'y'},
+                    {70'F',101'e',98'b',114'r',117'u',97'a',114'r',121'y'},
+                    {77'M',97'a',114'r',99'c',104'h'},
+                    {65'A',112'p',114'r',105'i',108'l'},
+                    {77'M',97'a',121'y'},
+                    {74'J',117'u',110'n',101'e'},
+                    {74'J',117'u',108'l',121'y'},
+                    {65'A',117'u',103'g',117'u',115's',116't'},
+                    {83'S',101'e',112'p',116't',101'e',109'm',98'b',101'e',
+114'r'},
+                    {79'O',99'c',116't',111'o',98'b',101'e',114'r'},
+                    {78'N',111'o',118'v',101'e',109'm',98'b',101'e',114'r'},
+                    {68'D',101'e',99'c',101'e',109'm',98'b',101'e',114'r'}
+                  }
+    month_abbrs = {
+                    {74'J',97'a',110'n'},
+                    {70'F',101'e',98'b'},
+                    {77'M',97'a',114'r'},
+                    {65'A',112'p',114'r'},
+                    {77'M',97'a',121'y'},
+                    {74'J',117'u',110'n'},
+                    {74'J',117'u',108'l'},
+                    {65'A',117'u',103'g'},
+                    {83'S',101'e',112'p'},
+                    {79'O',99'c',116't'},
+                    {78'N',111'o',118'v'},
+                    {68'D',101'e',99'c'}
+                  }
+    day_names = {
+                  {83'S',117'u',110'n',100'd',97'a',121'y'},
+                  {77'M',111'o',110'n',100'd',97'a',121'y'},
+                  {84'T',117'u',101'e',115's',100'd',97'a',121'y'},
+                  {87'W',101'e',100'd',110'n',101'e',115's',100'd',97'a',
+121'y'},
+                  {84'T',104'h',117'u',114'r',115's',100'd',97'a',121'y'},
+                  {70'F',114'r',105'i',100'd',97'a',121'y'},
+                  {83'S',97'a',116't',117'u',114'r',100'd',97'a',121'y'}
+                }
+    day_abbrs = {
+                  {83'S',117'u',110'n'},
+                  {77'M',111'o',110'n'},
+                  {84'T',117'u',101'e'},
+                  {87'W',101'e',100'd'},
+                  {84'T',104'h',117'u'},
+                  {70'F',114'r',105'i'},
+                  {83'S',97'a',116't'}
+                }
+    ampm = {
+             {65'A',77'M'},
+             {80'P',77'M'}
+           }
+
+ /home/matt/eu/oe/include/std/filesys.e:
+    STAT_VER = 0
+    my_dir = -2
+    InitCurDir = {47'/',104'h',111'o',109'm',101'e',47'/',109'm',97'a',116't',
+116't',47'/',101'e',117'u',47'/',111'o',101'e',47'/',116't',101'e',115's',
+116't',115's',47'/'}
+    file_counters = {}
+
+ /home/matt/eu/oe/include/std/pretty.e:
+    pretty_end_col = <no value>
+    pretty_chars = <no value>
+    pretty_start_col = <no value>
+    pretty_level = <no value>
+    pretty_file = <no value>
+    pretty_ascii = <no value>
+    pretty_indent = <no value>
+    pretty_ascii_min = <no value>
+    pretty_ascii_max = <no value>
+    pretty_line_count = <no value>
+    pretty_line_max = <no value>
+    pretty_dots = <no value>
+    pretty_line_breaks = <no value>
+    pretty_printing = <no value>
+    pretty_fp_format = <no value>
+    pretty_int_format = <no value>
+    pretty_line = <no value>
+
+ /home/matt/eu/oe/include/std/serialize.e:
+    mem0 = 40583168
+    mem1 = 40583169
+    mem2 = 40583170
+    mem3 = 40583171
+    mem4 = 40583172
+    mem5 = 40583173
+    mem6 = 40583174
+    mem7 = 40583175
+
+ /home/matt/eu/oe/include/std/text.e:
+    lower_case_SET = {}
+    upper_case_SET = {}
+    encoding_NAME = {65'A',83'S',67'C',73'I',73'I'}
+
+ /home/matt/eu/oe/include/std/io.e:
+    mem0 = 41537536
+    mem1 = 41537537
+    mem2 = 41537538
+    mem3 = 41537539
+
+ /home/matt/eu/oe/include/std/scinot.e:
+    NATIVE_FORMAT = 3
+
+ /home/matt/eu/oe/include/std/get.e:
+    input_file = <no value>
+    input_string = <no value>
+    string_next = <no value>
+    ch = <no value>
+    leading_whitespace = <no value>
+
+ /home/matt/eu/oe/include/std/eumem.e:
+    ram_space = {}
+    ram_free_list = 0
+    free_rid = 6
+
+ /home/matt/eu/oe/include/std/primes.e:
+    list_of_primes = {2,3}
+
+ /home/matt/eu/oe/include/std/map.e:
+    threshold_size = 23
+
+ /home/matt/eu/oe/include/std/graphcst.e:
+    true_fgcolor = {0,4,2,6,1,5,3,7,8,12,10,14,9,13,11,15,16,20,18,22,17,
+21,19,23,24,28,26,28,25,29,17,31}
+    true_bgcolor = {0,4,2,6,1,5,3,7,8,12,10,14,9,13,11,15,16,20,18,22,17,
+21,19,23,24,28,26,28,25,29,17,31}
+
+ /home/matt/eu/oe/include/std/unittest.e:
+    time_start = 18959898.72
+    time_test = 18959898.72
+    test_count = 0
+    tests_passed = 0
+    tests_failed = 0
+    filename = {116't',95'_',99'c',95'_',115's',119'w',105'i',116't',99'c',
+104'h',95'_',114'r',116't',95'_',100'd',117'u',112'p',46'.',101'e'}
+    verbose = 1
+    abort_on_fail = 0
+    wait_on_summary = 0
+    accumulate_on_summary = 0
+    log_fh = 0
+    cmd = {
+            {46'.',46'.',47'/',54'6',52'4',47'/',101'e',117'u',105'i'},
+            {116't',95'_',99'c',95'_',115's',119'w',105'i',116't',99'c',
+104'h',95'_',114'r',116't',95'_',100'd',117'u',112'p',46'.',101'e'}
+          }
+    i = 3
+    func (from inlined routine 'crash_routine' at 1518) = <no value>
+
+
