@@ -132,9 +132,9 @@ ifdef EU4_0 then
 
 	--**
 	-- @nodoc@
-	public function poke_long(atom address, object x)
+	public procedure poke_long(atom address, object x)
 		poke4( address, x )
-	end function
+	end procedure
 
 	--**
 	-- @nodoc

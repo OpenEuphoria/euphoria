@@ -6,18 +6,16 @@
 OpenEuphoria currently supports Euphoria on many different
 **platforms**. More platforms will be added in the future.
 
+[[**DOS**|:The Discontinued DOS32 Platform]] platform support has been discontinued.
 
-**Windows** in particular, the 32-bit version of
-Windows that is used on Windows 95/98/ME, as well as NT/2000/XP/Vista/7 and
-later systems.
+[[**Windows**|:The WINDOWS Platform]] in particular, the 32-bit x86 compatible version of Windows. The minimum version is
+Windows 95 Original Equipment Manufacturer Service Release 2.5. EUPHORIA will work on all old and
+new versions of Windows written after Windows 95. However, to use all of the features you must use 
+Windows XP or later.  See ''.
 
-
-
-**Linux**. Linux is based on the UNIX operating
-system. It has recently become very popular  on PCs. There are many
-distributors of Linux, including Red Hat, Debian, Caldera, etc. Linux
-can be obtained on a CD for a very low price. Linux  is an open-source
-operating system.
+**Linux**. Linux is based on the UNIX operating system. It has recently become very popular on PCs.
+There are many distributors of Linux, including Red Hat, Debian, Caldera, etc. Linux can be obtained
+on a CD for a very low price. Linux is an open-source operating system.
 
 **FreeBSD**. FreeBSD is also based on the UNIX
 operating system. It is very popular on  Internet server machines. It's
@@ -253,7 +251,9 @@ When running an interpreter or translator for the WINDOWS platform, ##platform##
 returns WINDOWS and a parsetime branch (with ifdef/end ifdef) with ##WINDOWS## 
 will be followed.
 
-
+In order to use [[:sockets]] you must have Windows 2000 Professional or later. In order for the the
+routines [[:has_console]] and [[:maybe_any_key]] to have useful behavior you must have Windows XP or
+later.
 
 ==== High-Level WINDOWS Programming
 
@@ -347,6 +347,9 @@ When running an interpreter or translator for a //UNIX// platform, ##platform##
 will return one of the several symbols for //UNIX// and a parsetime branch (with
 ifdef/end ifdef) with ##UNIX## and the symbol that is that of the specific OS 
 will be followed.
+
+We assume that the environment is always run from some kind of CLI in two routines: The routine
+[[:has_console]] always returns 0, and [[:maybe_any_key]] never waits for key input.
 
 === Interfacing with C Code
 

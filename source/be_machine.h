@@ -77,7 +77,7 @@ object Wrap(object x);
 
 IFILE long_iopen(char *name, char *mode);
 
-uintptr_t internal_general_call_back(
+object internal_general_call_back(
 		  intptr_t cb_routine,
 						   uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 						   uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,

@@ -2608,7 +2608,17 @@ end if
 
 The <val> in a ##case## must be either an atom, literal string, constant or
 enum.  Multiple values for a single ##case## can be specified by separating the
-values by commas.  By default, control flows to the end of the ##switch## block
+values by commas. The same symbol (or literal) may not be used multiple times as
+a ##case## for the same ##switch##. If two different symbols used as ##case## values
+happen to have the same value, they must be in the same ##case...then## statement,
+or an error will occur. If the parser can determine all values when the ##switch##
+is parsed, then a compile time error will be thrown. Otherwise, the error will occur
+the first time that the switch is encountered. Likewise, when translating code, if
+the parser cannot determine all values at the time when the ##case## values are parsed,
+the compilation will fail due to mulitple ##case## values in the emitted C code (it is
+assumed that the programmer should work out this sort of bug in interpreted mode).
+
+By default, control flows to the end of the ##switch## block
 when the next ##case## is encountered.  The default behavior can be modified in
 two ways.  The default for a particular ##switch## block can be changed so that
 control passes to the next executable statement whenever a new case is

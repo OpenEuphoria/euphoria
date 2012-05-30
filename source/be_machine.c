@@ -2548,7 +2548,7 @@ object CallBack(object x)
 	return MAKE_UINT(addr);
 }
 
-uintptr_t internal_general_call_back(
+object internal_general_call_back(
 		  intptr_t cb_routine,
 						   uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 						   uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
@@ -2556,6 +2556,7 @@ uintptr_t internal_general_call_back(
 /* general call-back routine: 0 to 9 args */
 {
 	int num_args;
+	object result;
 	intptr_t (*addr)();
 
 // translator call-back
@@ -2657,8 +2658,9 @@ uintptr_t internal_general_call_back(
 			break;
 	}
 
+	return call_back_result->obj;
 	// Don't do get_pos_int() for crash handler
-	return (uintptr_t)get_pos_int("internal-call-back", call_back_result->obj);
+// 	return (uintptr_t)get_pos_int("internal-call-back", call_back_result->obj);
 }
 
 int *crash_list = NULL;    // list of routines to call when there's a crash
@@ -2790,8 +2792,8 @@ object start_backend(object x)
 
 	x_ptr = SEQ_PTR(x);
 
-	if (IS_ATOM(x) || x_ptr->length != 13)
-		RTFatal("BACKEND requires a sequence of length 13");
+	if (IS_ATOM(x) || x_ptr->length != 16)
+		RTFatal("BACKEND requires a sequence of length 16");
 
 	fe.st = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
 	fe.sl = (struct sline *) get_pos_int(w, *(x_ptr->base+2));
@@ -2808,8 +2810,12 @@ object start_backend(object x)
 	syncolor          = get_pos_int(w, *(x_ptr->base+11));
 	
 	set_debugger( (char*) get_pos_int(w, *(x_ptr->base+12)) );
+
+	map_new = get_pos_int(w, *(x_ptr->base+13));
+	map_put = get_pos_int(w, *(x_ptr->base+14));
+	map_get = get_pos_int(w, *(x_ptr->base+15));
 	
-	trace_lines = get_pos_int(w, *(x_ptr->base+13));
+	trace_lines = get_pos_int(w, *(x_ptr->base+16));
 	// This is checked when we try to write coverage to make sure
 	// we need to output an error message.
 	in_backend = 1;
