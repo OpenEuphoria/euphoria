@@ -1472,6 +1472,7 @@ void analyze_switch()
 	unique_values = NewS1( values->length );
 	unique_values->postfill = unique_values->length;
 	unique_values->length = 0;
+	unique_values->base[1] = NOVALUE;
 	unique_values_obj = MAKE_SEQ( unique_values );
 	empty_sequence = MAKE_SEQ( NewS1(0) );
 	for( i = 1; i <= values->length; ++i ){
