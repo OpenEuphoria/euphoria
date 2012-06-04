@@ -5439,7 +5439,7 @@ uintptr_t __cdecl osx_cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t 
 	uintptr_t (*f)(uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
 	uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)
 	= (uintptr_t (*)(uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
-	uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)) 0xF001F001;
+	uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)) general_ptr_magic;
 	return (f)((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, arg8, arg9);

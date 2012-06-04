@@ -228,15 +228,16 @@ int getKBchar();
 
 #if INTPTR_MAX == INT32_MAX
 #define CALLBACK_POINTER 0x12345678
+#define general_ptr_magic 0xF001F001
 
 #elif INTPTR_MAX == INT64_MAX
+#define general_ptr_magic 0xabcdefabcdefabcdLL
 #ifdef ERUNTIME
 #define CALLBACK_POINTER ((uintptr_t)0x1234567812345678LL)
 #else
 #define CALLBACK_POINTER ((symtab_ptr)0x1234567812345678LL)
 #endif
 #endif
-
 
 #ifdef EOSX
 uintptr_t __cdecl osx_cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
