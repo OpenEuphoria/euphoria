@@ -241,7 +241,7 @@ int getKBchar();
 #ifdef EOSX
 uintptr_t __cdecl osx_cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 						uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
-						uintptr_t arg7, uintptr_t arg8, uintptr_t arg9)
+                        uintptr_t arg7, uintptr_t arg8, uintptr_t arg9);
 #endif // EOSX
 extern uintptr_t (*general_ptr)();
 
