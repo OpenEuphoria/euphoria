@@ -49,6 +49,7 @@ tests/save_map.raw3
 tests/include_subdir/foo/test.err
 
 regex:
+\.DS_Store
 ^build/.*
 ^build40/.*
 ^build_mingw/.*
@@ -69,3 +70,4 @@ regex:
 ^packaging/debian/.*dsc
 ^packaging/debian/.*changes
 ^packaging/debian/.*gz
+^packaging/osx/euphoria-.*
