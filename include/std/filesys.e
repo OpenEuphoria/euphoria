@@ -2558,8 +2558,13 @@ public function disk_metrics(object disk_path)
 		integer stat_t_offset, stat_buf_size
 
 		ifdef LINUX then
-			stat_t_offset = 48
-			stat_buf_size = 88 * 2
+			ifdef BITS32 then
+				stat_t_offset = 48
+				stat_buf_size = 88
+			elsedef
+				stat_t_offset = 88
+				stat_buf_size = 144
+			end ifdef
 		elsifdef FREEBSD or OSX then
 			stat_t_offset = 64
 			stat_buf_size = 96
