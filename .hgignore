@@ -7,6 +7,7 @@ bin/bench.exe
 bin/creole
 bin/creole.exe
 bin/eu.a
+bin/eu.cfg
 bin/eu.lib
 bin/eub
 bin/eub.exe
