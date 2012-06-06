@@ -2546,6 +2546,7 @@ procedure opINTERNAL_ERROR()
 end procedure
 
 sequence switch_stack = {}
+-- for each i, switch_stack[i][4] is a stack of actual case values used in the switch statement that have so far been converted into C code.
 
 procedure opSWITCH_I()
 	-- pc+1 = switch value
@@ -2555,7 +2556,7 @@ procedure opSWITCH_I()
 
 	integer var_type = GType( Code[pc+1] )
 
-	switch_stack = append( switch_stack, { Code[pc], pc, var_type } )
+	switch_stack = append( switch_stack, { Code[pc], pc, var_type, {} } )
 	if var_type != TYPE_INTEGER then
 
 		if var_type = TYPE_SEQUENCE then
@@ -2588,6 +2589,7 @@ procedure opSWITCH_I()
 				min = cases[i]-1
 			end if
 		end for
+		-- min is now a value that is not a value in cases.
 
 		-- it's possibly an atom or a sequence, so we have extra checking to do
 		c_stmt("if (IS_SEQUENCE(@) ){\n", Code[pc+1] )
@@ -2618,7 +2620,7 @@ procedure opSWITCH()
 	-- pc+2 = cases seq
 	-- pc+3 = jump table  (ignored)
 	-- pc+4 = else offset (ignored)
-	switch_stack = append( switch_stack, { Code[pc], pc, 0 } )
+	switch_stack = append( switch_stack, { Code[pc], pc, 0, {} } )
 	c_stmt("_1 = find(@, @);\n", { Code[pc+1], Code[pc+2]})
 	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 	c_stmt0("switch ( _1 ){ \n" )
@@ -2716,6 +2718,12 @@ procedure opCASE()
 			else
 				integer sym = Code[switch_stack[$][2] + 2]
 				caseval = SymTab[sym][S_OBJ][Code[pc+1]]
+				if find(caseval, switch_stack[$][4]) then
+					-- case has been emitted already.  So, don't do it again.
+					stmt = 0
+				else
+					switch_stack[$][4] = append( switch_stack[$][4], caseval )
+				end if
 			end if
 		end if
 
