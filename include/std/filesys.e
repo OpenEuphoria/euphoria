@@ -2233,12 +2233,18 @@ ifdef LINUX then
 	
 elsifdef UNIX then
 		ifdef FREEBSD or OSX then
-
-			constant
-				STAT_ST_BLKSIZE = 64,
-				SIZEOF_STAT     = 96,
-				$
-
+			ifdef BITS32 then
+				constant
+					STAT_ST_BLKSIZE = 76,
+					SIZEOF_STAT     = 108,
+					$
+			elsedef
+				constant
+					STAT_ST_BLKSIZE = 112,
+					SIZEOF_STAT     = 144,
+					$
+			end ifdef
+			
 		elsifdef OPENBSD then
 			constant
 				STAT_ST_BLKSIZE = 72,
