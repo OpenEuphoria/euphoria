@@ -6,6 +6,8 @@
 namespace serialize
 
 include std/convert.e
+include std/dll.e
+include std/error.e
 include std/machine.e
 
 -- Serialized format of Euphoria objects
@@ -19,7 +21,9 @@ constant I2B = 249,   -- 2-byte signed integer follows
 		 F4B = 252,   -- 4-byte f.p. number follows
 		 F8B = 253,   -- 8-byte f.p. number follows
 		 S1B = 254,   -- sequence, 1-byte length follows, then elements
-		 S4B = 255    -- sequence, 4-byte length follows, then elements
+		 S4B = 255,   -- sequence, 4-byte length follows, then elements
+		 I8B = 0,     -- 8-byte integer, for 4.1 compatibility
+		 F10B= 1      -- 10-byte floating point, for 4.1 compatibility
 
 constant MIN1B = -9,
 		 MAX1B = 239,
@@ -34,6 +38,70 @@ mem0 = machine:allocate(4)
 mem1 = mem0 + 1
 mem2 = mem0 + 2
 mem3 = mem0 + 3
+
+atom f80 = 0
+atom f64 = 0
+integer F80_TO_ATOM = 0
+procedure init_float80()
+	f80 = allocate( 10 )
+	if f64 = 0 then
+		f64 = allocate( 8 )
+	end if
+
+	atom code
+	code = machine:allocate_code(
+			{
+				0x55, 0x89, 0xe5, 0x83, 0xec, 0x08, 0x8b, 0x45,
+				0x0c, 0x8b, 0x55, 0x08, 0xdb, 0x2a, 0xdd, 0x5d,
+				0xf8, 0xdd, 0x45, 0xf8, 0xdd, 0x18, 0xc9, 0xc3,
+				0x00
+			} )
+	F80_TO_ATOM = dll:define_c_proc( "", {"+", code}, { dll:C_POINTER, dll:C_POINTER } )
+
+end procedure
+
+function float80_to_atom( sequence f )
+	if not f80 then
+		init_float80()
+	end if
+	poke( f80, f )
+	c_proc( F80_TO_ATOM, { f80, f64 } )
+	return float64_to_atom( peek( { f64, 8 } ) )
+end function
+
+atom i64 = 0
+integer PEEK8S = 0
+procedure init_peek8s()
+	i64 = allocate( 8 )
+	if f64 = 0 then
+		f64 = allocate( 8 )
+	end if
+	atom code = machine:allocate_code(	{
+			0x55,              -- push   %ebp
+			0x89, 0xe5,        -- mov    %esp,%ebp
+			0x83, 0xec, 0x08,  -- sub    $0x8,%esp
+			0x8b, 0x45, 0x08,  -- mov    0x8(%ebp),%eax
+			0x8b, 0x50, 0x04,  -- mov    0x4(%eax),%edx
+			0x8b, 0x00,        -- mov    (%eax),%eax
+			0x89, 0x45, 0xf8,  -- mov    %eax,-0x8(%ebp)
+			0x89, 0x55, 0xfc,  -- mov    %edx,-0x4(%ebp)
+			0xdf, 0x6d, 0xf8,  -- fildll -0x8(%ebp)
+			0x8b, 0x45, 0x0c,  -- mov    0xc(%ebp),%eax
+			0xdd, 0x18,        -- fstpl  (%eax)
+			0xc9,              -- leave
+			0xc3               -- ret
+		})
+	PEEK8S = define_c_proc( "", {"+", code}, { C_POINTER, C_POINTER } )
+end procedure
+
+function int64_to_atom( sequence s )
+	if i64 = 0 then
+		init_peek8s()
+	end if
+	poke( i64, s )
+	c_proc( PEEK8S, { i64, f64 } )
+	return float64_to_atom( peek( f64 & 8 ) )
+end function
 
 function get4(integer fh)
 -- read 4-byte value at current position in database file
@@ -92,17 +160,37 @@ function deserialize_file(integer fh, integer c)
 			if len < 0  or not integer(len) then
 				return 0
 			end if
-			s = repeat(0, len)
-			for i = 1 to len do
-				-- in-line small integer for greater speed on strings
-				c = getc(fh)
-				if c < I2B then
-					s[i] = c + MIN1B
+			if c = S4B and len < 256 then
+				if len = I8B then
+
+					return int64_to_atom( {
+								getc(fh), getc(fh), getc(fh), getc(fh),
+								getc(fh), getc(fh), getc(fh), getc(fh) } )
+
+				elsif len = F10B then
+					return float80_to_atom(
+							{
+								getc(fh), getc(fh), getc(fh), getc(fh),
+								getc(fh), getc(fh), getc(fh), getc(fh),
+								getc(fh), getc(fh)
+								
+							})
 				else
-					s[i] = deserialize_file(fh, c)
+					error:crash( "Invalid sequence serialization" )
 				end if
-			end for
-			return s
+			else
+				s = repeat(0, len)
+				for i = 1 to len do
+					-- in-line small integer for greater speed on strings
+					c = getc(fh)
+					if c < I2B then
+						s[i] = c + MIN1B
+					else
+						s[i] = deserialize_file(fh, c)
+					end if
+				end for
+				return s
+			end if
 	end switch
 end function
 
@@ -162,20 +250,30 @@ function deserialize_object(sequence sdata, integer pos, integer c)
 				len = getp4(sdata, pos)
 				pos += 4
 			end if
-			s = repeat(0, len)
-			for i = 1 to len do
-				-- in-line small integer for greater speed on strings
-				c = sdata[pos]
-				pos += 1
-				if c < I2B then
-					s[i] = c + MIN1B
+			if c = S4B and len < 256 then
+				if len = I8B then
+					return {int64_to_atom( sdata[pos..pos+7] ), pos + 8 }
+				elsif len = F10B then
+					return { float80_to_atom( sdata[pos..pos+9] ), pos + 10 }
 				else
-					sequence temp = deserialize_object(sdata, pos, c)
-					s[i] = temp[1]
-					pos = temp[2]
+					error:crash( "Invalid sequence serialization" )
 				end if
-			end for
-			return {s, pos}
+			else
+				s = repeat(0, len)
+				for i = 1 to len do
+					-- in-line small integer for greater speed on strings
+					c = sdata[pos]
+					pos += 1
+					if c < I2B then
+						s[i] = c + MIN1B
+					else
+						sequence temp = deserialize_object(sdata, pos, c)
+						s[i] = temp[1]
+						pos = temp[2]
+					end if
+				end for
+				return {s, pos}
+			end if
 	end switch
 end function
 
