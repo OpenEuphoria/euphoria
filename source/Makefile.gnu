@@ -264,7 +264,7 @@ ifeq "$(TRANSLATE)" "euc"
 	TRANSLATE=$(EECU)
 else
 #   We MUST pass these arguments to $(EXE), for $(EXE) is not and shouldn't be governed by eu.cfg in BUILDDIR.
-	TRANSLATE=$(HOST_EXE) $(CYPINCDIR) $(EC_DEBUG) $(EFLAG) $(CYPTRUNKDIR)/source/ec.ex
+	TRANSLATE=$(HOST_EXE) $(CYPINCDIR) $(EC_DEBUG) $(EFLAG) $(CYPTRUNKDIR)/source/euc.ex
 endif
 
 ifeq "$(MANAGED_MEM)" "1"
@@ -303,7 +303,7 @@ EU_INTERPRETER_FILES = \
 	compress.e \
 	global.e \
 	intinit.e \
-	int.ex
+	eui.ex
 
 EU_TRANSLATOR_FILES = \
 	buildsys.e \
@@ -314,7 +314,7 @@ EU_TRANSLATOR_FILES = \
 	compress.e \
 	global.e \
 	traninit.e \
-	ec.ex
+	euc.ex
 
 EU_BACKEND_RUNNER_FILES = \
 	backend.e \
@@ -505,10 +505,10 @@ binder : translator library $(EU_BACKEND_RUNNER_FILES)
 .PHONY : binder
 
 euisource : $(BUILDDIR)/intobj/main-.c
-euisource :  EU_TARGET = int.ex
+euisource :  EU_TARGET = eui.ex
 euisource : $(BUILDDIR)/include/be_ver.h
 eucsource : $(BUILDDIR)/transobj/main-.c
-eucsource :  EU_TARGET = ec.ex
+eucsource :  EU_TARGET = euc.ex
 eucsource : $(BUILDDIR)/include/be_ver.h
 backendsource : $(BUILDDIR)/backobj/main-.c
 backendsource :  EU_TARGET = backend.ex
@@ -558,7 +558,7 @@ $(EUI_RES) : eui.rc version_info.rc eu.manifest
 $(EUIW_RES) : euiw.rc version_info.rc eu.manifest
 endif
 
-$(BUILDDIR)/$(EEXU) :  EU_TARGET = int.ex
+$(BUILDDIR)/$(EEXU) :  EU_TARGET = eui.ex
 $(BUILDDIR)/$(EEXU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) $(EU_STD_INC)
 $(BUILDDIR)/$(EEXU) :  EU_OBJS = $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
 $(BUILDDIR)/$(EEXU) :  $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(EU_TRANSLATOR_FILES) $(EUI_RES) $(EUIW_RES)
@@ -578,7 +578,7 @@ $(EUC_RES) : euc.rc version_info.rc eu.manifest
 endif
 
 $(BUILDDIR)/$(EECU) :  OBJDIR = transobj
-$(BUILDDIR)/$(EECU) :  EU_TARGET = ec.ex
+$(BUILDDIR)/$(EECU) :  EU_TARGET = euc.ex
 $(BUILDDIR)/$(EECU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_STD_INC)
 $(BUILDDIR)/$(EECU) :  EU_OBJS = $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 $(BUILDDIR)/$(EECU) : $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) $(EUC_RES)
@@ -877,25 +877,25 @@ $(BUILDDIR)/eudis-build/main-.c : $(EU_INTERPRETER_FILES)
 $(BUILDDIR)/$(EUDIS) : translator library $(BUILDDIR)/eudis-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/eudis-build" -f dis.mak
 
-$(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/bind.ex $(EU_INTERPRETER_FILES) $(EU_BACKEND_RUNNER_FILES)
+$(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/eubind.ex $(EU_INTERPRETER_FILES) $(EU_BACKEND_RUNNER_FILES)
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/bind-build" \
 		-o "$(BUILDDIR)/$(EUBIND)" \
 		-lib "$(BUILDDIR)/eu.a" \
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
-		$(MINGW_FLAGS) $(TRUNKDIR)/source/bind.ex
+		$(MINGW_FLAGS) $(TRUNKDIR)/source/eubind.ex
 
 $(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c
-		$(MAKE) -C "$(BUILDDIR)/bind-build" -f bind.mak
+		$(MAKE) -C "$(BUILDDIR)/bind-build" -f eubind.mak
 
-$(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/shroud.ex  $(EU_INTERPRETER_FILES) $(EU_BACKEND_RUNNER_FILES)
+$(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/eushroud.ex  $(EU_INTERPRETER_FILES) $(EU_BACKEND_RUNNER_FILES)
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/shroud-build" \
 		-o "$(BUILDDIR)/$(EUSHROUD)" \
 		-lib "$(BUILDDIR)/eu.a" \
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
-		$(MINGW_FLAGS) $(TRUNKDIR)/source/shroud.ex
+		$(MINGW_FLAGS) $(TRUNKDIR)/source/eushroud.ex
 
 $(BUILDDIR)/$(EUSHROUD) : $(BUILDDIR)/shroud-build/main-.c
-		$(MAKE) -C "$(BUILDDIR)/shroud-build" -f shroud.mak
+		$(MAKE) -C "$(BUILDDIR)/shroud-build" -f eushroud.mak
 
 $(BUILDDIR)/eutest-build/main-.c : $(TRUNKDIR)/source/eutest.ex
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eutest-build" \
