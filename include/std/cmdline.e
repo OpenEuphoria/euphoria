@@ -1332,7 +1332,19 @@ end function
 --
 -- For more details on how the command line is being pre-parsed, see [[:command_line]].
 --
--- Example:
+-- Simple Example:
+-- <eucode>
+-- map args = cmd_parse({  
+--     { "o", 0, "Output directory", { HAS_PARAMETER } },  
+--     { "v", 0, "Verbose mode" }  
+-- })
+--
+-- if map:get(args, "v") then
+--     printf(1, "Output directory is %s\n", { map:get(args, "o") })
+-- end if
+-- </eucode>
+--
+-- Complex Example:
 -- <eucode>
 -- sequence option_definition
 -- integer gVerbose = 0
