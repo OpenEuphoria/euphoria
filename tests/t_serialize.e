@@ -123,7 +123,24 @@ size = dump(objcache, "cust.dat")
 test_true("Dump", size > 0)
 
 test_equal("Load", {1, objcache}, load("cust.dat"))
+delete_file("cust.dat")
 
---object _ = delete_file("cust.dat")
+constant I8B_NEGATIVE = {255,0,0,0,0,0,240,255,255,239,255,255,255}
+constant I8B_POSITIVE = {255,0,0,0,0,0,16,0,0,16,0,0,0}
+constant F80_1_3 = {255, 1, 0, 0, 0, 102,102,102,102,102,102,102,166,255,63}
+
+test_equal( "deserialize negative 8-byte int", {-0x10_0000_1000, length(I8B_NEGATIVE) + 1}, deserialize( I8B_NEGATIVE ) )
+test_equal( "deserialize positive 8-byte int", { 0x10_0000_1000, length(I8B_POSITIVE) + 1}, deserialize( I8B_POSITIVE ) )
+test_equal( "deserialize f80", {1.3, length( F80_1_3 ) + 1}, deserialize( F80_1_3 ) )
+
+fh = open( "serialize.dat", "wb" )
+puts( fh, I8B_NEGATIVE & I8B_POSITIVE & F80_1_3 )
+close( fh )
+fh = open( "serialize.dat", "rb" )
+test_equal( "deserialize file negative 8-byte int", -0x10_0000_1000, deserialize( fh ) )
+test_equal( "deserialize file positive 8-byte int", 0x10_0000_1000, deserialize( fh ) )
+test_equal( "deserialize file long double", 1.3, deserialize( fh ) )
+close( fh )
+
 delete_file("cust.dat")
 test_report()
