@@ -12,7 +12,7 @@
 -- Increment version number with each release, not really with each change
 -- in the SCM
 
-constant APP_VERSION = "1.0.0"
+constant APP_VERSION = "1.0.1"
 
 include std/pretty.e
 include std/sequence.e
@@ -32,28 +32,27 @@ include std/eds.e
 include std/regex.e
 
 constant cmdopts = {
-	{ "verbose",          0, "verbose output", { } },
-	{ "all",              0, "show tests that pass and fail", {} },
-	{ "failed",           0, "show tests that fail only", {} },
-	{ "wait",             0, "Wait on summary", {} },
-	{ "accumulate",       0, "Count the individual tests in each file", {} },
-	{ "html",             0, "Enable HTML output mode", { } },
-	{ "html-file",        0, "output file for html log output", { HAS_PARAMETER, "filename" } },
-	{ "testopt",          0, "option for tester", { HAS_PARAMETER, "test-opt"} },
-	{ "eui",              0, "interpreter command", { HAS_PARAMETER, "command" } },
-	{ "exe",              0, "DEPRECATED interpreter path", { HAS_PARAMETER, "command" } },
-	{ "eubind",           0, "binder command", { HAS_PARAMETER, "command" } },
-	{ "bind",             0, "DEPRECATED path to eubind", { HAS_PARAMETER, "command"} },
-	{ "eub",              0, "path to backend runner", { HAS_PARAMETER, "command" } },
-	{ "euc",              0, "translator command", { HAS_PARAMETER, "command" } },
-	{ "ec",               0, "DEPRECATED translator path",  { HAS_PARAMETER, "command" } },
-	{ "trans",            0, "translate using default translator", { } },
+	{ "eui",              0, "Interpreter command", { HAS_PARAMETER, "command" } },
+	{ "eubind",           0, "Binder command", { HAS_PARAMETER, "command" } },
+	{ "eub",              0, "Path to backend runner", { HAS_PARAMETER, "command" } },
+	{ "euc",              0, "Translator command", { HAS_PARAMETER, "command" } },
+	{ "trans",            0, "Translate using default translator", { } },
 	{ "cc",               0, "C compiler (wat or gcc)", { HAS_PARAMETER, "compiler name" } },
-	{ "lib",              0, "runtime library path", { HAS_PARAMETER, "library" } },
-	{ "i",                0, "include directory", { MULTIPLE, HAS_PARAMETER, "directory" }},
-	{ "d",                0, "define a preprocessor word", { MULTIPLE, HAS_PARAMETER, "word" }},
-	{ "log",              0, "Log filename", { } },
+	{ "lib",              0, "Runtime library path", { HAS_PARAMETER, "library" } },
+	{ "i",                0, "Include directory", { MULTIPLE, HAS_PARAMETER, "directory" }},
+	{ "d",                0, "Define a preprocessor word", { MULTIPLE, HAS_PARAMETER, "word" }},
+	{ "testopt",          0, "Option for tester", { HAS_PARAMETER, "test-opt"} },
+	{ HEADER,                "Control the output" },
+	{ "all",              0, "Show tests that pass and fail", {} },
+	{ "failed",           0, "Show tests that fail only", {} },
+	{ "accumulate",       0, "Count the individual tests in each file", {} },
+	{ "wait",             0, "Wait on summary", {} },
+	{ HEADER,                "Logging" },
+	{ "log",              0, "Enable logging", { } },
 	{ "process-log",      0, "Process log instead of running tests", { } },
+	{ "html",             0, "Enable HTML output mode", { } },
+	{ "html-file",        0, "Output file for html log output", { HAS_PARAMETER, "filename" } },
+	{ HEADER,                "Test Coverage" },
 	{ "coverage",         0, "Indicate files or directories for which to gather coverage statistics", 
 	                         { MULTIPLE, HAS_PARAMETER, "dir|file" } },
 	{ "coverage-db",      0, "Specify the filename for the coverage database.", 
@@ -62,8 +61,14 @@ constant cmdopts = {
 	                         { } },
 	{ "coverage-pp",      0, "Coverage post-processor (eucoverage?)", { HAS_PARAMETER, "filename"} },
 	{ "coverage-exclude", 0, "Pattern for files to exclude from coverage", { MULTIPLE, HAS_PARAMETER, "pattern"}},
-	{ "v",        "version", "Display the version number", { VERSIONING, "eutest v" & APP_VERSION } },
+	{ HEADER,                "Deprecated options (will be removed in 1.1.0)" },
+	{ "exe",              0, "Interpreter path", { HAS_PARAMETER, "command" } },
+	{ "bind",             0, "Path to eubind", { HAS_PARAMETER, "command"} },
+	{ "ec",               0, "Translator path",  { HAS_PARAMETER, "command" } },
+	{ HEADER,                "Miscellaneous" },
+	{ "verbose",          0, "Verbose output", { } },
 	{ "n",        "nocheck", "Don't check the supplied interpreter, translator, binder", {} },
+	{ "v",        "version", "Display the version number", { VERSIONING, "eutest v" & APP_VERSION } },
 	$
 }
 
