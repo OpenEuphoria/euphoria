@@ -46,6 +46,10 @@ public constant
 
 	--** This option switch triggers the 'help' display. See [[:cmd_parse]]
 	HELP          = 'h',
+	
+	--** This option switch is simply a help display header to group like options together.
+	-- See [[:cmd_parse]]
+	HEADER        = 'H',
 
     --** This option switch sets the program version information. If this option
     -- is chosen by the user cmd_parse will display the program version information
@@ -381,6 +385,10 @@ function print_help( sequence opts, sequence cmds )
 	for i = 1 to length(opts) do
 		this_size = 0
 		param_name = ""
+		
+		if atom(opts[i][SHORTNAME]) and opts[i][SHORTNAME] = HEADER then
+			continue
+		end if
 
 		if atom(opts[i][SHORTNAME]) and atom(opts[i][LONGNAME]) then
 			extras_opt = i
@@ -434,6 +442,15 @@ function print_help( sequence opts, sequence cmds )
 	printf(1, "%s options:\n", {cmds[2]})
 
 	for i = 1 to length(opts) do
+		if atom(opts[i][1]) and opts[i][1] = HEADER then
+			if i > 1 then
+				printf(1, "\n")
+			end if
+			
+			printf(1, "%s\n", { opts[i][2] })
+			continue
+		end if
+		
 		print_option_help( opts[i], pad_size )
 	end for
 	
@@ -536,7 +553,7 @@ procedure print_option_help( sequence opt, integer pad_size )
 		-- Ignore 'extras' record
 		return
 	end if
-
+	
 	integer has_param = find(HAS_PARAMETER, opt[OPTIONS])
 	sequence param_name
 	if has_param != 0 then
@@ -1300,6 +1317,11 @@ end function
 --   ## The option's value as found on the command line
 --   ## 1 if the command line indicates that this option is to remove any earlier occurrences of it.
 --
+-- One special circumstance exists and that is an option group header. It should contain only
+-- two elements
+--   # The header constant: HEADER
+--   # A sequence to display as the option group header
+--
 -- When assigning a value to the resulting map, the key is the long name if present,
 -- otherwise it uses the short name. For options, you must supply a short name,
 -- a long name or both.
@@ -1345,11 +1367,14 @@ end function
 -- end function
 --
 -- option_definition = {
---     { "v", "verbose", "Verbose output",   { NO_PARAMETER }, routine_id("opt_verbose") },
+--     { HEADER,         "General options" },
 --     { "h", "hash",    "Calc hash values", { NO_PARAMETER }, -1 },
+--     { HEADER,         "Input and output" },
 --     { "o", "output",  "Output filename",  { MANDATORY, HAS_PARAMETER, ONCE } , 
 --                                             routine_id("opt_output_filename") },
 --     { "i", "import",  "An import path",   { HAS_PARAMETER, MULTIPLE}, -1 },
+--     { HEADER,         "Miscellaneous" },
+--     { "v", "verbose", "Verbose output",   { NO_PARAMETER }, routine_id("opt_verbose") },
 --     { "e", "version", "Display version",  { VERSIONING, "myprog v1.0" } },
 --     {  0, 0, 0, 0, routine_id("extras")}
 -- }
