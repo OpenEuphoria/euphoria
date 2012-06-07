@@ -173,11 +173,16 @@ export constant
 	MPROTECT = dll:define_c_func( STDLIB, "mprotect", {dll:C_POINTER, dll:C_LONG, dll:C_INT}, dll:C_INT),
 	--**
 	-- @nodoc@
-	MAP_ANONYMOUS = 32,
-	--**
-	-- @nodoc@
 	MAP_PRIVATE   = 2,
 	$
+
+    ifdef OSX then
+        --**
+        -- @nodoc@
+        export constant MAP_ANONYMOUS = 0x1000
+    elsedef
+        export constant MAP_ANONYMOUS = 32
+    end ifdef
 end ifdef
 
 --**

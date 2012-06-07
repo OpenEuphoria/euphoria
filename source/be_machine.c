@@ -2264,7 +2264,7 @@ object DefineC(object x)
 #else
 
 #ifdef EOSX
-	#define CALLBACK_SIZE (108)
+	#define CALLBACK_SIZE (300)
 #else
 	#if __GNUC__ == 4
 		#if INTPTR_MAX == INT32_MAX
@@ -2336,11 +2336,6 @@ void set_page_to_read_write_execute(page_ptr page_addr) {
 }
 /* addressable version of CALLBACK_POINTER constant for use with memcmp */
 const uintptr_t callback_pointer_magic = (uintptr_t) CALLBACK_POINTER;
-#if defined(EOSX)
-	const uintptr_t general_ptr_magic = 0xF001F001;
-#elif (INTPTR_MAX == INT64_MAX)
-	const uintptr_t general_ptr_magic = 0xabcdefabcdefabcdLL;
-#endif
 object CallBack(object x)
 /* return either a call-back address for routine id x
    x can be the routine id for stdcall, or {'+', routine_id} for cdecl
