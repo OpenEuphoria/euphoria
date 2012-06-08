@@ -970,6 +970,7 @@ public procedure remove(map the_map_p, object the_key_p)
 	integer from_
 	
 	temp_map_ = eumem:ram_space[the_map_p]
+	eumem:ram_space[the_map_p] = 0
 	if temp_map_[MAP_TYPE] = LARGEMAP then
 		bucket_ = calc_hash(the_key_p, length(temp_map_[KEY_BUCKETS]))
 	
