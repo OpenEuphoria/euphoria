@@ -139,7 +139,7 @@ EU_INTERPRETER_FILES = &
 	cominit.e &
 	compress.e &
 	intinit.e &
-	int.ex 
+	eui.ex 
 
 EU_TRANSLATOR_FILES = &
 	buildsys.e &
@@ -149,7 +149,7 @@ EU_TRANSLATOR_FILES = &
 	compile.e &
 	compress.e &
 	traninit.e &
-	ec.ex
+	euc.ex
 	
 !include $(BUILDDIR)\transobj.wat
 !include $(BUILDDIR)\intobj.wat
@@ -211,7 +211,7 @@ EU_INCLUDES = $(TRUNKDIR)\include\std\*.e $(TRUNKDIR)\include\*.e &
 		$(TRUNKDIR)\include\euphoria\debug\*.e
 
 EU_ALL_FILES = *.e $(EU_INCLUDES) &
-		 int.ex ec.ex backend.ex
+		 eui.ex euc.ex backend.ex
 
 DOCDIR = $(TRUNKDIR)\docs
 EU_DOC_SOURCE = &
@@ -311,7 +311,7 @@ EXE="$(EX)"
 # Change to using the EXEs to keep your CPU cool using
 # --use-binary-translator
 !ifndef EC
-EC=$(EXE) -d E32 $(INCDIR) $(EUDEBUG) $(I_FLAGS) "$(TRUNKDIR)\source\ec.ex"
+EC=$(EXE) -d E32 $(INCDIR) $(EUDEBUG) $(I_FLAGS) "$(TRUNKDIR)\source\euc.ex"
 !endif
 
 EUTEST=$(EXE) -i $(TRUNKDIR)\include $(TRUNKDIR)\source\eutest.ex
@@ -502,7 +502,7 @@ $(TRUNKDIR)\tests\ecp.dat : $(BUILDDIR)\ecp.dat
 testeu : .SYMBOLIC  $(TRUNKDIR)\tests\ecp.dat
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR)
-	-$(EUTEST) -i ..\include $(TEST_EXTRA) --nocheck -eui "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\eu.ex" -euc "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\ec.ex" $(LIST) $(TESTFILE)
+	-$(EUTEST) -i ..\include $(TEST_EXTRA) --nocheck -eui "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\eu.ex" -euc "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\euc.ex" $(LIST) $(TESTFILE)
 	cd ..\source
 
 !endif #EUPHORIA
@@ -539,12 +539,12 @@ tester: .SYMBOLIC
 binder : .SYMBOLIC $(BUILDDIR)\eubind.exe
 
 $(BUILDDIR)\eubind.exe : $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib
-	$(BUILDDIR)\euc -con $(TRANSDEBUG) -lib $(LIBTARGET) -i $(TRUNKDIR)\include -o $(BUILDDIR)\eubind.exe $(TRUNKDIR)\source\bind.ex
+	$(BUILDDIR)\euc -con $(TRANSDEBUG) -lib $(LIBTARGET) -i $(TRUNKDIR)\include -o $(BUILDDIR)\eubind.exe $(TRUNKDIR)\source\eubind.ex
 
 shrouder : .SYMBOLIC $(BUILDDIR)\eushroud.exe
 
 $(BUILDDIR)\eushroud.exe :  $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib
-	$(BUILDDIR)\euc -con $(TRANSDEBUG) -lib $(LIBTARGET) -i $(TRUNKDIR)\include -o $(BUILDDIR)\eushroud.exe $(TRUNKDIR)\source\shroud.ex
+	$(BUILDDIR)\euc -con $(TRANSDEBUG) -lib $(LIBTARGET) -i $(TRUNKDIR)\include -o $(BUILDDIR)\eushroud.exe $(TRUNKDIR)\source\eushroud.ex
 
 tools: .SYMBOLIC
     @echo ------- TOOLS -----------

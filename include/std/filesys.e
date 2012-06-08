@@ -2219,12 +2219,69 @@ public function rename_file(sequence old_name, sequence new_name, integer overwr
 end function
 
 ifdef LINUX then
-	function xstat(atom psrc, atom psrcbuf)
-		return c_func(xStatFile, {STAT_VER, psrc, psrcbuf})
-	end function
+			ifdef BITS32 then
+				constant
+					STAT_ST_BLKSIZE = 48,
+					SIZEOF_STAT     = 88,
+					$
+			elsedef
+				constant
+					STAT_ST_BLKSIZE = 88,
+					SIZEOF_STAT     = 144,
+					$
+			end ifdef
+	
 elsifdef UNIX then
-	function xstat(atom psrc, atom psrcbuf)
-		return c_func(xStatFile, {psrc, psrcbuf})
+		ifdef FREEBSD or OSX then
+			ifdef BITS32 then
+				constant
+					STAT_ST_BLKSIZE = 76,
+					SIZEOF_STAT     = 108,
+					$
+			elsedef
+				constant
+					STAT_ST_BLKSIZE = 112,
+					SIZEOF_STAT     = 144,
+					$
+			end ifdef
+			
+		elsifdef OPENBSD then
+			constant
+				STAT_ST_BLKSIZE = 72,
+				SIZEOF_STAT     = 112,
+				$
+		elsifdef NETBSD then
+			constant
+				STAT_ST_BLKSIZE = 80,
+				SIZEOF_STAT     = 100,
+				$
+			stat_t_offset = 80
+			stat_buf_size = 100
+		end ifdef
+end ifdef
+
+ifdef UNIX then
+	enum
+		STAT_DEV,
+		STAT_BLKSIZE,
+		STAT_RETURN,
+		$
+	
+	constant
+		STAT_ST_DEV = 0
+	
+	function stat( sequence src )
+		atom psrc = machine:allocate_string( src, 1 )
+		atom psrcbuf = machine:allocate( SIZEOF_STAT, 1 )
+		sequence stat_result = repeat( 0, STAT_RETURN )
+		ifdef LINUX then
+			stat_result[STAT_RETURN] = c_func(xStatFile, {STAT_VER, psrc, psrcbuf})
+		elsedef
+			stat_result[STAT_RETURN] = c_func(xStatFile, {psrc, psrcbuf})
+		end ifdef
+		stat_result[STAT_DEV]    = peek8u( psrcbuf + STAT_ST_DEV )
+		stat_result[STAT_BLKSIZE] = peek_pointer( psrcbuf + STAT_ST_BLKSIZE )
+		return stat_result
 	end function
 end ifdef
 
@@ -2259,49 +2316,29 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 			return 0
 		end if
 	end if
-	
-	ifdef UNIX then
-		atom psrcbuf = 0, pdestbuf = 0
-		integer stat_t_offset, stat_buf_size
-	end ifdef
-	ifdef LINUX then
-		stat_t_offset = 0
-		stat_buf_size = 88 * 2
-	elsifdef FREEBSD or OSX then
-		stat_t_offset = 0
-		stat_buf_size = 96
-	elsifdef OPENBSD then
-		stat_t_offset = 0
-		stat_buf_size = 112
-	elsifdef NETBSD then
-		stat_t_offset = 0
-		stat_buf_size = 100
-	end ifdef
-	
 
 	ifdef UNIX then
-		psrcbuf = machine:allocate(stat_buf_size, 1)
-		psrc = machine:allocate_string(src, 1)
-		ret = xstat(psrc, psrcbuf)
+		sequence src_result, dest_result
+		src_result = stat( src )
+		ret = src_result[STAT_RETURN]
 		if ret then
 			return 0
 		end if
 		
-		pdestbuf = machine:allocate(stat_buf_size)
-		pdest = machine:allocate_string(dest)
-		ret = xstat(pdest, pdestbuf)
+		dest_result = stat( dest )
+		ret = dest_result[STAT_RETURN]
 		if ret then
 			-- Assume destination doesn't exist
 			atom pdir
 			if length(dirname(dest)) = 0 then
-				pdir = machine:allocate_string(current_dir(), 1)
+				dest_result = stat( current_dir() )
 			else
-				pdir = machine:allocate_string(dirname(dest), 1)
+				dest_result = stat( dirname( dest ) )
 			end if
-			ret = xstat(pdir, pdestbuf)
+			ret = dest_result[STAT_RETURN]
 		end if
 		
-		if not ret and not equal(peek(pdestbuf+stat_t_offset), peek(psrcbuf+stat_t_offset)) then
+		if not ret and dest_result[STAT_DEV] != src_result[STAT_DEV] then
 			-- on different filesystems, can not use rename
 			-- fall back on copy&delete
 			ret = copy_file(src, dest, overwrite)
@@ -2311,17 +2348,18 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
  			return (not ret)
 		end if
 		
-	elsedef		
-		psrc  = machine:allocate_string(src, 1)
-		pdest = machine:allocate_string(dest, 1)
 	end ifdef
+	
+	psrc  = machine:allocate_string(src, 1)
+	pdest = machine:allocate_string(dest, 1)
+	
 
 	if overwrite then
 		-- return value is ignored, we don't care if it existed or not
 		tempfile = temp_file(dest)
 		move_file(dest, tempfile)
 	end if
-
+	
 	ret = c_func(xMoveFile, {psrc, pdest})
 	
 	ifdef UNIX then
@@ -2554,28 +2592,13 @@ public function disk_metrics(object disk_path)
 		sequence size_of_disk = {0,0,0}
 
 		atom bytes_per_cluster
-		atom psrc, ret, psrcbuf
+		atom ret
 		integer stat_t_offset, stat_buf_size
 
-		ifdef LINUX then
-			stat_t_offset = 48
-			stat_buf_size = 88 * 2
-		elsifdef FREEBSD or OSX then
-			stat_t_offset = 64
-			stat_buf_size = 96
-		elsifdef OPENBSD then
-			stat_t_offset = 72
-			stat_buf_size = 112
-		elsifdef NETBSD then
-			stat_t_offset = 80
-			stat_buf_size = 100
-		end ifdef
+		sequence stat_result = stat( disk_path )
+		ret               = stat_result[STAT_RETURN]
+		bytes_per_cluster = stat_result[STAT_BLKSIZE]
 
-		psrc    = machine:allocate_string(disk_path, 1)
-		psrcbuf = machine:allocate(stat_buf_size, 1)
-		ret = xstat(psrc,psrcbuf)
-		bytes_per_cluster = peek4s(psrcbuf+stat_t_offset)
-		
 		if ret then
 			-- failure
 			return result 
