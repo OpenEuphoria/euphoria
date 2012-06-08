@@ -2765,12 +2765,12 @@ procedure opCASE()
 			else
 				integer sym = Code[switch_stack[$][SWITCH_PC] + 2]
 				caseval = SymTab[sym][S_OBJ][Code[pc+1]]
-				if find(caseval, switch_stack[$][4]) then
-					-- case has been emitted already.  So, don't do it again.
-					stmt = 0
-				else
-					switch_stack[$][4] = append( switch_stack[$][4], caseval )
-				end if
+-- 				if find(caseval, switch_stack[$][4]) then
+-- 					-- case has been emitted already.  So, don't do it again.
+-- 					stmt = 0
+-- 				else
+-- 					switch_stack[$][4] = append( switch_stack[$][4], caseval )
+-- 				end if
 			end if
 		end if
 
