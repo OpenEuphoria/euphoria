@@ -10,7 +10,10 @@
 * [[ticket:665]] documented minimal requirements for various features in EUPHORIA on various platforms.
 * [[ticket:665]] set minimal version for Windows in its installer to avoid installing on computers that it wont work on.
 * [[ticket:767]] translated ##[[:insert]]()## could segfault when inserting an atom stored as an integer
- 
+* [[ticket:744]] Duplicate case values in a switch block no longer result in a failed compile after being translated to C.
+
 === Enhancements
 
 * [[ticket:768]] Backported support for deserializing 8-byte integers and 10-byte floating point.
+* Optimization of std/map.e ##remove()## to prevent unnecessary copy on write
+

@@ -2644,6 +2644,7 @@ procedure opINTERNAL_ERROR()
 end procedure
 
 sequence switch_stack = {}
+-- for each i, switch_stack[i][4] is a stack of actual case values used in the switch statement that have so far been converted into C code.
 
 enum
 	SWITCH_OP,
@@ -2693,6 +2694,7 @@ procedure opSWITCH_I()
 				min = cases[i]-1
 			end if
 		end for
+		-- min is now a value that is not a value in cases.
 
 		-- it's possibly an atom or a sequence, so we have extra checking to do
 		c_stmt("if (IS_SEQUENCE(@) ){\n", Code[pc+1] )
@@ -2821,6 +2823,12 @@ procedure opCASE()
 			else
 				integer sym = Code[switch_stack[$][SWITCH_PC] + 2]
 				caseval = SymTab[sym][S_OBJ][Code[pc+1]]
+-- 				if find(caseval, switch_stack[$][4]) then
+-- 					-- case has been emitted already.  So, don't do it again.
+-- 					stmt = 0
+-- 				else
+-- 					switch_stack[$][4] = append( switch_stack[$][4], caseval )
+-- 				end if
 			end if
 		end if
 

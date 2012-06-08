@@ -100,7 +100,7 @@ fi
 echo EHOST=$EHOST >>  "$PREFIX"${CONFIG_FILE}
 
 # default use source
-export EC="eui ec.ex"
+export EC="eui euc.ex"
 export BUILDDIR=build
 export XLTTARGETCC=gcc
 export CC=gcc
@@ -211,7 +211,7 @@ while [ "$1" != "" ]; do
 		;;
 
 	--use-source-translator )
-		export EC="eui ec.ex"
+		export EC="eui euc.ex"
 		;;
 
 	--final)

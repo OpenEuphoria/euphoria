@@ -14,8 +14,8 @@ include std/io.e
 
 constant src_files = {
 -- front end
-"int.ex",
-"ec.ex",
+"eui.ex",
+"euc.ex",
 "eu.ex",
 "main.e",
 "pathopen.e",

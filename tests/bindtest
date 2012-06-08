@@ -1,3 +1,3 @@
 echo Binding...
-../source/exu ../source/bind.ex bindme.ex
+../source/exu ../source/eubind.ex bindme.ex
 

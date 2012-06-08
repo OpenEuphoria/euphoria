@@ -52,9 +52,15 @@ if file_exists(lower(home)) then
 	test_not_equal("dir() #2", dir(lower(home) & '*'),-1)
 	test_not_equal("dir() #3", dir(lower(home[1..$-1]) & '*'),-1)
 end if
+
 if file_exists(upper(home)) then
 	test_not_equal("dir() #4", dir(upper(home) & '*'),-1)
-	test_not_equal("dir() #5", dir(upper(home[1..$-1]) & '*'),-1)
+	ifdef not OSX then
+	    -- ls /USERS/NAME* does not work on OS X, OS X has some weird UPPER/lower file handling
+	    -- that doesn't always seem to be consistent. I do know the user can choose to make the
+	    -- file system case sensitive or insensitive.
+	    test_not_equal("dir() #5", dir(upper(home[1..$-1]) & '*'), -1)
+	end ifdef
 end if
 test_not_equal("dir() #6", dir(home[1..$-1] & '*'),-1)
 
