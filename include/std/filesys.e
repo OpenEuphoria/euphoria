@@ -52,6 +52,16 @@ ifdef LINUX then
 		STAT_VER = 3
 	end if
 	constant xStatFile = dll:define_c_func(lib, "__xstat", {dll:C_INT, dll:C_POINTER, dll:C_POINTER}, dll:C_INT)
+elsifdef OSX then
+	function define_stat()
+		integer xStatFile = dll:define_c_func(lib, "stat64", {dll:C_POINTER, dll:C_POINTER}, dll:C_INT)
+		if xStatFile = -1 then
+			xStatFile = dll:define_c_func(lib, "stat", {dll:C_POINTER, dll:C_POINTER}, dll:C_INT)
+		end if
+		return xStatFile
+	end function
+	constant xStatFile = define_stat()
+	
 elsifdef UNIX then
 	constant xStatFile = dll:define_c_func(lib, "stat", {dll:C_POINTER, dll:C_POINTER}, dll:C_INT)
 end ifdef
