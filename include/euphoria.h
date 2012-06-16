@@ -328,7 +328,8 @@ extern object last_w_file_no;
 extern IFILE last_w_file_ptr;
 extern object last_r_file_no;
 extern IFILE last_r_file_ptr;
-extern int insert_pos;;
+extern int insert_pos;
+extern int trace_lines;
 
 object find_from(object,object,object);
 object e_match_from(object aobj, object bobj, object c);

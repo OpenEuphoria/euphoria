@@ -50,6 +50,8 @@ extern int print_chars;  // value can be checked by caller
 
 extern struct op_info optable[MAX_OPCODE+1];
 
+extern int trace_lines;
+
 void debug_msg(char *msg);
 
 void UserCleanup(int status)
