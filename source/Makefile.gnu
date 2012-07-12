@@ -831,7 +831,7 @@ endif
 	install ../include/std/net/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std/net
 	install ../include/std/win32/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std/win32
 	install ../include/euphoria/*.e  $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria
-	install ../include/euphoria/debug/*.e  $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria
+	install ../include/euphoria/debug/*.e  $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria/debug
 	install ../include/euphoria.h $(DESTDIR)$(PREFIX)/share/euphoria/include
 	install ../demo/*.e* $(DESTDIR)$(PREFIX)/share/euphoria/demo
 	install ../demo/bench/* $(DESTDIR)$(PREFIX)/share/euphoria/demo/bench 

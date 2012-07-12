@@ -1132,7 +1132,7 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 	end for
 	if report_errors and length( errors ) then
 		sequence msg = ""
-		sequence errloc = "???"
+		sequence errloc = "Internal Error - Unknown Error Message"
 		
 		for e = length(errors) to 1 by -1 do
 			sequence ref = forward_references[errors[e]]
