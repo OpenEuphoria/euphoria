@@ -212,7 +212,7 @@ endif
 # The -i command with the include directory in the form we need the EUPHORIA binaries to see them. 
 # (Use a drive id 'C:')
 # [Which on Windows is different from the how it is expressed in for the GNU binaries. ]
-CYPINCDIR_CMD=-i $(CYPTRUNKDIR)/include
+CYPINCDIR=-i $(CYPTRUNKDIR)/include
 
 BE_CALLC = be_callc
 MSIZE=-m32
