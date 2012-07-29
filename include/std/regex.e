@@ -331,7 +331,7 @@ enum
 -- but both ##find( re, s1 )## and ##find( re, s2 )## would not,
 -- then ##find( re, s1, 1, PCRE_PARTIAL )##
 -- will return ##ERROR_PARTIAL## rather than ##ERROR_NOMATCH##.
--- We say ##s1## has a *partial match* of ##re##.
+-- We say ##s1## has a //partial match// of ##re##.
 --
 -- Note that ##find( re, s2, 1, PCRE_PARTIAL )## will ##ERROR_NOMATCH##.
 -- In C, this constant is called PCRE_PARTIAL.
@@ -425,31 +425,57 @@ constant option_names = {
 
 --****
 -- === Error Constants
+-- 
+-- Error constants differ from their C equivalents as they do not have PCRE_ prepended to each name.
+--
 
 public constant
+	--** There was no match found.
 	ERROR_NOMATCH        =  (-1),
+	--** There was an internal error in the EUPHORIA wrapper (std/regex.e in the standard include directory or be_regex.c in the EUPHORIA source).
 	ERROR_NULL           =  (-2),
+	--** There was an internal error in the EUPHORIA wrapper (std/regex.e in the standard include directory or be_regex.c in the EUPHORIA source).
 	ERROR_BADOPTION      =  (-3),
+	--** The pattern passed is not a value returned from [[:new]].
 	ERROR_BADMAGIC       =  (-4),
+	--** An internal error either in the pcre library EUPHORIA uses or its wrapper occured.
 	ERROR_UNKNOWN_OPCODE =  (-5),
+	--** An internal error either in the pcre library EUPHORIA uses or its wrapper occured.
 	ERROR_UNKNOWN_NODE   =  (-5),
+	--** Out of memory.
 	ERROR_NOMEMORY       =  (-6),
+	--** The wrapper or the PCRE backend didn't preallocate enough capturing groups for this pattern.
 	ERROR_NOSUBSTRING    =  (-7),
+	--** Too many matches encountered.
 	ERROR_MATCHLIMIT     =  (-8),
+	--** Not applicable to our implementation.
 	ERROR_CALLOUT        =  (-9),
+	--** The subject or pattern is not valid UTF8 but it was specified as such with [[:UTF8]].
 	ERROR_BADUTF8        = (-10),
+	--** The offset specified doesn't start on a UTF8 character boundary but it was specified as UTF8 with [[:UTF8]].
 	ERROR_BADUTF8_OFFSET = (-11),
+	--** Pattern didn't match, but there is a //partial match//.  See [[:PARTIAL]].
 	ERROR_PARTIAL        = (-12),
+	--** PCRE backend doesn't support partial matching for this pattern.
 	ERROR_BADPARTIAL     = (-13),
 	ERROR_INTERNAL       = (-14),
+	--** size parameter to find is less than minus 1.
 	ERROR_BADCOUNT       = (-15),
+	--** Not applicable to our implementation: The PCRE wrapper doesn't use DFA routines
 	ERROR_DFA_UITEM      = (-16),
+	--** Not applicable to our implementation: The PCRE wrapper doesn't use DFA routines
 	ERROR_DFA_UCOND      = (-17),
+	--** Not applicable to our implementation: The PCRE wrapper doesn't use DFA routines
 	ERROR_DFA_UMLIMIT    = (-18),
+	--** Not applicable to our implementation: The PCRE wrapper doesn't use DFA routines
 	ERROR_DFA_WSSIZE     = (-19),
+	--** Not applicable to our implementation: The PCRE wrapper doesn't use DFA routines
 	ERROR_DFA_RECURSE    = (-20),
+	--** Too much recursion used for match.
 	ERROR_RECURSIONLIMIT = (-21),
+	--** This error isn't in the source code.
 	ERROR_NULLWSLIMIT    = (-22),
+	--** Both BSR_UNICODE and BSR_ANY options were specified.  These options are contradictory.
 	ERROR_BADNEWLINE     = (-23)
 
 public constant error_names = {
