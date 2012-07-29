@@ -1243,7 +1243,7 @@ export procedure emit_op(integer op)
 
 	case IS_AN_INTEGER, IS_AN_ATOM, IS_A_SEQUENCE, IS_AN_OBJECT then
 		cont11ii(op, FALSE)
-		clear_temp( Code[$-1] )
+-- 		clear_temp( Code[$-1] )
 
 	-- special 1 input, 1 output - also emits CurrentSub
 	case ROUTINE_ID then

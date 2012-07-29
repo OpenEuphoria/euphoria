@@ -11,6 +11,8 @@
 * [[ticket:665]] set minimal version for Windows in its installer to avoid installing on computers that it wont work on.
 * [[ticket:767]] translated ##[[:insert]]()## could segfault when inserting an atom stored as an integer
 * [[ticket:744]] Duplicate case values in a switch block no longer result in a failed compile after being translated to C.
+* [[ticket:775]] Fixed potential memory leak when a temp is passed to one of the
+  native type check functions: [[:integer]](), [[:atom]](), [[:object]]() or [[:sequence]]()
 
 === Enhancements
 
