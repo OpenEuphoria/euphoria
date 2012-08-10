@@ -1,6 +1,7 @@
 == Version 4.0.5 Date TBD
 
 === Bug Fixes
+* [[ticket:777]] When invalid input is sent to 'match' or 'find' the error includes 'match' or 'find' in the error message repectively.
 * [[ticket:749]] Fix init checks for while-entry and goto
 * [[ticket:563]] Default values for arguments are always parsed and resolved as though they
   were being evaluated from the point of the routine declaration, not the point where the
