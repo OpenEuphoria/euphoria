@@ -109,7 +109,7 @@ procedure resolved_reference( integer ref )
 	end if
 	
 	if ax then
-		sequence r = active_references[file][sp] 
+		sequence r = active_references[file][sp]		
 		active_references[file][sp] = 0
 		r = remove( r, ax )
 		active_references[file][sp] = r
@@ -223,6 +223,7 @@ export procedure set_property( integer ref, atom key, object data )
 end procedure
 
 export constant test_literal_match_key = new_property_type()
+
 export procedure set_line( integer ref, integer line_no, sequence this_line, integer bp )
 	forward_references[ref][FR_LINE] = line_no
 	forward_references[ref][FR_THISLINE] = this_line
@@ -269,6 +270,7 @@ procedure patch_forward_nameof( token tok, integer ref )
 	
 	set_code( ref )
 	
+	patch_type_mismatch_warning( tok, ref )
 	integer start_pc = fr[FR_PC]
 	-- forward call look like:
 	-- OP, REF, # ARGS, ARGS...,[ASSIGN SYM]
@@ -321,6 +323,7 @@ procedure patch_forward_call( token tok, integer ref )
 	integer supplied_args = code[pc+2]
 	sequence name = fr[FR_NAME]
 	
+	patch_type_mismatch_warning( tok, ref )
 	if Code[pc] != FUNC_FORWARD and Code[pc] != PROC_FORWARD then
 		prep_forward_error( ref )
 		CompileErr( "The forward call to [4] wasn't where we thought it would be: [1]:[2]:[3]",
@@ -465,7 +468,12 @@ procedure set_error_info( integer ref )
 	current_file_no = fr[FR_FILE]
 end procedure
 
-procedure patch_type_mismatch_warning( token tok, integer ref )
+type positive_integer(integer i)
+	return i > 0
+end type
+
+
+procedure patch_type_mismatch_warning( token tok, positive_integer ref )
 	atom test_parameters_ptr = get_property( ref, test_literal_match_key )
 	if equal(test_parameters_ptr,0) then
 		return
@@ -475,38 +483,32 @@ procedure patch_type_mismatch_warning( token tok, integer ref )
 	if ref_location = 0 then
 		return
 	end if
+	del_property( ref, test_literal_match_key ) 
 	test_parameters[ref_location] = tok[T_SYM]
-	integer	lsym = test_parameters[1]
+	
+	integer routine_sym = test_parameters[1]
+	integer param_sym = test_parameters[2]
+	integer	lsym = test_parameters[3]
 	integer rsym = test_parameters[4]
-	integer lsym_type = 0
-	integer rsym_type = 0
-	if test_parameters[5] = 0 and symtab_index(lsym) and lsym != 0 then
-		-- not a forward reference yet it may not have its type worked out....
-		if length(SymTab[lsym]) >= S_VTYPE then
-			lsym_type = SymTab[lsym][S_VTYPE]
-			test_parameters[5] = lsym_type
-		else
-			-- TODO: handle this case.  Why is this too short?
-		end if
-	end if
-	if test_parameters[6] = 0 and symtab_index(rsym) and rsym != 0 then
-		if length(SymTab[rsym]) >= S_VTYPE then
-			rsym_type = SymTab[rsym][S_VTYPE]
-			test_parameters[6] = rsym_type
-		else
-			-- TODO: handle this case
-		end if
-	end if
+	integer lsym_type = test_parameters[5]
+	integer rsym_type = test_parameters[6]
 	
-	poke4(test_parameters_ptr, test_parameters)
-	if lsym_type < 0 then
-		set_property(-lsym_type, test_literal_match_key, test_parameters_ptr)
-	end if
-	if rsym_type < 0 then
-		set_property(-rsym_type, test_literal_match_key, test_parameters_ptr)
-	end if
-	
-	del_property( ref, test_literal_match_key )
+	switch ref_location do
+		case 3 then -- lsym
+			if forward_reference( lsym_type ) and symtab_index( SymTab[lsym][S_VTYPE] ) then
+				del_property( -lsym_type, test_literal_match_key )
+				lsym_type = SymTab[lsym][S_VTYPE]
+			end if
+		case 4 then -- rsym
+			if forward_reference( rsym_type ) and symtab_index(  SymTab[rsym][S_VTYPE] ) then
+				del_property( -rsym_type, test_literal_match_key )
+				rsym_type = SymTab[rsym][S_VTYPE]
+			end if
+	end switch
+
+
+	poke4(test_parameters_ptr, {routine_sym, param_sym, lsym, rsym, lsym_type, rsym_type})
+
 	if not find(1, test_parameters < 0) then
 		-- there are no more negative values
 		if test_parameters[1] = 0 then
@@ -514,6 +516,7 @@ procedure patch_type_mismatch_warning( token tok, integer ref )
 		else
 			test_literal_match( test_parameters[1..3], test_parameters[4])
 		end if
+		-- free( test_parameters_ptr )
 	end if		
 end procedure
 
@@ -592,6 +595,7 @@ procedure patch_forward_type( token tok, integer ref )
 	sequence fr = forward_references[ref]
 	sequence syms = fr[FR_DATA]
 
+	patch_type_mismatch_warning( tok, ref )
 	for i = 2 to length( syms ) do
 		integer sym, enum_type_ref
 		
@@ -667,6 +671,7 @@ procedure patch_forward_type_check( token tok, integer ref )
 	sequence fr = forward_references[ref]
 	symtab_index which_type
 	symtab_index var
+	patch_type_mismatch_warning( tok, ref )
 	
 	if fr[FR_OP] = TYPE_CHECK_FORWARD then
 		which_type = SymTab[tok[T_SYM]][S_VTYPE]

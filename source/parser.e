@@ -1800,11 +1800,11 @@ public procedure test_literal_match(object left_param, symtab_pointer valsym)
 	integer parameter, forward_ref = 0
 	sequence lparameter_name = "", rparameter_name = "", routine_name = ""
 	if atom(left_param) then
-		lsym = left_param
+		lsym = left_param -- the left hand symbol we assign, modify or compare
 		parameter = 0
 		routine_sym = 0
 	elsif length(left_param) = 3 then
-		lsym = left_param[3]
+		lsym = left_param[3] -- the local symbol in the sub-routine we copy to in the call.
 		parameter = left_param[2]
 		routine_sym = left_param[1]
 		ifdef DEBUG then
@@ -1822,14 +1822,6 @@ public procedure test_literal_match(object left_param, symtab_pointer valsym)
 	end if
 	symtab_index valsym_type = 0, lsym_type = 0
 	if (not forward_ref) and lsym != 0 and valsym != 0 then
-		ifdef DEBUG then
-			if find(0, (length(SymTab[lsym]) & length(SymTab[valsym])) >= S_NAME) = 0 then
-				lparameter_name = SymTab[lsym][S_NAME]
-				rparameter_name = SymTab[valsym][S_NAME]
-				trace(find(lparameter_name, {"z", "s88999", "t", "MB_OKCANCEL", "MB_OKCANCELRETRY"}) != 0)
-				trace(find(rparameter_name, {"ARM", "ID_CANCEL", "s88999", "y", "X86_64", "z", "ID_OK", "MB_OK", "ID_RETRY"}) != 0)
-			end if
-		end ifdef
 		if length(SymTab[lsym]) >= S_VTYPE and length(SymTab[valsym]) >= S_VTYPE then
 			if find(sym_mode(lsym),  {M_CONSTANT, M_NORMAL}) != 0 
 			and find(sym_mode(valsym),  {M_CONSTANT, M_NORMAL}) != 0 then
@@ -1868,6 +1860,9 @@ public procedure test_literal_match(object left_param, symtab_pointer valsym)
 		end if
 		if valsym_type < 0 then
 			set_property( -valsym_type,  test_literal_match_key,  match_data_pointer )
+		end if
+		if routine_sym < 0 then
+			set_property( -routine_sym, test_literal_match_key, match_data_pointer )
 		end if
 	end if
 end procedure
