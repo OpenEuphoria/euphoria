@@ -28,12 +28,12 @@ status s888999 = ARM
 -- assigning an architecture to a status
 button_type t = y
 
--- does not warn here but should
+-- didn't warn here but it does now.
 -- comparing an architecture to a status
 if equal(s888999,X86_64) then
 end if
 
--- does not warn here but should
+-- didn't warn here but it does now.
 -- comparing a button_type to an architecture
 if compare(MB_OKCANCELRETRY,z) then
 end if
@@ -43,12 +43,12 @@ end if
 if MB_OKCANCELRETRY < X86 then
 end if
 
--- does not warn here but should
+-- didn't warn here but it does now.
 -- comparing a button_type to an architecture
 if t = z then
 end if
 
--- does not warn here but should
+-- didn't warn here but it does now.
 -- assigning a status to an architecture
 z = ID_OK 
 

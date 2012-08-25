@@ -189,7 +189,7 @@ export function new_property_type()
 	return property_value
 end function
 
-export function get_property( integer ref, atom key )
+export function get_property( positive_integer ref, atom key )
 	sequence pairs = forward_references[ref][FR_PROPERTIES]
 	integer i1 = find(key,pairs[1])
 	if i1 = 0 then
@@ -198,7 +198,7 @@ export function get_property( integer ref, atom key )
 	return pairs[2][i1]
 end function
 
-export procedure del_property( integer ref, atom key )
+export procedure del_property( positive_integer ref, atom key )
 	sequence pair = forward_references[ref][FR_PROPERTIES]
 	integer loc = find( key, pair[1] )
 	forward_references[ref][FR_PROPERTIES] = 0
@@ -208,7 +208,7 @@ export procedure del_property( integer ref, atom key )
 	forward_references[ref][FR_PROPERTIES] = pair
 end procedure
 	
-export procedure set_property( integer ref, atom key, object data )
+export procedure set_property( positive_integer ref, atom key, object data )
 	sequence pair = forward_references[ref][FR_PROPERTIES]
 	forward_references[ref][FR_PROPERTIES] = 0
 	integer loc = find(key, pair[1])
@@ -222,7 +222,7 @@ export procedure set_property( integer ref, atom key, object data )
 	forward_references[ref][FR_PROPERTIES] = pair
 end procedure
 
-export constant test_literal_match_key = new_property_type()
+export constant test_literal_match_pair_key = new_property_type()
 
 export procedure set_line( integer ref, integer line_no, sequence this_line, integer bp )
 	forward_references[ref][FR_LINE] = line_no
@@ -403,8 +403,20 @@ procedure patch_forward_call( token tok, integer ref )
 			params[defarg] = Pop()
 		else
 			extra_default_args = 0
+			ifdef DEBUG then
+				if symtab_index(param_sym) and symtab_index(sym_type(param_sym)) then
+					printf(1, "%s is of type %s routine %s.\n", { sym_name(param_sym), sym_name(sym_type(param_sym)), sym_name(code_sub)})
+				else
+					printf(1, "%d is not a symtab index.\n", {code[i]})
+				end if
+				object rprops = get_property( ref, test_literal_match_pair_key )
+				if sequence(rprops) then
+					printf(1, "Properties had been set for this routine %s.\n", sym_name(code_sub))
+				end if
+			end ifdef
 			add_private_symbol( code[i], SymTab[param_sym][S_NAME] )
 			params[defarg] = code[i]
+			
 		end if
 	end for
 	
@@ -472,52 +484,70 @@ type positive_integer(integer i)
 	return i > 0
 end type
 
-
 procedure patch_type_mismatch_warning( token tok, positive_integer ref )
-	atom test_parameters_ptr = get_property( ref, test_literal_match_key )
-	if equal(test_parameters_ptr,0) then
+	object test_parameter_ptrs = get_property( ref, test_literal_match_pair_key )
+	if atom(test_parameter_ptrs) then
 		return
 	end if
-	sequence test_parameters = peek4s(test_parameters_ptr & 6)
-	integer ref_location = find( -ref, test_parameters )
-	if ref_location = 0 then
-		return
-	end if
-	del_property( ref, test_literal_match_key ) 
-	test_parameters[ref_location] = tok[T_SYM]
+	for i = 1 to length(test_parameter_ptrs) do
 	
-	integer routine_sym = test_parameters[1]
-	integer param_sym = test_parameters[2]
-	integer	lsym = test_parameters[3]
-	integer rsym = test_parameters[4]
-	integer lsym_type = test_parameters[5]
-	integer rsym_type = test_parameters[6]
-	
-	switch ref_location do
-		case 3 then -- lsym
-			if forward_reference( lsym_type ) and symtab_index( SymTab[lsym][S_VTYPE] ) then
-				del_property( -lsym_type, test_literal_match_key )
-				lsym_type = SymTab[lsym][S_VTYPE]
-			end if
-		case 4 then -- rsym
-			if forward_reference( rsym_type ) and symtab_index(  SymTab[rsym][S_VTYPE] ) then
-				del_property( -rsym_type, test_literal_match_key )
-				rsym_type = SymTab[rsym][S_VTYPE]
-			end if
-	end switch
-
-
-	poke4(test_parameters_ptr, {routine_sym, param_sym, lsym, rsym, lsym_type, rsym_type})
-
-	if not find(1, test_parameters < 0) then
-		-- there are no more negative values
-		if test_parameters[1] = 0 then
-			test_literal_match( test_parameters[3], test_parameters[4])
-		else
-			test_literal_match( test_parameters[1..3], test_parameters[4])
+		sequence test_parameter_data = peek4s(test_parameter_ptrs[i] & 6)
+		integer ref_location = find( -ref, test_parameter_data )
+		if ref_location = 0 then
+				continue
 		end if
-		-- free( test_parameters_ptr )
-	end if		
+	
+		test_parameter_data[ref_location] = tok[T_SYM]
+		poke4(test_parameter_ptrs[i]+(ref_location-1)*4, tok[T_SYM])
+		integer routine_sym = test_parameter_data[1]
+		integer parameter_index = test_parameter_data[2]
+		integer	lsym = test_parameter_data[3]
+		integer rsym = test_parameter_data[4]
+		integer lsym_type = test_parameter_data[5]
+		integer rsym_type = test_parameter_data[6]
+		if symtab_index(lsym) and lsym > 0 then
+			lsym_type = sym_type(lsym)
+			if lsym_type < 0 then
+				object lprops = get_property( -lsym_type,  test_literal_match_pair_key )
+				if equal(0,lprops) then
+					lprops = {}
+				end if
+				poke4(test_parameter_ptrs[i]+4*4, lsym_type)
+				lprops = append(lprops, test_parameter_ptrs[i])
+				set_property( -lsym_type, test_literal_match_pair_key, lprops )
+			end if
+		end if
+		if symtab_index(rsym) and rsym > 0 then
+			rsym_type = sym_type(rsym)
+			if rsym_type < 0 then
+				object rprops = get_property( -rsym_type,  test_literal_match_pair_key )
+				if equal(0,rprops) then
+					rprops = {}
+				end if
+				poke4(test_parameter_ptrs[i]+4*5, rsym_type)
+				rprops = append(rprops, test_parameter_ptrs[i])
+				set_property( -rsym_type, test_literal_match_pair_key, rprops )
+			end if
+		end if
+		
+		test_parameter_data = peek4s({test_parameter_ptrs[i],6}) 
+		if not find(1, test_parameter_data < 0) then
+			-- there are no more negative values
+			type_mismatch_warning(lsym, rsym, routine_sym, parameter_index)
+			test_parameter_ptrs[i] = 0
+		end if
+	end for
+	integer zero_loc
+	while zero_loc with entry do
+		test_parameter_ptrs = remove(test_parameter_ptrs, zero_loc)
+	entry
+		zero_loc = find(0, test_parameter_ptrs)
+	end while
+	if length( test_parameter_ptrs ) then
+		set_property( ref, test_literal_match_pair_key, test_parameter_ptrs )
+	else
+		del_property( ref, test_literal_match_pair_key )
+	end if
 end procedure
 
 procedure patch_forward_variable( token tok, integer ref )

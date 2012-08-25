@@ -1044,6 +1044,7 @@ procedure Forward_call(token tok, integer opcode = PROC_FORWARD )
 	remove_symbol( proc )
 	short_circuit -= 1
 	while 1 do
+		sequence temp_tok
 		tok = next_token()
 		integer id = tok[T_ID]
 
@@ -1056,9 +1057,18 @@ procedure Forward_call(token tok, integer opcode = PROC_FORWARD )
 				exit
 
 			case else
+				temp_tok = next_token()
+				putback( temp_tok )
 				putback( tok )
 				call_proc( forward_expr, {} )
 				args += 1
+				if temp_tok[T_ID] = COMMA then
+					symtab_pointer passed = Pop()
+					if not forward_type_mismatch_warning(tok[T_SYM], passed, proc, args) then
+						type_mismatch_warning(tok[T_SYM], passed, proc, args)
+					end if
+					Push( passed )
+				end if
 
 				tok = next_token()
 				id = tok[T_ID]
@@ -1330,6 +1340,31 @@ function Name_of_call( token tok )
 		return 0
 end function
 
+-- Load call to forward properties
+-- routine_sym must not be a forward reference.
+public function get_routine_parameters(symtab_index routine_sym)
+	sequence stack_segment = {}
+	sequence parameter_segment = {}
+	
+	symtab_pointer s = routine_sym
+	integer n = SymTab[routine_sym][S_NUM_ARGS]
+	-- grab elements from the stack
+	for i = 1 to n do
+		if not Empty() then
+			stack_segment = prepend(stack_segment,Pop())
+		end if
+	end for
+	
+	-- grab the parameters
+	for i = 1 to n do
+		s = SymTab[s][S_NEXT]
+		parameter_segment = append(parameter_segment, s)
+		Push(stack_segment[i])
+	end for
+		
+	return {stack_segment, parameter_segment}
+end function
+
 procedure Function_call( token tok )
 --	token tok2, tok3
 	integer id, scope, opcode, e
@@ -1390,32 +1425,22 @@ procedure Function_call( token tok )
 	end if
 	
 	routine_sym = tok[T_SYM]
-	sequence stack_segment = {}
-	symtab_pointer s = routine_sym
-	integer n = SymTab[routine_sym][S_NUM_ARGS]
-	-- grab elements from the stack
-	for i = 1 to n do
-		if not Empty() then
-			stack_segment &= Pop()
+	sequence stack_segment
+	sequence stack_and_routine_segment = get_routine_parameters(routine_sym)
+	stack_segment = stack_and_routine_segment[1]
+	sequence parameter_segment = stack_and_routine_segment[2]
+	for i = 1 to SymTab[routine_sym][S_NUM_ARGS] do
+		if not forward_type_mismatch_warning(parameter_segment[i], stack_segment[i], routine_sym, i) then
+			type_mismatch_warning(parameter_segment[i], stack_segment[i], routine_sym, i)
 		end if
 	end for
-	-- test elements against their literal sets
-	for i = n to 1 by -1 do
-		s = SymTab[s][S_NEXT]
-		test_literal_match({routine_sym,n-i+1,s}, stack_segment[i])
-	end for
-	delete(s)
-	-- put elements back into the stack
-	while length(stack_segment) != 0 do
-		Push(stack_segment[length(stack_segment)])
-		stack_segment = remove(stack_segment,length(stack_segment))
-	end while
-	delete(stack_segment)
 	
 	if scope = SC_PREDEF then
 		if find(routine_sym,{compare_builtin,equal_builtin}) != 0 then
 			integer last = Pop()
-			test_literal_match(last,Top())
+			if not forward_type_mismatch_warning(last, Top()) then
+				type_mismatch_warning(last, Top())
+			end if
 			Push(last)
 		end if
 		emit_op(opcode)
@@ -1624,7 +1649,9 @@ function rexpr()
 		id = tok[T_ID]
 		tok = cexpr()
 		integer last = Pop()
-		test_literal_match(last,Top())
+		if not forward_type_mismatch_warning(last, Top()) then
+			type_mismatch_warning(last, Top())
+		end if
 		Push(last)
 		emit_op(id)
 	end while
@@ -1794,77 +1821,61 @@ end procedure
 
 include std/machine.e
 
-public procedure test_literal_match(object left_param, symtab_pointer valsym)
-	integer lsym
-	integer routine_sym
-	integer parameter, forward_ref = 0
+-- sets up data structures so that patch_type_mismatch_warning can operate
+-- returns false if there is no need for forward references and you should simply 
+-- run the literal_match test.
+public function forward_type_mismatch_warning(symtab_pointer left_sym, symtab_pointer right_sym, integer routine_sym = 0, integer parameter_index = 0)
+	sequence forward_refs = routine_sym & parameter_index & left_sym & right_sym & 0 & 0
+	if routine_sym >= 0 and left_sym and right_sym and symtab_index(left_sym) and symtab_index(right_sym) and length(SymTab[left_sym]) >= S_VTYPE and length(SymTab[right_sym]) >= S_VTYPE then
+		symtab_pointer right_sym_type = sym_type(right_sym)
+		symtab_pointer left_sym_type = sym_type(left_sym)
+		forward_refs = forward_refs[1..4] & left_sym_type & right_sym_type
+		if right_sym_type and left_sym_type and symtab_index(right_sym_type) and symtab_index(left_sym_type) 
+			and	find(sym_mode(left_sym),  {M_CONSTANT, M_NORMAL}) != 0 
+			and find(sym_mode(right_sym),  {M_CONSTANT, M_NORMAL}) != 0 then
+			return 0
+		end if
+	end if
+	
+	atom match_data_pointer = allocate( 6 * 4, 1 )
+	poke4(match_data_pointer, forward_refs)
+	
+	object match_data
+	integer fi = length(forward_refs)
+	while fi > 0 do
+		if forward_refs[fi] < 0 then
+			match_data = get_property( -forward_refs[fi], test_literal_match_pair_key )
+			if atom(match_data) then
+				match_data = {}
+			end if
+			match_data = append(match_data, match_data_pointer)
+			set_property( -forward_refs[fi], test_literal_match_pair_key, match_data )
+		end if
+		fi -= 1
+	end while
+	return 1
+end function
+
+-- issues a type mismatch warning if appropriate for symbols left_sym and right_sym which are NOT forward references and whose types are NOT forward references.  If they are arguments in a routine, that is left_sym is an argument to the function and right_sym is a passed argument, then routine_sym will be the symbol for said routine. 
+public procedure type_mismatch_warning(symtab_index left_sym, symtab_index right_sym, symtab_index routine_sym = 0, integer parameter_index = 0)
 	sequence lparameter_name = "", rparameter_name = "", routine_name = ""
-	if atom(left_param) then
-		lsym = left_param -- the left hand symbol we assign, modify or compare
-		parameter = 0
-		routine_sym = 0
-	elsif length(left_param) = 3 then
-		lsym = left_param[3] -- the local symbol in the sub-routine we copy to in the call.
-		parameter = left_param[2]
-		routine_sym = left_param[1]
-		ifdef DEBUG then
-			if routine_sym > 0 and length(SymTab[routine_sym]) >= S_NAME then
-				routine_name = SymTab[routine_sym][S_NAME]
-			else
-				routine_name = sprintf("forward reference? (%d)", routine_sym)
-			end if
-		end ifdef
-	else
-		return
-	end if
-	if lsym < 0 or valsym < 0 then
-		forward_ref = 1
-	end if
-	symtab_index valsym_type = 0, lsym_type = 0
-	if (not forward_ref) and lsym != 0 and valsym != 0 then
-		if length(SymTab[lsym]) >= S_VTYPE and length(SymTab[valsym]) >= S_VTYPE then
-			if find(sym_mode(lsym),  {M_CONSTANT, M_NORMAL}) != 0 
-			and find(sym_mode(valsym),  {M_CONSTANT, M_NORMAL}) != 0 then
-				valsym_type = sym_type(valsym)
-				lsym_type = sym_type(lsym)
-				integer valsym_ls, lsym_ls
-				if valsym_type < 0 or lsym_type < 0 then
-					forward_ref = 1
-				else
-					valsym_ls = find(valsym_type,literal_sets[LS_KEY])
-					lsym_ls = find(lsym_type,literal_sets[LS_KEY])
-					if valsym_ls != 0 and lsym_ls != 0 and (valsym_ls != lsym_ls) then
-						-- issue warning
-						if atom(left_param) then
-							Warning(WARNMSG_ENUM_MISMATCH_TYPES_BINOP, enum_mismatch_warning_flag, {sym_name(valsym), sym_name(valsym_type), sym_name(lsym), sym_name(lsym_type)})
-						else
-							Warning(WARNMSG_ENUM_MISMATCH_TYPES_FNCALL, enum_mismatch_warning_flag,
-							{sym_name(routine_sym), left_param[2], sym_name(valsym_type), sym_name(lsym_type)})
-						end if
-					end if
-				end if
-			end if
+	symtab_index right_sym_type = 0, left_sym_type = 0
+	
+	right_sym_type = sym_type(right_sym)
+	left_sym_type = sym_type(left_sym)
+	integer valsym_ls, lsym_ls
+	valsym_ls = find(right_sym_type,literal_sets[LS_KEY])
+	lsym_ls = find(left_sym_type,literal_sets[LS_KEY])
+	if valsym_ls != 0 and lsym_ls != 0 and (valsym_ls != lsym_ls) then
+		-- issue warning
+		if routine_sym = 0 then
+			Warning(WARNMSG_ENUM_MISMATCH_TYPES_BINOP, enum_mismatch_warning_flag, {sym_name(right_sym), sym_name(right_sym_type), sym_name(left_sym), sym_name(left_sym_type)})
+		else
+			Warning(WARNMSG_ENUM_MISMATCH_TYPES_FNCALL, enum_mismatch_warning_flag,
+			{sym_name(routine_sym), parameter_index, sym_name(right_sym_type), sym_name(left_sym_type)})
 		end if
 	end if
-	if forward_ref or routine_sym < 0 then
-		atom match_data_pointer = allocate( 4 * 6, 1 )
-		poke4(match_data_pointer, {routine_sym, parameter, lsym, valsym, lsym_type, valsym_type})
-		if lsym < 0 then
-			set_property( -lsym, test_literal_match_key,  match_data_pointer )
-		end if
-		if valsym < 0 then
-			set_property( -valsym, test_literal_match_key,  match_data_pointer )
-		end if
-		if lsym_type < 0 then
-			set_property( -lsym_type,  test_literal_match_key,  match_data_pointer )
-		end if
-		if valsym_type < 0 then
-			set_property( -valsym_type,  test_literal_match_key,  match_data_pointer )
-		end if
-		if routine_sym < 0 then
-			set_property( -routine_sym, test_literal_match_key, match_data_pointer )
-		end if
-	end if
+
 end procedure
 
 
@@ -1961,7 +1972,9 @@ procedure Assignment(token left_var)
 		integer temp_len = length(Code)
 		if assign_op = EQUALS then
 			Expr() -- RHS expression
-			test_literal_match(left_sym, Top()) 
+			if not forward_type_mismatch_warning(left_sym, Top()) then
+				type_mismatch_warning(left_sym, Top())
+			end if
 			InitCheck(left_sym, FALSE)
 		else
 			InitCheck(left_sym, TRUE)
@@ -4018,23 +4031,15 @@ procedure Procedure_call(token tok)
 	end if
 	ParseArgs(s)
 
-	stack_segment = {}
-	-- grab elements from the stack
+	
+	sequence stack_and_routine_segment = get_routine_parameters(s)
+	stack_segment = stack_and_routine_segment[1]
+	sequence parameter_segment = stack_and_routine_segment[2]
 	for i = 1 to n do
-		if not Empty() then
-			stack_segment &= Pop()
+		if not forward_type_mismatch_warning(parameter_segment[i], stack_segment[i], sub, i) then
+			type_mismatch_warning(parameter_segment[i], stack_segment[i], sub, i)
 		end if
 	end for
-	-- test elements against their literal sets
-	for i=1 to n do
-		s = SymTab[s][S_NEXT]
-		test_literal_match({sub,i,s}, stack_segment[n-i+1])
-	end for
-	-- put elements back into the stack
-	while length(stack_segment) do
-		Push(stack_segment[$])
-		stack_segment = remove(stack_segment,length(stack_segment))
-	end while
 	
 	-- check for any initialisation code for variables
 	s = SymTab[s][S_NEXT]
