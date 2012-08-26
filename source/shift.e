@@ -408,6 +408,9 @@ export procedure insert_code( sequence code, integer index )
 	shift( index, length( code ) )
 end procedure
 
+--**
+-- replaces the subsequence of the global variable Code, Code[start..finish] with code[start..finish] 
+-- and then adjusts the addresses from code to be like that of Code
 export procedure replace_code( sequence code, integer start, integer finish )
 	Code = replace( Code, code, start, finish )
 	shift( start, length( code ) - (finish - start + 1), finish )

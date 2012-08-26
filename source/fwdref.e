@@ -100,7 +100,28 @@ procedure resolved_reference( integer ref )
 		tx = 0,
 		ax = 0,
 		sp = 0
+
+	ifdef EXTRA_CHECK then
+		object property_ptrs = get_property( ref, test_literal_match_pair_key )
 	
+		if sequence(property_ptrs) then
+			-- I am finding what seem to be properties here. If the property pointers are 
+			-- referenced by other forward referenced values this is not a problem. As an 
+			-- extra check, if this condition is enabled. We shouldn't ever see the 
+			-- 'This forward reference...' message displayed.
+			sequence property = property_ptrs
+			for i = 1 to length(property_ptrs) do
+				property[i] = peek4s(property_ptrs[i] & 6)
+				integer nl = find(1, property[i]  < 0 )
+				if nl and equal(forward_references[-property[i][nl]],0) then
+					printf(1, "\tThis forward reference at %d has been cleared.\n")
+				end if
+			end for
+		end if
+	end ifdef
+		
+	del_property( ref, test_literal_match_pair_key )
+
 	if forward_references[ref][FR_SUBPROG] = TopLevelSub then
 		tx = find( ref, toplevel_references[file] )
 	else
@@ -142,6 +163,7 @@ sequence patch_code_temp = {}
 sequence patch_linetab_temp = {}
 symtab_index patch_code_sub
 symtab_index patch_current_sub
+-- Sets the Code and LineTable variables according to what is set for this forward reference ref.
 procedure set_code( integer ref )
 	patch_code_sub = forward_references[ref][FR_SUBPROG]
 	
@@ -222,7 +244,7 @@ export procedure set_property( positive_integer ref, atom key, object data )
 	forward_references[ref][FR_PROPERTIES] = pair
 end procedure
 
-export constant test_literal_match_pair_key = new_property_type()
+export constant test_literal_match_pair_key = new_property_type(), test_literal_match_routine_key = new_property_type()
 
 export procedure set_line( integer ref, integer line_no, sequence this_line, integer bp )
 	forward_references[ref][FR_LINE] = line_no
@@ -298,6 +320,8 @@ procedure patch_forward_nameof( token tok, integer ref )
 	reset_code()
 end procedure
 
+
+-- patches the function call pointed to by ref with the function definition that it has found at tok
 procedure patch_forward_call( token tok, integer ref )
 	-- Format of IL:
 	-- pc   OPCODE
@@ -323,7 +347,6 @@ procedure patch_forward_call( token tok, integer ref )
 	integer supplied_args = code[pc+2]
 	sequence name = fr[FR_NAME]
 	
-	patch_type_mismatch_warning( tok, ref )
 	if Code[pc] != FUNC_FORWARD and Code[pc] != PROC_FORWARD then
 		prep_forward_error( ref )
 		CompileErr( "The forward call to [4] wasn't where we thought it would be: [1]:[2]:[3]",
@@ -403,6 +426,12 @@ procedure patch_forward_call( token tok, integer ref )
 			params[defarg] = Pop()
 		else
 			extra_default_args = 0
+			if code[i] < 0 then
+				forward_type_mismatch_warning(code[i], param_sym, sub, i - (pc + 2))
+			else
+				type_mismatch_warning(code[i], param_sym, sub, i - (pc + 2))
+			end if
+			
 			ifdef DEBUG then
 				if symtab_index(param_sym) and symtab_index(sym_type(param_sym)) then
 					printf(1, "%s is of type %s routine %s.\n", { sym_name(param_sym), sym_name(sym_type(param_sym)), sym_name(code_sub)})
@@ -491,12 +520,17 @@ procedure patch_type_mismatch_warning( token tok, positive_integer ref )
 	end if
 	for i = 1 to length(test_parameter_ptrs) do
 	
-		sequence test_parameter_data = peek4s(test_parameter_ptrs[i] & 6)
+		sequence old_parameter_data, test_parameter_data = peek4s(test_parameter_ptrs[i] & 6)
 		integer ref_location = find( -ref, test_parameter_data )
 		if ref_location = 0 then
+				-- no negative numbers in test_parameter_data, then we missed this before and should have got rid of it.
+				if find(1, test_parameter_data < 0) = 0 then 
+					test_parameter_ptrs[i] = 0
+				end if
 				continue
 		end if
 	
+		old_parameter_data = test_parameter_data
 		test_parameter_data[ref_location] = tok[T_SYM]
 		poke4(test_parameter_ptrs[i]+(ref_location-1)*4, tok[T_SYM])
 		integer routine_sym = test_parameter_data[1]
@@ -505,7 +539,10 @@ procedure patch_type_mismatch_warning( token tok, positive_integer ref )
 		integer rsym = test_parameter_data[4]
 		integer lsym_type = test_parameter_data[5]
 		integer rsym_type = test_parameter_data[6]
-		if symtab_index(lsym) and lsym > 0 then
+		if symtab_index(tok[T_SYM]) and lsym > 0 then -- LSYM
+			if lsym_type < 0 and sym_type(lsym) > 0 then
+				del_property( -lsym_type, test_literal_match_pair_key )
+			end if
 			lsym_type = sym_type(lsym)
 			if lsym_type < 0 then
 				object lprops = get_property( -lsym_type,  test_literal_match_pair_key )
@@ -513,11 +550,17 @@ procedure patch_type_mismatch_warning( token tok, positive_integer ref )
 					lprops = {}
 				end if
 				poke4(test_parameter_ptrs[i]+4*4, lsym_type)
-				lprops = append(lprops, test_parameter_ptrs[i])
+				if find( test_parameter_ptrs[i], lprops ) = 0 then
+					lprops = append(lprops, test_parameter_ptrs[i])
+				end if
 				set_property( -lsym_type, test_literal_match_pair_key, lprops )
+			else
 			end if
 		end if
 		if symtab_index(rsym) and rsym > 0 then
+			if rsym_type < 0 and sym_type(rsym) > 0 then
+				del_property( -rsym_type, test_literal_match_pair_key )
+			end if
 			rsym_type = sym_type(rsym)
 			if rsym_type < 0 then
 				object rprops = get_property( -rsym_type,  test_literal_match_pair_key )
@@ -525,7 +568,9 @@ procedure patch_type_mismatch_warning( token tok, positive_integer ref )
 					rprops = {}
 				end if
 				poke4(test_parameter_ptrs[i]+4*5, rsym_type)
-				rprops = append(rprops, test_parameter_ptrs[i])
+				if find( test_parameter_ptrs[i], rprops ) = 0 then
+					rprops = append(rprops, test_parameter_ptrs[i])
+				end if
 				set_property( -rsym_type, test_literal_match_pair_key, rprops )
 			end if
 		end if
