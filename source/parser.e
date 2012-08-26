@@ -1356,7 +1356,7 @@ public function get_routine_parameters(symtab_index routine_sym)
 	end for
 	
 	-- grab the parameters
-	for i = 1 to n do
+	for i = 1 to length(stack_segment) do
 		s = SymTab[s][S_NEXT]
 		parameter_segment = append(parameter_segment, s)
 		Push(stack_segment[i])
@@ -1963,6 +1963,7 @@ procedure Assignment(token left_var)
 		if assign_op = COLON then
 			CompileErr(133, {lname})
 		else
+			? 1/0
 			CompileErr(76, {lname})
 		end if
 	end if
@@ -4036,10 +4037,13 @@ procedure Procedure_call(token tok)
 	stack_segment = stack_and_routine_segment[1]
 	sequence parameter_segment = stack_and_routine_segment[2]
 	for i = 1 to n do
+		s = SymTab[s][S_NEXT]
 		if not forward_type_mismatch_warning(parameter_segment[i], stack_segment[i], sub, i) then
 			type_mismatch_warning(parameter_segment[i], stack_segment[i], sub, i)
 		end if
 	end for
+	
+	
 	
 	-- check for any initialisation code for variables
 	s = SymTab[s][S_NEXT]
