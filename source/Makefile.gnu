@@ -190,7 +190,6 @@ endif
 
 ifndef TESTFILE
 COVERAGE_ERASE=-coverage-erase
-TESTFILE=-log
 endif
 
 ifeq  "$(ELINUX)" "1"

@@ -48,7 +48,7 @@ enum
 	FR_HASHVAL,
 --	FR_PRIVATE_LIST, -- not used yet
 	FR_DATA,  -- extra info
-	FR_PROPERTIES
+	FR_PROPERTIES -- used by get_property, set_property, del_property
 
 constant FR_SIZE = FR_PROPERTIES
 
@@ -101,7 +101,7 @@ procedure resolved_reference( integer ref )
 		ax = 0,
 		sp = 0
 
-	ifdef EXTRA_CHECK then
+	ifdef DEBUG then
 		object property_ptrs = get_property( ref, test_literal_match_pair_key )
 	
 		if sequence(property_ptrs) then
@@ -205,12 +205,45 @@ end procedure
 atom property_value = 1999
 constant property_multiplier = 1993
 public integer property_count = 0
+
+--**
+-- Create a special key for associating data with for forward references 
+-- (passed as a positive value)
+--
+-- Parameters:
+--   # this function takes no parameters
+--
+-- Returns:
+--   the said special key.  The key will be a positive integer. 
+--
+-- Errors:
+--   
+--
+-- Comments:
+--    Because the (add,get,set)_data routines already have a use for the data they contain,
+--  it has become necessary to create yet another field which we call properties.  This is a
+--  function for creating property types for all of the forward references.
 export function new_property_type()
 	property_value *= property_multiplier
 	property_value = remainder( property_value, #7FFF_FFFF)
 	return property_value
 end function
 
+
+
+--**
+-- Get a property for a particular forward reference and a key.
+--
+-- Parameters:
+--   # ##ref## is the forward reference passed as a positive integer
+--   # ##key## is the special key which identifies the property
+--
+-- Returns:
+--   The property value or 0 if this property is not set for this forward reference.
+--
+-- Errors:
+--   returns 0 if there is no properties for this forward reference
+--
 export function get_property( positive_integer ref, atom key )
 	sequence pairs = forward_references[ref][FR_PROPERTIES]
 	integer i1 = find(key,pairs[1])
@@ -220,9 +253,25 @@ export function get_property( positive_integer ref, atom key )
 	return pairs[2][i1]
 end function
 
+--**
+-- Delete a property of forward reference, ref and a key.
+--
+-- Parameters:
+--   # ##ref## is the forward reference passed as a positive integer
+--   # ##key## is the special key which identifies the property
+--
+-- Errors:
+--   
+--
+-- Comments:
+--   Removes the property of ##ref## and ##key##.
+--
 export procedure del_property( positive_integer ref, atom key )
 	sequence pair = forward_references[ref][FR_PROPERTIES]
 	integer loc = find( key, pair[1] )
+	if not loc then
+		return
+	end if
 	forward_references[ref][FR_PROPERTIES] = 0
 	pair[1] = remove(pair[1],loc)
 	pair[2] = remove(pair[2],loc)
@@ -230,6 +279,20 @@ export procedure del_property( positive_integer ref, atom key )
 	forward_references[ref][FR_PROPERTIES] = pair
 end procedure
 	
+--**
+-- Sets a property of forward reference, ref and a key.
+--
+-- Parameters:
+--   # ##ref## is the forward reference passed as a positive integer
+--   # ##key## is the special key which identifies the property
+--   # ##data## can be any data.
+--
+-- Errors:
+--   
+--
+-- Comments:
+--   Sets the property of ##ref## and ##key## to ##data##.
+--
 export procedure set_property( positive_integer ref, atom key, object data )
 	sequence pair = forward_references[ref][FR_PROPERTIES]
 	forward_references[ref][FR_PROPERTIES] = 0
@@ -244,7 +307,21 @@ export procedure set_property( positive_integer ref, atom key, object data )
 	forward_references[ref][FR_PROPERTIES] = pair
 end procedure
 
-export constant test_literal_match_pair_key = new_property_type(), test_literal_match_routine_key = new_property_type()
+ 
+-- Comments:
+--   This data is for keeping track of both assignments, comparisons and parameter passing.
+--   Everywhere we test for a alternative literal match. The property it points to via
+--   [[:set_property]] and [[:get_property]], is a sequence of pointers. The pointers will be freed
+--   by EUPHORIA's cleanup system. Each pointer points to six signed 4-byte values. Which are, in
+--   order, this order routine_id (0 if not applicable), parameter number (0 if not applicable),
+--   left symbol value, right symbol value, left symbol type, and right symbol type. The symbols
+--   that are encoded as negative values are forward references. Those that are encoded as 0. The
+--   symbols that are encoded as positive values are symtab_indexes. The same pointer may be set as
+--   a property for distinct forward references. We can update these six values as we resolve these
+--   references when we have all of the data we need we check to see if the types are both
+--   enumerated and if they match and issue a warning if they don't.
+--      
+export constant test_literal_match_pair_key = new_property_type()
 
 export procedure set_line( integer ref, integer line_no, sequence this_line, integer bp )
 	forward_references[ref][FR_LINE] = line_no
@@ -431,21 +508,8 @@ procedure patch_forward_call( token tok, integer ref )
 			else
 				type_mismatch_warning(code[i], param_sym, sub, i - (pc + 2))
 			end if
-			
-			ifdef DEBUG then
-				if symtab_index(param_sym) and symtab_index(sym_type(param_sym)) then
-					printf(1, "%s is of type %s routine %s.\n", { sym_name(param_sym), sym_name(sym_type(param_sym)), sym_name(code_sub)})
-				else
-					printf(1, "%d is not a symtab index.\n", {code[i]})
-				end if
-				object rprops = get_property( ref, test_literal_match_pair_key )
-				if sequence(rprops) then
-					printf(1, "Properties had been set for this routine %s.\n", sym_name(code_sub))
-				end if
-			end ifdef
 			add_private_symbol( code[i], SymTab[param_sym][S_NAME] )
-			params[defarg] = code[i]
-			
+			params[defarg] = code[i]			
 		end if
 	end for
 	
@@ -720,10 +784,10 @@ procedure patch_forward_case( token tok, integer ref )
 	end if
 	
  	ifdef DEBUG then	
-	if not cx then
-		prep_forward_error( ref )
-		InternalErr( 261, { fr[FR_NAME] } )
-	end if
+		if not cx then
+			prep_forward_error( ref )
+			InternalErr( 261, { fr[FR_NAME] } )
+		end if
 	end ifdef
 	
 	integer negative = 0
