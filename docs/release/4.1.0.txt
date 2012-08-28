@@ -24,6 +24,7 @@
 * Architecture ifdefs (X86, X86_64, ARM, BITS32, BITS64, LONG32, LONG64)
 * -arch option for translator for cross translating
 * [[ticket:657]] name_of call added for display of alternative literals
+* [[ticket:657]] warnings are displayed when two variables or literals of distinct enumerated types are compared or one is assigned to the other.
 * -cc-prefix option for translator
 * Can [[assign to multiple variables -> :Multiple Assignment]] with one statement using sequence semantics.
 * Use ##?## to stand in for default parameters.

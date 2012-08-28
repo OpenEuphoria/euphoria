@@ -13,6 +13,8 @@ without type_check
 include std/filesys.e
 include std/sort.e
 include std/search.e
+include std/machine.e
+include std/types.e
 
 include global.e
 include parser.e
@@ -307,7 +309,7 @@ export procedure set_property( positive_integer ref, atom key, object data )
 	forward_references[ref][FR_PROPERTIES] = pair
 end procedure
 
- 
+--** 
 -- Comments:
 --   This data is for keeping track of both assignments, comparisons and parameter passing.
 --   Everywhere we test for a alternative literal match. The property it points to via
@@ -322,6 +324,113 @@ end procedure
 --   enumerated and if they match and issue a warning if they don't.
 --      
 export constant test_literal_match_pair_key = new_property_type()
+
+
+--** 
+-- append a new pointer to a forward reference in its match pair information unless it already
+-- has that pointer in the list.
+export procedure include_match_pair(positive_integer ref, atom ptr)
+	object match_data = get_property( ref, test_literal_match_pair_key )
+	if atom(match_data) then
+		match_data = {}
+	end if
+	if not find(ptr, match_data) then
+		match_data = append(match_data, ptr)
+	end if
+	set_property( ref, test_literal_match_pair_key, match_data )
+end procedure
+
+
+--** 
+-- Creates a new space for match pair data to go and returns its pointer
+-- The pointer should not be freed.
+export function new_match_pair_data()
+	return allocate(4 * 6, TRUE)
+end function
+
+--**
+-- Gets the routine symbol for nth match pair entry
+--
+export function get_match_pair_data_routine(atom ptr)
+	return peek4s(ptr)
+end function
+
+--**
+-- Gets the routine index for the nth match pair entry
+export function get_match_pair_data_index(atom ptr)
+	return peek4s(ptr+4)
+end function
+
+--**
+-- Gets the left value for the nth match pair entry
+export function get_match_pair_data_left_value(atom ptr)
+	sequence data = peek4s({ptr,6})
+	return data[3]
+end function
+
+--**
+-- Gets the right value for the nth match pair entry
+export function get_match_pair_data_right_value(atom ptr)
+	sequence data = peek4s({ptr,6})
+	return data[4]
+end function
+
+--**
+-- Gets the left hand symbol value in ptr
+export function get_match_pair_data_left_type(atom ptr)
+	sequence data = peek4s({ptr,6})
+	return data[5]
+end function
+
+--**
+-- Gets the right hand symbol type in ptr
+export function get_match_pair_data_right_type(atom ptr)
+	
+	sequence data = peek4s({ptr,6})
+	return data[6]
+end function
+	
+--**
+-- Sets the routine right hand symbol type symbol in ptr
+export procedure set_match_pair_data_right_type(atom ptr, symtab_pointer p)
+	
+	poke4(ptr+5*4,p)
+end procedure
+
+--**
+-- Sets the routine right hand symbol type symbol in ptr
+export procedure set_match_pair_data_left_type(atom ptr, symtab_pointer p)
+	
+	poke4(ptr+4*4,p)
+end procedure
+
+--**
+-- Sets the routine right hand symbol type symbol in ptr
+export procedure set_match_pair_data_right_value(atom ptr, symtab_pointer p)
+	
+	poke4(ptr+3*4,p)
+end procedure
+
+--**
+-- Sets the routine right hand symbol type symbol in ptr
+export procedure set_match_pair_data_left_value(atom ptr, symtab_pointer p)
+	
+	poke4(ptr+2*4,p)
+end procedure
+
+--**
+-- Sets the routine right hand symbol type symbol in ptr
+export procedure set_match_pair_data_index(atom ptr, symtab_pointer p)
+	
+	poke4(ptr+4,p)
+end procedure
+
+--**
+-- Sets the routine right hand symbol type symbol in ptr
+export procedure set_match_pair_data_routine(atom ptr, symtab_pointer p)
+	
+	poke4(ptr,p)
+end procedure
 
 export procedure set_line( integer ref, integer line_no, sequence this_line, integer bp )
 	forward_references[ref][FR_LINE] = line_no
@@ -603,22 +712,14 @@ procedure patch_type_mismatch_warning( token tok, positive_integer ref )
 		integer rsym = test_parameter_data[4]
 		integer lsym_type = test_parameter_data[5]
 		integer rsym_type = test_parameter_data[6]
-		if symtab_index(tok[T_SYM]) and lsym > 0 then -- LSYM
+		if symtab_index(tok[T_SYM]) and lsym > 0 then
 			if lsym_type < 0 and sym_type(lsym) > 0 then
 				del_property( -lsym_type, test_literal_match_pair_key )
 			end if
 			lsym_type = sym_type(lsym)
 			if lsym_type < 0 then
-				object lprops = get_property( -lsym_type,  test_literal_match_pair_key )
-				if equal(0,lprops) then
-					lprops = {}
-				end if
-				poke4(test_parameter_ptrs[i]+4*4, lsym_type)
-				if find( test_parameter_ptrs[i], lprops ) = 0 then
-					lprops = append(lprops, test_parameter_ptrs[i])
-				end if
-				set_property( -lsym_type, test_literal_match_pair_key, lprops )
-			else
+				set_match_pair_data_left_type(test_parameter_ptrs[i], lsym_type)
+				include_match_pair( -lsym_type, test_parameter_ptrs[i] )
 			end if
 		end if
 		if symtab_index(rsym) and rsym > 0 then
@@ -627,15 +728,8 @@ procedure patch_type_mismatch_warning( token tok, positive_integer ref )
 			end if
 			rsym_type = sym_type(rsym)
 			if rsym_type < 0 then
-				object rprops = get_property( -rsym_type,  test_literal_match_pair_key )
-				if equal(0,rprops) then
-					rprops = {}
-				end if
-				poke4(test_parameter_ptrs[i]+4*5, rsym_type)
-				if find( test_parameter_ptrs[i], rprops ) = 0 then
-					rprops = append(rprops, test_parameter_ptrs[i])
-				end if
-				set_property( -rsym_type, test_literal_match_pair_key, rprops )
+				set_match_pair_data_right_type(test_parameter_ptrs[i], rsym_type)
+				include_match_pair( -rsym_type, test_parameter_ptrs[i])
 			end if
 		end if
 		

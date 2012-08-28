@@ -1826,9 +1826,11 @@ include std/machine.e
 -- run the literal_match test.
 public function forward_type_mismatch_warning(symtab_pointer left_sym, symtab_pointer right_sym, integer routine_sym = 0, integer parameter_index = 0)
 	sequence forward_refs = routine_sym & parameter_index & left_sym & right_sym & 0 & 0
+	symtab_pointer right_sym_type = 0
+	symtab_pointer left_sym_type = 0
 	if routine_sym >= 0 and left_sym and right_sym and symtab_index(left_sym) and symtab_index(right_sym) and length(SymTab[left_sym]) >= S_VTYPE and length(SymTab[right_sym]) >= S_VTYPE then
-		symtab_pointer right_sym_type = sym_type(right_sym)
-		symtab_pointer left_sym_type = sym_type(left_sym)
+		right_sym_type = sym_type(right_sym)
+		left_sym_type = sym_type(left_sym)
 		forward_refs = forward_refs[1..4] & left_sym_type & right_sym_type
 		if right_sym_type and left_sym_type and symtab_index(right_sym_type) and symtab_index(left_sym_type) 
 			and	find(sym_mode(left_sym),  {M_CONSTANT, M_NORMAL}) != 0 
@@ -1837,19 +1839,19 @@ public function forward_type_mismatch_warning(symtab_pointer left_sym, symtab_po
 		end if
 	end if
 	
-	atom match_data_pointer = allocate( 6 * 4, 1 )
-	poke4(match_data_pointer, forward_refs)
+	atom match_data_pointer = new_match_pair_data()
+	set_match_pair_data_routine(match_data_pointer, routine_sym) 
+	set_match_pair_data_index(match_data_pointer, parameter_index) 
+	set_match_pair_data_left_value(match_data_pointer, left_sym) 
+	set_match_pair_data_right_value(match_data_pointer, right_sym) 
+	set_match_pair_data_left_type(match_data_pointer, left_sym_type) 
+	set_match_pair_data_right_type(match_data_pointer, right_sym_type) 
 	
 	object match_data
 	integer fi = length(forward_refs)
 	while fi > 0 do
 		if forward_refs[fi] < 0 then
-			match_data = get_property( -forward_refs[fi], test_literal_match_pair_key )
-			if atom(match_data) then
-				match_data = {}
-			end if
-			match_data = append(match_data, match_data_pointer)
-			set_property( -forward_refs[fi], test_literal_match_pair_key, match_data )
+			include_match_pair(-forward_refs[fi], match_data_pointer)
 		end if
 		fi -= 1
 	end while
