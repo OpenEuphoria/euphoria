@@ -1201,10 +1201,20 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 							-- anything else okay...
 
 					end switch
-					if length(errloc) and not match(errloc, msg) then
-						msg &= errloc
-						prep_forward_error( errors[e] )
-					end if
+				elsif ref[FR_TYPE] = MS_MEMBER then
+					errloc = sprintf("\t\'%s\' (%s:%d) could not be resolved as a member of %s (%s).\n",
+												{
+												ref[FR_NAME],
+												abbreviate_path(known_files[ref[FR_FILE]]),
+												ref[FR_LINE],
+												join( ref[FR_DATA], "." ),
+												opnames[ref[FR_OP]]
+											})
+				end if
+				
+				if length(errloc) and not match(errloc, msg) then
+					msg &= errloc
+					prep_forward_error( errors[e] )
 				end if
 				
 			end if
