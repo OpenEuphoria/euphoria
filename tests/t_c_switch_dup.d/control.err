@@ -1,0 +1,19 @@
+/home/matt/eu/oe/tests/t_c_switch_dup.e:9
+duplicate case value used in switch: D = 1
+	case D then
+	      ^
+
+
+--- Defined Words ---
+EU4
+EU4_1
+EU4_1_0
+CONSOLE
+UNIX
+LINUX
+X86_64
+BITS64
+LONG64
+E64
+EUI
+-------------------

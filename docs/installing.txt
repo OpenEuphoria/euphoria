@@ -8,7 +8,7 @@ operating system.
 === Windows
 
 All versions other than Windows 95 work without problems.  To use Windows 95, it must have Internet Explorer version 4 or higher
-installed (included in service pack 2.5).  To use the new socket functions you will also need fully patched versions of Windows.
+installed (included in service pack 2.5).  To use the new socket functions you will also Windows 2000 or later.  To use all of the new standard library functions you will need at least Windows XP or later.
 
 EUPHORIA is frequently tested on versions Windows XP, Vista, 7.
 
@@ -94,19 +94,18 @@ directory for the C:\EUPHORIA examples below.
 =====  More on editing environment variables
 
 
-* If your PATH is not set, you
- will have to create one that includes C:\EUPHORIA\BIN.
 * set EUDIR to the location of your Euphoria installation directory.
+* In PATH you need to include %EUDIR%\BIN.
 * There is another, optional, environment variable used by some experienced
- users of Euphoria. It is called EUINC (see the [[:include statement]] ). It determines the search path for
- included files. You might want to add it, or change it, when you install a new
- version of Euphoria.
+ users of Euphoria. It is called EUINC (see the [[:include statement]] ). It determines a search path for
+ included files and this variable is used by new and older versions of EUPHORIA. However, for 4.0 and above we now have a [[:set_up_the_euphoria_configuration_file|"configuration file"]] for adding include paths and other settings.
 
+@[:modifying_the_registry|]
 ==== Modifying the Registry
  
 Updating the environment is not enough, your old installation will still be called when you open a Euphoria program in explorer or invoke the Euphoria program on the command line without typing in the interpreter (eui euiw).  Do not type in the single quotes.
 
-You can set these in regedit:
+You can set these in regedit (replace C:\EUPHORIA with your Euphoria installation directory):
 {{{
 HKEY_CLASSES_ROOT\.exw\(Default) => 'EUWinApp'
 HKEY_CLASSES_ROOT\EuWinApp\(Default) => 'Euphoria Windows App'
@@ -287,8 +286,8 @@ Before building.
 The "include", "demo" and "tutorial" directories are the same in
 //Windows// and //Unix//.
 
-
 %%output=configuration
+@[:set_up_the_euphoria_configuration_file|]
 == Set Up the Euphoria Configuration File (eu.cfg)
 
 Euphoria supports reading command line switches from configuration files. The 

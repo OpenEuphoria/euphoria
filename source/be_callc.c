@@ -1201,12 +1201,12 @@ int64_t icall_x86_64( intptr_t func, double* xmm, int64_t *r, int args ){
 				r[5], r[6], r[7], r[8], r[9],
 				r[10], r[11], r[12], r[13], 
 				r[14], r[15], r[16],
-				xmm[0], xmm[1], xmm[2], xmm[3], xmm[4] );
+				xmm[0], xmm[1], xmm[2], xmm[3], xmm[4], xmm[5], xmm[6], xmm[7] );
 	}
 }
 
 double dcall_x86_64( intptr_t func, double* xmm, int64_t *r ){
-	return ((double (*)())func)( xmm[0], xmm[1], xmm[2], xmm[3], xmm[4],
+	return ((double (*)())func)( xmm[0], xmm[1], xmm[2], xmm[3], xmm[4], xmm[5], xmm[6], xmm[7],
 			r[0], r[1], r[2], r[3], r[4], 
 			r[5], r[6], r[7], r[8], r[9],
 			r[10], r[11], r[12], r[13], 
@@ -1214,7 +1214,7 @@ double dcall_x86_64( intptr_t func, double* xmm, int64_t *r ){
 }
 
 float fcall_x86_64( intptr_t func, double* xmm, int64_t *r ){
-	return ((float (*)())func)( xmm[0], xmm[1], xmm[2], xmm[3], xmm[4],
+	return ((float (*)())func)( xmm[0], xmm[1], xmm[2], xmm[3], xmm[4], xmm[5], xmm[6], xmm[7],
 			r[0], r[1], r[2], r[3], r[4], 
 			r[5], r[6], r[7], r[8], r[9],
 			r[10], r[11], r[12], r[13], 
@@ -1252,7 +1252,7 @@ union xmm_param {
  * stack separately from what goes into the registers.
  */
 #define MAX_INT_PARAM_REGISTERS 6
-#define MAX_FP_PARAM_REGISTERS 5
+#define MAX_FP_PARAM_REGISTERS 8
 #define INCREMENT_FP_ARGS ;
 #define INCREMENT_INT_ARGS ;
 #define SIGNATURE_PARAM
@@ -1325,7 +1325,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	 * floating point params could start overflowing onto the stack
 	 * before we have enough ints to go there.
 	 */
-	union xmm_param dbl_op[5];
+	union xmm_param dbl_op[8];
 	intptr_t xmm_i = 0;
 	intptr_t arg_stack = MAX_INT_PARAM_REGISTERS;
 	int int_args = 0;

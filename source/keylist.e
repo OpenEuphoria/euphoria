@@ -173,6 +173,9 @@ export sequence keylist = {
 	{"peek_pointer",     SC_PREDEF, FUNC, PEEK_POINTER,     1, E_PURE},
 	{"sizeof",           SC_PREDEF, FUNC, SIZEOF,           1, E_PURE},
 	{"deprecate",        SC_KEYWORD, DEPRECATE, 0, 0, 0},
+	{"poke_long",        SC_PREDEF, PROC, POKE_LONG,        2, E_OTHER_EFFECT},
+	{"peek_longs",       SC_PREDEF, FUNC, PEEK_LONGS,       1, E_PURE},
+	{"peek_longu",       SC_PREDEF, FUNC, PEEK_LONGU,       1, E_PURE},
 	{"name_of",          SC_PREDEF, FUNC, IS_AN_OBJECT,     1, E_PURE},
 	$
 

@@ -539,11 +539,12 @@ ifdef EU4_0 then
 			case C_SHORT, C_WORD, C_USHORT then
 				return 2
 			-- In 4.0 everything is x86-32
-			case C_INT, C_LONG, C_ULONG then
-			case C_SIZE_T, C_POINTER, C_FLOAT then
+			case E_OBJECT, E_INTEGER, E_ATOM, E_SEQUENCE, C_INT, C_UINT, C_LONG, C_ULONG, C_SIZE_T, C_POINTER, C_FLOAT then
 				return 4
 			case C_DOUBLE, C_DWORDLONG, C_LONGLONG then
 				return 8
+			case else
+				crash( "Value %08x is not a handled constant and is being passed to sizeof()", x )
 		end switch
 	end function
 end ifdef

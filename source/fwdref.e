@@ -516,14 +516,26 @@ procedure patch_forward_call( token tok, integer ref )
 	-- pc+3 Args... [/ Func target]
 	
 	sequence fr = forward_references[ref]
-	integer code_sub = fr[FR_SUBPROG]
 	symtab_index sub = tok[T_SYM]
+
+	if sequence( fr[FR_DATA] ) then
+		sequence defarg = fr[FR_DATA][1]
+		symtab_index paramsym = defarg[2]
+		token old = { RECORDED, defarg[3] }
+		integer tx = find( old, SymTab[paramsym][S_CODE] )
+		SymTab[paramsym][S_CODE][tx] = tok
+		resolved_reference( ref )
+		return
+	end if
+	
+	integer code_sub = fr[FR_SUBPROG]
+	
 	integer args = SymTab[sub][S_NUM_ARGS]
 	integer is_func = (SymTab[sub][S_TOKEN] = FUNC) or (SymTab[sub][S_TOKEN] = TYPE)
 	
 	integer real_file = current_file_no
 	current_file_no = fr[FR_FILE]
-	
+
 	set_code( ref )
 	sequence code = Code
 	integer temp_sub = CurrentSub
@@ -532,7 +544,7 @@ procedure patch_forward_call( token tok, integer ref )
 	integer next_pc = pc
 	integer supplied_args = code[pc+2]
 	sequence name = fr[FR_NAME]
-	
+
 	if Code[pc] != FUNC_FORWARD and Code[pc] != PROC_FORWARD then
 		prep_forward_error( ref )
 		CompileErr( "The forward call to [4] wasn't where we thought it would be: [1]:[2]:[3]",
@@ -791,6 +803,20 @@ procedure patch_forward_variable( token tok, integer ref )
 		end while
 		resolved_reference( ref )
 	end if
+
+	if sequence( fr[FR_DATA] ) then
+		for i = 1 to length( fr[FR_DATA] ) do
+			object d = fr[FR_DATA][i]
+			if sequence( d ) and d[1] = PAM_RECORD then
+				-- resolving default parameter tokens
+				symtab_index param = d[2]
+				token old = {RECORDED, d[3]}
+				token new = {VARIABLE, sym}
+				SymTab[param][S_CODE] = find_replace( old, SymTab[param][S_CODE], new )
+			end if
+		end for
+		resolved_reference( ref )
+	end if
 	reset_code()
 end procedure
 
@@ -798,8 +824,15 @@ procedure patch_forward_init_check( token tok, integer ref )
 -- forward reference for a variable
 	sequence fr = forward_references[ref]
 	set_code( ref )
-	Code[fr[FR_PC]+1] = tok[T_SYM]
-	resolved_reference( ref )
+	if sequence( fr[FR_DATA] ) then
+		-- init check in default param code
+		resolved_reference( ref )
+	elsif fr[FR_PC] > 0 then
+		Code[fr[FR_PC]+1] = tok[T_SYM]
+		resolved_reference( ref )
+	else
+		forward_error( tok, ref )
+	end if
 	reset_code()
 end procedure
 
@@ -1090,6 +1123,7 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 	integer 
 		ref, 
 		len = length( inactive_references )
+
 	
 	if len then
 		ref = inactive_references[len]
@@ -1137,28 +1171,29 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 	-- If we're recording tokens (for a default parameter), this ref will never 
 	-- get resolved.  So ignore it for now, and when someone actually calls
 	-- the routine, it will be resolved normally then.
-	if  Parser_mode != PAM_RECORD then
-		if CurrentSub = TopLevelSub then
-			if length( toplevel_references ) < current_file_no then
-				toplevel_references &= repeat( {}, current_file_no - length( toplevel_references ) )
-			end if
-			toplevel_references[current_file_no] &= ref
-		else
-			if length( active_references ) < current_file_no then
-				active_references &= repeat( {}, current_file_no - length( active_references ) )
-				active_subprogs   &= repeat( {}, current_file_no - length( active_subprogs ) )
-			end if
-			integer sp = find( CurrentSub, active_subprogs[current_file_no] )
-			if not sp then
-				active_subprogs[current_file_no] &= CurrentSub
-				sp = length( active_subprogs[current_file_no] )
-				
-				active_references[current_file_no] = append( active_references[current_file_no], {} )
-			end if
-			active_references[current_file_no][sp] &= ref
+	
+	if CurrentSub = TopLevelSub then
+		if length( toplevel_references ) < current_file_no then
+			toplevel_references &= repeat( {}, current_file_no - length( toplevel_references ) )
 		end if
-		fwdref_count += 1
+		toplevel_references[current_file_no] &= ref
+	else
+		add_active_reference( ref )
+
+		if Parser_mode = PAM_RECORD then
+			symtab_pointer default_sym = CurrentSub
+			symtab_pointer param = 0
+			while default_sym with entry do
+				if sym_scope( default_sym ) = SC_PRIVATE then
+					param = default_sym
+				end if
+			entry
+				default_sym = sym_next( default_sym )
+			end while
+			set_data( ref, {{ PAM_RECORD, param, length( Recorded_sym ) }} )
+		end if
 	end if
+	fwdref_count += 1
 	
 	ifdef EUDIS then
 		sequence name = forward_references[ref][FR_NAME]
@@ -1176,6 +1211,27 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 	return ref
 end function
 
+procedure add_active_reference( integer ref, integer file_no = current_file_no )
+	if length( active_references ) < file_no then
+		active_references &= repeat( {}, file_no - length( active_references ) )
+		active_subprogs   &= repeat( {}, file_no - length( active_subprogs ) )
+	end if
+	integer sp = find( CurrentSub, active_subprogs[file_no] )
+	if not sp then
+		active_subprogs[file_no] &= CurrentSub
+		sp = length( active_subprogs[file_no] )
+
+		active_references[file_no] = append( active_references[file_no], {} )
+	end if
+	active_references[file_no][sp] &= ref
+end procedure
+
+procedure remove_active_reference( integer ref, integer file_no = current_file_no )
+	integer sp = find( CurrentSub, active_subprogs[file_no] )
+	active_references[file_no][sp] = remove( active_references[file_no][sp],
+											length( active_references[file_no][sp] ) )
+end procedure
+
 function resolve_file( sequence refs, integer report_errors, integer unincluded_ok )
 	
 	sequence errors = {}
@@ -1186,12 +1242,13 @@ function resolve_file( sequence refs, integer report_errors, integer unincluded_
 		if include_matrix[fr[FR_FILE]][current_file_no] = NOT_INCLUDED and not unincluded_ok then
 			continue
 		end if
+		
 		token tok = find_reference( fr )
 		if tok[T_ID] = IGNORED then
 			errors &= ref
 			continue
 		end if
-		
+
 		-- found a match...
 		integer code_sub = fr[FR_SUBPROG]
 		integer fr_type  = fr[FR_TYPE]
@@ -1225,6 +1282,7 @@ function resolve_file( sequence refs, integer report_errors, integer unincluded_
 					errors &= ref
 					continue
 				end if
+				
 				switch sym_tok do
 					case CONSTANT, ENUM, VARIABLE then
 						patch_forward_variable( tok, ref )
@@ -1307,7 +1365,7 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 		
 	if report_errors and length( errors ) then
 		sequence msg = ""
-		sequence errloc
+		sequence errloc = "Internal Error - Unknown Error Message"
 		
 		for e = length(errors) to 1 by -1 do
 			sequence ref = forward_references[errors[e]]

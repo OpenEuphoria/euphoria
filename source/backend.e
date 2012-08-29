@@ -12,8 +12,9 @@ end ifdef
 
 include std/dll.e
 include std/machine.e
-include std/text.e
-
+-- test to see if we need either of these.
+--include std/text.e
+--include std/map.e
 include global.e
 include common.e
 include mode.e as mode
@@ -292,23 +293,41 @@ procedure BackEnd(integer il_file)
 	end if
 
 	-- M_BACKEND:
-	machine_proc(65, 
-		{
-			st, 
-			sl, 
-			ms, 
-			lit, 
-			include_info, 
-			get_switches(), 
-			Argv,
-			routine_id( "cover_line" ),
-			routine_id( "cover_routine" ),
-			routine_id( "write_coverage_db" ),
-			routine_id( "DisplayColorLine" ),
-			external_debugger_ptr,
-			routine_id( "sprint" ),
-			$
-		})
+	ifdef EU4_0 and EUI then
+		machine_proc(65, 
+			{
+				st, 
+				sl, 
+				ms, 
+				lit, 
+				include_info, 
+				get_switches(), 
+				Argv,
+				$
+			})
+	elsedef
+		machine_proc(65, 
+			{
+				st, 
+				sl, 
+				ms, 
+				lit, 
+				include_info, 
+				get_switches(), 
+				Argv,
+				routine_id( "cover_line" ),
+				routine_id( "cover_routine" ),
+				routine_id( "write_coverage_db" ),
+				routine_id( "DisplayColorLine" ),
+				external_debugger_ptr,	
+				routine_id( "map:new" ),
+				routine_id( "map:put" ),
+				routine_id( "map:get" ),
+				trace_lines,
+				routine_id( "sprint" ),
+				$
+			})
+	end ifdef
 end procedure
 mode:set_backend( routine_id("BackEnd") )
 

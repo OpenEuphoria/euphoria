@@ -15,6 +15,7 @@ include std/cmdline.e
 include std/console.e
 include std/error.e as error
 include std/filesys.e
+include std/get.e
 include std/io.e
 include std/map.e as m
 include std/search.e
@@ -47,6 +48,7 @@ constant COMMON_OPTIONS = {
 	{ "batch",     0, GetMsgText(279,0), { } },
 	{ "strict",    0, GetMsgText(288,0), { } },
 	{ "test",      0, GetMsgText(289,0), { } },
+	{ "trace-lines",0, GetMsgText(TRACE_LINES_CMD, 0), { HAS_PARAMETER, "lines" } },
 	{ "copyright", 0, GetMsgText(281,0), { } },
 	{ "v", "version", GetMsgText(290,0), { } },
  	$
@@ -534,7 +536,15 @@ export procedure handle_common_options(m:map opts)
 			
 			case "eudir" then
 				set_eudir( val )
-				
+			
+			case "trace-lines" then
+				val = value( val )
+				if val[1] = GET_SUCCESS then
+					trace_lines = floor( val[2] )
+				else
+					puts(2, GetMsgText( BAD_TRACE_LINES ) )
+					abort( 1 )
+				end if
 		end switch
 	end for
 

@@ -15,5 +15,5 @@
 -- identify missing include statements.
 
 with define STDDEBUG
-include int.ex
+include eui.ex
 

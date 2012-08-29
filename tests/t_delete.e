@@ -158,4 +158,42 @@ val = {}
 
 test_equal( "recursive assign_subs", 1, delete_count() )
 
+integer
+	atom_check     = 0,
+	integer_check  = 0,
+	object_check   = 0,
+	sequence_check = 0
+
+procedure is_an_atom( object x )
+	atom_check += 1
+end procedure
+
+procedure is_an_integer( object x )
+	integer_check += 1
+end procedure
+
+procedure is_an_object( object x )
+	object_check += 1
+end procedure
+
+procedure is_a_sequence( object x )
+	sequence_check += 1
+end procedure
+
+procedure native_derefs_ticket_775()
+	sequence s = {
+		delete_routine( 1, routine_id("is_an_atom") ),
+		delete_routine( 1, routine_id("is_an_integer") ),
+		delete_routine( 1, routine_id("is_an_object") ),
+		delete_routine( 1, routine_id("is_a_sequence") )
+	}
+	integer x = atom( s[1] ) + integer( s[2] ) + object( s[3] ) + sequence( s[4] )
+	s = ""
+	test_true( "atom check dereferenced temp", atom_check )
+	test_true( "integer check dereferenced temp", integer_check )
+	test_true( "object check dereferenced temp", object_check )
+	test_true( "sequence check dereferenced temp", sequence_check )
+end procedure
+native_derefs_ticket_775()
+
 test_report()

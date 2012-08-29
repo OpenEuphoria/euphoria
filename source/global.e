@@ -599,5 +599,5 @@ export constant LS_DATA = 2 -- literal set
 export sequence literal_sets = {{} -- keys are symtab indicies of the type
 								,{}} -- data
 				
+export integer trace_lines = 500
 	
-

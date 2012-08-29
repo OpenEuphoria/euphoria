@@ -23,6 +23,8 @@ export enum
 	ERRMSG_NAME_OF_NOT_ENUM_TYPE,
 	WARNMSG_ENUM_MISMATCH_TYPES_BINOP,
 	WARNMSG_ENUM_MISMATCH_TYPES_FNCALL,
+	TRACE_LINES_CMD,
+	BAD_TRACE_LINES,
 	$
 
 -- don't change this please, but please look for -deleted- items before adding new options
@@ -395,6 +397,8 @@ constant StdErrMsgs = {
 	{ MSG_CC_PREFIX, "Prefix for compiler and related binaries"},
 	{DUPLICATE_MULTI_ASSIGN, "duplicate variables in left hand side of multiple assignment"},
 	{MISSING_CMD_PARAMETER, "Command line argument [1] requires a parameter"},
+	{TRACE_LINES_CMD, "Specify the number of lines to use in ctrace.out"},
+	{BAD_TRACE_LINES, "the -trace-lines option requires a valid number\n"},
 	$
 }
 

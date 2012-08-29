@@ -1180,7 +1180,7 @@ procedure opSTARTLINE()
 						slist[a][LINE],
 						line})
 		trace_line += 1
-		if trace_line >= 5000 then
+		if trace_line >= trace_lines then
 			-- wrap around to start of file
 			trace_line = 0
 			one_trace_line("")

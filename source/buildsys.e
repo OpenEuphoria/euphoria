@@ -446,9 +446,9 @@ function setup_build()
 		abort(1)
 	end if
 	
-	integer ptr_size = 4
+	integer bits = 32
 	if TX86_64 then
-		ptr_size = 8
+		bits = 64
 	end if
 	
 	switch compiler_type do
@@ -468,13 +468,8 @@ function setup_build()
 				c_flags &= " -fPIC"
 			end if
 
-			ifdef EU4_0 then 
-				c_flags &= sprintf(" -c -w -fsigned-char -O2 -m%d -I%s -ffast-math",
-				{ 4 * 8, adjust_for_build_file(get_eucompiledir()) })
-			elsedef
-				c_flags &= sprintf(" -c -w -fsigned-char -O2 -m%d -I%s -ffast-math",
-				{ ptr_size * 8, adjust_for_build_file(get_eucompiledir()) })
-			end ifdef
+			c_flags &= sprintf(" -c -w -fsigned-char -O2 -m%d -I%s -ffast-math",
+					{ bits, adjust_for_build_file(get_eucompiledir()) })
 			
 			if TWINDOWS and mno_cygwin then
 				-- we must use this compile flag here to ensure that we load the MINGW include
@@ -482,11 +477,7 @@ function setup_build()
 				c_flags &= " -mno-cygwin"
 			end if
 
-			ifdef EU4_0 then
-				l_flags = sprintf( " %s -m%d", { adjust_for_build_file(user_library), 4 * 8 })
-			elsedef			
-				l_flags = sprintf( " %s -m%d", { adjust_for_build_file(user_library), ptr_size * 8 })
-			end ifdef
+			l_flags = sprintf( " %s -m%d", { adjust_for_build_file(user_library), bits })
 
 			if dll_option then
 				l_flags &= " -shared "

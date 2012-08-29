@@ -855,6 +855,8 @@ int eusock_getsock_option(int x)
     		return;
     	}
     	
+    	/* On Windows, you must have Windows Sockets version 2.2 or greater installed.
+    	 * This means at least Windows 2000 Professional or Windows 2000 Server.       */
 		WSAStartupPtr = (WSAStartup_fntype)GetProcAddress(eusock_wsastarted, "WSAStartup");
 		if (WSAStartupPtr == NULL) {
 			RTFatal("Could not load routine WSAStartup.");

@@ -15,12 +15,14 @@ include std/error.e
 
 include euphoria/info.e
 
-include std/sequence.e
-include std/text.e
-include std/search.e
 include std/convert.e
 include std/filesys.e
+include std/map.e
+include std/search.e
+include std/sequence.e
 include std/sort.e
+include std/text.e
+
 
 include literal_set.e as literal_set
 include global.e
@@ -75,6 +77,7 @@ sequence goto_addr
 sequence goto_stack
 sequence goto_ref
 sequence label_block
+map goto_init
 
 -- flow control management
 sequence break_list        -- back-patch list for end if label
@@ -84,6 +87,8 @@ sequence exit_delay        -- delay list for end for/while/until
 sequence continue_list     -- stack of exits to back-patch
 sequence continue_delay    -- stack of exits to back-patch
 sequence entry_addr, continue_addr, retry_addr -- lists of Code indexes for the entry, continue and retry keywords
+
+sequence entry_stack       -- stack for keeping track of uninitialized vars in case of entry
 
 -- block headers
 sequence loop_labels       -- sequence of loop labels, 0 for unlabelled loops
@@ -153,7 +158,7 @@ procedure CheckForUndefinedGotoLabels()
 end procedure
 
 procedure PushGoto()
-	goto_stack = append(goto_stack, {goto_addr, goto_list, goto_labels, goto_delay, goto_line, goto_ref, label_block })
+	goto_stack = append(goto_stack, {goto_addr, goto_list, goto_labels, goto_delay, goto_line, goto_ref, label_block, goto_init })
 	goto_addr = {}
 	goto_list = {}
 	goto_labels = {}
@@ -161,18 +166,22 @@ procedure PushGoto()
 	goto_line = {}
 	goto_ref = {}
 	label_block = {}
+	goto_init = map:new()
 end procedure
 
 procedure PopGoto()
 	CheckForUndefinedGotoLabels()
-	goto_addr = goto_stack[$][1]
-	goto_list = goto_stack[$][2]
+	goto_addr   = goto_stack[$][1]
+	goto_list   = goto_stack[$][2]
 	goto_labels = goto_stack[$][3]
-	goto_delay = goto_stack[$][4]
-	goto_line = goto_stack[$][5]
-	goto_ref = goto_stack[$][6]
+	goto_delay  = goto_stack[$][4]
+	goto_line   = goto_stack[$][5]
+	goto_ref    = goto_stack[$][6]
 	label_block = goto_stack[$][7]
-	goto_stack = goto_stack[1..$-1]
+	goto_init   = goto_stack[$][8]
+	
+	goto_stack = remove( goto_stack, length( goto_stack ) )
+	
 end procedure
 
 procedure EnterTopLevel( integer end_line_table = 1 )
@@ -252,6 +261,8 @@ export procedure InitParser()
 	m_sprint_tok = {VARIABLE,NewIntSym(M_SPRINT)}
 	SymTab[m_sprint_tok[2]][S_OBJ] = M_SPRINT
 	machine_func_tok = {BUILTIN,keyfind("eu:machine_func",-1)}
+	entry_stack = {}
+	goto_init = map:new()	
 end procedure
 
 sequence switch_stack = {}
@@ -262,7 +273,15 @@ enum
 	SWITCH_ELSE,
 	SWITCH_PC,
 	SWITCH_FALLTHRU,
-	SWITCH_VALUE
+	SWITCH_VALUE,
+	SWITCH_CASE_MAP,
+	SWITCH_CASE_VALUES,
+	SWITCH_JUMP_OFFSET,
+	SWITCH_THISLINE,
+	SWITCH_BP,
+	SWITCH_LINE_NUMBER,
+	SWITCH_CURRENT_FILE_NO,
+	$
 
 procedure NotReached(integer tok, sequence keyword)
 -- Issue warning about code that can't be executed
@@ -571,9 +590,9 @@ enum -- struct parseargs_states record
 	PS_ON_ARG
 
 sequence private_list = {}
-integer lock_scanner = 0
+export integer lock_scanner = 0
 integer on_arg = 0
-sequence nested_calls = {}
+export sequence nested_calls = {}
 
 procedure restore_parseargs_states()
 	sequence s
@@ -593,7 +612,7 @@ end procedure
 function read_recorded_token(integer n)
 	token t
 	integer p, prev_Nne
-	if atom(Ns_recorded[n]) then
+	if atom(Ns_recorded[n]) label "top if" then
 		if use_private_list then
 			p = find( Recorded[n], private_list)
 			if p > 0 then -- the value of this parameter is known, use it
@@ -614,8 +633,15 @@ function read_recorded_token(integer n)
 
 			end if
 		end if
+
 		prev_Nne = No_new_entry
 		No_new_entry = 1
+		
+		if Recorded_sym[n] > 0 and  sym_scope( Recorded_sym[n] ) != SC_UNDEFINED then
+			t = { sym_token( Recorded_sym[n] ), Recorded_sym[n] }
+			break "top if"
+		end if
+		
 		t = keyfind(Recorded[n],-1)
 		if t[T_ID] = IGNORED then
 	        p = Recorded_sym[n]
@@ -1594,7 +1620,7 @@ function Term()
 
 	UFactor()
 	tok = next_token()
-	while tok[T_ID] = MULTIPLY or tok[T_ID] = DIVIDE do
+	while tok[T_ID] = reserved:MULTIPLY or tok[T_ID] = reserved:DIVIDE do
 		UFactor()
 		emit_op(tok[T_ID])
 		tok = next_token()
@@ -1623,13 +1649,13 @@ function cexpr()
 
 	tok = aexpr()
 	concat_count = 0
-	while tok[T_ID] = CONCAT do
+	while tok[T_ID] = reserved:CONCAT do
 		tok = aexpr()
 		concat_count += 1
 	end while
 
 	if concat_count = 1 then
-		emit_op(CONCAT)
+		emit_op( reserved:CONCAT )
 
 	elsif concat_count > 1 then
 		op_info1 = concat_count+1
@@ -2297,6 +2323,8 @@ procedure GLabel_statement()
 		n = find(labbel, goto_delay)
 	end while
 
+	force_uninitialize( map:get( goto_init, labbel, {} ) )
+	
 	if TRANSLATE then
 		emit_op(GLABEL)
 		emit_addr(laddr)
@@ -2319,6 +2347,7 @@ procedure Goto_statement()
 			goto_list &= length(Code)+2 --not 1???
 			goto_line &= {{line_number,ThisLine}}
 			goto_ref &= new_forward_reference( GOTO, top_block() )
+			map:put( goto_init, SymTab[tok[T_SYM]][S_OBJ], get_private_uninitialized() )
 			add_data( goto_ref[$], sym_obj( tok[T_SYM] ) )
 			set_line( goto_ref[$], line_number, ThisLine, bp )
 		else
@@ -2693,7 +2722,23 @@ end procedure
 
 procedure push_switch()
 	if_stack &= SWITCH
-	switch_stack = append( switch_stack, { {}, {}, 0, 0, 0, 0 })
+	switch_stack = append( switch_stack,
+			{
+				{},          -- SWITCH_CASES
+				{},          -- SWITCH_JUMP_TABLE
+				0,           -- SWITCH_ELSE
+				0,           -- SWITCH_PC
+				0,           -- SWITCH_FALLTHRU
+				0,           -- SWITCH_VALUE
+				map:new(),   -- SWITCH_CASE_MAP
+				{},          -- SWITCH_CASE_VALUES
+				0,           -- SWITCH_JUMP_OFFSET
+				{},          -- SWITCH_THISLINE
+				{},          -- SWTICH_BP
+				{},          -- SWITCH_LINE_NUMBER
+				{},          -- SWITCH_CURRENT_FILE_NO
+				$
+			})
 end procedure
 
 procedure pop_switch( integer break_base )
@@ -2716,8 +2761,12 @@ procedure add_case( object sym, integer sign )
 	end if
 
 	if find(sym, switch_stack[$][SWITCH_CASES] ) = 0 then
-		switch_stack[$][SWITCH_CASES]       = append( switch_stack[$][SWITCH_CASES], sym )
-		switch_stack[$][SWITCH_JUMP_TABLE] &= length(Code) + 1
+		switch_stack[$][SWITCH_CASES]            = append( switch_stack[$][SWITCH_CASES], sym )
+		switch_stack[$][SWITCH_JUMP_TABLE]      &= length(Code) + 1
+		switch_stack[$][SWITCH_THISLINE]        &= {ThisLine}
+		switch_stack[$][SWITCH_BP]              &= bp
+		switch_stack[$][SWITCH_LINE_NUMBER]     &= line_number
+		switch_stack[$][SWITCH_CURRENT_FILE_NO] &= current_file_no
 
 		if TRANSLATE then
 			emit_addr( CASE )
@@ -2907,6 +2956,11 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 	integer has_sequence   = 0
 	integer has_unassigned = 0
 	integer has_fwdref     = 0
+	sequence unique_values = {}
+	map unique_jumps = map:new()
+	
+	sequence jump = switch_stack[$][SWITCH_JUMP_TABLE]
+	integer jump_offset = 0
 	for i = 1 to length( values ) do
 		if sequence( values[i] ) then
 			has_fwdref = 1
@@ -2914,6 +2968,7 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 		end if
 		integer sym = values[i]
 		integer sign
+		
 		if sym < 0 then
 			sign = -1
 			sym = -sym
@@ -2921,23 +2976,56 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 			sign = 1
 		end if
 		if not equal(SymTab[sym][S_OBJ], NOVALUE) then
-			values[i] = sign * SymTab[sym][S_OBJ]
-			if not is_integer( values[i] ) then
-				all_ints = 0
-				if atom( values[i] ) then
-					has_atom = 1
+			object value_i = sign * SymTab[sym][S_OBJ]
+			values[i] = value_i
+			if TRANSLATE then
+				if Code[jump[i]-2] = CASE then
+					jump_offset -=2
 				else
-					has_sequence = 1
+					jump_offset = 0
 				end if
+			end if
+			
+			if find( value_i, map:get( unique_jumps, jump[i] + jump_offset, {}) ) then
+				-- do nothing...duplicate value for the same jump target...warning?
+				
+			elsif find( value_i, unique_values ) then
+				-- error!
+				-- TODO: need to identify line, plus duplicate sym
+				object v = ""
+				if length( SymTab[sym] ) > S_NAME and sequence( sym_name( sym ) ) then
+					v = sym_name( sym ) & " = " 
+				end if
+				
+				v &= sprint( value_i )
+				ThisLine        = switch_stack[$][SWITCH_THISLINE][i]
+				bp              = switch_stack[$][SWITCH_BP][i]
+				line_number     = switch_stack[$][SWITCH_LINE_NUMBER][i]
+				current_file_no = switch_stack[$][SWITCH_CURRENT_FILE_NO][i]
+				
+				CompileErr("duplicate case value used in switch: [1]", {v})
 			else
-				has_integer = 1
+				
+				unique_values   &= value_i
+				map:put( unique_jumps, jump[i] + jump_offset, value_i, map:APPEND )
+				
+				if not is_integer( value_i ) then
+					all_ints = 0
+					if atom( value_i ) then
+						has_atom = 1
+					else
+						has_sequence = 1
+					end if
+				else
+					has_integer = 1
 
-				if values[i] < min then
-					min = values[i]
-				end if
+					if value_i < min then
+						min = value_i
+					end if
 
-				if values[i] > max then
-					max = values[i]
+					if value_i > max then
+						max = value_i
+					end if
 				end if
 			end if
 		else
@@ -2975,7 +3063,7 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 		atom delta = max - min
 		if not TRANSLATE and  delta < 1024 and delta >= 0 then
 			opcode = SWITCH_SPI
-			sequence jump = switch_stack[$][SWITCH_JUMP_TABLE]
+-- 			sequence jump = switch_stack[$][SWITCH_JUMP_TABLE]
 			sequence switch_table = repeat( else_target, delta + 1 )
 			integer offset = min - 1
 			for i = 1 to length( values ) do
@@ -3062,12 +3150,31 @@ procedure Switch_statement()
 	pop_switch( break_base )
 end procedure
 
+function get_private_uninitialized()
+	sequence uninitialized = {}
+	if CurrentSub != TopLevelSub then
+		symtab_pointer s = SymTab[CurrentSub][S_NEXT]
+		sequence pu = { SC_PRIVATE, SC_UNDEFINED }
+		while s and find( SymTab[s][S_SCOPE], pu ) do
+			if SymTab[s][S_SCOPE] = SC_PRIVATE and SymTab[s][S_INITLEVEL] = -1 then
+				uninitialized &= s
+			end if
+			s = SymTab[s][S_NEXT]
+		end while
+	end if
+	return uninitialized
+end function
+
 procedure While_statement()
 -- Parse a while loop
 	integer bp1
 	integer bp2
 	integer exit_base, next_base
 
+	sequence uninitialized = get_private_uninitialized()
+	
+	entry_stack = append( entry_stack, uninitialized )
+	
 	Start_block( WHILE )
 
 	exit_base = length(exit_list)
@@ -3135,6 +3242,7 @@ procedure While_statement()
 		backpatch(bp2, length(Code)+1)
 	end if
 	exit_loop(exit_base)
+	entry_stack = remove( entry_stack, length( entry_stack ) )
 	push_temps( temps )
 end procedure
 
@@ -3145,6 +3253,9 @@ procedure Loop_statement()
 	token t
 
 	Start_block( LOOP )
+
+	sequence uninitialized = get_private_uninitialized()
+	entry_stack = append( entry_stack, uninitialized )
 
 	exit_base = length(exit_list)
 	next_base = length(continue_list)
@@ -3677,11 +3788,11 @@ function Global_declaration(integer type_ptr, integer scope)
 			integer negate = 0
 			ptok = next_token()
 			switch ptok[T_ID] do
-				case MULTIPLY then
+				case reserved:MULTIPLY then
 					deltafunc = '*'
 					ptok = next_token()
 
-				case DIVIDE then
+				case reserved:DIVIDE then
 					deltafunc = '/'
 					ptok = next_token()
 
@@ -4111,6 +4222,18 @@ procedure Entry_statement()
 	if TRANSLATE then
 	    emit_op(NOP1)
 	end if
+	
+	force_uninitialize( entry_stack[$] )
+
+end procedure
+
+--*
+-- Make sure these symbols are marked uninitialized.  An entry or goto
+-- may require extra init checks after a variable may have been initialized.
+procedure force_uninitialize( sequence uninitialized )
+	for i = 1 to length( uninitialized ) do
+		SymTab[uninitialized[i]][S_INITLEVEL] = -1
+	end for
 end procedure
 
 procedure Statement_list()

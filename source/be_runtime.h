@@ -50,6 +50,8 @@ extern int print_chars;  // value can be checked by caller
 
 extern struct op_info optable[MAX_OPCODE+1];
 
+extern int trace_lines;
+
 void debug_msg(char *msg);
 
 void UserCleanup(int status)
@@ -228,8 +230,10 @@ int getKBchar();
 
 #if INTPTR_MAX == INT32_MAX
 #define CALLBACK_POINTER 0x12345678
+#define general_ptr_magic 0xF001F001
 
 #elif INTPTR_MAX == INT64_MAX
+#define general_ptr_magic 0xabcdefabcdefabcdLL
 #ifdef ERUNTIME
 #define CALLBACK_POINTER ((uintptr_t)0x1234567812345678LL)
 #else
@@ -237,11 +241,10 @@ int getKBchar();
 #endif
 #endif
 
-
 #ifdef EOSX
 uintptr_t __cdecl osx_cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 						uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
-						uintptr_t arg7, uintptr_t arg8, uintptr_t arg9)
+                        uintptr_t arg7, uintptr_t arg8, uintptr_t arg9);
 #endif // EOSX
 extern uintptr_t (*general_ptr)();
 

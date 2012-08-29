@@ -541,6 +541,10 @@ indicates that the referenced switch applies only to that execution mode.
   parameter which enables many editor/IDE programs to test the syntax of your
   Euphoria source in real time.
 
+; ##-TRACE-LINES n## (all)
+: Changes the number of lines that will be used in ctrace.out for lines traced
+  under ##trace(3)##.  The default is 500.
+
 ; ##-VERSION## (all)
 : Displays the version of euphoria that is running.
 

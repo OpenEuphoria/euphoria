@@ -37,9 +37,16 @@ BINS= \
 	eudist \
 	eutest
 
+ifeq "$(ARCH)" "ix86_64"
+EECUSOA=euso.a
+EECUSODBGA=eusodbg.a
+endif
+
 LIBS= \
 	eu.a \
-	eudbg.a
+	eudbg.a \
+	euso.a \
+	eusodbg.a
 
 all :
 	-rm -r $(REL_NAME)

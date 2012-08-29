@@ -393,5 +393,26 @@ procedure ticket_662()
 end procedure
 ticket_662()
 
+enum A744, B744, C744
+procedure ticket_744( object x )
+	switch x do
+		case A744, 1, E744 then
+			test_equal("ticket 744, multiple case 1", 1, x )
+		case B744, 2 then
+			test_equal("ticket 744, multiple case 2", 2, x )
+		case C744, G744 then
+			test_equal("ticket 744, multiple case 3", 3, x )
+		case else
+			test_false("ticket 744 multiple case else", find( x, {1,2,3})  )
+	end switch
+end procedure
+enum E744, F744, G744
+
+for i = 1 to 4 do
+	ticket_744( i )
+end for
+ticket_744( {} )
+ticket_744( 1.5 )
+
 test_report()
       

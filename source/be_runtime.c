@@ -2232,6 +2232,7 @@ object DRandom(d_ptr a)
 	if ((uint32_t)(a->dbl) <= 0)
 		RTFatal("argument to rand is too large");
 	res = (1 + good_rand() % (uint32_t)(a->dbl));
+	res = (1 + good_rand() % (unsigned)(a->dbl));
 	return MAKE_UINT(res);
 }
 
@@ -3740,6 +3741,7 @@ object EGets(object file_no)
 	long oldc;
 	IFILE f;
 	object_ptr line_ptr;
+	s1_ptr line;
 	object_ptr next_char_ptr;
 	object_ptr last_char_ptr;
 	int bufsize;
@@ -3760,7 +3762,8 @@ object EGets(object file_no)
 	if (current_screen != MAIN_SCREEN && might_go_screen(last_r_file_no))
 		MainScreen();
 
-	line_ptr = (object_ptr)EMalloc(bufsize * sizeof(object));
+	line = (s1_ptr)EMalloc(bufsize * sizeof(object) + sizeof( struct s1 ));
+	line_ptr = (object_ptr)(line + 1);
 	next_char_ptr = line_ptr - 1; // Point to the [-1] object.
 	last_char_ptr = line_ptr + (bufsize - 2); // Leave room for final NL and NOVALUE
 	i = 0;
@@ -3777,7 +3780,8 @@ object EGets(object file_no)
 				// No room in current buffer, so expand it.
 				bufsize = 64;	// Expansions use this value.
 				i = last_char_ptr - line_ptr;
-				line_ptr = (object_ptr)ERealloc((char *)line_ptr, (i + bufsize + 2) * sizeof(object));
+				line = (s1_ptr)ERealloc((char *)line, (i + bufsize + 2) * sizeof(object) + sizeof( struct s1) );
+				line_ptr = (object_ptr)(line + 1);
 				next_char_ptr = line_ptr + i;
 				last_char_ptr = next_char_ptr + bufsize; // Leave room for final NL and NOVALUE
 			}
@@ -3811,7 +3815,8 @@ object EGets(object file_no)
 				// No room in current buffer, so expand it.
 				bufsize = 64;	// Expansions use this value.
 				i = last_char_ptr - line_ptr;
-				line_ptr = (object_ptr)ERealloc((char *)line_ptr, (i + bufsize + 2) * sizeof(object));
+				line = (s1_ptr)ERealloc((char *)line, (i + bufsize + 2) * sizeof(object) + sizeof( struct s1 ) );
+				line_ptr = (object_ptr)(line + 1);
 				next_char_ptr = line_ptr + i;
 				last_char_ptr = next_char_ptr + bufsize;
 			}
@@ -3854,10 +3859,11 @@ object EGets(object file_no)
 		
 
 	// Shrink buffer
-	line_ptr = (object_ptr)ERealloc((char *)line_ptr, i * sizeof(object));
+	line = (s1_ptr)ERealloc((char *)line, i * sizeof(object) + sizeof( struct s1 ) );
+	line_ptr = (object_ptr)(line + 1);
 
 	// Create the new sequence.
-	return NewPreallocSeq(i, line_ptr);
+	return NewPreallocSeq(i, line);
 
 }
 
@@ -4001,6 +4007,7 @@ s1_ptr concatonate_s1_with_string(s1_ptr s1,  char * poke_addr, int i )
 	*++obj_ptr = NOVALUE;	
 	return s1;
 }
+
 
 static void rPrint(object a)
 /* print any object in default numeric format either to the screen and if
@@ -4572,6 +4579,7 @@ int get_key(int wait)
 
 static int trace_line = 0;
 static IFILE trace_file;
+int trace_lines = 500;
 
 static void one_trace_line(char *line)
 /* write a line to the ctrace.out file */
@@ -4597,7 +4605,7 @@ void ctrace(char *line)
 		}
 		if (trace_file != NULL) {
 			trace_line++;
-			if (trace_line >= 500) {
+			if (trace_line >= trace_lines) {
 				one_trace_line("");
 				one_trace_line("               "); // erase THE END
 				trace_line = 0;
@@ -5458,7 +5466,7 @@ uintptr_t __cdecl osx_cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t 
 	uintptr_t (*f)(uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
 	uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)
 	= (uintptr_t (*)(uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
-	uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)) 0xF001F001;
+	uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)) general_ptr_magic;
 	return (f)((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, arg8, arg9);
@@ -5914,9 +5922,9 @@ object find_from(object a, object bobj, object c)
 	object bv;
 	s1_ptr b;
 
-	if (!IS_SEQUENCE(bobj))
+	if (!IS_SEQUENCE(bobj)){
 		RTFatal("second argument of find_from() must be a sequence");
-
+	}
 	b = SEQ_PTR(bobj);
 	length = b->length;
 

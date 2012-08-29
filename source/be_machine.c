@@ -1857,6 +1857,23 @@ void init_fp_conversions(){
 }
 #endif
 
+#if ARCH == ARM
+void arm_float80_to_float64( unsigned char *a, unsigned char *b ){
+	int64_t exp_a, exp_b, sign;
+	int64_t mantissa_a, mantissa_b;
+
+	sign  = 0x80 == (a[9] & 0x80);
+	exp_a = (a[8] | ((a[9] & 0x7f) << 8 )) - 0x3fff; // IEEE854_LONG_DOUBLE_BIAS
+	// chop off most significant bit
+	mantissa_a = 0x7fffffffffffffffLL & *((int64_t*)a);
+
+	exp_b = (exp_a + 0x3ff ); // IEEE754_DOUBLE_BIAS
+	mantissa_b = (mantissa_a >> (11));
+
+	*((int64_t*)b) = (mantissa_b & 0x7fffffffffffffLL) | (exp_b << 52)  | (sign << 63);
+}
+#endif
+
 static object float_to_atom(object x, int flen)
 /* convert a sequence of 4, 8 or 10 bytes in IEEE format to an atom */
 /* must avoid type casts from floating point values that may not be 8-byte aligned. */
@@ -1888,6 +1905,8 @@ static object float_to_atom(object x, int flen)
 	else{
 		#ifdef EWATCOM
 			(*convert_80_to_64)( &convert, &d );
+		#elif ARCH == ARM
+			arm_float80_to_float64( (unsigned char*) &convert.fbuff, (unsigned char*)&d );
 		#else
 			d = (eudouble)convert.ldouble;
 		#endif
@@ -2264,7 +2283,7 @@ object DefineC(object x)
 #else
 
 #ifdef EOSX
-	#define CALLBACK_SIZE (108)
+	#define CALLBACK_SIZE (300)
 #else
 	#if __GNUC__ == 4
 		#if INTPTR_MAX == INT32_MAX
@@ -2336,11 +2355,6 @@ void set_page_to_read_write_execute(page_ptr page_addr) {
 }
 /* addressable version of CALLBACK_POINTER constant for use with memcmp */
 const uintptr_t callback_pointer_magic = (uintptr_t) CALLBACK_POINTER;
-#if defined(EOSX)
-	const uintptr_t general_ptr_magic = 0xF001F001;
-#elif (INTPTR_MAX == INT64_MAX)
-	const uintptr_t general_ptr_magic = 0xabcdefabcdefabcdLL;
-#endif
 object CallBack(object x)
 /* return either a call-back address for routine id x
    x can be the routine id for stdcall, or {'+', routine_id} for cdecl
@@ -2548,7 +2562,7 @@ object CallBack(object x)
 	return MAKE_UINT(addr);
 }
 
-uintptr_t internal_general_call_back(
+object internal_general_call_back(
 		  intptr_t cb_routine,
 						   uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 						   uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
@@ -2556,6 +2570,7 @@ uintptr_t internal_general_call_back(
 /* general call-back routine: 0 to 9 args */
 {
 	int num_args;
+	object result;
 	intptr_t (*addr)();
 
 // translator call-back
@@ -2657,8 +2672,9 @@ uintptr_t internal_general_call_back(
 			break;
 	}
 
+	return call_back_result->obj;
 	// Don't do get_pos_int() for crash handler
-	return (uintptr_t)get_pos_int("internal-call-back", call_back_result->obj);
+// 	return (uintptr_t)get_pos_int("internal-call-back", call_back_result->obj);
 }
 
 int *crash_list = NULL;    // list of routines to call when there's a crash
@@ -2792,8 +2808,9 @@ object start_backend(object x)
 
 	x_ptr = SEQ_PTR(x);
 
-	if (IS_ATOM(x) || x_ptr->length != 13)
-		RTFatal("BACKEND requires a sequence of length 13");
+	if (IS_ATOM(x) || x_ptr->length != 17)
+		RTFatal("BACKEND requires a sequence of length 17");
+
 
 	fe.st = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
 	fe.sl = (struct sline *) get_pos_int(w, *(x_ptr->base+2));
@@ -2810,8 +2827,13 @@ object start_backend(object x)
 	syncolor          = get_pos_int(w, *(x_ptr->base+11));
 	
 	set_debugger( (char*) get_pos_int(w, *(x_ptr->base+12)) );
-	sprint_ptr        = get_pos_int(w, *(x_ptr->base+13));
+	sprint_ptr        = get_pos_int(w, *(x_ptr->base+17));
+
+	map_new = get_pos_int(w, *(x_ptr->base+13));
+	map_put = get_pos_int(w, *(x_ptr->base+14));
+	map_get = get_pos_int(w, *(x_ptr->base+15));
 	
+	trace_lines = get_pos_int(w, *(x_ptr->base+16));
 	// This is checked when we try to write coverage to make sure
 	// we need to output an error message.
 	in_backend = 1;

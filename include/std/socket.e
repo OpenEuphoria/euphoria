@@ -772,6 +772,10 @@ integer delete_socket_rid = routine_id("delete_socket")
 -- Returns:
 --   An **object**, an atom, representing an integer code on failure, else a sequence representing a valid socket id.
 --
+-- Comment:
+--   On Windows, you must have Windows Sockets version 2.2 or greater installed.  This means at
+--   least Windows 2000 Professional or Windows 2000 Server.
+--
 -- Example 1:
 -- <eucode>
 -- socket = create(AF_INET, SOCK_STREAM, 0)
