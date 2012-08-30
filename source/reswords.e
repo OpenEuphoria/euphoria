@@ -168,7 +168,7 @@ export constant
 	END_PARAM_CHECK     = 156,
 	CONCAT_N            = 157,
 	NOPWHILE            = 158,  -- Translator only
-	NOP1                = 159,  -- Translator only
+	NOP1                = 159,
 	PLENGTH             = 160,
 	LHS_SUBS1           = 161,
 	PASSIGN_SUBS        = 162,

@@ -1716,7 +1716,7 @@ procedure TypeCheck(symtab_index var)
 	end if
 end procedure
 
-function check_assign_op( token left_var )
+function check_assign_op( token left_var, integer subs = 0 )
 	token tok = next_token()
 	integer assign_op = tok[T_ID]
 	
@@ -1724,6 +1724,21 @@ function check_assign_op( token left_var )
 		sequence lname = sym_name( left_var[T_SYM] )
 		if assign_op = DOT then
 			-- memstruct
+			if subs then
+				-- need to emit subscripts!
+				-- also, convert LHS_SUBS into RHS subs
+				integer pc = length( Code ) + 1
+				for i = subs - 1 to 1 do
+					Code[$] = NOP1
+					pc -= 5 -- size of LHS_SUBS
+					if i = 1 then
+						Code[pc] = RHS_SUBS
+					else
+						Code[pc] = RHS_SUBS_CHECK
+					end if
+				end for
+				emit_op( RHS_SUBS )
+			end if
 			MemStruct_access( left_var[T_SYM], TRUE )
 			assign_op = check_assign_op( left_var )
 			integer ox = find( assign_op, ASSIGN_OPS )
@@ -1745,7 +1760,7 @@ function check_assign_op( token left_var )
 	return assign_op
 end function
 
-procedure Assignment(token left_var)
+procedure Assignment(token left_var )
 -- parse an assignment statement
 	token tok
 	integer subs, slice, assign_op, subs1_patch
@@ -1824,7 +1839,7 @@ procedure Assignment(token left_var)
 	lhs_ptr = FALSE
 	
 	putback( tok )
-	assign_op = check_assign_op( left_var )
+	assign_op = check_assign_op( left_var, subs )
 
 	if subs = 0 label "subs_if" then
 		-- not subscripted

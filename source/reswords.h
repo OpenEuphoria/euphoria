@@ -169,7 +169,7 @@
 #define END_PARAM_CHECK     156
 #define CONCAT_N            157
 #define NOPWHILE            158 // Translator only
-#define NOP1                159 // Translator only
+#define NOP1                159
 #define PLENGTH             160
 #define LHS_SUBS1           161
 #define PASSIGN_SUBS        162

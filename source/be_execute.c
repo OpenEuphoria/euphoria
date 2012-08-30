@@ -1941,7 +1941,7 @@ void do_exec(intptr_t *start_pc)
   &&L_CONCAT_N,
   NULL, /* L_NOPWHILE not emitted */
 /* 160 (previous) */
-  NULL, /* L_NOP1 not emitted */
+  &&L_NOP1,
   &&L_PLENGTH,
   &&L_LHS_SUBS1,
   &&L_PASSIGN_SUBS, &&L_PASSIGN_SLICE, &&L_PASSIGN_OP_SUBS,
@@ -2698,7 +2698,12 @@ void do_exec(intptr_t *start_pc)
 					RTFatalMemType(pc-4, pc[-1]);
 				}
 				BREAK;
-				
+
+			case L_NOP1:
+			deprintf("case L_NOP1");
+				++pc;
+				thread();
+				BREAK;
 			case L_NOP2:
 			deprintf("case L_NOP2:");
 				thread2();
