@@ -1702,7 +1702,7 @@ function IntegerMultiply(integer a, integer b)
 			multiply_code &= "}\n"
 			multiply_code &= "else{\n"
 			multiply_code &= "@1 = (intptr_t) p128;\n"
-			multiply_code &= "}\n"
+			multiply_code &= "}\n}\n"
 		end if
 	else
 		multiply_code = "@1 = @2 * @3;\n"  -- no tests, must be integer
