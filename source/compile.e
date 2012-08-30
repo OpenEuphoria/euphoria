@@ -1699,7 +1699,10 @@ function IntegerMultiply(integer a, integer b)
 			multiply_code  = "{\nint128_t p128 = (int128_t)@2 * (int128_t)@3;\n"
 			multiply_code &= "if( p128 != (int128_t)(@1 = (intptr_t)p128) ){\n"
 			multiply_code &= "@1 = NewDouble( (eudouble)p128 );\n"
-			multiply_code &= "}\n}\n"
+			multiply_code &= "}\n"
+			multiply_code &= "else{\n"
+			multiply_code &= "@1 = (intptr_t) p128;\n"
+			multiply_code &= "}\n"
 		end if
 	else
 		multiply_code = "@1 = @2 * @3;\n"  -- no tests, must be integer
