@@ -2827,11 +2827,15 @@ object start_backend(object x)
 	syncolor          = get_pos_int(w, *(x_ptr->base+11));
 	
 	set_debugger( (char*) get_pos_int(w, *(x_ptr->base+12)) );
-	sprint_ptr        = get_pos_int(w, *(x_ptr->base+17));
+	;
 
-	map_new = get_pos_int(w, *(x_ptr->base+13));
-	map_put = get_pos_int(w, *(x_ptr->base+14));
-	map_get = get_pos_int(w, *(x_ptr->base+15));
+	if (
+		((sprint_ptr        = get_pos_int(w, *(x_ptr->base+17))) == 0) ||
+		((map_new = get_pos_int(w, *(x_ptr->base+13))) == 0) ||
+		((map_put = get_pos_int(w, *(x_ptr->base+14))) == 0) ||
+		((map_get = get_pos_int(w, *(x_ptr->base+15))) == 0) ) {
+		RTInternal("BACKEND requires the routine ids args passed arg 13,14,15 & 17 be non-zero.");
+	}
 	
 	trace_lines = get_pos_int(w, *(x_ptr->base+16));
 	// This is checked when we try to write coverage to make sure

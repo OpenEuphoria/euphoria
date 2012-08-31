@@ -12,9 +12,8 @@ end ifdef
 
 include std/dll.e
 include std/machine.e
--- test to see if we need either of these.
---include std/text.e
---include std/map.e
+include std/text.e
+include std/map.e
 include global.e
 include common.e
 include mode.e as mode

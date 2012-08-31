@@ -4904,27 +4904,35 @@ char **make_arg_cv(char *cmdline, int *argc)
 /* Convert command line string to argc, argv.
    If *argc is 1, then get program name from GetModuleFileName().
    When double-clicked under Windows, cmdline will
-   typically contain double-quoted strings. */
+   typically contain double-quoted strings. 
+   
+   The returned pointer should be later freed with EFree but the strings in the array should 
+   not be freed.
+   */
 {
 	int i, w, j;
 	char **argv;
 #ifdef EWINDOWS
+	static char * first_argument;
 	int ns;
 	int bs;
 #endif
 	InitEMalloc();
 #ifdef EWINDOWS
+	if (first_argument == NULL) {
+		first_argument = get_module_name();
+	}
 	if( cmdline == NULL ){
 		// Windows already did the work for us
 		*argc = __argc;
-		__argv[0] = get_module_name();
+		__argv[0] = first_argument;
 		return __argv;
 	}
 #endif
 	argv = (char **)EMalloc((strlen(cmdline)/2+3) * sizeof(char *));
 #ifdef EWINDOWS
 	if (*argc == 1) {
-		argv[0] = get_module_name();
+		argv[0] = first_argument;
 		w = 1;
 	}
 	else
@@ -5067,13 +5075,7 @@ object system_exec_call(object command, object wait)
 #else
 	argv = make_arg_cv(string_ptr, &exit_code);
 	exit_code = spawnvp(P_WAIT, argv[0], (char * const *)argv);
-
-	#if INTPTR_MAX == INT32_MAX
-	// This causes a crash on Win64
-	EFree(argv[0]);		// free the 'process' name
-	#endif
 	EFree((char *)argv); // free the list of arg addresses, but not the args themself.
-
 #endif
 	if (len > TEMP_SIZE)
 		EFree(string_ptr);
