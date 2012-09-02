@@ -3128,7 +3128,7 @@ void do_exec(intptr_t *start_pc)
 #if INT64_MAX == INTPTR_MAX
 					{
 						int128_t product = (int128_t)c * (int128_t)b;
-						if( product == (int128_t)( a = (intptr_t)product ) ){
+						if( product == (int128_t)( a = (intptr_t)product ) && IS_ATOM_INT( product ) ){
 							top = MAKE_INT( a );
 						}
 						else{

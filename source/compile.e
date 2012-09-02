@@ -1698,7 +1698,7 @@ function IntegerMultiply(integer a, integer b)
 			multiply_code &= "@1 = NewDouble(@2 * (eudouble)@3);\n}\n"
 		else
 			multiply_code  = "{\nint128_t p128 = (int128_t)@2 * (int128_t)@3;\n"
-			multiply_code &= "if( p128 != (int128_t)(@1 = (intptr_t)p128) ){\n"
+			multiply_code &= "if( p128 != (int128_t)(@1 = (intptr_t)p128) || !IS_ATOM_INT( p128 ) ){\n"
 			multiply_code &= "@1 = NewDouble( (eudouble)p128 );\n"
 			multiply_code &= "}\n}\n"
 		end if
