@@ -545,7 +545,7 @@ procedure mark_all( integer attribute )
 		while p != 0 do
 			integer sym_file = SymTab[p][S_FILE_NO]
 			just_mark_everything_from = p
-			if find( sym_file, recheck_files ) then
+			if sym_file = current_file_no or find( sym_file, recheck_files ) then
 				SymTab[p][attribute] += 1
 			else
 				integer scope = SymTab[p][S_SCOPE]
