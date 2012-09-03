@@ -14,6 +14,7 @@
 * [[ticket:744]] Duplicate case values in a switch block no longer result in a failed compile after being translated to C.
 * [[ticket:775]] Fixed potential memory leak when a temp is passed to one of the
   native type check functions: [[:integer]](), [[:atom]](), [[:object]]() or [[:sequence]]()
+* [[ticket:778]] Translator keeps forward referenced routine_id routines in include files
 
 === Enhancements
 
