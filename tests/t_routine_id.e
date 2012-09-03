@@ -33,4 +33,6 @@ include std/error.e
 id = routine_id("crash")
 test_equal( "forward, computed routine id included", id, fwd_id )
 
+include routine_id.e
+
 test_report()

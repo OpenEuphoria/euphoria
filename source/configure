@@ -1,6 +1,7 @@
 #!/bin/sh
 
 CONFIG_FILE=config.gnu
+PLAT="default platform"
 
 UNAME_SYSTEM=`(uname -s) 2>/dev/null`  || UNAME_SYSTEM=unknown
 UNAME_MACHINE=`(uname -m) 2>/dev/null` || UNAME_MACHINE=unknown
@@ -111,7 +112,7 @@ HG="hg"
 
 echo "# File generated from configure" > ${CONFIG_FILE}
 echo CONFIGURE_PARAMS=$@ >> "$PREFIX"${CONFIG_FILE}
-PLAT=""
+
 # parameters
 while [ "$1" != "" ]; do
     case $1 in
@@ -225,7 +226,7 @@ while [ "$1" != "" ]; do
 		fi
 
 		echo EREL_TYPE=-DEREL_TYPE=\"$VAL\" >> ${CONFIG_FILE}
-		# "
+		#" comment to help display in some editors
 		;;
 
 	--verbose-tests )
@@ -355,7 +356,8 @@ while [ "$1" != "" ]; do
 		echo "                       Use the already built translator rather"
 		echo "                       than interpreting its source           "
 		echo "   --use-source-translator                                    "
-		echo "                       Interpret the translator's source rather" # '"
+		echo "                       Interpret the translator's source rather" 
+		#'" (comment to help display in some editors)
 		echo "                       than using the already built translator"
 		echo "                       (default)"
 		echo "   --verbose-tests     cause the 'test' target to use the verbose flag"
@@ -500,7 +502,7 @@ echo -eudir $CYPTRUNKDIR >> $BUILDDIR/eu.cfg
 echo -i $CYPTRUNKDIR/include >> $BUILDDIR/eu.cfg
 
 echo "[translate]" >> $BUILDDIR/eu.cfg
-if [ x"$PLAT" != x"" ]; then
+if [ x"$PLAT" != "xdefault platform" ]; then
 	echo "-plat" $PLAT  >> $BUILDDIR/eu.cfg
 	echo PLAT=$PLAT >> "$PREFIX"${CONFIG_FILE}
 fi

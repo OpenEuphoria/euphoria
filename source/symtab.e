@@ -551,7 +551,7 @@ procedure mark_all( integer attribute )
 		while p != 0 do
 			integer sym_file = SymTab[p][S_FILE_NO]
 			just_mark_everything_from = p
-			if sym_file = current_file_no then
+			if sym_file = current_file_no or find( sym_file, recheck_files ) then
 				SymTab[p][attribute] += 1
 			else
 				integer scope = SymTab[p][S_SCOPE]
@@ -577,7 +577,7 @@ procedure mark_all( integer attribute )
 end procedure
 
 sequence recheck_targets = {}
-
+sequence recheck_files = {}
 
 export procedure mark_final_targets()
 	if just_mark_everything_from then
@@ -653,6 +653,9 @@ export function MarkTargets(symtab_index s, integer attribute)
 		if not found then
 			just_mark_everything_from = TopLevelSub
 			recheck_targets &= s
+			if not find( current_file_no, recheck_files ) then
+				recheck_files &= current_file_no
+			end if
 		end if
 		return found
 	else

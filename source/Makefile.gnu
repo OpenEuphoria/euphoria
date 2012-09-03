@@ -242,7 +242,9 @@ else
 EXE=$(EUBIN)/$(EEXU)
 HOST_EXE=$(EUBIN)/$(HOST_EEXU)
 endif
-INCDIR=-i $(TRUNKDIR)/include
+# The -i command with the include directory in the form we need the EUPHORIA binaries to see them. 
+# (Use a drive id 'C:')
+# [Which on Windows is different from the how it is expressed in for the GNU binaries. ]
 CYPINCDIR=-i $(CYPTRUNKDIR)/include
 
 
@@ -365,6 +367,9 @@ EU_LIB_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_callc.o \
 	$(PREFIXED_PCRE_OBJECTS)
 	
+# The bare include directory in this checkout as we want the make file to see it.  Forward slashes, no 'C:'. 
+# Which (on Windows) is different to the way we need to give paths to EUPHORIA's binaries.
+INCDIR = $(TRUNKDIR)/include
 
 EU_STD_INC = \
 	$(wildcard $(INCDIR)/std/*.e) \
