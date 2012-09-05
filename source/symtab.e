@@ -603,6 +603,33 @@ export procedure mark_final_targets()
 	end if
 end procedure
 
+function is_routine( symtab_index sym )
+	integer tok = sym_token( sym )
+	switch tok do
+		case FUNC, PROC, TYPE then
+			return 1
+		case else
+			return 0
+	end switch
+end function
+
+function is_visible( symtab_index sym, integer from_file )
+	integer scope = sym_scope( sym )
+	integer sym_file = SymTab[sym][S_FILE_NO]
+	integer visible_mask
+	switch scope do
+		case SC_PUBLIC then
+			visible_mask = DIRECT_OR_PUBLIC_INCLUDE
+		case SC_EXPORT then
+			visible_mask = DIRECT_INCLUDE
+		case SC_GLOBAL then
+			return 1
+		case else
+			return from_file = sym_file
+	end switch
+	return and_bits( visible_mask, include_matrix[from_file][sym_file] )
+end function
+
 
 export function MarkTargets(symtab_index s, integer attribute)
 -- Note the possible targets of a routine id call
@@ -630,8 +657,6 @@ export function MarkTargets(symtab_index s, integer attribute)
 			end while
 		end if
 
-		-- simple approach - mark all names in hash bucket that match,
-		-- ignoring GLOBAL/LOCAL
 		if length(sname) = 0 then
 			return 1
 		end if
@@ -642,9 +667,11 @@ export function MarkTargets(symtab_index s, integer attribute)
 					if BIND then
 						add_ref({PROC, h})
 					end if
-				else
+				elsif is_routine( h ) and is_visible( h, current_file_no ) then
 					SymTab[h][attribute] += 1
-					found = 1
+					if current_file_no = SymTab[h][S_FILE_NO] then
+						found = 1
+					end if
 				end if
 			end if
 			h = SymTab[h][S_SAMEHASH]
