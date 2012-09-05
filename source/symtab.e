@@ -600,8 +600,7 @@ end procedure
 function is_routine( symtab_index sym )
 	integer tok = sym_token( sym )
 	switch tok do
-		case FUNCTION, PROCEDURE, TYPE,
-		QUALIFIED_PROC, QUALIFIED_FUNC, QUALIFIED_TYPE then
+		case FUNC, PROC, TYPE then
 			return 1
 		case else
 			return 0
@@ -613,11 +612,11 @@ function is_visible( symtab_index sym, integer from_file )
 	integer sym_file = SymTab[sym][S_FILE_NO]
 	integer visible_mask
 	switch scope do
-		case PUBLIC then
+		case SC_PUBLIC then
 			visible_mask = DIRECT_OR_PUBLIC_INCLUDE
-		case EXPORT then
+		case SC_EXPORT then
 			visible_mask = DIRECT_INCLUDE
-		case GLOBAL then
+		case SC_GLOBAL then
 			return 1
 		case else
 			return from_file = sym_file
@@ -652,8 +651,6 @@ export function MarkTargets(symtab_index s, integer attribute)
 			end while
 		end if
 
-		-- simple approach - mark all names in hash bucket that match,
-		-- ignoring GLOBAL/LOCAL
 		if length(sname) = 0 then
 			return 1
 		end if
