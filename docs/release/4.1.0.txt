@@ -8,6 +8,8 @@
 * OS X bug fixes:
 ** Callbacks function again, including on 64bit platforms
 ** Memory maps function
+* Fix std/net/http.e that caused malformed HTTP GET requests
+* Updated demo/news.ex with up-to-date URLs for some news web sites.
 
 == Enhancements
 
