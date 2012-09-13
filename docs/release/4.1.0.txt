@@ -36,4 +36,4 @@
 * [[ticket:735]] The number of lines to be used in ctrace.out by ##trace(3)## can be configured
   using ##-trace-lines n## command line switch. See [[Command line switches -> :command line switches]]
   for more information.
-
+* [[ticket:782]] When downloading http content, std/net/http.e will yield to other tasks

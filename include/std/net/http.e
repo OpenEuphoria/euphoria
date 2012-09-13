@@ -11,6 +11,7 @@ include std/convert.e
 include std/rand.e
 include std/sequence.e
 include std/socket.e as sock
+include std/task.e
 include std/text.e
 include std/types.e
 
@@ -258,6 +259,7 @@ function execute_request(sequence host, integer port, sequence request, integer 
 			end if
 
 			content &= data
+			task_yield()
 
 			if not got_header then
 				integer header_end_pos = match("\r\n\r\n", content)
