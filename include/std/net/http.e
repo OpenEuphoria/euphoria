@@ -237,7 +237,7 @@ function execute_request(sequence host, integer port, sequence request, integer 
 	end if
 
 	atom start_time = time()
-	integer got_header = 0, content_length = 0
+	integer got_header = 0, content_length = -1
 	sequence content = ""
 	sequence headers = {}
 	while time() - start_time < timeout label "top" do
