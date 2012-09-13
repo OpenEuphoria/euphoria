@@ -99,10 +99,10 @@ function format_base_request(sequence request_type, sequence url, object headers
 	-- some sites, such as euphoria.pastey.net, will break otherwise
 	if noport then
 		request = sprintf("%s %s HTTP/1.0\r\nHost: %s\r\n", {
-			request_type, url, path, host })
+			request_type, path, host })
 	else
 		request = sprintf("%s %s HTTP/1.0\r\nHost: %s:%d\r\n", {
-			request_type, url, host, port })
+			request_type, path, host, port })
 	end if
 
 	integer has_user_agent = 0
