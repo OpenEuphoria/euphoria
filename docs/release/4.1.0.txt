@@ -8,6 +8,9 @@
 * OS X bug fixes:
 ** Callbacks function again, including on 64bit platforms
 ** Memory maps function
+* Fix std/net/http.e that caused malformed HTTP GET requests
+* Updated demo/news.ex with up-to-date URLs for some news web sites.
+* Fix std/net/http.e so it can handle cases where the Content-Length header is not present
 
 == Enhancements
 
@@ -38,4 +41,4 @@
 * [[ticket:735]] The number of lines to be used in ctrace.out by ##trace(3)## can be configured
   using ##-trace-lines n## command line switch. See [[Command line switches -> :command line switches]]
   for more information.
-
+* [[ticket:782]] When downloading http content, std/net/http.e will yield to other tasks

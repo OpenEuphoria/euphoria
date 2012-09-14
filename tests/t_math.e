@@ -309,4 +309,29 @@ end function
 test_equal( "privates not initialized in BB when set to novalue", 2, ticket_730() )
 end ifdef
 
+ifdef BITS64 then
+
+-- correctly capture 64-bit multiplication and promotion of
+-- products that fix in 64-bit integers, but not 63-bit integers
+procedure bigmult64()
+	sequence V = {-70368744177665,7.036874418e+13,65536,65536}
+	atom ptr = machine_func( 16, 8 )
+	poke( ptr, { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x3f } )
+	atom max_int = peek8s( ptr )
+
+	atom
+		MAXINT = max_int,
+		MININT = -MAXINT-1,   -- should be -ve
+		MININT_DBL = MININT,
+		MAXINT_DBL = MAXINT
+	atom d1 = V[1] * V[3]
+	if d1 < MININT then
+		test_pass("no machine crash")
+	end if
+	test_pass("no machine crash")
+end procedure
+bigmult64()
+
+end ifdef
+
 test_report()

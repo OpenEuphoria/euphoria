@@ -1,6 +1,7 @@
 == Version 4.0.5 Date TBD
 
 === Bug Fixes
+* [[ticket:777]] When invalid input is sent to 'match' or 'find' the error includes 'match' or 'find' in the error message repectively.
 * [[ticket:749]] Fix init checks for while-entry and goto
 * [[ticket:563]] Default values for arguments are always parsed and resolved as though they
   were being evaluated from the point of the routine declaration, not the point where the
@@ -13,6 +14,7 @@
 * [[ticket:744]] Duplicate case values in a switch block no longer result in a failed compile after being translated to C.
 * [[ticket:775]] Fixed potential memory leak when a temp is passed to one of the
   native type check functions: [[:integer]](), [[:atom]](), [[:object]]() or [[:sequence]]()
+* [[ticket:778]] Translator keeps forward referenced routine_id routines in include files
 
 === Enhancements
 

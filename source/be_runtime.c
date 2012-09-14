@@ -5924,9 +5924,9 @@ object find_from(object a, object bobj, object c)
 	object bv;
 	s1_ptr b;
 
-	if (!IS_SEQUENCE(bobj)){
-		RTFatal("second argument of find_from() must be a sequence");
-	}
+	if (!IS_SEQUENCE(bobj))
+		RTFatal("second argument of find/find_from() must be a sequence");
+
 	b = SEQ_PTR(bobj);
 	length = b->length;
 
@@ -5938,12 +5938,12 @@ object find_from(object a, object bobj, object c)
 		c = (object)(DBL_PTR(c)->dbl);
 	}
 	else
-		RTFatal("third argument of find_from() must be an atom");
+		RTFatal("third argument of find/find_from() must be an atom");
 
 	// we allow c to be $+1, just as we allow the lower limit
 	// of a slice to be $+1, i.e. the empty sequence
 	if (c < 1 || c > length+1) {
-		RTFatal("third argument of find_from() is out of bounds (%ld)", c);
+		RTFatal("third argument of find/find_from() is out of bounds (%ld)", c);
 	}
 
 	bp = b->base;
@@ -6032,17 +6032,17 @@ object e_match_from(object aobj, object bobj, object c)
 	s1_ptr a, b;
 
 	if (!IS_SEQUENCE(aobj))
-		RTFatal("first argument of match_from() must be a sequence");
+		RTFatal("first argument of match/match_from() must be a sequence");
 
 	if (!IS_SEQUENCE(bobj))
-		RTFatal("second argument of match_from() must be a sequence");
+		RTFatal("second argument of match/match_from() must be a sequence");
 
 	a = SEQ_PTR(aobj);
 	b = SEQ_PTR(bobj);
 
 	lengtha = a->length;
 	if (lengtha == 0)
-		RTFatal("first argument of match_from() must be a non-empty sequence");
+		RTFatal("first argument of match/match_from() must be a non-empty sequence");
 
 	// same rules as the lower limit on a slice
 	if (IS_ATOM_INT(c)) {
@@ -6052,14 +6052,14 @@ object e_match_from(object aobj, object bobj, object c)
 		c = (object)(DBL_PTR(c)->dbl);
 	}
 	else
-		RTFatal("third argument of match_from() must be an atom");
+		RTFatal("third argument of match/match_from() must be an atom");
 
 	lengthb = b->length;
 
 	// we allow c to be $+1, just as we allow the lower limit
 	// of a slice to be $+1, i.e. the empty sequence
 	if (c < 1 || c > lengthb+1) {
-		RTFatal("third argument of match_from() is out of bounds (%ld)", c);
+		RTFatal("third argument of match/match_from() is out of bounds (%ld)", c);
 	}
 
 	b1 = b->base;
