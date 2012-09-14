@@ -11,6 +11,7 @@ include std/convert.e
 include std/rand.e
 include std/sequence.e
 include std/socket.e as sock
+include std/task.e
 include std/text.e
 include std/types.e
 
@@ -99,10 +100,10 @@ function format_base_request(sequence request_type, sequence url, object headers
 	-- some sites, such as euphoria.pastey.net, will break otherwise
 	if noport then
 		request = sprintf("%s %s HTTP/1.0\r\nHost: %s\r\n", {
-			request_type, url, path, host })
+			request_type, path, host })
 	else
 		request = sprintf("%s %s HTTP/1.0\r\nHost: %s:%d\r\n", {
-			request_type, url, host, port })
+			request_type, path, host, port })
 	end if
 
 	integer has_user_agent = 0
@@ -236,7 +237,7 @@ function execute_request(sequence host, integer port, sequence request, integer 
 	end if
 
 	atom start_time = time()
-	integer got_header = 0, content_length = 0
+	integer got_header = 0, content_length = -1
 	sequence content = ""
 	sequence headers = {}
 	while time() - start_time < timeout label "top" do
@@ -258,6 +259,7 @@ function execute_request(sequence host, integer port, sequence request, integer 
 			end if
 
 			content &= data
+			task_yield()
 
 			if not got_header then
 				integer header_end_pos = match("\r\n\r\n", content)
