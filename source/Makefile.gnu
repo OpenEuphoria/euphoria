@@ -717,12 +717,12 @@ test-eucode :
 # Unit Testing
 #
 
-report : $(CYPBUILDDIR)\test-report.html
+report : $(CYPBUILDDIR)/test-report.html
 
-..\tests\unittest.log ..\tests\ctc.log : 
+../tests/unittest.log ../tests/ctc.log : 
 	$(MAKE) TESTFILE=-log
 
-$(CYPBUILDDIR)\test-report.html: ..\tests\unittest.log ..\tests\ctc.log 
+$(CYPBUILDDIR)/test-report.html: ../tests/unittest.log ../tests/ctc.log 
 	cd ../tests && cp *.log $(CYPBUILDDIR) && \
 		$(EXE) -i ../include ../source/eutest.ex \
 		-process-log -html > $(CYPBUILDDIR)/test-report.html
