@@ -1020,9 +1020,9 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 	if length( sym_ref ) = 3 then
 		-- just the sym...serialize it
 		if lhs then
-			emit_opnd( sym )
 			emit_symstruct( struct_sym, ref )
 			emit_opnd( 0 ) -- don't deref
+			
 			return
 		else
 			emit_symstruct( struct_sym, ref )
