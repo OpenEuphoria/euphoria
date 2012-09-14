@@ -508,10 +508,7 @@ char *EMalloc(uintptr_t nbytes)
 
 	do {
 		p = malloc((long)nbytes+8);
-// 		assert(p);
 		if (p == NULL) {
-			printf("couldn't alloc %" PRIdPTR " bytes\n", nbytes );
-			// Only triggered if asserts are turned off.
 			p = Out_Of_Space(nbytes + 8);
 		}
 
