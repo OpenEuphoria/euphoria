@@ -804,6 +804,7 @@ install :
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria/debug
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/std/win32
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/std/net
+	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/std/memstruct
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/langwar
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/unix
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/net
@@ -834,6 +835,7 @@ endif
 	install ../include/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include
 	install ../include/std/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std
 	install ../include/std/net/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std/net
+	install ../include/std/memstruct/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std/memstruct
 	install ../include/std/win32/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std/win32
 	install ../include/euphoria/*.e  $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria
 	install ../include/euphoria/debug/*.e  $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria/debug
