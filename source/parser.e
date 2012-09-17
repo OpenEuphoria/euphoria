@@ -1333,7 +1333,9 @@ end function
 -- parse a name_of call...
 function Name_of_call( token tok )
 	object argument_tok = next_token(), round_tok
-	
+	if integer(SymTab[argument_tok[T_SYM]]) or length(SymTab[argument_tok[T_SYM]]) < S_SCOPE then
+		goto "handle error"
+	end if
 	if SymTab[argument_tok[T_SYM]][S_SCOPE] != SC_UNDEFINED
 		and find(argument_tok[T_ID],{
 		VARIABLE, QUALIFIED_VARIABLE})=0  then
