@@ -126,6 +126,8 @@ extern eudouble eustart_time; /* from be_runtime.c */
 /* 30-bit magic #s for old Complete & PD Edition binds */
 #define COMPLETE_MAGIC ('1' + ('2'<< 8) + ('3' << 16) + ('O' << 24))
 unsigned char * new_page();
+// Enough space for writing a number to a string.
+#define NUMSIZE 30
 
 /**********************/
 /* Exported variables */
@@ -2570,7 +2572,6 @@ object internal_general_call_back(
 /* general call-back routine: 0 to 9 args */
 {
 	int num_args;
-	object result;
 	intptr_t (*addr)();
 
 // translator call-back
@@ -2808,8 +2809,8 @@ object start_backend(object x)
 
 	x_ptr = SEQ_PTR(x);
 
-	if (IS_ATOM(x) || x_ptr->length != 17)
-		RTFatal("BACKEND requires a sequence of length 17");
+	if (IS_ATOM(x) || x_ptr->length != 16)
+		RTFatal("BACKEND requires a sequence of length 16");
 
 
 	fe.st = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
@@ -2830,11 +2831,10 @@ object start_backend(object x)
 	;
 
 	if (
-		((sprint_ptr        = get_pos_int(w, *(x_ptr->base+17))) == 0) ||
 		((map_new = get_pos_int(w, *(x_ptr->base+13))) == 0) ||
 		((map_put = get_pos_int(w, *(x_ptr->base+14))) == 0) ||
 		((map_get = get_pos_int(w, *(x_ptr->base+15))) == 0) ) {
-		RTInternal("BACKEND requires the routine ids args passed arg 13,14,15 & 17 be non-zero.");
+		RTInternal("BACKEND requires the routine ids args passed arg 13,14,15 be non-zero.");
 	}
 	
 	trace_lines = get_pos_int(w, *(x_ptr->base+16));
@@ -2876,6 +2876,72 @@ object start_backend(object x)
 }
 #endif
 
+/* Get the string representation of an object.  Used when name_of
+ * is used on something which is not of an enumerated type.  */
+static object SPrint(object x)
+{
+	/* a small buffer for numbers */
+	static char sbuf[NUMSIZE];
+	/* result sequence, the passed in object and a temporary */ 
+	s1_ptr rs, xs, ts;
+	/* result object and a temporary object */
+	object ro, to;
+	/* a EUPHORIA string representation of ", ". */
+	static object cso = 0;
+	/* For caching the length of both xs and rs */ 
+	int len;
+	int i,j;
+	
+	sbuf[sizeof(sbuf)-1] = '\0';
+	if (IS_ATOM_INT(x)) {
+		len = snprintf(sbuf, sizeof(sbuf)-1, "%d", x );
+	} else if (IS_ATOM(x)) {
+		#if INTPTR_MAX == INT32_MAX
+			len = snprintf(sbuf, sizeof(sbuf)-1, "%.10g", DBL_PTR(x)->dbl);
+		#else
+			len = snprintf(sbuf, sizeof(sbuf)-1, "%.10Lg", DBL_PTR(x)->dbl);
+		#endif
+	} else {
+		/* must be a sequence */
+		if (!cso) {
+			ts = NewS1(2);
+			ts->base[1] = ',';
+			ts->base[2] = ' ';
+			cso = MAKE_SEQ(ts);
+			ts = NULL;
+		}
+		xs = SEQ_PTR(x);
+		len = xs->length;
+		rs = NewS1(51);
+		rs->length = 1;
+		rs->postfill = 50;
+		ro = MAKE_SEQ(rs);
+		rs->base[1] = '{';
+		if (len > 0) {
+			to = SPrint(xs->base[1]);
+			Concat(&ro, ro, to);
+			DeRef(to);
+			for ( i = 2; i <= len; ++i) {
+				to = SPrint(xs->base[i]);
+				Concat(&ro, ro, cso);
+				Concat(&ro, ro, to);
+				DeRef(to);
+			}
+			to = 0;
+		}
+		Append(&ro, ro, '}');
+		return ro;		
+	}
+	if (len >= sizeof(sbuf))
+		RTInternal("Insufficient length used in string buffer %s:%d.  Adjust NUMSIZE to at least %d\n", __FILE__, __LINE__, len);
+	rs = NewS1(len);
+	for (i = 0, j = 1; i <= len; ++j,++i)
+		rs->base[j] = MAKE_INT(sbuf[i]);
+	rs->base[len+1] = NOVALUE;
+	return MAKE_SEQ(rs);
+}
+
+
 object machine(object opcode, object x)
 /* Machine-specific function "machine". It is passed an opcode and
    a general Euphoria object as its parameters and it returns a
@@ -2886,10 +2952,6 @@ object machine(object opcode, object x)
 	char *src;
 	eudouble d;
 	int temp;
-#	ifndef ERUNTIME	
-		intptr_t (*fn_ptr)();
-		fn_ptr = rt00[sprint_ptr].addr;
-#	endif
 
 	while (TRUE) {
 		switch(opcode) {  /* tricky - could be atom or sequence */
@@ -3355,19 +3417,8 @@ object machine(object opcode, object x)
 				return 0;
 #endif
 	        case M_SPRINT:
-#			ifndef ERUNTIME
-		        	return (*fn_ptr)(x);
-#			else
-				sprint_sequence = NULL;
-				Print((IFILE)DOING_SPRINTF, x, 100, 80, 0, 0);
-				if (sprint_sequence == NULL) 
-					RTInternal("Creation of sprint_sequence failed.\n");
-				x = MAKE_SEQ(sprint_sequence);
-				Ref(x);				
-				return x;
-#			endif
-			
-		
+	        	// when using Print instead of SPrint routine below some problem always killed off translated programs using this.
+	        	return SPrint(x);
 
             case M_KEY_CODES:
                 return key_codes(x);

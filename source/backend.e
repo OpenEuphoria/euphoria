@@ -323,7 +323,6 @@ procedure BackEnd(integer il_file)
 				routine_id( "map:put" ),
 				routine_id( "map:get" ),
 				trace_lines,
-				routine_id( "sprint" ),
 				$
 			})
 	end ifdef
