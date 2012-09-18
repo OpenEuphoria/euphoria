@@ -2249,7 +2249,6 @@ object DRandom(d_ptr a)
 	if ((uint32_t)(a->dbl) <= 0)
 		RTFatal("argument to rand is too large");
 	res = (1 + good_rand() % (uint32_t)(a->dbl));
-	res = (1 + good_rand() % (unsigned)(a->dbl));
 	return MAKE_UINT(res);
 }
 
