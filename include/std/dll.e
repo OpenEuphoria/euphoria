@@ -539,6 +539,7 @@ ifdef EU4_0 then
 			case C_SHORT, C_WORD, C_USHORT then
 				return 2
 			-- In 4.0 everything is x86-32
+			case E_OBJECT, E_ATOM, E_SEQUENCE, E_INTEGER then
 			case C_INT, C_LONG, C_ULONG then
 			case C_SIZE_T, C_POINTER, C_FLOAT then
 				return 4

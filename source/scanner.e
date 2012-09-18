@@ -13,7 +13,11 @@ include std/filesys.e
 include std/get.e
 include std/hash.e
 include std/machine.e
-include std/scinot.e
+ifdef EU_4_0 then
+	include scinot.e
+elsedef
+	include std/scinot.e
+end ifdef
 include std/search.e
 include std/sequence.e
 include std/text.e
