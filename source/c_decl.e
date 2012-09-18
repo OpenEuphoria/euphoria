@@ -616,7 +616,7 @@ export procedure CName(symtab_index s)
 
 		if LeftSym = FALSE and GType(s) = TYPE_INTEGER and v != NOVALUE then
 			c_printf("%d", v)
-			if SIZEOF_POINTER = 8 then
+			if TARGET_SIZEOF_POINTER = 8 then
 				c_puts( "LL" )
 			end if
 		else
@@ -639,7 +639,7 @@ export procedure CName(symtab_index s)
 			-- integer: either literal, or
 			-- declared constant rvalue with integer value
 			c_printf("%d", v)
-			if SIZEOF_POINTER = 8 then
+			if TARGET_SIZEOF_POINTER = 8 then
 				c_puts( "LL" )
 			end if
 		else
@@ -655,7 +655,7 @@ export procedure CName(symtab_index s)
 		-- literal doubles, strings, temporary vars that we create
 		if LeftSym = FALSE and GType(s) = TYPE_INTEGER and v != NOVALUE then
 			c_printf("%d", v)
-			if SIZEOF_POINTER = 8 then
+			if TARGET_SIZEOF_POINTER = 8 then
 				c_puts( "LL" )
 			end if
 		else

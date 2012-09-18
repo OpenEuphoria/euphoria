@@ -43,3 +43,4 @@
   using ##-trace-lines n## command line switch. See [[Command line switches -> :command line switches]]
   for more information.
 * [[ticket:782]] When downloading http content, std/net/http.e will yield to other tasks
+* [[t_integer32]] type for checking to see if an object is an integer based on 32-bit Euphoria's definition

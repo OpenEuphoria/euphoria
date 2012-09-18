@@ -1161,3 +1161,27 @@ public constant INVALID_ROUTINE_ID = routine_id("#")
 -- to be used as a flag for no [[:routine_id]]() supplied.
 public constant NO_ROUTINE_ID = -99999
 
+-- Maximum and minimum values for Euphoria 31-bit integers (as implemented by 32-bit Euphoria)
+constant
+	MAXINT32 = 1073741823,
+	MININT32 = -17179869184
+
+--** Returns:
+-- TRUE if the argument is a valid 31-bit euphoria integer.
+--
+-- Comment:
+-- This function is the same as ##integer(o)## on 32-bit euphoria,
+-- but is portable to 64-bit architectures.
+
+public type t_integer32( object o )
+	ifdef EU32 then
+		return integer( o )
+	elsedef
+		if integer( o ) and o <= MAXINT32 and o >= MININT32 then
+			return 1
+		else
+			return 0
+		end if
+	end ifdef
+end type
+
