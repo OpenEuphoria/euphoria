@@ -39,6 +39,7 @@ end ifdef
 
 constant cmdopts = {
 	{ "eui",              0, "Interpreter command", { HAS_PARAMETER, "command" } },
+	{ "eubin",            0, "Euphoria binary directory", { HAS_PARAMETER, "directory" } },
 	{ "eubind",           0, "Binder command", { HAS_PARAMETER, "command" } },
 	{ "eub",              0, "Path to backend runner", { HAS_PARAMETER, "command" } },
 	{ "euc",              0, "Translator command", { HAS_PARAMETER, "command" } },
@@ -1285,6 +1286,37 @@ procedure main()
 	sequence output_format = ASCII_output
 	no_check = map:has( opts, "n") or map:has( opts, "nocheck" )
 	
+	-- need to check this because it affects the behavior of the option below. 
+	if map:has(opts, "verbose") then
+		verbose_switch = 1
+	end if				
+
+	-- Because the "eubin" option sets several parameters at once, there is utility in allowing this option to be processed before the other options.   For in this case, after setting several parameters with this option we can change one or two with less typing than setting all of them with other options.  Because the order of keys is not related to the order they appear on the command line, we must always process this option first before the loop.
+	if map:has(opts, "eubin") then
+		sequence val = canonical_path(map:get(opts, "eubin"),1=1)
+		if not file_exists(val) then
+			printf(1, "Specified binary directory via -eubin parameter was not found\n")
+			if not no_check then
+				abort(1)
+			end if
+		end if
+		executable = change_if_exists(executable, val & "eui" & dexe)
+		binder = change_if_exists(binder, val & "eubind" & dexe)
+		if file_exists(val & SLASH & "eub" & dexe) then
+			eub_path = "-eub " & val & "eub" & dexe
+		end if
+		translator = change_if_exists(translator,val & "euc" & dexe)
+		sequence tmp = val & "eudbg.a"
+		if file_exists(tmp) then
+			library = "-lib " & tmp
+		else
+			tmp = val & "eu.a"
+			if file_exists(tmp) then
+				library = "-lib " & tmp
+			end if
+		end if
+		verbose_printf(1, "Setting new parameters: executable = %s, binder = %s, translator = %s, backend %s, library %s\n", { executable, binder, translator, eub_path, library } )
+	end if
 	for i = 1 to length( keys ) do
 		sequence param = keys[i]
 		object val = map:get(opts, param)
@@ -1303,9 +1335,10 @@ procedure main()
 				logging_activated = 1
 				test_options &= " -log "
 				
+			case "eubin" then
+				-- do nothing
 			case "verbose" then
-				verbose_switch = 1
-
+				-- do nothing
 				
 			case "eui", "exe" then
 				executable = canonical_path(val)
