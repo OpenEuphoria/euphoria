@@ -6,6 +6,8 @@
 
 namespace random
 
+include std/types.e
+
 --****
 -- Signature:
 -- <built-in> function rand(object maximum)
@@ -34,7 +36,6 @@ namespace random
 --
 -- See Also:
 -- 		[[:set_rand]], [[:ceil]]
-
 
 --**
 -- Return a random integer from a specified inclusive integer range.
@@ -67,8 +68,8 @@ public function rand_range(atom lo, atom hi)
 		hi = lo
 		lo = temp
 	end if
-	
-	if not integer(lo) or not integer(hi) then
+
+	if not t_integer32( lo ) or not t_integer32( hi ) then
    		hi = rnd() * (hi - lo)
    	else
 		lo -= 1
