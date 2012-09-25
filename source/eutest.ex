@@ -262,9 +262,11 @@ function prepare_error_file(object file_name)
     	file_data = 0
     end if
     
-    for i = 1 to length(file_data) do
-    	file_data[i] = search:match_replace(base_path, file_data[i], "", 1000)
-    end for
+    if not equal(base_path,"") then
+	    for i = 1 to length(file_data) do
+    		file_data[i] = search:match_replace(base_path, file_data[i], "", 1000)
+		end for
+	end if
     
     return file_data
 end function
