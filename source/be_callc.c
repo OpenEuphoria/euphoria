@@ -1560,17 +1560,11 @@ object call_c(int func, object proc_ad, object arg_list)
 		case C_FLOAT:
 			return NewDouble((eudouble)fresult);
 		case C_POINTER:
-			if ((uintptr_t)iresult <= (uintptr_t)MAXINT) {
+			if (iresult >= 0 && iresult <= MAXINT) {
 				return iresult;
 			}
 			else {
-				// signed integer result
-				if (return_type >= E_INTEGER ||
-					(iresult >= MININT && iresult <= MAXINT)) {
-					return iresult;
-				}
-				else
-					return NewDouble((double)iresult);
+				return NewDouble((double)(uintptr_t)iresult);
 			}
 		case C_LONGLONG:
 			if ((long long int)iresult <= (long long int)MAXINT) {
