@@ -750,7 +750,7 @@ end function
 -- Returns:
 -- An **object**, either an atom if the input was a single address, or a
 -- sequence of atoms if a sequence was passed. In both cases, atoms returned
--- are double words, in the range -power(2,31)..power(2,31)-1.
+-- are double words, in the range -(2^^31^^)..2^^31^^-1.
 --
 -- Errors:
 -- Peeking in memory you don't own may be blocked by the OS, and cause a
@@ -806,7 +806,7 @@ end function
 -- Returns:
 --              An **object**, either an atom if the input was a single address, or
 -- a sequence of atoms if a sequence was passed. In both cases, atoms
--- returned are double words, in the range 0..power(2,32)-1. 
+-- returned are double words, in the range 0..2^^32^^-1. 
 --
 -- Errors:
 --      Peek() in memory you don't own may be blocked by the OS, and cause
@@ -1017,7 +1017,7 @@ end function
 -- Comments: 
 --
 -- There is no point in having poke4s() or poke4u(). For example, both
--- +power(2,31) and -power(2,31) are stored as #F0000000. It's up to whoever
+-- +2^^31^^ and -(2^^31^^) are stored as #F0000000. It's up to whoever
 -- reads the value to figure it out.
 --
 -- It is faster to write several double words at once by poking a sequence
@@ -1031,7 +1031,7 @@ end function
 -- The 4-byte values to be stored can be negative or positive. You can read
 -- them back with either ##peek4s##() or ##peek4u##(). However, the results
 -- are unpredictable if you want to store values with a fractional part or a
--- magnitude greater than power(2,32), even though Euphoria represents them
+-- magnitude greater than 2^^32^^, even though Euphoria represents them
 -- all as atoms.
 --
 -- Example 1:
