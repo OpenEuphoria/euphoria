@@ -1581,7 +1581,7 @@ object call_c(int func, object proc_ad, object arg_list)
 				return iresult;
 			}
 			else {
-				return NewDouble((double)(uintptr_t)iresult);
+				return NewDouble((eudouble)(uintptr_t)iresult);
 			}
 		case C_LONGLONG:
 			if ((long long int)iresult <= (long long int)MAXINT) {
