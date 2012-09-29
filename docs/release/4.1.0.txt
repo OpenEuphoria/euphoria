@@ -41,3 +41,5 @@
   for more information.
 * [[ticket:782]] When downloading http content, std/net/http.e will yield to other tasks
 * [[t_integer32]] type for checking to see if an object is an integer based on 32-bit Euphoria's definition
+* Improved identification of ##routine_id()## targets by the translator
+* Smaller translated DLLs are produced by improved identification of routines that need to be exported

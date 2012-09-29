@@ -10,6 +10,7 @@ end ifdef
 
 include std/search.e
 include std/filesys.e
+include std/map.e
 
 include global.e
 include c_out.e
@@ -551,7 +552,7 @@ procedure mark_all( integer attribute )
 		while p != 0 do
 			integer sym_file = SymTab[p][S_FILE_NO]
 			just_mark_everything_from = p
-			if sym_file = current_file_no or find( sym_file, recheck_files ) then
+			if sym_file = current_file_no or map:has( recheck_routines, sym_file ) then
 				SymTab[p][attribute] += 1
 			else
 				integer scope = SymTab[p][S_SCOPE]
@@ -576,8 +577,27 @@ procedure mark_all( integer attribute )
 	end if
 end procedure
 
-sequence recheck_targets = {}
-sequence recheck_files = {}
+map recheck_routines = map:new()
+
+procedure mark_rechecks( integer file_no = current_file_no )
+
+	sequence recheck_targets = map:get( recheck_routines, file_no, {} )
+	if length( recheck_targets ) then
+		sequence remaining = {}
+		for i = length( recheck_targets ) to 1 by -1 do
+			integer marked = 0
+			if TRANSLATE then
+				marked = MarkTargets( recheck_targets[i], S_RI_TARGET )
+			elsif BIND then
+				marked = MarkTargets( recheck_targets[i], S_NREFS )
+			end if
+			if not marked then
+				remaining &= file_no
+			end if
+		end for
+		map:put( recheck_routines, file_no, recheck_targets )
+	end if
+end procedure
 
 export procedure mark_final_targets()
 	if just_mark_everything_from then
@@ -586,19 +606,10 @@ export procedure mark_final_targets()
 		elsif BIND then
 			mark_all( S_NREFS )
 		end if
-	elsif length( recheck_targets ) then
-		
-		for i = length( recheck_targets ) to 1 by -1 do
-			integer marked = 0
-			if TRANSLATE then
-				marked = MarkTargets( recheck_targets[i], S_RI_TARGET )
-			elsif BIND then
-				marked = MarkTargets( recheck_targets[i], S_NREFS )
-			end if
-			
-			if marked then
-				recheck_targets = remove( recheck_targets, i )
-			end if
+	elsif map:size( recheck_routines ) then
+		sequence recheck_files = map:keys( recheck_routines )
+		for i = 1 to length( recheck_files ) do
+			mark_rechecks( recheck_files[i] )
 		end for
 	end if
 end procedure
@@ -678,11 +689,7 @@ export function MarkTargets(symtab_index s, integer attribute)
 		end while
 		
 		if not found then
-			just_mark_everything_from = TopLevelSub
-			recheck_targets &= s
-			if not find( current_file_no, recheck_files ) then
-				recheck_files &= current_file_no
-			end if
+			map:put( recheck_routines, current_file_no, s, map:APPEND )
 		end if
 		return found
 	else
@@ -1234,6 +1241,7 @@ export procedure HideLocals()
 -- hide the local symbols and "lint" check them
 	symtab_index s
 
+	mark_rechecks()
 	s = file_start_sym
 	while s do
 		if SymTab[s][S_SCOPE] = SC_LOCAL and
