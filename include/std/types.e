@@ -1163,8 +1163,8 @@ public constant NO_ROUTINE_ID = -99999
 
 -- Maximum and minimum values for Euphoria 31-bit integers (as implemented by 32-bit Euphoria)
 constant
-	MAXINT32 = 1073741823,
-	MININT32 = -17179869184
+	MAXSINT31 = power(2,30)-1,
+	MINSINT31 = -power(2,30)
 
 --** Returns:
 -- TRUE if the argument is a valid 31-bit euphoria integer.
@@ -1177,7 +1177,7 @@ public type t_integer32( object o )
 	ifdef EU32 then
 		return integer( o )
 	elsedef
-		if integer( o ) and o <= MAXINT32 and o >= MININT32 then
+		if integer( o ) and o <= MAXSINT31 and o >= MINSINT31 then
 			return 1
 		else
 			return 0
