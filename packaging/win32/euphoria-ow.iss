@@ -226,7 +226,7 @@ begin
 
 		ExpandConstant('SET EUDIR={app}') + #13#10 + 
 		ExpandConstant('SET WATCOM={app}\watcom') + #13#10 + 
-		'SET PATH=%EUDIR%\bin;%WATCOM\binw;%WATCOM%\binnt;%PATH%' + #13#10 + 
+		'SET PATH=%EUDIR%\bin;%WATCOM%\binw;%WATCOM%\binnt;%PATH%' + #13#10 + 
 		'SET INCLUDE=%WATCOM%\h;%WATCOM%\h\nt' + #13#10, 
 		True);
 end;

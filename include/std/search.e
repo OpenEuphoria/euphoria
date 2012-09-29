@@ -199,6 +199,7 @@ end function
 -- Comments:
 --   This function may be applied to a string sequence or a complex
 --   sequence.
+--   An empty needles sequence will always result in 0.
 --
 -- Example 1:
 --   <eucode>
@@ -628,7 +629,7 @@ end function
 --
 -- Parameters:
 --
---		# ##needle## : an object to search and perhaps replace
+--		# ##needle## : an non-empty sequence or atom to search and perhaps replace
 --		# ##haystack## : a sequence to be inspected
 --		# ##replacement## : an object to substitute for any (first) instance of ##needle##
 --		# ##max## : an integer, 0 to replace all occurrences
@@ -643,6 +644,8 @@ end function
 --
 -- If either ##needle## or ##replacement## are atoms they will be treated as if you had passed in a 
 -- length-1 sequence containing the said atom. 
+--
+-- If ##needle## is an empty sequence, an error will be raised and your program will exit. 
 --
 -- Example 1:
 -- <eucode>
@@ -811,6 +814,10 @@ end function
 -- Returns:
 --     An **integer**, 0 if no slice of ##haystack## is ##needle##, else the smallest index at which such a slice starts.
 --
+-- Comments:
+--  If ##needle## is an empty sequence, an error is raised and your program 
+--  will exit.
+--
 -- Example 1:
 -- <eucode>
 -- location = match("pho", "Euphoria")
@@ -833,17 +840,24 @@ end function
 --  provided by ##match_from##. In an undetermined future release of Euphoria, ##match_from##
 --  will be removed.
 --
+-- Comments:
+--  If ##needle## is an empty sequence, an error is raised and your program 
+--  will exit.
+--
 
 --**
 -- Match all items of haystack in needle.
 --
 -- Parameters:
---     # ##needle## : a sequence, what to look for
+--     # ##needle## : a non-empty sequence, what to look for
 --     # ##haystack## : a sequence to search in
 --     # ##start## : an integer, the starting index position (defaults to 1)
 --
 -- Returns:
 --   A **sequence**, of integers, the list of all lower indexes, not less than ##start##, of all slices in ##haystack## that equal ##needle##. The list may be empty.
+--
+-- Comments:
+--   If ##needle## is an empty sequence, an error will be raised and your program will exit.
 --
 -- Example 1:
 -- <eucode>
@@ -886,6 +900,8 @@ end function
 --   to designate a position counted backwards. Thus, if ##start## is -1, the
 --   first element to be queried in ##haystack## will be ##haystack##[$-1],
 --   then ##haystack##[$-2] and so on.
+--
+--   If a ##needle## is an empty sequence this will return 0.
 --
 -- Example 1:
 -- <eucode>
@@ -940,6 +956,11 @@ end function
 -- Returns:
 --		An **integer**, 1 if ##sub_text## begins ##full_text##, else 0.
 --
+-- Comments:
+--  If ##sub_text## is an empty sequence, this returns 1 unless ##full_text## 
+--  is also an empty sequence.  When they are both empty sequences this returns 
+--  0.
+--
 -- Example 1:
 -- <eucode>
 -- s = begins("abc", "abcdef")
@@ -984,6 +1005,11 @@ end function
 --
 -- Returns:
 --		An **integer**, 1 if ##sub_text## ends ##full_text##, else 0.
+--
+--- Comments:
+--  If ##sub_text## is an empty sequence, this returns 1 unless ##full_text## 
+--  is also an empty sequence.  When they are both empty sequences this returns 
+--  0.
 --
 -- Example 1:
 -- <eucode>
