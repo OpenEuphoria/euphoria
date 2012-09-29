@@ -1170,7 +1170,8 @@ end procedure
 --   [[:get_screen_char]], [[:colors_to_attr]]
 
 public function attr_to_colors(integer attr_code)
-    return and_bits({attr_code, attr_code/16}, 0x0F)
+    sequence fgbg = and_bits({attr_code, attr_code/16}, 0x0F)
+    return {find(fgbg[1],true_fgcolor)-1, find(fgbg[2],true_bgcolor)-1}
 end function
 
 --**
