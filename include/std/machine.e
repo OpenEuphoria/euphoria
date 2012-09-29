@@ -1021,7 +1021,7 @@ end function
 -- Returns:
 -- An **object**, either an atom if the input was a single address, or a
 -- sequence of atoms if a sequence was passed. In both cases, atoms returned
--- are quad words, in the range -power(2,63)..power(2,63)-1.
+-- are quad words, in the range -(2^^63^^)..2^^63^^-1.
 --
 -- Errors:
 -- Peeking in memory you don't own may be blocked by the OS, and cause a
@@ -1078,9 +1078,9 @@ end function
 -- An **object**, either an atom if the input was a single address, or a
 -- sequence of atoms if a sequence was passed. In both cases, atoms returned
 -- are based on the native size of a "long int."  On Windows and all other 32-bit
--- architectures, the number will be in the range -power(2,31)..power(2,31)-1.
+-- architectures, the number will be in the range -(2^^31^^)..2^^31^^-1.
 -- On other 64-bit architectures, the number will be in the range of
--- -power(2,63)..power(2,63)-1.
+-- -(2^^63^^)..2^^63^^-1.
 --
 -- Errors:
 -- Peeking in memory you don't own may be blocked by the OS, and cause a
@@ -1192,7 +1192,7 @@ end function
 -- Returns:
 --              An **object**, either an atom if the input was a single address, or
 -- a sequence of atoms if a sequence was passed. In both cases, atoms
--- returned are quad words, in the range 0..power(2,64)-1.
+-- returned are quad words, in the range 0..2^^64^^-1.
 --
 -- Errors:
 --      Peek() in memory you don't own may be blocked by the OS, and cause
@@ -1249,9 +1249,9 @@ end function
 -- An **object**, either an atom if the input was a single address, or a
 -- sequence of atoms if a sequence was passed. In both cases, atoms returned
 -- are based on the native size of a "long int."  On Windows and all other 32-bit
--- architectures, the number will be in the range 0..power(2,32)-1.
+-- architectures, the number will be in the range 0..2^^32^^-1.
 -- On other 64-bit architectures, the number will be in the range of
--- 0..power(2,64)-1.
+-- 0..2^^64^^-1.
 --
 -- Errors:
 --      Peek() in memory you don't own may be blocked by the OS, and cause
@@ -1515,7 +1515,7 @@ end function
 -- Comments:
 --
 -- There is no point in having poke8s() or poke8u(). For example, both
--- +power(2,63) and -power(2,63) are stored as #F000000000000000. It's up to whoever
+-- +2^^63^^ and -(2^^63^^) are stored as #F000000000000000. It's up to whoever
 -- reads the value to figure it out.
 --
 -- It is faster to write several quad words at once by poking a sequence
@@ -1524,7 +1524,7 @@ end function
 -- The 8-byte values to be stored can be negative or positive. You can read
 -- them back with either ##peek8s##() or ##peek8u##(). However, the results
 -- are unpredictable if you want to store values with a fractional part or a
--- magnitude greater than power(2,64), even though Euphoria represents them
+-- magnitude greater than 2^^64^^, even though Euphoria represents them
 -- all as atoms.
 --
 -- Example 1:
@@ -1563,7 +1563,7 @@ end function
 -- Comments:
 --
 -- There is no point in having poke_longs() or poke_longu(). For example, both
--- +power(2,31) and -power(2,31) are stored as #F0000000 on a 32-bit
+-- +2^^31^^ and -(2^^31^^) are stored as #F0000000 on a 32-bit
 -- architecture. It's up to whoever reads the value to figure it out.
 --
 -- On all Windows and other 32-bit operating systems, the ##poke_long()##
