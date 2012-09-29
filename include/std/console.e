@@ -1194,9 +1194,9 @@ end function
 
 public function colors_to_attr(object fgbg, integer bg = 0)
 	if sequence(fgbg) then
-		return fgbg[1] + fgbg[2] * 16
+                return true_fgcolor[fgbg[1]+1] + true_bgcolor[fgbg[2]+1] * 16
 	else
-		return fgbg + bg * 16
+                return true_fgcolor[fgbg+1] + true_bgcolor[bg+1] * 16
 	end if
 end function
 
