@@ -13,7 +13,11 @@ include std/filesys.e
 include std/get.e
 include std/hash.e
 include std/machine.e
-include std/scinot.e
+ifdef EU_4_0 then
+	include scinot.e
+elsedef
+	include std/scinot.e
+end ifdef
 include std/search.e
 include std/sequence.e
 include std/text.e
@@ -383,6 +387,10 @@ export procedure read_line()
 		ThisLine = -1
 	else
 		ThisLine = gets(src_file)
+		if sequence(ThisLine) and ends( {13,10}, ThisLine ) then
+			ThisLine = remove(ThisLine, length(ThisLine))
+			ThisLine[$] = 10
+		end if
 	end if
 	if atom(ThisLine) then
 		ThisLine = {END_OF_FILE_CHAR}

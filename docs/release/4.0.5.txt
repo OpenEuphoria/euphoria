@@ -15,9 +15,11 @@
 * [[ticket:775]] Fixed potential memory leak when a temp is passed to one of the
   native type check functions: [[:integer]](), [[:atom]](), [[:object]]() or [[:sequence]]()
 * [[ticket:778]] Translator keeps forward referenced routine_id routines in include files
+* [[ticket:789]] Make parser read Windows eols the same as unix eols on Linux.
 
 === Enhancements
 
 * [[ticket:768]] Backported support for deserializing 8-byte integers and 10-byte floating point.
 * Optimization of std/map.e ##remove()## to prevent unnecessary copy on write
+* [[ticket:787]] Document cases where you pass an empty sequence into search routines
 
