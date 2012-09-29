@@ -1,4 +1,4 @@
-t_c_749_goto.e:14 in procedure goto_init() 
+tests/t_c_749_goto.e:14 in procedure goto_init()
 variable x has not been assigned a value 
     y = 8
     x = <no value>

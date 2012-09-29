@@ -1510,7 +1510,13 @@ export procedure GenerateUserRoutines()
 					else
 						ret_type = "object "
 					end if
-					if find( SymTab[s][S_SCOPE], {SC_GLOBAL, SC_EXPORT, SC_PUBLIC} ) and dll_option then
+					integer s_scope = sym_scope( s )
+					integer s_file  = SymTab[s][S_FILE_NO]
+					if dll_option and
+					(s_scope = SC_GLOBAL
+					or (s_file = 1 and (s_scope = SC_PUBLIC or s_scope = SC_EXPORT)
+					or (s_scope = SC_PUBLIC and and_bits( include_matrix[1][s_file], PUBLIC_INCLUDE ) ) ) )
+					then
 						-- mark it as a routine_id target, so it won't be deleted
 						SymTab[s][S_RI_TARGET] = TRUE
 						LeftSym = TRUE
