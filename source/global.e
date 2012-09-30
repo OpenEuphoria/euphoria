@@ -283,6 +283,8 @@ elsedef
 	end if
 end ifdef
 
+public integer TARGET_SIZEOF_POINTER = SIZEOF_POINTER
+
 export constant
 	MAXINT = max_int,
 	MININT = -MAXINT-1,   -- should be -ve

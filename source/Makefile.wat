@@ -393,7 +393,7 @@ nearlyclean mostlyclean : .SYMBOLIC
 	-@for %i in ($(BUILD_DIRS)) do -$(RM) %i\*.obj
 	-@for %i in ($(BUILD_DIRS)) do -$(RM) %i\back\*.obj	
 	-$(RM) $(BUILDDIR)\pcre\*.obj
-	-$(RM) $(TRUNKDIR)\tests\ecp.dat
+	-$(RM) $(TRUNKDIR)\bin\ecp.dat
 	-$(RM) $(TRUNKDIR)\tests\*.c	
 	-$(RM) $(TRUNKDIR)\tests\*.obj
 	-$(RM) $(TRUNKDIR)\tests\*.h
@@ -496,10 +496,7 @@ translate source : .SYMBOLIC
 	wmake -h backendsource EX="$(EUBIN)\eui.exe" EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
 
 
-$(TRUNKDIR)\tests\ecp.dat : $(BUILDDIR)\ecp.dat
-	-copy $(BUILDDIR)\ecp.dat $(TRUNKDIR)\tests
-
-testeu : .SYMBOLIC  $(TRUNKDIR)\tests\ecp.dat
+testeu : .SYMBOLIC
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR)
 	-$(EUTEST) -i ..\include $(TEST_EXTRA) --nocheck -eui "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\eu.ex" -euc "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\euc.ex" $(LIST) $(TESTFILE)
@@ -507,7 +504,7 @@ testeu : .SYMBOLIC  $(TRUNKDIR)\tests\ecp.dat
 
 !endif #EUPHORIA
 
-test : .SYMBOLIC $(TRUNKDIR)\tests\ecp.dat $(BUILDDIR)\eubind.exe $(FULLBUILDDIR)\eu.$(LIBEXT) $(BUILDDIR)\eub.exe
+test : .SYMBOLIC $(BUILDDIR)\eubind.exe $(FULLBUILDDIR)\eu.$(LIBEXT) $(BUILDDIR)\eub.exe
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR) 
 	-$(EUTEST) $(TEST_EXTRA) $(VERBOSE_TESTS) -i ..\include -cc wat -eui $(FULLBUILDDIR)\eui.exe -euc $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -bind $(FULLBUILDDIR)\eubind.exe -eub $(BUILDDIR)\eub.exe -log $(LIST) $(TESTFILE)

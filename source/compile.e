@@ -1293,7 +1293,7 @@ procedure main_temps()
 end procedure
 
 export sequence LL_suffix = ""
-if SIZEOF_POINTER = 8 then
+if TARGET_SIZEOF_POINTER = 8 then
 	LL_suffix = "LL"
 end if
 function FoldInteger(integer op, integer target, integer left, integer right)
@@ -1640,19 +1640,19 @@ function IntegerMultiply(integer a, integer b)
 	dblcode = "@1 = NewDouble(@2 * (eudouble)@3);\n"
 
 	-- test_a
-	if SIZEOF_POINTER = 4 then
+	if TARGET_SIZEOF_POINTER = 4 then
 		test_a = int32_mult_testa( range_a )
 		
 	else
 		test_a = int64_mult_testa( range_a )
 	end if
 	
-	if atom( test_a ) and SIZEOF_POINTER = 4 then
+	if atom( test_a ) and TARGET_SIZEOF_POINTER = 4 then
 		return dblcode
 	end if
 	
 	-- test_b1
-	if SIZEOF_POINTER = 4 then
+	if TARGET_SIZEOF_POINTER = 4 then
 		test_b1 = int32_mult_testb1( range_b )
 	else
 		test_b1 = int64_mult_testb1( range_b )
@@ -1663,7 +1663,7 @@ function IntegerMultiply(integer a, integer b)
 	
 	
 	-- test_b2
-	if SIZEOF_POINTER = 4 then
+	if TARGET_SIZEOF_POINTER = 4 then
 		test_b2 = int32_mult_testb2( range_b )
 	else
 		test_b2 = int64_mult_testb2( range_b )
@@ -1693,7 +1693,7 @@ function IntegerMultiply(integer a, integer b)
 		multiply_code &= "){\n" &
 						 "@1 = @2 * @3;\n}\n" &
 						 "else{\n"
-		if SIZEOF_POINTER = 4 then
+		if TARGET_SIZEOF_POINTER = 4 then
 			multiply_code &= "@1 = NewDouble(@2 * (eudouble)@3);\n}\n"
 		else
 			multiply_code  = "{\nint128_t p128 = (int128_t)@2 * (int128_t)@3;\n"

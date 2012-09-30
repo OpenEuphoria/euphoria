@@ -183,6 +183,14 @@ export constant
     elsedef
         export constant MAP_ANONYMOUS = 32
     end ifdef
+    
+    ifdef LINUX then
+    	ifdef EU4_0 then
+    		export constant MAP_FAILED = power(256,4)-1
+    	elsedef
+		    export constant MAP_FAILED = power(256,sizeof(dll:C_POINTER))-1
+		end ifdef
+    end ifdef
 end ifdef
 
 --**
@@ -2130,6 +2138,9 @@ function local_allocate_protected_memory( integer s, integer first_protection )
 		end if
 	elsifdef UNIX then
 		atom ptr = c_func( MMAP, { 0, s, first_protection, or_bits( MAP_ANONYMOUS, MAP_PRIVATE ), -1, 0 })
+		if ptr = MAP_FAILED then
+			return 0
+		end if
 		integer fail = local_change_protection_on_protected_memory( ptr, s, first_protection )
 		return ptr
 	end ifdef
