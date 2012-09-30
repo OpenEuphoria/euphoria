@@ -17,18 +17,32 @@ constant BASE = #10 * power(#100,(pointer_size-1))
 constant SEQ_MASK =  #8 * BASE
 constant NOVALUE  =  #C * BASE - 1
 constant MAXUINT =  #10 * BASE - 1 
+constant MAXUSHORT = power(2,16)-1
+constant MAXUBYTE  = #FF
 integer gb = 5
 
 function minus_1_fn() 
 	return -1 
 end function 
-atom r_max_uint_fn  = define_c_func( "", call_back( routine_id("minus_1_fn") ), {}, C_POINTER )
-test_equal( "return type C_POINTER makes unsigned value", MAXUINT32, c_func(r_max_uint_fn, {}) )
 
-r_max_uint_fn = define_c_func( "", call_back( routine_id("minus_1_fn") ), {}, C_UINT )
-test_equal( "return type C_UINT makes unsigned value", MAXUINT32, c_func(r_max_uint_fn, {}) )
+constant unsigned_types      = { C_UCHAR, C_UBYTE, C_USHORT, C_UINT, C_POINTER }
+constant unsigned_type_names = { "C_UCHAR", "C_UBYTE", "C_USHORT", "C_UINT", "C_POINTER" }
+constant minus_1_values      = { #FF, #FF, #FF_FF, MAXUINT, MAXUINT }
+		 
 
+		
+atom r_max_uint_fn
+for i = 1 to length(minus_1_values) do
+	r_max_uint_fn = define_c_func( "", call_back( routine_id("minus_1_fn") ), {}, unsigned_types[i] )
+	test_equal( sprintf("return type %s makes unsigned value", {unsigned_type_names[i]}), minus_1_values[i], c_func(r_max_uint_fn, {}) )
+end for
 
+constant signed_types      = { C_CHAR, C_BYTE, C_SHORT, C_INT, C_BOOL, C_LONG }
+constant signed_type_names = { "C_CHAR", "C_BYTE", "C_SHORT", "C_INT", "C_BOOL", "C_LONG" }
+for i = 1 to length(signed_types) do
+	r_max_uint_fn = define_c_func( "", call_back( routine_id("minus_1_fn") ), {}, signed_types[i] )
+	test_equal( sprintf("return type %s preserves -1", {signed_type_names[i]}), -1, c_func(r_max_uint_fn, {}) )
+end for
 
 test_report()
 
