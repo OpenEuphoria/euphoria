@@ -1,4 +1,4 @@
-== Version 4.0.5 Date TBD
+== Version 4.0.5 October 8, 2012
 
 === Bug Fixes
 * [[ticket:777]] When invalid input is sent to 'match' or 'find' the error includes 'match' or 'find' in the error message repectively.
