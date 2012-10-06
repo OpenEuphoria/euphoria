@@ -226,7 +226,7 @@ function execute_request(sequence host, integer port, sequence request, integer 
 	end if
 
 	atom start_time = time()
-	integer got_header = 0, content_length = 0
+	integer got_header = 0, content_length = -1
 	sequence content = ""
 	sequence headers = {}
 	while time() - start_time < timeout label "top" do
@@ -265,7 +265,7 @@ function execute_request(sequence host, integer port, sequence request, integer 
 						this_header[1] = lower(this_header[1])
 						headers = append(headers, this_header)
 
-						if equal(this_header[1], "content-length") then
+						if equal(lower(this_header[1]), "content-length") then
 							content_length = to_number(this_header[2])
 						end if
 					end for
