@@ -56,7 +56,7 @@ procedure init_float80()
 				0xf8, 0xdd, 0x45, 0xf8, 0xdd, 0x18, 0xc9, 0xc3,
 				0x00
 			} )
-	F80_TO_ATOM = dll:define_c_proc( "", {"+", code}, { dll:C_POINTER, dll:C_POINTER } )
+	F80_TO_ATOM = dll:define_c_proc( "", {'+', code}, { dll:C_POINTER, dll:C_POINTER } )
 
 end procedure
 
@@ -91,7 +91,7 @@ procedure init_peek8s()
 			0xc9,              -- leave
 			0xc3               -- ret
 		})
-	PEEK8S = define_c_proc( "", {"+", code}, { C_POINTER, C_POINTER } )
+	PEEK8S = define_c_proc( {}, {'+', code}, { C_POINTER, C_POINTER } )
 end procedure
 
 function int64_to_atom( sequence s )
