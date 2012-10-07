@@ -16,6 +16,8 @@
   native type check functions: [[:integer]](), [[:atom]](), [[:object]]() or [[:sequence]]()
 * [[ticket:778]] Translator keeps forward referenced routine_id routines in include files
 * [[ticket:789]] Make parser read Windows eols the same as unix eols on Linux.
+* [[ticket:795]] Corrected std/serialize.e to call define_c_proc correctly
+* [[ticket:795]] Corrected std/net/http.e to call do a case insensitive search for 'content-length'
 
 === Enhancements
 
