@@ -12,7 +12,7 @@
 -- Increment version number with each release, not really with each change
 -- in the SCM
 
-constant APP_VERSION = "1.0.2"
+constant APP_VERSION = "1.1.0"
 
 include std/pretty.e
 include std/sequence.e
