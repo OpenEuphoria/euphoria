@@ -1,4 +1,4 @@
-== Version 4.0.5 October 8, 2012
+ == Version 4.0.5 October 8, 2012
 
 === Bug Fixes
 * [[ticket:777]] When invalid input is sent to 'match' or 'find' the error includes 'match' or 'find' in the error message repectively.
@@ -18,6 +18,7 @@
 * [[ticket:789]] Make parser read Windows eols the same as unix eols on Linux.
 * [[ticket:795]] Corrected std/serialize.e to call define_c_proc correctly
 * [[ticket:795]] Corrected std/net/http.e to call do a case insensitive search for 'content-length'
+* [[ticket:796]] when binding and translating use different EXE names
 
 === Enhancements
 

@@ -10,7 +10,7 @@
 -- Increment version number with each release, not really with each change
 -- in the SCM
 
-constant APP_VERSION = "1.0.0"
+constant APP_VERSION = "1.0.1"
 
 include std/pretty.e
 include std/sequence.e
@@ -353,8 +353,9 @@ end function
 function translate( sequence filename, sequence fail_list )
 	printf(1, "\ntranslating %s:", {filename})
 	total += 1
-	sequence cmd = sprintf("%s %s %s %s -d UNITTEST -d EC -batch %s",
-		{ translator, library, compiler, translator_options, filename })
+	sequence exename = filebase(filename) & "-translated" & dexe
+	sequence cmd = sprintf("%s %s %s %s -d UNITTEST -d EC -batch %s -o %s",
+		{ translator, library, compiler, translator_options, filename, exename })
 	verbose_printf(1, "CMD '%s'\n", {cmd})
 	integer status = system_exec(cmd, 0)
 
@@ -362,7 +363,6 @@ function translate( sequence filename, sequence fail_list )
 
 	integer log_where = 0
 	if status = 0 then
-		sequence exename = filename & dexe
 
 		void = delete_file("cw.err")
 		verbose_printf(1, "executing %s:\n", {exename})
@@ -381,7 +381,7 @@ function translate( sequence filename, sequence fail_list )
 
 			if sequence(token) then
 				failed += 1
-				fail_list = append(fail_list, "translated" & " " & exename)					
+				fail_list = append(fail_list, "translated" & " " & exename)				
 				error(exename, E_EXECUTE, token, {}, "ex.err")
 			else
 				log_where = token
@@ -403,8 +403,9 @@ end function
 
 function bind( sequence filename, sequence fail_list )
 	printf(1, "\nbinding %s:\n", {filename})
-	sequence cmd = sprintf("\"%s\" %s %s -batch -d UNITTEST %s",
-		{ binder, eub_path, interpreter_options, filename } )
+	sequence exename = fs:filebase(filename) & "-bound" & dexe
+	sequence cmd = sprintf("\"%s\" %s %s -batch -d UNITTEST %s -out %s",
+		{ binder, eub_path, interpreter_options, filename, exename } )
 	
 	total += 1
 	verbose_printf(1, "CMD '%s'\n", {cmd})
@@ -413,7 +414,6 @@ function bind( sequence filename, sequence fail_list )
 	filename = filebase(filename)
 	integer log_where = 0
 	if status = 0 then
-		sequence exename = filename & dexe
 		verbose_printf(1, "executing %s:\n", {exename})
 		cmd = sprintf("./%s %s", {exename, test_options})
 		status = invoke(cmd, exename,  E_EXECUTE) 
