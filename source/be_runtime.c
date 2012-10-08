@@ -5713,14 +5713,30 @@ void Cleanup(int status)
 #ifdef EXTRA_STATS
 	Stats();
 #endif
-#if 0
+
 	{
 		symtab_ptr sym = TopLevelSub;
 		while( sym ){
-			if( sym->mode = M_NORMAL &&
+			object x = sym->obj;
+			if( x >= NOVALUE ) /* do nothing */;
+			else if ( IS_ATOM_DBL( x ) && DBL_PTR( x )->cleanup != 0) cleanup_double( DBL_PTR( x ) );
+			else if (IS_SEQUENCE( x ) && SEQ_PTR( x )->cleanup != 0 ) cleanup_sequence( SEQ_PTR( x ) );
+			sym = sym->next;
+		}
+
+		sym = TopLevelSub;
+		while( sym ){
+			DeRef( sym->obj );
+			sym->obj = NOVALUE;
+			sym = sym->next;
+		}
+	
+		sym = TopLevelSub;
+		while( sym ){
+			if( sym->mode == M_NORMAL &&
 				(sym->token == PROC ||
 				sym->token == FUNC ||
-				sym->token == TYPE)){
+				sym->token == TYPE) ){
 
 // 				EFree( sym->u.subp.code );
 				EFree( sym->u.subp.linetab );
@@ -5731,7 +5747,6 @@ void Cleanup(int status)
 	EFree( fe.st ); // = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
 	EFree( fe.sl ); //= (struct sline *) get_pos_int(w, *(x_ptr->base+2));
 	EFree( fe.misc ); // = (int *)        get_pos_int(w, *(x_ptr->base+3));
-#endif // 0
 #endif // ERUNTIME
 
 #ifdef EWINDOWS

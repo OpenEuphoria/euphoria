@@ -755,6 +755,7 @@ export procedure DeclareFileVars()
 
 	c_puts("// Declaring file vars\n")
 	s = SymTab[TopLevelSub][S_NEXT]
+	
 	while s do
 		eentry = SymTab[s]
 		if eentry[S_SCOPE] >= SC_LOCAL
@@ -786,6 +787,47 @@ export procedure DeclareFileVars()
 	end while
 	c_puts("\n")
 	c_hputs("\n")
+	if dll_option or debug_option then
+		integer cleanup_vars = 0
+		c_puts("// Declaring var array for cleanup\n")
+		s = SymTab[TopLevelSub][S_NEXT]
+		c_stmt0( "object_ptr _0var_cleanup[] = {\n" )
+		while s do
+			eentry = SymTab[s]
+			if eentry[S_SCOPE] >= SC_LOCAL
+			and (eentry[S_SCOPE] <= SC_GLOBAL or eentry[S_SCOPE] = SC_EXPORT or eentry[S_SCOPE] = SC_PUBLIC)
+			and eentry[S_USAGE] != U_UNUSED
+			and eentry[S_USAGE] != U_DELETED
+			and not find(eentry[S_TOKEN], RTN_TOKS)
+			and eentry[S_VTYPE] != integer_type then
+
+				
+				c_stmt0( sprintf("&_%d", eentry[S_FILE_NO]))
+				c_puts(eentry[S_NAME] )
+				c_puts(",\n" )
+				cleanup_vars += 1
+
+			end if
+			s = SymTab[s][S_NEXT]
+		end while
+		c_stmt0( "0\n" )
+		c_stmt0( "};\n" )
+
+		c_stmt0( "void _0cleanup_vars(){\n" )
+		c_stmt0( "int i;\n" )
+		c_stmt0( "object x;\n" )
+		c_stmt0( sprintf( "for( i = 0; i < %d; ++i ){\n", cleanup_vars ) )
+		c_stmt0( "x = *_0var_cleanup[i];\n" )
+		c_stmt0( "if( x >= NOVALUE ) /* do nothing */;\n" )
+		c_stmt0( "else if ( IS_ATOM_DBL( x ) && DBL_PTR( x )->cleanup != 0) cleanup_double( DBL_PTR( x ) );\n" )
+		c_stmt0( "else if (IS_SEQUENCE( x ) && SEQ_PTR( x )->cleanup != 0 ) cleanup_sequence( SEQ_PTR( x ) );\n" )
+		c_stmt0( "}\n" )
+		c_stmt0( sprintf( "for( i = 0; i < %d; ++i ){\n", cleanup_vars ) )
+		c_stmt0( "DeRef( *_0var_cleanup[i] );\n" )
+		c_stmt0( "*_0var_cleanup[i] = NOVALUE;\n" )
+		c_stmt0( "}\n" )
+		c_stmt0( "}\n" )
+	end if
 end procedure
 
 integer deleted_routines = 0
