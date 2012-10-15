@@ -107,15 +107,23 @@ Updating the environment is not enough, your old installation will still be call
 
 You can set these in regedit (replace C:\EUPHORIA with your Euphoria installation directory):
 {{{
-HKEY_CLASSES_ROOT\.exw\(Default) => 'EUWinApp'
-HKEY_CLASSES_ROOT\EuWinApp\(Default) => 'Euphoria Windows App'
-HKEY_CLASSES_ROOT\EUWinApp\shell\open\command\(Default) => 'C:\EUPHORIA\BIN\euiw.exe "%1"'
-HKEY_CLASSES_ROOT\EUWinApp\shell\translate\command\(Default) => 'C:\EUPHORIA\BIN\euc.exe "%1"'
+HKEY_CLASSES_ROOT\.exw\(Default) 
+    => 'EUWinApp'
+HKEY_CLASSES_ROOT\EuWinApp\(Default) 
+    => 'Euphoria Windows App'
+HKEY_CLASSES_ROOT\EUWinApp\shell\open\command\(Default) 
+    => 'C:\EUPHORIA\BIN\euiw.exe "%1"'
+HKEY_CLASSES_ROOT\EUWinApp\shell\translate\command\(Default) 
+    => 'C:\EUPHORIA\BIN\euc.exe "%1"'
 
-HKEY_CLASSES_ROOT\.ex\(Default) => 'EUConsoleApp'
-HKEY_CLASSES_ROOT\EUConsoleApp\(Default) => 'Euphoria Console App'
-HKEY_CLASSES_ROOT\EUConsoleApp\shell\open\command\(Default) => 'C:\EUPHORIA\BIN\eui.exe "%1"'
-HKEY_CLASSES_ROOT\EUConsoleApp\shell\translate\command\(Default) => 'C:\EUPHORIA\BIN\euc.exe -con "%1"'
+HKEY_CLASSES_ROOT\.ex\(Default) 
+   => 'EUConsoleApp'
+HKEY_CLASSES_ROOT\EUConsoleApp\(Default) 
+   => 'Euphoria Console App'
+HKEY_CLASSES_ROOT\EUConsoleApp\shell\open\command\(Default) 
+   => 'C:\EUPHORIA\BIN\eui.exe "%1"'
+HKEY_CLASSES_ROOT\EUConsoleApp\shell\translate\command\(Default) 
+   => 'C:\EUPHORIA\BIN\euc.exe -con "%1"'
 
 HKEY_CLASSES_ROOT\.e\(Default) => 'EUInc'
 HKEY_CLASSES_ROOT\EUInc\(Default) => 'Euphoria Include File'
@@ -124,18 +132,24 @@ HKEY_CLASSES_ROOT\.ew\(Default) => 'EUInc'
 
 You can also set an editor for your EUPHORIA programs this way:
 {{{
-HKEY_CLASSES_ROOT\EUWinApp\shell\edit\command"\(Default) => 'C:\EUPHORIA\BIN\euiw.exe C:\EUPHORIA\BIN\ed.ex "%1"'
-HKEY_CLASSES_ROOT\EUConsoleApp\shell\edit\command"\(Default) => 'C:\EUPHORIA\BIN\euiw.exe C:\EUPHORIA\BIN\ed.ex "%1"'
-HKEY_CLASSES_ROOT\EUInc\shell\edit\command"\(Default) => 'C:\EUPHORIA\BIN\euiw.exe C:\EUPHORIA\BIN\ed.ex "%1"'
+HKEY_CLASSES_ROOT\EUWinApp\shell\edit\command"\(Default) 
+   => 'C:\EUPHORIA\BIN\euiw.exe C:\EUPHORIA\BIN\ed.ex "%1"'
+HKEY_CLASSES_ROOT\EUConsoleApp\shell\edit\command"\(Default) 
+   => 'C:\EUPHORIA\BIN\euiw.exe C:\EUPHORIA\BIN\ed.ex "%1"'
+HKEY_CLASSES_ROOT\EUInc\shell\edit\command"\(Default) 
+   => 'C:\EUPHORIA\BIN\euiw.exe C:\EUPHORIA\BIN\ed.ex "%1"'
 }}}
 
 You can setup to allow the supplied editor program open to the line where the last failure occured in ex.err files:
 {{{
 HKEY_CLASSES_ROOT\.err\(Default) => 'EUError'
 HKEY_CLASSES_ROOT\EUError\(Default) => 'Error File'
-HKEY_CLASSES_ROOT\EUError\shell\debug => 'Debug what created this error file'
-HKEY_CLASSES_ROOT\EUError\shell\debug\command\(Default) => 'C:\EUPHORIA\BIN\eui.exe C:\EUPHORIA\BIN\ed.ex'
-HKEY_CLASSES_ROOT\EUError\DefaultIcon\(Default) => 'C:\Windows\system32\shell32.dll,78'
+HKEY_CLASSES_ROOT\EUError\shell\debug 
+    => 'Debug what created this error file'
+HKEY_CLASSES_ROOT\EUError\shell\debug\command\(Default) 
+    => 'C:\EUPHORIA\BIN\eui.exe C:\EUPHORIA\BIN\ed.ex'
+HKEY_CLASSES_ROOT\EUError\DefaultIcon\(Default) 
+    => 'C:\Windows\system32\shell32.dll,78'
 }}}
 
 
