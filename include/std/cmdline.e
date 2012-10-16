@@ -619,23 +619,23 @@ end procedure
 -- <built-in> function command_line()
 --
 -- Description:
--- A **sequence**, of strings, where each string is a word from the command-line that started your program.
+-- returns sequence of strings containing each word entered at the command-line that started your program.
 --
 -- Returns:
--- # The ##path##, to either the Euphoria executable, (eui, eui.exe, euid.exe euiw.exe) or to your bound
+-- # The ##path##, to either the Euphoria executable (eui, eui.exe, euid.exe euiw.exe) or to your bound
 --   executable file.
--- # The ##next word##, is either the name of your Euphoria main file, or
+-- # The ##next word##, is either the name of your Euphoria main file or
 -- (again) the path to your bound executable file.
 -- # Any ##extra words##, typed by the user. You can use these words in your program.
 --
 -- There are as many entries as words, plus the two mentioned above.
 --
 -- The Euphoria interpreter itself does not use any command-line options. You are free to use
--- any options for your own program. It does have [[:command line switches]] though.
+-- any options for your own program. The interpreter does have [[:command line switches]] though.
 --
 -- The user can put quotes around a series of words to make them into a single argument.
 --
--- If you convert your program into an executable file, either by binding it, or translating it to C,
+-- If you convert your program into an executable file, either by binding it, or translationg it to C,
 -- you will find that all command-line arguments remain the same, except for the first two,
 -- even though your user no longer types "eui" on the command-line (see examples below).
 --
@@ -669,7 +669,7 @@ end procedure
 --         "the end"
 --         }
 --
--- -- Note that all arguments remain the same as example 1
+-- -- Note that all arguments remain the same as in Example 1
 -- -- except for the first two. The second argument is always
 -- -- the same as the first and is inserted to keep the numbering
 -- -- of the subsequent arguments the same, whether your program
@@ -684,7 +684,7 @@ end procedure
 -- <built-in> function option_switches()
 --
 -- Description:
--- Retrieves the list of switches passed to the interpreter on the command line.
+-- retrieves the list of switches passed to the interpreter on the command line.
 --
 -- Returns:
 -- A **sequence**, of strings, each containing a word related to switches.
@@ -704,7 +704,7 @@ end procedure
 -- [[:Command line switches]]
 
 --**
--- Show help message for the given opts.
+-- shows the help message for the given opts.
 --
 -- Parameters:
 -- # ##opts## : a sequence of options. See the [[:cmd_parse]] for details.
@@ -1173,7 +1173,7 @@ function handle_opt( sequence find_result, integer arg_idx, sequence opts, map p
 end function
 
 --**
--- Parse command line options, and optionally call procedures that relate to these options
+-- parses command line options and optionally calls procedures based on these options.
 --
 -- Parameters:
 -- # ##opts## : a sequence of records that define the various command line
@@ -1332,8 +1332,10 @@ end function
 --
 -- For more details on how the command line is being pre-parsed, see [[:command_line]].
 --
--- Simple Example:
+-- Example 1:
 -- <eucode>
+--    -- simple usage
+--
 -- map args = cmd_parse({  
 --     { "o", 0, "Output directory", { HAS_PARAMETER } },  
 --     { "v", 0, "Verbose mode" }  
@@ -1344,8 +1346,10 @@ end function
 -- end if
 -- </eucode>
 --
--- Complex Example:
+-- Example 2:
 -- <eucode>
+--     -- complex usage
+--
 -- sequence option_definition
 -- integer gVerbose = 0
 -- sequence gOutFile = {}
@@ -1488,7 +1492,7 @@ end function
 
 
 --**
--- Returns a text string based on the set of supplied strings. Typically, this
+-- returns a text string based on the set of supplied strings. Typically, this
 -- is used to ensure that arguments on a command line are properly formed
 -- before submitting it to the shell.
 --
@@ -1502,7 +1506,7 @@ end function
 --
 -- Comments:
 --   Though this function does the quoting for you it is not going to protect
---   your programs from globing *, ?.  And it is not specied here what happens if you
+--   your programs from globing ##*##, ##?## .  And it is not specied here what happens if you
 --   pass redirection or piping characters.
 --
 --   When passing a result from with build_commandline to [[:system_exec]],
@@ -1538,7 +1542,7 @@ public function build_commandline(sequence cmds)
 end function
 
 --**
--- Parse a command line string breaking it into a sequence of command line
+-- parses a command line string breaking it into a sequence of command line
 -- options.
 --
 -- Parameters:
