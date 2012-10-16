@@ -1,6 +1,6 @@
-== Built-in Methods
+== Built-in Routines
 
-These methods are built into Euphoria and require no includes.
+These **built-in** routines do not require an include file:
 
 | ##[[? -> :q_print]]## | ##[[:abort]]## | ##[[:and_bits]]## | ##[[:append]]## |
 | ##[[:arctan]]## | ##[[:atom]]## | ##[[:c_func]]## | ##[[:c_proc]]## |
@@ -14,8 +14,10 @@ These methods are built into Euphoria and require no includes.
 | ##[[:mem_copy]]## | ##[[:mem_set]]## | ##[[:not_bits]]## | ##[[:object]]## |
 | ##[[:open]]## | ##[[:option_switches]]## | ##[[:or_bits]]## | ##[[:peek]]## |
 | ##[[:peek2s]]## | ##[[:peek2u]]## | ##[[:peek4s]]## | ##[[:peek4u]]## |
-| ##[[:peek_string]]## | ##[[:peeks]]## | ##[[:pixel]]## | ##[[:platform]]## |
-| ##[[:poke]]## | ##[[:poke2]]## | ##[[:poke4]]## | ##[[:position]]## |
+| ##[[:peek8s]]## | ##[[:peek8u]]## | ##[[:peek_longs]]## | ##[[:peek_longu]]## |
+| ##[[:peek_pointer]]## | ##[[:peeks]]## | ##[[:peek_string]]## | ##[[:pixel]]## |
+| ##[[:platform]]## | ##[[:poke]]## | ##[[:poke2]]## | ##[[:poke4]]## |
+| ##[[:poke8]]## | ##[[:poke_long]]## | ##[[:poke_pointer]]## | ##[[:position]]## |
 | ##[[:power]]## | ##[[:prepend]]## | ##[[:print]]## | ##[[:printf]]## |
 | ##[[:puts]]## | ##[[:rand]]## | ##[[:remainder]]## | ##[[:remove]]## |
 | ##[[:repeat]]## | ##[[:replace]]## | ##[[:routine_id]]## | ##[[:sequence]]## |
@@ -25,3 +27,7 @@ These methods are built into Euphoria and require no includes.
 | ##[[:task_schedule]]## | ##[[:task_self]]## | ##[[:task_status]]## | ##[[:task_suspend]]## |
 | ##[[:task_yield]]## | ##[[:time]]## | ##[[:trace]]## | ##[[:xor_bits]]## |
 
+A built-in routine has global scope and belongs to the ##eu## namespace. 
+
+An identifier for a built-in is not reserved; it is possible to override these identifiers 
+with new declarations.
