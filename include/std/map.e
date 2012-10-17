@@ -1,27 +1,29 @@
 --****
--- == Map (hash table)
+-- == Map (Hash Table)
 --
 -- <<LEVELTOC level=2 depth=4>>
 --
--- A map is a special array, often called an associative array or dictionary,
--- in which the index to the data can be any Euphoria object and not just
--- an integer. These sort of indexes are also called keys.
--- For example we can code things like this...
+-- A **map** is a special array, often called an associative array or dictionary;
+-- in a map the data **values** (any Euphoria object) are indexed by **keys (also any Euphoria object).
+--
+-- When programming think in terms of //key:value// pairs.
+-- For example we can code things like this:
 -- <eucode>
 --    custrec = new() -- Create a new map
 --    put(custrec, "Name", "Joe Blow")
 --    put(custrec, "Address", "555 High Street")
 --    put(custrec, "Phone", 555675632)
 -- </eucode>
--- This creates three elements in the map, and they are indexed by "Name", 
--- "Address" and "Phone", meaning that to get the data associated with those
--- keys we can code ...
+-- This creates three elements in the map, and they are indexed by ##"Name"##, 
+-- ##"Address"## and ##"Phone"##, meaning that to get the data associated with those
+-- keys we can code:
 -- <eucode>
 --    object data = get(custrec, "Phone")
 --    -- data now set to 555675632
 -- </eucode>
--- **Note~:** Only one instance of a given key can exist in a given map, meaning
--- for example, we couldn't have two separate "Name" values in the above //custrec//
+-- 
+-- Note that //only one instance of a given key// can exist in a given map, meaning
+-- for example, we could not have two separate ##"Name"## values in the above ##custrec##
 -- map.
 --
 -- Maps automatically grow to accommodate all the elements placed into it.
@@ -34,7 +36,8 @@
 -- ;large map: Faster for large number of elements. Speed is usually the same
 -- regardless of how many elements are in the map. The speed is often slower than
 -- a small map.\\
--- **Note~:** If the number of elements placed into a //small// map take it over
+--
+-- Note that if the number of elements placed into a //small// map take it over
 -- the initial size of the map, it is automatically converted to a //large// map.
 --
 
@@ -73,7 +76,7 @@ constant type_is_map   = "Eu:StdMap"
 
 
 --****
--- === Operation codes for put
+-- === Operation Codes for Put
 
 public enum
 	PUT,
@@ -95,7 +98,7 @@ public constant LARGEMAP = 'L'
 
 integer threshold_size = 23
 
--- This is a improbable value used to initialize a small map's keys list. 
+-- This is a //improbable// value used to initialize a small map's keys list. 
 constant init_small_map_key = -75960.358941
 
 --****
@@ -103,12 +106,12 @@ constant init_small_map_key = -75960.358941
 --
 
 --**
--- Defines the datatype 'map'
+-- defines the datatype 'map'.
 --
 -- Comments:
 -- Used when declaring a map variable.
 --
--- Example:
+-- Example 1:
 --   <eucode>
 --   map SymbolTable = new() -- Create a new map to hold the symbol table.
 --   </eucode>
@@ -169,7 +172,7 @@ constant maxInt = #3FFFFFFF
 --
 
 --**
--- Calculate a Hashing value from the supplied data.
+-- calculates a Hashing value from the supplied data.
 --
 -- Parameters:
 --   # ##key_p## : The data for which you want a hash value calculated.
@@ -200,9 +203,8 @@ public function calc_hash(object key_p, integer max_hash_p)
 end function
 
 --**
--- Gets or Sets the threshold value that determines at what point a small map
--- converts into a large map structure. Initially this has been set to 23,
--- meaning that maps up to 23 elements use the //small map// structure.
+-- gets or sets the threshold value that determines when a small map
+-- converts into a large map structure. 
 --
 -- Parameters:
 -- # ##new_value_p## : If this is greater than zero then it **sets** the threshold
@@ -212,7 +214,11 @@ end function
 --  An **integer**, the current value (when ##new_value_p## is less than 1) or the
 -- old value prior to setting it to ##new_value_p##.
 --
-
+-- Comments:
+-- Gets or sets the threshold value that determines at what point a small map
+-- converts into a large map structure. Initially this has been set to 23,
+-- meaning that maps up to 23 elements use the //small map// structure.
+--
 public function threshold(integer new_value_p = 0)
 
 	if new_value_p < 1 then
@@ -226,30 +232,29 @@ public function threshold(integer new_value_p = 0)
 end function
 	
 --**
--- Determines the type of the map.
+-- determines the type of the map.
 --
 -- Parameters:
 -- # ##m## : A map
 --
 -- Returns:
--- An **integer**, Either //SMALLMAP// or //LARGEMAP//
+-- An **integer**, Either ##SMALLMAP## or ##LARGEMAP##.
 --
-
 public function type_of(map the_map_p)
 	return eumem:ram_space[the_map_p][MAP_TYPE]
 end function
 	
 --**
--- Changes the width, i.e. the number of buckets, of a map. Only effects
--- //large// maps.
+-- changes the width (that is the number of buckets) of a map. 
 --
 -- Parameters:
 --   # ##m## : the map to resize
 --   # ##requested_bucket_size_p## : a lower limit for the new size.
 --
--- Comment:
+-- Comments:
 -- If ##requested_bucket_size_p## is not greater than zero, a new width is automatically derived from the current one.
---
+-- 
+-- Only effects //large// maps.
 -- See Also:
 --		[[:statistics]], [[:optimize]]
 
@@ -347,7 +352,7 @@ public procedure rehash(integer the_map_p, integer requested_bucket_size_p = 0)
 end procedure
 
 --**
--- Create a new map data structure
+-- creates a new map data structure.
 --
 -- Parameters:
 --		# ##initial_size_p## : An estimate of how many initial elements will be stored
@@ -400,7 +405,7 @@ public function new(integer initial_size_p = 690)
 end function
 
 --**
--- Returns either the supplied map or a new map.
+-- returns either the supplied map or a new map.
 --
 -- Parameters:
 --      # ##the_map_p## : An object, that could be an existing map
@@ -432,7 +437,7 @@ public function new_extra(object the_map_p, integer initial_size_p = 690)
 end function
 
 --**
--- Compares two maps to test equality.
+-- compares two maps to test equality.
 --
 -- Parameters:
 --		# ##map_1_p## : A map
@@ -489,7 +494,7 @@ public function compare(map map_1_p, map map_2_p, integer scope_p = 'd')
 end function
 
 --**
--- Check whether map has a given key.
+-- checks whether map has a given key.
 --
 -- Parameters:
 -- 		# ##the_map_p## : the map to inspect
@@ -544,7 +549,7 @@ public function has(integer the_map_p, object the_key_p)
 end function
 
 --**
--- Retrieves the value associated to a key in a map.
+-- retrieves the value associated to a key in a map.
 --
 -- Parameters:
 --		# ##the_map_p## : the map to inspect
@@ -622,10 +627,13 @@ public function get(integer the_map_p, object the_key_p, object default_value_p 
 end function
 
 --**
+-- returns the value given a nested key.
+--
+-- Comments:
 -- Returns the value that corresponds to the object ##the_keys_p## in the nested map 
 -- the_map_p.  ##the_keys_p## is a sequence of keys.  If any key is not in the map, the 
 -- object default_value_p is returned instead.
---
+-- 
 
 public function nested_get( map the_map_p, sequence the_keys_p, object default_value_p = 0)
 	for i = 1 to length( the_keys_p ) - 1 do
@@ -644,7 +652,7 @@ public function nested_get( map the_map_p, sequence the_keys_p, object default_v
 end function
 
 --**
--- Adds or updates an entry on a map.
+-- adds or updates an entry on a map.
 --
 -- Parameters:
 --		# ##the_map_p## : the map where an entry is being added or updated
@@ -878,7 +886,7 @@ end procedure
 
 
 --**
--- Adds or updates an entry on a map.
+-- adds or updates an entry on a map.
 --
 -- Parameters:
 --		# ##the_map_p## : the map where an entry is being added or updated
@@ -887,7 +895,9 @@ end procedure
 --		# ##operation_p## : an integer, indicating what is to be done with ##value##. Defaults to PUT.
 --		# ##trigger_p## : an integer. Default is the current threshold size. See Comments for details.
 --
--- Valid operations are: 
+--
+-- Comments:
+-- Valid operations are~: 
 -- 
 -- * ##PUT## ~--  This is the default, and it replaces any value in there already
 -- * ##ADD## ~--  Equivalent to using the += operator 
@@ -897,7 +907,6 @@ end procedure
 -- * ##APPEND## ~-- Appends the value to the existing data 
 -- * ##CONCAT## ~-- Equivalent to using the &= operator
 --
--- Comments:
 --   * If existing entry with the same key is already in the map, the value of the entry is updated.
 --   * The //trigger// parameter is used when you need to keep the average 
 --     number of keys in a hash bucket to a specific maximum. The //trigger// 
@@ -940,7 +949,7 @@ public procedure nested_put( map the_map_p, sequence the_keys_p, object the_valu
 end procedure
 
 --**
--- Remove an entry with given key from a map.
+-- removes an entry with given key from a map.
 --
 -- Parameters:
 --		# ##the_map_p## : the map to operate on
@@ -1020,7 +1029,7 @@ public procedure remove(map the_map_p, object the_key_p)
 end procedure
 
 --**
--- Remove all entries in a map.
+-- removes all entries in a map.
 --
 -- Parameters:
 --		# ##the_map_p## : the map to operate on
@@ -1066,7 +1075,7 @@ public procedure clear(map the_map_p)
 end procedure
 
 --**
--- Return the number of entries in a map.
+-- returns the number of entries in a map.
 --
 -- Parameters:
 --   ##the_map_p## : the map being queried
@@ -1103,7 +1112,7 @@ public enum
 	STDEV_BUCKET
 
 --**
--- Retrieves characteristics of a map.
+-- retrieves characteristics of a map.
 --
 -- Parameters:
 --   # ##the_map_p## : the map being queried
@@ -1174,7 +1183,7 @@ public function statistics(map the_map_p)
 end function
 
 --**
--- Return all keys in a map.
+-- returns all keys in a map.
 --
 -- Parameters:
 --   # ##the_map_p##: the map being queried
@@ -1243,7 +1252,7 @@ public function keys(map the_map_p, integer sorted_result = 0)
 end function
 
 --**
--- Return values, without their keys, from a map.
+-- returns values, without their keys, from a map.
 --
 -- Parameters:
 --   # ##the_map## : the map being queried
@@ -1349,7 +1358,7 @@ end function
 
 --**
 --
--- Return all key/value pairs in a map.
+-- returns all key:value pairs in a map.
 --
 -- Parameters:
 --   # ##the_map_p## : the map to get the data from
@@ -1357,8 +1366,8 @@ end function
 --                         output and 1 means to sort the output before returning.
 --
 -- Returns:
---   A **sequence**, of all key/value pairs stored in ##the_map_p##. Each pair is a 
---   sub-sequence in the form {key, value}
+--   A **sequence**, of all key:value pairs stored in ##the_map_p##. Each pair is a 
+--   sub-sequence in the form ##{key, value}##
 --
 -- Comments:
 --   If ##sorted_result## is not used, the order of the values returned is not predicable. 
@@ -1425,7 +1434,7 @@ public function pairs(map the_map_p, integer sorted_result = 0)
 end function
 
 --**
--- Widens a map to increase performance.
+-- widens a map to increase performance.
 --
 -- Parameters:
 --		# ##the_map_p## : the map being optimized
@@ -1483,7 +1492,7 @@ public procedure optimize(map the_map_p, integer max_p = threshold_size, atom gr
 end procedure
 
 --**
--- Loads a map from a file
+-- loads a map from a file.
 --
 -- Parameters:
 --		# ##file_name_p## : The file to load from. This file may have been created
@@ -1500,7 +1509,7 @@ end procedure
 -- closed by this routine.
 --
 -- The input file can be either one created by the [[:save_map]] function or
--- a manually created/edited text file. See [[:save_map]] for details about
+-- a manually created or edited text file. See [[:save_map]] for details about
 -- the required layout of the text file.
 --
 --
@@ -1675,7 +1684,7 @@ public enum
 	SM_RAW
 
 --**
--- Saves a map to a file.
+-- saves a map to a file.
 --
 -- Parameters:
 --		# ##m## : a map.
@@ -1814,7 +1823,7 @@ public function save_map(map the_map_, object file_name_p, integer type_ = SM_TE
 end function
 
 --**
--- Duplicates a map.
+-- duplicates a map.
 --
 -- Parameters:
 --   # ##source_map## : map to copy from
@@ -1919,7 +1928,7 @@ public function copy(map source_map, object dest_map=0, integer put_operation = 
 end function
 
 --**
--- Converts a set of Key-Value pairs to a map.
+-- converts a set of key:value pairs to a map.
 --
 -- Parameters:
 --   # ##kv_pairs## : A seqeuence containing any number of subsequences that
@@ -1956,7 +1965,7 @@ public function new_from_kvpairs(sequence kv_pairs)
 end function
 
 --**
--- Converts a set of Key-Value pairs contained in a string to a map.
+-- converts a set of key:value pairs contained in a string to a map.
 --
 -- Parameters:
 --   # ##kv_string## : A string containing any number of lines that
@@ -1994,7 +2003,7 @@ public function new_from_string(sequence kv_string)
 end function
 
 --**
--- Calls a user-defined routine for each of the items in a map.
+-- calls a user-defined routine for each of the items in a map.
 --
 -- Parameters:
 --   # ##source_map## : The map containing the data to process
@@ -2013,7 +2022,7 @@ end function
 -- An integer: 0 means that all the items were processed, and anything else is whatever
 -- was returned by the user routine to abort the ##for_each()## process.
 --
--- Comment:
+-- Comments:
 -- * The user defined routine is a function that must accept four parameters.
 -- ## Object: an Item Key
 -- ## Object: an Item Value
