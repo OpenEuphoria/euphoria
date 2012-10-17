@@ -14,20 +14,20 @@ sequence list_of_primes  = {2,3} -- Initial seedings.
 --
 
 --**
--- Returns all the prime numbers below a threshold, with a cap on computation time.
+-- returns all the prime numbers below a threshold, with a cap on computation time.
 --
 -- Parameters:
 --		# ##approx_limit## : an integer, This is not the upper limit but the last prime
---        returned is the **next** prime after or on this value.
+--        returned is the //next// prime after or on this value.
 --		# ##time_out_p## : an atom, the maximum number of seconds that this function can run for.
 --                        The default is 10 (ten) seconds.
 --
 -- Returns:
 --		A **sequence**, made of prime numbers in increasing order. The last value is 
---      the next prime number that falls on or **after** the value of ##approx_limit##.
+--      the next prime number that falls on or //after// the value of ##approx_limit##.
 --
 -- Comments:
--- * The ##approx_limit## argument **does not** represent the largest value to return. 
+-- * The ##approx_limit## argument //does not// represent the largest value to return. 
 --   The largest value returned will be the next prime number on or after ##approx_limit#.
 --   The [[:prime_list]] function will allow to specify a upper limit.
 -- * The returned sequence contains all the prime numbers less than its last element.
@@ -154,14 +154,14 @@ end function
 
 
 --**
--- Return the next prime number on or after the supplied number
+-- returns the next prime number on or after the supplied number.
 --
 -- Parameters:
 -- 		# ##n## : an integer, the starting point for the search
 --		# ##fail_signal_p## : an integer, used to signal error. Defaults to -1.
 --
 -- Returns:
---		An **integer**, which is prime only if it took less than 1 second 
+--		An **integer**, which is prime only if it took less than one second 
 --      to determine the next prime greater or equal to ##n##.
 --
 -- Comments:
@@ -204,7 +204,7 @@ public function next_prime(integer n, object fail_signal_p = -1, atom time_out_p
 end function
 
 --**
--- Returns a list of prime numbers.
+-- returns a list of prime numbers.
 --
 -- Parameters:
 -- 		# ##top_prime_p## : The list will end with the prime less than or equal
@@ -212,7 +212,7 @@ end function
 --        is returned.
 --
 -- Returns:
---		An **sequence**, a list of prime numbers from 2 to <= ##top_prime_p##
+--		An **sequence**, a list of prime numbers from ##2## to ##<=## ##top_prime_p##
 --
 -- Example 1:
 -- <eucode>
