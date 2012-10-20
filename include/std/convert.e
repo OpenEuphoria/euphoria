@@ -1,6 +1,6 @@
 --# This file uses ISO-8859-1 encoding
 --****
--- == Data type conversion
+-- == Data Type Conversion
 --
 -- <<LEVELTOC level=2 depth=4>>
 --
@@ -28,7 +28,7 @@ atom mem  = machine_func(M_ALLOC,8)
 -- === Routines
 
 --**
--- Converts an atom that represents an integer to a sequence of 4 bytes.
+-- converts an atom that represents an integer to a sequence of 4 bytes.
 --
 -- Parameters:
 --		# ##x## : an atom, the value to convert.
@@ -91,7 +91,7 @@ type sequence_4(sequence s)
 end type
 
 --**
--- Converts a sequence of at most 4 bytes into an atom.
+-- converts a sequence of at most 4 bytes into an atom.
 --
 -- Parameters:
 --		# ##s## : the sequence to convert
@@ -129,7 +129,7 @@ public function bytes_to_int(sequence s)
 end function
 
 --**
--- Extracts the lower bits from an integer.
+-- extracts the lower bits from an integer.
 --
 -- Parameters:
 --		# ##x## : the atom to convert
@@ -146,7 +146,7 @@ end function
 --
 -- For negative numbers the two's complement bit pattern is returned.
 --
--- You can use subscripting, slicing, and/or/xor/not of entire sequences etc.
+-- You can use operators like subscripting/slicing/and/or/xor/not on entire sequences
 -- to manipulate sequences of bits. Shifting of bits and rotating of bits are
 -- easy to perform.
 --
@@ -189,7 +189,7 @@ public function int_to_bits(atom x, integer nbits = 32)
 end function
 
 --**
--- Converts a sequence of bits to an atom that has no fractional part.
+-- converts a sequence of bits to an atom that has no fractional part.
 --
 -- Parameters:
 -- 		# ##bits## : the sequence to convert.
@@ -234,7 +234,8 @@ public function bits_to_int(sequence bits)
 end function
 
 --**
--- Convert an atom to a sequence of 8 bytes in IEEE 64-bit format
+-- converts an atom to a sequence of 8 bytes in IEEE 64-bit format.
+--
 -- Parameters:
 -- 		# ##a## : the atom to convert:
 --
@@ -248,7 +249,7 @@ end function
 --
 -- Integer values will also be converted to 64-bit floating-point format.
 --
--- Example:
+-- Example 1:
 -- <eucode>
 -- fn = open("numbers.dat", "wb")
 -- puts(fn, atom_to_float64(157.82)) -- write 8 bytes to a file
@@ -274,7 +275,8 @@ public function float80_to_atom( sequence bytes )
 end function
 
 --**
--- Convert an atom to a sequence of 4 bytes in IEEE 32-bit format
+-- converts an atom to a sequence of 4 bytes in IEEE 32-bit format.
+--
 -- Parameters:
 -- 		# ##a## : the atom to convert:
 --
@@ -288,8 +290,8 @@ end function
 -- (16 significant digits versus 7). The range of exponents is much larger
 -- in 64-bit format (10 to the 308, versus 10 to the 38), so some atoms may
 -- be too large or too small to represent in 32-bit format. In this case you
--- will get one of the special 32-bit values: inf or -inf (infinity or
--- -infinity). To avoid this, you can use [[:atom_to_float64]]().
+-- will get one of the special 32-bit values: ##inf## or ##-inf## (infinity or
+-- -infinity). To avoid this, you can use [[:atom_to_float64]].
 --
 -- Integer values will also be converted to 32-bit floating-point format.
 --
@@ -311,10 +313,10 @@ public function atom_to_float32(atom a)
 end function
 
 --**
--- Convert a sequence of 8 bytes in IEEE 64-bit format to an atom
+-- converts a sequence of 8 bytes in IEEE 64-bit format to an atom.
 --
 -- Parameters:
--- 		# ##ieee64## : the sequence to convert:
+-- 		# ##ieee64## : the sequence to convert.
 --
 -- Returns:
 --		An **atom**, the same value as the FPU would see by peeking
@@ -342,9 +344,10 @@ public function float64_to_atom(sequence_8 ieee64)
 end function
 
 --**
--- Convert a sequence of 4 bytes in IEEE 32-bit format to an atom
+-- converts a sequence of 4 bytes in IEEE 32-bit format to an atom.
+--
 -- Parameters:
--- 		# ##ieee32## : the sequence to convert:
+-- 		# ##ieee32## : the sequence to convert.
 --
 -- Returns:
 --		An **atom**, the same value as the FPU would see by peeking
@@ -372,7 +375,8 @@ public function float32_to_atom(sequence_4 ieee32)
 end function
 
 --**
--- Convert a text representation of a hexadecimal number to an atom
+-- converts a text representation of a hexadecimal number to an atom.
+--
 -- Parameters:
 -- 		# ##text## : the text to convert.
 --
@@ -380,9 +384,9 @@ end function
 --		An **atom**, the numeric equivalent to ##text##
 --
 -- Comments:
--- * The text can optionally begin with '#' which is ignored.
+-- * The text can optionally begin with ##'#'## which is ignored.
 -- * The text can have any number of underscores, all of which are ignored.
--- * The text can have one leading '-', indicating a negative number.
+-- * The text can have one leading ##'-'##, indicating a negative number.
 -- * The text can have any number of underscores, all of which are ignored.
 -- * Any other characters in the text stops the parsing and returns the value thus far.
 --
@@ -479,7 +483,7 @@ constant vDigits = "0123456789ABCDEFabcdef"
 integer decimal_mark = '.'
 
 --**
--- Gets, and possibly sets, the decimal mark that [[:to_number]]() uses.
+-- gets, and possibly sets, the decimal mark that [[:to_number]] uses.
 --
 -- Parameters:
 -- # ##new_mark## : An integer: Either a comma (,), a period (.) or any other integer.
@@ -488,9 +492,9 @@ integer decimal_mark = '.'
 -- An **integer**, The current value, before ##new_mark## changes it.
 --
 -- Comments:
--- * When ##new_mark## is a //period// it will cause ##to_number()## to interpret a dot ##(.)##
+-- * When ##new_mark## is a //period// it will cause ##to_number## to interpret a dot ##(.)##
 -- as the decimal point symbol. The pre-changed value is returned.
--- * When ##new_mark## is a //comma// it will cause ##to_number()## to interpret a comma ##(,)##
+-- * When ##new_mark## is a //comma// it will cause ##to_number## to interpret a comma ##(,)##
 -- as the decimal point symbol. The pre-changed value is returned.
 -- * Any other value does not change the current setting. Instead it just returns the current value.
 -- * The initial value of the decimal marker is a period.
@@ -510,7 +514,7 @@ public function set_decimal_mark(integer new_mark)
 end function
 
 --**
--- Converts the text into a number.
+-- converts the text into a number.
 --
 -- Parameters:
 -- # ##text_in## : A string containing the text representation of a number.
@@ -548,14 +552,14 @@ end function
 -- # You can supply a single leading or trailing sign. Either a minus (-) or plus (+).
 -- # You can supply one or more trailing adjacent percentage signs. The first one
 -- causes the resulting value to be divided by 100, and each subsequent one divides
--- the result by a further 10. Thus 3845% gives a value of (3845 / 100) ==> 38.45,
--- and 3845%% gives a value of (3845 / 1000) ==> 3.845.
+-- the result by a further 10. Thus ##3845%## gives a value of ##(3845 / 100) ==> 38.45##,
+-- and ##3845%%## gives a value of ##(3845 / 1000) ==> 3.845##.
 -- # You can have single currency symbol before the first digit or after the last
 -- digit. A currency symbol is any character of the string: "$£¤¥€".
 -- # You can have any number of whitespace characters before the first digit and
 -- after the last digit.
--- # The currency, sign and base symbols can appear in any order. Thus "$ -21.10" is
--- the same as " -$21.10 ", which is also the same as "21.10$-", etc.
+-- # The currency, sign and base symbols can appear in any order. Thus ##"$ -21.10"## is
+-- the same as ##" -$21.10 "##, which is also the same as ##"21.10$-"##, and so on.
 -- # This function can optionally return information about invalid numbers. If ##return_bad_pos##
 -- is not zero, a two-element sequence is returned. The first element is the converted
 -- number value , and the second is the position in the text where conversion stopped.
@@ -564,7 +568,7 @@ end function
 -- many numbers cannot be accurately converted to the exact value expected due to the
 -- limitations of the 64-bit IEEEE Floating point format.
 --
--- Examples:
+-- Example 1:
 -- <eucode>
 -- object val
 -- val = to_number("12.34")      ---> 12.34 -- No errors and no error return needed.
@@ -773,7 +777,7 @@ public function to_number( sequence text_in, integer return_bad_pos = 0)
 end function
 
 --**
--- Converts an object into a integer.
+-- converts an object into a integer.
 --
 -- Parameters:
 -- # ##data_in## : Any Euphoria object.
@@ -787,7 +791,7 @@ end function
 -- Comments:
 -- The returned value is guaranteed to be a valid Euphoria integer.
 --
--- Examples:
+-- Example 1:
 -- <eucode>
 -- ? to_integer(12)            --> 12
 -- ? to_integer(12.4)          --> 12
@@ -824,7 +828,7 @@ public function to_integer(object data_in, integer def_value = 0)
 end function
 
 --**
--- Converts an object into a text string.
+-- converts an object into a text string.
 --
 -- Parameters:
 -- # ##data_in## : Any Euphoria object.
@@ -834,7 +838,7 @@ end function
 --   enclose any strings embedded inside ##data_in##. The default is '"'
 --
 -- Returns:
--- A **sequence**. This is the string repesentation of data_in.
+-- A **sequence**. This is the string repesentation of ##data_in##.
 --
 -- Comments:
 -- * The returned value is guaranteed to be a displayable text string.
@@ -846,7 +850,7 @@ end function
 -- * ##embed_string_quote## is only used if ##data_in## is a sequence that contains
 --   strings. In this case, it is used as the enclosing quote for embedded strings.
 --
--- Examples:
+-- Example 1:
 -- <eucode>
 -- include std/console.e
 -- display(to_string(12))           --> 12

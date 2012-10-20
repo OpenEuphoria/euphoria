@@ -52,11 +52,11 @@ end type
 --
 
 --**
--- Create a new stack.
+-- creates a new stack.
 --
 -- Parameters:
 --		# ##stack_type## : an integer, defining the semantics of the stack. The
---                        default is FILO.
+--                        default is ##FILO##.
 --
 -- Returns:
 --		An empty **stack**, note that the variable storing the stack must
@@ -65,7 +65,7 @@ end type
 --      to zero, or if passed in a call to [[:delete]].
 --
 -- Comments:
--- There are two sorts of stacks, designated by the types ##FIFO## and ##FILO##:
+-- There are two sorts of stacks, designated by the types ##FIFO## and ##FILO##~:
 -- * A ##FIFO## stack is one where the first item to be pushed is popped first.
 --   People standing in queue form a ##FIFO## stack.
 -- * A ##FILO## stack is one where the item pushed last is popped first. 
@@ -84,7 +84,7 @@ end function
 
 
 --**
--- Determine whether a stack is empty.
+-- determines whether a stack is empty.
 --
 -- Parameters:
 --		# ##sk## : the stack being queried.
@@ -100,7 +100,7 @@ public function is_empty(stack sk)
 end function
 
 --**
--- Returns how many elements a stack has.
+-- returns how many elements a stack has.
 --
 -- Parameters:
 --		# ##sk## : the stack being queried.
@@ -113,7 +113,7 @@ public function size(stack sk)
 end function
 
 --**
--- Fetch a value from the stack without removing it from the stack.
+-- fetches a value from the stack without removing it from the stack.
 --
 -- Parameters:
 --   # ##sk## : the stack being queried
@@ -183,7 +183,7 @@ public function at(stack sk, integer idx = 1)
 end function
 
 --**
--- Adds something to a stack.
+-- adds something to a stack.
 --
 -- Parameters:
 --		# ##sk## : the stack to augment
@@ -238,7 +238,7 @@ public procedure push(stack sk, object value)
 end procedure
 
 --**
--- Retrieve the top element on a stack.
+-- retrieve the top element on a stack.
 --
 -- Parameters:
 --		# ##sk## : the stack to inspect.
@@ -284,7 +284,7 @@ public function top(stack sk)
 end function
 
 --**
--- Retrieve the end element on a stack.
+-- retrieves the end element on a stack.
 --
 -- Parameters:
 --		# ##sk## : the stack to inspect.
@@ -329,7 +329,7 @@ public function last(stack sk)
 end function
 
 --**
--- Removes an object from a stack.
+-- removes an object from a stack.
 --
 -- Parameters:
 --		# ##sk## : the stack to pop
@@ -347,9 +347,9 @@ end function
 -- * For ##FILO## stacks, the top item is the newest item in the stack.
 --
 -- When ##idx## is omitted the 'top' of the stack is removed and returned. 
--- When ##idx## is supplied, it represents the N-th item from the top to be
--- removed and returned. Thus an ##idx## of 2 returns the 2nd item from the
--- top, a value of 3 returns the 3rd item from the top, etc ...
+-- When ##idx## is supplied, it represents the n-th item from the top to be
+-- removed and returned. Thus an ##idx## of ##2## returns the 2nd item from the
+-- top, a value of ##3## returns the 3rd item from the top, and so on.
 --
 -- Example 1:
 -- <eucode>
@@ -433,7 +433,7 @@ public function pop(stack sk, integer idx = 1)
 end function
 
 --**
--- Gets an object, relative to the top, from a stack.
+-- gets an object, relative to the top, from a stack.
 --
 -- Parameters:
 --		# ##sk## : the stack to get from.
@@ -453,9 +453,9 @@ end function
 -- * For ##FILO## stacks, the top item is the newest item in the stack.
 --
 -- When ##idx## is omitted the 'top' of the stack is returned. 
--- When ##idx## is supplied, it represents the N-th item from the top to be
--- returned. Thus an ##idx## of 2 returns the 2nd item from the
--- top, a value of 3 returns the 3rd item from the top, etc ...
+-- When ##idx## is supplied, it represents the n-th item from the top to be
+-- returned. Thus an ##idx## of ##2## returns the 2nd item from the
+-- top, a value of ##3## returns the 3rd item from the top, and so on.
 --
 -- Example 1:
 -- <eucode>
@@ -504,7 +504,7 @@ public function peek_top(stack sk, integer idx = 1)
 end function
 
 --**
--- Gets an object, relative to the end, from a stack.
+-- gets an object, relative to the end, from a stack.
 --
 -- Parameters:
 --		# ##sk## : the stack to get from.
@@ -522,9 +522,9 @@ end function
 -- * For ##FILO## stacks, the end item is the oldest item in the stack.
 --
 -- When ##idx## is omitted the 'end' of the stack is returned. 
--- When ##idx## is supplied, it represents the N-th item from the end to be
--- returned. Thus an ##idx## of 2 returns the 2nd item from the
--- end, a value of 3 returns the 3rd item from the end, etc ...
+-- When ##idx## is supplied, it represents the n-th item from the end to be
+-- returned. Thus an ##idx## of ##2## returns the 2nd item from the
+-- end, a value of ##3## returns the 3rd item from the end, and so on.
 --
 -- Example 1:
 -- <eucode>
@@ -573,7 +573,7 @@ public function peek_end(stack sk, integer idx = 1)
 end function
 
 --**
--- Swap the top two elements of a stack
+-- swaps the top two elements of a stack.
 --
 -- Parameters:
 --		# ##sk## : the stack to swap.
@@ -640,13 +640,13 @@ public procedure swap(stack sk)
 end procedure
 
 --**
--- Repeat the top element of a stack.
+-- repeats the top element of a stack.
 --
 -- Parameters:
 --		# ##sk## : the stack.
 --
 -- Side effects:
---   The value of top() is pushed onto the stack, thus
+--   The value of ##top## is pushed onto the stack, thus
 --   the stack size grows by one.
 --
 -- Comments:
@@ -713,7 +713,7 @@ public procedure dup(stack sk)
 end procedure
 
 --**
--- Update a value on the stack
+-- updates a value on the stack.
 --
 -- Parameters:
 --   # ##sk## : the stack being queried
@@ -727,8 +727,8 @@ end procedure
 -- * For ##FIFO## stacks (queues), the top item is the oldest item in the stack.
 -- * For ##FILO## stacks, the top item is the newest item in the stack.
 --
--- ##idx## can be less than 1, in which case it refers to an element relative
--- to the end of the stack. Thus, 0 stands for the end element.
+-- ##idx## can be less than one, in which case it refers to an element relative
+-- to the end of the stack. Thus  ##0## stands for the end element.
 --
 -- See Also:
 -- [[:size]], [[:top]]
@@ -753,7 +753,7 @@ public procedure set(stack sk, object val, integer idx = 1)
 end procedure
 
 --**
--- Wipe out a stack.
+-- wipes out a stack.
 --
 -- Parameters:
 --   # ##sk## : the stack to clear.

@@ -41,7 +41,7 @@ end function
 constant END_MARKER = -1
 
 --**
--- Determine whether a string matches a pattern. The pattern may contain * and ? wildcards.
+-- determines whether a string matches a pattern. The pattern may contain ##*## and ##?## wildcards.
 --
 -- Parameters:
 --		# ##pattern## : a string, the pattern to match
@@ -53,14 +53,15 @@ constant END_MARKER = -1
 -- Comments:
 --
 -- Character comparisons are case sensitive.
--- If you want case insensitive comparisons, pass both ##pattern## and ##string## through [[:upper]](), or both through [[:lower]](), before calling ##is_match##().
+-- If you want case insensitive comparisons, pass both ##pattern## and ##string## through [[:upper]], or both through [[:lower]], before calling ##is_match##.
 --
--- If you want to detect a pattern anywhere within a string, add * to each end of the pattern: 
---  {{{
---  i = is_match('*' & pattern & '*', string)
---  }}}
+-- If you want to detect a pattern anywhere within a string, add ##*## to each end of the pattern: 
 --  
---  There is currently no way to treat * or ? literally in a pattern.
+-- <eucode>
+--  i = is_match('*' & pattern & '*', string)
+--  </eucode>
+--  
+--  There is currently no way to treat ##*## or ##?## literally in a pattern.
 --
 -- Example 1: 
 -- <eucode> 
@@ -81,7 +82,7 @@ constant END_MARKER = -1
 -- </eucode>
 --
 -- Example 4: 
--- ##bin/search.ex##
+-- ##.../euphoria/demo/search.ex##
 --
 -- See Also: 
 -- [[:upper]], [[:lower]], [[:Regular Expressions]]

@@ -1,5 +1,5 @@
 --****
--- == Date/Time
+-- == Date and Time
 --
 -- <<LEVELTOC level=2 depth=4>>
 
@@ -273,12 +273,12 @@ public sequence day_names = {
 public sequence day_abbrs = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" }
 
 --**
--- AM/PM
+-- AM and PM
 
 public sequence ampm = { "AM", "PM" }
 
 --****
--- === Date/Time type Accessors
+-- === Date and Time Type Accessors
 --
 -- These accessors can be used with the [[:datetime]] type.
 
@@ -367,8 +367,8 @@ public enum
 -- those values are in range. 
 -- 
 -- Note:
--- All components must be integers except
--- seconds, as those can also be floating point values.
+-- All elements must be integers except for
+-- seconds which could either integer or atom values.
 
 public type datetime(object o)
 	if atom(o) then return 0 end if
@@ -421,17 +421,17 @@ end type
 -- <built-in> function time()
 --
 -- Description:
---   Return the number of seconds since some fixed point in the past.
+--   returns the number of seconds since some fixed point in the past.
 --
 -- Returns:
 --   An **atom**, which represents an absolute number of seconds.
 --
 -- Comments: 
---   Take the difference between two readings of ##time##(), to measure, for example, how long 
+--   Take the difference between two readings of ##time()## to measure, for example, how long 
 --   a section of code takes to execute.
 --
---   On some machines, ##time##() can return a negative number. However, you can still use the
---   difference in calls to ##time##() to measure elapsed time.
+--   On some machines, ##time()## can return a negative number. However, you can still use the
+--   difference in calls to ##time()## to measure elapsed time.
 --
 -- Example 1:
 -- <eucode>
@@ -461,7 +461,7 @@ end type
 -- <built-in> function date()
 --
 -- Description:
--- Return a sequence with information on the current date.
+-- returns a sequence with information on the current date.
 --
 -- Returns:
 -- A **sequence** of length 8, laid out as follows:
@@ -476,7 +476,7 @@ end type
 --
 -- Comments:
 -- The value returned for the year is actually the number of years since 1900 (not the last 2 digits of the year). 
--- In the year 2000 this value was 100. In 2001 it was 101, etc.
+-- In the year 2000 this value was 100. In 2001 it was 101, and so on.
 --  
 -- Example 1:
 --
@@ -490,7 +490,7 @@ end type
 --  [[:time]], [[:now]]
 
 --**
--- Convert a sequence formatted according to the built-in ##date##() function to a valid datetime
+-- converts a sequence formatted according to the built-in ##date## function to a valid datetime
 -- sequence.
 --
 -- Parameters:
@@ -514,7 +514,7 @@ public function from_date(sequence src)
 end function
 
 --**
--- Create a new datetime value initialized with the current date and time
+-- creates a new datetime value initialized with the current date and time.
 --
 -- Returns:
 --   A **sequence**, more precisely a **datetime** corresponding to the current 
@@ -534,8 +534,10 @@ public function now()
 end function
 
 --**
--- Create a new datetime value that falls into the Greenwich Mean Time (GMT) timezone.
--- This function will return a datetime that is GMT, no matter what timezone the system
+-- create a new datetime value that falls into the Greenwich Mean Time (GMT) timezone.
+--
+-- Comments:
+-- This function will return a datetime that is GMT no matter what timezone the system
 -- is running under.
 --
 -- Example 1:
@@ -558,7 +560,7 @@ public function now_gmt()
 end function
 
 --**
--- Create a new datetime value.
+-- creates a new datetime value.
 --
 -- !! TODO: test default parameter usage
 --
@@ -591,7 +593,7 @@ public function new(integer year=0, integer month=0, integer day=0,
 end function
 
 --**
--- Create a new datetime value with a date of zeros.
+-- creates a new datetime value with a date of zeros.
 --
 -- Parameters:
 --   # ##hour## : is the hour (0-23)
@@ -612,7 +614,7 @@ public function new_time(integer hour, integer minute, atom second)
 end function
 
 --**
--- Get the day of week of the datetime dt.
+-- gets the day of week of the datetime ##dt##.
 --
 -- Parameters:
 --    # ##dt## : a datetime to be queried.
@@ -631,7 +633,7 @@ public function weeks_day(datetime dt)
 end function
 
 --**
--- Get the Julian day of year of the supplied date.
+-- gets the Julian day of year of the supplied date.
 --
 -- Parameters:
 --   # ##dt## : a datetime to be queried.
@@ -656,7 +658,7 @@ public function years_day(datetime dt)
 end function
 
 --**
--- Determine if ##dt## falls within leap year.
+-- determines if ##dt## falls within leap year.
 --
 -- Parameters:
 --   # ##dt## : a datetime to be queried.
@@ -680,8 +682,9 @@ public function is_leap_year(datetime dt)
 end function
 
 --**
--- Return the number of days in the month of ##dt##.
+-- returns the number of days in the month of ##dt##.
 --
+-- Comments:
 -- This takes into account leap year.
 --
 -- Parameters:
@@ -703,8 +706,9 @@ public function days_in_month(datetime dt)
 end function
 
 --**
--- Return the number of days in the year of ##dt##.
+-- returns the number of days in the year of ##dt##.
 --
+-- Comments:
 -- This takes into account leap year.
 --
 -- Parameters:
@@ -726,7 +730,7 @@ public function days_in_year(datetime dt)
 end function
 
 --**
--- Convert a datetime value to the unix numeric format (seconds since ##EPOCH_1970##)
+-- converts a datetime value to the //unix// numeric format (seconds since ##EPOCH_1970##).
 --
 -- Parameters:
 --   # ##dt## : a datetime to be queried.
@@ -749,7 +753,7 @@ public function to_unix(datetime dt)
 end function
 
 --**
--- Create a datetime value from the unix numeric format (seconds since EPOCH)
+-- creates a datetime value from the //unix// numeric format (seconds since EPOCH).
 --
 -- Parameters:
 --   # ##unix## : an atom, counting seconds elapsed since EPOCH.
@@ -772,7 +776,7 @@ public function from_unix(atom unix)
 end function
 
 --**
--- Format the date according to the format pattern string
+-- formats the date according to the format pattern string.
 --
 -- Parameters:
 --   # ##d## : a datetime which is to be printed out
@@ -928,7 +932,7 @@ end function
 constant date_now = now()
 
 --**
--- Parse a datetime string according to the given format.
+-- parses a datetime string according to the given format.
 --
 -- Parameters:
 --   # ##val## : string datetime value
@@ -958,6 +962,7 @@ constant date_now = now()
 --   All non-digits in the input string are ignored.
 --
 -- Parsing Two Digit Years:
+--
 --   When parsing a two digit year ##parse## has to make a decision if a given year
 --   is in the past or future. For example, 10/18/44. Is that Oct 18, 1944 or
 --   Oct 18, 2044. A common rule has come about for this purpose and that is the -80/+20 
@@ -1105,7 +1110,7 @@ public function parse(sequence val, sequence fmt="%Y-%m-%d %H:%M:%S", integer yy
 end function
 
 --**
--- Add a number of //intervals// to a datetime.
+-- adds a number of //intervals// to a datetime.
 --
 -- Parameters:
 --   # ##dt## : the base datetime
@@ -1116,10 +1121,10 @@ end function
 --   A **sequence**, more precisely a **datetime** representing the new moment in time.
 --
 -- Comments:
---   Please see Constants for Date/Time for a reference of valid intervals.
+--   Please see Constants for Date and Time for a reference of valid intervals.
 --
---   Do not confuse the item access constants such as YEAR, MONTH, DAY, etc... with the
---   interval constants YEARS, MONTHS, DAYS, etc...
+--   Do not confuse the item access constants (such as YEAR, MONTH, DAY ) with the
+--   interval constants (YEARS, MONTHS, DAYS ).
 --
 --   When adding MONTHS, it is a calendar based addition. For instance, a date of
 --   5/2/2008 with 5 MONTHS added will become 10/2/2008. MONTHS does not compute the number
@@ -1187,7 +1192,7 @@ public function add(datetime dt, object qty, integer interval)
 end function
 
 --**
--- Subtract a number of //intervals// to a base datetime.
+-- subtracts a number of //intervals// to a base datetime.
 --
 -- Parameters:
 --   # ##dt## : the base datetime
@@ -1199,9 +1204,9 @@ end function
 --   in time.
 --
 -- Comments:
---   Please see Constants for Date/Time for a reference of valid intervals.
+--   Please see Constants for Date and Time for a reference of valid intervals.
 --
---   See the function ##add##() for more information on adding and subtracting date
+--   See the function ##add## for more information on adding and subtracting date
 --   intervals
 --
 -- Example 1:
@@ -1219,7 +1224,7 @@ public function subtract(datetime dt, atom qty, integer interval)
 end function
 
 --**
--- Compute the difference, in seconds, between two dates.
+-- computes the difference, in seconds, between two dates.
 --
 -- Parameters:
 --   # ##dt1## : the end datetime
