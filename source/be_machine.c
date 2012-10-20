@@ -2060,7 +2060,13 @@ object DefineC(object x)
 	}
 
 	routine_name = *(((s1_ptr)x)->base+2);
+#ifdef EWINDOWS
+	/* On Windows we normally expect routines to restore the stack when they return. */
 	convention = C_STDCALL;
+#else
+	/* On Unix like Operating Systems the caller must always restore the stack */
+	convention = C_CDECL;
+#endif
 
 	if (raw_addr) {
 		/* machine code routine */
@@ -2075,14 +2081,12 @@ object DefineC(object x)
 				RTFatal("expected {'+', address} as second argument of define_c_proc/func");
 			proc_address = (int (*)())*(SEQ_PTR(routine_name)->base+2);
 			proc_address = (int (*)())get_pos_int("define_c_proc/func", (object)proc_address);
-#ifdef EWINDOWS
 			t = (int)*(SEQ_PTR(routine_name)->base+1);
 			t = get_pos_int("define_c_proc/func", (object)t);
 			if (t == '+')
-				convention = C_CDECL;
+				convention = C_CDECL; /* caller must restore stack */
 			else
 				RTFatal("unsupported calling convention - use '+' for CDECL");
-#endif
 		}
 		/* assign a sequence value to routine_ptr */
 		snprintf(TempBuff, TEMP_SIZE, "machine code routine at %p", proc_address);
@@ -2101,21 +2105,19 @@ object DefineC(object x)
 			RTFatal("routine name is too long");
 		routine_string = TempBuff;
 		MakeCString(routine_string, routine_name, TEMP_SIZE);
-#ifdef EWINDOWS
 		if (routine_string[0] == '+') {
 			routine_string++;
 			convention = C_CDECL;
 		}
+#if defined(EWINDOWS)
 		proc_address = (int (*)())GetProcAddress((void *)lib, routine_string);
 		if (proc_address == NULL)
 			return ATOM_M1;
 
-#else
-#ifdef EUNIX
+#elif defined(EUNIX)
 		proc_address = (int (*)())dlsym((void *)lib, routine_string);
 		if (dlerror() != NULL)
 			return ATOM_M1;
-#endif
 #endif
 	}
 
