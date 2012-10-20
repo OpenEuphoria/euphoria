@@ -1,3 +1,4 @@
+--# This file uses ISO-8859-1 encoding
 --****
 -- == Data type conversion
 --
