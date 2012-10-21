@@ -38,7 +38,7 @@ constant
 --   Set the cursor to line ##row##, column ##column##, where the top left corner of the screen is line 1,
 --   column 1. The next character displayed on the screen will be printed at this location.
 --   ##position## will report an error if the location is off the screen. 
---   The //windows// console does not check for rows, as the physical height of the
+--   The //Windows// console does not check for rows, as the physical height of the
 --   console may be vastly less than its logical height.
 --
 -- Example 1:
@@ -150,7 +150,7 @@ end procedure
 --   by using ##[X + 1]## where ##'X'## is one of the Euphoria color constants such as ##RED## or
 --   ##BLUE##.
 -- * This can be used to change the meaning of the standard color codes for
---   some consoles that are not using standard values. For example, the //unix// default
+--   some consoles that are not using standard values. For example, the //Unix// default
 --   color value for RED is 1 and BLUE is 4, but you might need this to swapped. See
 --   code Example 1. Another use might be to suppress highlighted (bold) colors. See
 --   code Example 2.
@@ -287,11 +287,11 @@ end procedure
 -- 		An **integer**, always returns zero. 
 --
 -- Platform:
---	//windows//
+--	//Windows//
 --
 -- Comments:
--- * This has no effect on //unix// platforms.
--- * On //windows// it causes a console to be shown if one has not already been created.
+-- * This has no effect on //Unix// platforms.
+-- * On //Windows// it causes a console to be shown if one has not already been created.
 -- See Also:
 -- 		[[:video_config]]
 

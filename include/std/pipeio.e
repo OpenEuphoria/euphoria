@@ -8,7 +8,7 @@
 -- ##STDERR## cannot captured for Euphoria programs (other programs will work fully)
 -- The IO functions currently work with file handles, a future version might wrap them in streams
 -- so that they can be used directly alongside other file/socket/other-streams with a
--- stream_select() function.
+-- ##stream_select## function.
 --
 
 namespace pipeio
@@ -160,7 +160,7 @@ end function
 -- closes pipes and kills process ##p## with signal signal (default 15).
 --
 -- Comments:
---   Signal is ignored on //windows//.
+--   Signal is ignored on //Windows//.
 --
 -- Example 1:
 -- <eucode>
@@ -305,7 +305,7 @@ end procedure
 -- gets error no from last call to a pipe function.
 --
 -- Comments:
---   Value returned will be OS-specific, and is not always set on //windows// at least
+--   Value returned will be OS-specific, and is not always set on //Windows// at least
 --
 -- Example 1:
 -- <eucode>

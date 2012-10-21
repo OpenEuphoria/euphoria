@@ -403,7 +403,7 @@ end function
 -- *  The result has the same sign as the dividend.
 -- * The arguments to this function may be atoms or sequences. The rules for
 -- [[:operations on sequences]] apply, and determine the shape of the returned object.
--- * When both arguments have the same sign, mod() and [[:remainder]]()
+-- * When both arguments have the same sign, mod() and [[:remainder]]
 -- return the same result. 
 -- * This differs from [[:remainder]] in that when the operands' signs are different
 -- this function rounds ##dividend/divisior## away from zero whereas ##remainder## rounds
@@ -905,7 +905,7 @@ end function
 --		# ##angle## : an object, all atoms of which will be converted, no matter how deeply nested.
 --
 -- Returns:
---		An **object**, the same shape as ##angle##, all atoms of which were multiplied by 180/PI.
+--		An **object**, the same shape as ##angle##, all atoms of which were multiplied by ##180/PI##.
 --
 -- Comments:
 -- This function may be applied to an atom or sequence. A flat angle is ##PI## radians and 180 degrees.
@@ -932,7 +932,7 @@ end function
 --		# ##angle## : an object, all atoms of which will be converted, no matter how deeply nested.
 --
 -- Returns:
---		An **object**, the same shape as ##angle##, all atoms of which were multiplied by PI/180.
+--		An **object**, the same shape as ##angle##, all atoms of which were multiplied by ##PI/180##.
 --
 -- Comments:
 -- This function may be applied to an atom or sequence. A flat angle is ##PI## radians and 180 degrees.
@@ -962,7 +962,7 @@ end function
 -- returns the natural logarithm of a positive number.
 --
 -- Parameters:
---		# ##value## : an object, any atom of which ##log##() acts upon.
+--		# ##value## : an object, any atom of which ##log## acts upon.
 --
 -- Returns:
 --		An **object**, the same shape as ##value##. For an atom, the returned atom is its logarithm of base E.
@@ -1002,7 +1002,7 @@ end function
 -- This function may be applied to an atom or to all elements
 -- of a sequence. 
 --
--- ##log10##() is proportional to ##log##() by a factor of ##1/log(10)##, 
+-- ##log10## is proportional to ##log## by a factor of ##1/log(10)##, 
 -- which is about ##0.435## .
 --
 -- Example 1:
@@ -1052,8 +1052,8 @@ end function
 -- raises a base value to some power.
 --
 -- Parameters:
---		# ##base## : an object, the value(s) to raise to some power.
---		# ##exponent## : an object, the exponent(s) to apply to ##base##.
+--		# ##base## : an object, the value or values to raise to some power.
+--		# ##exponent## : an object, the exponent or exponents to apply to ##base##.
 --
 -- Returns:
 --		An **object**, the shape of which depends on ##base##'s and ##exponent##'s. For two atoms, this will be ##base## raised to the power ##exponent##.
@@ -1142,7 +1142,7 @@ end function
 --
 -- Comments:
 -- * Note that due to the limitations of the floating point implementation,
--- only 'i' values less than 76 are accurate on //windows// platforms, and 
+-- only 'i' values less than 76 are accurate on //Windows// platforms, and 
 -- 69 on other platforms (due to rounding differences in the native C
 -- runtime libraries).
 --
@@ -1230,7 +1230,7 @@ end function
 --
 -- The hyperbolic tangent takes values from -1 to +1.
 --
--- ##tanh##() is the ratio ##sinh() / cosh()##. Compare with ordinary trigonometry.
+-- ##tanh## is the ratio ##sinh / cosh##. Compare with ordinary trigonometry.
 --
 -- Example 1:
 -- <eucode>
@@ -1481,7 +1481,7 @@ end function
 -- <built-in> function and_bits(object a, object b)
 --
 -- Description:
--- perform the bitwise AND operation on corresponding bits in two objects. A bit in the
+-- performs the bitwise AND operation on corresponding bits in two objects. A bit in the
 -- result will be 1 only if the corresponding bits in both arguments are 1.
 --
 -- Parameters:

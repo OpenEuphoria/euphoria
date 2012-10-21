@@ -229,7 +229,7 @@ end procedure
 -- [[:sleep]] lets the operating system run other programs.
 --
 -- The min and max values can be fractional. If the min value is smaller than the resolution of the scheduler's clock 
--- (currently ##0.01## seconds on //windows// or //unix//) then accurate time scheduling cannot be performed, but the 
+-- (currently ##0.01## seconds on //Windows// or //Unix//) then accurate time scheduling cannot be performed, but the 
 -- scheduler will try to run the task several times in a row to approximate what is desired.
 --
 -- For example, if you ask for a min time of ##0.002## seconds, then the scheduler will try to run your task 

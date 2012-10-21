@@ -773,7 +773,7 @@ integer delete_socket_rid = routine_id("delete_socket")
 --   An **object**, an atom, representing an integer code on failure, else a sequence representing a valid socket id.
 --
 -- Comments:
---   On //windows// you must have Windows Sockets version 2.2 or greater installed.  This means at
+--   On //Windows// you must have Windows Sockets version 2.2 or greater installed.  This means at
 --   least Windows 2000 Professional or Windows 2000 Server.
 --
 -- Example 1:
@@ -1067,7 +1067,7 @@ end function
 --   and the amount of time it takes the program to process each
 --   connection request.
 --
---   This function must be executed after [[:bind]]().
+--   This function must be executed after [[:bind]].
 --
 
 public function listen(socket sock, integer backlog)

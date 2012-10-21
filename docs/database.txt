@@ -141,7 +141,7 @@ any damage or data loss.
 mode when
 transferring a ##.edb## file via FTP from one machine to another. You must also
 avoid loading a ##.edb## file into an editor and saving it. If you open a 
-##.edb## file directly using Euphoria's ##open##(), which is not recommended, 
+##.edb## file directly using Euphoria's ##open##, which is not recommended, 
 you must use binary
 mode, not text mode.  Failure to follow these rules could result in 10
 (line-feed) and 13 (carriage-return) bytes being changed, leading to subtle and

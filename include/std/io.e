@@ -140,7 +140,7 @@ public constant EOF = (-1)
 --
 -- This procedure writes out the ##format## text to the output file ##fn##, 
 -- replacing format specifiers with the corresponding data from the ##values##
--- parameter. Whenever a format specifiers is found in ##format##, the //n-th// item
+-- parameter. Whenever a format specifiers is found in ##format##, the n-th item
 -- in ##values## will be turned into a string according to the format specifier. The resulting
 -- string will the format specifier. This means that the first format specifier uses the
 -- first item in ##values##, the second format specifier the second item, and so on.
@@ -289,7 +289,7 @@ public constant EOF = (-1)
 --
 -- Avoid outputting 0's to the screen or to standard output. Your output might get truncated.
 --
--- Remember that if the output file was opened in text mode, //windows// will change ##\n## (10) 
+-- Remember that if the output file was opened in text mode, //Windows// will change ##\n## (10) 
 -- to ##\r\n## ##(13 10)##. Open the file in binary mode if this is not what you want.
 --
 -- Example 1:
@@ -419,7 +419,7 @@ constant CHUNK = 100
 --  empty sequence will be returned.
 --
 --  This function is normally used with files opened in binary mode, ##"rb"##.
---  This avoids the confusing situation in text mode where //windows// will convert CR LF 
+--  This avoids the confusing situation in text mode where //Windows// will convert CR LF 
 --  pairs to LF.
 --
 -- Example 1:
@@ -630,7 +630,7 @@ public procedure put_integer16(integer fh, atom val)
 end procedure
 
 --**
--- read a delimited byte string from an opened file .
+-- read a delimited byte string from an opened file.
 --
 -- Parameters:
 --		# ##fh## : an integer, the handle to an open file to read from.
@@ -762,8 +762,8 @@ end type
 --		# ##path## : a string, the path to the file or device to open.
 -- 		# ##mode## : a string, the mode being used o open the file.
 --		# ##cleanup## : an integer, if 0, then the file must be manually closed by the
---coder.  If 1, then the file will be closed when either the file handle's references
---goes to 0, or if called as a parameter to ##delete##().
+-- coder.  If 1, then the file will be closed when either the file handle's references
+-- goes to 0, or if called as a parameter to ##delete##.
 --
 -- Returns:
 -- 		A small **integer**, -1 on failure, else 0 or more.
@@ -790,15 +790,15 @@ end type
 -- be created if necessary. A file opened for write will be set to 0 bytes. Output to a
 -- file opened for append will start at the end of file.
 --
--- On //windows//, output to text files will have carriage-return characters automatically
+-- On //Windows//, output to text files will have carriage-return characters automatically
 -- added before linefeed characters. On input, these carriage-return characters are removed.
 -- A Control+Z character (ASCII 26) will signal an immediate end of file.
 --
 -- I/O to binary files is not modified in any way. Any byte values from 0 to 255 can be
--- read or written. On //unix//, all files are binary files, so ##"r"## mode and ##"rb"##
+-- read or written. On //Unix//, all files are binary files, so ##"r"## mode and ##"rb"##
 -- mode are equivalent, as are ##"w"## and ##"wb"##, ##"u"## and ##"ub"##, and ##"a"## and ##"ab"##.
 --
--- Some typical devices that you can open on //windows// are~:
+-- Some typical devices that you can open on //Windows// are~:
 --
 -- * ##"CON"## ~-- the console (screen)
 -- * ##"AUX"## ~-- the serial auxiliary port
@@ -809,10 +809,10 @@ end type
 --
 -- Close a file or device when done with it, flushing out any still-buffered characters prior.
 --
--- //windows// and //unix//: Long filenames are fully supported for reading and writing and
+-- //Windows// and //Unix//: Long filenames are fully supported for reading and writing and
 -- creating.
 --
--- //windows//: Be careful not to use the special device names in a file name, even if you add an
+-- //Windows//: Be careful not to use the special device names in a file name, even if you add an
 -- extension. For example: ##CON.TXT##, ##CON.DAT##, ##CON.JPG## all refer to the ##CON## device and
 -- //not// to a file.
 --
@@ -859,7 +859,7 @@ end type
 -- Seek (move) to any byte position in a file.
 --
 -- Parameters:
---		# ##fn## : an integer, the handle to the file or device to seek()
+--		# ##fn## : an integer, the handle to the file or device to ##seek##
 --		# ##pos## : an atom, either an absolute 0-based position or -1 to seek to end of file.
 --
 -- Returns:
@@ -876,13 +876,13 @@ end type
 -- write some data, undefined bytes will be inserted into the gap between the original end
 -- of file and your new data.
 --
--- After seeking and reading (writing) a series of bytes, you may need to call seek()
+-- After seeking and reading (writing) a series of bytes, you may need to call ##seek##
 -- explicitly before you switch to writing (reading) bytes, even though the file position
 -- should already be what you want.
 --
--- This function is normally used with files opened in binary mode. In text mode, //windows//
+-- This function is normally used with files opened in binary mode. In text mode, //Windows//
 -- converts CR LF to LF on input, and LF to CR LF on output, which can cause great confusion
--- when you are trying to count bytes because seek() counts the //windows// end of line sequences
+-- when you are trying to count bytes because ##seek## counts the //Windows// end of line sequences
 -- as two bytes, even if the file has been opened in text mode.
 --
 -- Example 1:
@@ -924,7 +924,7 @@ end function
 -- Comments:
 -- The file position is is the place in the file where the next byte will be read from, or 
 -- written to. It is updated by reads, writes and seeks on the file. This procedure always 
--- counts //windows// end of line sequences (CR LF) as two bytes even when the file number has 
+-- counts //Windows// end of line sequences (CR LF) as two bytes even when the file number has 
 -- been opened in text mode.
 --
 
@@ -981,7 +981,7 @@ end procedure
 -- Parameters:
 --		# ##fn## : an integer, the handle to the file or device to (partially) lock.
 --		# ##t## : an integer which defines the kind of lock to apply.
---		# ##r## : a sequence, defining a section of the file to be locked, or {} for the whole file (the default).
+--		# ##r## : a sequence, defining a section of the file to be locked, or ##{}## for the whole file (the default).
 --
 -- Returns:
 --		An **integer**, 0 on failure, 1 on success.
@@ -998,8 +998,8 @@ end procedure
 -- other processes from using the file while your program is reading it
 -- or writing it.
 --
--- On //unix// there are two types of locks that
--- you can request using the ##t## parameter. (On //windows// the
+-- On //Unix// there are two types of locks that
+-- you can request using the ##t## parameter. (On //Windows// the
 -- parameter ##t## is ignored, but should be an integer.)
 -- Ask for a **shared** lock when you intend to read a file, and you want to
 -- temporarily block other processes from writing it. Ask for an
@@ -1015,20 +1015,20 @@ end procedure
 --     LOCK_EXCLUSIVE
 -- </eucode>
 --
--- On ///windows// you can lock a specified portion of a file using the ##r##  parameter.
+-- On ///Windows// you can lock a specified portion of a file using the ##r##  parameter.
 -- ##r## is a sequence of the form: ##{first_byte, last_byte}##. It indicates the first byte and
 -- last byte in the file,  that the lock applies to. Specify the empty sequence ##{}##,
--- if you want to lock the whole file, or don't specify it at all, as this is the default. In the current release for //unix//, locks
+-- if you want to lock the whole file, or don't specify it at all, as this is the default. In the current release for //Unix//, locks
 -- always apply to the whole file, and you should use this default value.
 --
--- ##lock_file##() does not wait
+-- ##lock_file## does not wait
 -- for other processes to relinquish their locks. You may have to call it repeatedly,
 -- before the lock request is granted.
 --
--- On //unix//, these locks are called advisory locks, which means they are not enforced
+-- On //Unix//, these locks are called advisory locks, which means they are not enforced
 -- by the operating system. It is up to the processes that use a particular file to cooperate
 -- with each other. A process can access a file without first obtaining a lock on it. On
--- //windows// locks are enforced by the operating system.
+-- //Windows// locks are enforced by the operating system.
 --
 -- Example 1:
 -- <eucode>
@@ -1068,11 +1068,11 @@ end function
 --
 -- Comments:
 -- You must have previously locked the
--- file using ##lock_file##(). On //windows// you can unlock a range of bytes within a
+-- file using ##lock_file##. On //Windows// you can unlock a range of bytes within a
 -- file by specifying the ##r## as ##{first_byte, last_byte}##. The same range of bytes
--- must have been locked by a previous call to [[:lock_file]](). On //unix// you can
+-- must have been locked by a previous call to [[:lock_file]]. On //Unix// you can
 -- currently only lock or unlock an entire file. ##r## should be ##{}## when you
--- want to unlock an entire file. On //unix//, ##r## must always be ##{}##, which is the default.
+-- want to unlock an entire file. On //Unix//, ##r## must always be ##{}##, which is the default.
 --
 --  You should unlock a file as soon as possible so other processes can use it.
 --
@@ -1313,7 +1313,7 @@ end function
 --     An **integer**, 1 on success, -1 on failure.
 --
 -- Errors:
---		If [[:puts]]() cannot write some line of text, a runtime error will occur.
+--		If [[:puts]] cannot write some line of text, a runtime error will occur.
 --
 -- Comments:
 -- ##file## is opened, written to and then closed.
@@ -1463,11 +1463,11 @@ end function
 --                     causes every byte to be written out as is,
 --         ** ##TEXT_MODE## assumes //text mode// that causes a NewLine
 --                     to be written out according to the operating system's
---                     end of line convention. On //unix// this is Control+J and on
---                     //windows// this is the pair ##{Ctrl-L, Ctrl-J}##.
---         ** ##UNIX_TEXT## ensures that lines are written out with //unix// style
+--                     end of line convention. On //Unix// this is Control+J and on
+--                     //Windows// this is the pair ##{Ctrl-L, Ctrl-J}##.
+--         ** ##UNIX_TEXT## ensures that lines are written out with //Unix// style
 --                     line endings (Control+J).
---         ** ##DOS_TEXT## ensures that lines are written out with //windows// style
+--         ** ##DOS_TEXT## ensures that lines are written out with //Windows// style
 --                     line endings ##{Ctrl-L, Ctrl-J}##.
 -- Returns:
 --     An **integer**, 1 on success, -1 on failure.
@@ -1545,7 +1545,7 @@ end function
 
 
 --**
--- writes formatted text to a file..
+-- writes formatted text to a file.
 --
 -- Parameters:
 -- There are two ways to pass arguments to this function~:

@@ -220,7 +220,7 @@ procedure pretty( object x, sequence options )
 end procedure
 
 --**
--- prints an object to a file or device using braces { , , , }, indentation, and multiple lines
+-- prints an object to a file or device using braces ##{ , , , }##, indentation, and multiple lines
 -- to show the structure.
 --
 -- Parameters:

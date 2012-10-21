@@ -507,8 +507,8 @@ end ifdef
 --   A **sequence**, the lowercase version of ##x##
 --
 -- Comments:
--- * For //windows// systems, this uses the current code page for conversion
--- * For non-Windows, this only works on ASCII characters. It alters characters in
+-- * For //Windows// systems, this uses the current code page for conversion
+-- * For //Unix// this only works on ASCII characters. It alters characters in
 --   the ##'a'..'z'## range. If you need to do case conversion with other encodings
 --   use the [[:set_encoding_properties]] first.
 -- * ##x## may be a sequence of any shape, all atoms of which will be acted upon.
@@ -553,8 +553,8 @@ end function
 --   A **sequence**, the uppercase version of ##x##
 --
 -- Comments:
--- * For //windows// systems, this uses the current code page for conversion
--- * For non-//windows// this only works on ASCII characters. It alters characters in
+-- * For //Windows// systems, this uses the current code page for conversion
+-- * For //Unix// this only works on ASCII characters. It alters characters in
 --   the ##'a'..'z'## range. If you need to do case conversion with other encodings
 --   use the [[:set_encoding_properties]] first.
 -- * ##x## may be a sequence of any shape, all atoms of which will be acted upon.

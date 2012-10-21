@@ -517,7 +517,7 @@ end function
 --
 -- ##get## can read arbitrarily complicated Euphoria objects. You
 -- could have a long sequence of values in braces and separated by
--- commas and comments. For example:. ##{23, {49, 57}, 0.5, -1, 99, 'A', "john"}##.
+-- commas and comments. For example: ##{23, {49, 57}, 0.5, -1, 99, 'A', "john"}##.
 -- A single call to ##get## will read in this entire sequence,  return its value as a result, and
 -- return complementary information.
 --
