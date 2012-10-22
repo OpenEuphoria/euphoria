@@ -47,6 +47,31 @@ include std/text.e
 constant TRUE = 1,
 		 FALSE = 0
 
+ 
+    -- patch to fix Linux screen positioning
+procedure get_real_text_starting_position() 
+                sequence sss = "" 
+                integer ccc 
+                puts(1, 27&"[6n") 
+                while 1 do 
+                        ccc = get_key() 
+                        if ccc = 'R' then 
+                                exit 
+                        end if 
+                        if ccc != -1 then 
+                                sss &= ccc 
+                        end if 
+                end while 
+                sss = sss[3..$] 
+                sequence aa, bb 
+                aa = value(sss[1..find(';', sss)-1]) 
+                bb = value(sss[find(';', sss)+1..$]) 
+                position(aa[2], bb[2]) 
+end procedure 
+ifdef LINUX then 
+	get_real_text_starting_position() 
+end ifdef 
+
 -- special input characters
 constant CONTROL_B = 2,
 		 CONTROL_C = 3,
