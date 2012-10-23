@@ -5082,7 +5082,13 @@ procedure opINSERT()
 		c_stmt0("}\n")
 		c_stmt0("else {\n" )
 		c_stmt("Ref( @ );\n", { Code[pc+2] } )
+		if Code[pc+1] = Code[pc+4] then
+			c_stmt("if( SEQ_PTR( @ )->ref > 1 ){\n", {Code[pc+1]} )
+		end if
 		c_stmt("RefDS( @ );\n", Code[pc+1] )
+		if Code[pc+1] = Code[pc+4] then
+			c_stmt0("}\n" )
+		end if
 		c_stmt("@ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
 		c_stmt0("}\n")
 	end if

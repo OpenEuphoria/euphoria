@@ -1,0 +1,5 @@
+== Version 4.0.5 Date TBD
+
+=== Bug Fixes
+
+* [[ticket:801]] fix translator memory leak for ##[[:insert]]##
