@@ -27,13 +27,13 @@ namespace utils
 --   All parameter expressions are evaluated **before**
 --   the function is called, thus, it cannot be used when one of the
 --   parameters could fail to evaluate correctly. For example, this is 
---   an **improper** use of the ##iif## method
+--   an **improper** use of the ##iif## statement~:
 -- <eucode>
 --   first = iif(sequence(var), var[1], var)
 -- </eucode>
 --   The reason for this is that both ##var[1]## and ##var## will be evaluated. 
 --   Therefore if ##var## happens to be an atom, the ##var[1]## statement will fail.
---   \\In situations like this, it is better to use the //long// method.
+--   \\In situations like this, it is better to use the //long// style.
 -- <eucode>
 --   if sequence(var) then
 --      first = var[1]

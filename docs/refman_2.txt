@@ -1679,7 +1679,7 @@ might not be the case when you [[:poke]] directly
 !!zzzz-------------------------^^^^^^^^^
 into memory, or call routines written in C or machine code.//)
 
-Euphoria's method of defining types is simpler than what you will find in other
+Euphoria's way of defining types is simpler than what you will find in other
 languages, yet Euphoria provides the programmer with //greater// flexibility
 in defining the legal values for a type of data. Any algorithm can be used to
 include or exclude values. You can even declare a variable to be of type object
@@ -3255,9 +3255,9 @@ if c = a then ...
 </eucode>
 
 But sometimes you need to leave a block that encloses the current one. Euphoria
-has two methods available for you to do this. The safest method, in terms of
+has two ways available for you to do this. The safest way, in terms of
 future maintenance, is to name the block you want to exit from and use that name
-on the exit statement. The other method is to use a number on the exit statement
+on the exit statement. The other way is to use a number on the exit statement
 that refers to the depth that you want to exit from.
 
 A block's name is always a string literal and only a string literal. You cannot
@@ -3317,7 +3317,7 @@ end for
 ? b
 </eucode>
 
-But using this method means you have to take more care when changing the program
+But using this way means you have to take more care when changing the program
 so that if you change the depth, you also need to change the //exit// statement.
 
 ;Note~:

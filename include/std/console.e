@@ -35,7 +35,7 @@ constant
 -- determines if the process has a console (terminal) window.
 --
 -- Returns:
--- An ##atom##,
+-- An **atom**,
 --  * ##1## if there is more than one process attached to the current console, 
 --  * ##0## if a console does not exist or only one process (Euphoria) is attached to
 --     the current console.
@@ -67,8 +67,9 @@ end function
 --  # ##codes## : Either a sequence of exactly 256 integers or an atom (the default).
 --
 -- Returns:
---   A **sequence**, of the current 256 keyboard codes, prior to any changes that
---   this function might make.
+--   A **sequence**, 
+-- of the current 256 keyboard codes, prior to any changes that
+-- this function might make.
 --
 -- Comments:
 --   When ##codes## is a atom then no change to the existing codes is made, otherwise
@@ -246,7 +247,7 @@ public constant
 -- An **integer**,
 -- * ##0## means no error.
 -- * ##-1## means that the supplied file could not me loaded in to a [[:map]].
--- * ##-2## means that a new key value was not an integer
+-- * ##-2## means that a new key value was not an integer.
 -- * ##-3## means that an unknown key name was found in the file.
 --
 -- Comments:
@@ -747,7 +748,8 @@ public constant
 --  codes are returned for the function keys, arrow keys, and so on.
 --
 -- Returns:
---		An **integer**, either -1 if no key waiting, or the code of the next key
+--	 	An **integer**, 
+-- either -1 if no key waiting, or the code of the next key
 --  waiting in keyboard buffer.
 --
 -- Comments:
@@ -803,7 +805,8 @@ end procedure
 -- 		returns the number of Control+C and Control+Break key presses.
 --
 -- Returns:
--- 		An **integer**, the number of times that Control+C or Control+Break have
+-- 		An **integer**, 
+-- the number of times that Control+C or Control+Break have
 --  been pressed since the last call to ##check_break##, or since the
 --  beginning of the program if this is the first call.
 --
@@ -841,7 +844,8 @@ end function
 --   waits for user to press a key, unless any is pending, and returns key code.
 --
 -- Returns:
---   An **integer**, which is a key code. If one is waiting in keyboard buffer, then return it. Otherwise, wait for one to come up.
+--   An **integer**, 
+-- which is a key code. If one is waiting in keyboard buffer, then return it. Otherwise, wait for one to come up.
 --
 -- See Also:
 --   [[:get_key]], [[:getc]]
@@ -855,8 +859,8 @@ end function
 --   displays a prompt to the user and waits for any key.
 --
 -- Parameters:
---   # ##prompt## : Prompt to display, defaults to ##"Press Any Key to continue..."##
---   # ##con## : Either 1 (stdout), or 2 (stderr). Defaults to 1.
+--   # ##prompt## : Prompt to display, defaults to ##"Press Any Key to continue..."## .
+--   # ##con## : Either ##1## (stdout), or ##2## (stderr). Defaults to ##1## .
 --
 -- Comments:
 -- This wraps [[:wait_key]] by giving a clue that the user should press a key, and
@@ -931,7 +935,8 @@ end procedure
 --  		   that the user may enter. s can be empty, {}, if there are no restrictions.
 --
 -- Returns:
---   An **atom**, in the assigned range which the user typed in.
+--   An **atom**, 
+-- in the assigned range which the user typed in.
 --
 -- Errors:
 --   If [[:puts]] cannot display ##st## on standard output, or if the first or second element
@@ -993,7 +998,8 @@ end function
 --		# ##st## : is a string that will be displayed on the screen.
 --
 -- Returns:
--- 		A **sequence**, the string that the user typed in, stripped of any new-line character.
+-- 		A **sequence**, 
+-- the string that the user typed in, stripped of any new-line character.
 --
 -- Comments:
 --     If the user happens to type Control+Z (indicates end-of-file), "" will be returned.
@@ -1057,16 +1063,16 @@ end type
 -- gets the value and attribute of the character at a given screen location.
 --
 -- Parameters:
--- 		# ##line## : the 1-base line number of the location
--- 		# ##column## : the 1-base column number of the location
---      # ##fgbg## : an integer, if 0 (the default) you get an attribute_code
+-- 		# ##line## : the 1-base line number of the location.
+-- 		# ##column## : the 1-base column number of the location.
+--      # ##fgbg## : an integer, if ##0## (the default) you get an attribute_code
 --                   returned otherwise you get a foreground and background color
 --                   number returned.
 --
 -- Returns:
 -- * If fgbg is zero then a **sequence** of //two// elements, ##{character, attribute_code}##
 -- for the specified location.
--- * If fgbg is not zero then a **sequence** of //three// elements, ##{characterfg_color, bg_color}##
+-- * If fgbg is not zero then a **sequence** of //three// elements, ##{characterfg_color, bg_color}##.
 --
 -- Comments:
 -- * This function inspects a single character on the //active page//.
@@ -1133,8 +1139,8 @@ end function
 -- stores and displays a sequence of characters with attributes at a given location.
 --
 -- Parameters:
--- 		# ##line## : the 1-based line at which to start writing
--- 		# ##column## : the 1-based column at which to start writing
+-- 		# ##line## : the 1-based line at which to start writing.
+-- 		# ##column## : the 1-based column at which to start writing.
 -- 		# ##char_attr## : a sequence of alternated characters and attribute codes.
 --
 -- Comments:
@@ -1172,7 +1178,8 @@ end procedure
 -- 		# ##attr_code## : integer, an attribute code.
 --
 -- Returns:
--- A sequence of two elements ~-- {fgcolor, bgcolor}
+-- A **sequence**,
+--  of two elements ~-- ##{fgcolor, bgcolor}##
 --
 -- Example 1:
 -- <eucode>
@@ -1191,11 +1198,12 @@ end function
 -- converts a foreground and background color set to its attribute code format.
 --
 -- Parameters:
--- 		# ##fgbg## : Either a sequence of {fgcolor, bgcolor} or just an integer fgcolor.
+-- 		# ##fgbg## : Either a sequence of ##{fgcolor, bgcolor}## or just an integer fgcolor.
 --      # ##bg## : An integer bgcolor. Only used when ##fgbg## is an integer.
 --
 -- Returns:
--- An integer attribute code.
+--        An **integer**,
+-- an attribute code.
 --
 -- Example 1:
 -- <eucode>
@@ -1218,7 +1226,7 @@ end function
 -- displays a text image in any text mode.
 --
 -- Parameters:
--- 		# ##xy## : a pair of 1-based coordinates representing the point at which to start writing
+-- 		# ##xy## : a pair of 1-based coordinates representing the point at which to start writing.
 --		# ##text## : a list of sequences of alternated character and attribute.
 --
 -- Comments:
@@ -1286,7 +1294,8 @@ end procedure
 --   # ##bottom_right## : the coordinates, given as a pair, of the lower right corner of the area to save.
 --
 -- Returns:
---   A **sequence**, of ##{character, attribute, character, ...}## lists.
+--   A **sequence**, 
+-- of ##{character, attribute, character, ...}## lists.
 --	 
 -- Comments:
 --
@@ -1333,7 +1342,8 @@ end function
 --		//Windows//
 --
 -- Returns:
--- 		An **integer**, the actual number of text lines.
+-- 		An **integer**, 
+-- the actual number of text lines.
 --
 -- Comments:
 -- Values of 25, 28, 43 and 50 lines are supported by most video cards.
@@ -1421,7 +1431,7 @@ end procedure
 --
 -- Parameters:
 -- # ##data_in## : Any object.
--- # ##args## : Optional arguments used to format the output. Default is 1.
+-- # ##args## : Optional arguments used to format the output. Default is ##1## .
 -- # ##finalnl## : Optional. Determines if a new line is output after the data.
 -- Default is to output a new line.
 --
@@ -1449,7 +1459,7 @@ end procedure
 -- want to avoid this, ensure that the last parameter is a zero. Or to put this
 -- another way, if the last parameter is zero then a New Line will **not** be output.
 --
--- Examples 1:
+-- Example 1:
 -- <eucode>
 -- display("Some plain text") 
 --         -- Displays this string on the console plus a new line.
@@ -1470,7 +1480,7 @@ end procedure
 -- display("",2)
 -- display({51,362,71}, {1})
 -- </eucode>
--- Output would be ...
+-- Output would be~:
 -- {{{
 -- Some plain text
 -- Your answer:cat

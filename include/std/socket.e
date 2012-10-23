@@ -812,7 +812,7 @@ end function
 --
 -- Parameters:
 --   # ##sock## : the socket to shutdown
---   # ##method## : the method used to close the socket
+--   # ##method## : the way used to close the socket
 --
 -- Returns:
 --   An **integer**, 0 on success and -1 on error.
