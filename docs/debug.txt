@@ -13,7 +13,7 @@ The file ##ex.err## will also have a dump of all variable values, and
 optionally a list of the most recently executed statements. For extremely large
 sequences, only a partial dump is shown. If the name ##ex.err## is not 
 convenient, or if a nondefault path is required, you can choose another file 
-name, anywhere on your system, by calling [[:crash_file]]().
+name, anywhere on your system, by calling [[:crash_file]].
 
 In addition, you are able to create [[:udt "user-defined types"]] that precisely
 determine the set of legal values for each of your variables. An error report 
@@ -57,7 +57,7 @@ are executed, especially when ##trace(3)## is used.
 
 After you have predetermined the lines that are traceable, your program must
 then dynamically cause the trace facility to be activated by executing a 
-[[:trace]]() statement.  You could simply say:
+[[:trace]] statement.  You could simply say:
 
 <eucode>
 with trace
@@ -80,7 +80,7 @@ end if
 You can turn off tracing by executing a ##trace(0)##
 statement. You can also turn it off interactively by typing 'q' to quit
 tracing. Remember that with trace must appear **//outside//** of any routine,
-whereas ##trace##() can appear **//inside//** a routine **//or outside//**.
+whereas ##trace## can appear **//inside//** a routine **//or outside//**.
 
 You might want to turn on tracing from within a [[:type -> types]]. Suppose you 
 run your program and it fails, with the ##ex.err## file showing that one of your
@@ -101,17 +101,17 @@ type positive_int(integer x)
 end type
 </eucode>
 
-When ##positive_int()## returns, you will see the exact statement that caused 
+When ##positive_int## returns, you will see the exact statement that caused 
 your variable to be set to the strange value, and you will be able to check the
 values of other variables.  You will also be able to check the output screen to
-see what has happened up to this precise moment. If you define positive_int()
+see what has happened up to this precise moment. If you define ##positive_int##
 so it returns zero for the strange value (99) instead of one, you can force a
 diagnostic dump into ##ex.err##.
 
-Remember that the argument to ##trace()## does not need to be a constant. It 
+Remember that the argument to ##trace## does not need to be a constant. It 
 only needs to be 0, 1, 2 or 3, but these values may be the result from any 
-expression passed to ##trace##().
-Other values will cause ##trace()## to fail.
+expression passed to ##trace##.
+Other values will cause ##trace## to fail.
 
 
 === The Trace Screen
@@ -132,7 +132,7 @@ values. The top line shows the commands that you can enter at this point:
 | down-arrow | continue execution and break when any statement coming after \\this one in the source listing is about to be executed. \\This lets you skip over subroutine calls. It also lets you stop on the first statement following the end of a loop\\ without having to witness all iterations of the loop. |
 | ? | display the value of a variable. After hitting **?** you will be prompted for the name of the variable.\\ Many variables are displayed for you automatically as they are assigned a value. If a variable is not currently being displayed, or is only partially displayed, you can ask for it.\\ Large sequences are limited to one line on the trace screen, but when you ask for the value of\\ a variable that contains a large sequence, the screen will clear, and you can scroll through\\ a pretty-printed display of the sequence. You will then be returned to the trace screen, \\where only one line of the variable is displayed. Variables that are not defined at this point\\ in the program cannot be shown. Variables that have not yet been initialized will have \\"< NO VALUE >" beside their name. Only variables, not general expressions, can be displayed.\\ As you step through execution of the program, the system will update any values showing\\ on the screen. Occasionally it will remove variables that are no longer in scope, or\\ that haven't been updated in a long time compared with newer, recently-updated variables. |
 | q | quit tracing and resume normal execution. Tracing will start again when the next trace(1) is executed. |
-| Q | quit tracing and let the program run freely to its normal completion. trace() statements will be ignored. |
+| Q | quit tracing and let the program run freely to its normal completion. ##trace## statements will be ignored. |
 | !| this will abort execution of your program. A traceback and dump of variable values will go to ##ex.err##. |
 
 As you trace your program, variable names and values appear automatically in
@@ -156,11 +156,11 @@ makes flipping between them quicker and easier.
 
 When a traced program requests keyboard input, the main output screen will
 appear, to let you type your input as you normally would. This works fine for a
-[[:gets]]() (read one line) input.  When a 
-[[:get_key]]() (quickly sample the keyboard) is
+[[:gets]] (read one line) input.  When a 
+[[:get_key]] (quickly sample the keyboard) is
 called you will be given 8 seconds to type a character, otherwise it is 
-assumed that there is no input for this call to ##get_key##(). This allows you 
-to test the case of input and also the case of no input for ##get_key##().
+assumed that there is no input for this call to ##get_key##. This allows you 
+to test the case of input and also the case of no input for ##get_key##.
 
 === The Trace File
 
@@ -178,7 +178,7 @@ This form of tracing is supported by both the interpreter and the the Euphoria
 to C translator.  It is particularly useful when a machine-level error occurs
 that prevents Euphoria from writing out an ##ex.err## diagnostic file. By
 looking at the last statement executed, you may be able to guess why the
-program crashed. Perhaps the last statement was a ##poke##() into an 
+program crashed. Perhaps the last statement was a ##poke## into an 
 illegal area
 of memory. Perhaps it was a call to a C routine. In some cases it might be a
 bug in the interpreter or the translator.
@@ -246,7 +246,7 @@ explosions, and logging a lot of samples, just for the explosion effect. If
 samples were charged against other lower-level routines, we knew that those
 samples occurred during an explosion. If we had simply profiled the whole
 program, the picture would not have been clear, as the lower-level routines
-would also have been used for moving ships, drawing phasors etc. ##profile##() 
+would also have been used for moving ships, drawing phasors etc. ##profile## 
 can help in the same way when you do execution-count profiling.
 
 === Some Further Notes on Time Profiling
@@ -282,7 +282,7 @@ does not increase.
 
 By taking more samples you can get more accurate results. However, one
 situation to watch out for is the case where a program synchronizes itself to
-the clock interrupt, by waiting for ##[[:time]]##() to
+the clock interrupt, by waiting for ##[[:time]]## to
 advance. The statements executed just after the point where the clock advances
 might //never// be sampled, which could give you a very distorted picture. e.g.
 

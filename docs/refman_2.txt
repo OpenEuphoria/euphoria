@@ -626,20 +626,20 @@ corresponding sequence elements, and the sequences must be the same length.
 When they are equal length, the result is a sequence of ones an zeros. When they
 are not equal length, the result is an error. Either way you'll get an error,
 since an if-condition must be an atom, not a sequence.  Instead you should use
-the ##equal()## built-in routine:
+the ##equal## built-in routine:
 
 <eucode>
 if equal("APPLE", "ORANGE") then  -- CORRECT
 </eucode>
 
-In general, you can do relational comparisons using the compare() built-in
+In general, you can do relational comparisons using the ##compare## built-in
 routine:
 
 <eucode>
 if compare("APPLE", "ORANGE") = 0 then  -- CORRECT
 </eucode>
 
-You can use compare() for other comparisons as well:
+You can use ##compare## for other comparisons as well:
 
 <eucode>
 if compare("APPLE", "ORANGE") < 0 then  -- CORRECT
@@ -685,7 +685,7 @@ where we have written the numbers in a way that makes the structure
 clearer. An expression of the form x[i][j] can be used to access any element.
 
 The two dimensions are not symmetric however, since an entire "row" can be
-selected with x[i], but you need to use [[:vslice]]() in the Standard Library
+selected with x[i], but you need to use [[:vslice]] in the Standard Library
 to select an entire column. Other logical structures, such as n-dimensional
 arrays, arrays of strings, structures, arrays of structures etc. can also be
 handled easily and flexibly:
@@ -739,7 +739,7 @@ employees = {
 -- employees[2][SALARY] would be 57000.
 </eucode>
 
-The ##length()## built-in function will tell you how many elements are in a
+The ##length## built-in function will tell you how many elements are in a
 sequence.  So the last element of a sequence ##s##, is:
 
 <eucode>
@@ -830,7 +830,7 @@ hard to declare in many other languages.
 
 Note that expressions in general may not be subscripted, just variables. For
 example: ##{5+2,6-1,7*8,8+1}[3]## is //not// supported, nor is something like:
-##date()[MONTH]##. You have to assign the sequence returned by ##date##() to a
+##date()[MONTH]##. You have to assign the sequence returned by ##date## to a
 variable, then subscript the variable to get the month.
 
 ==== Slicing of Sequences
@@ -1025,8 +1025,8 @@ The length of the new sequence is always one greater than the length of
 the original sequence. The item to be added to the sequence can be any atom or
 sequence.
 
-These two built-in functions, ##append()## and
-##prepend()##, have some similarities to the concatenate operator,
+These two built-in functions, ##append## and
+##prepend##, have some similarities to the concatenate operator,
 ##&##, but there are clear differences. e.g.
 
 <eucode>
@@ -1053,12 +1053,12 @@ s = insert({1,2,3},4,8.5)   -- s is {1,2,3,4}, like append()
 </eucode>
 
 The length of the returned sequence is one more than the one of ##in_what##.
-This is the same rule as for ##append()## and ##prepend()## above, which are
-actually special cases of ##insert()##.
+This is the same rule as for ##append## and ##prepend## above, which are
+actually special cases of ##insert##.
 
 ===== splice(sequence in_what, object what, atom position)
 
-If what is an ##atom##, this is the same as ##insert()##. But if what is a
+If what is an ##atom##, this is the same as ##insert##. But if what is a
 sequence, that sequence is inserted as successive elements into ##in_what##
 at ##position##. Example:
 
@@ -1582,7 +1582,7 @@ calculations on larger integer values, up to about ##15## decimal digits, but
 declare them as **atom**, rather than integer.
 
 ;**Note~:**
-:In a procedure or function parameter list like the one for ##fred()## above, 
+:In a procedure or function parameter list like the one for ##fred## above, 
 a type name may only be followed by a single parameter name.
 
 ;**Performance Note~:**
@@ -1625,12 +1625,12 @@ h2 = 25      -- error! program aborts with a message
 Variables ##h1## and ##h2## can only be assigned integer values in the range 
 ##0## to ##23##
 inclusive. After each assignment to ##h1## or ##h2## the interpreter will call 
-##hour##(),
+##hour##,
 passing the new value.  The value will first be checked to see if it is an
 integer (because of "integer x"). If it is, the return statement will be
 executed to test the value of ##x## (i.e. the new value of ##h1## or ##h2##).  
-If ##hour()##
-returns true, execution continues normally. If ##hour()## returns false then the
+If ##hour##
+returns true, execution continues normally. If ##hour## returns false then the
 program is aborted with a suitable diagnostic message.
 
 "hour" can be used to declare subroutine parameters as well:
@@ -1639,7 +1639,7 @@ program is aborted with a suitable diagnostic message.
 procedure set_time(hour h)
 </eucode>
 
-##set_time()## can only be called with a reasonable value for parameter ##h##,
+##set_time## can only be called with a reasonable value for parameter ##h##,
 otherwise the program will abort with a message.
 
 A variable's type will be checked after each assignment to the variable (except
@@ -1797,7 +1797,7 @@ in code safety and bug prevention far outweighs it.
 
 This type can hold any data Euphoria can handle, both atoms and sequences.
 
-The ##object##() type returns 0 if a variable is not initialized, else ##1##.
+The ##object## type returns 0 if a variable is not initialized, else ##1##.
 
 === Scope
 
@@ -1819,8 +1819,8 @@ For example, procedures, functions and types can call themselves or one another
 recursion, where routine A calls routine B which directly or indirectly calls
 routine A, implies one of A or B being called before it is defined. This was
 traditionally the most frequent situation which required using the
-[[:routine_id()]] mechanism, but is now supported directly.
-See [[:Indirect Routine Calling]] for more details on the [[:routine_id()]]
+[[:routine_id]] mechanism, but is now supported directly.
+See [[:Indirect Routine Calling]] for more details on the [[:routine_id]]
 mechanism.
 
 ==== Defining the scope of an identifier
@@ -1914,7 +1914,7 @@ foo() -- ok, declared in some_lib.e
 bar() -- error! bar() is not declared here
 </eucode>
 
-Why not declare ##foo()## as global, as it is meant to be used anywhere? Well,
+Why not declare ##foo## as global, as it is meant to be used anywhere? Well,
 one could, but this will increase the risks of name conflicts. This is why, for
 instance, all public identifiers from the standard library have **public**
 scope. **global** should be used rarely, if ever. Because earlier versions of
@@ -2842,7 +2842,7 @@ program by ##eub##.
 ==== Library Definitions
 
 * **DATA_EXECUTE** - Application will always get executable memory from
-##allocate()## even when the system has Data Execute Protection enabled for the
+##allocate## even when the system has Data Execute Protection enabled for the
 Euphoria Interpreter.
 * **SAFE** - Enables safe runtime checks for operations for routines found in
 ##machine.e## and ##dll.e##
@@ -4062,7 +4062,7 @@ temporarily affected by the "##without warning strict##" directive.
                          Euphoria chooses the built-in.
 | ##not_used## |  A variable has not been used and is going out of scope.
 | ##no_value## | A variable never got assigned a value and is going out of scope.
-| ##custom## |  Any warning that was defined using the warning() procedure.
+| ##custom## |  Any warning that was defined using the ##warning## procedure.
 | ##not_reached## | After a keyword that branches unconditionally, the only
                     thing that should appear is an end of block keyword, or
                     possibly a label that a goto statement can target.

@@ -6,14 +6,14 @@
 -- Warning: Some of these routines require a knowledge of
 -- machine-level programming. You could crash your system!
 --
--- These routines, along with [[:peek]](), [[:poke]]() and [[:call]](), let you access all
+-- These routines, along with [[:peek]], [[:poke]] and [[:call]], let you access all
 -- of the features of your computer.  You can read and write to any allowed memory
 -- location, and you can create and execute machine code subroutines.
 --
 -- If you are manipulating 32-bit addresses or values, remember to use
 -- variables declared as atom. The integer type only goes up to 31 bits.
 --
--- If you choose to call machine_proc() or machine_func() directly (to save
+-- If you choose to call ##machine_proc## or ##machine_func## directly (to save
 -- a bit of overhead) you *must* pass valid arguments or Euphoria could crash.
 --
 -- Some example programs to look at:
@@ -184,12 +184,8 @@ export constant
         export constant MAP_ANONYMOUS = 32
     end ifdef
     
-    ifdef LINUX then
-    	ifdef EU4_0 then
-    		export constant MAP_FAILED = power(256,4)-1
-    	elsedef
-		    export constant MAP_FAILED = power(256,sizeof(dll:C_POINTER))-1
-		end ifdef
+    ifdef LINUX or FREEBSD then
+		export constant MAP_FAILED = power(256,ADDRESS_LENGTH)-1
     end ifdef
 end ifdef
 
@@ -205,7 +201,7 @@ end ifdef
 -- production phases but only for development phases.
 --
 -- To define the word ##SAFE## run your application with the ##-D SAFE## command line
--- option, or add to the top of your main file :
+-- option, or add to the top of your main file~:
 --
 -- <eucode>
 -- with define safe
@@ -215,23 +211,23 @@ end ifdef
 --
 -- The implementation of the Machine Level Access routines used are controled 
 -- with the define word ##SAFE##.
--- The use of SAFE switches the routines included here to use debugging versions
+-- The use of ##SAFE## switches the routines included here to use debugging versions
 -- which will allow you to catch all kinds of bugs that might otherwise may not 
 -- always crash your program where in the line your program is written.  
--- There may be bugs that are invisible until you port the program the're in to 
+-- There may be bugs that are invisible until you port the program they are in to 
 -- another platform.  There has been no bench marking for how much of a speed penalty
--- there is using SAFE.
+-- there is using ##SAFE##.
 --
 --
--- You can take advantage of SAFE debugging by
+-- You can take advantage of ##SAFE## debugging by:
 --
 -- *  If necessary, call [[:register_block]](address, length, memory_protection) to add additional
 --    "external" blocks of memory to the safe_address_list. These are blocks 
 --    of memory that are safe to use but which you did not acquire 
---    through Euphoria's [[:allocate]](), [[:allocate_data]](), [[:allocate_code]]() or [[:allocate_protect]](),
---    [[:allocate_string]](), [[:allocate_wstring]](). Call 
+--    through Euphoria's [[:allocate]], [[:allocate_data]], [[:allocate_code]] or [[:allocate_protect]],
+--    [[:allocate_string]], [[:allocate_wstring]]. Call 
 --    [[:unregister_block]](address) when you want to prevent further access to 
---    an external block.  When SAFE is not enabled these functions will do nothing
+--    an external block.  When ##SAFE## is not enabled these functions will do nothing
 --    and will be converted into nothing by the inline code in the front-end.
 --
 -- *  You will be notified if memory that you haven't allocated is accessed, 
@@ -257,7 +253,7 @@ end ifdef
 -- Comments:
 --
 -- If this integer is 1, (the default), check all blocks for edge corruption after each
--- [[:Executable Memory]], [[:call]](), [[:c_proc]]() or [[:c_func]]().
+-- [[:Executable Memory]], [[:call]], [[:c_proc]] or [[:c_func]].
 -- To save time, your program can turn off this checking by setting check_calls to 0.
 
 --****
@@ -270,14 +266,14 @@ end ifdef
 --
 -- Comments:
 --
--- If this integer is 1 (the default under //WINDOWS//), only check for references to the 
+-- If this integer is 1 (the default under //Windows//), only check for references to the 
 -- leader or trailer areas just outside each registered block, and don't complain about 
 -- addresses that are far out of bounds (it's probably a legitimate block from another source)
 --
 -- For a stronger check, set this to 0 if your program will never read/write an 
 -- unregistered block of memory.
 --
--- On //WINDOWS//, people often use unregistered blocks.  Please don't be one of them.
+-- On //Windows// people often use unregistered blocks.  Please do not be one of them.
 
 --****
 -- ==== check_all_blocks
@@ -291,15 +287,15 @@ end ifdef
 -- Comments:
 --
 -- safe.e maintains a list of acquired memory blocks. Those gained through
--- allocate() are automatically included. Any other block,
--- for debugging purposes, must be registered by [[:register_block]]()
--- and unregistered by [[:unregister_block]]().
+-- ##allocate## are automatically included. Any other block,
+-- for debugging purposes, must be registered by [[:register_block]]
+-- and unregistered by [[:unregister_block]].
 --
 -- The list is scanned and, if any block shows signs of corruption, it is
 -- displayed on the screen and the program terminates. Otherwise, nothing
 -- happens.
 --
--- Unless SAFE is defined, this routine does nothing. It is there to make switching
+-- Unless ##SAFE## is defined, this routine does nothing. It is there to make switching
 -- between debugged and normal version of your program easier.
 --
 -- See Also:
@@ -312,7 +308,8 @@ end ifdef
 -- procedure register_block(machine_addr block_addr, positive_int block_len, 
 --             valid_memory_protection_constant memory_protection = PAGE_READ_WRITE )
 -- </eucode>
--- Description: Add a block of memory to the list of safe blocks maintained
+-- Description: 
+-- Adds a block of memory to the list of safe blocks maintained
 -- by safe.e (the debug version of memory.e). The block starts at address a.
 -- The length of the block is i bytes.
 --
@@ -330,17 +327,17 @@ end ifdef
 --
 -- This routine is only meant to be used for debugging purposes. safe.e
 -- tracks the blocks of memory that your program is allowed to 
--- [[:peek]](), [[:poke]](), [[:mem_copy]]() etc. These are normally just the
--- blocks that you have allocated using Euphoria's [[:allocate]]() 
+-- [[:peek]], [[:poke]], [[:mem_copy]] etc. These are normally just the
+-- blocks that you have allocated using Euphoria's [[:allocate]] 
 -- routine, and which you have not yet freed using
--- Euphoria's [[:free]](). In some cases, you may acquire
+-- Euphoria's [[:free]]. In some cases, you may acquire
 -- additional, external, blocks of memory, perhaps as a result of calling a
 -- C routine. 
 --
--- If you are debugging your program using safe.e, you must register these
--- external blocks of memory or safe.e will prevent you from accessing them.
+-- If you are debugging your program using ##safe.e##, you must register these
+-- external blocks of memory or ##safe.e## will prevent you from accessing them.
 -- When you are finished using an external block you can unregister it using
--- unregister_block().
+-- ##unregister_block##.
 --
 -- Example 1:
 -- <eucode>
@@ -361,7 +358,7 @@ end ifdef
 -- include std/machine.e
 -- public procedure unregister_block(machine_addr block_addr)
 -- </eucode>
--- Remove a block of memory from the list of safe blocks maintained by safe.e
+-- removes a block of memory from the list of safe blocks maintained by safe.e
 -- (the debug version of memory.e).
 --
 -- Parameters:
@@ -374,11 +371,11 @@ end ifdef
 --
 -- This routine is only meant to be used for debugging purposes. Use it to
 -- unregister blocks of memory that you have previously registered using
--- [[:register_block]](). By unregistering a block, you remove it from the
+-- [[:register_block]]. By unregistering a block, you remove it from the
 -- list of safe blocks maintained by safe.e. This prevents your program from
 -- performing any further reads or writes of memory within the block.
 --
---  See [[:register_block]]() for further comments and an example.
+--  See [[:register_block]] for further comments and an example.
 -- 
 -- See Also:
 --   [[:register_block]], [[:Safe Mode]]
@@ -564,19 +561,19 @@ end function
 --   too larger for an integer to hold.
 --
 -- Comments:
--- * Since ##allocate##() acquires memory from the system, it is your responsiblity to 
+-- * Since ##allocate## acquires memory from the system, it is your responsiblity to 
 -- return that memory when your application is done with it. There are two ways to
 -- do that - automatically or manually.
 -- ** //Automatically// - If the ##cleanup## parameter is non-zero, then the memory
 -- is returned when the variable that receives the address goes out of scope **and**
 -- is not referenced by anything else. Alternatively you can force it be released by
--- calling the [[:delete]]() function.
+-- calling the [[:delete]] function.
 -- ** //Manually// - If the ##cleanup## parameter is zero, then you must call the
--- [[:free]]() function at some point in your program to release the memory back to the system.
+-- [[:free]] function at some point in your program to release the memory back to the system.
 -- * When your program terminates, the operating system will reclaim
 -- all memory that your applicaiton acquired anyway.
--- * An address returned by this function shouldn't be passed to ##[[:call]]()##.
--- For that purpose you should use ##[[:allocate_code]]()## instead. 
+-- * An address returned by this function shouldn't be passed to ##[[:call]]##.
+-- For that purpose you should use ##[[:allocate_code]]## instead. 
 -- * The address returned will be at least 8-byte aligned.
 --
 -- Example 1:
@@ -647,7 +644,7 @@ end function
 --
 -- Comments:
 --   This is for NULL terminated lists, such as allocated by [[:allocate_pointer_array]].
---   Do not call ##free_pointer_array##() for a pointer that was allocated to be cleaned
+--   Do not call ##free_pointer_array## for a pointer that was allocated to be cleaned
 --   up automatically.  Instead, use [[:delete]].
 --
 -- See Also:
@@ -740,7 +737,7 @@ end function
 -- <built-in> function peek(object addr_n_length)
 --
 -- Description:
--- Fetches a byte, or some bytes, from an address in memory.
+-- fetches a byte, or some bytes, from an address in memory.
 --
 -- Parameters:
 --              # ##addr_n_length## : an object, either of
@@ -765,11 +762,11 @@ end function
 -- value of type integer (31-bits). Variables that hold an address should 
 -- therefore be declared as atoms.
 --
--- It is faster to read several bytes at once using the second form of peek()
+-- It is faster to read several bytes at once using the second form of ##peek##
 -- than it is to read one byte at a time in a loop. The returned sequence has
 -- the length you asked for on input.
 -- 
--- Remember that ##peek##() takes just one argument, which in the second form
+-- Remember that ##peek## takes just one argument, which in the second form
 -- is actually a 2-element sequence.
 --  
 -- Example 1: 
@@ -792,7 +789,7 @@ end function
 -- <built-in> function peeks(object addr_n_length)
 --
 -- Description:
--- Fetches a byte, or some bytes, from an address in memory.
+-- fetches a byte, or some bytes, from an address in memory.
 --
 -- Parameters:
 --              # ##addr_n_length## : an object, either of
@@ -807,8 +804,8 @@ end function
 --
 -- Errors:
 --
--- [[:peek | Peeking]] in memory you don't own may be blocked by the OS, and cause
--- a machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
+-- [[:peek | Peeking]] in memory you do not own may be blocked by the OS, and cause
+-- a machine exception. If you use the define safe these routines will catch these problems with a Euphoria error.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
@@ -818,11 +815,11 @@ end function
 -- value of type integer (31-bits). Variables that hold an address should
 -- therefore be declared as atoms.
 --
--- It is faster to read several bytes at once using the second form of ##peek##()
+-- It is faster to read several bytes at once using the second form of ##peek##
 -- than it is to read one byte at a time in a loop. The returned sequence has
 -- the length you asked for on input.
 -- 
--- Remember that ##peeks##() takes just one argument, which in the second
+-- Remember that ##peeks## takes just one argument, which in the second
 -- form is actually a 2-element sequence.
 --  
 -- Example 1:
@@ -864,23 +861,23 @@ end function
 -- Peeking in memory you don't own may be blocked by the OS, and cause
 -- a machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
 --
--- When supplying a {address, count} sequence, the count must not be negative.
+-- When supplying a ##{address, count}## sequence, the count must not be negative.
 --
 -- Comments: 
 -- Since addresses are 32-bit numbers on 32-bit architectures, they can be larger than the largest
 -- value of type integer (31-bits). Variables that hold an address should
 -- therefore be declared as atoms.
 --
--- It is faster to read several words at once using the second form of peek()
+-- It is faster to read several words at once using the second form of ##peek##
 -- than it is to read one word at a time in a loop. The returned sequence has
 -- the length you asked for on input.
 -- 
--- Remember that ##peek2s##() takes just one argument, which in the second
+-- Remember that ##peek2s## takes just one argument, which in the second
 -- form is actually a 2-element sequence.
 --
--- The only difference between ##peek2s##() and ##peek2u##() is how words
--- with the highest bit set are returned. ##peek2s##() assumes them to be
--- negative, while ##peek2u##() just assumes them to be large and positive.
+-- The only difference between ##peek2s## and ##peek2u## is how words
+-- with the highest bit set are returned. ##peek2s## assumes them to be
+-- negative, while ##peek2u## just assumes them to be large and positive.
 --  
 -- Example 1: 
 --
@@ -904,7 +901,7 @@ end function
 -- <built-in> function peek2u(object addr_n_length)
 --
 -- Description:
--- Fetches an //unsigned// word, or some //unsigned// words, from an address
+-- fetches an //unsigned// word, or some //unsigned// words, from an address
 -- in memory.
 --
 -- Parameters:
@@ -918,10 +915,10 @@ end function
 -- integers returned are words, in the range 0..65535.
 --
 -- Errors:
---      Peek() in memory you don't own may be blocked by the OS, and cause a
--- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
+--      Peeking in memory you do not own may be blocked by the OS, and cause a
+-- machine exception. If you use the define safe these routines will catch these problems with a Euphoria error.
 --
--- When supplying a {address, count} sequence, the count must not be negative.
+-- When supplying a ##{address, count}## sequence, the count must not be negative.
 --
 -- Comments: 
 --
@@ -929,16 +926,16 @@ end function
 -- value of type integer (31-bits). Variables that hold an address should
 -- therefore be declared as atoms.
 --
--- It is faster to read several words at once using the second form of peek()
+-- It is faster to read several words at once using the second form of ##peek##
 -- than it is to read one word at a time in a loop. The returned sequence has
 -- the length you asked for on input.
 -- 
--- Remember that ##peek2u##() takes just one argument, which in the second
+-- Remember that ##peek2u## takes just one argument, which in the second
 -- form is actually a 2-element sequence.
 --
--- The only difference between ##peek2s##() and ##peek2u##() is how words
--- with the highest bit set are returned. ##peek2s##() assumes them to be
--- negative, while ##peek2u##() just assumes them to be large and positive.
+-- The only difference between ##peek2s## and ##peek2u## is how words
+-- with the highest bit set are returned. ##peek2s## assumes them to be
+-- negative, while ##peek2u## just assumes them to be large and positive.
 --  
 -- Example 1: 
 -- <eucode>
@@ -962,7 +959,7 @@ end function
 -- <built-in> function peek4s(object addr_n_length)
 --
 -- Description:
--- Fetches a //signed// double words, or some //signed// double words,
+-- fetches a //signed// double words, or some //signed// double words,
 -- from an address in memory.
 --
 -- Parameters:
@@ -977,9 +974,9 @@ end function
 --
 -- Errors:
 -- Peeking in memory you don't own may be blocked by the OS, and cause a
--- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
+-- machine exception. If you use the define safe these routines will catch these problems with a Euphoria error.
 --
--- When supplying a {address, count} sequence, the count must not be negative.
+-- When supplying a ##{address, count}## sequence, the count must not be negative.
 --
 -- Comments: 
 --
@@ -988,15 +985,15 @@ end function
 -- therefore be declared as atoms.
 --
 -- It is faster to read several double words at once using the second form
--- of ##peek##() than it is to read one double word at a time in a loop. The
+-- of ##peek## than it is to read one double word at a time in a loop. The
 -- returned sequence has the length you asked for on input.
 -- 
--- Remember that ##peek4s##() takes just one argument, which in the second
+-- Remember that ##peek4s## takes just one argument, which in the second
 -- form is actually a 2-element sequence.
 --
--- The only difference between ##peek4s##() and [[:peek4u]]() is how double
--- words with the highest bit set are returned. ##peek4s##() assumes them to
--- be negative, while [[:peek4u]]() just assumes them to be large and positive.
+-- The only difference between ##peek4s## and [[:peek4u]] is how double
+-- words with the highest bit set are returned. ##peek4s## assumes them to
+-- be negative, while [[:peek4u]] just assumes them to be large and positive.
 --
 -- Example 1:
 -- <eucode>
@@ -1018,7 +1015,7 @@ end function
 -- <built-in> function peek8s(object addr_n_length)
 --
 -- Description:
--- Fetches a //signed// quad words, or some //signed// quad words,
+-- fetches a //signed// quad words, or some //signed// quad words,
 -- from an address in memory.
 --
 -- Parameters:
@@ -1033,9 +1030,9 @@ end function
 --
 -- Errors:
 -- Peeking in memory you don't own may be blocked by the OS, and cause a
--- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
+-- machine exception. If you use the define safe these routines will catch these problems with a Euphoria error.
 --
--- When supplying a {address, count} sequence, the count must not be negative.
+-- When supplying a ##{address, count}## sequence, the count must not be negative.
 --
 -- Comments:
 --
@@ -1044,15 +1041,15 @@ end function
 -- therefore be declared as atoms.
 --
 -- It is faster to read several quad words at once using the second form
--- of ##peek##() than it is to read one quad word at a time in a loop. The
+-- of ##peek## than it is to read one quad word at a time in a loop. The
 -- returned sequence has the length you asked for on input.
 --
--- Remember that ##peek8s##() takes just one argument, which in the second
+-- Remember that ##peek8s## takes just one argument, which in the second
 -- form is actually a 2-element sequence.
 --
--- The only difference between ##peek8s##() and [[:peek8u]]() is how quad
--- words with the highest bit set are returned. ##peek4s##() assumes them to
--- be negative, while [[:peek4u]]() just assumes them to be large and positive.
+-- The only difference between ##peek8s## and [[:peek8u]] is how quad
+-- words with the highest bit set are returned. ##peek4s## assumes them to
+-- be negative, while [[:peek4u]] just assumes them to be large and positive.
 --
 -- Example 1:
 -- <eucode>
@@ -1074,7 +1071,7 @@ end function
 -- <built-in> function peek_longs(object addr_n_length)
 --
 -- Description:
--- Fetches a //signed// integer, or some //signed// integers,
+-- fetches a //signed// integer, or some //signed// integers,
 -- from an address in memory.
 --
 -- Parameters:
@@ -1085,16 +1082,16 @@ end function
 -- Returns:
 -- An **object**, either an atom if the input was a single address, or a
 -- sequence of atoms if a sequence was passed. In both cases, atoms returned
--- are based on the native size of a "long int."  On Windows and all other 32-bit
+-- are based on the native size of a "long int."  On //Windows// and all other 32-bit
 -- architectures, the number will be in the range -power(2,31)..power(2,31)-1.
 -- On other 64-bit architectures, the number will be in the range of
 -- -power(2,63)..power(2,63)-1.
 --
 -- Errors:
--- Peeking in memory you don't own may be blocked by the OS, and cause a
--- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
+-- Peeking in memory you do not own may be blocked by the OS, and cause a
+-- machine exception. If you use the define safe these routines will catch these problems with a Euphoria error.
 --
--- When supplying a {address, count} sequence, the count must not be negative.
+-- When supplying a ##{address, count}## sequence, the count must not be negative.
 --
 -- Comments:
 --
@@ -1103,15 +1100,15 @@ end function
 -- therefore be declared as atoms.
 --
 -- It is faster to read several double words at once using the second form
--- of ##peek##() than it is to read one double word at a time in a loop. The
+-- of ##peek## than it is to read one double word at a time in a loop. The
 -- returned sequence has the length you asked for on input.
 --
--- Remember that ##peek_longs##() takes just one argument, which in the second
+-- Remember that ##peek_longs## takes just one argument, which in the second
 -- form is actually a 2-element sequence.
 --
--- The only difference between ##peek_long##() and [[:peek_longu]]() is how
--- integers with the highest bit set are returned. ##peek_longs##() assumes them to
--- be negative, while [[:peek_longu]]() just assumes them to be large and positive.
+-- The only difference between ##peek_long## and [[:peek_longu]] is how
+-- integers with the highest bit set are returned. ##peek_longs## assumes them to
+-- be negative, while [[:peek_longu]] just assumes them to be large and positive.
 --
 -- Example 1:
 -- <eucode>
@@ -1133,7 +1130,7 @@ end function
 -- <built-in> function peek4u(object addr_n_length)
 --
 -- Description:
--- Fetches an //unsigned// double word, or some //unsigned// double words,
+-- fetches an //unsigned// double word, or some //unsigned// double words,
 -- from an address in memory.
 --
 -- Parameters:
@@ -1147,10 +1144,10 @@ end function
 -- returned are double words, in the range 0..2^^32^^-1. 
 --
 -- Errors:
---      Peek() in memory you don't own may be blocked by the OS, and cause
--- a machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
+--      Peeking in memory you do not own may be blocked by the OS, and cause
+-- a machine exception. If you use the define safe these routines will catch these problems with a Euphoria error.
 --
--- When supplying a {address, count} sequence, the count must not be negative.
+-- When supplying a ##{address, count}## sequence, the count must not be negative.
 --
 -- Comments: 
 --
@@ -1159,15 +1156,15 @@ end function
 -- therefore be declared as atoms.
 --
 -- It is faster to read several double words at once using the second form 
--- of ##peek##() than it is to read one double word at a time in a loop. The
+-- of ##peek## than it is to read one double word at a time in a loop. The
 -- returned sequence has the length you asked for on input.
 -- 
--- Remember that ##peek4u##() takes just one argument, which in the second
+-- Remember that ##peek4u## takes just one argument, which in the second
 -- form is actually a 2-element sequence.
 --
--- The only difference between ##peek4s##() and ##peek4u##() is how double
--- words with the highest bit set are returned. ##peek4s##() assumes them
--- to be negative, while ##peek4u##() just assumes them to be large and
+-- The only difference between ##peek4s## and ##peek4u## is how double
+-- words with the highest bit set are returned. ##peek4s## assumes them
+-- to be negative, while ##peek4u## just assumes them to be large and
 -- positive.
 --  
 -- Example 1: 
@@ -1189,7 +1186,7 @@ end function
 -- <built-in> function peek8u(object addr_n_length)
 --
 -- Description:
--- Fetches an //unsigned// quad word, or some //unsigned// quad words,
+-- fetches an //unsigned// quad word, or some //unsigned// quad words,
 -- from an address in memory.
 --
 -- Parameters:
@@ -1203,10 +1200,10 @@ end function
 -- returned are quad words, in the range 0..power(2,64)-1.
 --
 -- Errors:
---      Peek() in memory you don't own may be blocked by the OS, and cause
--- a machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
+--      Peeking in memory you do not own may be blocked by the OS, and cause
+-- a machine exception. If you use the define safe these routines will catch these problems with a Euphoria error.
 --
--- When supplying a {address, count} sequence, the count must not be negative.
+-- When supplying a ##{address, count}## sequence, the count must not be negative.
 --
 -- Comments:
 --
@@ -1215,15 +1212,15 @@ end function
 -- therefore be declared as atoms.
 --
 -- It is faster to read several quad words at once using the second form
--- of ##peek##() than it is to read one quad word at a time in a loop. The
+-- of ##peek## than it is to read one quad word at a time in a loop. The
 -- returned sequence has the length you asked for on input.
 --
--- Remember that ##peek8u##() takes just one argument, which in the second
+-- Remember that ##peek8u## takes just one argument, which in the second
 -- form is actually a 2-element sequence.
 --
--- The only difference between ##peek8s##() and ##peek8u##() is how quad
--- words with the highest bit set are returned. ##peek8s##() assumes them
--- to be negative, while ##peek8u##() just assumes them to be large and
+-- The only difference between ##peek8s## and ##peek8u## is how quad
+-- words with the highest bit set are returned. ##peek8s## assumes them
+-- to be negative, while ##peek8u## just assumes them to be large and
 -- positive.
 --
 -- Example 1:
@@ -1245,7 +1242,7 @@ end function
 -- <built-in> function peek_longu(object addr_n_length)
 --
 -- Description:
--- Fetches an //unsigned// integer, or some //unsigned// integers,
+-- fetches an //unsigned// integer, or some //unsigned// integers,
 -- from an address in memory.
 --
 -- Parameters:
@@ -1256,16 +1253,16 @@ end function
 -- Returns:
 -- An **object**, either an atom if the input was a single address, or a
 -- sequence of atoms if a sequence was passed. In both cases, atoms returned
--- are based on the native size of a "long int."  On Windows and all other 32-bit
+-- are based on the native size of a "long int."  On //Windows// and all other 32-bit
 -- architectures, the number will be in the range 0..power(2,32)-1.
 -- On other 64-bit architectures, the number will be in the range of
 -- 0..power(2,64)-1.
 --
 -- Errors:
---      Peek() in memory you don't own may be blocked by the OS, and cause
--- a machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
+--      Peeking in memory you do not own may be blocked by the OS, and cause
+-- a machine exception. If you use the define safe these routines will catch these problems with a Euphoria error.
 --
--- When supplying a {address, count} sequence, the count must not be negative.
+-- When supplying a ##{address, count}## sequence, the count must not be negative.
 --
 -- Comments:
 --
@@ -1274,15 +1271,15 @@ end function
 -- therefore be declared as atoms.
 --
 -- It is faster to read several integers at once using the second form
--- of ##peek##() than it is to read one integer at a time in a loop. The
+-- of ##peek## than it is to read one integer at a time in a loop. The
 -- returned sequence has the length you asked for on input.
 --
--- Remember that ##peek_longu##() takes just one argument, which in the second
+-- Remember that ##peek_longu## takes just one argument, which in the second
 -- form is actually a 2-element sequence.
 --
--- The only difference between ##peek_longs##() and ##peek_longu##() is how double
--- words with the highest bit set are returned. ##peek4s##() assumes them
--- to be negative, while ##peek_longu##() just assumes them to be large and
+-- The only difference between ##peek_longs## and ##peek_longu## is how double
+-- words with the highest bit set are returned. ##peek4s## assumes them
+-- to be negative, while ##peek_longu## just assumes them to be large and
 -- positive.
 --
 -- Example 1:
@@ -1304,7 +1301,7 @@ end function
 -- <built-in> function peek_string(atom addr)
 --
 -- Description:
--- Read an ASCII string in RAM, starting from a supplied address.
+-- reads an ASCII string in RAM, starting from a supplied address.
 --
 -- Parameters:
 --              # ##addr## : an atom, the address at which to start reading.
@@ -1313,13 +1310,13 @@ end function
 -- A **sequence**, of bytes, the string that could be read.
 --
 -- Errors:
--- Further, ##peek##() memory that doesn't belong to your process is something the operating
+-- Further, peeking in memory that does not belong to your process is something the operating
 -- system could prevent, and you'd crash with a machine level exception.
 --
 -- Comments:
 --
 -- An ASCII string is any sequence of bytes and ends with a 0 byte.
--- If you ##peek_string##() at some place where there is no string, you will get a sequence of garbage.
+-- If you ##peek_string## at some place where there is no string, you will get a sequence of garbage.
 -- 
 -- See Also:
 -- [[:Using Strings]], [[:peek]], [[:peek_wstring]], [[:allocate_string]]
@@ -1327,7 +1324,7 @@ end function
 
 
 --**
--- Return a unicode (utf16) string that are stored at machine address a.
+-- returns a unicode (utf16) string that are stored at machine address a.
 --
 -- Parameters:
 --   # ##addr## : an atom, the address of the string in memory
@@ -1357,28 +1354,28 @@ end function
 -- <built-in> procedure poke(atom addr, object x)
 --
 -- Description:
--- Stores one or more bytes, starting at a memory location.
+-- stores one or more bytes, starting at a memory location.
 --
 -- Parameters:
 --              # ##addr## : an atom, the address at which to store
 --              # ##x## : an object, either a byte or a non empty sequence of bytes.
 --
 -- Errors:
---      Poke() in memory you don't own may be blocked by the OS, and cause a
--- machine exception. The -D SAFE option will make ##poke()## catch this sort of issues.
+--      Poking in memory you do not own may be blocked by the OS, and cause a
+-- machine exception. The ##-D SAFE## option will make ##poke## catch this sort of issues.
 --
 -- Comments:
 --
--- The lower 8-bits of each byte value, i.e. remainder(x, 256), is actually
+-- The lower 8-bits of each byte value (such as ##remainder(x, 256)##) is actually
 -- stored in memory.
 --
 -- It is faster to write several bytes at once by poking a sequence of values,
 -- than it is to write one byte at a time in a loop. 
 -- 
--- Writing to the screen memory with ##poke##() can be much faster than using
--- ##puts##() or ##printf##(), but the programming is more difficult. In most cases
+-- Writing to the screen memory with ##poke## can be much faster than using
+-- ##puts## or ##printf##, but the programming is more difficult. In most cases
 -- the speed is not needed. For example, the Euphoria editor, ##ed##, never uses
--- ##poke##().
+-- ##poke##.
 --  
 -- Example 1:
 -- <eucode>
@@ -1406,33 +1403,33 @@ end function
 -- <built-in> procedure poke2(atom addr, object x)
 --
 -- Description:
--- Stores one or more words, starting at a memory location.
+-- stores one or more words, starting at a memory location.
 --
 -- Parameters:
 --              # ##addr## : an atom, the address at which to store
 --              # ##x## : an object, either a word or a non empty sequence of words.
 --
 -- Errors:
---      Poke() in memory you don't own may be blocked by the OS, and cause a
--- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
+--      Poking in memory you do not own may be blocked by the OS, and cause a
+-- machine exception. If you use the define safe these routines will catch these problems with a Euphoria error.
 --
 -- Comments: 
 --
--- There is no point in having ##poke2s##() or ##poke2u##(). For example, both 32768
--- and -32768 are stored as #F000 when stored as words. It's up to whoever
+-- There is no point in having ##poke2s## or ##poke2u##. For example, both 32768
+-- and -32768 are stored as ###F000## when stored as words. It is up to whoever
 -- reads the value to figure it out.
 --
 -- It is faster to write several words at once by poking a sequence of
 -- values, than it is to write one words at a time in a loop.
 -- 
--- Writing to the screen memory with ##poke2##() can be much faster than using
--- ##puts##() or ##printf##(), but the programming is more difficult. In most cases
+-- Writing to the screen memory with ##poke2## can be much faster than using
+-- ##puts## or ##printf##, but the programming is more difficult. In most cases
 -- the speed is not needed. For example, the Euphoria editor, ed, never uses
--- poke2().
+-- ##poke2##.
 --  
 -- The 2-byte values to be stored can be negative or positive. You can read
--- them back with either ##peek2s##() or ##peek2u##(). Actually, only
--- remainder(##x##,65536) is being stored.
+-- them back with either ##peek2s## or ##peek2u##. Actually, only
+-- ##remainder(##x##,65536)## is being stored.
 --
 -- Example 1:
 -- <eucode>
@@ -1456,7 +1453,7 @@ end function
 -- <built-in> procedure poke4(atom addr, object x)
 --
 -- Description:
--- Stores one or more double words, starting at a memory location.
+-- stores one or more double words, starting at a memory location.
 --
 -- Parameters:
 --              # ##addr## : an atom, the address at which to store
@@ -1464,25 +1461,25 @@ end function
 -- double words.
 --
 -- Errors:
---      Poke() in memory you don't own may be blocked by the OS, and cause a
--- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
+--      Poking in memory you do not own may be blocked by the OS, and cause a
+-- machine exception. If you use the define safe these routines will catch these problems with a Euphoria error.
 --
 -- Comments: 
 --
--- There is no point in having poke4s() or poke4u(). For example, both
--- +2^^31^^ and -(2^^31^^) are stored as #F0000000. It's up to whoever
+-- There is no point in having ##poke4s## or ##poke4u##. For example, both
+-- +2^^31^^ and -(2^^31^^) are stored as ###F0000000##. It is up to whoever
 -- reads the value to figure it out.
 --
 -- It is faster to write several double words at once by poking a sequence
 -- of values, than it is to write one double words at a time in a loop.
 -- 
--- Writing to the screen memory with poke4() can be much faster than using
--- puts() or printf(), but the programming is more difficult. In most cases
+-- Writing to the screen memory with ##poke4## can be much faster than using
+-- ##puts## or ##printf##, but the programming is more difficult. In most cases
 -- the speed is not needed. For example, the Euphoria editor, ed, never uses
--- poke4().
+-- ##poke4##.
 --  
 -- The 4-byte values to be stored can be negative or positive. You can read
--- them back with either ##peek4s##() or ##peek4u##(). However, the results
+-- them back with either ##peek4s## or ##peek4u##. However, the results
 -- are unpredictable if you want to store values with a fractional part or a
 -- magnitude greater than 2^^32^^, even though Euphoria represents them
 -- all as atoms.
@@ -1509,7 +1506,7 @@ end function
 -- <built-in> procedure poke8(atom addr, object x)
 --
 -- Description:
--- Stores one or more quad words, starting at a memory location.
+-- stores one or more quad words, starting at a memory location.
 --
 -- Parameters:
 --              # ##addr## : an atom, the address at which to store
@@ -1517,20 +1514,20 @@ end function
 -- double words.
 --
 -- Errors:
---      Poke() in memory you don't own may be blocked by the OS, and cause a
--- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
+--      Poking in memory you do not own may be blocked by the OS, and cause a
+-- machine exception. If you use the define safe these routines will catch these problems with a Euphoria error.
 --
 -- Comments:
 --
--- There is no point in having poke8s() or poke8u(). For example, both
--- +power(2,63) and -power(2,63) are stored as #F000000000000000. It's up to whoever
+-- There is no point in having ##poke8s## or ##poke8u##. For example, both
+-- +power(2,63) and -power(2,63) are stored as ###F000000000000000##. It is up to whoever
 -- reads the value to figure it out.
 --
 -- It is faster to write several quad words at once by poking a sequence
 -- of values, than it is to write one quad words at a time in a loop.
 --
 -- The 8-byte values to be stored can be negative or positive. You can read
--- them back with either ##peek8s##() or ##peek8u##(). However, the results
+-- them back with either ##peek8s## or ##peek8u##. However, the results
 -- are unpredictable if you want to store values with a fractional part or a
 -- magnitude greater than power(2,64), even though Euphoria represents them
 -- all as atoms.
@@ -1557,7 +1554,7 @@ end function
 -- <built-in> procedure poke_long(atom addr, object x)
 --
 -- Description:
--- Stores one or more integers, starting at a memory location.
+-- stores one or more integers, starting at a memory location.
 --
 -- Parameters:
 --              # ##addr## : an atom, the address at which to store
@@ -1565,24 +1562,24 @@ end function
 -- double words.
 --
 -- Errors:
---      Poke() in memory you don't own may be blocked by the OS, and cause a
--- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
+--      Poking in memory you do not own may be blocked by the OS, and cause a
+-- machine exception. If you use the define safe these routines will catch these problems with a Euphoria error.
 --
 -- Comments:
 --
--- There is no point in having poke_longs() or poke_longu(). For example, both
--- +power(2,31) and -power(2,31) are stored as #F0000000 on a 32-bit
--- architecture. It's up to whoever reads the value to figure it out.
+-- There is no point in having ##poke_longs## or ##poke_longu##. For example, both
+-- +power(2,31) and -power(2,31) are stored as ###F0000000## on a 32-bit
+-- architecture. It is up to whoever reads the value to figure it out.
 --
--- On all Windows and other 32-bit operating systems, the ##poke_long()##
+-- On all //Windows// and other 32-bit operating systems, the ##poke_long##
 -- uses 4-byte integers.  On 64-bit architectures using operating systems
--- other than Windows, ##poke_long()## uses 8-byte integers.
+-- other than //Windows//, ##poke_long## uses 8-byte integers.
 --
 -- It is faster to write several integers at once by poking a sequence
 -- of values, than it is to write one double words at a time in a loop.
 --
 -- The 4-byte (or 8-byte) values to be stored can be negative or positive. You can read
--- them back with either ##peek_longs##() or ##peek_longu##(). However, the results
+-- them back with either ##peek_longs## or ##peek_longu##. However, the results
 -- are unpredictable if you want to store values with a fractional part or a
 -- magnitude greater than the size of a native ##long int##, even though Euphoria represents them
 -- all as atoms.
@@ -1658,7 +1655,7 @@ public function poke_string(atom buffaddr, integer buffsize, sequence s)
 end function
 
 --**
--- Stores a C-style null-terminated Double-Byte string in memory
+-- stores a C-style null-terminated Double-Byte string in memory.
 --
 -- Parameters:
 -- # ##buffaddr##: an atom, the RAM address to to the string at.
@@ -1716,7 +1713,7 @@ end function
 -- <built-in> procedure mem_copy(atom destination, atom origin, integer len)
 --
 -- Description:
--- Copy a block of memory from an address to another.
+-- copies a block of memory from an address to another.
 --
 -- Parameters:
 --              # ##destination## : an atom, the address at which data is to be copied
@@ -1748,7 +1745,7 @@ end function
 -- <built-in> procedure mem_set(atom destination, integer byte_value, integer how_many))
 --
 -- Description:
--- Sets a contiguous range of memory locations to a single value.
+-- sets a contiguous range of memory locations to a single value.
 --
 -- Parameters:
 --              # ##destination## : an atom, the address starting the range to set.
@@ -1781,7 +1778,7 @@ end function
 -- <built-in> procedure call(atom addr)
 --
 -- Description:
---  Call a machine language routine which was stored in memory prior.
+--  calls a machine language routine which was stored in memory prior.
 --
 -- Parameters:
 --              # ##addr## : an atom, the address at which to transfer execution control.
@@ -1793,11 +1790,11 @@ end function
 -- The routine should save and restore any registers that it uses.
 --
 -- You can allocate a block of memory for the routine and then poke in the
--- bytes of machine code using ##allocate_code##(). You might allocate other blocks of memory for data
--- and parameters that the machine code can operate on using ##allocate##(). The addresses of these
+-- bytes of machine code using ##allocate_code##. You might allocate other blocks of memory for data
+-- and parameters that the machine code can operate on using ##allocate##. The addresses of these
 -- blocks could be part of the machine code.
 --
--- If your machine code uses the stack, use ##c_proc##() instead of ##call##().
+-- If your machine code uses the stack, use ##c_proc## instead of ##call##.
 --
 -- Example 1: 
 --              ##demo/callmach.ex##
@@ -1904,11 +1901,11 @@ end procedure
 -- === Allocating and Writing to memory:
 
 --**
--- Allocates and copies data into executable memory.
+-- allocates and copies data into executable memory.
 --
 -- Parameters:
 -- # ##a_sequence_of_machine_code## : is the machine code to
--- be put into memory to be later called with [[:call()]]        
+-- be put into memory to be later called with [[:call]]        
 -- # the ##word length## : of the said code.  You can specify your
 -- code as 1-byte, 2-byte or 4-byte chunks if you wish.  If your machine code is byte
 -- code specify 1.  The default is 1.
@@ -1917,7 +1914,7 @@ end procedure
 -- An **address**,
 -- The function returns the address in memory of the code, that can be
 -- safely executed whether DEP is enabled or not or 0 if it fails.  On the
--- other hand, if you try to execute a code address returned by [[:allocate()]]
+-- other hand, if you try to execute a code address returned by [[:allocate]]
 -- with DEP enabled the program will receive a machine exception.  
 --
 -- Comments:
@@ -1926,12 +1923,13 @@ end procedure
 -- done for you and when the routine returns the memory may not be readable
 -- or writeable but it is guaranteed to be executable.  If you want to also
 -- write to this memory **after the machine code has been copied** you should
--- use [[:allocate_protect()]] instead and you should read about having memory
+-- use [[:allocate_protect]] instead and you should read about having memory
 -- executable and writeable at the same time is a bad idea.  You mustn't use
--- ##free()## on memory returned from this function.  You may instead
--- use ##free_code()## but since you will probably need the code throughout
+-- ##free## on memory returned from this function.  You may instead
+-- use ##free_code## but since you will probably need the code throughout
 -- the life of your program's process this normally is not necessary.
 -- If you want to put only data in the memory to be read and written use [[:allocate]].
+--
 -- See Also:
 -- [[:Executable Memory]], [[:allocate]], [[:free_code]], [[:allocate_protect]]
 public function allocate_code( object data, memconst:valid_wordsize wordsize = 1 )
@@ -1956,13 +1954,13 @@ end function
 --
 -- Comments:
 -- Only the 8 lowest bits of each atom in ##s## is stored. Use
--- ##allocate_wstring##()  for storing double byte encoded strings.
+-- ##allocate_wstring##  for storing double byte encoded strings.
 --
--- There is no allocate_string_low() function. However, you could easily
+-- There is no ##allocate_string_low## function. However, you could easily
 -- craft one by adapting the code for ##allocate_string##.
 --
--- Since ##allocate_string##() allocates memory, you are responsible to
--- [[:free]]() the block when done with it if ##cleanup## is zero.
+-- Since ##allocate_string## allocates memory, you are responsible to
+-- [[:free]] the block when done with it if ##cleanup## is zero.
 -- If ##cleanup## is non-zero, then the memory can be freed by calling
 -- [[:delete]], or when the pointer's reference count drops to zero.
 --
@@ -2009,8 +2007,8 @@ end procedure
 -- Allocates and copies data into memory and gives it protection using
 -- [[:Standard Library Memory Protection Constants]] or
 -- [[:Microsoft Windows Memory Protection Constants]].  The user may only pass in one of these 
--- constants.  If you only wish to execute a sequence as machine code use ##allocate_code()##.  
--- If you only want to read and write data into memory use ##allocate()##.
+-- constants.  If you only wish to execute a sequence as machine code use ##allocate_code##.  
+-- If you only want to read and write data into memory use ##allocate##.
 --
 -- See [[http://msdn.microsoft.com/en-us/library/aa366786(VS.85).aspx "MSDN: Microsoft's Memory Protection Constants"]]
 --
@@ -2018,7 +2016,7 @@ end procedure
 -- # ##data## : is the machine code to be put into memory. 
 -- # ##wordsize## : is the size each element of data will take in 
 -- memory.  Are they 1-byte, 2-bytes, 4-bytes or 8-bytes long?  Specify here.  The default is 1.
--- # ##protection## : is the particular Windows protection.
+-- # ##protection## : is the particular //Windows// protection.
 --
 -- Returns:
 -- An **address**,
@@ -2031,9 +2029,9 @@ end procedure
 -- [[:allocate]] instead.  It is more efficient and simpler.
 --
 -- If you want to call ##allocate_protect( data, PAGE_EXECUTE )##, you can use 
--- [[:allocate_code()]] instead.  It is simpler.
+-- [[:allocate_code]] instead.  It is simpler.
 --
--- You must not use [[:free()]] on memory returned from this function, instead use [[:free_code()]].
+-- You must not use [[:free]] on memory returned from this function, instead use [[:free_code]].
 -- 
 -- See also:
 -- [[:Executable Memory]]
@@ -2138,9 +2136,14 @@ function local_allocate_protected_memory( integer s, integer first_protection )
 		end if
 	elsifdef UNIX then
 		atom ptr = c_func( MMAP, { 0, s, first_protection, or_bits( MAP_ANONYMOUS, MAP_PRIVATE ), -1, 0 })
-		if ptr = MAP_FAILED then
-			return 0
-		end if
+		-- please check the value for MAP_FAILED for other OSes above and here:
+		ifdef LINUX or FREEBSD then
+			if ptr = MAP_FAILED then
+				return 0
+			end if
+		elsedef
+			-- fail silently on other OSes...
+		end ifdef
 		integer fail = local_change_protection_on_protected_memory( ptr, s, first_protection )
 		return ptr
 	end ifdef
@@ -2170,22 +2173,22 @@ end function
 
 
 --**
--- Free up a previously allocated block of memory.
+-- frees up a previously allocated block of memory.
 --
 -- Parameters:
 --  # ##addr##, either a single atom or a sequence of atoms; these are addresses of a blocks to free.
 --
 -- Comments:
---  * Use ##free##() to return blocks of memory the during execution. This will reduce the chance of 
+--  * Use ##free## to return blocks of memory the during execution. This will reduce the chance of 
 --   running out of memory or getting into excessive virtual memory swapping to disk. 
 -- * Do not reference a block of memory that has been freed. 
 -- * When your program terminates, all allocated memory will be returned to the system.
--- * ##addr## must have been allocated previously using [[:allocate]](). You
+-- * ##addr## must have been allocated previously using [[:allocate]]. You
 --   cannot use it to relinquish part of a block. Instead, you have to allocate
 --   a block of the new size, copy useful contents from old block there and
---   then ##free        ##() the old block.  
+--   then ##free## the old block.  
 -- * If the memory was allocated and automatic cleanup
---   was specified, then do not call ##free()## directly.  Instead, use [[:delete]].
+--   was specified, then do not call ##free## directly.  Instead, use [[:delete]].
 -- * An ##addr## of zero is simply ignored.
 --
 -- Example 1:
@@ -2228,11 +2231,11 @@ memconst:FREE_RID = routine_id("free")
 -- </eucode>
 --
 -- Description:
--- Frees up allocated code memory
+-- frees up allocated code memory.
 --
 -- Parameters:
--- # ##addr## : must be an address returned by [[:allocate_code()]] or [[:allocate_protect()]].  Do **not** pass memory returned from [[:allocate()]] here! 
--- # ##size## : is the length of the sequence passed to ##alllocate_code()## or the size you specified when you called allocate_protect().  
+-- # ##addr## : must be an address returned by [[:allocate_code]] or [[:allocate_protect]].  Do **not** pass memory returned from [[:allocate]] here! 
+-- # ##size## : is the length of the sequence passed to ##alllocate_code## or the size you specified when you called ##allocate_protect##.  
 -- # ##wordsize##: valid_wordsize  default = 1
 --
 -- Comments:
@@ -2256,18 +2259,18 @@ memconst:FREE_RID = routine_id("free")
 -- <built-in> function delete_routine( object x, integer rid )
 -- 
 -- Description:
--- Associates a routine for cleaning up after a euphoria object.
+-- associates a routine for cleaning up after a Euphoria object.
 -- 
 -- Comments:
--- delete_routine() associates a euphoria object with a routine id meant
+-- ##delete_routine## associates a euphoria object with a routine id meant
 -- to clean up any allocated resources.  It always returns an atom
 -- (double) or a sequence, depending on what was passed (integers are
 -- promoted to atoms).
 -- 
--- The routine specified by delete_routine() should be a procedure that
+-- The routine specified by ##delete_routine## should be a procedure that
 -- takes a single parameter, being the object to be cleaned up after.
 -- Objects are cleaned up under one of two circumstances.  The first is
--- if it's called as a parameter to delete().  After the call, the
+-- if it's called as a parameter to ##delete##.  After the call, the
 -- association with the delete routine is removed.
 -- 
 -- The second way for the delete routine to be called is when its
@@ -2275,7 +2278,7 @@ memconst:FREE_RID = routine_id("free")
 -- delete routine is called. A default delete will be used if the cleanup 
 -- parameter to one of the [[:allocate]] routines is true. 
 -- 
--- delete_routine() may be called multiple times for the same object.
+-- ##delete_routine## may be called multiple times for the same object.
 -- In this case, the routines are called in reverse order compared to
 -- how they were associated.
 
@@ -2284,7 +2287,7 @@ memconst:FREE_RID = routine_id("free")
 -- <built-in> procedure delete( object x )
 -- 
 -- Description:
--- Calls the cleanup routines associated with the object, and removes the
+-- calls the cleanup routines associated with the object, and removes the
 -- association with those routines.
 -- 
 -- Comments:
@@ -2300,10 +2303,10 @@ memconst:FREE_RID = routine_id("free")
 -- === Types and Constants
 
 --**
--- an address returned from allocate() or allocate_protect()
--- or allocate_code() or the value 0.
+-- an address returned from ##allocate## or ##allocate_protect##
+-- or ##allocate_code## or the value 0.
 --
--- Return Value:
+-- Returns:
 -- An **integer**, 
 -- The type will return 1 if the parameter, an address, was returned
 -- from one of these Machine Level functions (and has not yet been freeed)
@@ -2361,7 +2364,8 @@ end type
 -- 
 -- When [[:Safe Mode]] is not turned on, this always returns true.
 --
--- Comment: This is used mostly inside the safe library itself to check whenever
+-- Comments: 
+-- This is used mostly inside the safe library itself to check whenever
 -- you call Machine Level Access Functions or Procedures.  It should only be used
 -- for debugging purposes.
 --
@@ -2402,7 +2406,7 @@ end type
 -- <built-in> function routine_id(sequence routine_name)
 --
 -- Description:
--- Return an integer id number for a user-defined Euphoria procedure or function.
+-- returns an integer id number for a user-defined Euphoria procedure or function.
 --
 -- Parameters:
 --              # ##routine_name## : a string, the name of the procedure or function.
@@ -2414,34 +2418,37 @@ end type
 -- ##routine_name## should not exceed 1,024 characters.
 --
 -- Comments:
--- The id number can be passed to [[:call_proc]]() or [[:call_func]](), to indirectly call
+-- The id number can be passed to [[:call_proc]] or [[:call_func]], to indirectly call
 -- the routine named by ##routine_name##. This id depends on the internal process of 
 -- parsing your code, not on ##routine_name##.
 --
--- The routine named ##routine_name## must be visible, i.e. callable, at the place where
--- ##routine_id##() is used to get the id number. If it is not, -1 is returned.
+-- The routine named ##routine_name## must be visible (that is callable) at the place where
+-- ##routine_id## is used to get the id number. If it is not, -1 is returned.
 --
 -- Indirect calls to the routine can appear earlier in the program than the definition of the routine,
 -- but the id number can only be obtained in code that comes after the definition
 -- of the routine - see example 2 below.
 --
 -- Once obtained, a valid routine id can be used at any place in the program to call
--- a routine indirectly via [[:call_proc]]()/[[:call_func]](), including at places where
+-- a routine indirectly via [[:call_proc]] or [[:call_func]], including at places where
 -- the routine is no longer in scope.
 --
--- Some typical uses of ##routine_id##() are:
+-- Some typical uses of ##routine_id## are:
 --
 -- # Creating a subroutine that takes another routine as a parameter. (See Example 2 below)
 -- # Using a sequence of routine id's to make a case (switch) statement. Using the 
 -- [[:switch statement]] is more efficient.
 -- # Setting up an Object-Oriented system.
--- # Getting a routine id so you can pass it to [[:call_back]](). (See [[:Platform-Specific Issues]])
--- # Getting a routine id so you can pass it to [[:task_create]](). (See [[:Multitasking in Euphoria]])
+-- # Getting a routine id so you can pass it to [[:call_back]]. (See [[:Platform-Specific Issues]])
+-- # Getting a routine id so you can pass it to [[:task_create]]. (See [[:Multitasking in Euphoria]])
 -- # Calling a routine that is defined later in a program. This is no longer needed from v4.0 onward.
 --
 -- Note that C routines, callable by Euphoria, also have ids, but they cannot be used where 
 -- routine ids are, because of the different type checking and other technical issues.
--- See [[:define_c_proc]]() and [[:define_c_func]]().
+--
+-- See Also:
+-- [[:define_c_proc]] and [[:define_c_func]]
+--
 -- Example 1:
 -- <eucode>  
 --  procedure foo()
@@ -2485,7 +2492,7 @@ end type
 -- <built-in> function call_func(integer id, sequence args={})
 --
 -- Description:
---  Call the user-defined Euphoria function by routine id.
+--  calls the user-defined Euphoria function by routine id.
 --
 -- Parameters:
 --   # ##id## : an integer, the routine id of the function to call
@@ -2500,7 +2507,7 @@ end type
 -- If the length of ##args## is not the number of parameters the function takes, an error occurs.
 --
 -- Comments: 
--- ##id## must be a valid routine id returned by [[:routine_id]]().
+-- ##id## must be a valid routine id returned by [[:routine_id]].
 --
 -- ##args## must be a sequence of argument values of length n, where n is the number of
 -- arguments required by the called function. Defaulted parameters currently cannot be
@@ -2520,7 +2527,7 @@ end type
 -- <built-in> procedure call_proc(integer id, sequence args={})
 --
 -- Description:
--- Call a user-defined Euphoria procedure by routine id.
+-- calls a user-defined Euphoria procedure by routine id.
 --
 -- Parameters:
 --   # ##id## : an integer, the routine id of the procedure to call
@@ -2532,7 +2539,7 @@ end type
 -- If the length of ##args## is not the number of parameters the function takes, an error occurs.
 --
 -- Comments: 
--- ##id## must be a valid routine id returned by [[:routine_id]]().
+-- ##id## must be a valid routine id returned by [[:routine_id]].
 --
 -- ##args## must be a sequence of argument values of length n, where n is the number of
 -- arguments required by the called procedure. Defaulted parameters currently cannot be
@@ -2561,14 +2568,14 @@ end type
 --   [[:call_func]], [[:routine_id]], [[:c_proc]]
 
 --****
--- === Accessing Euphoria internals
+-- === Accessing Euphoria Internals
 
 --****
 -- Signature:
 -- <built-in> function machine_func(integer machine_id, object args={})
 --
 -- Description:
--- Perform a machine-specific operation that returns a value.
+-- performs a machine-specific operation that returns a value.
 --
 -- Returns:
 -- Depends on the called internal facility.
@@ -2589,7 +2596,7 @@ end type
 -- <built-in> procedure machine_proc(integer machine_id, object args={})
 --
 -- Description:
--- Perform a machine-specific operation that does not return a value.
+-- perform a machine-specific operation that does not return a value.
 --
 -- Comments:
 -- This procedure us mainly used by the standard library files to implement machine dependent 

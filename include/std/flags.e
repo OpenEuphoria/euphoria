@@ -48,7 +48,7 @@ map:put(one_bit_numbers, 0b1000_0000_0000_0000_0000_0000_0000_0000, 32)
 --
 
 --**
--- Tests if the supplied value has only a single bit on in its representation.
+-- tests if the supplied value has only a single bit on in its representation.
 -- Parameters:
 -- # ##theValue## : an object to test.
 --
@@ -57,7 +57,7 @@ map:put(one_bit_numbers, 0b1000_0000_0000_0000_0000_0000_0000_0000, 32)
 -- otherwise the bit number set. The right-most bit is position 1 and the leftmost bit
 -- is position 32.
 --
--- Examples:
+-- Example 1:
 -- <eucode>
 -- ? which_bit(2) --> 2
 -- ? which_bit(0) --> 0
@@ -75,23 +75,23 @@ public function which_bit( object theValue )
 end function
 
 --**
--- Returns a list of strings that represent the human-readable identities of
--- the supplied flag(s).
+-- returns a list of strings that represent the human-readable identities of
+-- the supplied flag or flags.
 --
 -- Parameters:
 -- # ##flag_bits## : Either a single 32-bit set of flags (a flag value),
 -- or a list of such flag values. The function returns the names for these flag values.
 -- # ##flag_names## : A sequence of two-element sub-sequences. Each sub-sequence
--- is contains {FlagValue, FlagName}, where //FlagName// is a string and 
+-- is contains ##{FlagValue, FlagName}##, where //FlagName// is a string and 
 -- //FlagValue// is the set of bits that set the flag on.
 -- # ##expand_flags##: An integer. 0 (the default) means that the flag values in
--- ##flag_bits## are not broken down to their single-bit values. eg. #0c returns
--- the name of #0c and not the names for #08 and #04. When ##expand_flags## is
+-- ##flag_bits## are not broken down to their single-bit values. For example: ###0c## returns
+-- the name of ###0c## and not the names for ###08## and ###04##. When ##expand_flags## is
 -- non-zero then each bit in the ##flag_bits## parameter is scanned for a
 -- matching name.
 --
 -- Returns:
--- A sequence. This contains the name(s) for each supplied flag value(s).
+-- A sequence. This contains the name or names for each supplied flag value or values.
 --
 -- Comments:
 -- * The number of strings in the returned value depends on ##expand_flags## is 
@@ -99,13 +99,13 @@ end function
 -- * When ##flag_bits## is an atom, you get returned a sequence of strings, one
 -- for each matching name (according to ##expand_flags## option). 
 -- * When ##flag_bits## is a sequence, it is assumed to represent a list of
--- atomic flags. That is, {#1, #4} is a set of two flags for which you want their
+-- atomic flags. That is, ##{#1, #4}## is a set of two flags for which you want their
 -- names. In this case, you get returned a sequence that contains one sequence
--- for each element in ##flag_bits##, which in turn contain the matching name(s).
+-- for each element in ##flag_bits##, which in turn contain the matching name or names.
 -- * When a flag's name can not be found in ##flag_names##, this function returns
 -- the //name// of "##?##".
 --
--- Examples:
+-- Example 1:
 -- <eucode>
 -- include std/console.e
 -- sequence s

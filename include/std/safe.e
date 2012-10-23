@@ -732,7 +732,7 @@ end function
 
 -- **
 -- @devdoc@
--- Internal use of the library only.  free() calls this.  It works with
+-- Internal use of the library only.  ##free## calls this.  It works with
 -- only atoms and in the unSAFE implementation is different.
 --**
 -- @nodoc@

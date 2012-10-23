@@ -4,12 +4,13 @@ include euphoria/keywords.e
 integer fh = open("builtins.txt", "w")
 
 puts(fh, `
-== Built-in Methods
+== Built-in Routines
 
-These methods are built into Euphoria and require no includes.
-
+These **built-in** routines do not require an include file~:
 
 `)
+
+puts(fh, "\n" )
 
 integer x = 1
 for i = 1 to length(builtins) do
@@ -34,5 +35,15 @@ if x > 1 then
 end if
 
 printf(fh, "\n")
+
+
+puts(fh, `
+A built-in routine has global scope and belongs to the ##eu## namespace. 
+
+An identifier for a built-in is not reserved; it is possible to override a built-in
+identifier with a new declaration.
+` )
+
+
 
 close(fh)

@@ -56,12 +56,12 @@ public enum
 --
 
 --****
--- === Environment.
+-- === Environment
 
 constant M_INSTANCE = 55
 
 --**
--- Return ##hInstance## on //Windows// and Process ID (pid) on //Unix//.
+-- returns ##hInstance## on //Windows// and Process ID (pid) on //Unix//.
 --
 -- Comments:
 -- On //Windows// the ##hInstance## can be passed around to various
@@ -76,12 +76,12 @@ ifdef WINDOWS then
 end ifdef
 
 --**
--- Return the ID of the current Process (pid)
+-- returns the ID of the current Process (pid).
 --
 -- Returns: 
--- An atom: The current process' id.
+-- An atom: The current id for a process.
 --
--- Example:
+-- Example 1:
 -- <eucode>
 -- mypid = get_pid()
 -- </eucode>
@@ -108,37 +108,41 @@ elsifdef UNIX then
 end ifdef
 
 --**
--- Retrieves the name of the host OS.
+-- retrieves the name of the host OS.
 --
 -- Returns:
 --    A **sequence**, starting with the OS name. If identification fails, returns
---    an OS name of UNKNOWN. Extra information depends on the OS.
+--    an OS name of ##UNKNOWN##. Extra information depends on the OS.
 --
---    On Unix, returns the same information as the uname() syscall in the same
---    order as the struct utsname. This information is:
+--    On //Unix// returns the same information as the ##uname## syscall in the same
+--    order as the struct ##utsname##. This information is:
+-- {{{
 --        OS Name/Kernel Name
 --        Local Hostname
 --        Kernel Version/Kernel Release
 --        Kernel Specific Version information (This is usually the date that the
 --        kernel was compiled on and the name of the host that performed the compiling.)
 --        Architecture Name (Usually a string of i386 vs x86_64 vs ARM vs etc)
+-- }}}
 --
---    On Windows, returns the following in order:
+--    On //Windows// returns the following in order:
+-- {{{
 --        Windows Platform (out of WinCE, Win9x, WinNT, Win32s, or Unknown Windows)
 --        Name of Windows OS (Windows 3.1, Win95, WinXP, etc)
 --        Platform Number
 --        Build Number
 --        Minor OS version number
 --        Major OS version number
+-- }}}
 --
---    On UNKNOWN, returns an OS name of "UNKNOWN". No other information is returned.
+--    On ##UNKNOWN## returns an OS name of ##"UNKNOWN"##. No other information is returned.
 --
---    Returns a string of "" if an internal error has occured.
+--    Returns an empty string of "" if an internal error has occured.
 --
 -- Comments:
--- On Unix, M_UNAME is defined as a machine_func() and this is passed to the C
--- backend. If the M_UNAME call fails, the raw machine_func() returns -1.
--- On non Unix platforms, calling the machine_func() directly returns 0.
+-- On //Unix//  ##M_UNAME## is defined as a ##machine_func## and this is passed to the C
+-- backend. If the ##M_UNAME## call fails, the raw ##machine_func## returns -1.
+-- On non-//Unix// platforms, calling the ##machine_func## directly returns 0.
 
 public function uname()
 	ifdef WINDOWS then
@@ -216,7 +220,7 @@ public function uname()
 end function
 
 --**
--- Decides whether the host system is a newer Windows version (NT/2K/XP/Vista).
+-- reports whether the host system is a newer Windows version (NT/2K/XP/Vista).
 --
 -- Returns:
 -- An **integer**, 1 if host system is a newer Windows (NT/2K/XP/Vista), else 0.
@@ -236,7 +240,7 @@ end function
 -- <built-in> function getenv(sequence var_name)
 --
 -- Description:
--- Return the value of an environment variable.
+-- returns the value of an environment variable.
 --
 -- Parameters:
 -- 		# ##var_name## : a string, the name of the variable being queried.
@@ -248,7 +252,7 @@ end function
 --
 -- Both the argument and the return value, may, or may not be, case sensitive. You might need to test this on your own system.
 --
--- Example:
+-- Example 1:
 -- <eucode>
 --  e = getenv("EUDIR")
 -- -- e will be "C:\EUPHORIA" -- or perhaps D:, E: etc.
@@ -258,7 +262,7 @@ end function
 -- [[:setenv]], [[:command_line]]
 
 --**
--- Set an environment variable.
+-- sets an environment variable.
 --
 -- Parameters:
 --
@@ -281,7 +285,7 @@ public function setenv(sequence name, sequence val, integer overwrite=1)
 end function
 
 --**
--- Unset an environment variable
+-- unsets an environment variable.
 --
 -- Parameters:
 -- # ##name## : name of environment variable to unset
@@ -303,7 +307,7 @@ end function
 -- <built-in> function platform()
 --
 -- Description:
--- Indicates the platform that the program is being executed on.
+-- indicates the platform that the program is being executed on.
 --
 -- Returns:
 -- An **integer**,
@@ -319,9 +323,9 @@ end function
 -- </eucode>
 --
 -- Comments:
--- The [[:ifdef statement]] is much more versatile and in most cases supersedes ##platform##().
+-- The [[:ifdef statement]] is much more versatile and in most cases supersedes ##platform##.
 --
--- ##platform##() used to be the way to execute different code depending on which platform the program
+-- ##platform## used to be the way to execute different code depending on which platform the program
 -- is running on. Additional platforms will be added as Euphoria is ported to new machines and
 -- operating environments.
 --
@@ -348,28 +352,28 @@ end function
 -- <built-in> procedure system(sequence command, integer mode=0)
 --
 -- Description:
--- Pass a command string to the operating system command interpreter.
+-- passes a command string to the operating system command interpreter.
 --
 -- Parameters:
 --		# ##command## : a string to be passed to the shell
 --		# ##mode## : an integer, indicating the manner in which to return from the call.
 --
 -- Errors:
--- ##command## should not exceed 1,024 characters.
+-- ##command## should not exceed 1_024 characters.
 --
 -- Comments:
--- Allowable values for ##mode## are:
+-- Allowable values for ##mode## are~:
 -- * 0: the previous graphics mode is restored and the screen is cleared.
 -- * 1: a beep sound will be made and the program will wait for the user to press a key before the previous graphics mode is restored.
 -- * 2: the graphics mode is not restored and the screen is not cleared.
 --
--- ##mode## = 2 should only be used when it is known that the command executed by ##system##() will not change the graphics mode.
+-- ##mode## = 2 should only be used when it is known that the command executed by ##system## will not change the graphics mode.
 --
--- You can use Euphoria as a sophisticated "batch" (.bat) language by making calls to ##system##() and ##system_exec##().
+-- You can use Euphoria as a sophisticated "batch" (.bat) language by making calls to ##system## and ##system_exec##.
 --
--- ##system##() will start a new command shell.
+-- ##system## will start a new command shell.
 --
--- ##system##() allows you to use command-line redirection of standard input and output in
+-- ##system## allows you to use command-line redirection of standard input and output in
 -- ##command##.
 --
 -- Example 1:
@@ -395,39 +399,39 @@ end function
 -- <built-in> function system_exec(sequence command, integer mode=0)
 --
 -- Description:
--- Try to run the a shell executable command
+-- tries to run the a shell executable command.
 --
 -- Parameters:
 --		# ##command## : a string to be passed to the shell, representing an executable command
 --		# ##mode## : an integer, indicating the manner in which to return from the call.
 --
 -- Returns:
--- An **integer**, basically the exit/return code from the called process.
+-- An **integer**, basically the exit or return code from the called process.
 --
 -- Errors:
--- ##command## should not exceed 1,024 characters.
+-- ##command## should not exceed 1_024 characters.
 --
 -- Comments:
 --
--- Allowable values for ##mode## are:
+-- Allowable values for ##mode## are~:
 -- * 0 ~-- the previous graphics mode is restored and the screen is cleared.
 -- * 1 ~-- a beep sound will be made and the program will wait for the user to press a key before the previous graphics mode is restored.
 -- * 2 ~-- the graphics mode is not restored and the screen is not cleared.
 --
--- If it is not possible to run the program, ##system_exec##() will return -1.
+-- If it is not possible to run the program, ##system_exec## will return -1.
 --
--- On //WINDOWS//, ##system_exec##() will only run .exe and .com programs.
--- To run .bat files, or built-in shell commands, you need [[:system]](). Some commands,
--- such as DEL, are not programs, they are actually built-in to the command interpreter.
+-- On //Windows// ##system_exec## will only run ##.exe## and ##.com## programs.
+-- To run ##.bat## files, or built-in shell commands, you need [[:system]]. Some commands,
+-- such as ##DEL##, are not programs, they are actually built-in to the command interpreter.
 --
--- On //WINDOWS//, ##system_exec##() does not allow the use of command-line redirection in ##command##.
+-- On //Windows// ##system_exec## does not allow the use of command-line redirection in ##command##.
 -- Nor does it allow you to quote strings that contain blanks, such as file names.
 --
--- exit codes from Windows programs are normally in the range 0 to 255, with 0 indicating "success".
+-- exit codes from //Windows// programs are normally in the range 0 to 255, with 0 indicating "success".
 --
--- You can run a Euphoria program using ##system_exec##(). A Euphoria program can return an exit code using [[:abort]]().
+-- You can run a Euphoria program using ##system_exec##. A Euphoria program can return an exit code using [[:abort]].
 --
--- ##system_exec##() does not start a new command shell.
+-- ##system_exec## does not start a new command shell.
 --
 -- Example 1:
 -- <eucode>
@@ -459,7 +463,7 @@ end function
 -- === Miscellaneous
 
 --**
--- Suspend thread execution. for ##t## seconds.
+-- suspend thread execution for ##t## seconds.
 --
 -- Parameters:
 -- # ##t## : an atom, the number of seconds for which to sleep.
@@ -469,9 +473,9 @@ end function
 --
 -- With multiple tasks, the whole program sleeps, not just the current task. To make
 -- just the current task sleep, you can call ##[[:task_schedule]]([[:task_self]](), {i, i})##
--- and then execute [[:task_yield]](). Another option is to call [[:task_delay]]().
+-- and then execute [[:task_yield]]. Another option is to call [[:task_delay]].
 --
--- Example:
+-- Example 1:
 -- <eucode>
 -- puts(1, "Waiting 15 seconds and a quarter...\n")
 -- sleep(15.25)

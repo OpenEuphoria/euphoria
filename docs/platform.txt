@@ -160,7 +160,7 @@ add_code = {
 </eucode>
 
 This is machine code to be put into memory as an example from 
-##demo/callmach.ex##.  Here if ##platform() = WINDOWS## is true, then the code 
+##.../euphoria/demo/callmach.ex##.  Here if ##platform() = WINDOWS## is true, then the code 
 will pop 8 bytes off of the stack, if not it will pop 0 bytes off of the stack.  
 This has to be done because of where the function call conventions are 
 implemented in the various compilers.  We use Watcom C for WINDOWS and GCC for the 
@@ -265,8 +265,10 @@ many small example programs.
 
 If you have a SVN client, you can get a Euphoria version 4.0-compatible Win32lib
  at:
-[[ https://win32libex.svn.sourceforge.net/svnroot/win32libex/trunk ]].  Get 
-version 68.
+ 
+[[ https://win32libex.svn.sourceforge.net/svnroot/win32libex/trunk ]].  
+
+Get version 68.
 
 There is also an **IDE**, by Judith Evans for use with **Win32lib**. 
 [[ https://euvide.svn.sourceforge.net/svnroot/euvide ]].
@@ -337,7 +339,7 @@ it was 13 (carriage-return).
 * Other OSes use '/' (slash) on file paths. Windows use '\' (backslash).
   If you use the SLASH constant from std/filesys.e you don't have to
   worry about this however.
-* Calls to system() and system_exec() that contain Windows commands
+* Calls to ##system## and ##system_exec## that contain //Windows// commands
 will obviously have to be changed to the corresponding Linux or FreeBSD
 command. e.g. "DEL" becomes "rm", and "MOVE" becomes "mv".  Often you
 can use a standard library call instead and it will be portable across platforms.
@@ -411,7 +413,7 @@ Most C compilers however have **{{{__cdecl}}}** as their default.
 {{{__cdecl}}} allows for variable numbers of arguments to be passed.
 Euphoria assumes {{{__stdcall}}}, but if you need to call a C routine
 that uses {{{__cdecl}}}, you can put a '+' sign at the start of the
-routine name in define_c_proc() and define_c_func(). In the
+routine name in define_##c_proc## and ##define_c_func##. In the
 example above, you would have "+LoadIconA", instead of "LoadIconA".
 
 You can examine a ##dll## file by right-clicking on it, and choosing
@@ -531,7 +533,7 @@ value can be used later to call the routine. You can also use it as an
 argument to the [[:call_back]] function.
 
 In the example above, The 32-bit //call-back address//, ##WndProcAddress##,
-can be stored in a C structure and passed to Windows via the
+can be stored in a C structure and passed to //Windows// via the
 ~RegisterClass() C API function.\\
 **This gives //Windows// the ability to call the Euphoria routine, ~WndProc(),
 whenever the user performs an action on a certain class of window.**
@@ -561,7 +563,7 @@ given parameter, a Euphoria type-check error may occur (depending on
 [[:type_check]]) \\
 No error will occur if you declare all parameters as ##atom##.
 
-Normally, as in the case of ~WndProc() above, Windows initiates these
+Normally, as in the case of ~WndProc() above, //Windows// initiates these
 call-backs to your routines. **It is also
 possible for a C routine in any .dll to call one of your Euphoria
 routines.** You just have to declare the C routine properly,
@@ -594,7 +596,7 @@ or you'll get an error when your Euphoria routine tries to return to
 your .DLL.
 
 If you need your Euphoria routine to be called using the {{{__cdecl}}}
-convention, you must code the call to call_back() as:
+convention, you must code the call to ##call_back## as:
 
 <eucode>
 myroutineaddr = call_back({'+', id})
@@ -611,5 +613,5 @@ other place in your Euphoria program).
 
 A call-back address can be passed to the UNIX signal()
 function to specify a Euphoria routine to handle various signals (e.g. SIGTERM).
-It can also be passed to C routines such as ##qsort##(), to specify a Euphoria
+It can also be passed to C routines such as ##qsort##, to specify a Euphoria
 comparison function.

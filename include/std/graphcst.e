@@ -12,7 +12,7 @@ public enum
 	BMP_INVALID_MODE
 
 --****
--- === video_config sequence accessors
+-- === video_config Sequence Accessors
 
 public enum
 	VC_COLOR,
@@ -131,7 +131,7 @@ export sequence true_bgcolor = { 0, 4, 2, 6, 1, 5, 3, 7, 8,12,10,14, 9,13,11,15,
 end ifdef
 
 --** 
--- Add to color to get blinking text
+-- Add to color number to get blinking text.
 public constant BLINKING = 16
 
 public constant BYTES_PER_CHAR = 2
@@ -154,7 +154,7 @@ end type
 --
 -- A mixture is a ##{red, green, blue}## triple of intensities, which enables you to define
 -- custom colors. Intensities must be from 0 (weakest) to 63 (strongest). Thus, the brightest
--- white is {63, 63, 63}.
+-- white is ##{63, 63, 63}##.
 
 public type mixture(object s)
 	if atom(s) then
@@ -180,11 +180,11 @@ constant
 	M_VIDEO_CONFIG   = 13
 
 --**
--- Return a description of the current video configuration:
+-- returns a description of the current video configuration.
 --
 -- Returns:
 -- 		A **sequence**, of 10 non-negative integers, laid out as follows:
---	# color monitor? ~-- 1 0 if monochrome, 1 otherwise
+--	# color monitor? ~-- 0 if monochrome, 1 otherwise
 --	# current video mode
 -- 	# number of text rows in console buffer
 -- 	# number of text columns in console buffer
@@ -197,7 +197,7 @@ constant
 --
 -- Comments:
 --
--- A public enum is available for convenient access to the returned configuration data:
+-- A public enum is available for convenient access to the returned configuration data~:
 --     * ##VC_COLOR##
 --     * ##VC_MODE##
 --     * ##VC_LINES##
@@ -212,7 +212,7 @@ constant
 -- This routine makes it easy for you to parameterize a program so it will work in many
 -- different graphics modes.
 --
--- Example:
+-- Example 1:
 -- <eucode>
 -- vc = video_config()
 -- -- vc could be {1, 3, 300, 132, 0, 0, 32, 8, 37, 90}

@@ -26,7 +26,7 @@ LicenseFile=..\..\license.txt
 DisableStartupPrompt=yes
 DisableReadyPage=yes
 OutputDir=.\
-OutputBaseFilename=euphoria-4.0.4-ow
+OutputBaseFilename=euphoria-4.0.5-ow
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
@@ -137,8 +137,8 @@ Source: "cleanbranch\bin\*.exw"; DestDir: {app}\bin\; Flags: ignoreversion; Comp
 Source: "cleanbranch\demo\*.*"; DestDir: {app}\demo\; Flags: ignoreversion recursesubdirs; Components: comp_demos
 
 ; Docs
-Source: "..\..\build\*.pdf"; DestDir: {app}\docs\; Flags: ignoreversion; Components: comp_docs
-Source: "..\..\build\html\*.*"; DestDir: {app}\docs\html\; Flags: ignoreversion recursesubdirs; Components: comp_docs
+Source: "..\..\source\build\*.pdf"; DestDir: {app}\docs\; Flags: ignoreversion; Components: comp_docs
+Source: "..\..\source\build\html\*.*"; DestDir: {app}\docs\html\; Flags: ignoreversion recursesubdirs; Components: comp_docs
 
 ; Includes
 Source: "cleanbranch\include\*.*"; DestDir: {app}\include\; Flags: ignoreversion recursesubdirs; Components: comp_main

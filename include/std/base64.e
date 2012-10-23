@@ -1,5 +1,5 @@
 --****
--- == Base 64 Encoding/Decoding
+-- == Base 64 Encoding and Decoding
 --
 -- <<LEVELTOC level=2 depth=4>>
 
@@ -73,17 +73,15 @@ constant ldrop = { 2, 1, 1 }    --# to drop len by 4 every 3 output
 --
 
 --**
--- Encode to base64  (See also RFC 2045)
---
--- returns base64 encode of passed sequence.
+-- encodes to base64  (See also RFC 2045).
 --
 -- Parameters:
---	 # ##in## - must be a simple sequence
---   # ##wrap_column## - column to wrap the base64 encoded message to.
+--	 # ##in## ~-- must be a simple sequence
+--   # ##wrap_column## ~-- column to wrap the base64 encoded message to.
 --     defaults to 0, which is do not wrap
 --
 -- Returns:
---	 a base64 encoded sequence representing ##in##.
+-- A **sequence**,	 a base64 encoded sequence representing ##in##.
 --
 
 public function encode(sequence in, integer wrap_column = 0) 
@@ -140,15 +138,19 @@ public function encode(sequence in, integer wrap_column = 0)
 end function
 
 --**
--- Decode to base64  (See also RFC 2045)
+-- decodes to base64  (See also RFC 2045).
 --
--- Returns base256 decode of passed sequence.
--- the length of data to decode must be a multiple of 4.
--- calling program is expected to strip nl etc before calling.
 --
 -- Parameters:
---	 # ##in## - must be a simple sequence of length 4 to 76.
+--	 # ##in## ~-- must be a simple sequence of length 4 to 76.
 --
+-- Returns:
+-- A **sequence**, base256 decode of passed sequence.
+-- the length of data to decode must be a multiple of 4.
+--
+-- Comments:
+-- The calling program is expected to strip newlines and so on before calling.
+
 
 public function decode(sequence in) 
 	integer len, oidx, case3, tmp
