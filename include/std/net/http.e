@@ -283,7 +283,7 @@ function execute_request(sequence host, integer port, sequence request, integer 
 						this_header[1] = lower(this_header[1])
 						headers = append(headers, this_header)
 
-						if equal(this_header[1], "content-length") then
+						if equal(lower(this_header[1]), "content-length") then
 							content_length = to_number(this_header[2])
 						end if
 					end for
