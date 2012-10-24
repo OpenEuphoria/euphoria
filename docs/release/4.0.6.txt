@@ -3,3 +3,4 @@
 === Bug Fixes
 
 * [[ticket:801]] fix translator memory leak for ##[[:insert]]##
+* [[ticket:799]] fix memory leak in ##[[:gets]]## when reading EOF
