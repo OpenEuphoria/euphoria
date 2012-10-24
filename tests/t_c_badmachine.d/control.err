@@ -1,0 +1,20 @@
+std/dll.e:279 in function define_c_proc()
+unsupported calling convention - use '+' for CDECL 
+    lib = {}
+    routine_name = {
+                     {43'+'},
+                     144846848
+                   }
+    arg_types = {}
+    msg (from inlined routine 'crash' at 36) = <no value>
+
+... called from tests/t_c_badmachine.e:7
+
+
+Public & Export & Global & Local Variables
+
+ std/memconst.e:
+    DEP_really_works = 0
+    use_DEP = 1
+    FREE_RID = 1
+    kernel_dll = <no value>
