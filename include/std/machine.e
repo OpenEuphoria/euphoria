@@ -772,10 +772,10 @@ end function
 -- Example 1: 
 -- <eucode>
 -- -- The following are equivalent:
--- -- method 1
+-- -- first way
 -- s = {peek(100), peek(101), peek(102), peek(103)}
 -- 
--- -- method 2
+-- -- second way
 -- s = peek({100, 4})
 -- </eucode>
 -- 
@@ -826,10 +826,10 @@ end function
 --
 -- <eucode>
 -- -- The following are equivalent:
--- -- method 1
+-- -- first way
 -- s = {peeks(100), peek(101), peek(102), peek(103)}
 -- 
--- -- method 2
+-- -- second way
 -- s = peeks({100, 4})
 -- </eucode>
 -- 
@@ -883,10 +883,10 @@ end function
 --
 -- <eucode>
 -- -- The following are equivalent:
--- -- method 1
+-- -- first way
 -- s = {peek2s(100), peek2s(102), peek2s(104), peek2s(106)}
 --
--- -- method 2
+-- -- second way
 -- s = peek2s({100, 4})
 -- </eucode>
 -- 
@@ -940,11 +940,11 @@ end function
 -- Example 1: 
 -- <eucode>
 -- -- The following are equivalent:
--- -- method 1
+-- -- first way
 -- Get 4 2-byte numbers starting address 100.
 -- s = {peek2u(100), peek2u(102), peek2u(104), peek2u(106)}
 --
--- -- method 2
+-- -- second way
 -- Get 4 2-byte numbers starting address 100.
 -- s = peek2u({100, 4})
 -- </eucode>
@@ -998,10 +998,10 @@ end function
 -- Example 1:
 -- <eucode>
 -- -- The following are equivalent:
--- -- method 1
+-- -- first way
 -- s = {peek4s(100), peek4s(104), peek4s(108), peek4s(112)}
 --
--- -- method 2
+-- -- second way
 -- s = peek4s({100, 4})
 -- </eucode>
 -- 
@@ -1054,10 +1054,10 @@ end function
 -- Example 1:
 -- <eucode>
 -- -- The following are equivalent:
--- -- method 1
+-- -- first way
 -- s = {peek8s(100), peek8s(108), peek8s(116), peek8s(124)}
 --
--- -- method 2
+-- -- second way
 -- s = peek8s({100, 4})
 -- </eucode>
 --
@@ -1113,10 +1113,10 @@ end function
 -- Example 1:
 -- <eucode>
 -- -- The following are equivalent (on a 32-bit architecture, or Windows):
--- -- method 1
+-- -- first way
 -- s = {peek_longs(100), peek_longs(104), peek_longs(108), peek_longs(112)}
 --
--- -- method 2
+-- -- second way
 -- s = peek_longs({100, 4})
 -- </eucode>
 --
@@ -1170,10 +1170,10 @@ end function
 -- Example 1: 
 -- <eucode>
 -- -- The following are equivalent:
--- -- method 1
+-- -- first way
 -- s = {peek4u(100), peek4u(104), peek4u(108), peek4u(112)}
 --
--- -- method 2
+-- -- second way
 -- s = peek4u({100, 4})
 -- </eucode>
 -- 
@@ -1226,10 +1226,10 @@ end function
 -- Example 1:
 -- <eucode>
 -- -- The following are equivalent:
--- -- method 1
+-- --first way
 -- s = {peek8u(100), peek8u(108), peek8u(116), peek8u(124)}
 --
--- -- method 2
+-- -- second way
 -- s = peek8u({100, 4})
 -- </eucode>
 --
@@ -1285,10 +1285,10 @@ end function
 -- Example 1:
 -- <eucode>
 -- -- The following are equivalent (on a 32-bit architecture, or Windows):
--- -- method 1
+-- -- first way
 -- s = {peek_longu(100), peek4u(104), peek4u(108), peek4u(112)}
 --
--- -- method 2
+-- -- second way
 -- s = peek_longu({100, 4})
 -- </eucode>
 --

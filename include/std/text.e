@@ -1295,7 +1295,7 @@ end function
 --
 -- The qualifier. ##<Q>## is a set of zero or more codes that modify the default
 -- way that the argument is used to replace the token. The default replacement
--- method is to convert the argument to its shortest string representation and
+-- way is to convert the argument to its shortest string representation and
 -- use that to replace the token. This may be modified by the following codes,
 -- which can occur in any order.
 --

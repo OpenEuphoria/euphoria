@@ -216,8 +216,8 @@ The DLL file (or shared library on Unixes) has a real benefit in that
 with each file that needs to be pre-processed does not require a new
 process to be spawned as with an executable or a Euphoria script. Once
 you have the pre-processor written and functioning, it's easy to convert
-your script to use the more advanced, better performing shared library
-method. Let's do that now with our ##datesub.ex## pre-processor. Take a
+your script to use the more advanced, better performing shared library.
+Let's do that now with our ##datesub.ex## pre-processor. Take a
 moment to review the code above for the ##datesub.ex## program before
 continuing. This will allow you to more easily see the changes that we
 make here.
@@ -360,7 +360,7 @@ explanations.
 ===== Other examples of pre-processors include
 
 * eSQL - Allows you to include a ##.sql## file directly. It parses
-##CREATE TABLE## and ##CREATE INDEX## statements building common methods
+##CREATE TABLE## and ##CREATE INDEX## statements building common routines
 to create, destroy, get by id, find by any index, add, remove and save
 entities.
 * make40 - Will process any 3.x script on the fly making sure that it

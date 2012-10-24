@@ -348,7 +348,7 @@ end function
 -- could possible be taken again. The "without-replacement" method does not return the sample so
 -- these items can only ever be chosen once.
 --
--- * If ##sample_size## is less than 1, an empty set is returned.
+-- * If ##sample_size## is less than ##1## , an empty set is returned.
 -- * When using "without-replacement" method, if ##sample_size## is greater than
 --   or equal to the population count, the entire population set is returned,
 --   but in a random order.

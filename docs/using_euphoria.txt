@@ -426,16 +426,16 @@ Euphoria provides you with 4 distinct ways of distributing a program.
 * "translate" into a C-compiled executable
 
 
-In the first method you simply ship your users the interpreter along with your
+In the first way you simply ship your users the interpreter along with your
 Euphoria source files including any Euphoria includes that may be necessary
 from the ##euphoria/include## directory. If the Euphoria source files and the
 interpreter are placed together in one directory then your user can run your
 program by typing ##eui## followed by the path of your main executable source
 file. You might also provide a small ##.bat## file so people won't actually
-have to type the interpreter name. This method assumes that you are willing to
+have to type the interpreter name. This way assumes that you are willing to
 share your Euphoria source code with your users.
 
-The Binder gives you two more methods of distribution. You can ##shroud## your
+The Binder gives you two more ways of distribution. You can ##shroud## your
 program, or you can ##bind## your program. **Shrouding** combines all of the
 Euphoria source code that your program needs to create a single ##.il## file.
 **Binding** combines your shrouded program with the Euphoria backend

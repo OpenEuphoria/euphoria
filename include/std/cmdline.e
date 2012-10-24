@@ -1,7 +1,7 @@
 --****
 -- == Command Line Handling
 --
--- <<LEVELTOC level=2 depth=5>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 
 namespace cmdline

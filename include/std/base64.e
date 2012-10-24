@@ -2,6 +2,11 @@
 -- == Base 64 Encoding and Decoding
 --
 -- <<LEVELTOC level=2 depth=4>>
+--
+-- Base64 is used to encode binary data into an ASCII string; this allows
+-- binary data to be transmitted using media designed to transmit text data only.
+-- See [[en.wikipedia.org/wiki/Base64]] and the RFC 2045 standard for more
+-- information.
 
 namespace base64
 
@@ -73,17 +78,22 @@ constant ldrop = { 2, 1, 1 }    --# to drop len by 4 every 3 output
 --
 
 --**
--- encodes to base64  (See also RFC 2045).
+-- encodes to base64.
 --
 -- Parameters:
 --	 # ##in## ~-- must be a simple sequence
---   # ##wrap_column## ~-- column to wrap the base64 encoded message to.
---     defaults to 0, which is do not wrap
+--   # ##wrap_column## ~-- column to wrap the base64 encoded message to;
+--     defaults to ##0## which is do not wrap
 --
 -- Returns:
 -- A **sequence**,	 a base64 encoded sequence representing ##in##.
 --
-
+-- Example 1:
+-- <eucode>
+-- puts(1, encode( "Hello Euphoria!") )
+-- --> SGVsbG8gRXVwaG9yaWEh
+-- </eucode>
+--
 public function encode(sequence in, integer wrap_column = 0) 
 	integer len, oidx, prev, case4, tmp, inch
 	sequence result
@@ -138,20 +148,18 @@ public function encode(sequence in, integer wrap_column = 0)
 end function
 
 --**
--- decodes to base64  (See also RFC 2045).
---
+-- decodes base64. 
 --
 -- Parameters:
---	 # ##in## ~-- must be a simple sequence of length 4 to 76.
+--	 # ##in## ~-- must be a simple sequence of length ##4## to ##76## .
 --
 -- Returns:
 -- A **sequence**, base256 decode of passed sequence.
--- the length of data to decode must be a multiple of 4.
+-- the length of data to decode must be a multiple of ##4## .
 --
 -- Comments:
 -- The calling program is expected to strip newlines and so on before calling.
-
-
+--
 public function decode(sequence in) 
 	integer len, oidx, case3, tmp
 	sequence result

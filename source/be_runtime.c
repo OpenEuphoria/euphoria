@@ -3859,6 +3859,7 @@ object EGets(object file_no)
 	
 	if (oldc == EOF) {
 		// No input characters where actually read.
+		EFree( line );
 		return (object)ATOM_M1;
 	}
 
