@@ -885,6 +885,10 @@ s1_ptr Copy_elements(int start,s1_ptr source, int replace )
 	}
 }
 
+/**
+  * Insert b into, the sequence, a at position pos.  If a has a ref > 1, Insert makes a copy of 
+  * a and inserts b into this copy and derefs a.  After that, this modified copy of a is returned. 
+  */
 object Insert(object a,object b,int pos)
 {
 	s1_ptr s1 = Add_internal_space(a,pos,1);
@@ -892,7 +896,10 @@ object Insert(object a,object b,int pos)
 	return MAKE_SEQ(s1);
 }
 
-
+/**
+  * Assigns to *target a sequence object which is comprised of the first reqlen-1 elements of s1.
+  * If s1->ref == 1 and *target == MAKESEQ(s1), the sequence will be processed in place.
+  */
 void Head(s1_ptr s1, int reqlen, object_ptr target)
 {
 	int i;
@@ -900,7 +907,7 @@ void Head(s1_ptr s1, int reqlen, object_ptr target)
 
 	if (s1->ref == 1 && *target == MAKE_SEQ(s1)) {
 		// Target is same as source and source only has one reference,
-		// so just use the existing allocation rather than creare a new sequence.
+		// so just use the existing allocation rather than create a new sequence.
 
 		// First, dereference all existing elements after the new end position.
 		for (op = (s1->base+reqlen), se = s1->base + s1->length + 1; op < se; op++)
