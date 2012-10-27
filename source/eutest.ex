@@ -372,8 +372,9 @@ end function
 function translate( sequence filename, sequence fail_list )
 	printf(1, "\ntranslating %s:", {filename})
 	total += 1
-	sequence cmd = sprintf("%s %s %s %s -d UNITTEST -d EC -batch %s",
-		{ translator, library, compiler, translator_options, filename })
+	sequence exename = filebase(filename) & "-translated" & dexe
+	sequence cmd = sprintf("%s %s %s %s -d UNITTEST -d EC -batch %s -o %s",
+		{ translator, library, compiler, translator_options, filename, exename })
 	verbose_printf(1, "CMD '%s'\n", {cmd})
 	integer status = system_exec(cmd, 0)
 
@@ -381,8 +382,6 @@ function translate( sequence filename, sequence fail_list )
 
 	integer log_where = 0
 	if status = 0 then
-		sequence exename = filename & dexe
-
 		void = delete_file("cw.err")
 		verbose_printf(1, "executing %s:\n", {exename})
 		cmd = sprintf("./%s %s", {exename, test_options})
@@ -400,7 +399,7 @@ function translate( sequence filename, sequence fail_list )
 
 			if sequence(token) then
 				failed += 1
-				fail_list = append(fail_list, "translated" & " " & exename)					
+				fail_list = append(fail_list, "translated" & " " & exename)				
 				error(exename, E_EXECUTE, token, {}, "ex.err")
 			else
 				log_where = token

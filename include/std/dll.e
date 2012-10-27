@@ -42,11 +42,11 @@ public constant
 	C_BOOL    = C_INT,
 	--** unsigned int 32-bits
 	C_UINT    = #02000004,
-	--** long 32-bits except on 64-bit //unix//, where it is 64-bits
+	--** long 32-bits except on 64-bit //Unix//, where it is 64-bits
 	C_LONG    = #01000008,
-	--** unsigned long 32-bits except on 64-bit //unix//, where it is 64-bits
+	--** unsigned long 32-bits except on 64-bit //Unix//, where it is 64-bits
 	C_ULONG   = #02000008,
-	--** size_t unsigned long 32-bits except on 64-bit //unix//, where it is 64-bits
+	--** size_t unsigned long 32-bits except on 64-bit //Unix//, where it is 64-bits
 	C_SIZE_T  = C_ULONG,
 	--** any valid pointer
 	C_POINTER = #03000001,
@@ -105,7 +105,7 @@ constant M_OPEN_DLL  = 50,
 --
 
 --**
--- opens a //windows// dynamic link library (##.dll##) file, or a //unix// shared library
+-- opens a //Windows// dynamic link library (##.dll##) file, or a //Unix// shared library
 -- (##.so##) file. 
 --
 -- Parameters:
@@ -180,7 +180,7 @@ end function
 -- gets the address of a symbol in a shared library or in RAM.
 --
 -- Parameters:
---   # ##lib## : an atom, the address of a //unix// ##.so## or //windows// ##.dll##, as returned by ##open_dll##.
+--   # ##lib## : an atom, the address of a //Unix// ##.so## or //Windows// ##.dll##, as returned by ##open_dll##.
 --   # ##variable_name## : a sequence, the name of a public C variable defined within the library.
 --
 -- Returns:
@@ -220,18 +220,18 @@ end function
 -- 		Use the returned routine id as the first argument to [[:c_proc]] when
 -- you wish to call the routine from Euphoria.
 --
--- 	A returned value of -1 indicates that the procedure could not be found or linked to.
+-- 	A returned value of ##-1## indicates that the procedure could not be found or linked to.
 --
--- On //windows// you can add
--- a '+' character as a prefix to the procedure name. This tells Euphoria that the function
+-- On //Windows// you can add
+-- a ##'+'## character as a prefix to the procedure name. This tells Euphoria that the function
 -- uses the cdecl calling convention. By default, Euphoria assumes that C routines accept 
 -- the stdcall convention.
 --
--- When defining a machine code routine, ##lib## must be the empty sequence, "" or {}, and ##routine_name##
+-- When defining a machine code routine, ##lib## must be the empty sequence, ##""## or ##{}##, and ##routine_name##
 -- indicates the address of the machine code routine. You can poke the bytes of machine code
--- into a block of memory reserved using ##allocate##. On //windows// the machine code routine is
+-- into a block of memory reserved using ##allocate##. On //Windows// the machine code routine is
 -- normally expected to follow the stdcall calling convention, but if you wish to use the
--- cdecl convention instead you can code {'+', address} instead of address.
+-- cdecl convention instead you can code ##{'+', address}## instead of address.
 --
 -- ##argtypes## is made of type constants, which describe the C types of arguments to the procedure. They may be used to define machine code parameters as well.
 --
@@ -302,18 +302,18 @@ end function
 -- 		Use the returned routine id as the first argument to [[:c_proc]] when
 -- you wish to call the routine from Euphoria.
 --
--- 	A returned value of -1 indicates that the procedure could not be found or linked to.
+-- 	A returned value of ##-1## indicates that the procedure could not be found or linked to.
 --
--- On //windows// you can add a
--- '+' character as a prefix to the function name. This indicates to Euphoria that the 
+-- On //Windows// you can add a
+-- ##'+'## character as a prefix to the function name. This indicates to Euphoria that the 
 -- function uses the cdecl calling convention. By default, Euphoria assumes that C routines
 -- accept the stdcall convention.
 -- 
--- When defining a machine code routine, ##x1## must be the empty sequence ( "" or {}), and ##x2##
+-- When defining a machine code routine, ##x1## must be the empty sequence ( ##""## or ##{}##), and ##x2##
 -- indicates the address of the machine code routine. You can poke the bytes of machine code
--- into a block of memory reserved using ##allocate##. On //windows// the machine code routine is
+-- into a block of memory reserved using ##allocate##. On //Windows// the machine code routine is
 -- normally expected to follow the stdcall calling convention, but if you wish to use the
--- cdecl convention instead, you can code {'+', address} instead of address for ##x2##.
+-- cdecl convention instead, you can code ##{'+', address}## instead of address for ##x2##.
 --
 --The C function that you define could be one created by the Euphoria To C Translator, in
 -- which case you can pass Euphoria data to it, and receive Euphoria data back. A list of 
@@ -333,13 +333,13 @@ end function
 -- 
 -- Currently, there is no way to pass a C structure by value or get a C structure as a return
 -- result. You can only pass a pointer to a structure and get a pointer to a structure as a 
--- result. However, you can pass a 64 bit integer as two C_LONG instead. On calling the routine, pass low doubleword first, then high doubleword.
+-- result. However, you can pass a 64 bit integer as two ##C_LONG## instead. On calling the routine, pass low doubleword first, then high doubleword.
 --
 -- If you are not interested in using the value returned by the C function, you should 
 -- instead define it with [[:define_c_proc]] and call it with [[:c_proc]].
 -- 
 -- If you use euiw to call a cdecl C routine that returns a floating-point value, it might not 
--- work. This is because the Watcom C compiler (used to build euiw) has a non-standard way of 
+-- work. This is because the Watcom C compiler (used to build ##euiw##) has a non-standard way of 
 -- handling cdecl floating-point return values.
 --
 -- Passing floating-point values to a machine code routine will be faster if you use 
@@ -391,14 +391,14 @@ end function
 --		# ##args## : a sequence, the list of parameters to pass to the function
 --
 -- Returns:
---	An **object**, whose type and meaning was defined on calling [[:define_c_func]]().
+--	An **object**, whose type and meaning was defined on calling [[:define_c_func]].
 --
 -- Errors:
 -- If ##rid## is not a valid routine id, or the arguments do not match the prototype of
 -- the routine being called, an error occurs.
 --
 -- Comments:
--- ##rid## must have been returned by [[:define_c_func]](), **not** by [[:routine_id]](). The
+-- ##rid## must have been returned by [[:define_c_func]], **not** by [[:routine_id]]. The
 -- type checks are different, and you would get a machine level exception in the best case.
 --
 -- If the function does not take any arguments then ##args## should be ##{}##.
@@ -484,11 +484,11 @@ constant M_CALL_BACK = 52
 -- gets a machine address for an Euphoria procedure.
 --
 -- Parameters:
---   # ##id## : an object, either the id returned by [[:routine_id]] (for the function or procedure), or a pair {'+', id}.
+--   # ##id## : an object, either the id returned by [[:routine_id]] (for the function or procedure), or a pair ##{'+', id}##.
 --
 -- Returns:
 --   An **atom**, the address of the machine code of the routine. It can be
---   used by //windows//, an external C routine in a //windows// ##.dll##,  or //unix//
+--   used by //Windows//, an external C routine in a //Windows// ##.dll##,  or //Unix//
 --   shared library (##.so##), as a 32-bit "call-back" address for calling your
 --   Euphoria routine.
 --
@@ -497,14 +497,14 @@ constant M_CALL_BACK = 52
 --
 -- Comments:
 --   By default, your routine will work with the stdcall convention. On
---   //windows// you can specify its id as {'+', id}, in which case it will
---   work with the cdecl calling convention instead. On non-Microsoft
+--   //Windows// you can specify its id as ##{'+', id}##, in which case it will
+--   work with the cdecl calling convention instead. On //Unix//
 --   platforms, you should only use simple IDs, as there is just one standard
---   ( cdecl) calling convention.
+--   cdecl calling convention.
 --
 --   You can set up as many call-back functions as you like, but they must all be Euphoria
---   functions (or types) with 0 to 9 arguments. If your routine has nothing to return
---   (it should really be a procedure), just return 0 (say), and the calling C routine can
+--   functions (or types) with ##0## to ##9## arguments. If your routine has nothing to return
+--   (it should really be a procedure), just return ##0## (say), and the calling C routine can
 --   ignore the result.
 --
 --   When your routine is called, the argument values will all be 32-bit unsigned (positive)
@@ -517,7 +517,7 @@ constant M_CALL_BACK = 52
 --   process that has used too much CPU time.
 --
 --   A call-back routine that uses the cdecl convention and returns a floating-point result,
---   might not work with euiw. This is because the Watcom C compiler (used to build euiw) has
+--   might not work with euiw. This is because the Watcom C compiler (used to build ##euiw##) has
 --   a non-standard way of handling cdecl floating-point return values.
 --
 -- Example 1: 

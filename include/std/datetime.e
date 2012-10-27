@@ -244,7 +244,7 @@ end function
 -- === Localized Variables
 
 --**
--- Names of the months
+-- Month Names
 
 public sequence month_names = { 
 	"January", "February", "March", "April", "May", "June", 
@@ -252,7 +252,7 @@ public sequence month_names = {
 }
 
 --**
--- Abbreviations of month names
+-- Abbreviations of Month Names
 
 public sequence month_abbrs = { 
 	"Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -260,7 +260,7 @@ public sequence month_abbrs = {
 }
 
 --**
--- Names of the days
+-- Day Names
 
 public sequence day_names = { 
 	"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
@@ -268,7 +268,7 @@ public sequence day_names = {
 }
 
 --**
--- Abbreviations of day names
+-- Abbreviations of Day Names
 
 public sequence day_abbrs = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" }
 
@@ -362,7 +362,7 @@ public enum
 --   # ##obj## : any object, so no crash takes place.
 --
 -- Comments:
--- A datetime type consists of a sequence of length 6 in the form
+-- A datetime type consists of a sequence of length six in the form
 -- ##{year, month, day_of_month, hour, minute, second}##. Checks are made to guarantee
 -- those values are in range. 
 -- 
@@ -464,7 +464,7 @@ end type
 -- returns a sequence with information on the current date.
 --
 -- Returns:
--- A **sequence** of length 8, laid out as follows:
+-- A **sequence** of length 8, laid out as follows~:
 -- # year  ~-- since 1900
 -- # month ~-- January = 1
 -- # day   ~-- day of month, starting at 1
@@ -494,7 +494,7 @@ end type
 -- sequence.
 --
 -- Parameters:
---   # ##src## : a sequence which date() might have returned
+--   # ##src## : a sequence which ##date## might have returned
 --
 -- Returns:
 --   A **sequence**, more precisely a **datetime** corresponding to the same moment 
@@ -730,7 +730,7 @@ public function days_in_year(datetime dt)
 end function
 
 --**
--- converts a datetime value to the //unix// numeric format (seconds since ##EPOCH_1970##).
+-- converts a datetime value to the //Unix// numeric format (seconds since ##EPOCH_1970##).
 --
 -- Parameters:
 --   # ##dt## : a datetime to be queried.
@@ -753,7 +753,7 @@ public function to_unix(datetime dt)
 end function
 
 --**
--- creates a datetime value from the //unix// numeric format (seconds since EPOCH).
+-- creates a datetime value from the //Unix// numeric format (seconds since EPOCH).
 --
 -- Parameters:
 --   # ##unix## : an atom, counting seconds elapsed since EPOCH.
@@ -780,8 +780,8 @@ end function
 --
 -- Parameters:
 --   # ##d## : a datetime which is to be printed out
---   # ##pattern## : a format string, similar to the ones sprintf() uses, but with 
---     some Unicode encoding. The default is "%Y-%m-%d %H:%M:%S".
+--   # ##pattern## : a format string, similar to the ones ##sprintf## uses, but with 
+--     some Unicode encoding. The default is ##"%Y-%m-%d %H:%M:%S"##.
 --
 -- Returns:
 --  A **string**, with the date ##d## formatted according to the specification in ##pattern##.
@@ -936,7 +936,7 @@ constant date_now = now()
 --
 -- Parameters:
 --   # ##val## : string datetime value
---   # ##fmt## : datetime format. Default is "%Y-%m-%d %H:%M:%S"
+--   # ##fmt## : datetime format. Default is ##"%Y-%m-%d %H:%M:%S"##
 --   # ##yysplit## : Set the maximum difference from the current year when parsing
 --     a two digit year. Defaults to -80/+20.
 --
@@ -961,7 +961,7 @@ constant date_now = now()
 --
 --   All non-digits in the input string are ignored.
 --
--- Parsing Two Digit Years:
+-- Parsing Two Digit Years~:
 --
 --   When parsing a two digit year ##parse## has to make a decision if a given year
 --   is in the past or future. For example, 10/18/44. Is that Oct 18, 1944 or
@@ -970,7 +970,7 @@ constant date_now = now()
 --   future events, thus it favors history rather than future. Some other applications may
 --   require a different rule, thus the ##yylower## parameter can be supplied.
 --
---   Assuming today is 12/22/2010 here is an example of the -80/+20 rule
+--   Assuming today is 12/22/2010 here is an example of the -80/+20 rule~:
 --   || YY || Diff   || CCYY ||
 --   | 18   | -92/+8  |  2018 |
 --   | 95   | -15/+85 |  1995 |
@@ -978,7 +978,7 @@ constant date_now = now()
 --   | 29   | -81/+19 |  2029 |
 --
 --   Another rule in use is the -50/+50 rule. Therefore, if you supply -50 to the ##yylower## 
---   to set the lower bounds, some examples may be (given that today is 12/22/2010)
+--   to set the lower bounds, some examples may be (given that today is 12/22/2010)~:
 --   || YY || Diff   || CCYY ||
 --   | 18   | -92/+8  |  2018 |
 --   | 95   | -15/+85 |  1995 |
@@ -998,7 +998,7 @@ constant date_now = now()
 -- </eucode>
 --
 -- Versioning:
---   * Since 4.0.1 - 2-digit year parsing and ##yylower## parameter
+--   * Since 4.0.1 ~-- 2-digit year parsing and ##yylower## parameter.
 --
 -- See Also:
 --   [[:format]]
@@ -1123,14 +1123,14 @@ end function
 -- Comments:
 --   Please see Constants for Date and Time for a reference of valid intervals.
 --
---   Do not confuse the item access constants (such as YEAR, MONTH, DAY ) with the
---   interval constants (YEARS, MONTHS, DAYS ).
+--   Do not confuse the item access constants (such as ##YEAR##, ##MONTH##, ##DAY## ) with the
+--   interval constants (##YEARS##, ##MONTHS##, ##DAYS## ).
 --
---   When adding MONTHS, it is a calendar based addition. For instance, a date of
---   5/2/2008 with 5 MONTHS added will become 10/2/2008. MONTHS does not compute the number
+--   When adding ##MONTHS##, it is a calendar based addition. For instance, a date of
+--   5/2/2008 with 5 ##MONTHS## added will become 10/2/2008. ##MONTHS## does not compute the number
 --   of days per each month and the average number of days per month.
 --
---   When adding YEARS, leap year is taken into account. Adding 4 YEARS to a date may result
+--   When adding ##YEARS##, leap year is taken into account. Adding 4 ##YEARS## to a date may result
 --   in a different day of month number due to leap year.
 --
 -- Example 1:

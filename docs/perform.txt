@@ -239,13 +239,13 @@ x = x & y          -- where x is much larger than y,
 When you write a loop that "grows" a sequence, by appending or
 concatenating data onto it, the time will, in general, grow in proportion
 to the **square** of the number (N) of elements you are adding.
-However, if you can use one of the special optimized forms of ##append##(),
-##prepend##() or concatenation listed above, the time will grow in proportion
+However, if you can use one of the special optimized forms of ##append##,
+##prepend## or concatenation listed above, the time will grow in proportion
 to just N (roughly). This could save you a **huge** amount of time
 when creating an extremely long sequence. 
 
 
-(You could also use ##repeat##() to establish the maximum size
+(You could also use ##repeat## to establish the maximum size
 of the sequence, and then fill in the elements in a loop, as discussed
 below.)
 
@@ -307,9 +307,9 @@ for i = 1 to 100 do
     x = append(x, i)
 end for
 </eucode>
- because ##append##() has to allocate and reallocate
+ because ##append## has to allocate and reallocate
  space as ##x## grows in size. With ##repeat##(), the
- space for ##x## is allocated once at the beginning. (##append##() is smart enough
+ space for ##x## is allocated once at the beginning. (##append## is smart enough
  not to allocate space with //every// append to ##x##.
  It will allocate somewhat more than it needs, to reduce the number of
  reallocations.)

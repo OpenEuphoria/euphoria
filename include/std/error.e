@@ -19,7 +19,7 @@ constant
 --
 -- Parameters:
 -- 		# ##fmt## : a sequence representing the message text. It may have format specifiers in it
---		# ##data## : an object, defaulted to {}.
+--		# ##data## : an object, defaulted to ##{}##.
 --
 -- Comments:
 -- Formatting is the same as with ##printf##.
@@ -180,7 +180,7 @@ end procedure
 -- Comments:
 --
 -- Writing a library has specific requirements, since the code you write will be mainly used
--- inside code you didn't write. It may be desirable then to influence, from inside the library,
+-- inside code you did not write. It may be desirable then to influence, from inside the library,
 -- that code you did not write.
 -- 
 -- This is what ##warning##, in a limited way, does. It enables to generate custom warnings in

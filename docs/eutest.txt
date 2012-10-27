@@ -9,7 +9,7 @@ interpreter and translator works properly by use of //unit tests//.  The
 unit tests are Euphoria //include// files that ##include unittest.e##
 at the top, several test-routines for comparison between expected value
 and true value and at the end of the program a call to
-##test_report()##.  There are error control files for when we expect
+##test_report##.  There are error control files for when we expect
 the interpreter to fail but we want it to fail with a particular error
 message. You may use this section as an outline for testing your own code.
 

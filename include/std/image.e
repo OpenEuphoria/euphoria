@@ -395,14 +395,14 @@ end procedure
 -- create a ##.BMP## bitmap file, given a palette and a 2-d sequence of sequences of colors.
 --
 -- Parameters:
--- 		# ##palette_n_image## : a ##{palette, image}## pair, like [[:read_bitmap()]] returns
+-- 		# ##palette_n_image## : a ##{palette, image}## pair, like [[:read_bitmap]] returns
 -- 		# ##file_name## : a sequence, the name of the file to save to.
 --
 -- Returns:
 -- 		An **integer**, 0 on success.
 --
 -- Comments:
---   This routine does the opposite of [[:read_bitmap]]().
+--   This routine does the opposite of [[:read_bitmap]].
 -- The first element of ##palette_n_image## is a sequence of [[:mixture]]s defining each 
 -- color in the bitmap. The second element is a sequence of sequences of colors. The inner 
 -- sequences must have the same length.

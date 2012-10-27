@@ -1094,9 +1094,9 @@ end function
 --                         can be either ##DB_LOCK_NO## (no lock) or 
 --                         ##DB_LOCK_EXCLUSIVE## (exclusive lock).
 --      # ##init_tables## : an integer giving the initial number of tables to
---                         reserve space for. The default is 5 and the minimum is 1.
+--                         reserve space for. The default is ##5## and the minimum is ##1## .
 --      # ##init_free## : an integer giving the initial amount of free space pointers to
---                         reserve space for. The default is 5 and the minimum is 0.
+--                         reserve space for. The default is ##5## and the minimum is ##0## .
 --
 -- Returns:
 --		An **integer**, status code, either ##DB_OK## if creation successful or anything else on an error.
@@ -1235,8 +1235,8 @@ end function
 -- </eucode>
 --
 -- Comments:
---   ##DB_LOCK_SHARED## is only supported on //unix// platforms. It allows you to read the database, 
---   but not write anything to it. If you request ##DB_LOCK_SHARED## on //windows// it will be 
+--   ##DB_LOCK_SHARED## is only supported on //Unix// platforms. It allows you to read the database, 
+--   but not write anything to it. If you request ##DB_LOCK_SHARED## on //Windows// it will be 
 --   treated as if you had asked for ##DB_LOCK_EXCLUSIVE##.
 --
 --   If the lock fails, your program should wait a few seconds and try again.
@@ -1402,7 +1402,9 @@ end function
 -- unlocks and closes the current database.
 --
 -- Comments:
--- Call this procedure when you are finished with the current database. Any lock will be removed, allowing other processes to access the database file. The current database becomes undefined.
+-- Call this procedure when you are finished with the current database. 
+-- Any lock will be removed, allowing other processes to access the 
+-- database file. The current database becomes undefined.
 
 public procedure db_close()
 -- close the current database
@@ -1960,7 +1962,7 @@ end function
 --      * If equal to zero, an error occured.
 --
 -- Errors:
--- 		If the current table is not defined, it returns 0.
+-- 		If the current table is not defined, it returns ##0## .
 --
 -- Comments:
 --
@@ -1975,7 +1977,7 @@ end function
 --
 -- For example, suppose you want to know which records have keys
 -- greater than ##"GGG"## and less than ##"MMM"##. If ##-5## is returned for key ##"GGG"##,
--- it means a record with ##"GGG"## as a key would be inserted as record number ##5##.
+-- it means a record with ##"GGG"## as a key would be inserted as record number ##5## .
 -- ##-27## for ##"MMM"## means a record with ##"MMM"## as its key would be inserted as record
 -- number ##27##. This quickly tells you that all records, ##>= 5## and ##< 27## qualify.
 --
@@ -2200,7 +2202,9 @@ end function
 --      # ##table_name## : optional table name to delete record from.
 --
 -- Errors:
--- 	If the current table is not defined, or ##key_location## is not a valid record index, an error will occur. Valid record indexes are between 1 and the number of records in the table.
+-- 	If the current table is not defined, or ##key_location## is not a 
+-- valid record index, an error will occur. Valid record indexes are 
+-- between 1 and the number of records in the table.
 --
 -- Example 1:
 -- <eucode>
@@ -2303,7 +2307,7 @@ end procedure
 --      # ##table_name##: optional table name of record to replace data in.
 --
 -- Comments:
---##key_location## must be from 1 to the number of records in the
+--##key_location## must be from ##1## to the number of records in the
 -- current table.
 -- ##data## is an Euphoria object of any kind, atom or sequence.
 --
@@ -2690,7 +2694,7 @@ end procedure
 -- sets the key cache behavior.
 --
 -- Parameters:
---		# ##integer## : 0 will turn of caching, 1 will turn it back on.
+--		# ##integer## : ##0## will turn of caching, ##1## will turn it back on.
 --
 -- Returns:
 -- 		An **integer**, the previous setting of the option.
@@ -2843,7 +2847,7 @@ end function
 -- looking for a matching record key. They can also be used without selecting
 -- a table first, as the ##recid## is unique to the database and not just a table.
 -- However, they only remain valid while a database is open and so long as it
--- doesn't get compressed. Compressing the database will give each record a
+-- does not get compressed. Compressing the database will give each record a
 -- new ##recid## value. 
 --
 -- Because it is faster to fetch a record with a ##recid## rather than with its key,

@@ -181,7 +181,7 @@ in struct s1.  To this end, the 64bit implementation of 4.1 has these members in
 ==== Description
 
 The macros are imperfect.  For example, ##IS_SEQUENCE(NOVALUE)## returns 
-##TRUE## and ##IS_ATOM_DBL()## will return ##TRUE## for integer values as well 
+##TRUE## and ##IS_ATOM_DBL## will return ##TRUE## for integer values as well 
 as encoded pointers to
 'struct d's.   This is why there is an order that these tests are made: We test 
 ##IS_ATOM_INT## and if that fails we can use ##IS_ATOM_DBL## and then that will 
@@ -217,7 +217,7 @@ A sequence is held in a 'struct s1' type and a double is contained in a
 true if object is a Euphoria integer and not an encoded pointer.
 
 ===== Note
-##IS_ATOM_INT##() will return true even though the argument is out of the 
+##IS_ATOM_INT## will return true even though the argument is out of the 
 Euphoria integer range when the argument is positive.  These values 
 are not possible encoded pointers.
 
@@ -478,7 +478,7 @@ The list of constants is in reswords.e.  Often it is enough to only examin the c
 In the case of variables, it is important to know which variable.
 In this case the second element, comes into play.
 
-You can use putback() to put tokens into the token buffer.  The tokens will be pulled out
+You can use ##putback## to put tokens into the token buffer.  The tokens will be pulled out
 by the parser in a filo manner, like a stack.  
 
 ==== Backend Instructions

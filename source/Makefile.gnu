@@ -235,6 +235,7 @@ else ifeq "$(EMINGW)" "1"
 PLAT=WINDOWS
 endif
 
+# We mustn't use eui rather than $(EEXU) in these three lines below.   When this translates from Unix, the interpreter we call to do the translation must not have a .exe extension. 
 ifeq  "$(EUBIN)" ""
 EXE=$(EEXU)
 HOST_EXE=$(HOST_EEXU)
@@ -263,7 +264,7 @@ CREOLE=creole
 endif
 
 ifeq "$(TRANSLATE)" "euc"
-	TRANSLATE=$(EECU)
+	TRANSLATE="euc"
 else
 #   We MUST pass these arguments to $(EXE), for $(EXE) is not and shouldn't be governed by eu.cfg in BUILDDIR.
 	TRANSLATE=$(HOST_EXE) $(CYPINCDIR) $(EC_DEBUG) $(EFLAG) $(CYPTRUNKDIR)/source/euc.ex

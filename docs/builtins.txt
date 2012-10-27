@@ -1,6 +1,6 @@
 == Built-in Routines
 
-These **built-in** routines do not require an include file:
+These **built-in** routines do not require an include file~:
 
 | ##[[? -> :q_print]]## | ##[[:abort]]## | ##[[:and_bits]]## | ##[[:append]]## |
 | ##[[:arctan]]## | ##[[:atom]]## | ##[[:c_func]]## | ##[[:c_proc]]## |
@@ -29,5 +29,5 @@ These **built-in** routines do not require an include file:
 
 A built-in routine has global scope and belongs to the ##eu## namespace. 
 
-An identifier for a built-in is not reserved; it is possible to override these identifiers 
-with new declarations.
+An identifier for a built-in is not reserved; it is possible to override a built-in
+identifier with a new declaration.

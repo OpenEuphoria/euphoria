@@ -99,7 +99,7 @@ end function
 -- * When ##flag_bits## is an atom, you get returned a sequence of strings, one
 -- for each matching name (according to ##expand_flags## option). 
 -- * When ##flag_bits## is a sequence, it is assumed to represent a list of
--- atomic flags. That is, {#1, #4} is a set of two flags for which you want their
+-- atomic flags. That is, ##{#1, #4}## is a set of two flags for which you want their
 -- names. In this case, you get returned a sequence that contains one sequence
 -- for each element in ##flag_bits##, which in turn contain the matching name or names.
 -- * When a flag's name can not be found in ##flag_names##, this function returns
