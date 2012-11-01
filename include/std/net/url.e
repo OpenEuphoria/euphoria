@@ -396,11 +396,11 @@ public function decode(sequence what)
         -- strip empty percent sign
         what = what[1..k-1] & what[k+1 .. $]
       elsif k+1 = length(what) then
-        what[k] = stdget:value("#0" & what[k+1])
+        what[k] = stdget:value("#0" & decode_upper(what[k+1]))
         what[k] = what[k][2]
         what = what[1..k] & what[k+2 .. $]
       else
-        what[k] = stdget:value("#" & what[k+1..k+2])
+        what[k] = stdget:value("#" & decode_upper(what[k+1..k+2]))
         what[k] = what[k][2]
         what = what[1..k] & what[k+3 .. $]
       end if
@@ -412,4 +412,8 @@ public function decode(sequence what)
   end while
 
   return what
+end function
+
+function decode_upper(object x)
+  return x - (x >= 'a' and x <= 'z') * ('a' - 'A')
 end function
