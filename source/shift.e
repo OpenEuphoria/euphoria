@@ -32,8 +32,22 @@ export enum
 	OP_TARGET,
 	OP_SUB
 
+sequence
+	op_info_size_type,
+	op_info_size,
+	op_info_addr,
+	op_info_target,
+	op_info_sub,
+	$
+
 procedure init_op_info()
 	op_info = repeat( 0, MAX_OPCODE )
+	op_info_size_type = repeat( 0, MAX_OPCODE )
+	op_info_size = repeat( 0, MAX_OPCODE )
+	op_info_addr = repeat( 0, MAX_OPCODE )
+	op_info_target = repeat( 0, MAX_OPCODE )
+	op_info_sub = repeat( 0, MAX_OPCODE )
+	
 	op_info[ABORT               ] = { FIXED_SIZE, 2, {}, {}, {} }   -- ary: pun
 	op_info[ADDRESSOF           ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[AND                 ] = { FIXED_SIZE, 4, {}, {}, {} }   -- ary: bin
@@ -277,48 +291,63 @@ procedure init_op_info()
 	op_info[MEMSTRUCT_ACCESS    ] = { VARIABLE_SIZE, 0, {}, {}, {} } -- TARGET: [pc+1] + 2
 	op_info[ARRAY_ACCESS        ] = { VARIABLE_SIZE, 0, {}, {}, {} } -- TARGET: [pc+1] + 3
 	op_info[OFFSETOF            ] = { VARIABLE_SIZE, 0, {}, {}, {} }
+
+	for i = 1 to MAX_OPCODE do
+		object info = op_info[i]
+		if sequence( info ) then
+			op_info_size_type[i] = info[OP_SIZE_TYPE]
+			op_info_size[i] = info[OP_SIZE]
+			op_info_addr[i] = info[OP_ADDR]
+			op_info_target[i] = info[OP_TARGET]
+			op_info_sub[i] = info[OP_SUB]
+		end if
+	end for
 end procedure
 
 init_op_info()
 
-function op_size( integer pc, sequence code = Code )
-	integer op = code[pc]
-	sequence info = op_info[op]
-	integer int = info[OP_SIZE_TYPE]
-	
-	if int = FIXED_SIZE then
-		int = info[OP_SIZE]
-		return int
-	else
-		switch op do
-			case PROC, PROC_TAIL then
-				info = SymTab[code[pc+1]]
-				return info[S_NUM_ARGS] + 2 + (info[S_TOKEN] != PROC)
-			case PROC_FORWARD then
-				int = code[pc+2]
-				int += 3
-			case FUNC_FORWARD then
-				int = code[pc+2]
-				int += 4
-			case RIGHT_BRACE_N, CONCAT_N, OFFSETOF then
-				int = code[pc+1]
-				int += 3
+function variable_op_size( integer pc, integer op, sequence code = Code )
+	integer int
+	switch op do
+		case PROC, PROC_TAIL then
+			sequence info = SymTab[code[pc+1]]
+			return info[S_NUM_ARGS] + 2 + (info[S_TOKEN] != PROC)
+
+		case PROC_FORWARD then
+			int = code[pc+2]
+			int += 3
+		case FUNC_FORWARD then
+			int = code[pc+2]
+			int += 4
+		case RIGHT_BRACE_N, CONCAT_N, OFFSETOF then
+			int = code[pc+1]
+			int += 3
 			case MEMSTRUCT_ACCESS then
 				int = code[pc+1]
 				int += 4
 			case ARRAY_ACCESS then
 				int = code[pc+1]
 				int += 5
-			case else
-				InternalErr( 269, {op} )
-		end switch
-		return int
+		case else
+			InternalErr( 269, {op} )
+	end switch
+	return int
+end function
+
+function op_size( integer pc, sequence code = Code )
+	integer op = code[pc]
+	integer int = op_info_size_type[op]
+	
+	if int = FIXED_SIZE then
+		return op_info_size[op]
+	else
+		return variable_op_size( pc, op, code )
 	end if
 end function
 
 export function advance( integer pc, sequence code = Code )
-	pc += op_size( pc, code )
-	return pc
+	integer size = op_size( pc, code )
+	return pc + size
 end function
 
 procedure shift_switch( integer pc, integer start, integer amount )
@@ -397,10 +426,10 @@ export procedure shift( integer start, integer amount, integer bound = start )
 	integer finish = start + amount - 1
 	integer len = length( Code )
 	while pc <= len do
+		op = Code[pc]
 		if pc < start or pc > finish then
-			op = Code[pc]
-			sequence addrs = op_info[op][OP_ADDR]
-			for i = 1 to length( addrs ) do
+			
+			if length( op_info_addr[op] ) then
 
 				switch op with fallthru do
 					case SWITCH then
@@ -412,13 +441,19 @@ export procedure shift( integer start, integer amount, integer bound = start )
 						break
 
 					case else
-						int = addrs[i]
+						int = op_info_addr[op][1]
 						shift_addr( pc + int, amount, start, bound )
 
 				end switch
-			end for
+			end if
 		end if
-		pc = advance( pc )
+		integer size_type = op_info_size_type[op]
+		if size_type = FIXED_SIZE then
+			-- most common case...inline this for speed
+			pc += op_info_size[op]
+		else
+			pc += variable_op_size( pc, op )
+		end if
 	end while
 	shift_fwd_refs( start, amount )
 	move_last_pc( amount )

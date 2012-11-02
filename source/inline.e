@@ -969,6 +969,8 @@ export procedure inline_deferred_calls()
 				CurrentSub = calling_sub
 				Code = SymTab[calling_sub][S_CODE]
 				LineTable = SymTab[calling_sub][S_LINETAB]
+				SymTab[calling_sub][S_CODE] = 0
+				SymTab[calling_sub][S_LINETAB] = 0
 				sequence code = {}
 				
 				sequence calls = find_ops( 1, PROC )
