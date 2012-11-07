@@ -48,7 +48,7 @@ for i = 1 to length(signed_types) do
 	test_equal( sprintf("return type %s preserves -1", {signed_type_names[i]}), -1, c_func(r_max_uint_fn, {}) )
 end for
 
-constant lib818 = open_dll("lib818.dll")
+constant lib818 = open_dll("./lib818.dll")
 
 test_true( "Can open lib818.dll", lib818 )
 if lib818 then

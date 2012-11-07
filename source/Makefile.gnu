@@ -142,6 +142,7 @@ ifeq "$(EMINGW)" "1"
 			MEM_FLAGS=-DESIMPLE_MALLOC
 		endif
 	endif
+	CREATEDLLFLAGS=-Wl,--out-implib,lib818dll.a 
 else
 	EXE_EXT=
 	EPTHREAD=-pthread
@@ -167,6 +168,7 @@ else
 		endif
 	endif
 	MEM_FLAGS=-DESIMPLE_MALLOC
+	CREATEDLLFLAGS=
 endif
 
 MKVER=$(BUILDDIR)/mkver$(HOST_EXE_EXT)
@@ -1009,7 +1011,7 @@ $(BUILDDIR)/test818.o : test818.c
 	gcc -c -I ../include $(FE_FLAGS) -Wall -shared ../source/test818.c -o $(BUILDDIR)/test818.o
 
 ../tests/lib818.dll : $(BUILDDIR)/test818.o
-	gcc -shared -o ../tests/lib818.dll -Wl,--out-implib,lib818dll.a $(BUILDDIR)/test818.o
+	gcc -shared -o ../tests/lib818.dll $(CREATEDLLFLAGS) $(BUILDDIR)/test818.o
 
 ifeq "$(EUPHORIA)" "1"
 
