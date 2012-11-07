@@ -743,7 +743,7 @@ test : EUCOMPILEDIR=$(TRUNKDIR)
 test : EUCOMPILEDIR=$(TRUNKDIR)	
 test : C_INCLUDE_PATH=$(TRUNKDIR):..:$(C_INCLUDE_PATH)
 test : LIBRARY_PATH=$(%LIBRARY_PATH)
-test : 
+test : ../tests/lib818.dll
 test :  
 	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
 		$(EXE) -i ../include ../source/eutest.ex -i ../include -cc gcc $(VERBOSE_TESTS) \
@@ -1005,6 +1005,11 @@ $(BUILDDIR)/%.res : %.rc
 $(BUILDDIR)/$(OBJDIR)/%.o : $(BUILDDIR)/$(OBJDIR)/%.c
 	$(CC) $(EBSDFLAG) $(FE_FLAGS) $(BUILDDIR)/$(OBJDIR)/$*.c -I/usr/share/euphoria -o$(BUILDDIR)/$(OBJDIR)/$*.o
 
+$(BUILDDIR)/test818.o : test818.c
+	gcc -c -I ../include $(FE_FLAGS) -Wall -shared ../source/test818.c -o $(BUILDDIR)/test818.o
+
+../tests/lib818.dll : $(BUILDDIR)/test818.o
+	gcc -shared -o ../tests/lib818.dll -Wl,--out-implib,lib818dll.a $(BUILDDIR)/test818.o
 
 ifeq "$(EUPHORIA)" "1"
 
