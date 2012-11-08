@@ -265,8 +265,10 @@ many small example programs.
 
 If you have a SVN client, you can get a Euphoria version 4.0-compatible Win32lib
  at:
-[[ https://win32libex.svn.sourceforge.net/svnroot/win32libex/trunk ]].  Get 
-version 68.
+ 
+[[ https://win32libex.svn.sourceforge.net/svnroot/win32libex/trunk ]].  
+
+Get version 68.
 
 There is also an **IDE**, by Judith Evans for use with **Win32lib**. 
 [[ https://euvide.svn.sourceforge.net/svnroot/euvide ]].

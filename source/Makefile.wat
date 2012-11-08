@@ -107,7 +107,7 @@ LIBEXT=lib
 BASEPATH=$(BUILDDIR)\pcre
 !include pcre\objects.wat
 
-FULLBUILDDIR=$(BUILDDIR)
+FULLBUILDDIR=$(BUILDDIR)\
 
 EU_CORE_FILES = &
 	block.e &
@@ -303,7 +303,7 @@ EXTRACHECKFLAG=/dEXTRA_CHECK
 EX="$(EUBIN)\eui.exe"
 !endif
 
-EXE="$(EX)"
+EXE=$(EX)
 
 # The default is to use the interpreter for everything
 # That way one can build everything with only the
@@ -491,8 +491,8 @@ exsource : .SYMBOLIC $(BUILDDIR)\$(OBJDIR)\main-.c
 !ifeq EUPHORIA 1
 translate source : .SYMBOLIC  
     @echo ------- TRANSLATE WINDOWS -----------
-	wmake -h exwsource EX="$(EUBIN)\eui.exe" EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
-	wmake -h ecwsource EX="$(EUBIN)\eui.exe" EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
+	wmake -h exwsource EX="$(EUBIN)\eui.exe" EU_TARGET=eui. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
+	wmake -h ecwsource EX="$(EUBIN)\eui.exe" EU_TARGET=euc. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
 	wmake -h backendsource EX="$(EUBIN)\eui.exe" EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
 
 
@@ -536,31 +536,44 @@ $(FULLBUILDDIR)\test-report.html: ..\tests\unittest.log ..\tests\ctc.log
 	copy *.log $(FULLBUILDDIR)
 	cd ..\source
 
+!ifndef BASE
 tester: .SYMBOLIC 
-	wmake -h $(BUILDDIR)\eutestdr\eutest.exe BUILD_TOOLS=1 OBJDIR=eutestdr
+	wmake -h $(BUILDDIR)\eutest\eutest.exe  SRCDIR=source BASE=eutest $(VARS)
 
 binder : .SYMBOLIC $(BUILDDIR)\eubind.exe
 
-$(BUILDDIR)\eubind.exe : $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib
-	$(BUILDDIR)\euc -con $(TRANSDEBUG) -lib $(LIBTARGET) -i $(TRUNKDIR)\include -o $(BUILDDIR)\eubind.exe $(TRUNKDIR)\source\eubind.ex
+$(BUILDDIR)\eubind.exe : $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib $(TRUNKDIR)\source\eubind.ex
+	wmake -h $(BUILDDIR)\eubind.exe SRCDIR=source BASE=eubind $(VARS)
 
 shrouder : .SYMBOLIC $(BUILDDIR)\eushroud.exe
 
-$(BUILDDIR)\eushroud.exe :  $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib
-	$(BUILDDIR)\euc -con $(TRANSDEBUG) -lib $(LIBTARGET) -i $(TRUNKDIR)\include -o $(BUILDDIR)\eushroud.exe $(TRUNKDIR)\source\eushroud.ex
-
+$(BUILDDIR)\eushroud.exe :  $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib $(TRUNKDIR)\source\eushroud.ex
+	wmake -h $(BUILDDIR)\eushroud.exe SRCDIR=source BASE=eushroud $(VARS)
+	
+!endif
 tools: .SYMBOLIC
     @echo ------- TOOLS -----------
-	wmake -h $(BUILDDIR)\eutest.exe $(VARS)
-	wmake -h $(BUILDDIR)\euloc.exe $(VARS)
-	wmake -h $(BUILDDIR)\eucoverage.exe $(VARS)
-	wmake -h $(BUILDDIR)\eudis.exe $(VARS)
-	wmake -h $(BUILDDIR)\eudist.exe $(VARS)
+	wmake -h $(BUILDDIR)\eutest.exe SRCDIR=source BASE=eutest $(VARS)
+	wmake -h $(BUILDDIR)\eucoverage.exe SRCDIR=bin BASE=eucoverage $(VARS)
+	wmake -h $(BUILDDIR)\euloc.exe SRCDIR=bin BASE=euloc $(VARS)
+	wmake -h $(BUILDDIR)\eudist.exe SRCDIR=source BASE=eudist $(VARS)
 
+!ifdef BASE
+
+$(BUILDDIR)\$(BASE)\$(BASE).mak : $(TRUNKDIR)\$(SRCDIR)\$(BASE).ex 
+	$(RM) $(BUILDDIR)\$(BASE)
+	$(BUILDDIR)\euc -wat -con -nobuild -keep -build-dir $(BUILDDIR)\$(BASE) -makefile -o $(BUILDDIR)\$(BASE).exe -i $(TRUNKDIR)\include $<
+
+$(BUILDDIR)\$(BASE).exe : $(BUILDDIR)\$(BASE)\$(BASE).mak
+	cd $(BUILDDIR)\$(BASE)
+	wmake /f $(BASE).mak
+
+!endif
+	
 tools-additional: .SYMBOLIC
     @echo ------- ADDITIONAL TOOLS -----------
-	wmake -h $(BUILDDIR)\eudoc.exe $(VARS)
-	wmake -h $(BUILDDIR)\creole.exe $(VARS)
+	wmake -h $(BUILDDIR)\eudoc.exe $(VARS) BASE=eudoc
+	wmake -h $(BUILDDIR)\creole.exe $(VARS) BASE=creole
 
 tools-all: tools tools-additional
 
@@ -573,26 +586,8 @@ $(TRUNKDIR)\source\creole\creole.ex :
 $(TRUNKDIR)\source\eudoc\eudoc.ex :
 	hg clone http://scm.openeuphoria.org/hg/eudoc $(TRUNKDIR)\source\eudoc
 
-$(BUILDDIR)\eutest.exe: $(TRUNKDIR)\source\eutest.ex
-	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
 
-$(BUILDDIR)\euloc.exe: $(TRUNKDIR)\bin\euloc.ex
-	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
 
-$(BUILDDIR)\eucoverage.exe: $(TRUNKDIR)\bin\eucoverage.ex
-	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
-
-$(BUILDDIR)\eudis.exe: $(TRUNKDIR)\source\dis.ex
-	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
-
-$(BUILDDIR)\eudist.exe: $(TRUNKDIR)\source\eudist.ex
-	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
-
-$(BUILDDIR)\eudoc.exe: $(TRUNKDIR)\source\eudoc\eudoc.ex
-	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
-
-$(BUILDDIR)\creole.exe: $(TRUNKDIR)\source\creole\creole.ex
-	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
 
 !ifdef OBJDIR
 
@@ -626,32 +621,37 @@ $(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_COR
 !else
 
 $(BUILDDIR)\eui.exe : .always .recheck
-	wmake -h $(BUILDDIR)\intobj\main-.c EX="$(EUBIN)\eui.exe" EU_TARGET=int. OBJDIR=intobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+	wmake -h $(BUILDDIR)\intobj\main-.c EX="$(EUBIN)\eui.exe" EU_TARGET=eui. OBJDIR=intobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 	wmake -h objlist OBJDIR=intobj $(VARS) EU_NAME_OBJECT=EU_INTERPRETER_OBJECTS
-	wmake -h $(BUILDDIR)\eui.exe EX="$(EUBIN)\eui.exe" EU_TARGET=int. OBJDIR=intobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+	wmake -h $(BUILDDIR)\eui.exe EX="$(EUBIN)\eui.exe" EU_TARGET=eui. OBJDIR=intobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 		
 
 !endif
 
 interpreter : .SYMBOLIC $(BUILDDIR)\eui.exe
 
-install : .SYMBOLIC
+$(PREFIX) : .existsonly
+	mkdir $^@
+	
+$(PREFIX)\source $(PREFIX)\include $(PREFIX)\bin :  .existsonly $(PREFIX)
+	mkdir $^@
+
+$(PREFIX)\include\std $(PREFIX)\include\euphoria : .existsonly $(PREFIX)\include
+	mkdir $^@
+	
+$(PREFIX)\include\std\net $(PREFIX)\include\std\win32 : .existsonly $(PREFIX)\include\std
+	mkdir $^@
+
+install : .SYMBOLIC $(PREFIX) $(PREFIX)\source $(PREFIX)\include $(PREFIX)\bin $(PREFIX)\include\std\net $(PREFIX)\include\std\win32  $(PREFIX)\include\euphoria
 	@echo --------- install $(PREFIX) ------------
 	if /I $(PWD)==$(PREFIX)\source exit
-	if not exist $(PREFIX) mkdir $(PREFIX)
-	if not exist $(PREFIX)\source mkdir $(PREFIX)\source
 	for %i in (*.e) do @copy %i $(PREFIX)\source\
 	for %i in (*.ex) do @copy %i $(PREFIX)\source\
-	if not exist $(PREFIX)\include\std mkdir $(PREFIX)\include\std
 	copy ..\include\* $(PREFIX)\include\
 	copy ..\include\std\* $(PREFIX)\include\std
-	if not exist $(PREFIX)\include\std\net mkdir $(PREFIX)\include\std\net
 	copy ..\include\std\net\* $(PREFIX)\include\std\net
-	if not exist $(PREFIX)\include\std\win32 mkdir $(PREFIX)\include\std\win32
 	copy ..\include\std\win32\* $(PREFIX)\include\std\win32
-	if not exist $(PREFIX)\include\euphoria mkdir $(PREFIX)\include\euphoria
 	copy ..\include\euphoria\* $(PREFIX)\include\euphoria
-	@if not exist $(PREFIX)\bin mkdir $(PREFIX)\bin
 	copy ..\bin\*.ex $(PREFIX)\bin
 	copy ..\bin\*.bat $(PREFIX)\bin
 	@if exist $(BUILDDIR)\euc.exe copy $(BUILDDIR)\euc.exe $(PREFIX)\bin\
@@ -687,9 +687,9 @@ $(BUILDDIR)\euc.exe : $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_TRAN
 
 $(BUILDDIR)\euc.exe : .always .recheck
     @echo ------- TRANSLATOR -----------
-	wmake -h $(BUILDDIR)\transobj\main-.c EX="$(EUBIN)\eui.exe" EU_TARGET=ec. OBJDIR=transobj  $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+	wmake -h $(BUILDDIR)\transobj\main-.c EX="$(EUBIN)\eui.exe" EU_TARGET=euc. OBJDIR=transobj  $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 	wmake -h objlist OBJDIR=transobj EU_NAME_OBJECT=EU_TRANSLATOR_OBJECTS $(VARS)
-	wmake -h $(BUILDDIR)\euc.exe EX="$(EUBIN)\eui.exe" EU_TARGET=ec. OBJDIR=transobj $(VARS)
+	wmake -h $(BUILDDIR)\euc.exe EX="$(EUBIN)\eui.exe" EU_TARGET=euc. OBJDIR=transobj $(VARS)
 
 !endif
 

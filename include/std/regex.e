@@ -22,11 +22,11 @@
 --
 -- === General Use
 --
--- Many functions take an optional ##options## parameter. This parameter can be either
+-- Many functions take an optional ##options## argument. This argument can be either
 -- a single option constant (see [[:Option Constants]]), multiple option constants or'ed
 -- together into a single atom or a sequence of options, in which the function will take
 -- care of ensuring the are or'ed together correctly.  Options are like their C equivalents
--- with the 'PCRE_' prefix stripped off.  Name spaces disambiguate symbols so we don't
+-- with the 'PCRE_' prefix stripped off.  Name spaces disambiguate symbols so we do not
 -- need this prefix.
 --
 -- All strings passed into this library must be either 8-bit per character strings or
@@ -54,7 +54,7 @@ enum
 --
 -- ==== Compile Time and Match Time
 --
--- When a regular expression object is created via ##new## we call also say it get's "compiled."
+-- When a regular expression object is created via ##new## we call also say it gets "compiled."
 -- The options you may use for this are called "compile time" option constants.  Once
 -- the regular expression is created you can use the other functions that take this regular
 -- expression and a string.  These routines' options are called "match time" option constants.
@@ -62,7 +62,7 @@ enum
 --
 -- ===== Compile Time Option Constants
 --
---     The only options that may set at "compile time"; that is, to pass to ##new##;
+--     The only options that may set at "compile time" (that is to pass to ##new##)
 --     are [[:ANCHORED]], [[:AUTO_CALLOUT]], [[:BSR_ANYCRLF]], [[:BSR_UNICODE]], [[:CASELESS]],
 --     [[:DEFAULT]], [[:DOLLAR_ENDONLY]], [[:DOTALL]], [[:DUPNAMES]], [[:EXTENDED]], [[:EXTRA]],
 --     [[:FIRSTLINE]], [[:MULTILINE]], [[:NEWLINE_CR]], [[:NEWLINE_LF]], [[:NEWLINE_CRLF]],
@@ -72,10 +72,12 @@ enum
 --
 -- ===== Match Time Option Constants
 --
---     Options that may be set at "match time" are [[:ANCHORED]], [[:NEWLINE_CR]], [[:NEWLINE_LF]],
+--     Options that may be set at "match time" are: [[:ANCHORED]], [[:NEWLINE_CR]], [[:NEWLINE_LF]],
 --     [[:NEWLINE_CRLF]], [[:NEWLINE_ANY]] [[:NEWLINE_ANYCRLF]] [[:NOTBOL]], [[:NOTEOL]],
---     [[:NOTEMPTY]], [[:NO_UTF8_CHECK]].  Routines that take match time option constants match,
---     split or replace a regular expression against some string.
+--     [[:NOTEMPTY]], [[:NO_UTF8_CHECK]].  
+--
+-- Routines that take match time option constants: ##match##,
+--     ##split##, or ##replace## a regular expression against some string.
 --
 --
 
@@ -95,7 +97,7 @@ enum
 --
 -- Description:
 -- In C, this is called PCRE_AUTO_CALLOUT.
--- To get the functionality of this flag in EUPHORIA, you can use:
+-- To get the functionality of this flag in Euphoria, you can use:
 -- [[:find_replace_callback]] without passing this option.
 -- This is passed to [[:new]].
 
@@ -123,7 +125,7 @@ enum
 --
 -- Description:
 -- This will make your regular expression matches case insensitive.  With this
--- flag for example, [a-z] is the same as [A-Za-z].
+-- flag for example, ##[a-z]## is the same as ##[A-Za-z]##.
 -- This is passed to [[:new]].
 
 --****
@@ -159,7 +161,7 @@ enum
 -- before any other newlines). Thus you must include the newline character
 -- in the pattern before the dollar sign if you want to match a line that contanis
 -- a newline character.
--- The DOLLAR_ENDONLY option  is  ignored if  MULTILINE  is  set.
+-- The ##DOLLAR_ENDONLY## option  is  ignored if  ##MULTILINE##  is  set.
 -- There is no way to set this option within a pattern.
 -- This is passed to [[:new]].
 
@@ -195,7 +197,7 @@ enum
 -- public constant EXTRA
 --
 -- Description:
--- When an alphanumeric follows a backslash(\) has no special meaning an
+-- When an alphanumeric follows a backslash ( ##\## ) has no special meaning an
 -- error is generated.
 -- This is passed to [[:new]].
 
@@ -204,7 +206,7 @@ enum
 -- public constant FIRSTLINE
 --
 -- Description:
--- If PCRE_FIRSTLINE is set, the match must happen before or at the first
+-- If ##PCRE_FIRSTLINE## is set, the match must happen before or at the first
 -- newline in the subject (though it may continue over the newline).
 -- This is passed to [[:new]].
 
@@ -213,7 +215,7 @@ enum
 -- public constant MULTILINE
 --
 -- Description:
--- When  MULTILINE  it  is set, the "start of line" and "end of line"
+-- When  ##MULTILINE##  is set the "start of line" and "end of line"
 -- constructs match immediately following or immediately  before  internal
 -- newlines  in  the  subject string, respectively, as well as at the very
 -- start and end.  This is passed to [[:new]].
@@ -223,9 +225,9 @@ enum
 -- public constant NEWLINE_CR
 --
 -- Description:
--- Sets CR as the NEWLINE sequence.
--- The NEWLINE sequence will match $
--- when MULTILINE is set.
+-- Sets CR as the ##NEWLINE## sequence.
+-- The ##NEWLINE## sequence will match ##$##
+-- when ##MULTILINE## is set.
 -- This is passed to all routines including [[:new]].
 
 --****
@@ -233,9 +235,9 @@ enum
 -- public constant NEWLINE_LF
 --
 -- Description:
--- Sets LF as the NEWLINE sequence.
--- The NEWLINE sequence will match $
--- when MULTILINE is set.
+-- Sets LF as the ##NEWLINE## sequence.
+-- The ##NEWLINE## sequence will match ##$##
+-- when ##MULTILINE## is set.
 -- This is passed to all routines including [[:new]].
 
 --****
@@ -243,9 +245,9 @@ enum
 -- public constant NEWLINE_CRLF
 --
 -- Description:
--- Sets CRLF as the NEWLINE sequence
--- The NEWLINE sequence will match $
--- when MULTILINE is set.
+-- Sets ##CRLF## as the ##NEWLINE## sequence
+-- The ##NEWLINE## sequence will match ##$##
+-- when ##MULTILINE## is set.
 -- This is passed to all routines including [[:new]].
 
 --****
@@ -253,11 +255,11 @@ enum
 -- public constant NEWLINE_ANY
 --
 -- Description:
--- Sets ANY newline sequence as the NEWLINE sequence including
+-- Sets ##ANY## newline sequence as the ##NEWLINE## sequence including
 -- those from UNICODE when UTF8 is also set.  The string will have
 -- to be encoded as UTF8, however.
--- The NEWLINE sequence will match $
--- when MULTILINE is set.
+-- The ##NEWLINE## sequence will match ##$##
+-- when ##MULTILINE## is set.
 -- This is passed to all routines including [[:new]].
 
 --****
@@ -265,9 +267,9 @@ enum
 -- public constant NEWLINE_ANYCRLF
 --
 -- Description:
--- Sets ANY newline sequence from ASCII.
--- The NEWLINE sequence will match $
--- when MULTILINE is set.
+-- Sets ##ANY## newline sequence from ASCII.
+-- The ##NEWLINE## sequence will match ##$##
+-- when ##MULTILINE## is set.
 -- This is passed to all routines including [[:new]].
 
 --****
@@ -275,9 +277,9 @@ enum
 -- public constant NOTBOL
 --
 -- Description:
--- This indicates that beginning of the passed string does **NOT** start
--- at the **B**eginning **O**f a **L**ine (NOTBOL), so a carrot symbol (^) in the
--- original pattern will not match the beginning of the string.
+-- This indicates that beginning of the passed string does NOTBOL ( **NOT** start
+-- at the **B**eginning **O**f a **L**ine) so a carrot symbol (##^##) in the
+-- original pattern will //not match// the beginning of the string.
 -- This is used by routines other than [[:new]].
 
 --****
@@ -285,9 +287,9 @@ enum
 -- public constant NOTEOL
 --
 -- Description:
--- This indicates that end of the passed string does **NOT** end
--- at the **E**nd **O**f a **L**ine (NOTEOL), so a dollar sign ($) in the
--- original pattern will not match the end of the string.
+-- This indicates that end of the passed string does NOTEOL ( **NOT** end
+-- at the **E**nd **O**f a **L**ine) so a dollar sign (##$##) in the
+-- original pattern will //not match// the end of the string.
 -- This is used by routines other than [[:new]].
 
 --****
@@ -305,7 +307,7 @@ enum
 --
 -- Description:
 -- Turn off checking for the validity of your UTF string.  Use this
--- with caution.  An invalid utf8 string with this option could **crash**
+-- with caution.  An invalid utf8 string with this option could //crash//
 -- your program.  Only use this if you know the string is a valid utf8 string.
 -- !!See [[:unicode:validate]].
 -- This is passed to all routines including [[:new]].
@@ -315,8 +317,8 @@ enum
 -- public constant NOTEMPTY
 --
 -- Description:
--- Here matches of empty strings will not be allowed.  In C, this is PCRE_NOTEMPTY.
--- The pattern: `A*a*` will match "AAAA", "aaaa", and "Aaaa" but not "".
+-- Here matches of empty strings will not be allowed.  In C, this is ##PCRE_NOTEMPTY##.
+-- The pattern: ##`A*a*`## will match ##"AAAA"##, ##"aaaa"##, and ##"Aaaa"## but not ##""##.
 -- This is used by routines other than [[:new]].
 
 --****
@@ -334,7 +336,7 @@ enum
 -- We say ##s1## has a //partial match// of ##re##.
 --
 -- Note that ##find( re, s2, 1, PCRE_PARTIAL )## will ##ERROR_NOMATCH##.
--- In C, this constant is called PCRE_PARTIAL.
+-- In C, this constant is called ##PCRE_PARTIAL##.
 
 --****
 -- Signature:
@@ -346,11 +348,13 @@ enum
 --****
 -- Signature:
 -- public constant UNGREEDY
--- This modifier sets the pattern such that quantifiers are
--- not greedy by default, but become greedy if followed by a question mark.
 --
 -- Description:
 -- This is passed to [[:new]].
+-- This modifier sets the pattern such that quantifiers are
+-- not greedy by default, but become greedy if followed by a question mark.
+
+
 
 --****
 -- Signature:
@@ -426,7 +430,7 @@ constant option_names = {
 --****
 -- === Error Constants
 -- 
--- Error constants differ from their C equivalents as they do not have PCRE_ prepended to each name.
+-- Error constants differ from their C equivalents as they do not have ##PCRE_## prepended to each name.
 --
 
 public constant
@@ -444,7 +448,7 @@ public constant
 	ERROR_UNKNOWN_NODE   =  (-5),
 	--** Out of memory.
 	ERROR_NOMEMORY       =  (-6),
-	--** The wrapper or the PCRE backend didn't preallocate enough capturing groups for this pattern.
+	--** The wrapper or the PCRE backend did not preallocate enough capturing groups for this pattern.
 	ERROR_NOSUBSTRING    =  (-7),
 	--** Too many matches encountered.
 	ERROR_MATCHLIMIT     =  (-8),
@@ -452,7 +456,7 @@ public constant
 	ERROR_CALLOUT        =  (-9),
 	--** The subject or pattern is not valid UTF8 but it was specified as such with [[:UTF8]].
 	ERROR_BADUTF8        = (-10),
-	--** The offset specified doesn't start on a UTF8 character boundary but it was specified as UTF8 with [[:UTF8]].
+	--** The offset specified does not start on a UTF8 character boundary but it was specified as UTF8 with [[:UTF8]].
 	ERROR_BADUTF8_OFFSET = (-11),
 	--** Pattern didn't match, but there is a //partial match//.  See [[:PARTIAL]].
 	ERROR_PARTIAL        = (-12),
@@ -538,7 +542,7 @@ constant all_options = math:or_all({
 })
 
 --****
--- === Create/Destroy
+-- === Create and Destroy
 
 --**
 -- Regular expression type
@@ -572,7 +576,7 @@ public type option_spec(object o)
 end type
 
 --**
--- Converts an option spec to a string.
+-- converts an option spec to a string.
 --
 -- This can be useful for debugging what options were passed in.
 -- Without it you have to convert a number to hex and lookup the
@@ -583,10 +587,10 @@ public function option_spec_to_string(option_spec o)
 end function
 
 --**
--- Converts an regex error to a string.
+-- converts an regex error to a string.
 --
 -- This can be useful for debugging and even something rough to give to
--- the user incase of a regex failure.  It's preferable to
+-- the user incase of a regex failure.  It is preferable to
 -- a number.
 --
 -- See Also:
@@ -601,7 +605,7 @@ public function error_to_string(integer i)
 end function
 
 --**
--- Return an allocated regular expression
+-- returns an allocated regular expression.
 --
 -- Parameters:
 --   # ##pattern## : a sequence representing a human readable regular expression
@@ -669,14 +673,17 @@ public function new(string pattern, option_spec options=DEFAULT)
 end function
 
 --**
--- If ##[[:new]]## returns an atom, this function will return a text error message
--- as to the reason.
+-- returns a text based error message.
 --
 -- Parameters:
 --   # ##re##: Regular expression to get the error message from
 --
 -- Returns:
 --   An atom (0) when no error message exists, otherwise a sequence describing the error.
+--
+-- Comments:
+-- If ##[[:new]]## returns an atom, this function will return a text error message
+-- as to the reason.
 --
 -- Example 1:
 -- <eucode>
@@ -697,11 +704,11 @@ end function
 --
 
 --**
--- Escape special regular expression characters that may be entered into a search
+-- escapes special regular expression characters that may be entered into a search
 -- string from user input.
 --
 -- Notes:
---   Special regex characters are:
+--   Special regex characters are~:
 --       {{{
 --   . \ + * ? [ ^ ] $ ( ) { } = ! < > | : -
 --       }}}
@@ -725,7 +732,7 @@ public function escape(string s)
 end function
 
 --**
--- Returns the number of capturing subpatterns (the ovector size) for a regex
+-- returns the number of capturing subpatterns (the ovector size) for a regex.
 --
 -- Parameters:
 --   # ##ex## : a regex
@@ -748,7 +755,7 @@ end function
 -- === Match
 
 --**
--- Return the first match of ##re## in ##haystack##. You can optionally start at the position
+-- returns the first match of ##re## in ##haystack##. You can optionally start at the position
 -- ##from##.
 --
 -- Parameters:
@@ -770,21 +777,21 @@ end function
 -- Returns:
 --   An **object**, which is either an atom of 0, meaning nothing matched or a sequence of 
 --   index pairs.  These index pairs may be fewer than the number of groups specified.  These
---   index pairs may be the invalid index pair {0,0}.
+--   index pairs may be the invalid index pair ##{0,0}##.
 --
 --   The first pair is the starting and ending indeces of the sub-string that matches the 
 --   expression.  This pair may be followed by indeces of the groups.  The groups are 
 --   subexpressions in the regular expression surrounded by parenthesis ().  
 --
 --   Now, it is possible to get a match without having all of the groups match.
---   This can happen when there is a quantifier after a group.  For example: '([01])*' or '([01])?'.
+--   This can happen when there is a quantifier after a group.  For example: ##'([01])*'## or ##'([01])?'##.
 --   In this case, the returned sequence of pairs will be missing the last group indeces for
 --   which there is no match.   
---   However, if the missing group is followed by a group that *does* match, {0,0} will be 
+--   However, if the missing group is followed by a group that *does* match, ##{0,0}## will be 
 --   used as a place holder.
 --   You can ensure your groups match when your expression matches by keeping quantifiers 
 --   inside your groups: 
---   For example use: '([01]?)' instead of '([01])?'
+--   For example use: ##'([01]?)'## instead of ##'([01])?'##
 --
 --
 --
@@ -816,7 +823,7 @@ public function find(regex re, string haystack, integer from=1, option_spec opti
 end function
 
 --**
--- Return all matches of ##re## in ##haystack## optionally starting at the sequence position
+-- returns all matches of ##re## in ##haystack## optionally starting at the sequence position
 -- ##from##.
 --
 -- Parameters:
@@ -828,6 +835,8 @@ end function
 -- Returns:
 --   A **sequence** of **sequences** that were returned by [[:find]] and in the case of
 --   no matches this returns an empty **sequence**.
+--
+-- Comments:
 --   Please see [[:find]] for a detailed description of each member of the return
 --   sequence.
 --
@@ -875,7 +884,7 @@ public function find_all(regex re, string haystack, integer from=1, option_spec 
 end function
 
 --**
--- Determine if ##re## matches any portion of ##haystack##.
+-- determines if ##re## matches any portion of ##haystack##.
 --
 -- Parameters:
 --   # ##re## : a regex for a subject to be matched against
@@ -895,7 +904,7 @@ public function has_match(regex re, string haystack, integer from=1, option_spec
 end function
 
 --**
--- Determine if the entire ##haystack## matches ##re##.
+-- determines if the entire ##haystack## matches ##re##.
 --
 -- Parameters:
 --   # ##re## : a regex for a subject to be matched against
@@ -921,7 +930,7 @@ public function is_match(regex re, string haystack, integer from=1, option_spec 
 end function
 
 --**
--- Get the matched text only.
+-- gets the matched text only.
 --
 -- Parameters:
 --   # ##re## : a regex for a subject to be matched against
@@ -996,7 +1005,7 @@ public function matches(regex re, string haystack, integer from=1, option_spec o
 end function
 
 --**
--- Get the text of all matches
+-- gets the text of all matches.
 --
 -- Parameters:
 --   # ##re## : a regex for a subject to be matched against
@@ -1097,7 +1106,7 @@ end function
 -- === Splitting
 
 --**
--- Split a string based on a regex as a delimiter
+-- splits a string based on a regex as a delimiter.
 --
 -- Parameters:
 --   # ##re## : a regex which will be used for matching
@@ -1167,7 +1176,7 @@ end function
 --
 
 --**
--- Replaces all matches of a regex with the replacement text.
+-- replaces all matches of a regex with the replacement text.
 --
 -- Parameters:
 --   # ##re## : a regex which will be used for matching
@@ -1183,12 +1192,13 @@ end function
 --   A **sequence**, the modified ##text##.  If there is no match with ##re## the
 --  return value will be the same as ##text## when it was passed in.
 --
--- Special replacement operators:
+-- Comments:
+-- Special replacement operators~:
 --
 -- * **##\##**  ~-- Causes the next character to lose its special meaning.
--- * **##\n##** ~ -- Inserts a 0x0A (LF) character.
--- * **##\r##** ~-- Inserts a 0x0D (CR) character.
--- * **##\t##** ~-- Inserts a 0x09 (TAB) character.
+-- * **##\n##** ~ -- Inserts a ##0x0A## (LF) character.
+-- * **##\r##** ~-- Inserts a ##0x0D## (CR) character.
+-- * **##\t##** ~-- Inserts a ##0x09## (TAB) character.
 -- * **##\1##** to **##\9##** ~-- Recalls stored substrings from registers (\1, \2, \3, to \9).
 -- * **##\0##** ~-- Recalls entire matched pattern.
 -- * **##\u##** ~-- Convert next character to uppercase
@@ -1213,12 +1223,8 @@ public function find_replace(regex ex, string text, sequence replacement, intege
 end function
 
 --**
--- Replaces up to ##limit## matches of ##ex## in ##text## except when ##limit## is 0.  When
+-- replaces up to ##limit## matches of ##ex## in ##text## except when ##limit## is 0.  When
 -- ##limit## is 0, this routine replaces all of the matches.
---
--- This function is identical to [[:find_replace]] except it allows you to limit the number of
--- replacements to perform. Please see the documentation for [[:find_replace]] for all the
--- details.
 --
 -- Parameters:
 --   # ##re## : a regex which will be used for matching
@@ -1230,6 +1236,11 @@ end function
 --     ##options## can be any match time option or a
 --     sequence of valid options or it can be a value that comes from using or_bits on
 --     any two valid option values.
+--
+-- Comments:
+-- This function is identical to [[:find_replace]] except it allows you to limit the number of
+-- replacements to perform. Please see the documentation for [[:find_replace]] for all the
+-- details.
 --
 -- Returns:
 --   A **sequence**, the modified ##text##.
@@ -1249,17 +1260,7 @@ public function find_replace_limit(regex ex, string text, sequence replacement,
 end function
 
 --**
--- When ##limit## is positive,
--- this routine replaces up to ##limit## matches of ##ex## in ##text## with the
--- result of the user
--- defined callback, ##rid##, and when ##limit## is 0, replaces
--- all matches of ##ex## in ##text## with the result of this user defined callback, ##rid##.
---
--- The callback should take one sequence.  The first member of this sequence will be a
--- a string
--- representing the entire match and the subsequent members, if they exist,
--- will be a strings
--- for the captured groups within the regular expression.
+-- finds and then replaces text that is processed by a call back function.
 --
 -- Parameters:
 --   # ##re## : a regex which will be used for matching
@@ -1272,6 +1273,22 @@ end function
 --     sequence of valid options or it can be a value that comes from using or_bits on
 --     any two valid option values.
 --
+-- Returns:
+--   A **sequence**, the modified ##text##.
+--
+-- Comments:
+-- When ##limit## is positive,
+-- this routine replaces up to ##limit## matches of ##ex## in ##text## with the
+-- result of the user
+-- defined callback, ##rid##, and when ##limit## is 0, replaces
+-- all matches of ##ex## in ##text## with the result of this user defined callback, ##rid##.
+--
+-- The callback should take one sequence.  The first member of this sequence will be a
+-- a string
+-- representing the entire match and the subsequent members, if they exist,
+-- will be a strings
+-- for the captured groups within the regular expression.
+--
 --   The function rid.  Must take one sequence parameter.  The function needs to accept a sequence
 -- of strings and return a string.  For each match, the function will be passed a sequence of 
 -- strings.  The first string is the entire match the subsequent strings are for the capturing groups.  
@@ -1279,10 +1296,8 @@ end function
 -- does exist, the palce will contain the matching group string.
 -- for that group.
 --
--- Returns:
---   A **sequence**, the modified ##text##.
 --
--- Examples:
+-- Example 1:
 -- <eucode>
 -- include std/text.e 
 -- function my_convert(sequence params)

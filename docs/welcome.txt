@@ -119,7 +119,7 @@ There are now enthusiastic users around the world.
 Euphoria is a very high-level programming language. It is unique among a
 crowd of conventional languages.
 
-=== Euphoria delivers the expected features of a modern language
+=== Great Features
 
 * Open source
 * Free for personal and commercial use
@@ -159,7 +159,7 @@ data-structures.
 modify them to any size and complexity
 * It supports both //static// data typing and //dynamic// data typing.
 
-=== Euphoria has qualities that go beyond the elegance of sequences
+=== Beyond Elegance Sequences
 
 * Euphoria programs are considerably faster than conventional interpreted
 languages {{{--}}} Euphoria makes a better website server
@@ -234,12 +234,11 @@ reader is left to choose the correct interpreter.
 Euphoria runs on many platforms. When operating system specific issues must be 
 described you will see these descriptions:
 
-* //Windows// will be a general reference to a family of Microsoft Windows
-operating systems that includes 95/ME/98/XP/NT/Vista/7/.
+* //"Windows"// is a general reference to operating systems from Microsoft. 
 !! lines above run off right side of page 
 You will see the constant ##WINDOWS## used for //Windows// specific code.
 
-* //Unix// will be a general reference to the family operating systems that
+* //"Unix"// is a general reference to the family operating systems that
 includes Linux, FreeBSD, NetBSD, OpenBSD, Mac OS X, ... You will see the
 constant ##UNIX## used for Unix specific code.
 

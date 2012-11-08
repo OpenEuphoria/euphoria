@@ -32,7 +32,7 @@ constant
 -- === Information
 
 --**
--- Determing if the process has a console window or not
+-- determines if the process has a console (terminal) window.
 --
 -- Returns:
 --   1 if there is more than one process attached to the current console, 
@@ -40,11 +40,12 @@ constant
 --     the current console.
 --
 -- Notes:
---   Method always returns 1 on *nix systems.
---   On Windows client systems earlier than Windows XP the method always returns 0.
---   On Windows server systems earlier than Windows Server 2003 the method always returns 0.
+--   This function always returns 1 on //unix// systems.
 --
--- Examples:
+--   On //windows// client systems earlier than Windows XP the function always returns 0.
+--   On //windows// server systems earlier than Windows Server 2003 the function always returns 0.
+--
+-- Example 1:
 -- <eucode>
 -- include std/console.e
 --
@@ -60,20 +61,20 @@ end function
 
 
 --**
--- Gets and sets the keyboard codes used internally by Euphoria.
+-- gets and sets the keyboard codes used internally by Euphoria.
 --
 -- Parameters:
 --  # ##codes## : Either a sequence of exactly 256 integers or an atom (the default).
 --
 -- Returns:
---   A sequence of the current 256 keyboard codes, prior to any changes that
+--   A **sequence** of the current 256 keyboard codes, prior to any changes that
 --   this function might make.
 --
 -- Comments:
 --   When ##codes## is a atom then no change to the existing codes is made, otherwise
 --   the set of 256 integers in ##codes## completely replaces the existing codes.
 --
--- Examples:
+-- Example 1:
 -- <eucode>
 -- include std/console.e
 -- sequence kc
@@ -107,7 +108,7 @@ public constant
 	KC_CLEAR  = #0C + 1, --  CLEAR key NUMPAD-5
 	KC_RETURN  = #0D + 1, --  ENTER key NUMPAD-ENTER
 	KC_SHIFT  = #10 + 1, --  SHIFT key
-	KC_CONTROL  = #11 + 1, --  CTRL key
+	KC_CONTROL  = #11 + 1, --  Control key
 	KC_MENU  = #12 + 1, --  ALT key
 	KC_PAUSE  = #13 + 1, --  PAUSE key
 	KC_CAPITAL  = #14 + 1, --  CAPS LOCK key
@@ -236,13 +237,14 @@ public constant
 	$
 
 --**
--- Change the default codes returned by the keyboard.
+-- changes the default codes returned by the keyboard.
 --
 -- Parameters:
 --   # ##kcfile## : Either the name of a text file or the handle of an opened (for reading) text file.
 --
 -- Comments:
 --   The text file is expected to contain bindings for one or more keyboard codes.
+--
 -- The format of the files is a set of lines, one line per key binding, in the
 -- form ##KEYNAME = NEWVALUE##. The //keyname// is the same as the constants but without
 -- the "##KC_##" prefix. The key bindings can be in any order.
@@ -718,7 +720,7 @@ end function
 --
 -- In the cursor constants below, the second and fourth hex digits (from the
 -- left) determine the top and bottom row of pixels in the cursor. The first
--- digit controls whether the cursor will be visible or not. For example, #0407
+-- digit controls whether the cursor will be visible or not. For example~: #0407
 -- turns on the 4th through 7th rows.
 --
 -- See Also:
@@ -739,8 +741,8 @@ end type
 -- 		<built-in> function get_key()
 --
 -- Description:
---     Return the key that was pressed by the user, without waiting. Special 
---  codes are returned for the function keys, arrow keys etc.
+--     returns the key that was pressed by the user, without waiting. Special 
+--  codes are returned for the function keys, arrow keys, and so on.
 --
 -- Returns:
 --		An **integer**, either -1 if no key waiting, or the code of the next key
@@ -750,7 +752,7 @@ end type
 --     The operating system can hold a small number of key-hits in its keyboard buffer.
 --     ##get_key##() will return the next one from the buffer, or -1 if the buffer is empty.
 --
---     Run the ##key.bat## program to see what key code is generated for each key on your
+--     Run the ##.../euphoria/demo/key.ex## program to see what key code is generated for each key on your
 --     keyboard.
 --
 -- Example 1:
@@ -765,21 +767,21 @@ end type
 --   [[:wait_key]]
 
 --**
--- Set behavior of CTRL+C/CTRL+Break
+-- sets the behavior of Control+C and Control+Break keys. 
 --
 -- Parameters:
 --   # ##b## : a boolean,  TRUE ( != 0 ) to enable the trapping of
---     Ctrl-C/Ctrl-Break, FALSE ( 0 ) to disable it.
+--     Control+C and Control+Break, FALSE ( 0 ) to disable it.
 --
 -- Comments:
---   When ##b## is 1 (true), CTRL+C and CTRL+Break can terminate
+--   When ##b## is 1 (true), Control+C and Control+Break can terminate
 --   your program when it tries to read input from the keyboard. When
---   i is 0 (false) your program will not be terminated by CTRL+C or CTRL+Break.
+--   i is 0 (false) your program will not be terminated by Control+C or Control+Break.
 --   
 --   Initially your program can be terminated at any point where
 --   it tries to read from the keyboard.
 --   
---   You can find out if the user has pressed Control-C or Control-Break by calling
+--   You can find out if the user has pressed Control+C or Control+Break by calling
 --   [[:check_break]]().
 --
 -- Example 1:
@@ -796,21 +798,21 @@ end procedure
 
 --**
 -- Description:
--- 		Returns the number of Control-C/Control-BREAK key presses.
+-- 		Returns the number of Control+C and Control+Break key presses.
 --
 -- Returns:
--- 		An **integer**, the number of times that CTRL+C or CTRL+Break have
---  been pressed since the last call to ##check_break##(), or since the
+-- 		An **integer**, the number of times that Control+C or Control+Break have
+--  been pressed since the last call to ##check_break##, or since the
 --  beginning of the program if this is the first call.
 --
 -- Comments:
 -- This is useful after you have called [[:allow_break]](0) which
---  prevents CTRL+C or CTRL+Break from terminating your
---  program. You can use ##check_break##() to find out if the user
+--  prevents Control+C or Control+Break from terminating your
+--  program. You can use ##check_break## to find out if the user
 --  has pressed one of these keys. You might then perform some action
 --  such as a graceful shutdown of your program.
 --
--- Neither CTRL+C or CTRL+Break will be returned as input
+-- Neither Control+C nor Control+Break will be returned as input
 --  characters when you read the keyboard. You can only detect
 --  them by calling ##check_break##().
 --
@@ -847,10 +849,11 @@ public function wait_key()
 end function
 
 --**
--- Display a prompt to the user and wait for any key.
+-- Description:
+--   displays a prompt to the user and waits for any key.
 --
 -- Parameters:
---   # ##prompt## : Prompt to display, defaults to "Press Any Key to continue..."
+--   # ##prompt## : Prompt to display, defaults to ##"Press Any Key to continue..."##
 --   # ##con## : Either 1 (stdout), or 2 (stderr). Defaults to 1.
 --
 -- Comments:
@@ -881,7 +884,7 @@ end procedure
 
 --**
 -- Description:
---   Display a prompt to the user and wait for any key **only** if the user is
+--   displays a prompt to the user and waits for any key. //Only// if the user is
 --   running under a GUI environment.
 --   
 -- Parameters:
@@ -891,9 +894,11 @@ end procedure
 -- Comments:
 -- This wraps [[:wait_key]] by giving a clue that the user should press a key, and
 -- perhaps do some other things as well.
+--
 -- Requires Windows XP or later or Windows 2003 or later to work.  Earlier versions of Windows
 -- or O/S will always pause even when not needed.
--- On the other hand, on Unix like Operating Systems this wont pause even when needed.
+--
+-- On //unix// systems this will not pause even when needed.
 --
 -- Example 1:
 -- <eucode>
@@ -916,7 +921,7 @@ end procedure
 
 --**
 -- Description:
---   Prompts the user to enter a number, and returns only validated input.
+--   prompts the user to enter a number and returns only validated input.
 --
 -- Parameters:
 --   # ##st## : is a string of text that will be displayed on the screen.
@@ -930,7 +935,7 @@ end procedure
 --   If [[:puts]]() cannot display ##st## on standard output, or if the first or second element
 --   of ##s## is a sequence, a runtime error will be raised.
 --
---   If user tries cancelling the prompt by hitting Ctrl-Z, the program will abort as well,
+--   If user tries cancelling the prompt by hitting Control+Z, the program will abort as well,
 --   issuing a type check error.
 --
 -- Comments:
@@ -980,7 +985,7 @@ public function prompt_number(sequence prompt, sequence range)
 end function
 
 --**
--- Prompt the user to enter a string of text.
+-- prompts the user to enter a string of text.
 --
 -- Parameters:
 --		# ##st## : is a string that will be displayed on the screen.
@@ -989,7 +994,7 @@ end function
 -- 		A **sequence**, the string that the user typed in, stripped of any new-line character.
 --
 -- Comments:
---     If the user happens to type control-Z (indicates end-of-file), "" will be returned.
+--     If the user happens to type Control+Z (indicates end-of-file), "" will be returned.
 --
 -- Example 1:
 --     <eucode>
@@ -1037,14 +1042,14 @@ end type
 -- <built-in> procedure clear_screen()
 --
 -- Description:
--- Clear the screen using the current background color (may be set by [[:bk_color]]() ).
+-- clears the screen using the current background color (which may be set by [[:bk_color]] ).
 --
 -- See Also:
 -- [[:bk_color]]
 --
 
 --**
--- Get the value and attribute of the character at a given screen location.
+-- gets the value and attribute of the character at a given screen location.
 --
 -- Parameters:
 -- 		# ##line## : the 1-base line number of the location
@@ -1063,8 +1068,13 @@ end type
 -- * The attribute_code is an atom that contains the foreground and background
 -- color of the character, and possibly other operating-system dependant 
 -- information describing the appearance of the character on the screen.
--- * The fg_color and bg_color are integers in the range 0 to 15, which correspond
--- to...
+-- * With ##get_screen_char## and ##put_screen_char## you can save and restore
+-- a character on the screen along with its attribute_code.
+-- * The ##fg_color## and ##bg_color## are integers in the range 0 to 15, which correspond
+-- to the values in the table:
+--
+-- Color Table
+--
 -- |= color number |= name |
 -- |       0       | black      |
 -- |       1       | dark blue      |
@@ -1083,8 +1093,6 @@ end type
 -- |       14      | yellow      |
 -- |       15      | white      |
 --
--- * With get_screen_char() and [[:put_screen_char]]() you can save and restore
--- a character on the screen along with its attribute_code.
 --
 -- Example 1:
 -- <eucode>
@@ -1117,7 +1125,7 @@ public function get_screen_char(positive_atom line, positive_atom column, types:
 end function
 
 --**
--- Stores/displays a sequence of characters with attributes at a given location.
+-- stores and displays a sequence of characters with attributes at a given location.
 --
 -- Parameters:
 -- 		# ##line## : the 1-based line at which to start writing
@@ -1135,7 +1143,7 @@ end function
 --
 -- The attributes atom contains the foreground color, background color, and possibly other platform-dependent information controlling how the character is displayed on the screen.
 -- If ##char_attr## has ##0## length, nothing will be written to the screen. The characters are written to the //active page//.
--- It's faster to write several characters to the screen with a single call to ##put_screen_char##() than it is to write one character at a time.
+-- It is faster to write several characters to the screen with a single call to ##put_screen_char## than it is to write one character at a time.
 --
 -- Example 1:
 -- <eucode>
@@ -1153,13 +1161,13 @@ end procedure
 
 
 --**
--- Converts an attribute code to its foreground and background color components.
+-- converts an attribute code to its foreground and background color components.
 --
 -- Parameters:
 -- 		# ##attr_code## : integer, an attribute code.
 --
 -- Returns:
--- A sequence of two elements - {fgcolor, bgcolor}
+-- A sequence of two elements ~-- {fgcolor, bgcolor}
 --
 -- Example 1:
 -- <eucode>
@@ -1175,7 +1183,7 @@ public function attr_to_colors(integer attr_code)
 end function
 
 --**
--- Converts a foreground and background color set to its attribute code format.
+-- converts a foreground and background color set to its attribute code format.
 --
 -- Parameters:
 -- 		# ##fgbg## : Either a sequence of {fgcolor, bgcolor} or just an integer fgcolor.
@@ -1202,7 +1210,7 @@ public function colors_to_attr(object fgbg, types:boolean bg = 0)
 end function
 
 --**
--- Display a text image in any text mode.
+-- displays a text image in any text mode.
 --
 -- Parameters:
 -- 		# ##xy## : a pair of 1-based coordinates representing the point at which to start writing
@@ -1211,7 +1219,7 @@ end function
 -- Comments:
 -- This routine displays to the active text page, and only works in text modes.
 --
--- You might use [[:save_text_image]]()/[[:display_text_image]]() in a text-mode graphical
+-- You might use [[:save_text_image]] and [[:display_text_image]] in a text-mode graphical
 -- user interface, to allow "pop-up" dialog boxes, and drop-down menus to appear and disappear
 -- without losing what was previously on the screen.
 --
@@ -1266,7 +1274,7 @@ public procedure display_text_image(text_point xy, sequence text)
 end procedure
 
 --**
--- Copy a rectangular block of text out of screen memory
+-- copies a rectangular block of text out of screen memory.
 --
 -- Parameters:
 --   # ##top_left## : the coordinates, given as a pair, of the upper left corner of the area to save.
@@ -1282,7 +1290,7 @@ end procedure
 -- This routine reads from the active text page, and only works in text modes.
 --
 -- You might use this function in a text-mode graphical user interface to save a portion of the 
--- screen before displaying a drop-down menu, dialog box, alert box etc.
+-- screen before displaying a drop-down menu, dialog box, alert box, and so on.
 --
 -- Example 1:
 -- <eucode>
@@ -1311,13 +1319,13 @@ public function save_text_image(text_point top_left, text_point bottom_right)
 end function
 
 --**
--- Set the number of lines on a text-mode screen.
+-- sets the number of lines on a text-mode screen.
 --
 -- Parameters:
 -- 		# ##rows## : an integer, the desired number of rows.
 --
 -- Platforms:
---		Not //Unix//
+--		//windows//
 --
 -- Returns:
 -- 		An **integer**, the actual number of text lines.
@@ -1334,13 +1342,14 @@ public function text_rows(positive_int rows)
 end function
 
 --**
--- Select a style of cursor.
+-- selects a style of cursor.
 --
 -- Parameters:
 -- 		# ##style## : an integer defining the cursor shape.
 --
 -- Platform:
---		Not //Unix//
+--		//windows//
+--
 -- Comments:
 --
 --   In pixel-graphics modes no cursor is displayed.
@@ -1366,32 +1375,32 @@ public procedure cursor(style_t style)
 end procedure
 
 --**
--- Free (delete) any console window associated with your program.
+-- frees (deletes) any console window associated with your program.
 --
 -- Comments:
 --  Euphoria will create a console text window for your program the first time that your
 --  program prints something to the screen, reads something from the keyboard, or in some
---  way needs a console. On WINDOWS this window will automatically disappear when your program
---  terminates, but you can call free_console() to make it disappear sooner. On Linux or FreeBSD, 
+--  way needs a console. On //windows// this window will automatically disappear when your program
+--  terminates, but you can call ##free_console()## to make it disappear sooner. On //unix// 
 --  the text mode console is always there, but an xterm window will disappear after Euphoria 
 --  issues a "Press Enter" prompt at the end of execution.
 --  
---  On Unix-style systems, ##free_console##() will set the terminal parameters back to normal,
+--  On //unix// ##free_console## will set the terminal parameters back to normal,
 --  undoing the effect that curses has on the screen.
 --  
---  In an xterm window, a call to ##free_console##(), without any further
---  printing to the screen or reading from the keyboard, will eliminate the
+--  In a //unix// terminal a call to ##free_console## (without any further
+--  printing to the screen or reading from the keyboard) will eliminate the
 --  "Press Enter" prompt that Euphoria normally issues at the end of execution.
 --  
 --  After freeing the console window, you can create a new console window by printing
---  something to the screen, or simply calling ##clear_screen##(), ##position##() or any other
+--  something to the screen, calling ##clear_screen##, ##position##, or any other
 --  routine that needs a console.
 --  
 --  When you use the trace facility, or when your program has an error, Euphoria will
---  automatically create a console window to display trace information, error messages etc.
+--  automatically create a console window to display trace information, error messages, and so on.
 --  
---  There's a WINDOWS API routine, FreeConsole() that does something similar to
---  free_console(). You should use ##free_console##() instead, because it lets the interpreter know
+--  There is a WINDOWS API routine, {{{FreeConsole()}}} that does something similar to
+--  ##free_console##. Use the Euphoria ##free_console## because it lets the interpreter know
 --  that there is no longer a console to write to or read from.
 --
 -- See Also:
@@ -1403,7 +1412,7 @@ end procedure
 
 
 --**
--- Displays the supplied data on the console screen at the current cursor position.
+-- displays the supplied data on the console screen at the current cursor position.
 --
 -- Parameters:
 -- # ##data_in## : Any object.
@@ -1413,6 +1422,7 @@ end procedure
 --
 -- Comments:
 -- * If ##data_in## is an atom or integer, it is simply displayed.
+--
 -- * If ##data_in## is a simple text string, then ##args## can be used to
 --   produce a formatted output with ##data_in## providing the [[:text:format]] string and
 --   ##args## being a sequence containing the data to be formatted.
@@ -1422,6 +1432,7 @@ end procedure
 -- ** The formatting codes expected in ##data_in## are the ones used by [[:text:format]].
 -- It is not mandatory to use formatting codes, and if ##data_in## does not contain
 -- any then it is simply displayed and anything in ##args## is ignored.
+--
 -- * If ##data_in## is a sequence containing floating-point numbers, sub-sequences 
 -- or integers that are not characters, then ##data_in## is forwarded on to the
 --  [[:pretty_print]]() to display. 

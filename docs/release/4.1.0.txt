@@ -45,3 +45,5 @@
 * [[t_integer32]] type for checking to see if an object is an integer based on 32-bit Euphoria's definition
 * Improved identification of ##routine_id()## targets by the translator
 * Smaller translated DLLs are produced by improved identification of routines that need to be exported
+* Eutest now has an eubin option for specifying all binaries in a single option.  
+* Eutest has a retest option for retesting all tests that had previously failed.
