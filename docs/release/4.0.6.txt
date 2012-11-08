@@ -1,6 +1,7 @@
-== Version 4.0.5 Date TBD
+== Version 4.0.6 Date TBD
 
 === Bug Fixes
 
 * [[ticket:801]] fix translator memory leak for ##[[:insert]]##
 * [[ticket:799]] fix memory leak in ##[[:gets]]## when reading EOF
+* [[ticket:819]] use operating system sleep functions for fractions of seconds to avoid needless CPU utilization
