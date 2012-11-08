@@ -368,7 +368,16 @@ object call_c(int func, object proc_ad, object arg_list)
 #endif      
 		return NewDouble(dresult);
 	}
-	
+	else if (return_type == C_LONGLONG ){
+		long long int llresult;
+		llresult = (*((long long int (  __cdecl *)())int_proc_address))();
+		if( (unsigned long long int)llresult < (unsigned long long int)MAXINT ){
+			return (intptr_t) llresult;
+		}
+		else{
+			return NewDouble( (double) llresult );
+		}
+	}
 	else if (return_type == C_FLOAT) {
 		// expect float to be returned from C routine
 #if defined(EWINDOWS) && !defined(__WATCOMC__)
@@ -407,7 +416,7 @@ object call_c(int func, object proc_ad, object arg_list)
 				return NewDouble((double)(unsigned)iresult);
 			}
 		}
-		else if ((return_type & 0x000000FF) == 04) {
+		else if ((return_type & 0x000000FF) == 4 ||(return_type & 0x000000FF) == 8) {
 			/* 4-byte integer - usual case */
 			// check if unsigned result is required 
 			if ((return_type & C_TYPE) == 0x02000000) {
@@ -1584,14 +1593,14 @@ object call_c(int func, object proc_ad, object arg_list)
 				return NewDouble((eudouble)(uintptr_t)iresult);
 			}
 		case C_LONGLONG:
-			if ((long long int)iresult <= (long long int)MAXINT) {
+			if ((unsigned long long int)iresult <= (unsigned long long int)MAXINT) {
 				return iresult;
 			}
 			else{
 				return NewDouble((eudouble)(intptr_t)iresult);
 			}
 		case C_INT:
-			if ((intptr_t)(int)iresult <= MAXINT) {
+			if ((uintptr_t)(int)iresult <= MAXINT) {
 				return (int)iresult;
 			}
 			else{
@@ -1605,7 +1614,7 @@ object call_c(int func, object proc_ad, object arg_list)
 				return NewDouble((eudouble)(unsigned int)iresult);
 			}
 		case C_LONG:
-			if ((intptr_t)(long)iresult <= MAXINT) {
+			if ((uintptr_t)(long)iresult <= MAXINT) {
 				return (long)iresult;
 			}
 			else{

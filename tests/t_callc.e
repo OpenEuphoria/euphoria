@@ -50,7 +50,7 @@ end for
 
 constant lib818 = open_dll("./lib818.dll")
 
-test_true( "Can open lib818.dll", lib818 )
+set_test_verbosity( TEST_SHOW_ALL )
 if lib818 then
 	-- The underlying library will return values in C values that fit into thier values but are out of bounds 
 	-- amoung EUPHORIA integers.  Large negatives can appear to be encoded pointers to sequences, the interpreter uses
@@ -60,7 +60,18 @@ if lib818 then
 	for i = 1 to length(signed_types) do
 		r_faux_sequence = define_c_func( lib818, sprintf("%s_faux_sequence", {signed_type_names[i]}), {}, signed_types[i] )
 		if r_faux_sequence != -1 then
-			test_equal(sprintf("detect negative values as such for type %s",{signed_type_names[i]}),  MININT_EUPHORIA-20, c_func(r_faux_sequence, {}))
+			atom expected_ptr = define_c_var( lib818, signed_type_names[i] )
+			if expected_ptr > 0 then
+				atom expected_val
+				switch signed_types[i] do
+					case C_INT      then expected_val = peek4s( expected_ptr )
+					case C_LONG     then expected_val = peek_longs( expected_ptr )
+					case C_LONGLONG then expected_val = peek8s( expected_ptr )
+				end switch
+				test_equal(sprintf("detect negative values as such for type %s",{signed_type_names[i]}),
+					expected_val,
+					c_func(r_faux_sequence, {}))
+			end if
 		end if
 	end for
 end if	
