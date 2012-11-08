@@ -29,9 +29,9 @@ function minus_1_fn()
 	return -1 
 end function 
 
-constant unsigned_types      = { C_UCHAR, C_UBYTE, C_USHORT, C_UINT, C_POINTER }
-constant unsigned_type_names = { "C_UCHAR", "C_UBYTE", "C_USHORT", "C_UINT", "C_POINTER" }
-constant minus_1_values      = { #FF, #FF, #FF_FF, MAXUINT32, MAXUPTR }
+constant unsigned_types      = {  C_UCHAR,   C_UBYTE,   C_USHORT,   C_UINT,    C_POINTER }
+constant unsigned_type_names = { "C_UCHAR", "C_UBYTE", "C_USHORT", "C_UINT",  "C_POINTER" }
+constant minus_1_values      = { #FF,       #FF,       #FF_FF,      MAXUINT32, MAXUPTR }
 		 
 
 		
@@ -42,7 +42,7 @@ for i = 1 to length(minus_1_values) do
 end for
 
 constant signed_types      = { C_CHAR,    C_BYTE,   C_SHORT,   C_INT,   C_BOOL,   C_LONG,   C_LONGLONG }
-constant signed_type_names = { "C_CHAR", "C_BYTE", "C_SHORT", "C_INT", "C_BOOL", "C_LONG", "C_LONGLONG" }
+constant signed_type_names = { "C_CHAR", "C_BYTE", "C_SHORT", "C_INT", "C_BOOL", "C_LONG", "C_LONGLONG"}
 for i = 1 to length(signed_types) do
 	r_max_uint_fn = define_c_func( "", call_back( routine_id("minus_1_fn") ), {}, signed_types[i] )
 	test_equal( sprintf("return type %s preserves -1", {signed_type_names[i]}), -1, c_func(r_max_uint_fn, {}) )
@@ -50,7 +50,7 @@ end for
 
 constant lib818 = open_dll("./lib818.dll")
 
-set_test_verbosity( TEST_SHOW_ALL )
+test_true( "Can open lib818.dll", lib818 )
 if lib818 then
 	-- The underlying library will return values in C values that fit into thier values but are out of bounds 
 	-- amoung EUPHORIA integers.  Large negatives can appear to be encoded pointers to sequences, the interpreter uses
@@ -74,7 +74,7 @@ if lib818 then
 			end if
 		end if
 	end for
-end if	
+end if
 
 -- Should put some tests for argument passing as well : passing floating point, double, long long, etc..
 
