@@ -39,6 +39,35 @@
 -- when you search "*.*" the following files 
 -- will be skipped (to save time):
 
+include std/get.e
+
+-- patch for Linux screen positioning
+procedure get_real_text_starting_position() 
+                sequence sss = "" 
+                integer ccc 
+                puts(1, 27&"[6n") 
+                while 1 do 
+                        ccc = get_key() 
+                        if ccc = 'R' then 
+                                exit 
+                        end if 
+                        if ccc != -1 then 
+                                sss &= ccc 
+                        end if 
+                end while 
+                sss = sss[3..$] 
+                sequence aa, bb 
+                aa = value(sss[1..find(';', sss)-1]) 
+                bb = value(sss[find(';', sss)+1..$]) 
+                position(aa[2], bb[2]) 
+end procedure 
+ifdef LINUX then 
+	get_real_text_starting_position() 
+end ifdef 
+
+get_real_text_starting_position()
+
+
 sequence skip_list 
 ifdef UNIX then
     skip_list = {
@@ -456,6 +485,7 @@ end if
 
 if alphabetic(orig_string) then
     puts(SCREEN, "match case? (n)")
+    get_real_text_starting_position()
     pos = get_position()
     position(pos[1], pos[2] - 2)
     match_case = find('y', gets(KEYB))
@@ -490,6 +520,7 @@ for i = 1 to length(d) do
     if find('d', d[i][D_ATTRIBUTES]) then
 	if not find(d[i][D_NAME], {".", ".."}) then
 	    puts(SCREEN, "scan subdirectories? (y)")
+	    get_real_text_starting_position()
 	    pos = get_position()
 	    position(pos[1], pos[2] - 2)
 	    scan_subdirs = not match("n", gets(KEYB))

@@ -165,33 +165,44 @@ sequence patch_code_temp = {}
 sequence patch_linetab_temp = {}
 symtab_index patch_code_sub
 symtab_index patch_current_sub
+
 -- Sets the Code and LineTable variables according to what is set for this forward reference ref.
 procedure set_code( integer ref )
 	patch_code_sub = forward_references[ref][FR_SUBPROG]
-	
 	if patch_code_sub != CurrentSub then
+		-- we're patching a routine other than the current one
 		patch_code_temp = Code
 		patch_linetab_temp = LineTable
 		
 		Code = SymTab[patch_code_sub][S_CODE]
 		SymTab[patch_code_sub][S_CODE] = 0
 		LineTable = SymTab[patch_code_sub][S_LINETAB]
+		SymTab[patch_code_sub][S_LINETAB] = 0
 		
 		patch_current_sub = CurrentSub
 		CurrentSub = patch_code_sub
 	else
 		patch_current_sub = patch_code_sub
+		if sequence( SymTab[patch_current_sub][S_CODE] ) then
+			SymTab[patch_code_sub][S_CODE] = 0
+			SymTab[patch_code_sub][S_LINETAB] = 0
+		end if
 	end if
 end procedure
 
 procedure reset_code( )
-	SymTab[patch_code_sub][S_CODE] = Code
-	SymTab[patch_code_sub][S_LINETAB] = LineTable
 	if patch_code_sub != patch_current_sub then
+		-- put the patched code back into the symtab
+		SymTab[patch_code_sub][S_CODE] = Code
+		SymTab[patch_code_sub][S_LINETAB] = LineTable
+
+		-- reset to where we were before set_code() was called
 		CurrentSub = patch_current_sub
 		Code = patch_code_temp
 		LineTable = patch_linetab_temp
 	end if
+
+	-- clear the references on these
 	patch_code_temp = {}
 	patch_linetab_temp = {}
 end procedure
@@ -592,6 +603,7 @@ procedure patch_forward_call( token tok, integer ref )
 	sequence params = repeat( 0, args )
 	sequence orig_code = code
 	sequence orig_linetable = LineTable
+	LineTable = {}
 	Code = {}
 	
 	
@@ -645,7 +657,9 @@ procedure patch_forward_call( token tok, integer ref )
 	
 	sequence new_code = Code
 	Code = orig_code
+	orig_code = {}
 	LineTable = orig_linetable
+	orig_linetable = {}
 	set_dont_read( 0 )
 	current_file_no = real_file
 	
@@ -1233,7 +1247,6 @@ procedure remove_active_reference( integer ref, integer file_no = current_file_n
 end procedure
 
 function resolve_file( sequence refs, integer report_errors, integer unincluded_ok )
-	
 	sequence errors = {}
 	for ar = length( refs ) to 1 by -1 do
 		integer ref = refs[ar]
@@ -1355,7 +1368,6 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 		if (length( active_subprogs[i] ) or length(toplevel_references[i])) 
 		and (i = current_file_no or finished_files[i] or unincluded_ok)
 		then
-			
 			for j = length( active_references[i] ) to 1 by -1 do
 				errors &= resolve_file( active_references[i][j], report_errors, unincluded_ok )
 			end for

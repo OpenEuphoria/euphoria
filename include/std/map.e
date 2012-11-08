@@ -7,7 +7,7 @@
 -- in a map the data **values** (any Euphoria object) are indexed by **keys (also any Euphoria object).
 --
 -- When programming think in terms of //key:value// pairs.
--- For example we can code things like this:
+-- For example we can code things like this~:
 -- <eucode>
 --    custrec = new() -- Create a new map
 --    put(custrec, "Name", "Joe Blow")
@@ -16,7 +16,7 @@
 -- </eucode>
 -- This creates three elements in the map, and they are indexed by ##"Name"##, 
 -- ##"Address"## and ##"Phone"##, meaning that to get the data associated with those
--- keys we can code:
+-- keys we can code~:
 -- <eucode>
 --    object data = get(custrec, "Phone")
 --    -- data now set to 555675632
@@ -1976,7 +1976,7 @@ end function
 --   A **map**, containing the data from ##kv_string##
 --
 -- Comment:
--- This function actually calls ##[[:keyvalues]]()## to convert the string to
+-- This function actually calls ##[[:keyvalues]]## to convert the string to
 -- key-value pairs, which are then used to create the map.
 --
 -- Example 1:
@@ -2020,16 +2020,16 @@ end function
 --
 -- Returns:
 -- An integer: 0 means that all the items were processed, and anything else is whatever
--- was returned by the user routine to abort the ##for_each()## process.
+-- was returned by the user routine to abort the ##for_each## process.
 --
 -- Comments:
 -- * The user defined routine is a function that must accept four parameters.
 -- ## Object: an Item Key
 -- ## Object: an Item Value
--- ## Object: The ##user_data## value. This is never used by ##for_each()## itself, 
+-- ## Object: The ##user_data## value. This is never used by ##for_each## itself, 
 -- merely passed to the user routine.
 -- ## Integer: Progress code.
--- *** The ##abs()## value of the progress code is the ordinal call number. That
+-- *** The ##abs## value of the progress code is the ordinal call number. That
 -- is 1 means the first call, 2 means the second call, etc ...
 -- *** If the progress code is negative, it is also the last call to the routine.
 -- *** If the progress code is zero, it means that the map is empty and thus the
@@ -2037,10 +2037,10 @@ end function
 -- *** **note** that if ##signal_boundary## is zero, the Progress Code is never
 --     less than 1.
 -- * The user routine must return 0 to get the next map item. Anything else will
--- cause ##for_each()## to stop running, and is returned to whatever called 
--- ##for_each()##.
+-- cause ##for_each## to stop running, and is returned to whatever called 
+-- ##for_each##.
 -- * Note that any changes that the user routine makes to the map do not affect the
--- order or number of times the routine is called. ##for_each()## takes a copy of the
+-- order or number of times the routine is called. ##for_each## takes a copy of the
 -- map keys and data before the first call to the user routine and uses the copied
 -- data to call the user routine. 
 --

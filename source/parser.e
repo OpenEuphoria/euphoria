@@ -198,6 +198,8 @@ procedure EnterTopLevel( integer end_line_table = 1 )
 	end if
 	LineTable = SymTab[TopLevelSub][S_LINETAB]
 	Code = SymTab[TopLevelSub][S_CODE]
+	SymTab[TopLevelSub][S_LINETAB] = 0
+	SymTab[TopLevelSub][S_CODE] = 0
 	previous_op = -1
 	CurrentSub = TopLevelSub
 	clear_last()
@@ -5472,6 +5474,10 @@ export procedure parser()
 	mark_final_targets()
 	resolve_unincluded_globals( 1 )
 	Resolve_forward_references( 1 )
+	SymTab[TopLevelSub][S_CODE] = Code
+	SymTab[TopLevelSub][S_LINETAB] = LineTable
+	Code = {}
+	LineTable = {}
 	inline_deferred_calls()
 	if not repl then
 	End_block( PROC )

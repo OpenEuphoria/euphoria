@@ -6,7 +6,7 @@ integer fh = open("builtins.txt", "w")
 puts(fh, `
 == Built-in Routines
 
-These **built-in** routines do not require an include file:
+These **built-in** routines do not require an include file~:
 
 `)
 
@@ -40,8 +40,8 @@ printf(fh, "\n")
 puts(fh, `
 A built-in routine has global scope and belongs to the ##eu## namespace. 
 
-An identifier for a built-in is not reserved; it is possible to override these identifiers 
-with new declarations.
+An identifier for a built-in is not reserved; it is possible to override a built-in
+identifier with a new declaration.
 ` )
 
 

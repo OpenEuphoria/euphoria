@@ -470,7 +470,7 @@ end procedure
 --
 -- Comments:
 -- This assumes an expected value of 0. No fuzz is applied when checking whether an atom is zero
--- or not. Use [[:test_equal]]() instead in this case.
+-- or not. Use [[:test_equal]] instead in this case.
 --
 -- See Also:
 -- [[:test_equal]], [[:test_not_equal]], [[:test_true]], [[:test_pass]], [[:test_fail]]

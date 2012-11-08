@@ -61,11 +61,11 @@ public enum
 constant M_INSTANCE = 55
 
 --**
--- returns ##hInstance## on //windows// and Process ID (pid) on //unix//.
+-- returns ##hInstance## on //Windows// and Process ID (pid) on //Unix//.
 --
 -- Comments:
--- On //windows// the ##hInstance## can be passed around to various
--- //windows// routines.
+-- On //Windows// the ##hInstance## can be passed around to various
+-- //Windows// routines.
 
 public function instance()
 	return machine_func(M_INSTANCE, 0)
@@ -114,7 +114,7 @@ end ifdef
 --    A **sequence**, starting with the OS name. If identification fails, returns
 --    an OS name of ##UNKNOWN##. Extra information depends on the OS.
 --
---    On //unix// returns the same information as the ##uname## syscall in the same
+--    On //Unix// returns the same information as the ##uname## syscall in the same
 --    order as the struct ##utsname##. This information is:
 -- {{{
 --        OS Name/Kernel Name
@@ -125,7 +125,7 @@ end ifdef
 --        Architecture Name (Usually a string of i386 vs x86_64 vs ARM vs etc)
 -- }}}
 --
---    On //windows// returns the following in order:
+--    On //Windows// returns the following in order:
 -- {{{
 --        Windows Platform (out of WinCE, Win9x, WinNT, Win32s, or Unknown Windows)
 --        Name of Windows OS (Windows 3.1, Win95, WinXP, etc)
@@ -140,9 +140,9 @@ end ifdef
 --    Returns an empty string of "" if an internal error has occured.
 --
 -- Comments:
--- On //unix//  ##M_UNAME## is defined as a ##machine_func## and this is passed to the C
+-- On //Unix//  ##M_UNAME## is defined as a ##machine_func## and this is passed to the C
 -- backend. If the ##M_UNAME## call fails, the raw ##machine_func## returns -1.
--- On non-//unix// platforms, calling the ##machine_func## directly returns 0.
+-- On non-//Unix// platforms, calling the ##machine_func## directly returns 0.
 
 public function uname()
 	ifdef WINDOWS then
@@ -420,14 +420,14 @@ end function
 --
 -- If it is not possible to run the program, ##system_exec## will return -1.
 --
--- On //windows// ##system_exec## will only run ##.exe## and ##.com## programs.
+-- On //Windows// ##system_exec## will only run ##.exe## and ##.com## programs.
 -- To run ##.bat## files, or built-in shell commands, you need [[:system]]. Some commands,
 -- such as ##DEL##, are not programs, they are actually built-in to the command interpreter.
 --
--- On //windows// ##system_exec## does not allow the use of command-line redirection in ##command##.
+-- On //Windows// ##system_exec## does not allow the use of command-line redirection in ##command##.
 -- Nor does it allow you to quote strings that contain blanks, such as file names.
 --
--- exit codes from //windows// programs are normally in the range 0 to 255, with 0 indicating "success".
+-- exit codes from //Windows// programs are normally in the range 0 to 255, with 0 indicating "success".
 --
 -- You can run a Euphoria program using ##system_exec##. A Euphoria program can return an exit code using [[:abort]].
 --

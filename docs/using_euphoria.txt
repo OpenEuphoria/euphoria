@@ -9,7 +9,7 @@ The //mandatory// 'Hello World' program is a one-liner in Euphoria.
 puts(1, "Hello, World\n")
 </eucode>
 
-The built-in routine ##puts()## does the job of displaying text on a screen. It
+The built-in routine ##puts## does the job of displaying text on a screen. It
 requires two arguments. The first argument, ##1##,  directs the output to 
 STDOUT or the console. The second argument, is a string of text that will be 
 output.
@@ -78,7 +78,7 @@ The above example contains a number of statements that are processed in order.
 access to the public symbols declared in the file
 'std/console.e'. This is referred to as a //library//
 file. In our case here, the application will be using
-the ##display()## routine from console.e.
+the ##display## routine from ##console.e# .
 
 ; ##sequence original_list## 
 : This declares a variable that is not public but is 
@@ -93,13 +93,13 @@ a function routine. Functions return values when called.
 This function must be passed a single parameter when
 called - a sequence.
 
-; ##procedure print_sorted_list() ... end procedure## 
+; ##procedure ##print_sorted_list() ... end procedure## 
 : This declares and defines
 a procedure routine. Procedures never return values when called.
 This procedure must not be passed any parameters when
 called.
 
-; ##print_sorted_list()## 
+; ##print_sorted_list## 
 : This calls the routine called ##print_sorted_list##.
 
 The output from the program will be:
@@ -116,7 +116,7 @@ Number 84 was at position  5, now at  9
 Number 98 was at position  7, now at 10
 }}}
 
-Note that ##merge_sort()## will just as easily sort any list of data items ...
+Note that ##merge_sort## will just as easily sort any list of data items ...
 <eucode>
 {1.5, -9, 1e6, 100}
 {"oranges", "apples", "bananas"}
@@ -277,7 +277,7 @@ Depending on the platform you are using the interpreter could be called:
 The command-line may contain extra information. Following your program filename
 you may add extra words (known as //arguments//) that can used in your program
 to customize its behavior. These arguments are read within your program by the
-built-in function [[:command_line]]().
+built-in function [[:command_line]].
 
 Optionally, you may also use [[:command line switches]] that are typed between
 the interpreter name and the program name. Command line switches
@@ -314,7 +314,7 @@ eui myprog.ex %1 %2 %3 %4 %5 %6 %7 %8 %9
 </eucode>
 The first statement turns off echoing of commands to the screen. The second
 runs ##eui myprog.ex## with up to 9 command-line arguments. See
-[[:command_line]]() for an example of how to read these arguments. Having
+[[:command_line]] for an example of how to read these arguments. Having
 a .bat file will save you the minor inconvenience of typing ##eui##
 all the time; i.e., you can just type:
 <eucode>
@@ -426,16 +426,16 @@ Euphoria provides you with 4 distinct ways of distributing a program.
 * "translate" into a C-compiled executable
 
 
-In the first method you simply ship your users the interpreter along with your
+In the first way you simply ship your users the interpreter along with your
 Euphoria source files including any Euphoria includes that may be necessary
 from the ##euphoria/include## directory. If the Euphoria source files and the
 interpreter are placed together in one directory then your user can run your
 program by typing ##eui## followed by the path of your main executable source
 file. You might also provide a small ##.bat## file so people won't actually
-have to type the interpreter name. This method assumes that you are willing to
+have to type the interpreter name. This way assumes that you are willing to
 share your Euphoria source code with your users.
 
-The Binder gives you two more methods of distribution. You can ##shroud## your
+The Binder gives you two more ways of distribution. You can ##shroud## your
 program, or you can ##bind## your program. **Shrouding** combines all of the
 Euphoria source code that your program needs to create a single ##.il## file.
 **Binding** combines your shrouded program with the Euphoria backend

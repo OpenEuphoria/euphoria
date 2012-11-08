@@ -176,12 +176,7 @@ in Euphoria
 * No limits as to what you can program
 * Euphoria programming skills will enhance learning other languages
 
-=== As an extension to languages you already know
-
-* A fast, flexible, and powerful language
-* Euphoria, the language you will prefer to program in
-
-=== But, my favorite language is ...
+=== But, my favorite language is...
 
 You will find that Euphoria programmers are also knowledgeable in other
 languages. I find that the more tools you have (saws and hammers, or programming

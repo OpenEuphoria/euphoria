@@ -1652,21 +1652,23 @@ end function
 --
 -- * The predefined comparitors are~:
 --
--- | "<"  or "lt" | return items in ##source## that are less than ##userdata## |
--- | "<=" or "le" | return items in ##source## that are less than or equal to ##userdata## |
--- | "="  or "==" or "eq" | return items in ##source## that are equal to ##userdata## |
--- | "!=" or "ne" | return items in ##source## that are not equal to ##userdata## |
--- | ">"  or "gt" | return items in ##source## that are greater than ##userdata## |
--- | ">=" or "ge" | return items in ##source## that are greater than or equal to ##userdata## |
--- | "in" | return items in ##source## that are in ##userdata## |
--- | "out" | return items in ##source## that are not in ##userdata## |
+-- |= Comparitor |  |= Return Items in ##source## that are... |
+-- | "<"  |   "lt" | less than ##userdata## |
+-- | "<=" |  "le" |  less than or equal to ##userdata## |
+-- | "=" or "==" |  "eq" |  equal to ##userdata## |
+-- | "!=" |  "ne" |  not equal to ##userdata## |
+-- | ">"  |  "gt" |  greater than ##userdata## |
+-- | ">=" | "ge" | greater than or equal to ##userdata## |
+-- | | "in" | in ##userdata## |
+-- | | "out" | not in ##userdata## |
 --
 -- * Range Type Usage
--- |= Range Type  |= Meaning |
--- | "[]"         | Inclusive range. Lower and upper are in the range. |
--- | "[)"         | Low Inclusive range. Lower is in the range but upper is not. |
--- | "(]"         | High Inclusive range. Lower is not in the range but upper is. |
--- | "()"         | Exclusive range. Lower and upper are not in the range. |
+--
+-- |= Range Type  |= Range |= Meaning |
+-- | "[]"         | Inclusive range. | Lower and upper are in the range. |
+-- | "[)"         | Low Inclusive range. | Lower is in the range but upper is not. |
+-- | "(]"         | High Inclusive range.| Lower is not in the range but upper is. |
+-- | "()"         | Exclusive range. | Lower and upper are not in the range. |
 --
 -- Example 1:
 -- <eucode>
@@ -1904,7 +1906,7 @@ end function
 -- public constant STDFLTR_ALPHA
 --
 -- Description:
--- Predefined routine_id for use with [[:filter]]().
+-- Predefined routine_id for use with [[:filter]].
 --
 -- Comments:
 -- Used to filter out non-alphabetic characters from a string.
@@ -2574,7 +2576,7 @@ end function
 --        where 'x' is an item in the ##source## list, 'i' contains the position that 'x' is
 --        found in the ##source## list and the length of ##source##, and 'u'
 --        is the ##user_data## value. Each transformer
---        must return a two-element sequence. If the first element is zero, then build_list() continues
+--        must return a two-element sequence. If the first element is zero, then ##build_list## continues
 --        on with the next transformer function for the same 'x'. If the first element is not
 --        zero, the second element is added to the new list being built (other elements
 --        are ignored) and build_list skips the rest of the transformers and processes

@@ -243,7 +243,7 @@ public constant w32_names = {
 	}
 	
 --**
--- Canonical locale names for //WINDOWS//:
+-- Canonical locale names for //Windows//:
 -- 
 -- | Afrikaans_South Africa|  Afrikaans_South Africa| Afrikaans_South Africa| 
 -- | Afrikaans_South Africa|  Afrikaans_South Africa|  Afrikaans_South Africa| 
@@ -823,7 +823,7 @@ public function canonical(sequence new_locale)
 end function
 
 --**
--- Get the translation of a locale string for current platform.
+-- gets the translation of a locale string for current platform.
 --
 -- Parameters:
 --		# ##new_locale##: a sequence, the string for the locale.
@@ -866,7 +866,7 @@ public function decanonical(sequence new_locale)
 end function
 
 --**
--- Get the translation of a canoncial locale string for the Windows platform.
+-- gets the translation of a canoncial locale string for the //Windows// platform.
 --
 -- Parameters:
 --		# ##new_locale##: a sequence, the string for the locale.

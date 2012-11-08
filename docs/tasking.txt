@@ -122,11 +122,11 @@ old Language War tasking scheme a scheduler would *call* a task, which would
 eventually have to *return* to the scheduler, so it could then dispatch the
 next task.
 
-In the new system, a task can call the built-in procedure task_yield() at any
+In the new system, a task can call the built-in procedure ##task_yield## at any
 point, perhaps many levels deep in subroutine calls, and the scheduler, which
 is now part of the interpreter, will be able to transfer control to any other
 task. When control comes back to the original task, it will resume execution at
-the statement after task_yield(), with its call stack and all private variables
+the statement after ##task_yield##, with its call stack and all private variables
 intact. Each task has its own call stack, program counter (i.e. current
 statement being executed), and private variables.  You might have several tasks
 all executing a routine at the same time, and each task will have its own set
@@ -134,7 +134,7 @@ of private variable values for that routine. Global and local variables are
 shared between tasks.
 
 It's fairly easy to take any piece of code and run it as a task.  Just insert a
-few task_yield() statements so it won't hog the CPU.
+few ##task_yield## statements so it will not hog the CPU.
 
 === Comparison with multithreading
 

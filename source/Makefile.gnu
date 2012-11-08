@@ -130,6 +130,7 @@ ifeq "$(EMINGW)" "1"
 			MEM_FLAGS=-DESIMPLE_MALLOC
 		endif
 	endif
+	CREATEDLLFLAGS=-Wl,--out-implib,lib818dll.a 
 else
 	EXE_EXT=
 	EPTHREAD=-pthread
@@ -151,6 +152,9 @@ ifndef LIBRARY_NAME
 	else
 		LIBRARY_NAME=eu.a
 	endif
+
+	MEM_FLAGS=-DESIMPLE_MALLOC
+	CREATEDLLFLAGS=
 endif
 
 MKVER=$(BUILDDIR)/mkver$(HOST_EXE_EXT)
@@ -219,6 +223,7 @@ else ifeq "$(EMINGW)" "1"
 PLAT=WINDOWS
 endif
 
+# We mustn't use eui rather than $(EEXU) in these three lines below.   When this translates from Unix, the interpreter we call to do the translation must not have a .exe extension. 
 ifeq  "$(EUBIN)" ""
 EXE=$(EEXU)
 HOST_EXE=$(HOST_EEXU)
@@ -247,7 +252,7 @@ CREOLE=creole
 endif
 
 ifeq "$(TRANSLATE)" "euc"
-	TRANSLATE=$(EECU)
+	TRANSLATE="euc"
 else
 #   We MUST pass these arguments to $(EXE), for $(EXE) is not and shouldn't be governed by eu.cfg in BUILDDIR.
 	TRANSLATE=$(HOST_EXE) $(CYPINCDIR) $(EC_DEBUG) $(EFLAG) $(CYPTRUNKDIR)/source/euc.ex
@@ -739,7 +744,7 @@ test : EUCOMPILEDIR=$(TRUNKDIR)
 test : EUCOMPILEDIR=$(TRUNKDIR)	
 test : C_INCLUDE_PATH=$(TRUNKDIR):..:$(C_INCLUDE_PATH)
 test : LIBRARY_PATH=$(%LIBRARY_PATH)
-test : 
+test : ../tests/lib818.dll
 test :  
 	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
 		$(EXE) -i ../include ../source/eutest.ex -i ../include -cc gcc $(VERBOSE_TESTS) \
@@ -1001,6 +1006,11 @@ $(BUILDDIR)/%.res : %.rc
 $(BUILDDIR)/$(OBJDIR)/%.o : $(BUILDDIR)/$(OBJDIR)/%.c
 	$(CC) $(EBSDFLAG) $(FE_FLAGS) $(BUILDDIR)/$(OBJDIR)/$*.c -I/usr/share/euphoria -o$(BUILDDIR)/$(OBJDIR)/$*.o
 
+$(BUILDDIR)/test818.o : test818.c
+	gcc -c -I ../include $(FE_FLAGS) -Wall -shared ../source/test818.c -o $(BUILDDIR)/test818.o
+
+../tests/lib818.dll : $(BUILDDIR)/test818.o
+	gcc -shared -o ../tests/lib818.dll $(CREATEDLLFLAGS) $(BUILDDIR)/test818.o
 
 ifeq "$(EUPHORIA)" "1"
 

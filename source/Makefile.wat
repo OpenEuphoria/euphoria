@@ -300,7 +300,7 @@ EXTRACHECKFLAG=/dEXTRA_CHECK
 !endif
 
 !ifndef EX
-EX="$(EUBIN)\eui.exe"
+EX=$(EUBIN)\eui.exe
 !endif
 
 EXE=$(EX)

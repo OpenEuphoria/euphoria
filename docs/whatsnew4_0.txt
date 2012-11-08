@@ -36,7 +36,7 @@ Too numerous to list here, please see the reference section of this manual.
   add and delete items from the source code without having to adjust the commas.
 * [[:enum|Enumerated values/types]] (##enum##, ##enum type##)
 * Built-in ##eu:## [[:namespace]]
-* Declare variable anywhere, not just at the top of a method. 
+* Declare variable anywhere, not just at the top of a routine. 
 * Scoped variables (declared inside an ##if## for example)
 * Assign on declaration. You can now declare a variable and assign it an initial value on the same statement.
 * The ##[[:object]]()## built-in function can now be used to safely test if a variable has been initialized or not.

@@ -1,7 +1,7 @@
 --****
 -- == Command Line Handling
 --
--- <<LEVELTOC level=2 depth=5>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 
 namespace cmdline
@@ -44,15 +44,18 @@ public constant
 	--** This option switch may occur multiple times on a command line. See [[:cmd_parse]]
 	MULTIPLE      = '*',
 
-	--** This option switch triggers the 'help' display. See [[:cmd_parse]]
+	--** 
+	-- This option switch triggers the 'help' display. See [[:cmd_parse]]
 	HELP          = 'h',
 	
-	--** This option switch is simply a help display header to group like options together.
+	--** 
+	-- This option switch is simply a help display header to group like options together.
 	-- See [[:cmd_parse]]
 	HEADER        = 'H',
 
-    --** This option switch sets the program version information. If this option
-    -- is chosen by the user cmd_parse will display the program version information
+    --** 
+    -- This option switch sets the program version information. If this option
+    -- is chosen by the user ##cmd_parse## will display the program version information
     -- and then end the program with a zero error code.
     VERSIONING    = 'v'
 
@@ -77,42 +80,45 @@ public enum
 	-- with command line parameters that it is not meant to
 	-- handle.  At expansions after the first extra are also disabled.
 	--
-	-- For instance:
+	-- For instance~:
+	--
 	-- ##eui -D TEST greet.ex -name John -greeting Bye##
-	-- -D TEST is meant for ##eui##, but -name and -greeting options
+	--
+	-- ##-D TEST## is meant for ##eui##, but ##-name## and ##-greeting## options
 	-- are meant for ##greet.ex##. See [[:cmd_parse]]
 	--
 	-- ##eui @euopts.txt greet.ex @hotmail.com##
+	--
 	-- here 'hotmail.com' is not expanded into the command line but
 	-- 'euopts.txt' is.
 	NO_VALIDATION_AFTER_FIRST_EXTRA,
 
 	--**
-	-- Only display the option list in show_help. Do not display other
-	-- information such as program name, options, etc... See [[:cmd_parse]]
+	-- Only display the option list in ##show_help##. Do not display other
+	-- information (such as program name, options, and so on) See [[:cmd_parse]]
 	SHOW_ONLY_OPTIONS,
 
 	--**
-	-- Expand arguments that begin with '@' into the command line. (default)
-	-- For example, @filename will expand the contents of file named 'filename'
+	-- Expand arguments that begin with ##'@'## into the command line. (default)
+	-- For example, ##@filename## will expand the contents of file named 'filename'
 	-- as if the file's contents were passed in on the command line.  Arguments
 	-- that come after the first extra will not be expanded when
-	-- NO_VALIDATION_AFTER_FIRST_EXTRA is specified.
+	-- ##NO_VALIDATION_AFTER_FIRST_EXTRA## is specified.
 	AT_EXPANSION,
 
 	--**
-	-- Do not expand arguments that begin with '@' into the command line.
-	-- Normally @filename will expand the file names contents as if the
+	-- Do not expand arguments that begin with ##'@'## into the command line.
+	-- Normally ##@filename## will expand the file names contents as if the
 	-- file's contents were passed in on the command line.  This option
 	-- supresses this behavior.
 	NO_AT_EXPANSION,
 
 	--**
-	-- Supply a message to display and pause just prior to abort() being called.
+	-- Supply a message to display and pause just prior to ##abort## being called.
 	PAUSE_MSG,
 
 	--**
-	-- Disable the automatic inclusion of -h, -? and ~--help as help switches.
+	-- Disable the automatic inclusion of ##-h##, ##-?##, and ##~--help## as help switches.
 	NO_HELP,
 	
 	--**
@@ -128,7 +134,7 @@ public enum
 
 	--**
 	--   The number of times that the routine has been called
-	--   by cmd_parse for this option. See [[:cmd_parse]]
+	--   by ##cmd_parse## for this option. See [[:cmd_parse]]
 	OPT_CNT,
 
 	--**
@@ -622,7 +628,7 @@ end procedure
 -- returns sequence of strings containing each word entered at the command-line that started your program.
 --
 -- Returns:
--- # The ##path##, to either the Euphoria executable (eui, eui.exe, euid.exe euiw.exe) or to your bound
+-- # The ##path##, to either the Euphoria executable (##eui##, ##eui.exe##, ##euid.exe##, ##euiw.exe##) or to your bound
 --   executable file.
 -- # The ##next word##, is either the name of your Euphoria main file or
 -- (again) the path to your bound executable file.
@@ -710,7 +716,7 @@ end procedure
 -- # ##opts## : a sequence of options. See the [[:cmd_parse]] for details.
 -- # ##add_help_rid## : an object. Either a routine_id or a set of text strings.
 -- The default is -1 meaning that no additional help text will be used.
--- # ##cmds## : a sequence of strings. By default this is the output from [[:command_line]]()
+-- # ##cmds## : a sequence of strings. By default this is the output from [[:command_line]]
 -- # ##parse_options## : An option set of behavior modifiers.  See the [[:cmd_parse]] for details.
 --
 -- Comments:
@@ -735,7 +741,7 @@ end procedure
 --     {"r", 0, "Sets how many lines the console should display", 
 --     {HAS_PARAMETER,"lines"}, -1}}, description)
 -- </eucode>
--- Outputs:
+-- Outputs~:
 -- {{{
 -- myfile.ex options:
 --   -q, --silent      Suppresses any output to console
@@ -765,7 +771,7 @@ end procedure
 --     {"r", 0, "Sets how many lines the console should display", 
 --      {HAS_PARAMETER,"lines"}, -1}}, routine_id("sh"))
 -- </eucode>
--- Outputs:
+-- Outputs~:
 -- {{{
 -- myfile.ex options:
 --   -q, --silent      Suppresses any output to console
@@ -1180,7 +1186,7 @@ end function
 -- //switches// and //options// that are valid for the application: See Comments: section for details
 -- # ##parse_options## : an optional list of special behavior modifiers: See Parse Options section for details
 -- # ##cmds## : an optional sequence of command line arguments. If omitted the output from
---              ##command_line##() is used.
+--              ##command_line## is used.
 --
 -- Returns:
 -- A **map**, containing the set of actual options used in ##cmds##. The returned
@@ -1200,7 +1206,8 @@ end function
 -- default rules for parsing the command line. If used, it is a list of values
 -- that will affect the parsing of the command line options. 
 --
--- These modifers can be any combination of :
+-- These modifers can be any combination of~:
+--
 -- # ##VALIDATE_ALL## ~-- The default. All options will be validated for all possible errors.
 -- # ##NO_VALIDATION## ~-- Do not validate any parameter.
 -- # ##NO_VALIDATION_AFTER_FIRST_EXTRA## ~-- Do not validate any parameter after the first extra
@@ -1240,13 +1247,14 @@ end function
 --   resulting 'words' are then all treated as individual arguments on the command
 --   line.
 --
--- An example of parse options:
+-- An example of parse options~:
 -- <eucode>
 -- { HELP_RID, routine_id("my_help"), NO_VALIDATION }
 -- </eucode>
 --
 -- Comments:
--- Token types recognized on the command line:
+-- Token types recognized on the command line~:
+-- 
 -- # a single '-'. Simply added to the 'extras' list
 -- # a single "~-~-". This signals the end of command line options. What remains of the command
 --   line is added to the 'extras' list, and the parsing terminates.
@@ -1281,7 +1289,7 @@ end function
 -- switch to do so. **N.B**, the 'help' is still displayed if an invalid command
 -- line switch is used at runtime, regardless of whether ##NO_HELP## is used or not.
 --
--- Option records have the following structure:
+-- Option records have the following structure~:
 -- # a sequence representing the (short name) text that will follow the "-" option format.
 --  Use an atom if not relevant
 -- # a sequence representing the (long name) text that will follow the "~-~-" option format.
@@ -1309,7 +1317,7 @@ end function
 --   Use -1 if cmd_parse is not to invoke a function for this option.\\
 --   The user defined function must accept a single sequence parameter containing four values.
 --   If the function returns ##1## then the command option does not update the map.
---   You can use the predefined index values OPT_IDX, OPT_CNT, OPT_VAL, OPT_REV when
+--   You can use the predefined index values ##OPT_IDX##, ##OPT_CNT##, ##OPT_VAL##, ##OPT_REV## when
 --   referencing the function's parameter elements.
 --   ## An index into the ##opts## list.
 --   ## The number of times that the routine has been called
@@ -1318,7 +1326,7 @@ end function
 --   ## 1 if the command line indicates that this option is to remove any earlier occurrences of it.
 --
 -- One special circumstance exists and that is an option group header. It should contain only
--- two elements
+-- two elements~:
 --   # The header constant: HEADER
 --   # A sequence to display as the option group header
 --
@@ -1326,7 +1334,7 @@ end function
 -- otherwise it uses the short name. For options, you must supply a short name,
 -- a long name or both.
 --
--- If you want ##cmd_parse##() to call a user routine for the extra command line values,
+-- If you want ##cmd_parse## to call a user routine for the extra command line values,
 -- you need to specify an Option Record that has neither a short name or a long name,
 -- in which case only the routine_id field is used.
 --
@@ -1492,9 +1500,7 @@ end function
 
 
 --**
--- returns a text string based on the set of supplied strings. Typically, this
--- is used to ensure that arguments on a command line are properly formed
--- before submitting it to the shell.
+-- returns a text string based on the set of supplied strings. 
 --
 -- Parameters:
 --   # ##cmds## : A sequence. Contains zero or more strings.
@@ -1505,14 +1511,18 @@ end function
 --  string.
 --
 -- Comments:
+-- Typically, this
+-- is used to ensure that arguments on a command line are properly formed
+-- before submitting it to the shell.
+--
 --   Though this function does the quoting for you it is not going to protect
 --   your programs from globing ##*##, ##?## .  And it is not specied here what happens if you
 --   pass redirection or piping characters.
 --
 --   When passing a result from with build_commandline to [[:system_exec]],
 --   file arguments will benefit from using [[:canonical_path]] with the [[:TO_SHORT]].
---   On Windows, this is required for file arguments to always work.  There is a complication
---   with files that contain spaces.  On other platforms, 
+--   On //Windows// this is required for file arguments to always work.  There is a complication
+--   with files that contain spaces.  On //Unix// 
 --   this call will also return a useable filename. 
 --
 --   Alternatively, you can leave out calls to [[:canonical_path]] and use [[:system]] instead.
@@ -1524,9 +1534,9 @@ end function
 -- </eucode>
 --
 -- Example 2:
---     You can use this to run things that might be difficult to quote out:
+--     You can use this to run things that might be difficult to quote out.
 --     Suppose you want to run a program that requires quotes on its
---     command line?  Use this function to pass quotation marks:
+--     command line?  Use this function to pass quotation marks~:
 --
 -- <eucode>
 -- s = build_commandline( { "awk", "-e", "'{ print $1"x"$2; }'" } )

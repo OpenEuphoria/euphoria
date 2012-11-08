@@ -25,7 +25,7 @@ integer free_rid
 -- is the number one, meaning that the default initial structure is ##{0}##
 -- # ##cleanup_p## : Identifies whether the memory should be released automatically
 -- when the reference count for the handle for the allocated block drops to
--- zero, or when passed to ##delete()##.  If zero, then the block must be freed
+-- zero, or when passed to ##delete##.  If zero, then the block must be freed
 -- using the [[:free]] procedure.
 --
 -- Returns:

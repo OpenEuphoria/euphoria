@@ -377,8 +377,14 @@ function translate( sequence filename, sequence fail_list )
 	printf(1, "\ntranslating %s:", {filename})
 	total += 1
 	sequence exename = filebase(filename) & "-translated" & dexe
-	sequence cmd = sprintf("%s %s %s %s -d UNITTEST -d EC -batch %s -o %s",
+	sequence cmd
+	if ends(".ex", translator) then
+		cmd = sprintf("eui -batch \"%s\" %s %s %s -d UNITTEST -d EC -batch %s -o %s",
 		{ translator, library, compiler, translator_options, filename, exename })
+	else
+		cmd = sprintf("%s %s %s %s -d UNITTEST -d EC -batch %s -o %s",
+		{ translator, library, compiler, translator_options, filename, exename })
+	end if
 	verbose_printf(1, "CMD '%s'\n", {cmd})
 	integer status = system_exec(cmd, 0)
 
@@ -403,7 +409,7 @@ function translate( sequence filename, sequence fail_list )
 
 			if sequence(token) then
 				failed += 1
-				fail_list = append(fail_list, "translated" & " " & exename)					
+				fail_list = append(fail_list, "translated" & " " & exename)				
 				error(exename, E_EXECUTE, token, {}, "ex.err")
 			else
 				log_where = token

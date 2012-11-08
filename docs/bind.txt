@@ -1,7 +1,7 @@
-== Binding and Shrouding
+== Shrouding and Binding
 :<<LEVELTOC level=2 depth=4>>
 
-=== The Shroud Command
+=== The eushroud Command
 
 ==== Synopsis
 
@@ -9,7 +9,7 @@
 eushroud [-full_debug] [-list] [-quiet] [-out shrouded_file] filename.ex[w/u]
 }}}
 
-The **##shroud##** command converts a Euphoria program, typically consisting of a 
+The **##eushroud##** command converts a Euphoria program, typically consisting of a 
 main file plus many include files, into a single, compact file. A single file is
 easier to distribute, and it allows you to distribute your program to others without 
 releasing your source code.
@@ -19,9 +19,12 @@ it contains a low-level **Intermediate Language** (IL) that is executed by the
 back-end of the interpreter. A shrouded file does not require any parsing. It
 starts running immediately, and with large programs you will see a quicker
 start-up time. Shrouded files must be run using the interpreter back-end:
+
 ##eubw.exe## (//Windows//) or ##eub.exe##
-(//Unix//).  This backend is freely available, and you can give it to
-any of your users who need it. It's stored in ##euphoria\bin## in the Euphoria
+(//Unix//).  
+
+This backend is freely available, and you can give it to
+any of your users who need it. It is stored in ##.../euphoria/bin## in the Euphoria
 interpreter package. You can run your ##.il## file with:
 
 On //Windows// use:
@@ -44,14 +47,14 @@ The shrouder will remove any routines and variables that your program doesn't
 use. This will give you a smaller ##.il## file. There are often a great number of 
 unused routines and unused variables. For example, your program might include 
 several third party include files, plus some standard files from 
-##euphoria\include##, but only use a few items from each file. The unused items 
+##.../euphoria/include##, but only use a few items from each file. The unused items 
 will be deleted.
 
 ==== Options
 
-* **-full_debug**: Make a somewhat larger .il file that contains enough debug 
+* **-full_debug**: Make a somewhat larger ##.il## file that contains enough debug 
 information to provide a full ##ex.err## dump when a crash occurs. Normally, 
-variable names and line-number information is stripped out of the .il file, so 
+variable names and line-number information is stripped out of the ##.il## file, so 
 the ##ex.err## will simply have "no-name" where each variable name should be, 
 and line numbers will only be accurate to the start of a routine or the start of
 a file. Only the private variable values are shown, not the global or local 
@@ -70,7 +73,7 @@ and will add a ##!## line at the top, that will run ##eub.exe.## You
 can override this ##!## line by specifying your own ##!##
 line at the top of your main Euphoria file.
 
-Always keep a copy of your original source. There's no way to recover it from a 
+Always keep a copy of your original source. There is no way to recover it from a 
 shrouded file.
 
 === The Bind Command
@@ -85,7 +88,7 @@ eubind [-c config-file] [-con] [-copyright] [-eub path-to-backend]
 
 
 ##eubind## does the same thing as ##eushroud##, and
-includes the same options. It then combines your shrouded .il file with the
+includes the same options. It then combines your shrouded ##.il## file with the
 interpreter backend (##eub.exe##, ##eubw.exe## or ##eub##) to make
 a **single, stand-alone executable** file that you can conveniently use and
 distribute. Your users need not have Euphoria installed.  Each time your
@@ -100,12 +103,12 @@ source statements are not there.
 
 * **-c config-file**: A Euphoria config file to use when binding.
 * **-con**: **(//Windows// only)**: This option will create a //Windows// 
-console program instead of a //Windows GUI// program. Console programs can 
+console program instead of a //Windows// GUI program. Console programs can 
 access standard input and output, and they work within the current console 
 window, rather than popping up a new one.
 * **-eub path-to-backend** Allows specification of the backend runner to use
 instead of the default, installed version.
-* **-full_debug**: Same as ##shroud## above. If Euphoria detects an error, your 
+* **-full_debug**: Same as ##eushroud## above. If Euphoria detects an error, your 
 executable will generate either a partial, or a full, ##ex.err## dump, according
 to this option.
 * **-i dir**: A directory to add to the paths to use for searching for included 
@@ -115,12 +118,12 @@ can patch in your own customized icon, overwriting the one in ##euiw.exe##.
 ##eui.exe## contains a 32x32 icon using 256 colors. It resembles an **E)** 
 shape. //Windows// will display this shape beside ##euiw.exe##, and beside your 
 bound program, in file listings. You can also load this icon as a resource, 
-using the name "euiw" (see ##euphoria\demo\win32\window.exw## for an example). 
+using the name "euiw" (see ##...\euphoria\demo\win32\window.exw## for an example). 
 When you bind your program, you can substitute your own 32x32 256-color icon 
 file of size 2238 bytes or less. Other dimensions may also work as long as the 
 file is 2238 bytes or less. The file must contain a single icon image 
 (//Windows// will create a smaller or larger image as necessary). The default 
-**E)** icon file, ##euphoria.ico##, is included in the ##euphoria\bin## directory.
+##euphoria.ico##, is included in the ##...\euphoria\bin## directory.
 * **-list**: Same as ##shroud## above.
 * **-quiet**: Same as ##shroud## above.
 * **-out executable_file**: This option lets you choose the name of the 
@@ -132,12 +135,12 @@ back-end you are binding with, but the size increases very slowly as you add to
 your program. **When bound, the entire Euphoria editor,
 ##ed.ex##, adds only 27K to the size of the back-end.** 
 
-The first two items returned by [[:command_line]]() will be
+The first two items returned by [[:command_line]] will be
 slightly different when your program is bound. See the procedure description for
 the details.
 
 A **bound executable** file //can// handle standard input and output 
-redirection. e.g.
+redirection as with this syntax:
 
 {{{
 myprog.exe < file.in > file.out

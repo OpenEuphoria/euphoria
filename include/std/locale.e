@@ -324,7 +324,7 @@ end function
 --
 -- Further more, after the translation pass, if the result text begins with {{{"__"}}},
 --  the {{{"__"}}} is removed. 
--- This method can be used when you do not want an item to be translated.
+-- This function can be used when you do not want an item to be translated.
 --
 -- Example 1:
 -- <eucode>
