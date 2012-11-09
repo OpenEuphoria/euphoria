@@ -28,6 +28,6 @@ MAKE_BORDER_TESTS(long long,C_LONGLONG)
 	
 
 /* Which of these are not 64-bit on 64-bit platforms? */
-MAKE_FN(int,       C_INT,      EUPHORIA_MIN_INT)
-MAKE_FN(long,      C_LONG,     EUPHORIA_MIN_INT)
-MAKE_FN(long long, C_LONGLONG, EUPHORIA_MIN_INT)
+MAKE_FN(int,       C_INT,      MININT)
+MAKE_FN(long,      C_LONG,     MINLONG)
+MAKE_FN(long long, C_LONGLONG, 0xc000000000000000L)

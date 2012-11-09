@@ -56,7 +56,7 @@ if lib818 then
 	integer r_faux_sequence, r_below_minimum_euphoria_integer
 	object fs
 	for i = 1 to length(signed_types) do
-		if 0 and sizeof(signed_types[i]) >= sizeof(E_OBJECT) then
+		if sizeof(signed_types[i]) >= sizeof(E_OBJECT) then
 			-- The underlying library will return values in C values that fit into thier values 
 			-- but are out of bounds amoung EUPHORIA integers. 
 			r_below_minimum_euphoria_integer = define_c_func( lib818, 
@@ -79,7 +79,7 @@ if lib818 then
 					case C_LONG     then expected_val = peek_longs( expected_ptr )
 					case C_LONGLONG then expected_val = peek8s( expected_ptr )
 				end switch
-				test_equal(sprintf("detect negative values as such for type %s",{signed_type_names[i]}),
+				test_equal(sprintf("detect 0xC00...000 correctly for type %s",{signed_type_names[i]}),
 					expected_val,
 					c_func(r_faux_sequence, {}))
 			end if
