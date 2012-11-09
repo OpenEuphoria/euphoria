@@ -43,6 +43,7 @@ end for
 
 constant signed_types      = { C_CHAR,    C_BYTE,   C_SHORT,   C_INT,   C_BOOL,   C_LONG,   C_LONGLONG }
 constant signed_type_names = { "C_CHAR", "C_BYTE", "C_SHORT", "C_INT", "C_BOOL", "C_LONG", "C_LONGLONG"}
+
 for i = 1 to length(signed_types) do
 	r_max_uint_fn = define_c_func( "", call_back( routine_id("minus_1_fn") ), {}, signed_types[i] )
 	test_equal( sprintf("return type %s preserves -1", {signed_type_names[i]}), -1, c_func(r_max_uint_fn, {}) )
@@ -58,9 +59,11 @@ if lib818 then
 	integer r_faux_sequence
 	object fs
 	for i = 1 to length(signed_types) do
-		r_faux_sequence = define_c_func( lib818, sprintf("%s_faux_sequence", {signed_type_names[i]}), {}, signed_types[i] )
-		if r_faux_sequence != -1 then
-			test_equal(sprintf("detect negative values as such for type %s",{signed_type_names[i]}),  MININT_EUPHORIA-20, c_func(r_faux_sequence, {}))
+		if sizeof(signed_types[i]) >= sizeof(E_OBJECT) then
+			r_faux_sequence = define_c_func( lib818, sprintf("%s_faux_sequence", {signed_type_names[i]}), {}, signed_types[i] )
+			if r_faux_sequence != -1 then
+				test_equal(sprintf("detect negative values as such for type %s",{signed_type_names[i]}),  MININT_EUPHORIA-20, c_func(r_faux_sequence, {}))
+			end if
 		end if
 	end for
 end if
