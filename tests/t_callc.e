@@ -53,7 +53,7 @@ constant lib818 = open_dll("./lib818.dll")
 
 test_true( "Can open lib818.dll", lib818 )
 if lib818 then
-	integer r_faux_sequence, r_below_minimum_euphoria_integer
+	integer r_near_hashC, r_below_minimum_euphoria_integer
 	object fs
 	for i = 1 to length(signed_types) do
 		if sizeof(signed_types[i]) >= sizeof(E_OBJECT) then
@@ -67,11 +67,11 @@ if lib818 then
 					MININT_EUPHORIA-20, c_func(r_below_minimum_euphoria_integer, {}))
 			end if
 		end if
-		-- test that the upper limit of the C types come out as is
-		r_faux_sequence = define_c_func( lib818, sprintf("%s_faux_sequence", 
+		-- test that in the large negative values
+		r_near_hashC = define_c_func( lib818, sprintf("%s_BFF_FD", 
 			{signed_type_names[i]}), {}, signed_types[i] )
-		if r_faux_sequence != -1 then
-			atom expected_ptr = define_c_var( lib818, signed_type_names[i] )
+		if r_near_hashC != -1 then
+			atom expected_ptr = define_c_var( lib818, signed_type_names[i] & "_BFFD_value" )
 			if expected_ptr > 0 then
 				atom expected_val
 				switch signed_types[i] do
@@ -79,9 +79,9 @@ if lib818 then
 					case C_LONG     then expected_val = peek_longs( expected_ptr )
 					case C_LONGLONG then expected_val = peek8s( expected_ptr )
 				end switch
-				test_equal(sprintf("detect 0xC00...000 correctly for type %s",{signed_type_names[i]}),
+				test_equal(sprintf("detect #BFFF...D0 correctly for type %s",{signed_type_names[i]}),
 					expected_val,
-					c_func(r_faux_sequence, {}))
+					c_func(r_near_hashC, {}))
 			end if
 		end if
 	end for

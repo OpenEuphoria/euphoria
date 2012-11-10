@@ -1,33 +1,37 @@
 #include "euphoria.h"
 /* smallest EUPHORIA integer */
 #define EUPHORIA_MIN_INT MININT
+#define EUPHORIA_MAX_INT MAXINT
 #include <string.h>
 
+#define BFFD_INT_VALUE 0xc0000000
+#define BFFD_LONGLONG_VALUE 0xc000000000000000L
 #ifdef __WIN32
 #define EXPORT __declspec(dllexport)
-#define MINLONG 0xc0000000
+#define BFFD_LONG_VALUE 0xc0000000
 #else
 #define EXPORT
 #if INT32_MAX == INTPTR_MAX
-#define MINLONG 0xc0000000
+#define BFFD_LONG_VALUE 0xc0000000
 #else
-#define MINLONG 0xc000000000000000L
+#define BFFD_LONG_VALUE BFFD_LONGLONG_VALUE
 #endif
 #endif
 
 /* The expression falls within the signed int range but outside of that of EUPHORIA */
-#define MAKE_BORDER_TESTS(ctype,etype) EXPORT ctype etype ## _below_EUPHORIA_MIN_INT() { return EUPHORIA_MIN_INT - 20; }
+#define MAKE_BORDER_FUNCTIONS(ctype,etype) EXPORT ctype etype ## _below_EUPHORIA_MIN_INT() \
+	{ return EUPHORIA_MIN_INT - 20; }
 
-MAKE_BORDER_TESTS(int,C_INT)
-MAKE_BORDER_TESTS(long,C_LONG)
-MAKE_BORDER_TESTS(long long,C_LONGLONG)
+MAKE_BORDER_FUNCTIONS(int,C_INT)
+MAKE_BORDER_FUNCTIONS(long,C_LONG)
+MAKE_BORDER_FUNCTIONS(long long,C_LONGLONG)
 
-#define MAKE_FN(ctype,etype,min) \
-	ctype etype = min - 20; \
-	EXPORT ctype etype ## _faux_sequence() { return etype; }
+#define MAKE_NEAR_HASHC_FN(ctype,etype,min) \
+	ctype etype ## _BFFD_value = min - 20; \
+	EXPORT ctype etype ## _BFF_FD() { return etype ## _BFFD_value; }
 	
 
-/* Which of these are not 64-bit on 64-bit platforms? */
-MAKE_FN(int,       C_INT,      MININT)
-MAKE_FN(long,      C_LONG,     MINLONG)
-MAKE_FN(long long, C_LONGLONG, 0xc000000000000000L)
+
+MAKE_NEAR_HASHC_FN(int,       C_INT,      BFFD_INT_VALUE)
+MAKE_NEAR_HASHC_FN(long,      C_LONG,     BFFD_LONG_VALUE)
+MAKE_NEAR_HASHC_FN(long long, C_LONGLONG, BFFD_LONGLONG_VALUE)
