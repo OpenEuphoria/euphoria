@@ -23,6 +23,7 @@ constant MAXUINT32          = #10 * BASE_4 - 1
 constant MAXUSHORT          = power(2,16)-1
 constant MAXUBYTE           = #FF
 constant MININT_EUPHORIA    = -0b0100 * BASE_PTR -- on 32-bit: -1_073_741_824
+constant MAXINT_EUPHORIA    =  0b0100 * BASE_PTR - 1
 integer gb = 5
 
 function minus_1_fn() 
@@ -51,9 +52,10 @@ end for
 
 constant lib818 = open_dll("./lib818.dll")
 
-test_true( "Can open lib818.dll", lib818 )
+test_true( "can open lib818.dll", lib818 )
 if lib818 then
-	integer r_near_hashC, r_below_minimum_euphoria_integer
+	integer r_near_hashC, r_below_minimum_euphoria_integer, 
+		r_above_maximum_euphoria_integer, r_NOVALUE, r_half_MIN, r_half_MAX
 	object fs
 	for i = 1 to length(signed_types) do
 		if sizeof(signed_types[i]) >= sizeof(E_OBJECT) then
@@ -61,10 +63,33 @@ if lib818 then
 			-- but are out of bounds amoung EUPHORIA integers. 
 			r_below_minimum_euphoria_integer = define_c_func( lib818, 
 				sprintf("%s_below_EUPHORIA_MIN_INT", {signed_type_names[i]}), {}, signed_types[i] )
-			if r_below_minimum_euphoria_integer != -1 then
+			r_above_maximum_euphoria_integer = define_c_func( lib818, 
+				sprintf("%s_above_EUPHORIA_MAX_INT", {signed_type_names[i]}), {}, signed_types[i] )
+			r_NOVALUE = define_c_func(lib818, 
+				sprintf("%s_NOVALUE", {signed_type_names[i]}), {}, signed_types[i])			
+			r_half_MIN = define_c_func( lib818, 
+				sprintf("%s_half_MIN", {signed_type_names[i]}), {}, signed_types[i] )
+			r_half_MAX = define_c_func( lib818, 
+				sprintf("%s_half_MAX", {signed_type_names[i]}), {}, signed_types[i] )
+				
+			if r_below_minimum_euphoria_integer != -1 and r_above_maximum_euphoria_integer != -1
+			or r_NOVALUE != -1 and r_half_MIN != -1 and r_half_MAX != -1 then
 				test_equal(
-					sprintf("detect negative values as such for type %s",{signed_type_names[i]}),  
+					sprintf("detect negative values as such for type %s #1",{signed_type_names[i]}),  
 					MININT_EUPHORIA-20, c_func(r_below_minimum_euphoria_integer, {}))
+				test_equal(
+					sprintf("detect negative values as such for type %s #2",{signed_type_names[i]}),  
+					floor(MININT_EUPHORIA/2), c_func(r_half_MIN, {}))
+				test_equal(
+					sprintf("detect NOVALUE as its integer value for type %s",{signed_type_names[i]}),  
+					NOVALUE, c_func(r_NOVALUE, {}))
+				test_equal(
+					sprintf("detect positive values as such for type %s #1",{signed_type_names[i]}),  
+					MAXINT_EUPHORIA+20, c_func(r_above_maximum_euphoria_integer, {}))
+				test_equal(
+					sprintf("detect positive values as such for type %s #2",{signed_type_names[i]}),  
+					floor(MAXINT_EUPHORIA/2), c_func(r_half_MAX, {}))
+					
 			end if
 		end if
 		-- test that in the large negative values
@@ -75,9 +100,14 @@ if lib818 then
 			if expected_ptr > 0 then
 				atom expected_val
 				switch signed_types[i] do
+					case C_CHAR		then expected_val = peek( expected_ptr )
+					case C_SHORT	then expected_val = peek2s( expected_ptr )
 					case C_INT      then expected_val = peek4s( expected_ptr )
 					case C_LONG     then expected_val = peek_longs( expected_ptr )
 					case C_LONGLONG then expected_val = peek8s( expected_ptr )
+					case else
+						test_fail(sprintf("can read value for %s", {signed_type_names[i]})) 
+						continue
 				end switch
 				test_equal(sprintf("detect #BFFF...D0 correctly for type %s",{signed_type_names[i]}),
 					expected_val,
