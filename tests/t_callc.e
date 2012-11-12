@@ -30,6 +30,15 @@ function minus_1_fn()
 	return -1 
 end function 
 
+function unsigned_to_signed(atom v, integer t)
+	integer sign_bit  = shift_bits(1,-sizeof(t) * 8+1)
+	if and_bits(sign_bit,v) then
+		return v-shift_bits(sign_bit,-1)
+	else
+		return v
+	end if
+end function
+
 constant ubyte_values = { ' ', 192, 172, ')'}
 
 constant unsigned_types      = {  C_UCHAR,   C_UBYTE,   C_USHORT,   C_UINT,    C_POINTER }
@@ -117,7 +126,7 @@ if lib818 then
 			if expected_ptr > 0 then
 				atom expected_val
 				switch signed_types[i] do
-					case C_CHAR		then expected_val = peek( expected_ptr )-256
+					case C_CHAR		then expected_val = unsigned_to_signed(peek( expected_ptr ), C_CHAR)
 					case C_SHORT	then expected_val = peek2s( expected_ptr )
 					case C_INT      then expected_val = peek4s( expected_ptr )
 					case C_LONG     then expected_val = peek_longs( expected_ptr )
@@ -142,6 +151,13 @@ if lib818 then
 				values[i][j], c_func(id_r, {values[i][j]}))
 		end for
 	end for
+	
+	integer bit_repeat_r = define_c_func(lib818, "bit_repeat", { C_BOOL, C_UBYTE }, C_LONGLONG)
+	test_equal( "5  repeat bits: ", power(2,5)-1, c_func(bit_repeat_r, {1, 5}))
+	test_equal( "40 repeating bits: ", power(2,40)-1, c_func(bit_repeat_r, { 1, 40 }))
+	test_equal( "2**50: ", power(2,50), c_func(bit_repeat_r, {1, 50})+1)
+	test_equal( "-(2**50): ", -power(2,50), -c_func(bit_repeat_r, {1, 50})-1)
+	
 end if
 
 -- Should put some tests for argument passing as well : passing floating point, double, long long, etc..
