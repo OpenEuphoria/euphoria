@@ -27,6 +27,9 @@
 
 /* predefined as some macro */
 #undef bool
+#undef byte
+typedef signed char byte;
+typedef unsigned char ubyte;
 typedef enum {false,true} bool;
 #define BFFD_SHORT_VALUE (0xC * (1 << (8*sizeof(short)-8)))
 
@@ -61,13 +64,16 @@ MAKE_BORDER_FUNCTIONS(long long,C_LONGLONG)
 	EXPORT ctype etype ## _id(ctype val) {\
 		return val;\
 	}
-
+MAKE_ID_FUNCTION(bool, C_BOOL)
 MAKE_ID_FUNCTION(signed char, C_CHAR)
+MAKE_ID_FUNCTION(byte, C_BYTE)
+MAKE_ID_FUNCTION(ubyte, C_UBYTE)
 MAKE_ID_FUNCTION(unsigned char, C_UCHAR)
 MAKE_ID_FUNCTION(short, C_SHORT)
 MAKE_ID_FUNCTION(unsigned short, C_USHORT)
 MAKE_ID_FUNCTION(int, C_INT)
 MAKE_ID_FUNCTION(unsigned int, C_UINT)
+MAKE_ID_FUNCTION(void*, C_POINTER)
 MAKE_ID_FUNCTION(long, C_LONG)
 MAKE_ID_FUNCTION(unsigned long, C_ULONG)
 MAKE_ID_FUNCTION(long long, C_LONGLONG)
