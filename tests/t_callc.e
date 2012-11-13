@@ -4,14 +4,7 @@ include std/dll.e
 include std/machine.e
 include std/math.e
 
-ifdef EU4_0 then
-	constant pointer_size = 4
-	procedure poke_pointer(atom a, object x)
-		poke4(a,x)
-	end procedure
-elsedef
-	constant pointer_size = sizeof(C_POINTER)
-end ifdef
+constant pointer_size = sizeof(C_POINTER)
 
 -- one nibble less in magnitude than the smallest number too big to fit into a pointer. 
 constant BASE_PTR           = #10 * power(#100,(pointer_size-1))
