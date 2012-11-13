@@ -1033,7 +1033,7 @@ object call_c(int func, object proc_ad, object arg_list)
    Alternatively, call a machine-code routine at a given address. */
 {
 	volatile uint64_t arg;  // !!!! magic var to push values on the stack
-	volatile int argsize;        // !!!! number of bytes to pop 
+	volatile int argsize;   // !!!! number of bytes to pop 
 	
 	s1_ptr arg_list_ptr, arg_size_ptr;
 	object_ptr next_arg_ptr, next_size_ptr;
@@ -1175,18 +1175,32 @@ object call_c(int func, object proc_ad, object arg_list)
 
 			if (size == C_DOUBLE) {
 				#if INTPTR_MAX == INT32_MAX
+/* PUSH_INT64_ARG :
+   push a value as a 64-bit number */
 					#ifdef push
-						arg = dbl_arg.ints[1];
-						push();
-						arg = dbl_arg.ints[0];
-						push();
+						#define PUSH_INT64_ARG(x) \
+						dbl_arg.int64 = x;\
+						arg = dbl_arg.ints[1];\
+						push();\
+						arg = dbl_arg.ints[0];\
+						push();\
+						++arg_len;
 					#else
-						arg_op[arg_i++] = dbl_arg.ints[0];
-						arg_op[arg_i++] = dbl_arg.ints[1];
+						#define PUSH_INT64_ARG(x) \
+						dbl_arg.int64 = x;\
+						arg_op[arg_i++] = dbl_arg.ints[0];\
+						arg_op[arg_i++] = dbl_arg.ints[1];\
+						++arg_len;
 					#endif
-					++arg_len;
+					
+					PUSH_INT64_ARG(dbl_arg.int64)
 						
 				#elif INTPTR_MAX == INT64_MAX
+					/* real simple */
+					#define PUSH_INT64_ARG(x) \
+						arg = x;\
+						PUSH_INT_ARG
+				
 					if( xmm_i < MAX_FP_PARAM_REGISTERS ){
 						UPDATE_SIGNATURE
 						dbl_op[xmm_i++].d = dbl_arg.dbl;
@@ -1235,17 +1249,12 @@ object call_c(int func, object proc_ad, object arg_list)
 		}
 		else if( size == C_LONGLONG ){
 			if (IS_ATOM_INT(next_arg)) {
-				arg = next_arg;
-				PUSH_INT_ARG
+				PUSH_INT64_ARG(next_arg);
 			}
 			else if (IS_ATOM(next_arg)) {
-				// atoms are rounded to integers
-				
-				arg = (uint64_t)DBL_PTR(next_arg)->dbl; //correct
-				// if it's a -ve f.p. number, Watcom converts it to long and
-				// then to unsigned long. This is exactly what we want.
-				// Works with the others too. 
-				PUSH_INT_ARG
+				// atoms are converted to and rounded to 64-bit values, 
+				// this is lossess on both 32 and 64 bit.
+				PUSH_INT64_ARG((uint64_t)DBL_PTR(next_arg)->dbl);
 			}
 		}
 		else {
