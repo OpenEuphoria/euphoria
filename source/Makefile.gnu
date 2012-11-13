@@ -393,7 +393,7 @@ EU_BACKEND_RUNNER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/backobj/*.
 EU_INTERPRETER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/intobj/*.c))
 
 all : 
-	$(MAKE) interpreter translator library debug-library backend shared-library debug-shared-library
+	$(MAKE) interpreter translator library debug-library backend shared-library debug-shared-library lib818
 	$(MAKE) tools
 
 
@@ -454,7 +454,7 @@ endif
 	$(MAKE) -C pcre CONFIG=../$(CONFIG) FPIC=-fPIC clean
 	
 
-.PHONY : clean distclean clobber all htmldoc manual
+.PHONY : clean distclean clobber all htmldoc manual lib818
 
 debug-library : builddirs
 	$(MAKE) $(BUILDDIR)/$(EECUDBGA) OBJDIR=libobjdbg ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE)
@@ -1017,6 +1017,10 @@ endif
 
 $(BUILDDIR)/test818.o : test818.c
 	gcc -c $(LIB818_FPIC) -I ../include $(FE_FLAGS) -Wall -shared ../source/test818.c -o $(BUILDDIR)/test818.o
+
+lib818 :
+	touch test818.c
+	$(MAKE) ../tests/lib818.dll
 
 ../tests/lib818.dll : $(BUILDDIR)/test818.o
 	gcc  $(MSIZE) $(LIB818_FPIC) -shared -o ../tests/lib818.dll $(CREATEDLLFLAGS) $(BUILDDIR)/test818.o
