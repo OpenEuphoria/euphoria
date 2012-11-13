@@ -30,21 +30,46 @@ function minus_1_fn()
 	return -1 
 end function 
 
+function unsigned_to_signed(atom v, integer t)
+	integer sign_bit  = shift_bits(1,-sizeof(t) * 8+1)
+	if and_bits(sign_bit,v) then
+		return v-shift_bits(sign_bit,-1)
+	else
+		return v
+	end if
+end function
+
+constant ubyte_values = { ' ', 192, 172, ')'}
+
 constant unsigned_types      = {  C_UCHAR,   C_UBYTE,   C_USHORT,   C_UINT,    C_POINTER }
 constant unsigned_type_names = { "C_UCHAR", "C_UBYTE", "C_USHORT", "C_UINT",  "C_POINTER" }
 constant minus_1_values      = { #FF,       #FF,       #FF_FF,      MAXUINT32, MAXUPTR }
-		 
+constant unsigned_values     = {ubyte_values, ubyte_values,
+														50_000 & 8_000 & 20_000,
+																	4_000_000_000 & 420_000_000 & 42,
+																				#BEEFDEAD & #C001D00D}
+											
 
-		
+enum false=0, true=1
+
 atom r_max_uint_fn
 for i = 1 to length(minus_1_values) do
 	r_max_uint_fn = define_c_func( "", call_back( routine_id("minus_1_fn") ), {}, unsigned_types[i] )
 	test_equal( sprintf("return type %s makes unsigned value", {unsigned_type_names[i]}), minus_1_values[i], c_func(r_max_uint_fn, {}) )
 end for
 
+constant byte_values = ' ' & -32 & -100 & ')'
 constant signed_types      = { C_CHAR,    C_BYTE,   C_SHORT,   C_INT,   C_BOOL,   C_LONG,   C_LONGLONG }
 constant signed_type_names = { "C_CHAR", "C_BYTE", "C_SHORT", "C_INT", "C_BOOL", "C_LONG", "C_LONGLONG"}
-
+constant signed_values     = { byte_values, byte_values,
+													-20_000 & 10_000 & 20_000,
+																(2 & -2) * 1e9,
+																	true & false, (2 & -2) * power(2,20),
+																							(3 & -2) * power(2,40)}
+																		
+constant types = signed_types & unsigned_types
+constant type_names = signed_type_names & unsigned_type_names
+constant values = signed_values & unsigned_values
 for i = 1 to length(signed_types) do
 	r_max_uint_fn = define_c_func( "", call_back( routine_id("minus_1_fn") ), {}, signed_types[i] )
 	test_equal( sprintf("return type %s preserves -1", {signed_type_names[i]}), -1, c_func(r_max_uint_fn, {}) )
@@ -101,7 +126,7 @@ if lib818 then
 			if expected_ptr > 0 then
 				atom expected_val
 				switch signed_types[i] do
-					case C_CHAR		then expected_val = peek( expected_ptr )-256
+					case C_CHAR		then expected_val = unsigned_to_signed(peek( expected_ptr ), C_CHAR)
 					case C_SHORT	then expected_val = peek2s( expected_ptr )
 					case C_INT      then expected_val = peek4s( expected_ptr )
 					case C_LONG     then expected_val = peek_longs( expected_ptr )
@@ -116,6 +141,23 @@ if lib818 then
 			end if
 		end if
 	end for
+	for i = 1 to length(types) do
+		integer value_test_counter = 0
+		integer id_r = define_c_func(lib818, type_names[i] & "_id", {types[i]}, types[i])
+		test_true(sprintf("%s id function is in our library", {type_names[i]}), id_r != -1)
+		for j = 1 to length(values[i]) do
+			value_test_counter += 1
+			test_equal(sprintf("Value test for %s #%d", {type_names[i], value_test_counter}),
+				values[i][j], c_func(id_r, {values[i][j]}))
+		end for
+	end for
+	
+	integer bit_repeat_r = define_c_func(lib818, "bit_repeat", { C_BOOL, C_UBYTE }, C_LONGLONG)
+	test_equal( "5  repeat bits: ", power(2,5)-1, c_func(bit_repeat_r, {1, 5}))
+	test_equal( "40 repeating bits: ", power(2,40)-1, c_func(bit_repeat_r, { 1, 40 }))
+	test_equal( "2**50: ", power(2,50), c_func(bit_repeat_r, {1, 50})+1)
+	test_equal( "-(2**50): ", -power(2,50), -c_func(bit_repeat_r, {1, 50})-1)
+	
 end if
 
 -- Should put some tests for argument passing as well : passing floating point, double, long long, etc..
