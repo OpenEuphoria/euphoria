@@ -1343,7 +1343,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	/* not supported in MINGW or ARM */
 	else if (return_type == C_LONGLONG ){
 		int64_t int64_t_result;
-#if defined(push) || INTPTR_MAX != INT32_MAX		
+#if defined(push) || INTPTR_MAX == INT32_MAX
 		call_routine(int64_t);
 #else
 		call_routine(int);
@@ -1366,20 +1366,20 @@ object call_c(int func, object proc_ad, object arg_list)
 		// expect integer to be returned
 		call_routine(int);
 		if (return_type == C_POINTER ){
-			if ((unsigned)int_result <= (unsigned)MAXINT) {
-				return int_result;
+			if ((uintptr_t)int_result <= (uintptr_t)MAXINT) {
+				return (intptr_t)(uintptr_t)int_result;
 			}
 			else{
-				return NewDouble((eudouble)(unsigned)int_result);
+				return NewDouble((eudouble)(uintptr_t)int_result);
 			}
 		}
-		else if ((return_type & 0x000000FF) == 4 ||(return_type & 0x000000FF) == 8) {
+		else if ((return_type & 0x000000FF) == 4) {
 			/* 4-byte integer - usual case */
 			// check if unsigned result is required 
 			if ((return_type & C_TYPE) == 0x02000000) {
 				// unsigned integer result
-				if ((unsigned)int_result <= (unsigned)MAXINT) {
-					return int_result;
+				if ((unsigned)int_result <= (uintptr_t)MAXINT) {
+					return (intptr_t)(unsigned int)int_result;
 				}
 				else
 					return NewDouble((eudouble)(unsigned)int_result);
@@ -1387,11 +1387,32 @@ object call_c(int func, object proc_ad, object arg_list)
 			else {
 				// signed integer result
 				if (return_type >= E_INTEGER ||
-					(int_result >= MININT && int_result <= MAXINT)) {
-					return int_result;
+					((unsigned int)int_result >= (uintptr_t)MININT && (unsigned int)int_result <= (uintptr_t)MAXINT)) {
+					return (int)int_result;
 				}
 				else
-					return NewDouble((eudouble)int_result);
+					return NewDouble((eudouble)(int)int_result);
+			}
+		}
+		else if ( (return_type & 0x000000FF) == 8) {
+			/* long integer */
+			// check if unsigned result is required
+			if ((return_type & C_TYPE) == 0x02000000) {
+				// unsigned integer result
+				if ((unsigned long int)int_result <= (unsigned long int)MAXINT) {
+					return (intptr_t)(unsigned long int)int_result;
+				}
+				else
+					return NewDouble((eudouble)(unsigned long int)int_result);
+			}
+			else {
+				// signed integer result
+				if (return_type >= E_INTEGER ||
+					(int_result >= MININT && int_result <= MAXINT)) {
+					return (long)int_result;
+				}
+				else
+					return NewDouble((eudouble)(long)int_result);
 			}
 		}
 		else if (return_type == 0) {
