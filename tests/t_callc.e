@@ -76,6 +76,8 @@ if lib818 then
 		r_above_maximum_euphoria_integer, r_NOVALUE, r_half_MIN, r_half_MAX
 	object fs
 	for i = 1 to length(signed_types) do
+		-- test that values get encoded well when coming out from C.
+		-- test special values and ranges in EUPHORIA
 		if sizeof(signed_types[i]) >= sizeof(E_OBJECT) and signed_types[i] != C_BOOL then
 			-- The underlying library will return values in C values that fit into thier values 
 			-- but are out of bounds amoung EUPHORIA integers. 
@@ -111,7 +113,8 @@ if lib818 then
 				test_fail(sprintf("opening all functions for type %s", {signed_type_names[i]}))
 			end if
 		end if
-		-- test that in the large negative values
+		-- test that values that are sometimes large negative values in C are recognized
+		-- These values are #C00...00 - 20.
 		r_near_hashC = define_c_func( lib818, sprintf("%s_BFF_FD", 
 			{signed_type_names[i]}), {}, signed_types[i] )
 		if r_near_hashC != -1 then
@@ -128,7 +131,7 @@ if lib818 then
 						test_fail(sprintf("can read value for %s", {signed_type_names[i]})) 
 						continue
 				end switch
-				test_equal(sprintf("detect #BFFF...D0 correctly for type %s",{signed_type_names[i]}),
+				test_equal(sprintf("detect #C00...00-20 correctly for type %s",{signed_type_names[i]}),
 					expected_val,
 					c_func(r_near_hashC, {}))
 			end if
