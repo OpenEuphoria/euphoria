@@ -1367,7 +1367,7 @@ object call_c(int func, object proc_ad, object arg_list)
 		call_routine(int);
 		if (return_type == C_POINTER ){
 			if ((uintptr_t)int_result <= (uintptr_t)MAXINT) {
-				return (uintptr_t)int_result;
+				return (intptr_t)(uintptr_t)int_result;
 			}
 			else{
 				return NewDouble((eudouble)(uintptr_t)int_result);
@@ -1378,8 +1378,8 @@ object call_c(int func, object proc_ad, object arg_list)
 			// check if unsigned result is required 
 			if ((return_type & C_TYPE) == 0x02000000) {
 				// unsigned integer result
-				if ((unsigned int)int_result <= (uintptr_t)MAXINT) {
-					return (unsigned int)int_result;
+				if ((unsigned)int_result <= (uintptr_t)MAXINT) {
+					return (intptr_t)(unsigned int)int_result;
 				}
 				else
 					return NewDouble((eudouble)(unsigned int)int_result);
