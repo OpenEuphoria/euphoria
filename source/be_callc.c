@@ -1002,13 +1002,38 @@ union xmm_param {
 	} \
 	INCREMENT_FP_ARGS
 
+/* PUSH_INT64_ARG :
+   push a value as a 64-bit number */
+   /* real simple */
+#	define PUSH_INT64_ARG(x) \
+		arg = x;\
+		PUSH_INT_ARG
+
+	
 #else // 32-bit
 
 #	ifdef push
 #		define PUSH_INT_ARG push();
+
+#		define PUSH_INT64_ARG(x) \
+						dbl_arg.int64 = x;\
+						arg = dbl_arg.ints[1];\
+						push();\
+						arg = dbl_arg.ints[0];\
+						push();\
+						++arg_len;
+						
 #	else
 #		define PUSH_INT_ARG arg_op[arg_i++] = arg;
+
+#		define PUSH_INT64_ARG(x) \
+						dbl_arg.int64 = x;\
+						arg_op[arg_i++] = dbl_arg.ints[0];\
+						arg_op[arg_i++] = dbl_arg.ints[1];\
+						++arg_len;
+		
 #	endif
+#	define PUSH_DOUBLE_ARG(x) PUSH_INT64_ARG(x)
 
 #endif
 
@@ -1175,33 +1200,12 @@ object call_c(int func, object proc_ad, object arg_list)
 
 			if (size == C_DOUBLE) {
 				#if INTPTR_MAX == INT32_MAX
-/* PUSH_INT64_ARG :
-   push a value as a 64-bit number */
-					#ifdef push
-						#define PUSH_INT64_ARG(x) \
-						dbl_arg.int64 = x;\
-						arg = dbl_arg.ints[1];\
-						push();\
-						arg = dbl_arg.ints[0];\
-						push();\
-						++arg_len;
-					#else
-						#define PUSH_INT64_ARG(x) \
-						dbl_arg.int64 = x;\
-						arg_op[arg_i++] = dbl_arg.ints[0];\
-						arg_op[arg_i++] = dbl_arg.ints[1];\
-						++arg_len;
-					#endif
-					
+
 					PUSH_INT64_ARG(dbl_arg.int64)
 						
 				#elif INTPTR_MAX == INT64_MAX
-					/* real simple */
-					#define PUSH_INT64_ARG(x) \
-						arg = x;\
-						PUSH_INT_ARG
 				
-					if( xmm_i < MAX_FP_PARAM_REGISTERS ){
+					if( xmm_i < MAX_FP_PARAM_REGISTERS ) {
 						UPDATE_SIGNATURE
 						dbl_op[xmm_i++].d = dbl_arg.dbl;
 					}
