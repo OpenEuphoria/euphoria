@@ -55,9 +55,14 @@ typedef enum {false,true} bool;
 	{\
 		return EUPHORIA_MAX_INT/2; \
 	}
-	
+
+#if INT32_MAX == INTPTR_MAX
 MAKE_BORDER_FUNCTIONS(int,C_INT)
+#endif
+
+#if INT32_MAX == INTPTR_MAX || !defined(EWINDOWS)
 MAKE_BORDER_FUNCTIONS(long,C_LONG)
+#endif
 MAKE_BORDER_FUNCTIONS(long long,C_LONGLONG)
 
 #define MAKE_ID_FUNCTION(ctype,etype) \
