@@ -64,8 +64,11 @@ constant types = signed_types & unsigned_types
 constant type_names = signed_type_names & unsigned_type_names
 constant values = signed_values & unsigned_values
 for i = 1 to length(signed_types) do
-	r_max_uint_fn = define_c_func( "", call_back( routine_id("minus_1_fn") ), {}, signed_types[i] )
-	test_equal( sprintf("return type %s preserves -1", {signed_type_names[i]}), -1, c_func(r_max_uint_fn, {}) )
+	-- 32-bit callbacks don't return anything big enough to be a C_LONGLONG, so skip those
+	if pointer_size = 8 or signed_types[i] != C_LONGLONG then
+		r_max_uint_fn = define_c_func( "", call_back( routine_id("minus_1_fn") ), {}, signed_types[i] )
+		test_equal( sprintf("return type %s preserves -1", {signed_type_names[i]}), -1, c_func(r_max_uint_fn, {}) )
+	end if
 end for
 
 constant lib818 = open_dll("./lib818.dll")
@@ -76,6 +79,8 @@ if lib818 then
 		r_above_maximum_euphoria_integer, r_NOVALUE, r_half_MIN, r_half_MAX
 	object fs
 	for i = 1 to length(signed_types) do
+		-- test that values get encoded well when coming out from C.
+		-- test special values and ranges in EUPHORIA
 		if sizeof(signed_types[i]) >= sizeof(E_OBJECT) and signed_types[i] != C_BOOL then
 			-- The underlying library will return values in C values that fit into thier values 
 			-- but are out of bounds amoung EUPHORIA integers. 
@@ -111,7 +116,8 @@ if lib818 then
 				test_fail(sprintf("opening all functions for type %s", {signed_type_names[i]}))
 			end if
 		end if
-		-- test that in the large negative values
+		-- test that values that are sometimes large negative values in C are recognized
+		-- These values are #C00...00 - 20.
 		r_near_hashC = define_c_func( lib818, sprintf("%s_BFF_FD", 
 			{signed_type_names[i]}), {}, signed_types[i] )
 		if r_near_hashC != -1 then
@@ -128,7 +134,7 @@ if lib818 then
 						test_fail(sprintf("can read value for %s", {signed_type_names[i]})) 
 						continue
 				end switch
-				test_equal(sprintf("detect #BFFF...D0 correctly for type %s",{signed_type_names[i]}),
+				test_equal(sprintf("detect #C00...00-20 correctly for type %s",{signed_type_names[i]}),
 					expected_val,
 					c_func(r_near_hashC, {}))
 			end if
@@ -136,7 +142,7 @@ if lib818 then
 	end for
 	for i = 1 to length(types) do
 		integer value_test_counter = 0
-		integer id_r = define_c_func(lib818, type_names[i] & "_id", {types[i]}, types[i])
+		integer id_r = define_c_func(lib818, '+' & type_names[i] & "_id", {types[i]}, types[i])
 		test_true(sprintf("%s id function is in our library", {type_names[i]}), id_r != -1)
 		for j = 1 to length(values[i]) do
 			value_test_counter += 1
@@ -145,7 +151,7 @@ if lib818 then
 		end for
 	end for
 	
-	integer bit_repeat_r = define_c_func(lib818, "bit_repeat", { C_BOOL, C_UBYTE }, C_LONGLONG)
+	integer bit_repeat_r = define_c_func(lib818, "+bit_repeat", { C_BOOL, C_UBYTE }, C_LONGLONG)
 	test_equal( "5  repeat bits: ", power(2,5)-1, c_func(bit_repeat_r, {1, 5}))
 	test_equal( "40 repeating bits: ", power(2,40)-1, c_func(bit_repeat_r, { 1, 40 }))
 	test_equal( "2**50: ", power(2,50), c_func(bit_repeat_r, {1, 50})+1)
@@ -154,5 +160,5 @@ if lib818 then
 end if
 
 -- Should put some tests for argument passing as well : passing floating point, double, long long, etc..
-
 test_report()
+

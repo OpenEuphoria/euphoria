@@ -1016,14 +1016,14 @@ LIB818_FPIC=-fPIC
 endif
 
 $(BUILDDIR)/test818.o : test818.c
-	gcc -c $(LIB818_FPIC) -I ../include $(FE_FLAGS) -Wall -shared ../source/test818.c -o $(BUILDDIR)/test818.o
+	$(CC) -c $(LIB818_FPIC) -I ../include $(FE_FLAGS) -Wall -shared ../source/test818.c -o $(BUILDDIR)/test818.o
 
 lib818 :
 	touch test818.c
 	$(MAKE) ../tests/lib818.dll
 
 ../tests/lib818.dll : $(BUILDDIR)/test818.o
-	gcc  $(MSIZE) $(LIB818_FPIC) -shared -o ../tests/lib818.dll $(CREATEDLLFLAGS) $(BUILDDIR)/test818.o
+	$(CC)  $(MSIZE) $(LIB818_FPIC) -shared -o ../tests/lib818.dll $(CREATEDLLFLAGS) $(BUILDDIR)/test818.o
 
 ifeq "$(EUPHORIA)" "1"
 
