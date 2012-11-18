@@ -64,7 +64,7 @@
 /* Local variables */
 /*******************/
 
-#if defined(__GNUC__) && defined(EUNIX)
+#if defined(__GNUC__)
 #if ARCH == ix86
 /** 
  * push the value arg on to the **runtime** stack.  You must make sure that as_offset is
@@ -89,7 +89,7 @@
   */
 #define  pop() asm( "movl %0,%%ecx; addl (%%ecx),%%esp;" : /* no out */ : "r"(as_offset) : "%ecx" )
 #endif
-#endif  // EUNIX
+#endif  // GCC
 
 #ifdef EMSVC
 #define push() __asm { PUSH [last_offset] } do { } while (0)
@@ -119,336 +119,50 @@ typedef union {
 
 #if defined(push) && defined(pop)
 
-/** These stack types allow you take values off of the EUPHORIA c declaration
- *  And values off of the call to c_func/c_proc.
- *  
- *  In the later defined C only implementation, we pop values and types from left to right.
- *  The arguments are pushed into a virtual stack, but not the runtime stack.
- *  This stack, is implemented as an array and the values are written first one
- *  left to last one right in the call.  Ultimately, the ones on the right are
- *  first to be pushed in the **runtime** stack.
- *  
- *  The C-compiler generates code that will push these values last first, essentially
- *  reversing the order.  By the time the call is made the right most value is
- *  first on the run-time stack
- *  
- *  In the C+assembler implementation, we pop values and types from right to left.
- *  We use the assembler macros push and pop to put things directly on to the
- *  run time stack.  In the same order we removed them, right to left.
- *  It is in this order we push things on to the runtime stack. 
- *  Both cdecl and stdcall calling conventions push arguments in this order.
- * 
- */
-
-// Creates a stack of types from a sequence of stack members. 
-inline static object_ptr type_stack_init(s1_ptr type_list) {
-	return type_list->base + type_list->length;
-}
-// pops a type off of the type stack, this_type_stack.
-inline static object type_stack_pop(object_ptr * this_type_stack) {
-	//*next_size_ptr--
-	return *(*this_type_stack)--;
-}
-inline static object_ptr value_stack_init(s1_ptr type_list) {
-	return type_list->base + type_list->length;
-}
-// pops a type off of the type stack, this_type_stack.
-inline static object value_stack_pop(object_ptr * this_type_stack) {
-	//*next_size_ptr--
-	return *(*this_type_stack)--;
-}
-
-
-/*
- * 
- * DIRTY CODE! Modify this to push values onto the call stack 
- * N.B.!!! stack offset for variables "arg", and "argsize"
- * below must be correct! - make a .asm file to be sure. 
- *
- * What is meant by "correct"?
- * */
-// 32-bit only
-object call_c(int func, object proc_ad, object arg_list)
-/* Call a WIN32 or Linux C function in a DLL or shared library. 
-   Alternatively, call a machine-code routine at a given address. */
-{
-	volatile unsigned long arg;  // !!!! magic var to push values on the stack
-	volatile int argsize;        // !!!! number of bytes to pop 
+	/** These stack types allow you take values off of the EUPHORIA c declaration
+	 *  And values off of the call to c_func/c_proc.
+	 *  
+	 *  In the later defined C only implementation, we pop values and types from left to right.
+	 *  The arguments are pushed into a virtual stack, but not the runtime stack.
+	 *  This stack, is implemented as an array and the values are written first one
+	 *  left to last one right in the call.  Ultimately, the ones on the right are
+	 *  first to be pushed in the **runtime** stack.
+	 *  
+	 *  The C-compiler generates code that will push these values last first, essentially
+	 *  reversing the order.  By the time the call is made the right most value is
+	 *  first on the run-time stack
+	 *  
+	 *  In the C+assembler implementation, we pop values and types from right to left.
+	 *  We use the assembler macros push and pop to put things directly on to the
+	 *  run time stack.  In the same order we removed them, right to left.
+	 *  It is in this order we push things on to the runtime stack. 
+	 *  Both cdecl and stdcall calling conventions push arguments in this order.
+	 * 
+	 */
 	
-	/* List of arguments passed in this call to c_func/c_proc and 
-	 * a list of types made in the call to define_c_func or define_c_proc,
-	 * repsectively. */
-	s1_ptr arg_list_ptr, arg_size_ptr;
-	/* Stacks of arguments we will pop using type_stack_pop(), value_stack_pop()
-	 * inlined functions. */
-	object_ptr next_arg_ptr, next_size_ptr;
-	object next_arg, next_size;
-	int iresult, i;
-	double dresult;
-	double_arg dbl_arg;
-	float_arg flt_arg;
-	float fresult;
-	unsigned long size;
-	int proc_index;
-	int (*int_proc_address)();
-	unsigned return_type;
+	// Creates a stack of types from a sequence of stack members. 
+	inline static object_ptr type_stack_init(s1_ptr type_list) {
+		return type_list->base + type_list->length;
+	}
+	// pops a type off of the type stack, this_type_stack.
+	inline static object type_stack_pop(object_ptr * this_type_stack) {
+		//*next_size_ptr--
+		return *(*this_type_stack)--;
+	}
+	inline static object_ptr value_stack_init(s1_ptr type_list) {
+		return type_list->base + type_list->length;
+	}
+	// pops a type off of the type stack, this_type_stack.
+	inline static object value_stack_pop(object_ptr * this_type_stack) {
+		//*next_size_ptr--
+		return *(*this_type_stack)--;
+	}
 
-#if defined(EWINDOWS) && !defined(__WATCOMC__)
-	int cdecl_call;
+#	define value_stack_init type_stack_init
+#	define  value_stack_pop type_stack_pop
 #endif
 
-	unsigned long as_offset;
-	unsigned long last_offset;
 
-	// this code relies on arg always being the first variable and last_offset 
-	// always being the last variable
-	last_offset = (unsigned long)&arg;
-	as_offset = (unsigned long)&argsize;
-	// as_offset = last_offset - 4;
-
-	// Setup and Check for Errors
-	
-	proc_index = get_pos_int("c_proc/c_func", proc_ad); 
-	if (proc_index >= (unsigned)c_routine_next) {
-		RTFatal("c_proc/c_func: bad routine number (%d)", proc_index);
-	}
-	
-	int_proc_address = c_routine[proc_index].address;
-#if defined(EWINDOWS) && !defined(__WATCOMC__)
-	cdecl_call = c_routine[proc_index].convention;
-#endif
-	if (IS_ATOM(arg_list)) {
-		RTFatal("c_proc/c_func: argument list must be a sequence");
-	}
-	
-	arg_list_ptr = SEQ_PTR(arg_list);
-	next_arg_ptr = type_stack_init(arg_list_ptr);
-	
-	// only look at length of arg size sequence for now
-	arg_size_ptr = c_routine[proc_index].arg_size;
-	next_size_ptr = value_stack_init(arg_size_ptr);
-	
-	return_type = c_routine[proc_index].return_size; // will be INT
-	
-	if ((func && return_type == 0) || (!func && return_type != 0) ) {
-		if (c_routine[proc_index].name->length < TEMP_SIZE)
-			MakeCString(TempBuff, MAKE_SEQ(c_routine[proc_index].name), TEMP_SIZE);
-		else
-			TempBuff[0] = '\0';
-		RTFatal(func ? "%s does not return a value" :
-				"%s returns a value",
-				TempBuff);
-	}
-		
-	if (arg_list_ptr->length != arg_size_ptr->length) {
-		if (c_routine[proc_index].name->length < 100)
-			MakeCString(TempBuff, MAKE_SEQ(c_routine[proc_index].name), TEMP_SIZE);
-		else
-			TempBuff[0] = '\0';
-		RTFatal("C routine %s() needs %d argument%s, not %d",
-				TempBuff,
-				arg_size_ptr->length,
-				(arg_size_ptr->length == 1) ? "" : "s",
-				arg_list_ptr->length);
-	}
-	
-	argsize = arg_list_ptr->length << 2;
-	
-	// Push the Arguments
-	
-	for (i = 1; i <= arg_list_ptr->length; i++) {
-	
-		next_arg = value_stack_pop(&next_arg_ptr);
-		next_size = type_stack_pop(&next_size_ptr);
-		
-		if (IS_ATOM_INT(next_size))
-			size = INT_VAL(next_size);
-		else if (IS_ATOM(next_size))
-			size = (uintptr_t)DBL_PTR(next_size)->dbl;
-		else 
-			RTFatal("This C routine was defined using an invalid argument type");
-
-		if (size == C_DOUBLE || size == C_FLOAT) {
-			/* push 8-byte double or 4-byte float */
-			if (IS_ATOM_INT(next_arg))
-				dbl_arg.dbl = (double)next_arg;
-			else if (IS_ATOM(next_arg))
-				dbl_arg.dbl = DBL_PTR(next_arg)->dbl;
-			else { 
-				arg = arg+argsize+9999; // 9999 = 270f hex - just a marker for asm code
-				RTFatal("arguments to C routines must be atoms");
-			}
-
-			if (size == C_DOUBLE) {
-				arg = dbl_arg.ints[1];
-
-				push();  // push high-order half first
-				argsize += 4;
-				arg = dbl_arg.ints[0];
-				push(); // don't combine this with the push() below - Lcc bug
-			}
-			else {
-				/* C_FLOAT */
-				flt_arg.flt = (float)dbl_arg.dbl;
-				arg = (unsigned long)flt_arg.int32;
-				push();
-			}
-		}
-		else {
-			/* push 4-byte integer */
-			if (size >= E_INTEGER) {
-				if (IS_ATOM_INT(next_arg)) {
-					if (size == E_SEQUENCE)
-						RTFatal("passing an integer where a sequence is required");
-				}
-				else {
-					if (IS_SEQUENCE(next_arg)) {
-						if (size != E_SEQUENCE && size != E_OBJECT)
-							RTFatal("passing a sequence where an atom is required");
-					}
-					else {
-						if (size == E_SEQUENCE)
-							RTFatal("passing an atom where a sequence is required");
-					}
-					RefDS(next_arg);
-				}
-				arg = next_arg;
-				push();
-			} 
-			else if (IS_ATOM_INT(next_arg)) {
-				arg = next_arg;
-				push();
-			}
-			else if (IS_ATOM(next_arg)) {
-				// atoms are rounded to integers
-				
-				arg = (uintptr_t)DBL_PTR(next_arg)->dbl; //correct
-				// if it's a -ve f.p. number, Watcom converts it to int and
-				// then to unsigned int. This is exactly what we want.
-				// Works with the others too. 
-				push();
-			}
-			else {
-				arg = arg+argsize+9999; // just a marker for asm code
-				RTFatal("arguments to C routines must be atoms");
-			}
-		}
-	}    
-
-	// Make the Call - The C compiler thinks it's a 0-argument call
-	
-	// might be VOID C routine, but shouldn't crash
-
-	if (return_type == C_DOUBLE) {
-		// expect double to be returned from C routine
-#if defined(EWINDOWS) && !defined(__WATCOMC__)
-		if (cdecl_call) {
-			dresult = (*((double (  __cdecl *)())int_proc_address))();
-			// In __cdecl, the caller is supposed to restore the runtime stack.  As we have put 
-			// things on the stack manually with 'push' instead of supplying them here, 
-			// the compiler will not generate instructions to restore the stack for the above call.
-			// We must restore the stack pointer with pop.
-			
-			pop();
-		}
-		else
-#endif          
-			dresult = (*((double (__stdcall *)())int_proc_address))();
-			// In __stdcall, the callee is supposed to restore the stack.  Normally, we don't want
-			// to change set the stack pointer because it should be correct after the call and 
-			// calling pop would leave the stack in the wrong place.
-			
-		// In UNIX, rather than using stdcall it uses an undecorated cdecl call.  Where
-		// the function names do not begin with an underscore but the caller must restore the
-		// stack.
-		//
-		// undecorated cdecl__ is the convention used by GCC and thus on UNIX
-#ifdef EUNIX
-		pop();
-#endif      
-		return NewDouble(dresult);
-	}
-	
-	else if (return_type == C_FLOAT) {
-		// expect float to be returned from C routine
-#if defined(EWINDOWS) && !defined(__WATCOMC__)
-		if (cdecl_call) {
-			fresult = (*((float (  __cdecl *)())int_proc_address))();
-			pop();
-		}
-		else
-#endif          
-			fresult = (*((float (__stdcall *)())int_proc_address))();
-
-#ifdef EUNIX
-		pop();
-#endif      
-		return NewDouble((double)fresult);
-	}
-	
-	else {
-		// expect integer to be returned
-#if defined(EWINDOWS) && !defined(__WATCOMC__)
-		if (cdecl_call) {
-			iresult = (*((int (  __cdecl *)())int_proc_address))();
-			pop();
-		}
-		else
-#endif          
-			iresult = (*((int (__stdcall *)())int_proc_address))();
-#ifdef EUNIX       
-		pop();
-#endif      
-		if (return_type == C_POINTER ){
-			if ((unsigned)iresult <= (unsigned)MAXINT) {
-				return iresult;
-			}
-			else{
-				return NewDouble((double)(unsigned)iresult);
-			}
-		}
-		else if ((return_type & 0x000000FF) == 04) {
-			/* 4-byte integer - usual case */
-			// check if unsigned result is required 
-			if ((return_type & C_TYPE) == 0x02000000) {
-				// unsigned integer result
-				if ((unsigned)iresult <= (unsigned)MAXINT) {
-					return iresult;
-				}
-				else
-					return NewDouble((double)(unsigned)iresult);
-			}
-			else {
-				// signed integer result
-				if (return_type >= E_INTEGER ||
-					(iresult >= MININT && iresult <= MAXINT)) {
-					return iresult;
-				}
-				else
-					return NewDouble((double)iresult);
-			}
-		}
-		else if (return_type == 0) {
-			return 0; /* void - procedure */
-		}
-		/* less common cases */
-		else if (return_type == C_UCHAR) {
-			return (unsigned char)iresult;
-		}
-		else if (return_type == C_CHAR) {
-			return (signed char)iresult;
-		}
-		else if (return_type == C_USHORT) {
-			return (unsigned short)iresult;
-		}
-		else if (return_type == C_SHORT) {
-			return (short)iresult;
-		}
-		else
-			return 0; // unknown function return type
-	}
-}
-#else //EMINGW, 64-bit, ARM
 /*******************/
 /* Local variables */
 /*******************/
@@ -712,7 +426,7 @@ void call_std_proc(intptr_t i, intptr_t * op, long len) {
 	}
 }
 
-intptr_t call_std_func(intptr_t i, intptr_t * op, long len) {
+intptr_t int_std_func(intptr_t i, intptr_t * op, long len) {
     
 	switch(len) {
 	    case 0: return ((func0)i)();
@@ -757,7 +471,7 @@ void call_cdecl_proc(intptr_t i, intptr_t * op, long len) {
 	}
 }
 
-intptr_t call_cdecl_func(intptr_t i, intptr_t * op, long len) {
+intptr_t int_cdecl_func(intptr_t i, intptr_t * op, long len) {
 	switch(len) {
 	    case 0: return ((cdfunc0)i)();
 	    case 1: return ((cdfunc1)i)(op[0]);
@@ -1246,92 +960,146 @@ union xmm_param {
 
 #if INTPTR_MAX == INT64_MAX
 
-#ifdef EWINDOWS
+#	ifdef EWINDOWS
 
-/* The Windows x86-64 calling convention only uses a maximum of
- * four registers for passing parameters, regardless of the type.
- * Integer parameters are spread among 4 integer registers,
- * and floating point parameters are spread among the floating point
- * registers.
- */
-#define MAX_INT_PARAM_REGISTERS 4
-#define MAX_FP_PARAM_REGISTERS 4
-#define INCREMENT_FP_ARGS ++xmm_i;
-#define INCREMENT_INT_ARGS ++arg_i;
-#define SIGNATURE_PARAM , signature
-#define UPDATE_SIGNATURE signature |= (arg_i<<1);
-#else
-/* The x86-64 calling convention uses 6 registers for the first 6 integer
- * parameters.  After that, parameters are pushed on the stack.  Also,
- * the first 5 floating point parameters are put into floating point
- * registers.  Either type of argument can start overflowing onto the
- * stack, so we have to track the number of args we're putting onto the
- * stack separately from what goes into the registers.
- */
-#define MAX_INT_PARAM_REGISTERS 6
-#define MAX_FP_PARAM_REGISTERS 8
-#define INCREMENT_FP_ARGS ;
-#define INCREMENT_INT_ARGS ;
-#define SIGNATURE_PARAM
-#define UPDATE_SIGNATURE
-#endif // Platform defines for argument pushes
+		/* The Windows x86-64 calling convention only uses a maximum of
+		 * four registers for passing parameters, regardless of the type.
+		 * Integer parameters are spread among 4 integer registers,
+		 * and floating point parameters are spread among the floating point
+		 * registers.
+		 */
+#		define MAX_INT_PARAM_REGISTERS 4
+#		define MAX_FP_PARAM_REGISTERS 4
+#		define INCREMENT_FP_ARGS ++xmm_i;
+#		define INCREMENT_INT_ARGS ++arg_i;
+#		define SIGNATURE_PARAM , signature
+#		define UPDATE_SIGNATURE signature |= (arg_i<<1);
+#	else
+		/* The x86-64 calling convention uses 6 registers for the first 6 integer
+		 * parameters.  After that, parameters are pushed on the stack.  Also,
+		 * the first 5 floating point parameters are put into floating point
+		 * registers.  Either type of argument can start overflowing onto the
+		 * stack, so we have to track the number of args we're putting onto the
+		 * stack separately from what goes into the registers.
+		 */
+#		define MAX_INT_PARAM_REGISTERS 6
+#		define MAX_FP_PARAM_REGISTERS 8
+#		define INCREMENT_FP_ARGS ;
+#		define INCREMENT_INT_ARGS ;
+#		define SIGNATURE_PARAM
+#		define UPDATE_SIGNATURE
+#	endif // Platform defines for argument pushes
 
-/* Pushes the variable //arg// on to our argument stack, but not the
- * runtime stack, as an integer. */
-#define PUSH_INT_ARG \
-++int_args; \
-if( arg_i < MAX_INT_PARAM_REGISTERS ){ \
-	arg_op[arg_i++] = arg; \
-} \
-else{ \
-	arg_op[arg_stack++] = arg; \
-} \
-INCREMENT_FP_ARGS
+	/* Pushes the variable //arg// on to our argument stack, but not the
+	 * runtime stack, as an integer. */
+	#define PUSH_INT_ARG \
+	++int_args; \
+	if( arg_i < MAX_INT_PARAM_REGISTERS ){ \
+		arg_op[arg_i++] = arg; \
+	} \
+	else{ \
+		arg_op[arg_stack++] = arg; \
+	} \
+	INCREMENT_FP_ARGS
 
+/* PUSH_INT64_ARG :
+   push a value as a 64-bit number */
+   /* real simple */
+#	define PUSH_INT64_ARG(x) \
+		arg = x;\
+		PUSH_INT_ARG
+
+	
 #else // 32-bit
-#define PUSH_INT_ARG arg_op[arg_i++] = arg;
+
+#	ifdef push
+#		define PUSH_INT_ARG push();
+
+#		define PUSH_INT64_ARG(x) \
+						dbl_arg.int64 = (int64_t) x;\
+						arg = dbl_arg.ints[1];\
+						push();\
+						arg = dbl_arg.ints[0];\
+						push();\
+						argsize += 4;
+						
+#	else
+#		define PUSH_INT_ARG arg_op[arg_i++] = arg;
+
+#		define PUSH_INT64_ARG(x) \
+						dbl_arg.int64 = x;\
+						arg_op[arg_i++] = dbl_arg.ints[0];\
+						arg_op[arg_i++] = dbl_arg.ints[1];\
+						++arg_len;
+						
+		
+#	endif
+#	define PUSH_DOUBLE_ARG(x) PUSH_INT64_ARG(x)
+
 #endif
 
-// Pull off types and their values from the sequences passed in from left to right.
-// This goes into the function call as (first-pushed, second-pushed, ..., last-pushed)..
-// If using standard calling conventions, this means that the last-pushed value will
-// be first when values are pushed onto the runtime stack.  This is what we want.
-inline static object_ptr type_stack_init(s1_ptr type_list) {
-	return type_list->base + 1;
-}
-inline static object type_stack_pop(object_ptr * this_type_stack) {
-	//*next_size_ptr++
-	return *(*this_type_stack)++;
-}
-#define value_stack_init type_stack_init
-#define  value_stack_pop type_stack_pop
+#ifndef value_stack_init
+	// Pull off types and their values from the sequences passed in from left to right.
+	// This goes into the function call as (first-pushed, second-pushed, ..., last-pushed)..
+	// If using standard calling conventions, this means that the last-pushed value will
+	// be first when values are pushed onto the runtime stack.  This is what we want.
+	inline static object_ptr type_stack_init(s1_ptr type_list) {
+		return type_list->base + 1;
+	}
+	inline static object type_stack_pop(object_ptr * this_type_stack) {
+		//*next_size_ptr++
+		return *(*this_type_stack)++;
+	}
+#	define value_stack_init type_stack_init
+#	define  value_stack_pop type_stack_pop
+#endif
 
 object call_c(int func, object proc_ad, object arg_list)
-/* Call a WIN32 or Linux C function in a DLL or shared library. 
+/* Call a C function in a DLL or shared library. 
    Alternatively, call a machine-code routine at a given address. */
 {
+	volatile uint64_t arg;  // !!!! magic var to push values on the stack
+	volatile int argsize;   // !!!! number of bytes to pop 
+	
 	s1_ptr arg_list_ptr, arg_size_ptr;
 	object_ptr next_arg_ptr, next_size_ptr;
 	object next_arg, next_size;
-	int64_t iresult, i;
+	/* This type works on 32-bit C+assembler because we use Little Endian now.
+	 * Maybe we should use intptr_t instead. */
+	int64_t int_result = 0LL;
+	int i;
 	double_arg dbl_arg;
-	double dresult = 0;
+	double double_result = 0;
 	float_arg flt_arg;
-	float fresult = 0;
+	float float_result = 0;
 	uintptr_t size;
 	intptr_t proc_index;
 	intptr_t long_proc_address;
 	uintptr_t return_type;
 	char NameBuff[100];
-	uint64_t arg;
 
-	intptr_t arg_op[16];
-	intptr_t arg_i = 0;
-	#if INTPTR_MAX == INT32_MAX
-	intptr_t arg_len;
-	int cdecl_call;
-	#endif
-	
+#	ifndef push
+		intptr_t arg_op[16];
+		intptr_t arg_i = 0;
+#	endif
+#	if INTPTR_MAX == INT32_MAX
+		intptr_t arg_len;
+#		if defined(__WIN32) && !defined(__WATCOMC__)
+			int cdecl_call;
+#		else
+#			define cdecl_call (1)
+#		endif
+#	endif
+
+	uintptr_t as_offset;   // used by pop()
+	uintptr_t last_offset; // used by push()
+
+	// this code relies on arg always being the first variable and last_offset 
+	// always being the last variable
+	last_offset = (uintptr_t)&arg;
+	as_offset = (uintptr_t)&argsize;
+	// as_offset = last_offset - 4;
+
 	
 #if INTPTR_MAX == INT64_MAX
 #ifdef EWINDOWS
@@ -1346,8 +1114,8 @@ object call_c(int func, object proc_ad, object arg_list)
 	intptr_t xmm_i = 0;
 	intptr_t arg_stack = MAX_INT_PARAM_REGISTERS;
 	int int_args = 0;
-#endif
 	int is_double, is_float;
+#endif
 	
 	// Setup and Check for Errors
 	proc_index = get_pos_int("c_proc/c_func", proc_ad); 
@@ -1357,13 +1125,11 @@ object call_c(int func, object proc_ad, object arg_list)
 	}
 	
 	long_proc_address = (intptr_t)(c_routine[proc_index].address);
-#if INTPTR_MAX == INT32_MAX
-#if defined(EWINDOWS) && !defined(__WATCOMC__)
-	cdecl_call = c_routine[proc_index].convention;
-#else
-	cdecl_call = 1;
-#endif
-#endif
+#	if INTPTR_MAX == INT32_MAX
+#		if defined(__WIN32) && !defined(__WATCOMC__)
+			cdecl_call = c_routine[proc_index].convention;
+#		endif
+#	endif
 	if (IS_ATOM(arg_list)) {
 		RTFatal("c_proc/c_func: argument list must be a sequence");
 	}
@@ -1379,7 +1145,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	return_type = c_routine[proc_index].return_size; // will be INT
 
 	#if INTPTR_MAX == INT32_MAX
-	arg_len = arg_list_ptr->length;
+		arg_len = arg_list_ptr->length;
 	#endif
 	
 	if ( (func && return_type == 0) || (!func && return_type != 0) ) {
@@ -1405,6 +1171,8 @@ object call_c(int func, object proc_ad, object arg_list)
 						  arg_list_ptr->length);
 		RTFatal(TempBuff);
 	}
+	
+	argsize = arg_list_ptr->length << 2;
 	
 	// Push the Arguments
 	
@@ -1433,11 +1201,12 @@ object call_c(int func, object proc_ad, object arg_list)
 
 			if (size == C_DOUBLE) {
 				#if INTPTR_MAX == INT32_MAX
-					arg_op[arg_i++] = dbl_arg.ints[0];
-					arg_op[arg_i++] = dbl_arg.ints[1];
-					++arg_len;
+
+					PUSH_INT64_ARG(dbl_arg.int64)
+						
 				#elif INTPTR_MAX == INT64_MAX
-					if( xmm_i < MAX_FP_PARAM_REGISTERS ){
+				
+					if( xmm_i < MAX_FP_PARAM_REGISTERS ) {
 						UPDATE_SIGNATURE
 						dbl_op[xmm_i++].d = dbl_arg.dbl;
 					}
@@ -1453,7 +1222,8 @@ object call_c(int func, object proc_ad, object arg_list)
 				/* C_FLOAT */
 				flt_arg.flt = (float)dbl_arg.dbl;
 				#if INTPTR_MAX == INT32_MAX
-					arg_op[arg_i++] = (uintptr_t)flt_arg.int32;
+					arg = (uintptr_t)flt_arg.int32;
+					PUSH_INT_ARG
 				#elif INTPTR_MAX == INT64_MAX
 					if( xmm_i < MAX_FP_PARAM_REGISTERS ){
 						UPDATE_SIGNATURE
@@ -1484,17 +1254,12 @@ object call_c(int func, object proc_ad, object arg_list)
 		}
 		else if( size == C_LONGLONG ){
 			if (IS_ATOM_INT(next_arg)) {
-				arg = next_arg;
-				PUSH_INT_ARG
+				PUSH_INT64_ARG(next_arg);
 			}
 			else if (IS_ATOM(next_arg)) {
-				// atoms are rounded to integers
-				
-				arg = (uint64_t)DBL_PTR(next_arg)->dbl; //correct
-				// if it's a -ve f.p. number, Watcom converts it to long and
-				// then to unsigned long. This is exactly what we want.
-				// Works with the others too. 
-				PUSH_INT_ARG
+				// atoms are converted to and rounded to 64-bit values, 
+				// this is lossess on both 32 and 64 bit.
+				PUSH_INT64_ARG((uint64_t)DBL_PTR(next_arg)->dbl);
 			}
 		}
 		else {
@@ -1538,106 +1303,148 @@ object call_c(int func, object proc_ad, object arg_list)
 	}    
 
 	// Make the Call
-	
-	is_double = (return_type == C_DOUBLE);
-	is_float = (return_type == C_FLOAT);
+	#if INTPTR_MAX == INT32_MAX
+		#ifdef push
+			// Make the Call - The C compiler thinks it's a 0-argument call
+			// might be VOID C routine, but shouldn't crash
 
-#if INTPTR_MAX == INT32_MAX
-	if (func) {
-		if (cdecl_call && is_double) {
-			dresult = double_cdecl_func(long_proc_address, arg_op, arg_len);
-		} else if (cdecl_call && is_float) {
-			fresult = float_cdecl_func(long_proc_address, arg_op, arg_len);
-		} else if (is_double) {
-			dresult = double_std_func(long_proc_address, arg_op, arg_len);
-		} else if (is_float) {
-			fresult = float_std_func(long_proc_address, arg_op, arg_len);
-		} else if (cdecl_call) {
-			iresult = call_cdecl_func(long_proc_address, arg_op, arg_len);
-		} else {
-			iresult = call_std_func(long_proc_address, arg_op, arg_len);
+			// In __cdecl, the caller is supposed to restore the runtime stack.  As we have put 
+			// things on the stack manually with 'push' instead of supplying them here, 
+			// the compiler will not generate instructions to restore the stack for the above call.
+			// We must restore the stack pointer with pop.
+			
+			// In UNIX, rather than using stdcall it uses an undecorated cdecl call.  Where
+			// the function names do not begin with an underscore but the caller must restore the
+			// stack.
+			//
+			// undecorated cdecl__ is the convention used by GCC and thus on UNIX
+
+			// In __stdcall, the callee is supposed to restore the stack.  Normally, we don't want
+			// to change set the stack pointer because it should be correct after the call and 
+			// calling pop would leave the stack in the wrong place.
+			
+			#define	call_routine(type)	\
+						if (cdecl_call) {\
+							type ## _result = (*((type (  __cdecl *)())long_proc_address))();\
+							pop();\
+						}\
+						else\
+							type ## _result = (*((type (__stdcall *)())long_proc_address))()
+		
+		#else
+			#define call_routine(type)	\
+				 if (cdecl_call)\
+				 	 type ## _result = type ## _cdecl_func(long_proc_address, arg_op, arg_len);\
+				 else\
+				 	 type ## _result = type ## _std_func(long_proc_address, arg_op, arg_len)
+		#endif
+	#else
+		is_double = (return_type == C_DOUBLE);
+		is_float = (return_type == C_FLOAT);
+		/* I think you can safely change this such that there are no more conditions.  *
+		 * You'll need to rename those 64bit functions. */
+		#define call_routine(type) \
+				if( is_double ) double_result = dcall_x86_64( long_proc_address, (double*)dbl_op, arg_op SIGNATURE_PARAM);\
+				if( is_float  ) float_result = fcall_x86_64( long_proc_address, (double*)dbl_op, arg_op SIGNATURE_PARAM);\
+				else            int_result = icall_x86_64( long_proc_address, (double*)dbl_op, arg_op, int_args SIGNATURE_PARAM )
+	#endif
+	if (return_type == C_DOUBLE) {
+		call_routine(double);
+		return NewDouble(double_result);
+	}
+	/* not supported in MINGW or ARM */
+	else if (return_type == C_LONGLONG ){
+		long long int int64_t_result;
+#if defined(push) || INTPTR_MAX == INT32_MAX
+		call_routine(int64_t);
+#else
+		call_routine(int);
+		int64_t_result = int_result;
+#endif
+		if( int64_t_result <= (long long int)MAXINT && int64_t_result >= (long long int)MININT ){
+			return (intptr_t) int64_t_result;
 		}
-	} else {
-		if (cdecl_call) {
-			call_cdecl_proc(long_proc_address, arg_op, arg_len);
-			iresult = 0;
-		} else {
-			call_std_proc(long_proc_address, arg_op, arg_len);
-			iresult = 0;
+		else{
+			return NewDouble( (eudouble) int64_t_result );
 		}
 	}
-#else
-	if( is_double ) dresult = dcall_x86_64( long_proc_address, (double*)dbl_op, arg_op SIGNATURE_PARAM);
-	if( is_float  ) fresult = fcall_x86_64( long_proc_address, (double*)dbl_op, arg_op SIGNATURE_PARAM);
-	else            iresult = icall_x86_64( long_proc_address, (double*)dbl_op, arg_op, int_args SIGNATURE_PARAM );
-#endif
-	switch( return_type ){
-		case C_DOUBLE:
-			return NewDouble(dresult);
-		case C_FLOAT:
-			return NewDouble((eudouble)fresult);
-		case C_POINTER:
-			if (iresult >= 0 && iresult <= MAXINT) {
-				return iresult;
+	else if (return_type == C_FLOAT) {
+		// expect float to be returned from C routine
+		call_routine(float);
+		return NewDouble((eudouble)float_result);
+	}
+	
+	else {
+		// expect integer to be returned
+		call_routine(int);
+		if (return_type == C_POINTER ){
+			if ((uintptr_t)int_result <= (uintptr_t)MAXINT) {
+				return (intptr_t)(uintptr_t)int_result;
+			}
+			else{
+				return NewDouble((eudouble)(uintptr_t)int_result);
+			}
+		}
+		else if ((return_type & 0x000000FF) == 4 ) {
+			/* 4-byte integer - usual case */
+			// check if unsigned result is required 
+			if ((return_type & C_TYPE) == 0x02000000) {
+				// unsigned integer result
+				if ((unsigned)int_result <= (uintptr_t)MAXINT) {
+					return (intptr_t)(unsigned int)int_result;
+				}
+				else
+					return NewDouble((eudouble)(unsigned int)int_result);
 			}
 			else {
-				return NewDouble((eudouble)(uintptr_t)iresult);
+				// signed integer result
+				if (return_type >= E_INTEGER ||
+					((int)int_result >= MININT && (int)int_result <= MAXINT)) {
+					return (int) int_result;
+				}
+				else
+					return NewDouble((eudouble)(int)int_result);
 			}
-		case C_LONGLONG:
-			if ((long long int)iresult <= (long long int)MAXINT) {
-				return iresult;
+		}
+		else if ((return_type & 0x000000FF) == 8) {
+			/* long integer */
+			// check if unsigned result is required
+			if ((return_type & C_TYPE) == 0x02000000) {
+				// unsigned integer result
+				if ((unsigned long int)int_result <= (uintptr_t)MAXINT) {
+					return (unsigned long int)int_result;
+				}
+				else
+					return NewDouble((eudouble)(unsigned long int)int_result);
 			}
-			else{
-				return NewDouble((eudouble)(intptr_t)iresult);
+			else {
+				// signed long result
+				if (return_type >= E_INTEGER ||
+					((long)int_result >= (intptr_t)MININT && (long)int_result <= (intptr_t)MAXINT)) {
+					return (long)int_result;
+				}
+				else
+					return NewDouble((eudouble) (long int)int_result);
 			}
-		case C_INT:
-			if ((intptr_t)(int)iresult <= MAXINT) {
-				return (int)iresult;
-			}
-			else{
-				return NewDouble((eudouble)(int)iresult);
-			}
-		case C_UINT:
-			if ((uintptr_t)(unsigned int)iresult <= (unsigned int)MAXINT) {
-				return (unsigned int)iresult;
-			}
-			else{
-				return NewDouble((eudouble)(unsigned int)iresult);
-			}
-		case C_LONG:
-			if ((intptr_t)(long)iresult <= MAXINT) {
-				return (long)iresult;
-			}
-			else{
-				return NewDouble((eudouble)(long)iresult);
-			}
-		case C_ULONG:
-			if ((uintptr_t)(unsigned long int)iresult <= (unsigned long int)MAXINT) {
-				return iresult;
-			}
-			else{
-				return NewDouble((eudouble)(unsigned long int)iresult);
-			}
-		case C_UCHAR:
-			return (unsigned char) iresult;
-		case C_CHAR:
-			return (char) iresult;
-		case C_SHORT:
-			return (short) iresult;
-		case C_USHORT:
-			return (unsigned short) iresult;
-		case E_INTEGER:
-		case E_ATOM:
-		case E_SEQUENCE:
-		case E_OBJECT:
-			return iresult;
-		case 0:
-			// void procedure
-			return 0;
-			
-		default:
+		}
+		else if (return_type == 0) {
+			return 0; /* void - procedure */
+		}
+		/* less common cases */
+		else if (return_type == C_UCHAR) {
+			return (unsigned char)int_result;
+		}
+		else if (return_type == C_CHAR) {
+			return (signed char) int_result;
+		}
+		else if (return_type == C_USHORT) {
+			return (unsigned short)int_result;
+		}
+		else if (return_type == C_SHORT) {
+			return (short)int_result;
+		}
+		else
 			return 0; // unknown function return type
 	}
-}
 
-#endif // EMINGW
+}

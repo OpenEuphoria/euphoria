@@ -1567,7 +1567,7 @@ object eusock_socket(object x)
 
 	result_p = NewS1(2);
 	result_p->base[1] = MAKE_UINT((unsigned long)sock);
-	result_p->base[2] = MAKE_UINT((unsigned long)addr);
+	result_p->base[2] = MAKE_UINT((uintptr_t)addr);
 	
 	return MAKE_SEQ(result_p);
 }

@@ -380,7 +380,7 @@ EU_BACKEND_RUNNER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/backobj/*.
 EU_INTERPRETER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/intobj/*.c))
 
 all : 
-	$(MAKE) library debug-library shared-library debug-shared-library backend interpreter translator  
+	$(MAKE) library debug-library shared-library debug-shared-library backend interpreter translator lib818  
 	$(MAKE) tools
 
 
@@ -425,6 +425,7 @@ clean :
 	-rm -r $(BUILDDIR)/html
 	-rm -r $(BUILDDIR)/coverage
 	-rm -r $(BUILDDIR)/manual
+	-rm $(TRUNKDIR)/tests/lib818.dll
 	
 
 clobber distclean : clean
@@ -440,7 +441,7 @@ endif
 	$(MAKE) -C pcre CONFIG=../$(CONFIG) FPIC=-fPIC clean
 	
 
-.PHONY : clean distclean clobber all htmldoc manual
+.PHONY : clean distclean clobber all htmldoc manual lib818
 
 debug-library : builddirs
 	$(MAKE) $(BUILDDIR)/$(EECUDBGA) OBJDIR=libobjdbg ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE) LIBRARY_NAME=$(EECUDBGA)
@@ -757,7 +758,8 @@ test :
 	$(EXE) -i ../include ../source/eutest.ex -process-log -html > $(CYPBUILDDIR)/test-report.html	
 	cd ../tests && sh check_diffs.sh
 
-testeu : 
+testeu : ../tests/lib818.dll
+testeu :
 	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) $(EXE) ../source/eutest.ex --nocheck -i ../include -cc gcc -exe "$(CYPBUILDDIR)/$(EEXU) -batch $(CYPTRUNKDIR)/source/eu.ex" $(TESTFILE)
 
 test-311 :
@@ -769,7 +771,7 @@ test-311 :
 		-lib "$(CYPBUILDDIR)/$(LIBRARY_NAME)" \
 		$(TESTFILE)
 		
-coverage-311 :
+coverage-311 : 
 	cd ../tests/311 && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
 		$(EXE) -i ../include $(CYPTRUNKDIR)/source/eutest.ex -i $(CYPTRUNKDIR)/include \
 		-exe "$(CYPBUILDDIR)/$(EEXU)" $(COVERAGE_ERASE) \
@@ -777,14 +779,16 @@ coverage-311 :
 		-coverage-exclude std -coverage-exclude euphoria \
 		 -coverage-pp "$(EXE) -i $(CYPTRUNKDIR)/include $(CYPTRUNKDIR)/bin/eucoverage.ex" $(TESTFILE)
 
-coverage : 
+coverage :  ../tests/lib818.dll
+coverage :
 	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
 		$(EXE) -i ../include $(CYPTRUNKDIR)/source/eutest.ex -i $(CYPTRUNKDIR)/include \
 		-exe "$(CYPBUILDDIR)/$(EEXU)" $(COVERAGE_ERASE) \
 		-coverage-db $(CYPBUILDDIR)/unit-test.edb -coverage $(CYPTRUNKDIR)/include/std \
 		 -coverage-pp "$(EXE) -i $(CYPTRUNKDIR)/include $(CYPTRUNKDIR)/bin/eucoverage.ex" $(TESTFILE)
 
-coverage-front-end : 
+coverage-front-end :  ../tests/lib818.dll
+coverage-front-end :
 	-rm $(CYPBUILDDIR)/front-end.edb
 	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
 		$(EXE) -i ../include $(CYPTRUNKDIR)/source/eutest.ex -i $(CYPTRUNKDIR)/include \
@@ -1006,11 +1010,19 @@ $(BUILDDIR)/%.res : %.rc
 $(BUILDDIR)/$(OBJDIR)/%.o : $(BUILDDIR)/$(OBJDIR)/%.c
 	$(CC) $(EBSDFLAG) $(FE_FLAGS) $(BUILDDIR)/$(OBJDIR)/$*.c -I/usr/share/euphoria -o$(BUILDDIR)/$(OBJDIR)/$*.o
 
+ifneq "$(ARCH)" "ARM"
+LIB818_FPIC=-fPIC
+endif
+
 $(BUILDDIR)/test818.o : test818.c
-	gcc -c -I ../include $(FE_FLAGS) -Wall -shared ../source/test818.c -o $(BUILDDIR)/test818.o
+	$(CC) -c $(LIB818_FPIC) -I ../include $(FE_FLAGS) -Wall -shared ../source/test818.c -o $(BUILDDIR)/test818.o
+
+lib818 :
+	touch test818.c
+	$(MAKE) ../tests/lib818.dll
 
 ../tests/lib818.dll : $(BUILDDIR)/test818.o
-	gcc -shared -o ../tests/lib818.dll $(CREATEDLLFLAGS) $(BUILDDIR)/test818.o
+	$(CC)  $(MSIZE) $(LIB818_FPIC) -shared -o ../tests/lib818.dll $(CREATEDLLFLAGS) $(BUILDDIR)/test818.o
 
 ifeq "$(EUPHORIA)" "1"
 

@@ -178,51 +178,28 @@ void terminate_task(int task)
 double Wait(double t)
 // Wait for a while 
 {   
-	double t1, t2, now;
+#ifdef EWINDOWS
+
+	Sleep( floor(1000.0 * t) );
+	
+#else // EWINDOWS
+	
+	double t_int, t_frac;
 	int it;
-#ifdef EUNIX
-	double t3;
 	long itsme;
 	struct timespec req;
-#endif // EUNIX
+
+	t_int  = floor(t);
+	it     = (int) t_int;
+	t_frac = t - t_int;
+	itsme  = (long) floor(1000000000.0 * t_frac);
+
+	req.tv_sec  = it;
+	req.tv_nsec = itsme;
+	nanosleep(&req, NULL);
 	
-#ifdef EWINDOWS
-	t1 = EUFLOOR(1000.0 * t);
-	t2 = t1 / 1000.0;
-#else // EWINDOWS
-	t1 = EUFLOOR(t);
-#endif // EWINDOWS
-#ifdef EUNIX
-	t2 = t - t1;
-	t3 = EUFLOOR(1000000000.0 * t2);
 #endif // EUNIX
-	if (t1 >= 1.0) {
-		it = t1; // overflow?
-#ifdef EWINDOWS
-		Sleep(it);
-		t -= t2;
-#else // EWINDOWS
-#ifdef EUNIX
-		itsme = (long)t3;
-		req.tv_sec = it;
-		req.tv_nsec = itsme;
-		nanosleep(&req, NULL);
-		t3 = t3 / 1000000000.0;
-		t = t2 - t3;
-#else
-		sleep(it);
-		t -= t1;
-#endif  // EUNIX
-#endif // EWINDOWS
-	}
-	
-	// busy Wait for the last bit, < 1 sec
-	now = current_time();
-	t2 = now + t;
-	while (now < t2) {
-		now = current_time();
-	}
-	return now;
+	return current_time();
 }
 
 // Created by the translator:
