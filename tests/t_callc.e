@@ -71,6 +71,15 @@ for i = 1 to length(signed_types) do
 	end if
 end for
 
+function pow_sum(sequence s)
+	atom sum = 0
+	for i = 1 to length(s) by 2 do
+		sum += power(s[i],s[i+1])
+	end for
+	return sum
+end function
+
+
 constant lib818 = open_dll("./lib818.dll")
 
 test_true( "can open lib818.dll", lib818 )
@@ -157,8 +166,11 @@ if lib818 then
 	test_equal( "2**50: ", power(2,50), c_func(bit_repeat_r, {1, 50})+1)
 	test_equal( "-(2**50): ", -power(2,50), -c_func(bit_repeat_r, {1, 50})-1)
 	
-	integer pow_sum_r = define_c_func(lib818, "powsum", repeat_pattern( { C_DOUBLE, C_LONGLONG }, 5 ), C_DOUBLE )
-	test_equal( "Can call and things are passed correctly for ten argument functions", call_func( pow_sum_r, {#BEEF1042/power(2,32)+#B32100,1,#0111/power(4,4)+#333,3,#BEEF1042/power(2,32)+#B32100,1,#0111/power(4,4)+#333,3,3,30} ), 4 )
+	
+	integer pow_sum_c = define_c_func(lib818, "powsum", repeat_pattern( { C_DOUBLE, C_USHORT }, 5 ), C_DOUBLE )
+	sequence pow_sum_arg = {#BEEF1042/power(2,32)+#B32100,1,#0111/power(4,4)+#333,3,#BEEF1042/power(2,32)+#B32100,1,#0111/power(4,4)+#333,3,3,30} 
+	test_equal( "Can call and things are passed correctly for ten argument functions", pow_sum(pow_sum_arg), 
+		c_func( pow_sum_c, pow_sum_arg) )
 	
 end if
 
