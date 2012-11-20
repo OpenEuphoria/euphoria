@@ -5,7 +5,6 @@ include std/machine.e
 include std/math.e
 include std/sequence.e
 constant pointer_size = sizeof(C_POINTER)
-
 -- one nibble less in magnitude than the smallest number too big to fit into a pointer. 
 constant BASE_PTR           = #10 * power(#100,(pointer_size-1))
 constant BASE_4             = #10 * power(#100, 3)
@@ -94,15 +93,15 @@ if lib818 then
 			-- The underlying library will return values in C values that fit into thier values 
 			-- but are out of bounds amoung EUPHORIA integers. 
 			r_below_minimum_euphoria_integer = define_c_func( lib818, 
-				sprintf("%s_below_EUPHORIA_MIN_INT", {signed_type_names[i]}), {}, signed_types[i] )
+				sprintf("+%s_below_EUPHORIA_MIN_INT", {signed_type_names[i]}), {}, signed_types[i] )
 			r_above_maximum_euphoria_integer = define_c_func( lib818, 
-				sprintf("%s_above_EUPHORIA_MAX_INT", {signed_type_names[i]}), {}, signed_types[i] )
+				sprintf("+%s_above_EUPHORIA_MAX_INT", {signed_type_names[i]}), {}, signed_types[i] )
 			r_NOVALUE = define_c_func(lib818, 
-				sprintf("%s_NOVALUE", {signed_type_names[i]}), {}, signed_types[i])			
+				sprintf("+%s_NOVALUE", {signed_type_names[i]}), {}, signed_types[i])			
 			r_half_MIN = define_c_func( lib818, 
-				sprintf("%s_half_MIN", {signed_type_names[i]}), {}, signed_types[i] )
+				sprintf("+%s_half_MIN", {signed_type_names[i]}), {}, signed_types[i] )
 			r_half_MAX = define_c_func( lib818, 
-				sprintf("%s_half_MAX", {signed_type_names[i]}), {}, signed_types[i] )
+				sprintf("+%s_half_MAX", {signed_type_names[i]}), {}, signed_types[i] )
 				
 			if r_below_minimum_euphoria_integer != -1 and r_above_maximum_euphoria_integer != -1
 			and r_NOVALUE != -1 and r_half_MIN != -1 and r_half_MAX != -1 then
@@ -127,10 +126,10 @@ if lib818 then
 		end if
 		-- test that values that are sometimes large negative values in C are recognized
 		-- These values are #C00...00 - 20.
-		r_near_hashC = define_c_func( lib818, sprintf("%s_BFF_FD", 
+		r_near_hashC = define_c_func( lib818, sprintf("+%s_BFF_FD", 
 			{signed_type_names[i]}), {}, signed_types[i] )
 		if r_near_hashC != -1 then
-			atom expected_ptr = define_c_var( lib818, signed_type_names[i] & "_BFFD_value" )
+			atom expected_ptr = define_c_var( lib818, "+" & signed_type_names[i] & "_BFFD_value" )
 			if expected_ptr > 0 then
 				atom expected_val
 				switch signed_types[i] do
@@ -151,7 +150,7 @@ if lib818 then
 	end for
 	for i = 1 to length(types) do
 		integer value_test_counter = 0
-		integer id_r = define_c_func(lib818, type_names[i] & "_id", {types[i]}, types[i])
+		integer id_r = define_c_func(lib818, "+" & type_names[i] & "_id", {types[i]}, types[i])
 		test_true(sprintf("%s id function is in our library", {type_names[i]}), id_r != -1)
 		for j = 1 to length(values[i]) do
 			value_test_counter += 1
@@ -160,14 +159,14 @@ if lib818 then
 		end for
 	end for
 	
-	integer bit_repeat_r = define_c_func(lib818, "bit_repeat", { C_BOOL, C_UBYTE }, C_LONGLONG)
+	integer bit_repeat_r = define_c_func(lib818, "+bit_repeat", { C_BOOL, C_UBYTE }, C_LONGLONG)
 	test_equal( "5  repeat bits: ", power(2,5)-1, c_func(bit_repeat_r, {1, 5}))
 	test_equal( "40 repeating bits: ", power(2,40)-1, c_func(bit_repeat_r, { 1, 40 }))
 	test_equal( "2**50: ", power(2,50), c_func(bit_repeat_r, {1, 50})+1)
 	test_equal( "-(2**50): ", -power(2,50), -c_func(bit_repeat_r, {1, 50})-1)
 	
 	
-	integer pow_sum_c = define_c_func(lib818, "powsum", repeat_pattern( { C_DOUBLE, C_USHORT }, 5 ), C_DOUBLE )
+	integer pow_sum_c = define_c_func(lib818, "+powsum", repeat_pattern( { C_DOUBLE, C_USHORT }, 5 ), C_DOUBLE )
 	sequence pow_sum_arg = {#BEEF1042/power(2,32)+#B32100,1,#0111/power(4,4)+#333,3,#BEEF1042/power(2,32)+#B32100,1,#0111/power(4,4)+#333,3,3,30} 
 	test_equal( "Can call and things are passed correctly for ten argument functions", pow_sum(pow_sum_arg), 
 		c_func( pow_sum_c, pow_sum_arg) )
