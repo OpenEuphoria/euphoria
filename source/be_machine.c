@@ -218,6 +218,18 @@ static int MySetEnv(const char *name, const char *value, const int overwrite) {
 }
 #endif
 
+/* Converts any atom to an integer object if the atom's value can be expressed as such, otherwise return unchanged. */
+object ATOM_TO_ATOM_INT( object X ) {
+	if ( IS_ATOM( X ) && !IS_ATOM_INT( X ) ) { 
+		double TMP_dbl = DBL_PTR( X )->dbl;
+		int TMP_x = (object)TMP_dbl;
+		if( (TMP_x + HIGH_BITS < 0) && (TMP_dbl == (double)TMP_x) ){
+			X = MAKE_INT((object)TMP_dbl);
+		}
+	}
+	return X;
+}
+
 uintptr_t get_pos_int(char *where, object x)
 /* return a positive integer value if possible */
 {
