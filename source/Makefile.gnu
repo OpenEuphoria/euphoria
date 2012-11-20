@@ -468,10 +468,26 @@ shared-library :
 debug-shared-library : builddirs
 	$(MAKE) $(BUILDDIR)/$(EECUSODBGA) OBJDIR=libobjdbg-fPIC ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE) FPIC=-fPIC
 
+# All code in Ming is position independent.  So simply link
+# to the other existing one.
+ifeq "$(EMINGW)" "1"
+ifdef FPIC
+ifdef EDEBUG
+$(BUILDDIR)/$(LIBRARY_NAME) : $(BUILDDIR)/eudbg.a
+else
+$(BUILDDIR)/$(LIBRARY_NAME) : $(BUILDDIR)/eu.a
+endif
+	ln -f $<  $@
+else
 $(BUILDDIR)/$(LIBRARY_NAME) : $(EU_LIB_OBJECTS)
 	$(CC_PREFIX)ar -rc $(BUILDDIR)/$(LIBRARY_NAME) $(EU_LIB_OBJECTS)
 	$(ECHO) $(MAKEARGS)
-
+endif
+else
+$(BUILDDIR)/$(LIBRARY_NAME) : $(EU_LIB_OBJECTS)
+	$(CC_PREFIX)ar -rc $(BUILDDIR)/$(LIBRARY_NAME) $(EU_LIB_OBJECTS)
+	$(ECHO) $(MAKEARGS)
+endif
 builddirs : $(BUILD_DIRS)
 
 $(BUILD_DIRS) :
@@ -1016,14 +1032,14 @@ LIB818_FPIC=-fPIC
 endif
 
 $(BUILDDIR)/test818.o : test818.c
-	gcc -c $(LIB818_FPIC) -I ../include $(FE_FLAGS) -Wall -shared ../source/test818.c -o $(BUILDDIR)/test818.o
+	$(CC) -c $(LIB818_FPIC) -I ../include $(FE_FLAGS) -Wall -shared ../source/test818.c -o $(BUILDDIR)/test818.o
 
 lib818 :
 	touch test818.c
 	$(MAKE) ../tests/lib818.dll
 
 ../tests/lib818.dll : $(BUILDDIR)/test818.o
-	gcc  $(MSIZE) $(LIB818_FPIC) -shared -o ../tests/lib818.dll $(CREATEDLLFLAGS) $(BUILDDIR)/test818.o
+	$(CC)  $(MSIZE) $(LIB818_FPIC) -shared -o ../tests/lib818.dll $(CREATEDLLFLAGS) $(BUILDDIR)/test818.o
 
 ifeq "$(EUPHORIA)" "1"
 

@@ -25,12 +25,9 @@
 #endif
 #endif
 
-/* predefined as some macro */
-#undef bool
-#undef byte
-typedef signed char byte;
-typedef unsigned char ubyte;
-typedef enum {false,true} bool;
+typedef signed char Byte;
+typedef unsigned char UByte;
+typedef enum {false,true} Bool;
 #define BFFD_SHORT_VALUE (0xC * (1 << (8*sizeof(short)-8)))
 
 /* The expression falls within the signed int range but outside of that of EUPHORIA */
@@ -55,19 +52,24 @@ typedef enum {false,true} bool;
 	{\
 		return EUPHORIA_MAX_INT/2; \
 	}
-	
+
+#if INT32_MAX == INTPTR_MAX
 MAKE_BORDER_FUNCTIONS(int,C_INT)
+#endif
+
+#if INT32_MAX == INTPTR_MAX || !defined(EWINDOWS)
 MAKE_BORDER_FUNCTIONS(long,C_LONG)
+#endif
 MAKE_BORDER_FUNCTIONS(long long,C_LONGLONG)
 
 #define MAKE_ID_FUNCTION(ctype,etype) \
 	EXPORT ctype etype ## _id(ctype val) {\
 		return val;\
 	}
-MAKE_ID_FUNCTION(bool, C_BOOL)
+MAKE_ID_FUNCTION(Bool, C_BOOL)
 MAKE_ID_FUNCTION(signed char, C_CHAR)
-MAKE_ID_FUNCTION(byte, C_BYTE)
-MAKE_ID_FUNCTION(ubyte, C_UBYTE)
+MAKE_ID_FUNCTION(Byte, C_BYTE)
+MAKE_ID_FUNCTION(UByte, C_UBYTE)
 MAKE_ID_FUNCTION(unsigned char, C_UCHAR)
 MAKE_ID_FUNCTION(short, C_SHORT)
 MAKE_ID_FUNCTION(unsigned short, C_USHORT)
@@ -93,7 +95,7 @@ MAKE_NEAR_HASHC_FN(long,      C_LONG,     BFFD_LONG_VALUE)
 MAKE_NEAR_HASHC_FN(long long, C_LONGLONG, BFFD_LONGLONG_VALUE)
 
 
-unsigned long long bit_repeat(bool bit, unsigned char count) {
+EXPORT unsigned long long bit_repeat(Bool bit, unsigned char count) {
 	long long bit_vector = 0LL;
 	// make sure bit is boolean.
 	bit = (bit != false);

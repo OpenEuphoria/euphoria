@@ -64,8 +64,11 @@ constant types = signed_types & unsigned_types
 constant type_names = signed_type_names & unsigned_type_names
 constant values = signed_values & unsigned_values
 for i = 1 to length(signed_types) do
-	r_max_uint_fn = define_c_func( "", call_back( routine_id("minus_1_fn") ), {}, signed_types[i] )
-	test_equal( sprintf("return type %s preserves -1", {signed_type_names[i]}), -1, c_func(r_max_uint_fn, {}) )
+	-- 32-bit callbacks don't return anything big enough to be a C_LONGLONG, so skip those
+	if pointer_size = 8 or signed_types[i] != C_LONGLONG then
+		r_max_uint_fn = define_c_func( "", call_back( routine_id("minus_1_fn") ), {}, signed_types[i] )
+		test_equal( sprintf("return type %s preserves -1", {signed_type_names[i]}), -1, c_func(r_max_uint_fn, {}) )
+	end if
 end for
 
 constant lib818 = open_dll("./lib818.dll")
@@ -139,7 +142,7 @@ if lib818 then
 	end for
 	for i = 1 to length(types) do
 		integer value_test_counter = 0
-		integer id_r = define_c_func(lib818, type_names[i] & "_id", {types[i]}, types[i])
+		integer id_r = define_c_func(lib818, '+' & type_names[i] & "_id", {types[i]}, types[i])
 		test_true(sprintf("%s id function is in our library", {type_names[i]}), id_r != -1)
 		for j = 1 to length(values[i]) do
 			value_test_counter += 1
@@ -148,7 +151,7 @@ if lib818 then
 		end for
 	end for
 	
-	integer bit_repeat_r = define_c_func(lib818, "bit_repeat", { C_BOOL, C_UBYTE }, C_LONGLONG)
+	integer bit_repeat_r = define_c_func(lib818, "+bit_repeat", { C_BOOL, C_UBYTE }, C_LONGLONG)
 	test_equal( "5  repeat bits: ", power(2,5)-1, c_func(bit_repeat_r, {1, 5}))
 	test_equal( "40 repeating bits: ", power(2,40)-1, c_func(bit_repeat_r, { 1, 40 }))
 	test_equal( "2**50: ", power(2,50), c_func(bit_repeat_r, {1, 50})+1)
@@ -157,5 +160,5 @@ if lib818 then
 end if
 
 -- Should put some tests for argument passing as well : passing floating point, double, long long, etc..
-
 test_report()
+

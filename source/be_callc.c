@@ -64,7 +64,7 @@
 /* Local variables */
 /*******************/
 
-#if defined(__GNUC__) && defined(EUNIX)
+#if defined(__GNUC__)
 #if ARCH == ix86
 /** 
  * push the value arg on to the **runtime** stack.  You must make sure that as_offset is
@@ -89,7 +89,7 @@
   */
 #define  pop() asm( "movl %0,%%ecx; addl (%%ecx),%%esp;" : /* no out */ : "r"(as_offset) : "%ecx" )
 #endif
-#endif  // EUNIX
+#endif  // GCC
 
 #ifdef EMSVC
 #define push() __asm { PUSH [last_offset] } do { } while (0)
@@ -1016,12 +1016,12 @@ union xmm_param {
 #		define PUSH_INT_ARG push();
 
 #		define PUSH_INT64_ARG(x) \
-						dbl_arg.int64 = x;\
+						dbl_arg.int64 = (int64_t) x;\
 						arg = dbl_arg.ints[1];\
 						push();\
 						arg = dbl_arg.ints[0];\
 						push();\
-						++arg_len;
+						argsize += 4;
 						
 #	else
 #		define PUSH_INT_ARG arg_op[arg_i++] = arg;
@@ -1031,6 +1031,7 @@ union xmm_param {
 						arg_op[arg_i++] = dbl_arg.ints[0];\
 						arg_op[arg_i++] = dbl_arg.ints[1];\
 						++arg_len;
+						
 		
 #	endif
 #	define PUSH_DOUBLE_ARG(x) PUSH_INT64_ARG(x)
@@ -1090,13 +1091,13 @@ object call_c(int func, object proc_ad, object arg_list)
 #		endif
 #	endif
 
-	unsigned long as_offset;
-	unsigned long last_offset;
+	uintptr_t as_offset;   // used by pop()
+	uintptr_t last_offset; // used by push()
 
 	// this code relies on arg always being the first variable and last_offset 
 	// always being the last variable
-	last_offset = (unsigned long)&arg;
-	as_offset = (unsigned long)&argsize;
+	last_offset = (uintptr_t)&arg;
+	as_offset = (uintptr_t)&argsize;
 	// as_offset = last_offset - 4;
 
 	
@@ -1113,8 +1114,8 @@ object call_c(int func, object proc_ad, object arg_list)
 	intptr_t xmm_i = 0;
 	intptr_t arg_stack = MAX_INT_PARAM_REGISTERS;
 	int int_args = 0;
-#endif
 	int is_double, is_float;
+#endif
 	
 	// Setup and Check for Errors
 	proc_index = get_pos_int("c_proc/c_func", proc_ad); 
@@ -1302,10 +1303,6 @@ object call_c(int func, object proc_ad, object arg_list)
 	}    
 
 	// Make the Call
-	
-	is_double = (return_type == C_DOUBLE);
-	is_float = (return_type == C_FLOAT);
-
 	#if INTPTR_MAX == INT32_MAX
 		#ifdef push
 			// Make the Call - The C compiler thinks it's a 0-argument call
@@ -1342,6 +1339,8 @@ object call_c(int func, object proc_ad, object arg_list)
 				 	 type ## _result = type ## _std_func(long_proc_address, arg_op, arg_len)
 		#endif
 	#else
+		is_double = (return_type == C_DOUBLE);
+		is_float = (return_type == C_FLOAT);
 		/* I think you can safely change this such that there are no more conditions.  *
 		 * You'll need to rename those 64bit functions. */
 		#define call_routine(type) \
@@ -1355,14 +1354,14 @@ object call_c(int func, object proc_ad, object arg_list)
 	}
 	/* not supported in MINGW or ARM */
 	else if (return_type == C_LONGLONG ){
-		int64_t int64_t_result;
+		long long int int64_t_result;
 #if defined(push) || INTPTR_MAX == INT32_MAX
 		call_routine(int64_t);
 #else
 		call_routine(int);
 		int64_t_result = int_result;
 #endif
-		if( (unsigned long long int)int64_t_result < (uintptr_t)MAXINT ){
+		if( int64_t_result <= (long long int)MAXINT && int64_t_result >= (long long int)MININT ){
 			return (intptr_t) int64_t_result;
 		}
 		else{
@@ -1408,7 +1407,7 @@ object call_c(int func, object proc_ad, object arg_list)
 			}
 		}
 		else if ((return_type & 0x000000FF) == 8) {
-			/* 4-byte integer - usual case */
+			/* long integer */
 			// check if unsigned result is required
 			if ((return_type & C_TYPE) == 0x02000000) {
 				// unsigned integer result
@@ -1422,7 +1421,7 @@ object call_c(int func, object proc_ad, object arg_list)
 				// signed long result
 				if (return_type >= E_INTEGER ||
 					((long)int_result >= (intptr_t)MININT && (long)int_result <= (intptr_t)MAXINT)) {
-					return int_result;
+					return (long)int_result;
 				}
 				else
 					return NewDouble((eudouble) (long int)int_result);
@@ -1436,7 +1435,7 @@ object call_c(int func, object proc_ad, object arg_list)
 			return (unsigned char)int_result;
 		}
 		else if (return_type == C_CHAR) {
-			return (signed char)int_result;
+			return (signed char) int_result;
 		}
 		else if (return_type == C_USHORT) {
 			return (unsigned short)int_result;
