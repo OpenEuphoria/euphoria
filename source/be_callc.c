@@ -64,7 +64,7 @@
 /* Local variables */
 /*******************/
 
-#if defined(__GNUC__) && defined(EUNIX)
+#if defined(__GNUC__)
 #if ARCH == ix86
 /** 
  * push the value arg on to the **runtime** stack.  You must make sure that as_offset is
