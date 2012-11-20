@@ -124,10 +124,10 @@ ifeq "$(EMINGW)" "1"
 			MEM_FLAGS=
 		endif
 	else
+		# 'simple memloc' and special code for sorting out memory addresseses from malloc that might not be 8-byte aligned are mutually exclusive.
+		MEM_FLAGS=-DESIMPLE_MALLOC
 		ifeq "$(ALIGN4)" "1"
-			MEM_FLAGS=-DEALIGN4 -DESIMPLE_MALLOC
-		else
-			MEM_FLAGS=-DESIMPLE_MALLOC
+			# Impossible!
 		endif
 	endif
 	CREATEDLLFLAGS=-Wl,--out-implib,lib818dll.a 
