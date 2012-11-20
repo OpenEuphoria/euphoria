@@ -212,7 +212,7 @@ Euphoria DLL file, ##.dll##. The only requirements are that it must
 accept the two command line options, -i and -o described above and exit
 with a ZERO status code on success or non-ZERO on failure.
 
-The DLL file (or shared library on Unixes) has a real benefit in that
+The DLL file (or shared library on //Unix//) has a real benefit in that
 with each file that needs to be pre-processed does not require a new
 process to be spawned as with an executable or a Euphoria script. Once
 you have the pre-processor written and functioning, it's easy to convert
