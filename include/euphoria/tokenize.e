@@ -78,6 +78,7 @@ public enum
 	T_SLICE,
 	T_WHITE,
 	T_BUILTIN,
+	T_TEXT,
 	--****
 	-- === T_NUMBER formats and T_types
 	TF_HEX = 1,
@@ -449,9 +450,11 @@ procedure scan_escaped_char(atom state = g_state)
 	Token[TDATA] &= Look
 	if (Look = '\\') then
 		scan_char(state)
-		f = find(Look,QFLAGS)
-		if not f then report_error(ERR_ESCAPE) return end if
 		Token[TDATA] &= Look
+		f = find(Look,QFLAGS)
+		if not f then
+			report_error(ERR_ESCAPE)
+		end if
 	end if
 	scan_char(state)
 end procedure
@@ -463,16 +466,19 @@ function scan_qchar(atom state = g_state)
 	Token[TDATA] = ""
 	if (Look = EOL) then
 		if eumem:ram_space[state][STRING_KEEP_QUOTES] then
-			Token[TDATA] = "'" & Token[TDATA] & "'"
+			Token[TDATA] = "'" & Token[TDATA]
 		end if
 		report_error(ERR_EOL_CHAR)
 		return TRUE
 	end if
 	scan_escaped_char(state)
-	if ERR then return 1 end if
+	while Look != '\'' and Look != EOL do
+		Token[TDATA] &= Look
+		scan_char( state )
+	end while
 	if (Look != '\'') then
 		if eumem:ram_space[state][STRING_KEEP_QUOTES] then
-			Token[TDATA] = "'" & Token[TDATA] & "'"
+			Token[TDATA] = "'" & Token[TDATA]
 		end if
 		report_error(ERR_CLOSE_CHAR)
 		return TRUE
@@ -484,7 +490,55 @@ function scan_qchar(atom state = g_state)
 	return TRUE
 end function
 
+function lookahead_for( object needle, integer look_at =  1 )
+	if atom( needle ) then
+		needle = {needle}
+	end if
+	for i = 1 to length( needle ) do
+		if lookahead( look_at ) != needle[i] then
+			return FALSE
+		end if
+		look_at += 1
+	end for
+	return TRUE
+end function
+
+function raw_string( sequence delimiter, atom state )
+	Token[TTYPE] = T_STRING
+	Token[TDATA] = ""
+
+	if equal( delimiter, "`" ) then
+		Token[TFORM] = TF_STRING_BACKTICK
+	else
+		Token[TFORM] = TF_STRING_TRIPLE
+	end if
+	
+	while lookahead(1) != io:EOF and not lookahead_for( delimiter ) with entry do
+		scan_char(state)
+		Token[TDATA] &= Look
+		
+	end while
+
+	if Look != io:EOF then
+		sti += length( delimiter )
+		scan_char(state)
+	end if
+
+	if eumem:ram_space[state][STRING_KEEP_QUOTES] then
+		if Look = io:EOF then
+			Token[TDATA] = delimiter & Token[TDATA]
+		else
+			Token[TDATA] = delimiter & Token[TDATA] & delimiter
+		end if
+	end if
+	
+	return TRUE
+end function
+
 function scan_string(atom state = g_state)
+	if (Look = '`') then
+		return raw_string( "`", state )
+	end if
 	if (Look != '"') then 
 		return FALSE 
 	end if
@@ -492,36 +546,8 @@ function scan_string(atom state = g_state)
 	if sti + 3 < length(source_text) then
 		if equal(source_text[sti .. sti + 2], "\"\"\"") then
 			-- Got a raw string
-			Token[TTYPE] = T_STRING
-			Token[TDATA] = ""
-			Token[TFORM] = TF_STRING_TRIPLE
 			sti += 2
-			scan_char(state)
-
-			while (sti < length(source_text) - 2) and
-				not equal(source_text[sti .. sti +2], "\"\"\"")
-			do
-				if (Look = io:EOF) then
-					report_error(ERR_EOF)
-					return TRUE
-				end if
-
-				Token[TDATA] &= Look
-				scan_char(state)
-			end while
-			if eumem:ram_space[state][STRING_KEEP_QUOTES] then
-				Token[TDATA] = "\"\"\"" & Token[TDATA] & "\"\"\""
-			end if
-
-			if sti > length(source_text) - 2 then
-				report_error(ERR_EOF)
-				return TRUE
-			end if
-
-			sti += 2
-			scan_char(state)
-
-			return TRUE
+			return raw_string( `"""`, state )
 		end if
 	end if
 
@@ -533,9 +559,9 @@ function scan_string(atom state = g_state)
 	while (Look != '"') do
 		if (Look = EOL) then 
 			if eumem:ram_space[state][STRING_KEEP_QUOTES] then
-				Token[TDATA] = "\"" & Token[TDATA] & "\""
+				Token[TDATA] = "\"" & Token[TDATA] -- & "\""
 			end if
-			report_error(ERR_EOL_STRING) 
+			report_error(ERR_EOL_STRING)
 			return TRUE
 		end if
 
@@ -557,41 +583,6 @@ function scan_string(atom state = g_state)
 	return TRUE
 end function
 
-function scan_multistring(atom state = g_state)
-	integer end_of_string
-
-	if (Look != '`') then
-		return FALSE
-	end if
-
-	scan_char(state)
-	end_of_string = '`'
-	Token[TTYPE] = T_STRING
-	Token[TDATA] = ""
-	Token[TFORM] = TF_STRING_BACKTICK
-
-	while (Look != end_of_string) do
-		if (Look = io:EOF) then
-			if eumem:ram_space[state][STRING_KEEP_QUOTES] then
-				Token[TDATA] = "`" & Token[TDATA] & "`"
-			end if
-			report_error(ERR_EOF)
-			return TRUE
-		end if
-
-		Token[TDATA] &= Look
-
-		scan_char(state)
-	end while
-
-	scan_char(state)
-
-	if eumem:ram_space[state][STRING_KEEP_QUOTES] then
-		Token[TDATA] = "`" & Token[TDATA] & "`"
-	end if
-	return TRUE
-end function
-
 function hex_val(integer h)
 	if h >= 'a' then
 		return h - 'a' + 10
@@ -602,8 +593,19 @@ function hex_val(integer h)
 	end if
 end function
 
+function start_hex()
+	if Look = '#' and Hex_Char( lookahead( 1 ) ) then
+		return TRUE
+	elsif Look = '0' and lookahead( 1 ) = 'x' and Hex_Char( lookahead( 2 ) ) then
+		sti += 1
+		return TRUE
+	else
+		return FALSE
+	end if
+end function
+
 function scan_hex(atom state = g_state)
-	if (Look != '#') then
+	if not start_hex() then
 		return FALSE
 	end if
 
@@ -612,7 +614,7 @@ function scan_hex(atom state = g_state)
 	scan_char(state)
 
 	if not Hex_Char(Look) then
-		report_error(ERR_HEX) return TRUE
+		report_error(ERR_HEX) return FALSE
 	end if
 
 	Token[TTYPE] = T_NUMBER
@@ -1068,15 +1070,20 @@ procedure next_token(atom state = g_state)
 
 	elsif scan_string(state) then
 
-	elsif scan_multistring(state) then
-
 	elsif scan_prefixed_number(state) then
 
 	elsif scan_hex(state) then
 
 	elsif scan_number(state) then
 
+	elsif Look != io:EOF and not White_Char( Look ) then
+		while Look != io:EOF and not White_Char( Look ) do
+			Token[TDATA] &= Look
+			scan_char(state)
+		end while
+		Token[TTYPE] = T_TEXT
 	else
+		
 		-- error or end of file
 		Token[TTYPE] = T_EOF
 		Token[TDATA] = Look
@@ -1091,7 +1098,7 @@ end procedure
 --****
 -- === Routines
 
-public function tokenize_string(sequence code, atom state = g_state)
+public function tokenize_string(sequence code, atom state = g_state, integer stop_on_error = TRUE)
 	sequence tokens
 
 	ERR = FALSE
@@ -1110,13 +1117,14 @@ public function tokenize_string(sequence code, atom state = g_state)
 	Token[TLNUM] = 1
 	Token[TLPOS] = 1
 
-	if (Look = '#') and (source_text[sti+1] = '!') then
+	if (Look = '#') and (lookahead(1) = '!') then
 		sti += 1
 		scan_char(state)
 		if eumem:ram_space[state][DELETE_WHITE] then
 			scan_white(state)
 		end if
 		Token[TTYPE] = T_SHBANG
+		Token[TDATA] = "#!"
 		while Look != EOL do
 			Token[TDATA] &= Look
 			scan_char(state)
@@ -1126,12 +1134,12 @@ public function tokenize_string(sequence code, atom state = g_state)
 	end if
 
 	next_token(state)
-	if not ERR then
+	if not stop_on_error or not ERR then
 		while Token[TTYPE] != T_EOF do
 			tokens &= { Token }
 			next_token(state)
-			if ERR then
-				exit 
+			if stop_on_error and ERR then
+				exit
 			end if
 		end while
 	end if
