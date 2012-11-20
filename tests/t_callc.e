@@ -3,7 +3,7 @@ with define SAFE
 include std/dll.e
 include std/machine.e
 include std/math.e
-
+include std/sequence.e
 constant pointer_size = sizeof(C_POINTER)
 
 -- one nibble less in magnitude than the smallest number too big to fit into a pointer. 
@@ -142,7 +142,7 @@ if lib818 then
 	end for
 	for i = 1 to length(types) do
 		integer value_test_counter = 0
-		integer id_r = define_c_func(lib818, '+' & type_names[i] & "_id", {types[i]}, types[i])
+		integer id_r = define_c_func(lib818, type_names[i] & "_id", {types[i]}, types[i])
 		test_true(sprintf("%s id function is in our library", {type_names[i]}), id_r != -1)
 		for j = 1 to length(values[i]) do
 			value_test_counter += 1
@@ -151,11 +151,14 @@ if lib818 then
 		end for
 	end for
 	
-	integer bit_repeat_r = define_c_func(lib818, "+bit_repeat", { C_BOOL, C_UBYTE }, C_LONGLONG)
+	integer bit_repeat_r = define_c_func(lib818, "bit_repeat", { C_BOOL, C_UBYTE }, C_LONGLONG)
 	test_equal( "5  repeat bits: ", power(2,5)-1, c_func(bit_repeat_r, {1, 5}))
 	test_equal( "40 repeating bits: ", power(2,40)-1, c_func(bit_repeat_r, { 1, 40 }))
 	test_equal( "2**50: ", power(2,50), c_func(bit_repeat_r, {1, 50})+1)
 	test_equal( "-(2**50): ", -power(2,50), -c_func(bit_repeat_r, {1, 50})-1)
+	
+	integer pow_sum_r = define_c_func(lib818, "powsum", repeat_pattern( { C_DOUBLE, C_LONGLONG }, 5 ), C_DOUBLE )
+	test_equal( "Can call and things are passed correctly for ten argument functions", call_func( pow_sum_r, {#BEEF1042/power(2,32)+#B32100,1,#0111/power(4,4)+#333,3,#BEEF1042/power(2,32)+#B32100,1,#0111/power(4,4)+#333,3,3,30} ), 4 )
 	
 end if
 
