@@ -2180,10 +2180,12 @@ object DefineC(object x)
 				RTFatal("expected {'+', address} as second argument of define_c_proc/func");
 
 			proc_address = (intptr_t (*)())*(SEQ_PTR(routine_name)->base+2);
+			if (!IS_ATOM((object)proc_address))
+				RTFatal("expected {'+', address} as second argument of define_c_proc/func");
 			proc_address = (intptr_t (*)())get_pos_int("define_c_proc/func", (object)proc_address);
 
 			t = (intptr_t)*(SEQ_PTR(routine_name)->base+1);
-			t = get_pos_int("define_c_proc/func", (object)t);
+			t = ATOM_TO_ATOM_INT((object)t);
 			if (t == '+')
 				convention = C_CDECL; /* caller must restore stack */
 			else
