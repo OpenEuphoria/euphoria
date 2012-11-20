@@ -423,12 +423,12 @@ function scan_multicomment(atom state = g_state)
 	Token[TFORM] = TF_COMMENT_MULTIPLE
 
 	while 1 do
-		if (Look = io:EOF) then
-			report_error(ERR_EOF)
+		if (Look = io:EOF) or (Look = EOL) then
+-- 			report_error(ERR_EOF)
 			return TRUE 
 		end if
 
-		if (Look = '*') and source_text[sti + 1] = '/' then
+		if (Look = '*') and lookahead(1) = '/' then
 			Token[TDATA] &= "*/"
 
 			scan_char(state) -- skip the */
@@ -1107,7 +1107,11 @@ public function tokenize_string(sequence code, atom state = g_state, integer sto
 
 	tokens = {}
 
-	source_text = code & EOL & io:EOF
+	source_text = code
+	if not length( source_text ) or source_text[$] != EOL then
+		source_text &= EOL
+	end if
+	source_text &= io:EOF
 	LNum = 1
 	LPos = 1
 	sti = 1

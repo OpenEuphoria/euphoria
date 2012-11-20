@@ -1947,19 +1947,11 @@ procedure insert(char key)
 	sequence tail
 
 	set_modified()
-	tail = buffer[b_line][b_col..length(buffer[b_line])]
+	tail = buffer[b_line][b_col..$]
 	if key = CR or key = '\n' then
 		-- truncate this line and create a new line using tail
-		buffer[b_line] = buffer[b_line][1..b_col-1] & '\n'
-		
-		-- make room for new line:
-		buffer = append(buffer, 0)
-		for i = length(buffer)-1 to b_line+1 by -1 do
-			buffer[i+1] = buffer[i]
-		end for
-		
-		-- store new line
-		buffer[b_line+1] = tail
+		buffer[b_line] = head( buffer[b_line], b_col-1) & '\n'
+		buffer = eu:insert( buffer, tail, b_line + 1 )
 		
 		if s_line = window_length then
 			arrow_down()
@@ -2000,8 +1992,7 @@ procedure insert_string(sequence text)
 		if text[i] = CR or text[i] = '\n' then
 			insert(text[i])
 		else
-			buffer[b_line] = buffer[b_line][1..b_col-1] & text[i] &
-							 buffer[b_line][b_col..length(buffer[b_line])]
+			buffer[b_line] = splice( buffer[b_line], text[i], b_col )
 			b_col += 1
 			if i = length(text) then
 				DisplayLine(b_line, s_line, FALSE)
@@ -2064,8 +2055,7 @@ procedure try_auto_complete(char key)
 	end if
 	if key = CR then
 		if b_col >= first_non_blank then
-			buffer[b_line] = buffer[b_line][1..b_col-1] & leading_white &
-							 buffer[b_line][b_col..length(buffer[b_line])]
+			buffer[b_line] = eu:splice( buffer[b_line], leading_white, b_col )
 			insert(CR)
 			skip_white()
 		else
@@ -2087,9 +2077,7 @@ procedure insert_kill_buffer()
 		insert_string(kill_buffer)
 	else
 		-- inserting a sequence of lines
-		buffer = buffer[1..b_line - 1] &
-				 kill_buffer &
-				 buffer[b_line..length(buffer)]
+		buffer = splice( buffer, kill_buffer, b_line )
 		DisplayWindow(b_line, s_line)
 		b_col = 1
 		s_col = 1
@@ -2106,7 +2094,7 @@ procedure delete_line(buffer_line dead_line)
 	for i = dead_line to length(buffer)-1 do
 		buffer[i] = buffer[i+1]
 	end for
-	buffer = buffer[1..length(buffer)-1]
+	buffer = head( buffer, length(buffer)-1)
 	
 	x = dead_line - b_line + s_line
 	if window_line(x) then
