@@ -455,10 +455,26 @@ shared-library :
 debug-shared-library : builddirs
 	$(MAKE) $(BUILDDIR)/$(EECUSODBGA) OBJDIR=libobjdbg-fPIC ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE) FPIC=-fPIC LIBRARY_NAME=$(EECUSODBGA)
 
+# All code in Ming is position independent.  So simply link
+# to the other existing one.
+ifeq "$(EMINGW)" "1"
+ifdef FPIC
+ifdef EDEBUG
+$(BUILDDIR)/$(LIBRARY_NAME) : $(BUILDDIR)/eudbg.a
+else
+$(BUILDDIR)/$(LIBRARY_NAME) : $(BUILDDIR)/eu.a
+endif
+	ln -f $<  $@
+else
 $(BUILDDIR)/$(LIBRARY_NAME) : $(EU_LIB_OBJECTS)
 	$(CC_PREFIX)ar -rc $(BUILDDIR)/$(LIBRARY_NAME) $(EU_LIB_OBJECTS)
 	$(ECHO) $(MAKEARGS)
-
+endif
+else
+$(BUILDDIR)/$(LIBRARY_NAME) : $(EU_LIB_OBJECTS)
+	$(CC_PREFIX)ar -rc $(BUILDDIR)/$(LIBRARY_NAME) $(EU_LIB_OBJECTS)
+	$(ECHO) $(MAKEARGS)
+endif
 builddirs : $(BUILD_DIRS)
 
 $(BUILD_DIRS) :
