@@ -4,7 +4,7 @@
 -- <<LEVELTOC level=2 depth=4>>
 --
 -- A **map** is a special array, often called an associative array or dictionary;
--- in a map the data **values** (any Euphoria object) are indexed by **keys (also any Euphoria object).
+-- in a map the data **values** (any Euphoria object) are indexed by **keys** (also any Euphoria object).
 --
 -- When programming think in terms of //key:value// pairs.
 -- For example we can code things like this~:
