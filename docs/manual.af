@@ -172,13 +172,9 @@ end ifdef
 # be sure not to make any rows longer than the rest!
 ../docs/builtins.txt
 
-# FIXME: after this line something's bad!
 # General Routines
 ../include/std/cmdline.e
-# This line is bad!
 ../include/std/console.e
-# after this line things are good.
-
 ../include/std/datetime.e
 ../include/std/filesys.e
 ../include/std/io.e

@@ -729,7 +729,7 @@ end function
 -- See Also:
 --   [[:cursor]]
 
-public type enum style_t
+public enum type style_t
 	NO_CURSOR              = #2000,
 	UNDERLINE_CURSOR       = #0607,
 	THICK_UNDERLINE_CURSOR = #0507,
