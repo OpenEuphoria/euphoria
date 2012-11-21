@@ -168,6 +168,43 @@ typedef union {
 /*******************/
 
 #if INTPTR_MAX == INT32_MAX
+
+// reenable when these crashes stop
+#define generate_typedefs(function_name, return_type, convention, namebase, default_value) typedef return_type (convention *namebase ## 0)();\
+typedef return_type (convention *namebase ## 1)(intptr_t);\
+typedef return_type (convention *namebase ## 2)(intptr_t,intptr_t);\
+typedef return_type (convention *namebase ## 3)(intptr_t,intptr_t,intptr_t);\
+typedef return_type (convention *namebase ## 4)(intptr_t,intptr_t,intptr_t,intptr_t);\
+typedef return_type (convention *namebase ## 5)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);\
+typedef return_type (convention *namebase ## 6)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);\
+typedef return_type (convention *namebase ## 7)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);\
+typedef return_type (convention *namebase ## 8)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);\
+typedef return_type (convention *namebase ## 9)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);\
+typedef return_type (convention *namebase ## A)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);\
+typedef return_type (convention *namebase ## B)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);\
+typedef return_type (convention *namebase ## C)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);\
+typedef return_type (convention *namebase ## D)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);\
+typedef return_type (convention *namebase ## E)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,\
+	intptr_t);\
+typedef return_type (convention *namebase ## F)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t)
+
+#if 0
+/* for c_proc */
+generate_typedefs(call_std_proc, void, __stdcall, proc, );
+generate_typedefs(call_cdecl_proc, void, __cdecl, cdproc, );
+
+/* for c_func */
+generate_typedefs(int_std_func, intptr_t, __stdcall, func, 0);
+generate_typedefs(int_cdecl_func, intptr_t, __cdecl, cdfunc, 0);
+generate_typedefs(float_std_func, float, __stdcall, ffunc, 0.0);
+generate_typedefs(float_cdecl_func, float, __cdecl, cdffunc, 0.0);
+generate_typedefs(double_std_func, double, __stdcall, dfunc, 0.0);
+generate_typedefs(double_cdecl_func, double, __cdecl, cddfunc, 0.0);
+#endif
+
+generate_typedefs(int64_t_std_func, int64_t, __stdcall, llfunc, 0LL);
+generate_typedefs(int64_t_cdecl_func, int64_t, __cdecl, cdllfunc, 0LL);
+
 /* for c_proc */
 typedef void (__stdcall *proc0)();
 typedef void (__stdcall *proc1)(intptr_t);
@@ -492,6 +529,32 @@ intptr_t int_cdecl_func(intptr_t i, intptr_t * op, long len) {
 	}
     return 0;
 }
+
+#define generate_routine(function_name, return_type, convention, namebase, default_value) return_type \
+	function_name(intptr_t i, intptr_t * op, long len) {\
+	switch(len) {\
+	    case 0: return ((namebase ## 0)i)();\
+	    case 1: return ((namebase ## 1)i)(op[0]);\
+	    case 2: return ((namebase ## 2)i)(op[0],op[1]);\
+	    case 3: return ((namebase ## 3)i)(op[0],op[1],op[2]);\
+	    case 4: return ((namebase ## 4)i)(op[0],op[1],op[2],op[3]);\
+	    case 5: return ((namebase ## 5)i)(op[0],op[1],op[2],op[3],op[4]);\
+	    case 6: return ((namebase ## 6)i)(op[0],op[1],op[2],op[3],op[4],op[5]);\
+	    case 7: return ((namebase ## 7)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6]);\
+	    case 8: return ((namebase ## 8)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7]);\
+	    case 9: return ((namebase ## 9)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8]);\
+	    case 10: return ((namebase ## A)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8],op[9]);\
+	    case 11: return ((namebase ## B)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8],op[9],op[10]);\
+	    case 12: return ((namebase ## C)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8],op[9],op[10],op[11]);\
+	    case 13: return ((namebase ## D)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8],op[9],op[10],op[11],op[12]);\
+	    case 14: return ((namebase ## E)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8],op[9],op[10],op[11],op[12],op[13]);\
+	    case 15: return ((namebase ## F)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8],op[9],op[10],op[11],op[12],op[13],op[14]);\
+	}\
+    return 0;\
+}
+
+generate_routine(int64_t_std_func, int64_t, __stdcall, llfunc, 0LL)
+generate_routine(int64_t_cdecl_func, int64_t, __cdecl, cdllfunc, 0LL)
 
 #else
 // 64-bit Call-C
@@ -1352,15 +1415,9 @@ object call_c(int func, object proc_ad, object arg_list)
 		call_routine(double);
 		return NewDouble(double_result);
 	}
-	/* not supported in MINGW or ARM */
 	else if (return_type == C_LONGLONG ){
 		long long int int64_t_result;
-#if defined(push) || INTPTR_MAX == INT32_MAX
 		call_routine(int64_t);
-#else
-		call_routine(int);
-		int64_t_result = int_result;
-#endif
 		if( int64_t_result <= (long long int)MAXINT && int64_t_result >= (long long int)MININT ){
 			return (intptr_t) int64_t_result;
 		}

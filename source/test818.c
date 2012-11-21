@@ -106,3 +106,17 @@ EXPORT unsigned long long bit_repeat(Bool bit, unsigned char count) {
 	return bit_vector;
 }
 
+double Dpow(double d, unsigned short n) {
+	double base = 1.0;
+	while (n--) base *= d;
+	return base;
+}
+
+
+EXPORT double powsum(double d1, unsigned short n1, 
+	double d2, unsigned short n2,
+	double d3, unsigned short n3,
+	double d4, unsigned short n4,
+	double d5, unsigned short n5) {
+	return Dpow(d1,n1)+Dpow(d2,n2)+Dpow(d3,n3)+Dpow(d4,n4)+Dpow(d5,n5);
+}

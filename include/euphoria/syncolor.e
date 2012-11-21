@@ -176,7 +176,7 @@ public function SyntaxColor(sequence pline, atom state=g_state)
 	tokenize:return_literal_string(,token)
 	tokenize:string_strip_quotes(0,token)
 
-	line = tokenize:tokenize_string(pline, token)
+	line = tokenize:tokenize_string(pline, token, 0)
 	-- TODO error checking?
 	line = line[1]
 	current_color = DONT_CARE
