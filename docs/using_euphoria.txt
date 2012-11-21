@@ -93,7 +93,7 @@ a function routine. Functions return values when called.
 This function must be passed a single parameter when
 called ~-- a sequence.
 
-; ##procedure ##print_sorted_list() ... end procedure## 
+; ##procedure print_sorted_list() ... end procedure##
 : This declares and defines
 a procedure routine. Procedures never return values when called.
 This procedure must not be passed any parameters when

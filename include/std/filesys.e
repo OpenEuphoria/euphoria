@@ -2048,7 +2048,7 @@ public enum
 --   # ##name## :  filename to check existence of
 --
 -- Returns:
---   An **integer**, ##1## on yes, #0## on no.
+--   An **integer**, ##1## on yes, ##0## on no.
 --
 -- Example 1:
 -- <eucode>
