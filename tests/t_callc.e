@@ -78,6 +78,17 @@ function pow_sum(sequence s)
 	return sum
 end function
 
+function peekf(atom expected_ptr, integer c_type)
+	switch c_type do
+		case C_CHAR		then return unsigned_to_signed(peek( expected_ptr ), C_CHAR)
+		case C_SHORT	then return peek2s( expected_ptr )
+		case C_INT      then return peek4s( expected_ptr )
+		case C_LONG     then return peek_longs( expected_ptr )
+		case C_LONGLONG then return peek8s( expected_ptr )
+		case else
+			return "Unexpected type" 
+	end switch
+end function
 
 constant lib818 = open_dll("./lib818.dll")
 
@@ -131,20 +142,26 @@ if lib818 then
 		if r_near_hashC != -1 then
 			atom expected_ptr = define_c_var( lib818, "+" & signed_type_names[i] & "_BFFD_value" )
 			if expected_ptr > 0 then
-				atom expected_val
-				switch signed_types[i] do
-					case C_CHAR		then expected_val = unsigned_to_signed(peek( expected_ptr ), C_CHAR)
-					case C_SHORT	then expected_val = peek2s( expected_ptr )
-					case C_INT      then expected_val = peek4s( expected_ptr )
-					case C_LONG     then expected_val = peek_longs( expected_ptr )
-					case C_LONGLONG then expected_val = peek8s( expected_ptr )
-					case else
-						test_fail(sprintf("can read value for %s", {signed_type_names[i]})) 
-						continue
-				end switch
+				atom expected_val = peekf(expected_ptr, signed_types[i])
 				test_equal(sprintf("detect #C00...00-20 correctly for type %s",{signed_type_names[i]}),
 					expected_val,
 					c_func(r_near_hashC, {}))
+			end if
+		
+		end if
+		integer r_get_m20 = define_c_func( lib818, sprintf("+%s_M20", 
+			{signed_type_names[i]}), {}, signed_types[i] )
+		if r_get_m20 != -1 then
+			test_equal(sprintf("Can get -20 from a function returning that number as a %s", {signed_type_names[i]}), -20, c_func(r_get_m20, {}))
+		end if
+		integer r_get_m100 = define_c_func( lib818, sprintf("+%s_M100", 
+			{signed_type_names[i]}), {}, signed_types[i] )
+		if r_get_m100 != -1 then
+			atom expected_ptr = define_c_var( lib818, "+" & signed_type_names[i] & "_M100_value" )
+			if expected_ptr != 0 then
+				-- crashes EUPHORIA in a bad way.
+				test_equal(sprintf("Can get -100 like numbers from a function returning that number as a %s", 
+					{signed_type_names[i]}), peekf(expected_ptr, signed_types[i]), c_func(r_get_m100, {}))
 			end if
 		end if
 	end for
