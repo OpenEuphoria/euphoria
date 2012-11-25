@@ -260,7 +260,7 @@ end procedure
 -- top(sk) --> 2.3
 -- </eucode>
 --
--- Example 1:
+-- Example 2:
 -- <eucode>
 -- stack sk = new(FIFO)
 --
@@ -645,13 +645,14 @@ end procedure
 -- Parameters:
 --		# ##sk## : the stack.
 --
--- Side effects:
---   The value of ##top## is pushed onto the stack, thus
---   the stack size grows by one.
 --
 -- Comments:
 -- * For ##FIFO## stacks (queues), the top item is the oldest item in the stack.
 -- * For ##FILO## stacks, the top item is the newest item in the stack.
+--
+-- Side Effect:
+--   The value of ##top## is pushed onto the stack, thus
+--   the stack size grows by one.
 --
 -- Errors:
 --   If the stack has no elements, an error occurs.
@@ -758,7 +759,7 @@ end procedure
 -- Parameters:
 --   # ##sk## : the stack to clear.
 --
--- Side effect:
+-- Side Effect:
 --   The stack contents is emptied.
 --
 -- See Also:

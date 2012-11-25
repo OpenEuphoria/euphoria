@@ -1224,7 +1224,7 @@ end function
 -- Returns:
 --		An **integer**, status code, either ##DB_OK## if creation successful or anything else on an error.
 --
--- The return codes are:
+-- The return codes are~:
 --
 -- <eucode>
 -- public constant
@@ -2197,7 +2197,7 @@ end function
 --**
 -- deletes record number ##key_location## from the current table.
 --
--- Parameter:
+-- Parameters:
 -- 		# ##key_location## : a positive integer, designating the record to delete.
 --      # ##table_name## : optional table name to delete record from.
 --

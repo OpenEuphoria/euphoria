@@ -1082,7 +1082,7 @@ end type
 -- * With ##get_screen_char## and ##put_screen_char## you can save and restore
 -- a character on the screen along with its attribute_code.
 -- * The ##fg_color## and ##bg_color## are integers in the range ##0## to ##15## which correspond
--- to the values in the table:
+-- to the values in the table~:
 --
 -- Color Table
 --
@@ -1338,7 +1338,7 @@ end function
 -- Parameters:
 -- 		# ##rows## : an integer, the desired number of rows.
 --
--- Platforms:
+-- Platform:
 --		//Windows//
 --
 -- Returns:
@@ -1374,7 +1374,7 @@ end function
 -- cursor(BLOCK_CURSOR)
 -- </eucode>
 --
--- Cursor Type Constants:
+-- Cursor Type Constants~:
 -- * [[:NO_CURSOR]]
 -- * [[:UNDERLINE_CURSOR]]
 -- * [[:THICK_UNDERLINE_CURSOR]]

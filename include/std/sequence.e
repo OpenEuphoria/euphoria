@@ -1704,7 +1704,7 @@ end function
 -- filter(data, "out", {3,8}, "()") --> {8,20,19,3,2,10}
 -- </eucode>
 --
--- Example 3:
+-- Example 2:
 -- <eucode>
 -- function quiksort(sequence s)
 -- 	if length(s) < 2 then
@@ -1904,7 +1904,9 @@ end function
 
 --**
 -- Signature:
+-- <eucode>
 -- public constant STDFLTR_ALPHA
+-- </eucode>
 --
 -- Description:
 -- Predefined routine_id for use with [[:filter]].

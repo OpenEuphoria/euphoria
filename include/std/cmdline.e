@@ -1201,7 +1201,7 @@ end function
 -- to add to the command line, as if the file contents had actually been entered as 
 -- part of the original command line.
 --
--- Parse Options:
+-- Parse Options~:
 -- ##parse_options## is used to provide a set of behavior modifiers that change the
 -- default rules for parsing the command line. If used, it is a list of values
 -- that will affect the parsing of the command line options. 
