@@ -747,6 +747,19 @@ export procedure c_stmt0(sequence stmt)
 	end if
 end procedure
 
+function needs_uninit( sequence eentry )
+	if eentry[S_SCOPE] >= SC_LOCAL
+	and (eentry[S_SCOPE] <= SC_GLOBAL or eentry[S_SCOPE] = SC_EXPORT or eentry[S_SCOPE] = SC_PUBLIC)
+	and eentry[S_USAGE] != U_UNUSED
+	and eentry[S_USAGE] != U_DELETED
+	and not find(eentry[S_TOKEN], RTN_TOKS)
+	then
+		return 1
+	else
+		return 0
+	end if
+end function
+
 --**
 -- emit C declaration for each local and global constant and var
 export procedure DeclareFileVars()
@@ -794,17 +807,11 @@ export procedure DeclareFileVars()
 		c_stmt0( "object_ptr _0var_cleanup[] = {\n" )
 		while s do
 			eentry = SymTab[s]
-			if eentry[S_SCOPE] >= SC_LOCAL
-			and (eentry[S_SCOPE] <= SC_GLOBAL or eentry[S_SCOPE] = SC_EXPORT or eentry[S_SCOPE] = SC_PUBLIC)
-			and eentry[S_USAGE] != U_UNUSED
-			and eentry[S_USAGE] != U_DELETED
-			and not find(eentry[S_TOKEN], RTN_TOKS)
-			and eentry[S_VTYPE] != integer_type then
+			if needs_uninit( eentry ) then
 
-				
 				c_stmt0( sprintf("&_%d", eentry[S_FILE_NO]))
 				c_puts(eentry[S_NAME] )
-				c_puts(",\n" )
+				c_printf(", // %d\n", cleanup_vars )
 				cleanup_vars += 1
 
 			end if
@@ -812,20 +819,39 @@ export procedure DeclareFileVars()
 		end while
 		c_stmt0( "0\n" )
 		c_stmt0( "};\n" )
+		s = SymTab[TopLevelSub][S_NEXT]
+		c_stmt0( "char *_0var_cleanup_name[] = {\n" )
+		cleanup_vars = 0
+		while s do
+			eentry = SymTab[s]
+			if needs_uninit( eentry ) then
+				c_stmt0( sprintf("\"_%d", eentry[S_FILE_NO]))
+				c_puts(eentry[S_NAME] )
+				c_printf("\", // %d\n", cleanup_vars )
+				cleanup_vars += 1
 
+			end if
+			s = SymTab[s][S_NEXT]
+		end while
+		c_stmt0( "0\n" )
+		c_stmt0( "};\n" )
 		c_stmt0( "void _0cleanup_vars(){\n" )
-		c_stmt0( "int i;\n" )
-		c_stmt0( "object x;\n" )
-		c_stmt0( sprintf( "for( i = 0; i < %d; ++i ){\n", cleanup_vars ) )
-		c_stmt0( "x = *_0var_cleanup[i];\n" )
-		c_stmt0( "if( x >= NOVALUE ) /* do nothing */;\n" )
-		c_stmt0( "else if ( IS_ATOM_DBL( x ) && DBL_PTR( x )->cleanup != 0) cleanup_double( DBL_PTR( x ) );\n" )
-		c_stmt0( "else if (IS_SEQUENCE( x ) && SEQ_PTR( x )->cleanup != 0 ) cleanup_sequence( SEQ_PTR( x ) );\n" )
-		c_stmt0( "}\n" )
-		c_stmt0( sprintf( "for( i = 0; i < %d; ++i ){\n", cleanup_vars ) )
-		c_stmt0( "DeRef( *_0var_cleanup[i] );\n" )
-		c_stmt0( "*_0var_cleanup[i] = NOVALUE;\n" )
-		c_stmt0( "}\n" )
+			c_stmt0( "int i;\n" )
+			c_stmt0( "object x;\n" )
+			c_stmt0( sprintf( "for( i = 0; i < %d; ++i ){\n", cleanup_vars ) )
+				c_stmt0( "x = *_0var_cleanup[i];\n" )
+				c_stmt0( "if( x >= NOVALUE ) /* do nothing */;\n" )
+				c_stmt0( "else if ( IS_ATOM_DBL( x ) && DBL_PTR( x )->cleanup != 0) {\n")
+					c_stmt0( "cleanup_double( DBL_PTR( x ) );\n")
+				c_stmt0( "}\n" )
+					c_stmt0( "else if (IS_SEQUENCE( x ) && SEQ_PTR( x )->cleanup != 0 ) {\n")
+					c_stmt0( "cleanup_sequence( SEQ_PTR( x ) );\n")
+				c_stmt0( "}\n" )
+			c_stmt0( "}\n" )
+			c_stmt0( sprintf( "for( i = 0; i < %d; ++i ){\n", cleanup_vars ) )
+				c_stmt0( "DeRef( *_0var_cleanup[i] );\n" )
+				c_stmt0( "*_0var_cleanup[i] = NOVALUE;\n" )
+			c_stmt0( "}\n" )
 		c_stmt0( "}\n" )
 	end if
 end procedure

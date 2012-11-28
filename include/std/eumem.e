@@ -19,8 +19,6 @@ procedure cleanup_ram_space( object rs )
 	ram_space = {}
 end procedure
 
-ram_space = delete_routine( ram_space, routine_id("cleanup_ram_space") )
-
 integer ram_free_list = 0
 integer free_rid
 
@@ -95,11 +93,13 @@ end function
 -- </eucode>
 
 export procedure free(atom mem_p)
-	if mem_p < 1 then return end if
-	if mem_p > length(ram_space) then return end if
+	if object( ram_space ) then
+		if mem_p < 1 then return end if
+		if mem_p > length(ram_space) then return end if
 
-	ram_space[mem_p] = ram_free_list
-	ram_free_list = floor(mem_p)
+		ram_space[mem_p] = ram_free_list
+		ram_free_list = floor(mem_p)
+	end if
 end procedure
 free_rid = routine_id("free")
 

@@ -2024,11 +2024,9 @@ object memory_set(object d, object v, object n)
 	return ATOM_1;
 }
 
-#ifdef EWINDOWS
-HINSTANCE *open_dll_list = NULL;
+DLL_PTR_TYPE *open_dll_list = NULL;
 int open_dll_size = 0;
 int open_dll_count = 0;
-#endif
 
 object OpenDll(object x)
 {
@@ -2037,7 +2035,7 @@ object OpenDll(object x)
 	static char message[81];
 	char *dll_string;
 	int message_len;
-	HINSTANCE lib;
+	DLL_PTR_TYPE lib;
 
 	/* x will be a sequence if called via open_dll() */
 
@@ -2054,18 +2052,23 @@ object OpenDll(object x)
 	}
 #ifdef EWINDOWS
 	lib = (HINSTANCE)LoadLibrary(dll_string);
+#else
+	// Linux
+
+	lib = dlopen(dll_string, RTLD_LAZY | RTLD_GLOBAL);
+#endif
 	// add to dll list so we can close it at end of execution
 	if (lib != NULL) {
 		if (open_dll_count >= open_dll_size) {
 			size_t newsize;
 
 			open_dll_size += 100;
-			newsize = open_dll_size * sizeof(HINSTANCE);
+			newsize = open_dll_size * sizeof(DLL_PTR_TYPE);
 			if (open_dll_list == NULL) {
-				open_dll_list = (HINSTANCE *)EMalloc(newsize);
+				open_dll_list = (DLL_PTR_TYPE *)EMalloc(newsize);
 			}
 			else {
-				open_dll_list = (HINSTANCE *)ERealloc((char *)open_dll_list, newsize);
+				open_dll_list = (DLL_PTR_TYPE *)ERealloc((char *)open_dll_list, newsize);
 			}
 			if (open_dll_list == NULL) {
 				RTFatal("Cannot allocate RAM (%d bytes) for dll list to add %s", newsize, dll_string);
@@ -2073,12 +2076,6 @@ object OpenDll(object x)
 		}
 		open_dll_list[open_dll_count++] = lib;
 	}
-#else
-	// Linux
-
-	lib = dlopen(dll_string, RTLD_LAZY | RTLD_GLOBAL);
-
-#endif
 	return MAKE_UINT(lib);
 }
 
