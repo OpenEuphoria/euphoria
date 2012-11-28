@@ -5114,10 +5114,8 @@ procedure opINSERT()
 		c_stmt("RefDS( @ );\n", { Code[pc+2] } )
 		if Code[pc+1] = Code[pc+4] then
 			c_stmt("if( SEQ_PTR( @ )->ref > 1 ){\n", {Code[pc+1]} )
-		else
-			c_stmt("DeRef( @ );\n", {Code[pc+4]})
 		end if
-		c_stmt("RefDS( @ );\n", { Code[pc+1] } )
+		c_stmt("RefDS( @ );\n", Code[pc+1] )
 		if Code[pc+1] = Code[pc+4] then
 			c_stmt0("}\n" )
 		end if
@@ -5130,8 +5128,6 @@ procedure opINSERT()
 		c_stmt0( "else {\n" )
 		if Code[pc+1] = Code[pc+4] then
 			c_stmt("if( SEQ_PTR( @ )->ref > 1 ){\n", {Code[pc+1]} )
-		else
-			c_stmt("DeRef( @ );\n", {Code[pc+4]})
 		end if
 		c_stmt("RefDS( @ );\n", Code[pc+1] )
 		if Code[pc+1] = Code[pc+4] then
@@ -5148,8 +5144,6 @@ procedure opINSERT()
 		c_stmt("Ref( @ );\n", { Code[pc+2] } )
 		if Code[pc+1] = Code[pc+4] then
 			c_stmt("if( SEQ_PTR( @ )->ref > 1 ){\n", {Code[pc+1]} )
-		else
-			c_stmt("DeRef( @ );\n", {Code[pc+4]})
 		end if
 		c_stmt("RefDS( @ );\n", Code[pc+1] )
 		if Code[pc+1] = Code[pc+4] then

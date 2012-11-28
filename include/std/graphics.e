@@ -32,9 +32,12 @@ constant
 -- 		# ##column## : an integer, the index of the column to position the cursor on.
 --
 -- Description:
+-- sets the cursor to where the next character will be output.
+--
+-- Comments:
 --   Set the cursor to line ##row##, column ##column##, where the top left corner of the screen is line 1,
 --   column 1. The next character displayed on the screen will be printed at this location.
---   ##position##() will report an error if the location is off the screen. 
+--   ##position## will report an error if the location is off the screen. 
 --   The //Windows// console does not check for rows, as the physical height of the
 --   console may be vastly less than its logical height.
 --
@@ -47,18 +50,18 @@ constant
 -- 		[[:get_position]]
 
 --**
--- Return the current line and column position of the cursor 
+-- returns the current line and column position of the cursor. 
 --
 -- Returns:
 -- 		A **sequence**, ##{line, column}##, the current position of the text mode cursor.
 --
 -- Comments:
 --   The coordinate system for displaying text is different from the one for displaying pixels. 
---   Pixels are displayed such that the top-left is (x=0,y=0) and the first coordinate controls 
+--   Pixels are displayed such that the top-left is ##(x=0,y=0)## and the first coordinate controls 
 --   the horizontal, left-right location. In pixel-graphics modes you can display both text and 
---   pixels. ##get_position##() returns the current line and column for the text that you are 
+--   pixels. ##get_position## returns the current line and column for the text that you are 
 --   displaying, not the pixels that you may be plotting. There is no corresponding routine for 
---   getting the current pixel position, because there is not such a thing.
+--   getting the current pixel position, because there is no such thing.
 --
 -- See Also:
 --   [[:position]]
@@ -70,20 +73,20 @@ end function
 public include std/graphcst.e
 
 --**
--- Set the foreground text color. 
+-- sets the foreground text color. 
 --
 -- Parameters:
 -- 		# ##c## : the new text color. Add ##BLINKING## to get blinking text in some modes.
 --
 -- Comments:
--- Text that you print after calling ##[[:text_color]]##() will have the desired color.
+-- Text that you print after calling ##[[:text_color]]## will have the desired color.
 --
 -- When your program terminates, the last color that you selected and actually printed on the 
 -- screen will remain in effect. Thus you may have to print something, maybe just ##'\n'##, 
 -- in ##WHITE## to restore white text, especially if you are at the bottom line of the 
 -- screen, ready to scroll up.
 --
--- Example:
+-- Example 1:
 -- <eucode>	
 -- text_color(BRIGHT_BLUE)
 -- </eucode>
@@ -100,18 +103,18 @@ public procedure text_color(color c)
 end procedure
 
 --**
--- Set the background color to one of the 16 standard colors. 
+-- sets the background color to one of the sixteen standard colors. 
 --
 -- Parameters:
 -- 		# ##c## : the new text color. Add ##BLINKING## to get blinking text in some modes.
 --
 -- Comments:
 -- To restore the original background color when your program finishes, 
--- e.g. ##0 - BLACK##, you must call ##[[:bk_color]](0)##. If the cursor is at the bottom 
+-- ( often ##0 - BLACK##), you must call ##[[:bk_color]](0)##. If the cursor is at the bottom 
 -- line of the screen, you may have to actually print something before terminating your 
--- program. Printing ##'\n'## may be enough.
+-- program; printing ##'\n'## may be enough.
 --
--- Example:
+-- Example 1:
 -- <eucode>	
 -- bk_color(BLACK)
 -- </eucode>
@@ -127,30 +130,30 @@ public procedure bk_color(color c)
 end procedure
 
 --**
--- Set the codes for the colors used in text_color and bk_color.
+-- sets the codes for the colors used in ##text_color## and ##bk_color##.
 --
 -- Parameters:
 -- 	# ##colorset## : A sequence in one of two formats. 
---  ## Containing two sets of exactly 16 color numbers in which the first set 
+--  ## Containing two sets of exactly sixteen color numbers in which the first set 
 --  are foreground (text) colors and the other set are background colors.
 --  ## Containing a set of exactly sixteen color numbers. These are to be
 --  applied to both foreground and background.
 --
 -- Returns:
---    A sequence: This contains two sets of 16 color values currently in
---    use for FG and BG respectively.
+--    A sequence: This contains two sets of sixteen color values currently in
+--    use for foreground and background respectively.
 --
 -- Comments:
 -- * If the ##colorset## is omitted then this just returns the current values without
 --   changing anything.
--- * A color set contains 16 values. You can access the color value for a specific color
---   by using [X + 1] where 'X' is one of the Euphoria color constants such as ##RED##,
---   ##BLUE##, etc ...
+-- * A color set contains sixteen values. You can access the color value for a specific color
+--   by using ##[X + 1]## where ##'X'## is one of the Euphoria color constants such as ##RED## or
+--   ##BLUE##.
 -- * This can be used to change the meaning of the standard color codes for
---   some consoles that are not using standard values. For example, the Unix default
+--   some consoles that are not using standard values. For example, the //Unix// default
 --   color value for RED is 1 and BLUE is 4, but you might need this to swapped. See
---   code example 1. Another use might be to suppress highlighted (bold) colors. See
---   code example 2.
+--   code Example 1. Another use might be to suppress highlighted (bold) colors. See
+--   code Example 2.
 --
 -- Example 1:
 -- <eucode>	
@@ -217,7 +220,7 @@ public function console_colors(sequence colorset = {})
 end function
 
 --**
--- Determine whether text will wrap when hitting the rightmost column.
+-- determines whether text will wrap when hitting the rightmost column.
 --
 -- Parameters:
 -- 		# ##on## : an object, 0 to truncate text, anything else to wrap.
@@ -225,10 +228,10 @@ end function
 -- Comments:
 -- By default text will wrap.
 --
--- Use ##wrap##() in text modes or pixel-graphics modes when you are displaying long 
+-- Use ##wrap## in text modes or pixel-graphics modes when you are displaying long 
 -- lines of text.
 --
--- Example:
+-- Example 1:
 -- <eucode>	
 -- puts(1, repeat('x', 100) & "\n\n")
 -- -- now have a line of 80 'x' followed a line of 20 more 'x'
@@ -245,22 +248,22 @@ public procedure wrap(object on = 1)
 end procedure
 
 --**
--- Scroll a region of text on the screen.
+-- scrolls a region of text on the screen.
 --
 -- Parameters:
 --		# ##amount## : an integer, the number of lines by which to scroll. 
---        This is >0 to scroll up and <0 to scroll down.
+--        This is ##>0## to scroll up and ##<0## to scroll down.
 -- 		# ##top_line## : the 1-based number of the topmost line to scroll.
 -- 		# ##bottom_line## : the 1-based number of the bottom-most line to scroll.
 --
 -- Comments:
 -- * New blank lines will appear at the vacated lines.
--- * You could perform the scrolling operation using a series of calls to ##[:puts]]()##, 
--- but ##scroll##() is much faster.
+-- * You could perform the scrolling operation using a series of calls to ##[[:puts]]##, 
+-- but ##scroll## is much faster.
 -- * The position of the cursor after scrolling is not defined.
 --
 -- Example 1:
---   ##bin/ed.ex##
+--   ##.../euphoria/bin/ed.ex##
 --
 -- See Also:
 --   [[:clear_screen]], [[:text_rows]]
@@ -275,7 +278,7 @@ end procedure
 -- === Graphics Modes
 
 --**
--- Attempt to set up a new graphics mode.
+-- attempts to set up a new graphics mode.
 --
 -- Parameters:
 -- 		# ##x## : an object, but it will be ignored.
@@ -283,9 +286,12 @@ end procedure
 -- Returns:
 -- 		An **integer**, always returns zero. 
 --
+-- Platform:
+--	//Windows//
+--
 -- Comments:
--- * This has no effect on Unix platforms.
--- * On Windows, it causes a console to be shown if one has not already been created.
+-- * This has no effect on //Unix// platforms.
+-- * On //Windows// it causes a console to be shown if one has not already been created.
 -- See Also:
 -- 		[[:video_config]]
 

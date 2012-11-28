@@ -74,6 +74,7 @@ void echo_wait();
 object memory_copy(object d, object s, object n);
 object memory_set(object d, object v, object n);
 uintptr_t get_pos_int(char *where, object x);
+object ATOM_TO_ATOM_INT( object X );
 object get_int(object x);
 
 void NewConfig(int raise_console);

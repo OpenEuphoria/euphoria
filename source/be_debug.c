@@ -255,7 +255,6 @@ int add_to_call_stack( object_ptr stack_seq_ptr, intptr_t *pc, int debugger ){
 	if( current_proc == NULL ){
 		return 0;
 	}
-	puts( current_proc->name );
 	gline = FindLine(pc, current_proc );
 	
 	if( debugger ){

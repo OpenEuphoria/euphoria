@@ -220,17 +220,17 @@ procedure pretty( object x, sequence options )
 end procedure
 
 --**
--- Print an object to a file or device, using braces { , , , }, indentation, and multiple lines
+-- prints an object to a file or device using braces ##{ , , , }##, indentation, and multiple lines
 -- to show the structure.
 --
 -- Parameters:
--- # ##fn## : an integer, the file/device number to write to
--- # ##x## : the object to display/convert to printable form
+-- # ##fn## : an integer, the file or device number to write to
+-- # ##x## : the object to display or convert to printable form
 -- # ##options## : is an (up to) 10-element options sequence.
 --
 -- Comments:
 --
---  Pass {} in ##options## to select the defaults, or set options as below:
+--  Pass ##{}## in ##options## to select the defaults, or set options as below:
 --   # display ASCII characters:
 --     ** 0 ~-- never
 --     ** 1 ~-- alongside any integers in printable ASCII range (default)
@@ -248,9 +248,9 @@ end procedure
 --   # maximum number of lines to output 
 --   # line breaks between elements   ~-- default 1 (0 = no line breaks, -1 = line breaks to wrap only)
 -- 
--- If the length is less than 10, unspecified options at
+-- If the length is less than ten, unspecified options at
 -- the end of the sequence will keep the default values.    
--- e.g. {0, 5} will choose "never display ASCII",
+-- For example: ##{0, 5}## will choose ##"never display ASCII"##,
 -- plus 5-character indentation, with defaults for everything else.
 --
 -- The default options can be applied using the public constant ##PRETTY_DEFAULT##, and the
@@ -268,13 +268,13 @@ end procedure
 -- # ##LINE_BREAKS##
 --
 -- The display will start at the current cursor position. Normally you will want to call 
--- ##pretty_print##() when the cursor is in column 1 (after printing a <code>\n</code> character). 
--- If you want to start in a different column, you should call ##position##() and specify a value 
--- for option [3]. This will ensure that the first and last braces in a sequence line up 
+-- ##pretty_print## when the cursor is in column 1 (after printing a ##\n## character). 
+-- If you want to start in a different column, you should call ##position## and specify a value 
+-- for option ##[3]##. This will ensure that the first and last braces in a sequence line up 
 -- vertically.
 --
 -- When specifying the format to use for integers and floating-point numbers, you can add 
--- some decoration, e.g. "(%d)" or "$ %.2f" 
+-- some decoration. For example: ##"(%d)"## or ##"$ %.2f"## . 
 --
 -- Example 1:
 -- <eucode>
@@ -343,7 +343,7 @@ public procedure pretty_print(integer fn, object x, sequence options = PRETTY_DE
 end procedure
 
 --**
--- Format an object using braces { , , , }, indentation, and multiple lines to show the structure.
+-- formats an object using braces { , , , }, indentation, and multiple lines to show the structure.
 --
 -- Parameters:
 --   # ##x## : the object to display
@@ -355,7 +355,7 @@ end procedure
 --
 -- Comments:
 --
---   This function formats objects the same as [[:pretty_print]](), but returns the sequence obtained instead of sending it to some file..
+--   This function formats objects the same as [[:pretty_print]] but returns the sequence obtained instead of sending it to some file..
 --
 -- See Also:
 --   [[:pretty_print]], [[:sprint]]

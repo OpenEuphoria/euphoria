@@ -241,7 +241,7 @@ end function
 -- === Routines
 
 --**
--- Convert a serialized object in to a standard Euphoria object.
+-- converts a serialized object in to a standard Euphoria object.
 --
 -- Parameters:
 -- # ##sdata## : either a sequence containing one or more concatenated serialized objects or
@@ -355,7 +355,7 @@ public function deserialize(object sdata, integer pos = 1)
 end function
 
 --**
--- Convert a standard Euphoria object in to a serialized version of it.
+-- converts a standard Euphoria object in to a serialized version of it.
 --
 -- Parameters:
 -- # ##euobj## : any Euphoria object.
@@ -462,7 +462,7 @@ public function serialize(object x)
 end function
 
 --**
--- Saves a Euphoria object to disk in a binary format.
+-- saves a Euphoria object to disk in a binary format.
 --
 -- Parameters:
 -- # ##data## : any Euphoria object.
@@ -473,11 +473,11 @@ end function
 -- created file.
 -- 
 -- Comments:
--- If the named file doesn't exist it is created, otherwise it is overwritten.
+-- If the named file does not exist it is created, otherwise it is overwritten.
 --
 -- You can use the [[:load]] function to recover the data from the file.
 --
--- Example :
+-- Example 1:
 -- <eucode>
 -- include std/serialize.e
 -- integer size = dump(myData, theFileName) 
@@ -506,7 +506,7 @@ public function dump(sequence data, sequence filename)
 end function
 
 --**
--- Restores a Euphoria object that has been saved to disk by [[:dump]].
+-- restores a Euphoria object that has been saved to disk by [[:dump]].
 --
 -- Parameters:
 -- # ##filename## : the name of the file to restore it from.
@@ -520,7 +520,7 @@ end function
 -- This is used to load back data from a file created by the [[:dump]]
 -- function.
 --
--- Example :
+-- Example 1:
 -- <eucode>
 -- include std/serialize.e
 -- sequence mydata = load(theFileName) 

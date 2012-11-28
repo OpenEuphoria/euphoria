@@ -14,24 +14,24 @@ own code. It does not apply to routines implemented in the backend.
 ==== Getting a routine identifier
 
 Whenever a routine is in scope, you can supply its name to the builtin 
-##routine_id##() function, which returns a small integer:
+##routine_id## function, which returns a small integer:
 
 <eucode>
 include get.e
 constant value_id = routine_id("value")
 </eucode>
 
-Because ##value##() is defined as ##public##, that routine is in scope. This 
+Because ##value## is defined as ##public##, that routine is in scope. This 
 ensures the call succeeds.
 A failed call returns ##-1##, else a small nonnegative integer.
 
-You can then feed this integer to ##call_func##() or ##call_proc##() as 
+You can then feed this integer to ##call_func## or ##call_proc## as 
 appropriate. It does not matter whether the routine is still in scope at the 
 time you make that call. Once the id is gotten, it's valid.
 
 ==== Calling Euphoria routines by id
 
-This is very similar to using [[:c_func]]() or [[:c_proc]]() to interface with 
+This is very similar to using [[:c_func]] or [[:c_proc]] to interface with 
 external code.
 
 ===== Calling a function
@@ -43,7 +43,7 @@ result = call_func(id_of_the_routine,argument_sequence)
 </eucode>
 
 where
-* ##id_of_the_routine## is an id you obtained from [[:routine_id]]().
+* ##id_of_the_routine## is an id you obtained from [[:routine_id]].
 * ##argument_sequence## is the list of the parameters to pass, enclosed into 
 curly braces
 
@@ -63,8 +63,8 @@ result = value("Model 36A", 6, GET_LONG_ANSWER)
 
 ===== Calling a procedure
 
-The same formalism applies, but using ##call_proc##() instead. The differences 
-are almost the same as between [[:c_func]]() and [[:c_proc]]().
+The same formalism applies, but using ##call_proc## instead. The differences 
+are almost the same as between [[:c_func]] and [[:c_proc]].
 
 <eucode>
 include std/pretty.e
@@ -81,9 +81,9 @@ include std/pretty.e
 pretty_print(1, some_object, some_options)
 </eucode>
 
-The difference with [[:c_proc]]() is that you can call an external function 
-using [[:c_proc]]() and thus ignore its return value, like in C. Note that you 
-cannot use ##call_proc##() to invoke a Euphoria function, only C functions.
+The difference with [[:c_proc]] is that you can call an external function 
+using [[:c_proc]] and thus ignore its return value, like in C. Note that you 
+cannot use ##call_proc## to invoke a Euphoria function, only C functions.
 
 ==== Why call indirectly?
 
@@ -137,7 +137,7 @@ platform they will run on. It would be cumbersome, and at times downright
 impossible, to put such code in include files or to make the routine fully 
 builtin.
 
-A solution to this is provided by ##machine_func##() and ##machine_proc##(). 
+A solution to this is provided by ##machine_func## and ##machine_proc##. 
 User code normally never needs to use these. Various examples are to be 
 found in the standard library.
 
@@ -153,5 +153,5 @@ use some sort of dynamic calling. The circumstances where it is useful are rare.
 The complete list of known values for ##id## is to be found in the file 
 ##source/execute.h##.
 
-Defining new identifiers and overriding ##machine_func##() or ##machine_proc##()
+Defining new identifiers and overriding ##machine_func## or ##machine_proc##
 to handle them is an easy way to extend the capabilities of the interpreter.

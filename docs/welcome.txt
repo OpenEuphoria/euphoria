@@ -24,7 +24,7 @@ interpreter.
 : Extensive run-time checking for: out-of-bounds
 subscripts, uninitialized variables, bad parameter values for library
 routines, illegal value assigned to a variable and many more. There are
-no mysterious machine exceptions{{{--}}}you will always get a full English
+no mysterious machine exceptions~--you will always get a full English
 description of any problem that occurs with  your program at run-time,
 along with a call-stack trace-back and a dump of all of your variable
 values. Programs can be debugged quickly, easily and  more thoroughly.
@@ -52,7 +52,7 @@ file from your program.
 ; Generic
 : Euphoria routines are naturally
 generic. The example program below shows a  single routine that will
-sort any type of data{{{--}}}integers, floating-point numbers, strings etc.
+sort any type of data~--integers, floating-point numbers, strings etc.
 Euphoria is not an "object-oriented" language, yet it achieves many of
 the benefits of these languages in a much simpler way.
 ; Free
@@ -119,12 +119,12 @@ There are now enthusiastic users around the world.
 Euphoria is a very high-level programming language. It is unique among a
 crowd of conventional languages.
 
-=== Euphoria delivers the expected features of a modern language
+=== Great Features
 
 * Open source
 * Free for personal and commercial use
 * Produces royalty-free, stand-alone, programs
-* Multi-platform {{{--}}} //Windows//, //OS X//, //Linux//, //FreeBSD//,
+* Multi-platform ~-- //Windows//, //OS X//, //Linux//, //FreeBSD//,
   //OpenBSD//, //NetBSD//, ...
 * Provides a choice of multi-platform GUI toolkits: IUP, GTK, wxWindows
 * Syntax colored profiling, debugging and tracing of code
@@ -135,8 +135,8 @@ crowd of conventional languages.
 
 === Euphoria is unique
 
-What makes Euphoria unique is a design that uses just two basic data-types {{{--}}}
- //atom// and //sequence//, and two 'helper' data-types {{{--}}} //object// and
+What makes Euphoria unique is a design that uses just two basic data-types ~--
+ //atom// and //sequence//, and two 'helper' data-types ~-- //object// and
  //integer//.
 
 * An **atom** is single numeric value (either an integer or floating point)
@@ -148,26 +148,26 @@ floating point values are not required.
 
 What follows from this design are some advantages over conventional languages:
 
-* The language syntax is smaller {{{--}}} and thus easier to learn
-* The language syntax is consistent {{{--}}} and thus easier to program
-* Routines are more generic {{{--}}} a routine used for strings may also be
+* The language syntax is smaller ~-- and thus easier to learn
+* The language syntax is consistent ~-- and thus easier to program
+* Routines are more generic ~-- a routine used for strings may also be
 applied to any data structure
-* A higher level view of programming {{{--}}} because sequences encompass
+* A higher level view of programming ~-- because sequences encompass
 conventional lists, arrays, tables, tuples, ..., and all other
 data-structures.
-* Sequences are dynamic {{{--}}} you may create and destroy at will {{{--}}} and
+* Sequences are dynamic ~-- you may create and destroy at will ~-- and
 modify them to any size and complexity
 * It supports both //static// data typing and //dynamic// data typing.
 
-=== Euphoria has qualities that go beyond the elegance of sequences
+=== Beyond Elegance Sequences
 
 * Euphoria programs are considerably faster than conventional interpreted
-languages {{{--}}} Euphoria makes a better website server
-* Euphoria programs can be translated then compiled as C programs {{{--}}} fast
+languages ~-- Euphoria makes a better website server
+* Euphoria programs can be translated then compiled as C programs ~-- fast
 programs become even faster
-* Euphoria lets you write multi-tasking programs {{{--}}} independent of the
+* Euphoria lets you write multi-tasking programs ~-- independent of the
 platform you are using
-* Euphoria has a coherent design {{{--}}} Euphoria programmers enjoy programming
+* Euphoria has a coherent design ~-- Euphoria programmers enjoy programming
 in Euphoria
 
 === As a first programming language
@@ -176,12 +176,7 @@ in Euphoria
 * No limits as to what you can program
 * Euphoria programming skills will enhance learning other languages
 
-=== As an extension to languages you already know
-
-* A fast, flexible, and powerful language
-* Euphoria, the language you will prefer to program in
-
-=== But, my favorite language is ...
+=== But, my favorite language is...
 
 You will find that Euphoria programmers are also knowledgeable in other
 languages. I find that the more tools you have (saws and hammers, or programming
@@ -234,14 +229,13 @@ reader is left to choose the correct interpreter.
 Euphoria runs on many platforms. When operating system specific issues must be 
 described you will see these descriptions:
 
-* //Windows// will be a general reference to a family of Microsoft Windows
-operating systems that includes 95/ME/98/XP/NT/Vista/7/.
+* //"Windows"// is a general reference to operating systems from Microsoft. 
 !! lines above run off right side of page 
 You will see the constant ##WINDOWS## used for //Windows// specific code.
 
-* //Unix// will be a general reference to the family operating systems that
+* //"Unix"// is a general reference to the family operating systems that
 includes Linux, FreeBSD, NetBSD, OpenBSD, Mac OS X, ... You will see the
-constant ##UNIX## used for Unix specific code.
+constant ##UNIX## used for //Unix// specific code.
 
 Directory names in //Windows// use ##\## separators, while //Unix// systems use ##/##.
 //Unix// users should substitute ##/## when they examine sample code.

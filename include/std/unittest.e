@@ -58,11 +58,11 @@
 -- display each test run, regardless of whether it fails or not.
 --
 -- After running a series of tests, you can get a summary displayed by calling
--- the ##test_report##() procedure. To get a better feel for unit testing, have
+-- the ##test_report## procedure. To get a better feel for unit testing, have
 -- a look at the provided test cases for the standard library in the //tests//
 -- directory.
 --
--- When included in your program, unittest.e sets a crash handler to log a crash 
+-- When included in your program, ##unittest.e## sets a crash handler to log a crash 
 -- as a failure.
 
 namespace unittest
@@ -174,7 +174,7 @@ end procedure
 -- === Setup Routines
 
 --**
--- Set the amount of information that is returned about passed and failed tests.
+-- set the amount of information that is returned about passed and failed tests.
 --
 -- Parameters:
 -- # ##verbosity## : an atom which takes predefined values for verbosity levels.
@@ -195,8 +195,8 @@ end procedure
 --
 -- If a file crashes when it should not, this event is reported no matter the verbosity level.
 --
--- The command line switch "-failed" causes verbosity to be set to medium at startup. The
--- command line switch "-all" causes verbosity to be set to high at startup.
+-- The command line switch ##"-failed"## causes verbosity to be set to medium at startup. The
+-- command line switch ##"-all"## causes verbosity to be set to high at startup.
 --
 -- See Also:
 -- [[:test_report]]
@@ -206,7 +206,7 @@ public procedure set_test_verbosity(atom verbosity)
 end procedure
 
 --**
--- Request the test report to pause before exiting.
+-- requests the test report to pause before exiting.
 --
 -- Parameters:
 --		# ##to_wait## : an integer, zero not to wait, nonzero to wait.
@@ -214,7 +214,7 @@ end procedure
 -- Comments:
 -- Depending on the environment, the test results may be invisible if
 -- ##set_wait_on_summary(1)## was not called prior, as this is not the default. The command
--- line switch "-wait" performs this call.
+-- line switch ##"-wait"## performs this call.
 --
 -- See Also:
 -- [[:test_report]]
@@ -224,7 +224,7 @@ public procedure set_wait_on_summary(integer to_wait)
 end procedure
 
 --**
--- Request the test report to save run stats in "unittest.dat" before exiting.
+-- requests the test report to save run stats in ##"unittest.dat"## before exiting.
 --
 -- Parameters:
 --		# ##accumulate## : an integer, zero not to accumulate, nonzero to accumulate.
@@ -241,7 +241,7 @@ public procedure set_accumulate_summary(integer accumulate)
 end procedure
 
 --**
--- Set behavior on test failure, and return previous value.
+-- sets the behavior on test failure, and return previous value.
 --
 -- Parameters:
 --		# ##abort_test## : an integer, the new value for this setting.
@@ -263,7 +263,7 @@ end function
 -- === Reporting
 
 --**
--- Output test report
+-- outputs the test report.
 --
 -- Comments:
 --
@@ -345,7 +345,7 @@ end procedure
 --
 
 --**
--- Records whether a test passes by comparing two values.
+-- records whether a test passes by comparing two values.
 --
 -- Parameters:
 --		# ##name## : a string, the name of the test
@@ -354,7 +354,7 @@ end procedure
 --
 -- Comments:
 --
--- * For floating point numbers, a fuzz of 1e-9 is used to assess equality.
+-- * For floating point numbers, a fuzz of ##1e-9## is used to assess equality.
 --
 -- A test is recorded as passed if equality holds between ##expected## and ##outcome##. The latter
 -- is typically a function call, or a variable that was set by some prior action.
@@ -383,7 +383,7 @@ public procedure test_equal(sequence name, object expected, object outcome)
 end procedure
 
 --**
--- Records whether a test passes by comparing two values.
+-- records whether a test passes by comparing two values.
 --
 -- Parameters:
 --		# ##name## : a string, the name of the test
@@ -391,7 +391,7 @@ end procedure
 --		# ##outcome## : an object, some actual value that should equal the reference ##expected##.
 --
 -- Comments:
--- * For atoms, a fuzz of 1e-9 is used to assess equality.
+-- * For atoms, a fuzz of ##1e-9## is used to assess equality.
 -- * For sequences, no such fuzz is implemented.
 --
 -- A test is recorded as passed if equality does not hold between ##expected## and ##outcome##. The
@@ -416,7 +416,7 @@ public procedure test_not_equal(sequence name, object a, object b)
 end procedure
 
 --**
--- Records whether a test passes.
+-- records whether a test passes.
 --
 -- Parameters:
 --		# ##name## : a string, the name of the test
@@ -424,7 +424,7 @@ end procedure
 --
 -- Comments:
 -- This assumes an expected value different from 0. No fuzz is applied when checking whether an
--- atom is zero or not. Use [[:test_equal]]() instead in this case.
+-- atom is zero or not. Use [[:test_equal]] instead in this case.
 --
 -- See Also:
 -- [[:test_equal]], [[:test_not_equal]], [[:test_false]], [[:test_pass]], [[:test_fail]]
@@ -434,14 +434,14 @@ public procedure test_true(sequence name, object outcome)
 end procedure
 
 --**
--- Records whether a test passes. If it fails, the program also fails.
+-- records whether a test passes. If it fails, the program also fails.
 --
 -- Parameters:
 --		# ##name## : a string, the name of the test
 --		# ##outcome## : an object, some actual value that should not be zero.
 --
 -- Comments:
--- This is identical to ##test_true()## except that if the test fails, the
+-- This is identical to ##test_true## except that if the test fails, the
 -- program will also be forced to fail at this point.
 --
 -- See Also:
@@ -462,7 +462,7 @@ public procedure assert(object name, object outcome)
 end procedure
 
 --**
--- Records whether a test passes by comparing two values.
+-- records whether a test passes by comparing two values.
 --
 -- Parameters:
 --		# ##name## : a string, the name of the test
@@ -470,7 +470,7 @@ end procedure
 --
 -- Comments:
 -- This assumes an expected value of 0. No fuzz is applied when checking whether an atom is zero
--- or not. Use [[:test_equal]]() instead in this case.
+-- or not. Use [[:test_equal]] instead in this case.
 --
 -- See Also:
 -- [[:test_equal]], [[:test_not_equal]], [[:test_true]], [[:test_pass]], [[:test_fail]]
@@ -480,7 +480,7 @@ public procedure test_false(sequence name, object outcome)
 end procedure
 
 --**
--- Records that a test failed.
+-- records that a test failed.
 --
 -- Parameters:
 --		# ##name## : a string, the name of the test
@@ -494,7 +494,7 @@ public procedure test_fail(sequence name)
 end procedure
 
 --**
--- Records that a test passed.
+-- records that a test passed.
 --
 -- Parameters:
 --		# ##name## : a string, the name of the test

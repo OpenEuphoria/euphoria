@@ -26,14 +26,14 @@ include std/text.e
 -- * byte 7: number of free blocks
 -- * byte 11: 4-byte pointer to block of free blocks
 --
--- ==== Block of table headers
+-- ==== Block of Table Headers
 -- * -4: allocated size of this block (for possible reallocation)
 -- *  0: number of table headers currently in use
 -- *  4: table header1
 -- * 16: table header2
 -- * 28: etc.
 --
--- ==== Table header
+-- ==== Table Header
 -- * 0: pointer to the name of this table
 -- * 4: total number of records in this table
 -- * 8: number of blocks of records
@@ -47,7 +47,7 @@ include std/text.e
 -- be adjusted. This is particularly helpful when the table contains
 -- many thousands of records.
 --
--- ==== Index block
+-- ==== Index Block
 -- one per table
 --
 -- * -4: allocated size of index block
@@ -57,7 +57,7 @@ include std/text.e
 -- * 12: pointer to 2nd block
 -- * 16: etc.
 --
--- ==== Block of key pointers
+-- ==== Block of Key Pointers
 -- many per table
 --
 -- * -4: allocated size of this block in bytes
@@ -65,7 +65,7 @@ include std/text.e
 -- * 4: key pointer 2
 -- * 8: etc.
 --
--- ==== Free list
+-- ==== Free List
 -- in ascending order of address
 --
 -- * -4: allocated size of block of free blocks
@@ -126,7 +126,7 @@ public enum
 	MISSING_END = 900,
 	--** current_db is not set
 	NO_DATABASE,
-	--** io:seek() failed.
+	--** ##io:seek## failed.
 	BAD_SEEK,
 	--** no table was found.
 	NO_TABLE,
@@ -134,7 +134,7 @@ public enum
 	DUP_TABLE,
 	--** unknown key_location index was supplied.
 	BAD_RECNO,
-	--** couldn't insert a new record.
+	--** could not insert a new record.
 	INSERT_FAILED,
 	--** last error code
 	LAST_ERROR_CODE,
@@ -156,7 +156,7 @@ constant DEF_INIT_FREE = 5,
 
 -- 
 --****
--- === Indexes for connection option structure.
+-- === Indexes for Connection Option Structure.
 
 public enum 
 	--** Locking method
@@ -184,7 +184,7 @@ sequence cache_index = {}
 integer  caching_option = 1
 
 --****
--- === Database connection options
+-- === Database Connection Options
 
 public constant
 	--** Disconnect a connected database
@@ -211,9 +211,10 @@ sequence Alias_Details = {}
 -- === Variables
 
 --**
--- **Exception handler**\\
+-- This is an //Exception handler//.
+--
 -- Set this to a valid routine_id value for a procedure that
--- will be called whenever the library detects a serious error. You procedure
+-- will be called whenever the library detects a serious error. Your procedure
 -- will be passed a single text string that describes the error. It may also
 -- call [[:db_get_errors]] to get more detail about the cause of the error.
 
@@ -477,7 +478,7 @@ end procedure
 -- === Routines
 
 --**
--- Fetches the most recent set of errors recorded by the library.
+-- fetches the most recent set of errors recorded by the library.
 --
 -- Parameters:
 --		# ##clearing## : if zero the set of errors is not reset, otherwise
@@ -493,7 +494,7 @@ end procedure
 -- Comments:
 --  * A number of library routines can detect errors. If the routine is a 
 --    function, it usually returns an error code. However, procedures that
---    detect an error can't do that. Instead, they record the error details
+--    detect an error can not do that. Instead, they record the error details
 --    and you can query that after calling the library routine. 
 --	* Both functions and procedures that detect errors record the details
 --    in the ##Last Error Set##, which is fetched by this function.
@@ -521,11 +522,11 @@ public function db_get_errors(integer clearing = 1)
 end function
 
 --**
--- print the current database in readable form to file fn
+-- prints the current database in readable form to file ##fn##.
 --
 -- Parameters:
 --		# ##fn## : the destination file for printing the current Euphoria database;
---		# ##low_level_too## : a boolean. If true, a byte-by-byte binary dump
+--		# ##low_level_too## : a boolean. If //true//, a byte-by-byte binary dump
 --              is presented as well; otherwise this step is skipped. If omitted,
 --              //false// is assumed.
 --
@@ -736,7 +737,7 @@ public procedure db_dump(object file_id, integer low_level_too = 0)
 end procedure
 
 --**
--- Detects corruption of the free list in a Euphoria database.
+-- detects corruption of the free list in a Euphoria database.
 --
 -- Comments:
 -- This is a debug routine used by RDS to detect corruption of the free list.
@@ -936,32 +937,32 @@ procedure save_keys()
 end procedure
 
 --****
--- === Managing databases
+-- === Managing Databases
 
 --**
--- Define a symbolic name for a database, and its default attributes.
+-- defines a symbolic name for a database and its default attributes.
 --
 -- Parameters:
 --		# ##dbalias## : a sequence. This is the symbolic name that the database can
 --                      be referred to by.
 --		# ##path## : a sequence, the path to the file that will contain the database.
 --      # ##dboptions##: a sequence. Contains the set of attributes for the database.
---                      The default is {} meaning it will use the various EDS default values.
+--                      The default is ##{}## meaning it will use the various EDS default values.
 --
 -- Returns:
---		An **integer**, status code, either DB_OK if creation successful or anything else on an error.
+--		An **integer**, status code, either ##DB_OK## if creation successful or anything else on an error.
 --
 -- Comments:
 --
 -- * This does not create or open a database. It only associates a symbolic name with
---   a database path. This name can then be used in the calls to db_create(), db_open(),
---   and db_select() instead of the physical database name.
--- * If the file in the path does not have an extention, ".edb" will be added automatically.
+--   a database path. This name can then be used in the calls to ##db_create##, ##db_open##,
+--   and ##db_select## instead of the physical database name.
+-- * If the file in the path does not have an extention, ##".edb"## will be added automatically.
 -- * The ##dboptions## can contain any of the options detailed below. These can be
 -- given as a single string of the form ##"option=value, option=value, ..."## or as
 -- as sequence containing option-value pairs, ##{ {option,value}, {option,value}, ... }##
 -- //Note:// The options can be in any order.
--- * The options are...
+-- * The options are~:
 -- ** ##LOCK_METHOD## : an integer specifying which type of access can be granted to the database.
 --                      This must be one of ##DB_LOCK_NO##, ##DB_LOCK_EXCLUSIVE##,
 --                      ##DB_LOCK_SHARDED## or ##DB_LOCK_READ_ONLY##.
@@ -970,12 +971,12 @@ end procedure
 -- ** ##INIT_FREE## : an integer giving the initial amount of free space pointers to
 --                         reserve space for. The default is 5 and the minimum is 0.
 -- * If a symbolic name has already been defined for a database, you can get it's 
---   full path and options by calling this function with ##dboptions## set to CONNECTION.
+--   full path and options by calling this function with ##dboptions## set to ##CONNECTION##.
 --   The returned value is a sequence of two elements. The first is the full path name
 --   and the second is a list of the option values. These options are indexed by
 --   ##[CONNECT_LOCK]##, ##[CONNECT_TABLES]##, and ##[CONNECT_FREE]##.
 -- * If a symbolic name has already been defined for a database, you remove the
---   symbolic name by calling this function with ##dboptions## set to DISCONNECT.
+--   symbolic name by calling this function with ##dboptions## set to ##DISCONNECT##.
 --
 -- Example 1:
 -- <eucode>
@@ -1084,7 +1085,7 @@ end function
 
 
 --**
--- Create a new database, given a file path and a lock method.
+-- creates a new database given a file path and a lock method.
 --
 -- Parameters:
 --		# ##path## : a sequence, the path to the file that will contain the database.
@@ -1093,12 +1094,12 @@ end function
 --                         can be either ##DB_LOCK_NO## (no lock) or 
 --                         ##DB_LOCK_EXCLUSIVE## (exclusive lock).
 --      # ##init_tables## : an integer giving the initial number of tables to
---                         reserve space for. The default is 5 and the minimum is 1.
+--                         reserve space for. The default is ##5## and the minimum is ##1## .
 --      # ##init_free## : an integer giving the initial amount of free space pointers to
---                         reserve space for. The default is 5 and the minimum is 0.
+--                         reserve space for. The default is ##5## and the minimum is ##0## .
 --
 -- Returns:
---		An **integer**, status code, either DB_OK if creation successful or anything else on an error.
+--		An **integer**, status code, either ##DB_OK## if creation successful or anything else on an error.
 --
 -- Comments:
 --
@@ -1106,14 +1107,14 @@ end function
 -- becomes the **current database** to which
 -- all other database operations will apply.
 --
--- If the file in the path does not have an extention, ".edb" will be added automatically.
+-- If the file in the path does not have an extention, ##.edb## will be added automatically.
 --
 -- A version number is stored in the database file so future
 -- versions of the database software can recognize the format, and
 -- possibly read it and deal with it in some way.
 --
 -- If the database already exists, it will not be overwritten.
--- db_create() will return DB_EXISTS_ALREADY.
+-- ##db_create## will return ##DB_EXISTS_ALREADY##.
 --
 -- Example 1:
 -- <eucode>
@@ -1210,20 +1211,20 @@ public function db_create(sequence path, integer lock_method = DB_LOCK_NO, integ
 end function
 
 --**
--- Open an existing Euphoria database.
+-- opens an existing Euphoria database.
 --
 -- Parameters:
 --		# ##path## : a sequence, the path to the file containing the database
 --		# ##lock_method## : an integer specifying which sort of access can
 --           be granted to the database. The types of lock that you can use are:
---      ## ##DB_LOCK_NO## : (no lock) - The default
+--      ## ##DB_LOCK_NO## : (no lock) ~-- The default
 --      ## ##DB_LOCK_SHARED## : (shared lock for read-only access) 
---      ## ##DB_LOCK_EXCLUSIVE## : (for read/write access).
+--      ## ##DB_LOCK_EXCLUSIVE## : (for read and write access).
 --
 -- Returns:
 --		An **integer**, status code, either ##DB_OK## if creation successful or anything else on an error.
 --
--- The return codes are:
+-- The return codes are~:
 --
 -- <eucode>
 -- public constant
@@ -1234,9 +1235,9 @@ end function
 -- </eucode>
 --
 -- Comments:
---   ##DB_LOCK_SHARED## is only supported on Unix platforms. It allows you to read the database, 
---   but not write anything to it. If you request ##DB_LOCK_SHARED## on //WINDOWS// it will be 
---   treated as if you had asked for DB_LOCK_EXCLUSIVE.
+--   ##DB_LOCK_SHARED## is only supported on //Unix// platforms. It allows you to read the database, 
+--   but not write anything to it. If you request ##DB_LOCK_SHARED## on //Windows// it will be 
+--   treated as if you had asked for ##DB_LOCK_EXCLUSIVE##.
 --
 --   If the lock fails, your program should wait a few seconds and try again.
 --   Another process might be currently accessing the database.
@@ -1325,7 +1326,7 @@ end ifdef
 end function
 
 --**
--- Choose a new, already open, database to be the current database.
+-- chooses a new, already open, database to be the current database.
 --
 -- Parameters:
 --	# ##path## : a sequence, the path to the database to be the new current database.
@@ -1335,14 +1336,14 @@ end function
 -- 		An **integer**, ##DB_OK## on success or an error code.
 --
 -- Comments:
--- * Subsequent database operations will apply to this database. path is the
--- path of the database file as it was originally opened with ##db_open##()
--- or ##db_create##().\\
--- * When you create (db_create) or open (db_open) a database, it automatically
--- becomes the current database. Use ##db_select##() when you want to switch back
+-- * Subsequent database operations will apply to this database. ##path## is the
+-- path of the database file as it was originally opened with ##db_open##
+-- or ##db_create##.
+-- * When you create (##db_create##) or open (##db_open##) a database, it automatically
+-- becomes the current database. Use ##db_select## when you want to switch back
 -- and forth between open databases, perhaps to copy records from one to the
 -- other. After selecting a new database, you should select a table within
--- that database using ##db_select_table##().
+-- that database using ##db_select_table##.
 -- * If the ##lock_method## is omitted and the database has not already been opened,
 -- this function will fail. However, if ##lock_method## is a valid lock type for
 -- [[:db_open]]  and the database is not open yet, this function will attempt to
@@ -1398,10 +1399,12 @@ public function db_select(sequence path, integer lock_method = -1)
 end function
 
 --**
--- Unlock and close the current database.
+-- unlocks and closes the current database.
 --
 -- Comments:
--- Call this procedure when you are finished with the current database. Any lock will be removed, allowing other processes to access the database file. The current database becomes undefined.
+-- Call this procedure when you are finished with the current database. 
+-- Any lock will be removed, allowing other processes to access the 
+-- database file. The current database becomes undefined.
 
 public procedure db_close()
 -- close the current database
@@ -1460,7 +1463,7 @@ function table_find(sequence name)
 end function
 
 --****
--- === Managing tables
+-- === Managing Tables
 
 --**
 -- Parameters:
@@ -1470,7 +1473,7 @@ end function
 -- 		On success, the table with name given by name becomes the current table.
 --
 -- Returns:
--- 		An **integer**, either DB_OK on success or DB_OPEN_FAIL otherwise.
+-- 		An **integer**, either ##DB_OK## on success or ##DB_OPEN_FAIL## otherwise.
 --
 -- Errors:
 -- 		An error occurs if the current database is not defined.
@@ -1539,7 +1542,7 @@ public function db_select_table(sequence name)
 end function
 
 --**
--- Get name of currently selected table
+-- gets the name of currently selected table.
 --
 -- Parameters:
 --		# None.
@@ -1561,7 +1564,7 @@ public function db_current_table()
 end function
 
 --**
--- Create a new table within the current database.
+-- creates a new table within the current database.
 --
 -- Parameters:
 --		# ##name## : a sequence, the name of the new table.
@@ -1569,14 +1572,14 @@ end function
 --          (Default is 50)
 --
 -- Returns:
--- 		An **integer**, either DB_OK on success or DB_EXISTS_ALREADY on failure.
+-- 		An **integer**, either ##DB_OK## on success or ##DB_EXISTS_ALREADY## on failure.
 --
 -- Errors:
 -- 		An error occurs if the current database is not defined.
 --
 -- Comments:
 -- 		* The supplied name must not exist already on the current database.
--- 		* The table that you create will initially have 0 records. However
+-- 		* The table that you create will initially have zero records. However
 --        it will reserve some space for a number of records, which will
 --        improve the initial data load for the table.
 --      * It becomes the current table.
@@ -1663,7 +1666,7 @@ public function db_create_table(sequence name, integer init_records = DEF_INIT_R
 end function
 
 --**
--- Delete a table in the current database.
+-- deletes a table in the current database.
 --
 -- Parameters:
 -- 		# ##name## : a sequence, the name of the table to delete.
@@ -1758,7 +1761,7 @@ public procedure db_delete_table(sequence name)
 end procedure
 
 --**
--- Clears a table of all its records, in the current database.
+-- clears a table of all its records, in the current database.
 --
 -- Parameters:
 -- 		# ##name## : a sequence, the name of the table to clear.
@@ -1845,7 +1848,7 @@ public procedure db_clear_table(sequence name, integer init_records = DEF_INIT_R
 end procedure
 
 --**
--- Rename a table in the current database.
+-- renames a table in the current database.
 --
 -- Parameters:
 -- 		# ##name## : a sequence, the name of the table to rename
@@ -1893,7 +1896,7 @@ public procedure db_rename_table(sequence name, sequence new_name)
 end procedure
 
 --**
--- Lists all tables on the current database.
+-- lists all tables in the current database.
 --
 -- Returns:
 --	A **sequence**, of all the table names in the current database. Each element of this
@@ -1943,7 +1946,7 @@ end function
 -- === Managing Records
 
 --**
--- Find the record in the current table with supplied key.
+-- finds the record in the current table with supplied key.
 --
 -- Parameters:
 -- 		# ##key## : the identifier of the record to be looked up.
@@ -1959,7 +1962,7 @@ end function
 --      * If equal to zero, an error occured.
 --
 -- Errors:
--- 		If the current table is not defined, it returns 0.
+-- 		If the current table is not defined, it returns ##0## .
 --
 -- Comments:
 --
@@ -1969,12 +1972,14 @@ end function
 --
 --		You can select a range of records by searching
 -- for the first and last key values in the range. If those key values don't
--- exist, you'll at least get a negative value showing io:where they would be,
--- if they existed. e.g. Suppose you want to know which records have keys
--- greater than "GGG" and less than "MMM". If -5 is returned for key "GGG",
--- it means a record with "GGG" as a key would be inserted as record number 5.
--- -27 for "MMM" means a record with "MMM" as its key would be inserted as record
--- number 27. This quickly tells you that all records, >= 5 and < 27 qualify.
+-- exist, you'll at least get a negative value showing ##io:where## they would be,
+-- if they existed. 
+--
+-- For example, suppose you want to know which records have keys
+-- greater than ##"GGG"## and less than ##"MMM"##. If ##-5## is returned for key ##"GGG"##,
+-- it means a record with ##"GGG"## as a key would be inserted as record number ##5## .
+-- ##-27## for ##"MMM"## means a record with ##"MMM"## as its key would be inserted as record
+-- number ##27##. This quickly tells you that all records, ##>= 5## and ##< 27## qualify.
 --
 -- Example 1:
 -- <eucode>
@@ -2030,7 +2035,7 @@ public function db_find_key(object key, object table_name=current_table_name)
 end function
 
 --**
--- Insert a new record into the current table.
+-- inserts a new record into the current table.
 --
 -- Parameters:
 --		# ##key## : an object, the record key, which uniquely identifies it inside the current table
@@ -2038,10 +2043,10 @@ end function
 --      # ##table_name## : optional table name to insert record into
 --
 -- Returns:
--- 		An **integer**, either DB_OK on success or an error code on failure.
+-- 		An **integer**, either ##DB_OK## on success or an error code on failure.
 --
 -- Comments:
--- Within a table, all keys must be unique. ##db_insert##() will fail with
+-- Within a table, all keys must be unique. ##db_insert## will fail with
 -- ##DB_EXISTS_ALREADY## if a record already exists on current table with the same key value.
 --
 -- Both key and data can be any Euphoria data objects, atoms or sequences.
@@ -2190,14 +2195,16 @@ public function db_insert(object key, object data, object table_name=current_tab
 end function
 
 --**
--- Delete record number key_location from the current table.
+-- deletes record number ##key_location## from the current table.
 --
--- Parameter:
+-- Parameters:
 -- 		# ##key_location## : a positive integer, designating the record to delete.
 --      # ##table_name## : optional table name to delete record from.
 --
 -- Errors:
--- 	If the current table is not defined, or ##key_location## is not a valid record index, an error will occur. Valid record indexes are between 1 and the number of records in the table.
+-- 	If the current table is not defined, or ##key_location## is not a 
+-- valid record index, an error will occur. Valid record indexes are 
+-- between 1 and the number of records in the table.
 --
 -- Example 1:
 -- <eucode>
@@ -2292,7 +2299,7 @@ public procedure db_delete_record(integer key_location, object table_name=curren
 end procedure
 
 --**
--- In the current table, replace the data portion of a record  with new data.
+-- replaces, the current table, the data portion of a record  with new data.
 --
 -- Parameters:
 -- 		# ##key_location##: an integer, the index of the record the data is to be altered.
@@ -2300,7 +2307,7 @@ end procedure
 --      # ##table_name##: optional table name of record to replace data in.
 --
 -- Comments:
-	--##key_location## must be from 1 to the number of records in the
+--##key_location## must be from ##1## to the number of records in the
 -- current table.
 -- ##data## is an Euphoria object of any kind, atom or sequence.
 --
@@ -2332,7 +2339,7 @@ public procedure db_replace_data(integer key_location, object data, object table
 end procedure
 
 --**
--- Get the size (number of records) of the default table.
+-- gets the size (number of records) of the default table.
 --
 -- Parameters:
 --     # ##table_name## : optional table name to get the size of.
@@ -2374,15 +2381,17 @@ public function db_table_size(object table_name=current_table_name)
 end function
 
 --**
--- Returns the data in a record queried by position.
+-- returns the data in a record queried by position.
 --
 -- Parameters:
 -- 		# ##key_location## : the index of the record the data of which is being fetched.
 --      # ##table_name## : optional table name to get record data from.
 --
 -- Returns:
---		An **object**, the data portion of requested record.\\
---      **NOTE** This function calls ##fatal##() and returns a value of -1 if an error prevented
+--		An **object**, the data portion of requested record.
+--
+-- Note:
+--  This function calls ##fatal## and returns a value of ##-1## if an error prevented
 --      the correct data being returned. 
 --
 -- Comments:
@@ -2431,7 +2440,7 @@ public function db_record_data(integer key_location, object table_name=current_t
 end function
 
 --**
--- Returns the data for the record with supplied key.
+-- returns the data for the record with supplied key.
 --
 -- Parameters:
 -- 		# ##key## : the identifier of the record to be looked up.
@@ -2450,7 +2459,10 @@ end function
 --
 -- Comments:
 -- Each record in a Euphoria database consists of a key portion and a data
--- portion. Each of these can be any Euphoria atom or sequence. **NOTE** This
+-- portion. Each of these can be any Euphoria atom or sequence. 
+--
+-- Note:
+-- This
 -- function does not support records that data consists of a single non-sequence value.
 -- In those cases you will need to use [[:db_find_key]] and [[:db_record_data]].
 --
@@ -2475,13 +2487,16 @@ public function db_fetch_record(object key, object table_name=current_table_name
 end function
 
 --**
+-- returns the key of a record given an index. 
 -- Parameters:
 -- 		# ##key_location## : an integer, the index of the record the key is being requested.
 --      # ##table_name## : optional table name to get record key from.
 --
 -- Returns
--- 		An **object**, the key of the record being queried by index.\\
---      **NOTE** This function calls fatal() and returns a value of -1 if an error prevented
+-- 		An **object**, the key of the record being queried by index.
+--
+-- Note: 
+-- This function calls ##fatal## and returns a value of ##-1## if an error prevented
 --      the correct data being returned. 
 --
 -- Errors:
@@ -2496,6 +2511,7 @@ end function
 -- puts(1, "The 6th record has key value: ")
 -- ? db_record_key(6)
 -- </eucode>
+--
 -- See Also:
 -- 		[[:db_record_data]]
 
@@ -2519,7 +2535,7 @@ public function db_record_key(integer key_location, object table_name=current_ta
 end function
 
 --**
--- Compresses the current database.
+-- compresses the current database.
 --
 -- Returns:
 -- 		An **integer**, either DB_OK on success or an error code on failure.
@@ -2530,15 +2546,15 @@ end function
 -- the return value will be set to ##DB_OK##, and the new compressed database
 -- file will retain the same name. The current table will be undefined. As
 -- a backup, the original, uncompressed file will be renamed with an extension
--- of .t0 (or .t1, .t2, ..., .t99). In the highly unusual case that the
+-- of ##.t0 (or .t1, .t2, ..., .t99)##. In the highly unusual case that the
 -- compression is unsuccessful, the database will be left unchanged, and no
 -- backup will be made.
 --
 -- When you delete items from a database, you create blocks of free space within
 -- the database file. The system keeps track of these blocks and tries to use them
--- for storing new data that you insert. db_compress() will copy the current
+-- for storing new data that you insert. ##db_compress## will copy the current
 -- database without copying these free areas. The size of the database file may
--- therefore be reduced. If the backup filenames reach .t99 you will have to
+-- therefore be reduced. If the backup filenames reach ##.t99## you will have to
 -- delete some of them.
 --
 -- Example 1:
@@ -2622,7 +2638,7 @@ public function db_compress()
 end function
 
 --**
--- Get name of currently selected database.
+-- gets name of currently selected database.
 --
 -- Parameters:
 --		# None.
@@ -2632,7 +2648,7 @@ end function
 -- that no database is currently selected.
 --
 -- Comments:
--- The actual name returned is the //path// as supplied to the db_open routine.
+-- The actual name returned is the //path// as supplied to the ##db_open## routine.
 --
 -- Example 1:
 -- <eucode>
@@ -2654,10 +2670,10 @@ public function db_current ()
 end function
 
 --**
--- Forces the database index cache to be cleared.
+-- forces the database index cache to be cleared.
 --
 -- Parameters:
---  None
+--  # None
 --
 -- Comments:
 -- * This is not normally required to the run. You might run it to set up a
@@ -2675,19 +2691,20 @@ public procedure db_cache_clear()
 end procedure
 
 --**
--- Sets the key cache behavior.\\
--- Initially, the cache option is turned on. This means that when possible, the
--- keys of a table are kept in RAM rather than read from disk each time
--- ##db_select_table##() is called. For most databases, this will improve performance
--- when you have more than one table in it.
+-- sets the key cache behavior.
 --
 -- Parameters:
---		# ##integer## : 0 will turn of caching, 1 will turn it back on.
+--		# ##integer## : ##0## will turn of caching, ##1## will turn it back on.
 --
 -- Returns:
 -- 		An **integer**, the previous setting of the option.
 --
 -- Comments:
+-- Initially, the cache option is turned on. This means that when possible, the
+-- keys of a table are kept in RAM rather than read from disk each time
+-- ##db_select_table## is called. For most databases, this will improve performance
+-- when you have more than one table in it.
+--
 -- When caching is turned off, the current cache contents is totally cleared.
 --
 -- Example 1:
@@ -2709,16 +2726,17 @@ public function db_set_caching(atom new_setting)
 end function
 
 --**
--- In the current database, replace the data portion of a record with new data.
--- This can be used to quickly update records that have already been located
--- by calling [[:db_get_recid]]. This operation is faster than using
--- [[:db_replace_data]]
+-- replaces, in the current database, the data portion of a record with new data.
 --
 -- Parameters:
 -- 		# ##recid## : an atom, the ##recid## of the record to be updated.
 -- 		# ##data## : an object, the new value of the record.
 --
 -- Comments:
+-- This can be used to quickly update records that have already been located
+-- by calling [[:db_get_recid]]. This operation is faster than using
+-- [[:db_replace_data]]
+--
 -- * ##recid## must be fetched using [[:db_get_recid]] first.
 -- * ##data## is an Euphoria object of any kind, atom or sequence.
 -- * The ##recid## does not have to be from the current table.
@@ -2767,7 +2785,7 @@ public procedure db_replace_recid(integer recid, object data)
 end procedure
 
 --**
--- Returns the key and data in a record queried by ##recid##.
+-- returns the key and data in a record queried by ##recid##.
 --
 -- Parameters:
 -- 		# ##recid## : the ##recid## of the required record, which has been
@@ -2807,7 +2825,7 @@ public function db_record_recid(integer recid)
 end function
 
 --**
--- Returns the unique record identifier (##recid##) value for the record.
+-- returns the unique record identifier (##recid##) value for the record.
 --
 -- Parameters:
 -- 		# ##key## : the identifier of the record to be looked up.
@@ -2829,11 +2847,11 @@ end function
 -- looking for a matching record key. They can also be used without selecting
 -- a table first, as the ##recid## is unique to the database and not just a table.
 -- However, they only remain valid while a database is open and so long as it
--- doesn't get compressed. Compressing the database will give each record a
+-- does not get compressed. Compressing the database will give each record a
 -- new ##recid## value. 
 --
 -- Because it is faster to fetch a record with a ##recid## rather than with its key,
--- these are used when you know you have to **refetch** a record. 
+-- these are used when you know you have to //refetch// a record. 
 --
 -- Example 1:
 -- <eucode>

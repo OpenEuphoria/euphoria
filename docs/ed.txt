@@ -55,14 +55,14 @@ the desired key to the desired function.  e.g. you'll have to use
 | C-Delete  | Delete the current line (not available on all platforms) |
 | C-d       | Delete the current line (same as C-Delete) |
 | Insert    | re-insert the preceding series of Deletes before the current line/character |
-| C-Left    | Move to the start of the previous word. On Unix, use C-l |
-| C-Right   | Move to the start of the next word. On Unix, use C-r |
+| C-Left    | Move to the start of the previous word. On //Unix// use C-l |
+| C-Right   | Move to the start of the next word. On //Unix// use C-r |
 | Home      | Move to the beginning of the current line |
 | End       | Move to the end of the current line |
 | C-Home    | Move to the beginning of the file (euid.exe only, others use C-t |
 | C-End     | Move to the end of the file (euid.exe only, others use C-b |
-| PgUp      | Move up one screen. On Unix use C-u |
-| PgDn      | Move down one screen. On Unix use C-p |
+| PgUp      | Move up one screen. On //Unix// use C-u |
+| PgDn      | Move down one screen. On //Unix// use C-p |
 | F1..F10   | Select a new window. The windows are numbered from top to bottom with the top window on the screen being //F1// |
 | F12       | User definable key (see ##CUSTOM_KEYSTROKES## near top of ##ed.ex##. Default action is to insert ##--## for a Euphoria comment |
 

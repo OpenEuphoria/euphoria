@@ -26,14 +26,14 @@ public constant OBJ_SEQUENCE = 3
 -- <built-in> type object(object x)
 --
 -- Description:
--- Returns information about the object type of the supplied argument ##x##.
+-- returns information about the object type of the supplied argument ##x##.
 --
 -- Returns:
--- # An integer. 
--- ** OBJ_UNASSIGNED if ##x## has not been assigned anything yet.
--- ** OBJ_INTEGER if ##x## holds an integer value.
--- ** OBJ_ATOM if ##x## holds a number that is not an integer.
--- ** OBJ_SEQUENCE if ##x## holds a sequence value.
+-- # An **integer**, 
+-- ** ##OBJ_UNASSIGNED## if ##x## has not been assigned anything yet.
+-- ** ##OBJ_INTEGER## if ##x## holds an integer value.
+-- ** ##OBJ_ATOM## if ##x## holds a number that is not an integer.
+-- ** ##OBJ_SEQUENCE## if ##x## holds a sequence value.
 --
 -- Example 1:
 -- <eucode>
@@ -45,17 +45,17 @@ public constant OBJ_SEQUENCE = 3
 -- </eucode>
 --
 -- See Also:
--- [[:sequence]](), [[:integer]](), [[:atom]]()
+-- [[:sequence]], [[:integer]], [[:atom]]
 
 --****
 -- Signature:
 -- <built-in> type integer(object x)
 --
 -- Description:
--- Tests the supplied argument ##x## to see if it is an integer or not.
+-- tests the supplied argument ##x## to see if it is an integer or not.
 --
 -- Returns:
--- # An integer. 
+-- # An **integer**. 
 -- ** 1 if ##x## is an integer.
 -- ** 0 if ##x## is not an integer.
 --
@@ -67,17 +67,17 @@ public constant OBJ_SEQUENCE = 3
 -- </eucode>
 --
 -- See Also:
--- [[:sequence]](), [[:object]](), [[:atom]]()
+-- [[:sequence]], [[:object]], [[:atom]]
 
 --****
 -- Signature:
 -- <built-in> type atom(object x)
 --
 -- Description:
--- Tests the supplied argument ##x## to see if it is an atom or not.
+-- tests the supplied argument ##x## to see if it is an atom or not.
 --
 -- Returns:
--- # An integer. 
+-- # An **integer**, 
 -- ** 1 if ##x## is an atom.
 -- ** 0 if ##x## is not an atom.
 --
@@ -89,17 +89,17 @@ public constant OBJ_SEQUENCE = 3
 -- </eucode>
 --
 -- See Also:
--- [[:sequence]](), [[:object]](), [[:integer]]()
+-- [[:sequence]], [[:object]], [[:integer]]
 
 --****
 -- Signature:
 -- <built-in> type sequence( object x)
 --
 -- Description:
--- Tests the supplied argument ##x## to see if it is a sequence or not.
+-- tests the supplied argument ##x## to see if it is a sequence or not.
 --
 -- Returns:
--- # An integer. 
+-- # An **integer*, 
 -- ** 1 if ##x## is a sequence.
 -- ** 0 if ##x## is not an sequence.
 --
@@ -111,7 +111,7 @@ public constant OBJ_SEQUENCE = 3
 -- </eucode>
 --
 -- See Also:
--- [[:integer]](), [[:object]](), [[:atom]]()
+-- [[:integer]], [[:object]], [[:atom]]
 
 --**
 -- Boolean FALSE value
@@ -124,8 +124,8 @@ public constant FALSE = (1=0)
 public constant TRUE = (1=1)
 
 --****
--- === Predefined character sets
---
+-- === Predefined Character Sets
+
 
 public enum
 	CS_FIRST = 0,	
@@ -155,7 +155,7 @@ public enum
 --
 
 --**
--- Determine whether one or more characters are in a given character set.
+-- determines whether one or more characters are in a given character set.
 --
 -- Parameters:
 -- 		# ##test_data## : an object to test, either a character or a string
@@ -166,9 +166,9 @@ public enum
 --
 -- Comments:
 --
--- ##pCharset## is either a simple sequence of characters eg. "qwertyuiop[]\\"
+-- ##pCharset## is either a simple sequence of characters (such as ##"qwertyuiop[]\"##)
 -- or a sequence of character pairs, which represent allowable ranges
--- of characters. eg. Alphabetic is defined as ~{{'a','z'}, {'A', 'Z'}}
+-- of characters. For example  Alphabetic is defined as ##{{'a','z'}, {'A', 'Z'}}##.
 --
 -- To add an isolated character to a character set which is defined using ranges, present it as a range of length 1, like in ##{%,%}##.
 --
@@ -236,7 +236,7 @@ end function
 sequence Defined_Sets
 
 --**
--- Sets all the defined character sets to their default definitions.
+-- sets all the defined character sets to their default definitions.
 --
 -- Example 1:
 -- <eucode>
@@ -267,15 +267,15 @@ public procedure set_default_charsets()
 end procedure
 
 --**
--- Gets the definition for each of the defined character sets.
+-- gets the definition for each of the defined character sets.
 --
 -- Returns:
 -- A **sequence**, of pairs. The first element of each pair
--- is the character set id , eg. CS_Whitespace, and the second is the definition
+-- is the character set id ( such as ##CS_Whitespace## ) and the second is the definition
 -- of that character set.
 --
 -- Comments:
--- This is the same format required for the [[:set_charsets]]() routine.
+-- This is the same format required for the [[:set_charsets]] routine.
 --
 -- Example 1:
 -- <eucode>
@@ -298,17 +298,17 @@ public function get_charsets()
 end function
 
 --**
--- Sets the definition for one or more defined character sets.
+-- sets the definition for one or more defined character sets.
 --
 -- Parameters:
 --		# ##charset_list## : a sequence of zero or more character set definitions.
 --
 -- Comments:
 -- ##charset_list## must be a sequence of pairs. The first element of each pair
--- is the character set id , eg. CS_Whitespace, and the second is the definition
+-- is the character set id (such as ##CS_Whitespace##) and the second is the definition
 -- of that character set.
 --
--- This is the same format returned by the [[:get_charsets]]() routine.
+-- This is the same format returned by the [[:get_charsets]] routine.
 --
 -- You cannot create new character sets using this routine.
 --
@@ -340,6 +340,9 @@ end procedure
 --
 
 --**
+-- test for an integer boolean.
+--
+-- Returns:
 -- Returns TRUE if argument is 1 or 0
 --
 -- Returns FALSE if the argument is anything else other than 1 or 0.
@@ -368,6 +371,9 @@ public type boolean(object test_data)
 end type
 
 --**
+-- tests elements for boolean.
+--
+-- Returns:
 -- Returns TRUE if argument is boolean (1 or 0) or if every element of
 -- the argument is boolean.
 --
@@ -388,6 +394,9 @@ public type t_boolean(object test_data)
 end type
 
 --**
+-- tests for  alphanumeric character.
+--
+-- Returns:
 -- Returns TRUE if argument is an alphanumeric character or if every element of
 -- the argument is an alphanumeric character.
 --
@@ -415,6 +424,9 @@ public type t_alnum(object test_data)
 end type
 
 --**
+-- tests string if it is an valid identifier.
+--
+-- Returns:
 -- Returns TRUE if argument is an alphanumeric character or if every element of
 -- the argument is an alphanumeric character and that the first character is not
 -- numeric and the whole group of characters are not all numeric.
@@ -453,6 +465,9 @@ public type t_identifier(object test_data)
 end type
 
 --**
+-- tests for alphabetic characters.
+--
+-- Returns:
 -- Returns TRUE if argument is an alphabetic character or if every element of
 -- the argument is an alphabetic character.
 --
@@ -480,6 +495,9 @@ public type t_alpha(object test_data)
 end type
 
 --**
+-- tests for ASCII characters.
+--
+-- Returns:
 -- Returns TRUE if argument is an ASCII character or if every element of
 -- the argument is an ASCII character.
 --
@@ -507,6 +525,9 @@ public type t_ascii(object test_data)
 end type
 
 --**
+-- tests for control characters.
+--
+-- Returns:
 -- Returns TRUE if argument is an Control character or if every element of
 -- the argument is an Control character.
 --
@@ -535,6 +556,9 @@ public type t_cntrl(object test_data)
 end type
 
 --**
+-- tests for digits.
+--
+-- Returns:
 -- Returns TRUE if argument is an digit character or if every element of
 -- the argument is an digit character.
 --
@@ -564,6 +588,9 @@ public type t_digit(object test_data)
 end type
 
 --**
+-- test for glyphs (printable) characters.
+--
+-- Returns:
 -- Returns TRUE if argument is a glyph character or if every element of
 -- the argument is a glyph character. (One that is visible when displayed)
 --
@@ -594,6 +621,9 @@ public type t_graph(object test_data)
 end type
 
 --**
+-- tests for a special word character.
+--
+-- Returns:
 -- Returns TRUE if argument is a special word character or if every element of
 -- the argument is a special word character.
 --
@@ -630,6 +660,9 @@ public type t_specword(object test_data)
 end type
 
 --**
+-- tests for bytes.
+--
+-- Returns:
 -- Returns TRUE if argument is a byte or if every element of
 -- the argument is a byte. (Integers from 0 to 255)
 --
@@ -663,6 +696,9 @@ public type t_bytearray(object test_data)
 end type
 
 --**
+-- tests for lowercase characters.
+--
+-- Returns:
 -- Returns TRUE if argument is a lowercase character or if every element of
 -- the argument is an lowercase character.
 --
@@ -692,6 +728,9 @@ public type t_lower(object test_data)
 end type
 
 --**
+-- tests for ASCII glyph characters.
+--
+-- Returns:
 -- Returns TRUE if argument is a character that has an ASCII glyph or if every element of
 -- the argument is a character that has an ASCII glyph.
 --
@@ -723,6 +762,9 @@ public type t_print(object test_data)
 end type
 
 --**
+-- tests for printable characters.
+--
+-- Returns:
 -- Returns TRUE if argument is a character that can be displayed or if every element of
 -- the argument is a character that can be displayed.
 --
@@ -754,6 +796,9 @@ public type t_display(object test_data)
 end type
 
 --**
+-- tests for punctuation characters.
+--
+-- Returns:
 -- Returns TRUE if argument is an punctuation character or if every element of
 -- the argument is an punctuation character.
 --
@@ -783,6 +828,9 @@ public type t_punct(object test_data)
 end type
 
 --**
+-- tests for whitespace characters.
+--
+-- Returns:
 -- Returns TRUE if argument is a whitespace character or if every element of
 -- the argument is an whitespace character.
 --
@@ -811,6 +859,9 @@ public type t_space(object test_data)
 end type
 
 --**
+-- tests for uppercase characters.
+--
+-- Returns:
 -- Returns TRUE if argument is an uppercase character or if every element of
 -- the argument is an uppercase character.
 --
@@ -840,6 +891,9 @@ public type t_upper(object test_data)
 end type
 
 --**
+-- tests for hexadecimal characters.
+--
+-- Returns:
 -- Returns TRUE if argument is an hexadecimal digit character or if every element of
 -- the argument is an hexadecimal digit character.
 --
@@ -869,6 +923,9 @@ public type t_xdigit(object test_data)
 end type
 
 --**
+-- tests for vowel characters.
+--
+-- Returns:
 -- Returns TRUE if argument is a vowel or if every element of
 -- the argument is a vowel character.
 --
@@ -898,6 +955,9 @@ public type t_vowel(object test_data)
 end type
 
 --**
+-- tests for consonant characters.
+--
+-- Returns:
 -- Returns TRUE if argument is a consonant character or if every element of
 -- the argument is an consonant character.
 --
@@ -929,6 +989,8 @@ end type
 set_default_charsets()
 
 --**
+-- tests for integer elements.
+--
 -- Returns:
 --  TRUE if argument is a sequence that only contains zero or more integers.
 --
@@ -955,11 +1017,13 @@ public type integer_array( object x )
 end type
 
 --**
+-- tests for text characters.
+--
 -- Returns:
 --  TRUE if argument is a sequence that only contains zero or more characters.
 --
--- Comment:
--- A 'character' is defined as a positive integer or zero. This is a broad
+-- Comments:
+-- A **character** is defined as a positive integer or zero. This is a broad
 -- definition that may be refined once proper UNICODE support is implemented.
 --
 -- Example 1:
@@ -989,6 +1053,8 @@ public type t_text( object x )
 end type
 
 --**
+-- tests for atom elements.
+--
 -- Returns:
 --  TRUE if argument is a sequence that only contains zero or more numbers.
 --
@@ -1015,6 +1081,8 @@ public type number_array( object x )
 end type
 
 --**
+-- tests for sequence with possible nested sequences.
+-- 
 -- Returns:
 --  TRUE if argument is a sequence that only contains zero or more sequences.
 --
@@ -1042,10 +1110,12 @@ public type sequence_array( object x )
 end type
 
 --**
+-- tests for ASCII elements.
+--
 -- Returns:
 --  TRUE if argument is a sequence that only contains zero or more ASCII characters.
 --
--- Comment:
+-- Comments:
 -- An ASCII 'character' is defined as a integer in the range [0 to 127].
 --
 -- Example 1:
@@ -1078,10 +1148,12 @@ public type ascii_string( object x )
 end type
 
 --**
+-- tests for a string sequence.
+--
 -- Returns:
 --  TRUE if argument is a sequence that only contains zero or more byte characters.
 --
--- Comment:
+-- Comments:
 -- A byte 'character' is defined as a integer in the range [0 to 255].
 --
 -- Example 1:
@@ -1115,10 +1187,12 @@ public type string( object x )
 end type
 
 --**
+-- tests for a string sequence (that has no null character).
+--
 -- Returns:
 --  TRUE if argument is a sequence that only contains zero or more non-null byte characters.
 --
--- Comment:
+-- Comments:
 -- A non-null byte 'character' is defined as a integer in the range [1 to 255].
 --
 -- Example 1:
@@ -1152,32 +1226,35 @@ public type cstring( object x )
 end type
 
 --**
--- value returned from [[:routine_id]]()
--- when the routine doesn't exist or is out of scope.
--- this is typically seen as -1 in legacy code.
+-- Value returned from [[:routine_id]]
+-- when the routine does not exist or is out of scope.
+-- This is typically seen as -1 in legacy code.
 public constant INVALID_ROUTINE_ID = routine_id("#")
 
 --**
--- to be used as a flag for no [[:routine_id]]() supplied.
+-- To be used as a flag for no [[:routine_id]] supplied.
 public constant NO_ROUTINE_ID = -99999
 
 -- Maximum and minimum values for Euphoria 31-bit integers (as implemented by 32-bit Euphoria)
 constant
-	MAXINT32 = 1073741823,
-	MININT32 = -17179869184
+	MAXSINT31 = power(2,30)-1,
+	MINSINT31 = -power(2,30)
 
---** Returns:
--- TRUE if the argument is a valid 31-bit euphoria integer.
+--** 
+-- tests for Euphoria integer.
 --
--- Comment:
--- This function is the same as ##integer(o)## on 32-bit euphoria,
+-- Returns:
+-- TRUE if the argument is a valid 31-bit Euphoria integer.
+--
+-- Comments:
+-- This function is the same as ##integer(o)## on 32-bit Euphoria,
 -- but is portable to 64-bit architectures.
 
 public type t_integer32( object o )
 	ifdef EU32 then
 		return integer( o )
 	elsedef
-		if integer( o ) and o <= MAXINT32 and o >= MININT32 then
+		if integer( o ) and o <= MAXSINT31 and o >= MINSINT31 then
 			return 1
 		else
 			return 0

@@ -23,22 +23,21 @@ integer ram_free_list = 0
 integer free_rid
 
 --**
--- Allocate a block of (pseudo) memory
+-- allocates a block of (pseudo) memory.
 --
 -- Parameters:
 -- # ##mem_struct_p## : The initial structure (sequence) to occupy the allocated
 -- block. If this is an integer, a sequence of zero this long is used. The default
--- is the number 1, meaning that the default initial structure is {0}
+-- is the number one, meaning that the default initial structure is ##{0}##
 -- # ##cleanup_p## : Identifies whether the memory should be released automatically
 -- when the reference count for the handle for the allocated block drops to
--- zero, or when passed to ##delete()##.  If 0, then the block must be freed
+-- zero, or when passed to ##delete##.  If zero, then the block must be freed
 -- using the [[:free]] procedure.
 --
 -- Returns:
--- A **handle**, to the acquired block. Once you acquire this, you can use it as you
--- need to.  Note that if ##cleanup_p## is 1, then the variable holding the 
--- handle must be capable of storing an atom as a double floating point value
--- (i.e., not an integer).
+-- A **handle**, to the acquired block. Once you acquire the handle you can use it as needed.
+-- Note that if ##cleanup_p## is one, then the variable holding the 
+-- handle must be capable of storing an atom (do not use an integer) as a double floating point value.
 -- 
 -- Example 1:
 -- <eucode>
@@ -73,7 +72,7 @@ export function malloc(object mem_struct_p = 1, integer cleanup_p = 1)
 end function
 
 --**
--- Deallocate a block of (pseudo) memory
+-- deallocates a block of (pseudo) memory.
 --
 -- Parameters:
 -- # ##mem_p## : The handle to a previously acquired [[:ram_space]] location.
@@ -82,7 +81,7 @@ end function
 -- This allows the location to be used by other parts of your application. You 
 -- should no longer access this location again because it could be acquired by
 -- some other process in your application.  This routine should only be called
--- if you passed 0 as ##cleanup_p## to [[:malloc]].
+-- if you passed zero as ##cleanup_p## to [[:malloc]].
 --
 -- Example 1:
 -- <eucode>
@@ -104,18 +103,18 @@ end procedure
 free_rid = routine_id("free")
 
 --**
--- Validates a block of (pseudo) memory
+-- validates a block of (pseudo) memory.
 --
 -- Parameters:
 -- # ##mem_p## : The handle to a previously acquired [[:ram_space]] location.
 -- # ##mem_struct_p## : If an integer, this is the length of the sequence that
--- should be occupying the ram_space location pointed to by ##mem_p##.
+-- should be occupying the ##ram_space## location pointed to by ##mem_p##.
 --
 -- Returns:
 -- An **integer**,\\
 -- 0 if either the ##mem_p## is invalid or if the sequence at that location is
 -- the wrong length.\\
--- 1 if the handle and contents is okay.
+-- 1 if the handle and contents are okay.
 --
 -- Comments:
 -- This can only check the length of the contents at the location. Nothing else

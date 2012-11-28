@@ -142,6 +142,7 @@ ifeq "$(EMINGW)" "1"
 			MEM_FLAGS=-DESIMPLE_MALLOC
 		endif
 	endif
+	CREATEDLLFLAGS=-Wl,--out-implib,lib818dll.a 
 else
 	EXE_EXT=
 	EPTHREAD=-pthread
@@ -167,6 +168,7 @@ else
 		endif
 	endif
 	MEM_FLAGS=-DESIMPLE_MALLOC
+	CREATEDLLFLAGS=
 endif
 
 MKVER=$(BUILDDIR)/mkver$(HOST_EXE_EXT)
@@ -236,6 +238,7 @@ else ifeq "$(EMINGW)" "1"
 PLAT=WINDOWS
 endif
 
+# We mustn't use eui rather than $(EEXU) in these three lines below.   When this translates from Unix, the interpreter we call to do the translation must not have a .exe extension. 
 ifeq  "$(EUBIN)" ""
 EXE=$(EEXU)
 HOST_EXE=$(HOST_EEXU)
@@ -264,7 +267,7 @@ CREOLE=creole
 endif
 
 ifeq "$(TRANSLATE)" "euc"
-	TRANSLATE=$(EECU)
+	TRANSLATE="euc"
 else
 #   We MUST pass these arguments to $(EXE), for $(EXE) is not and shouldn't be governed by eu.cfg in BUILDDIR.
 	TRANSLATE=$(HOST_EXE) $(CYPINCDIR) $(EC_DEBUG) $(EFLAG) $(CYPTRUNKDIR)/source/euc.ex $(EUC_DEBUG_FLAG)
@@ -391,7 +394,7 @@ EU_BACKEND_RUNNER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/backobj/*.
 EU_INTERPRETER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/intobj/*.c))
 
 all : 
-	$(MAKE) interpreter translator library debug-library backend shared-library debug-shared-library
+	$(MAKE) interpreter translator library debug-library backend shared-library debug-shared-library lib818
 	$(MAKE) tools
 
 
@@ -436,6 +439,7 @@ clean :
 	-rm -r $(BUILDDIR)/html
 	-rm -r $(BUILDDIR)/coverage
 	-rm -r $(BUILDDIR)/manual
+	-rm $(TRUNKDIR)/tests/lib818.dll
 	
 
 clobber distclean : clean
@@ -451,7 +455,7 @@ endif
 	$(MAKE) -C pcre CONFIG=../$(CONFIG) FPIC=-fPIC clean
 	
 
-.PHONY : clean distclean clobber all htmldoc manual
+.PHONY : clean distclean clobber all htmldoc manual lib818
 
 debug-library : builddirs
 	$(MAKE) $(BUILDDIR)/$(EECUDBGA) OBJDIR=libobjdbg ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE)
@@ -465,10 +469,26 @@ shared-library :
 debug-shared-library : builddirs
 	$(MAKE) $(BUILDDIR)/$(EECUSODBGA) OBJDIR=libobjdbg-fPIC ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE) FPIC=-fPIC
 
+# All code in Ming is position independent.  So simply link
+# to the other existing one.
+ifeq "$(EMINGW)" "1"
+ifdef FPIC
+ifdef EDEBUG
+$(BUILDDIR)/$(LIBRARY_NAME) : $(BUILDDIR)/eudbg.a
+else
+$(BUILDDIR)/$(LIBRARY_NAME) : $(BUILDDIR)/eu.a
+endif
+	ln -f $<  $@
+else
 $(BUILDDIR)/$(LIBRARY_NAME) : $(EU_LIB_OBJECTS)
 	$(CC_PREFIX)ar -rc $(BUILDDIR)/$(LIBRARY_NAME) $(EU_LIB_OBJECTS)
 	$(ECHO) $(MAKEARGS)
-
+endif
+else
+$(BUILDDIR)/$(LIBRARY_NAME) : $(EU_LIB_OBJECTS)
+	$(CC_PREFIX)ar -rc $(BUILDDIR)/$(LIBRARY_NAME) $(EU_LIB_OBJECTS)
+	$(ECHO) $(MAKEARGS)
+endif
 builddirs : $(BUILD_DIRS)
 
 $(BUILD_DIRS) :
@@ -743,7 +763,7 @@ test : EUCOMPILEDIR=$(TRUNKDIR)
 test : EUCOMPILEDIR=$(TRUNKDIR)	
 test : C_INCLUDE_PATH=$(TRUNKDIR):..:$(C_INCLUDE_PATH)
 test : LIBRARY_PATH=$(%LIBRARY_PATH)
-test : 
+test : ../tests/lib818.dll
 test :  
 	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
 		$(EXE) -i ../include ../source/eutest.ex -i ../include -cc gcc $(VERBOSE_TESTS) \
@@ -756,7 +776,8 @@ test :
 	$(EXE) -i ../include ../source/eutest.ex -process-log -html > $(CYPBUILDDIR)/test-report.html	
 	cd ../tests && sh check_diffs.sh
 
-testeu : 
+testeu : ../tests/lib818.dll
+testeu :
 	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) $(EXE) ../source/eutest.ex --nocheck -i ../include -cc gcc -exe "$(CYPBUILDDIR)/$(EEXU) -batch $(CYPTRUNKDIR)/source/eu.ex" $(TESTFILE)
 
 test-311 :
@@ -768,7 +789,7 @@ test-311 :
 		-lib "$(CYPBUILDDIR)/$(LIBRARY_NAME)" \
 		$(TESTFILE)
 		
-coverage-311 :
+coverage-311 : 
 	cd ../tests/311 && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
 		$(EXE) -i ../include $(CYPTRUNKDIR)/source/eutest.ex -i $(CYPTRUNKDIR)/include \
 		-exe "$(CYPBUILDDIR)/$(EEXU)" $(COVERAGE_ERASE) \
@@ -776,14 +797,16 @@ coverage-311 :
 		-coverage-exclude std -coverage-exclude euphoria \
 		 -coverage-pp "$(EXE) -i $(CYPTRUNKDIR)/include $(CYPTRUNKDIR)/bin/eucoverage.ex" $(TESTFILE)
 
-coverage : 
+coverage :  ../tests/lib818.dll
+coverage :
 	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
 		$(EXE) -i ../include $(CYPTRUNKDIR)/source/eutest.ex -i $(CYPTRUNKDIR)/include \
 		-exe "$(CYPBUILDDIR)/$(EEXU)" $(COVERAGE_ERASE) \
 		-coverage-db $(CYPBUILDDIR)/unit-test.edb -coverage $(CYPTRUNKDIR)/include/std \
 		 -coverage-pp "$(EXE) -i $(CYPTRUNKDIR)/include $(CYPTRUNKDIR)/bin/eucoverage.ex" $(TESTFILE)
 
-coverage-front-end : 
+coverage-front-end :  ../tests/lib818.dll
+coverage-front-end :
 	-rm $(CYPBUILDDIR)/front-end.edb
 	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
 		$(EXE) -i ../include $(CYPTRUNKDIR)/source/eutest.ex -i $(CYPTRUNKDIR)/include \
@@ -1005,6 +1028,19 @@ $(BUILDDIR)/%.res : %.rc
 $(BUILDDIR)/$(OBJDIR)/%.o : $(BUILDDIR)/$(OBJDIR)/%.c
 	$(CC) $(EBSDFLAG) $(FE_FLAGS) $(BUILDDIR)/$(OBJDIR)/$*.c -I/usr/share/euphoria -o$(BUILDDIR)/$(OBJDIR)/$*.o
 
+ifneq "$(ARCH)" "ARM"
+LIB818_FPIC=-fPIC
+endif
+
+$(BUILDDIR)/test818.o : test818.c
+	$(CC) -c $(LIB818_FPIC) -I ../include $(FE_FLAGS) -Wall -shared ../source/test818.c -o $(BUILDDIR)/test818.o
+
+lib818 :
+	touch test818.c
+	$(MAKE) ../tests/lib818.dll
+
+../tests/lib818.dll : $(BUILDDIR)/test818.o
+	$(CC)  $(MSIZE) $(LIB818_FPIC) -shared -o ../tests/lib818.dll $(CREATEDLLFLAGS) $(BUILDDIR)/test818.o
 
 ifeq "$(EUPHORIA)" "1"
 

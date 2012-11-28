@@ -12,7 +12,7 @@ namespace stdsort
 
 public constant
 	--**
-	-- ascending sort order, always the default.
+	-- Ascending sort order, always the default.
 	--
 	-- When a sequence is sorted in ##ASCENDING## order, its first element
 	-- is the smallest as per the sort order and its last element is the
@@ -23,7 +23,7 @@ public constant
 	NORMAL_ORDER = ASCENDING,
 
 	--**
-	-- descending sort order, which is the reverse of ##ASCENDING##.
+	-- Descending sort order, which is the reverse of ##ASCENDING##.
 	DESCENDING = -1,
 
 	--** Reverses the sense of the order returned by a custom comparison routine.
@@ -35,7 +35,7 @@ public constant
 --
 
 --**
--- Sort the elements of a sequence into ascending order.
+-- sorts the elements of a sequence into ascending order.
 --
 -- Parameters:
 --	 # ##x## : The sequence to be sorted.
@@ -48,10 +48,10 @@ public constant
 --
 -- The elements can be atoms or sequences.
 --
---	 The standard ##compare##()
+--	 The standard ##compare##
 -- routine is used to compare elements. This means that "##y## is greater than ##x##" is defined by ##compare(y, x)=1##.
 --
--- This function uses the "Shell" sort algorithm. This sort is not "stable", i.e. elements that are considered equal might
+-- This function uses the "Shell" sort algorithm. This sort is not "stable" which means elements that are considered equal might
 -- change position relative to each other.
 --
 -- Example 1:
@@ -106,12 +106,12 @@ public function sort(sequence x, integer order = ASCENDING)
 end function
 
 --**
--- Sort the elements of a sequence according to a user-defined order.
+-- sorts the elements of a sequence according to a user-defined order.
 --
 -- Parameters:
 --		# ##custom_compare## : an integer, the routine-id of the user defined routine that compares two items which appear in the sequence to sort.
 --		# ##x## : the sequence of items to be sorted.
---		# ##data## : an object, either {} (no custom data, the default), an atom or a non-empty sequence.
+--		# ##data## : an object, either ##{}## (no custom data, the default), an atom or a non-empty sequence.
 --		# ##order## : an integer, either ##NORMAL_ORDER## (the default) or ##REVERSE_ORDER##.
 --
 -- Returns:
@@ -153,8 +153,8 @@ end function
 -- sort needs to compare two items in the sequence, it calls
 -- the user-defined function to determine the order.
 --
--- * This function uses the "Shell" sort algorithm. This sort is not "stable",
---  i.e. elements that are considered equal might change position relative to
+-- * This function uses the "Shell" sort algorithm. This sort is not "stable"
+--  which means the elements that are considered equal might change position relative to
 --  each other.
 --
 -- Example 1:
@@ -334,7 +334,7 @@ function column_compare(object a, object b, object cols)
 end function
 
 --**
--- Sort the rows in a sequence according to a user-defined
+-- sorts the rows in a sequence according to a user-defined
 -- column order.
 --
 -- Parameters:
@@ -352,12 +352,12 @@ end function
 -- allows sorting of records that are shorter than the columns in the
 -- column list.
 --
--- By default,
+-- By default
 -- columns are sorted in ascending order. To sort in descending
--- order, make the column number negative.
+-- order make the column number negative.
 --
 --	This function uses the "Shell" sort algorithm.
--- This sort is not "stable", i.e. elements that are considered equal might
+-- This sort is not "stable" which means elements that are considered equal might
 -- change position relative to each other.
 --
 -- Example 1:
@@ -378,7 +378,7 @@ end function
 
 
 --**
--- Merge two pre-sorted sequences into a single sequence.
+-- merges two pre-sorted sequences into a single sequence.
 --
 -- Parameters:
 -- # ##a## : a sequence, holding pre-sorted data.
@@ -454,7 +454,7 @@ public function merge(sequence a, sequence b, integer compfunc = -1, object user
 end function
 
 --**
--- Sort a sequence, and optionally another object together.
+-- sorts a sequence and optionally another object together.
 --
 -- Parameters:
 -- # ##s## : a sequence, holding data to be sorted.
@@ -475,7 +475,7 @@ end function
 -- * The user-defined comparision function must accept two objects and return an
 --   integer. It returns -1 if the first object must appear before the second one,
 --   and 1 if the first object must after before the second one, and 0 if the order
---   doesn't matter.
+--   does not matter.
 --
 -- Example 1:
 --   <eucode>
