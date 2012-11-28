@@ -157,9 +157,8 @@ if lib818 then
 		integer r_get_m100 = define_c_func( lib818, sprintf("+%s_M100", 
 			{signed_type_names[i]}), {}, signed_types[i] )
 		if r_get_m100 != -1 then
-			atom expected_ptr = define_c_var( lib818, "+" & signed_type_names[i] & "_M100_value" )
+			atom expected_ptr = define_c_var( lib818, signed_type_names[i] & "_M100_value" )
 			if expected_ptr != 0 then
-				-- crashes EUPHORIA in a bad way.
 				test_equal(sprintf("Can get -100 like numbers from a function returning that number as a %s", 
 					{signed_type_names[i]}), peekf(expected_ptr, signed_types[i]), c_func(r_get_m100, {}))
 			end if
@@ -184,7 +183,8 @@ if lib818 then
 	
 	
 	integer pow_sum_c = define_c_func(lib818, "+powsum", repeat_pattern( { C_DOUBLE, C_USHORT }, 5 ), C_DOUBLE )
-	sequence pow_sum_arg = {#BEEF1042/power(2,32)+#B32100,1,#0111/power(4,4)+#333,3,#BEEF1042/power(2,32)+#B32100,1,#0111/power(4,4)+#333,3,3,30} 
+	-- use floor to avoid double / long double conversion issues
+	sequence pow_sum_arg = floor({#BEEF1042/power(2,32)+#B32100,1,#0111/power(4,4)+#333,3,#BEEF1042/power(2,32)+#B32100,1,#0111/power(4,4)+#333,3,3,30})
 	test_equal( "Can call and things are passed correctly for ten argument functions", pow_sum(pow_sum_arg), 
 		c_func( pow_sum_c, pow_sum_arg) )
 	

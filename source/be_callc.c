@@ -1416,7 +1416,11 @@ object call_c(int func, object proc_ad, object arg_list)
 		return NewDouble(double_result);
 	}
 	else if (return_type == C_LONGLONG ){
-		long long int int64_t_result;
+		#if INTPTR_MAX == INT32_MAX
+			long long int int64_t_result;
+		#else
+			#define int64_t_result int_result
+		#endif
 		call_routine(int64_t);
 		if( int64_t_result <= (long long int)MAXINT && int64_t_result >= (long long int)MININT ){
 			return (intptr_t) int64_t_result;
