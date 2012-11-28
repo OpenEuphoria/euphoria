@@ -79,7 +79,7 @@ end function
 --   largest( {"just","text"} ) -- Ans: {}
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:range]]
 --
 public function largest(object data_set)
@@ -130,7 +130,7 @@ end function
 --   ? smallest( {"just","text"} ) -- Ans: {}
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:range]]
 public function smallest(object data_set)
 	atom result_, temp_
@@ -175,7 +175,7 @@ end function
 --   ? range( {7,2,8,5,6,6,4,8,6,16,3,3,4,1,8,"text"} ) -- Ans: {1, 16, 15, 8.5}
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:smallest]] [[:largest]]
 --
 public function range(object data_set)
@@ -301,7 +301,7 @@ end function
 -- ? stdev( {4,5,6,7,5,4,3,"text"}, 0, ST_FULLPOP )         -- Ans: 1.984313483
 -- </eucode>
 --
--- See also:
+-- See Also:
 --   [[:average]], [[:avedev]]
 --
 
@@ -397,7 +397,7 @@ end function
 --    --> Ans: 2.0859375
 -- </eucode>
 --
--- See also:
+-- See Also:
 --   [[:average]], [[:stdev]]
 --
 
@@ -475,7 +475,7 @@ end function
 --   ? sum( {7,2,8.5,6,6,-4.8,6,6,3.341,-8,"text"}, 0 ) -- Ans: 32.041
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:average]]
 
 public function sum(object data_set, object subseq_opt = ST_ALLNUM)
@@ -527,7 +527,7 @@ end function
 --   ? count( 5 ) -- Ans: 1
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:average]], [[:sum]]
 
 public function count(object data_set, object subseq_opt = ST_ALLNUM)
@@ -581,7 +581,7 @@ end function
 --   ? average( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"}, ST_IGNSTR ) -- Ans: 5.13333333
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:geomean]], [[:harmean]], [[:movavg]], [[:emovavg]]
 --
 public function average(object data_set, object subseq_opt = ST_ALLNUM)
@@ -785,7 +785,7 @@ end function
 --    -- Ans: {3.25, 6.5, 5.75, 5.75}
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:average]]
 --
 public function movavg(object data_set, object period_delta)
@@ -873,7 +873,7 @@ end function
 --    -- Ans: {6.066666667,4.711111111,5.807407407,5.538271605,5.69218107}
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:average]]
 
 public function emovavg(object data_set, atom smoothing_factor)
@@ -940,7 +940,7 @@ end function
 --   ? median( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,4} ) -- Ans: 5
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:average]], [[:geomean]], [[:harmean]], [[:movavg]], [[:emovavg]]
 --
 
@@ -1081,7 +1081,7 @@ end function
 -- ? mode( {8,2,8,5,6,6,4,8,6,6,3,3,4,1,8,4} ) -- Ans: {8,6}
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:average]], [[:geomean]], [[:harmean]], [[:movavg]], [[:emovavg]]
 --
 
@@ -1154,7 +1154,7 @@ end function
 -- ? central_moment("the cat is the hatter", 't',3) -->   12395.12536                          
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:average]]
 --
 public function central_moment(sequence data_set, object datum, integer order_mag = 1, object subseq_opt = ST_ALLNUM)
@@ -1208,7 +1208,7 @@ end function
 -- ? sum_central_moments("the cat is the hatter", 4) --> 56824083.71
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:central_moment]], [[:average]]
 --
 public function sum_central_moments(object data_set, integer order_mag = 1, object subseq_opt = ST_ALLNUM)
@@ -1260,7 +1260,7 @@ end function
 -- ? skewness("thecatisthehatter")     --> 0.1093730315
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:kurtosis]]
 --
 public function skewness(object data_set, object subseq_opt = ST_ALLNUM)
@@ -1318,7 +1318,7 @@ end function
 -- ? kurtosis("thecatisthehatter")     --> -1.737889192
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:skewness]]
 --
 public function kurtosis(object data_set, object subseq_opt = ST_ALLNUM)

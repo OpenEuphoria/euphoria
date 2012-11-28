@@ -185,6 +185,7 @@ ifdef EDEBUG
 DEBUG_FLAGS=-g3 -O0 -Wall
 CALLC_DEBUG=-g3
 EC_DEBUG=-D DEBUG
+EUC_DEBUG_FLAG=-debug
 else
 DEBUG_FLAGS=-fomit-frame-pointer $(EOSMING)
 endif
@@ -269,7 +270,7 @@ ifeq "$(TRANSLATE)" "euc"
 	TRANSLATE="euc"
 else
 #   We MUST pass these arguments to $(EXE), for $(EXE) is not and shouldn't be governed by eu.cfg in BUILDDIR.
-	TRANSLATE=$(HOST_EXE) $(CYPINCDIR) $(EC_DEBUG) $(EFLAG) $(CYPTRUNKDIR)/source/euc.ex
+	TRANSLATE=$(HOST_EXE) $(CYPINCDIR) $(EC_DEBUG) $(EFLAG) $(CYPTRUNKDIR)/source/euc.ex $(EUC_DEBUG_FLAG)
 endif
 
 ifeq "$(MANAGED_MEM)" "1"
@@ -396,7 +397,7 @@ EU_BACKEND_RUNNER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/backobj/*.
 EU_INTERPRETER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/intobj/*.c))
 
 all : 
-	$(MAKE) interpreter translator library debug-library backend shared-library debug-shared-library
+	$(MAKE) interpreter translator library debug-library backend shared-library debug-shared-library lib818
 	$(MAKE) tools
 
 
@@ -457,7 +458,7 @@ endif
 	$(MAKE) -C pcre CONFIG=../$(CONFIG) FPIC=-fPIC clean
 	
 
-.PHONY : clean distclean clobber all htmldoc manual
+.PHONY : clean distclean clobber all htmldoc manual lib818
 
 debug-library : builddirs
 	$(MAKE) $(BUILDDIR)/$(EECUDBGA) OBJDIR=libobjdbg ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE)
@@ -471,10 +472,26 @@ shared-library :
 debug-shared-library : builddirs
 	$(MAKE) $(BUILDDIR)/$(EECUSODBGA) OBJDIR=libobjdbg-fPIC ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE) FPIC=-fPIC
 
+# All code in Ming is position independent.  So simply link
+# to the other existing one.
+ifeq "$(EMINGW)" "1"
+ifdef FPIC
+ifdef EDEBUG
+$(BUILDDIR)/$(LIBRARY_NAME) : $(BUILDDIR)/eudbg.a
+else
+$(BUILDDIR)/$(LIBRARY_NAME) : $(BUILDDIR)/eu.a
+endif
+	ln -f $<  $@
+else
 $(BUILDDIR)/$(LIBRARY_NAME) : $(EU_LIB_OBJECTS)
 	$(CC_PREFIX)ar -rc $(BUILDDIR)/$(LIBRARY_NAME) $(EU_LIB_OBJECTS)
 	$(ECHO) $(MAKEARGS)
-
+endif
+else
+$(BUILDDIR)/$(LIBRARY_NAME) : $(EU_LIB_OBJECTS)
+	$(CC_PREFIX)ar -rc $(BUILDDIR)/$(LIBRARY_NAME) $(EU_LIB_OBJECTS)
+	$(ECHO) $(MAKEARGS)
+endif
 builddirs : $(BUILD_DIRS)
 
 $(BUILD_DIRS) :
@@ -1021,10 +1038,14 @@ LIB818_FPIC=-fPIC
 endif
 
 $(BUILDDIR)/test818.o : test818.c
-	gcc -c $(LIB818_FPIC) -I ../include $(FE_FLAGS) -Wall -shared ../source/test818.c -o $(BUILDDIR)/test818.o
+	$(CC) -c $(LIB818_FPIC) -I ../include $(FE_FLAGS) -Wall -shared ../source/test818.c -o $(BUILDDIR)/test818.o
+
+lib818 :
+	touch test818.c
+	$(MAKE) ../tests/lib818.dll
 
 ../tests/lib818.dll : $(BUILDDIR)/test818.o
-	gcc  $(MSIZE) $(LIB818_FPIC) -shared -o ../tests/lib818.dll $(CREATEDLLFLAGS) $(BUILDDIR)/test818.o
+	$(CC)  $(MSIZE) $(LIB818_FPIC) -shared -o ../tests/lib818.dll $(CREATEDLLFLAGS) $(BUILDDIR)/test818.o
 
 ifeq "$(EUPHORIA)" "1"
 

@@ -4,7 +4,7 @@
 -- <<LEVELTOC level=2 depth=4>>
 --
 -- A **map** is a special array, often called an associative array or dictionary;
--- in a map the data **values** (any Euphoria object) are indexed by **keys (also any Euphoria object).
+-- in a map the data **values** (any Euphoria object) are indexed by **keys** (also any Euphoria object).
 --
 -- When programming think in terms of //key:value// pairs.
 -- For example we can code things like this~:
@@ -931,7 +931,7 @@ end procedure
 --     2503281 )
 -- </eucode>
 --
--- See also:
+-- See Also:
 --   [[:put]]
 --
 
@@ -1726,7 +1726,7 @@ public enum
 -- line is appended to the end of it. After all these physical lines have been
 -- joined into one logical line, all combinations of `",$"` and `,$` are removed.
 --
--- For example:
+-- For example~:
 -- {{{
 -- one = {"first",
 --        "second",
@@ -1750,7 +1750,7 @@ public enum
 -- The SM_RAW type saves the map in an efficient manner. It is generally smaller
 -- than the text format and is faster to process, but it is not human readable and
 -- standard text editors can not be used to edit it. In this format, the file will
--- contain three serialized sequences:
+-- contain three serialized sequences~:
 -- # Header sequence: {integer:format version, string: date and time of save (YYMMDDhhmmss),
 --                     sequence: euphoria version {major, minor, revision, patch}}
 -- # Keys. A list of all the keys
@@ -1975,7 +1975,7 @@ end function
 -- Returns:
 --   A **map**, containing the data from ##kv_string##
 --
--- Comment:
+-- Comments:
 -- This function actually calls ##[[:keyvalues]]## to convert the string to
 -- key-value pairs, which are then used to create the map.
 --

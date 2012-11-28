@@ -99,7 +99,9 @@ end ifdef
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant SLASH
+-- </eucode>
 --
 -- Description:
 -- Current platform's path separator character
@@ -110,7 +112,9 @@ end ifdef
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant SLASHES
+-- </eucode>
 --
 -- Description:
 -- Current platform's possible path separators. This is slightly different
@@ -120,7 +124,9 @@ end ifdef
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant SLASHES
+-- </eucode>
 --
 -- Description:
 -- Current platform's possible path separators. This is slightly different
@@ -130,14 +136,18 @@ end ifdef
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant EOLSEP
+-- </eucode>
 --
 -- Description:
 -- Current platform's newline string: ##"\n"## on //Unix//, else ##"\r\n"##.
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant EOL
+-- </eucode>
 --
 -- Description:
 -- All platform's newline character: ##'\n'##. When text lines are read the native
@@ -145,22 +155,28 @@ end ifdef
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant PATHSEP
+-- </eucode>
 --
 -- Description:
 -- Current platform's path separator character: ##:## on //Unix//, else ##;##.
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant NULLDEVICE
+-- </eucode>
 --
 -- Description:
 -- Current platform's null device path: ##/dev/null## on //Unix//, else ##NUL:##.
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant SHARED_LIB_EXT
--- 
+-- </eucode>
+--
 -- Description:
 -- Current platform's shared library extension. For instance it can be ##dll##, 
 -- ##so## or ##dylib## depending on the platform.
@@ -205,8 +221,23 @@ public enum
 	D_MILLISECOND,
 	D_ALTNAME
 
---**
+
+--****
+-- Signature:
+-- <eucode>
+-- public constant W_BAD_PATH
+-- </eucode>
+--
+-- Description:
 -- Bad path error code. See [[:walk_dir]]
+
+--****
+-- Signature:
+-- <eucode>
+-- public constant W_SKIP_DIRECTORY
+-- </eucode>
+
+
 
 public constant 
 	W_BAD_PATH = -1, -- error code
@@ -784,7 +815,7 @@ end function
 -- Returns:
 --     A **sequence**, the current directory.
 --
--- Comment:
+-- Comments:
 --  //Windows// maintains a current directory for each disk drive. You
 --  would use this routine if you wanted the current directory for a drive that
 --  may not be the current drive.
@@ -848,7 +879,7 @@ sequence InitCurDir = curdir() -- Capture the original PWD
 -- Returns:
 --     A **sequence**, the current directory at the time the program started running.
 --
--- Comment:
+-- Comments:
 -- You would use this if the program might change the current directory during
 -- its processing and you wanted to return to the original directory.
 --
@@ -881,7 +912,7 @@ end function
 -- Returns:
 --     An **integer**, ##0## on failure, otherwise the number of files plus ##1## .
 --
--- Comment:
+-- Comments:
 -- This never removes a directory. It only ever removes files. It is used to 
 -- clear a directory structure of all existing files, leaving the structure
 -- intact.
@@ -2048,7 +2079,7 @@ public enum
 --   # ##name## :  filename to check existence of
 --
 -- Returns:
---   An **integer**, ##1## on yes, #0## on no.
+--   An **integer**, ##1## on yes, ##0## on no.
 --
 -- Example 1:
 -- <eucode>

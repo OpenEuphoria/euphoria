@@ -84,16 +84,16 @@ the ##display## routine from ##console.e# .
 : This declares a variable that is not public but is 
 accessible from anywhere in this file. The datatype
 for the variable is a ##sequence##, which is a 
-variable-length array, and whose symbol name is
+variable-length "array," and whose symbol name is
 ##original_list##.
 
 ; ##function merge_sort(sequence x) ... end function## 
 : This declares and defines
 a function routine. Functions return values when called.
 This function must be passed a single parameter when
-called - a sequence.
+called ~-- a sequence.
 
-; ##procedure ##print_sorted_list() ... end procedure## 
+; ##procedure print_sorted_list() ... end procedure##
 : This declares and defines
 a procedure routine. Procedures never return values when called.
 This procedure must not be passed any parameters when
@@ -116,7 +116,7 @@ Number 84 was at position  5, now at  9
 Number 98 was at position  7, now at 10
 }}}
 
-Note that ##merge_sort## will just as easily sort any list of data items ...
+Note that ##merge_sort## will just as easily sort any list of data items~:
 <eucode>
 {1.5, -9, 1e6, 100}
 {"oranges", "apples", "bananas"}
@@ -285,7 +285,7 @@ customize  how the interpreter itself behaves.
 
 Unlike many other compilers and interpreters, there is no obligation for any
 special command-line options for ##eui## or ##euiw##. Only the
-name of you Euphoria file is expected, and if you don't supply it, Euphoria
+name of you Euphoria file is expected, and if you do not supply it, Euphoria
 will display all the command line options available.
 
 Euphoria doesn't care about your choice of file extensions. By
@@ -293,7 +293,7 @@ convention, however, console-based applications have an extension of ##.ex##,
 GUI-based applications have an extension of ##.exw## and include files have an
 extension of ##.e##. Note that a GUI application is not necessarily a
 //Windows// program. A GUI application can exist on Linux,
-OS X, FreeBSD, etc...
+OS X, FreeBSD, and so on.
 
 You can redirect standard input and standard output when you run a Euphoria
  program, for example:
@@ -316,7 +316,7 @@ The first statement turns off echoing of commands to the screen. The second
 runs ##eui myprog.ex## with up to 9 command-line arguments. See
 [[:command_line]] for an example of how to read these arguments. Having
 a .bat file will save you the minor inconvenience of typing ##eui##
-all the time; i.e., you can just type:
+all the time; for example you can just type:
 <eucode>
 myprog
 </eucode>
@@ -354,7 +354,7 @@ foo.ex
 
 to run your program. You could even shorten the name to simply "foo". Euphoria
 ignores the first line when it starts with **#!**.  Be careful though that
-your first line ends with the unix-style ##\n##, and not the
+your first line ends with the //Unix//-style ##\n##, and not the
 //Windows//-style ##\r\n##, or the unix shell might get confused. If your
 file is shrouded, you must give the path to ##eub##, not ##eui##.
 
@@ -431,7 +431,7 @@ Euphoria source files including any Euphoria includes that may be necessary
 from the ##euphoria/include## directory. If the Euphoria source files and the
 interpreter are placed together in one directory then your user can run your
 program by typing ##eui## followed by the path of your main executable source
-file. You might also provide a small ##.bat## file so people won't actually
+file. You might also provide a small ##.bat## file so people will not actually
 have to type the interpreter name. This way assumes that you are willing to
 share your Euphoria source code with your users.
 
@@ -450,7 +450,7 @@ Euphoria program into C and then compile it with a C compiler to get an
 executable program.
 
 %%output=command_switches
-== Command line switches
+== Command Line Switches
 :<<LEVELTOC level=2 depth=4>>
 
 You can launch Euphoria with some extra command line switches, in order to add
@@ -571,7 +571,7 @@ opposite of the ##-W## switch.
 
 The case of the switches is ignored, so ##-I## and ##-i## are equivalent.
 
-=== Further notes
+=== Further Notes
 
 * Included files are searched for in all included paths, in the following order:
 ## The current path

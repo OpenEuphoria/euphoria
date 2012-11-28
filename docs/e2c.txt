@@ -19,7 +19,7 @@ front-end portion of the interpreter. The source code for the translator is in
 
 === C Compilers Supported
 
-The **Translator** currently works with GNU C on //Unix//-like OSes,
+The **Translator** currently works with GNU C on //Unix// OSes,
 GNU C on //Windows// from  [[http://www.mingw.org|MinGW]]  
 or [[http://en.wikipedia.org/wiki/Cygwin|Cygwin]] using the ##-gcc## option
 and with [[http://www.openwatcom.org|Watcom C]] (the default) on //Windows//.
@@ -47,7 +47,7 @@ Running the **Translator** is similar to running the **Interpreter**:
 euc -con allsorts.ex
 }}}
 
-Note: that on Unix, the demos might be installed to ##/usr/share/euphoria/demo##
+Note: that on //Unix// the demos might be installed to ##/usr/share/euphoria/demo##
 
 Instead of running the ##allsorts.ex## program, the **Translator** will
 create several C source files in a temporary build directory, compile them
@@ -286,7 +286,7 @@ and [[:c_proc]].
 The routine names exported from a Euphoria shared dynamically loading library 
 will vary depending on which C compiler you use.
 
-GNU C on Unix exports the names exactly as they appear in the C
+GNU C on //Unix// exports the names exactly as they appear in the C
 code produced by the **Translator**, e.g. a Euphoria routine
 
 {{{

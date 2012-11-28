@@ -49,3 +49,5 @@
 * Eutest now has an eubin option for specifying all binaries in a single option.  
 * Eutest has a retest option for retesting all tests that had previously failed.
 * Front end optimizations to reduce parsing time
+* Added dynamic library uninitialization to reduce memory leaks if a euphoria translated .dll or .so
+  is unloaded

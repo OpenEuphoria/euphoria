@@ -12,6 +12,16 @@ extern int in_backend;
 #endif
 
 #ifdef EWINDOWS
+#define DLL_PTR_TYPE HINSTANCE
+#else
+#define DLL_PTR_TYPE void*
+#endif
+
+extern DLL_PTR_TYPE *open_dll_list;
+extern int open_dll_size;
+extern int open_dll_count;
+
+#ifdef EWINDOWS
 extern HINSTANCE *open_dll_list;
 extern int open_dll_size;
 extern int open_dll_count;
@@ -64,6 +74,7 @@ void echo_wait();
 object memory_copy(object d, object s, object n);
 object memory_set(object d, object v, object n);
 uintptr_t get_pos_int(char *where, object x);
+object ATOM_TO_ATOM_INT( object X );
 object get_int(object x);
 
 void NewConfig(int raise_console);

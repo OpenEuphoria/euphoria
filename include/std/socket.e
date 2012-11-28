@@ -562,7 +562,7 @@ public constant
 	SO_PEERCRED = sockinfo[ESO_PEERCRED]
 
 --****
--- =====  - Security levels - as per NRL IPv6 - do not actually do anything
+-- ====  - Security levels - as per NRL IPv6 - do not actually do anything
 public constant
 	SO_SECURITY_AUTHENTICATION = sockinfo[ESO_SECURITY_AUTHENTICATION],
 	SO_SECURITY_ENCRYPTION_TRANSPORT = sockinfo[ESO_SECURITY_ENCRYPTION_TRANSPORT],
@@ -951,7 +951,7 @@ end function
 --  A **sequence** or **atom**,   On success, either an atom or
 --   a sequence containing the option value.
 --
--- See also:
+-- See Also:
 --   [[:get_option]]
 --
 

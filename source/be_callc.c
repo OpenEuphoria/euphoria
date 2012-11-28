@@ -64,7 +64,7 @@
 /* Local variables */
 /*******************/
 
-#if defined(__GNUC__) && defined(EUNIX)
+#if defined(__GNUC__)
 #if ARCH == ix86
 /** 
  * push the value arg on to the **runtime** stack.  You must make sure that as_offset is
@@ -89,7 +89,7 @@
   */
 #define  pop() asm( "movl %0,%%ecx; addl (%%ecx),%%esp;" : /* no out */ : "r"(as_offset) : "%ecx" )
 #endif
-#endif  // EUNIX
+#endif  // GCC
 
 #ifdef EMSVC
 #define push() __asm { PUSH [last_offset] } do { } while (0)
@@ -168,6 +168,43 @@ typedef union {
 /*******************/
 
 #if INTPTR_MAX == INT32_MAX
+
+// reenable when these crashes stop
+#define generate_typedefs(function_name, return_type, convention, namebase, default_value) typedef return_type (convention *namebase ## 0)();\
+typedef return_type (convention *namebase ## 1)(intptr_t);\
+typedef return_type (convention *namebase ## 2)(intptr_t,intptr_t);\
+typedef return_type (convention *namebase ## 3)(intptr_t,intptr_t,intptr_t);\
+typedef return_type (convention *namebase ## 4)(intptr_t,intptr_t,intptr_t,intptr_t);\
+typedef return_type (convention *namebase ## 5)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);\
+typedef return_type (convention *namebase ## 6)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);\
+typedef return_type (convention *namebase ## 7)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);\
+typedef return_type (convention *namebase ## 8)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);\
+typedef return_type (convention *namebase ## 9)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);\
+typedef return_type (convention *namebase ## A)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);\
+typedef return_type (convention *namebase ## B)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);\
+typedef return_type (convention *namebase ## C)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);\
+typedef return_type (convention *namebase ## D)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);\
+typedef return_type (convention *namebase ## E)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,\
+	intptr_t);\
+typedef return_type (convention *namebase ## F)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t)
+
+#if 0
+/* for c_proc */
+generate_typedefs(call_std_proc, void, __stdcall, proc, );
+generate_typedefs(call_cdecl_proc, void, __cdecl, cdproc, );
+
+/* for c_func */
+generate_typedefs(int_std_func, intptr_t, __stdcall, func, 0);
+generate_typedefs(int_cdecl_func, intptr_t, __cdecl, cdfunc, 0);
+generate_typedefs(float_std_func, float, __stdcall, ffunc, 0.0);
+generate_typedefs(float_cdecl_func, float, __cdecl, cdffunc, 0.0);
+generate_typedefs(double_std_func, double, __stdcall, dfunc, 0.0);
+generate_typedefs(double_cdecl_func, double, __cdecl, cddfunc, 0.0);
+#endif
+
+generate_typedefs(int64_t_std_func, int64_t, __stdcall, llfunc, 0LL);
+generate_typedefs(int64_t_cdecl_func, int64_t, __cdecl, cdllfunc, 0LL);
+
 /* for c_proc */
 typedef void (__stdcall *proc0)();
 typedef void (__stdcall *proc1)(intptr_t);
@@ -492,6 +529,32 @@ intptr_t int_cdecl_func(intptr_t i, intptr_t * op, long len) {
 	}
     return 0;
 }
+
+#define generate_routine(function_name, return_type, convention, namebase, default_value) return_type \
+	function_name(intptr_t i, intptr_t * op, long len) {\
+	switch(len) {\
+	    case 0: return ((namebase ## 0)i)();\
+	    case 1: return ((namebase ## 1)i)(op[0]);\
+	    case 2: return ((namebase ## 2)i)(op[0],op[1]);\
+	    case 3: return ((namebase ## 3)i)(op[0],op[1],op[2]);\
+	    case 4: return ((namebase ## 4)i)(op[0],op[1],op[2],op[3]);\
+	    case 5: return ((namebase ## 5)i)(op[0],op[1],op[2],op[3],op[4]);\
+	    case 6: return ((namebase ## 6)i)(op[0],op[1],op[2],op[3],op[4],op[5]);\
+	    case 7: return ((namebase ## 7)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6]);\
+	    case 8: return ((namebase ## 8)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7]);\
+	    case 9: return ((namebase ## 9)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8]);\
+	    case 10: return ((namebase ## A)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8],op[9]);\
+	    case 11: return ((namebase ## B)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8],op[9],op[10]);\
+	    case 12: return ((namebase ## C)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8],op[9],op[10],op[11]);\
+	    case 13: return ((namebase ## D)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8],op[9],op[10],op[11],op[12]);\
+	    case 14: return ((namebase ## E)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8],op[9],op[10],op[11],op[12],op[13]);\
+	    case 15: return ((namebase ## F)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8],op[9],op[10],op[11],op[12],op[13],op[14]);\
+	}\
+    return 0;\
+}
+
+generate_routine(int64_t_std_func, int64_t, __stdcall, llfunc, 0LL)
+generate_routine(int64_t_cdecl_func, int64_t, __cdecl, cdllfunc, 0LL)
 
 #else
 // 64-bit Call-C
@@ -1002,13 +1065,39 @@ union xmm_param {
 	} \
 	INCREMENT_FP_ARGS
 
+/* PUSH_INT64_ARG :
+   push a value as a 64-bit number */
+   /* real simple */
+#	define PUSH_INT64_ARG(x) \
+		arg = x;\
+		PUSH_INT_ARG
+
+	
 #else // 32-bit
 
 #	ifdef push
 #		define PUSH_INT_ARG push();
+
+#		define PUSH_INT64_ARG(x) \
+						dbl_arg.int64 = (int64_t) x;\
+						arg = dbl_arg.ints[1];\
+						push();\
+						arg = dbl_arg.ints[0];\
+						push();\
+						argsize += 4;
+						
 #	else
 #		define PUSH_INT_ARG arg_op[arg_i++] = arg;
+
+#		define PUSH_INT64_ARG(x) \
+						dbl_arg.int64 = x;\
+						arg_op[arg_i++] = dbl_arg.ints[0];\
+						arg_op[arg_i++] = dbl_arg.ints[1];\
+						++arg_len;
+						
+		
 #	endif
+#	define PUSH_DOUBLE_ARG(x) PUSH_INT64_ARG(x)
 
 #endif
 
@@ -1033,7 +1122,7 @@ object call_c(int func, object proc_ad, object arg_list)
    Alternatively, call a machine-code routine at a given address. */
 {
 	volatile uint64_t arg;  // !!!! magic var to push values on the stack
-	volatile int argsize;        // !!!! number of bytes to pop 
+	volatile int argsize;   // !!!! number of bytes to pop 
 	
 	s1_ptr arg_list_ptr, arg_size_ptr;
 	object_ptr next_arg_ptr, next_size_ptr;
@@ -1065,13 +1154,13 @@ object call_c(int func, object proc_ad, object arg_list)
 #		endif
 #	endif
 
-	unsigned long as_offset;
-	unsigned long last_offset;
+	uintptr_t as_offset;   // used by pop()
+	uintptr_t last_offset; // used by push()
 
 	// this code relies on arg always being the first variable and last_offset 
 	// always being the last variable
-	last_offset = (unsigned long)&arg;
-	as_offset = (unsigned long)&argsize;
+	last_offset = (uintptr_t)&arg;
+	as_offset = (uintptr_t)&argsize;
 	// as_offset = last_offset - 4;
 
 	
@@ -1088,8 +1177,8 @@ object call_c(int func, object proc_ad, object arg_list)
 	intptr_t xmm_i = 0;
 	intptr_t arg_stack = MAX_INT_PARAM_REGISTERS;
 	int int_args = 0;
-#endif
 	int is_double, is_float;
+#endif
 	
 	// Setup and Check for Errors
 	proc_index = get_pos_int("c_proc/c_func", proc_ad); 
@@ -1175,19 +1264,12 @@ object call_c(int func, object proc_ad, object arg_list)
 
 			if (size == C_DOUBLE) {
 				#if INTPTR_MAX == INT32_MAX
-					#ifdef push
-						arg = dbl_arg.ints[1];
-						push();
-						arg = dbl_arg.ints[0];
-						push();
-					#else
-						arg_op[arg_i++] = dbl_arg.ints[0];
-						arg_op[arg_i++] = dbl_arg.ints[1];
-					#endif
-					++arg_len;
+
+					PUSH_INT64_ARG(dbl_arg.int64)
 						
 				#elif INTPTR_MAX == INT64_MAX
-					if( xmm_i < MAX_FP_PARAM_REGISTERS ){
+				
+					if( xmm_i < MAX_FP_PARAM_REGISTERS ) {
 						UPDATE_SIGNATURE
 						dbl_op[xmm_i++].d = dbl_arg.dbl;
 					}
@@ -1235,17 +1317,12 @@ object call_c(int func, object proc_ad, object arg_list)
 		}
 		else if( size == C_LONGLONG ){
 			if (IS_ATOM_INT(next_arg)) {
-				arg = next_arg;
-				PUSH_INT_ARG
+				PUSH_INT64_ARG(next_arg);
 			}
 			else if (IS_ATOM(next_arg)) {
-				// atoms are rounded to integers
-				
-				arg = (uint64_t)DBL_PTR(next_arg)->dbl; //correct
-				// if it's a -ve f.p. number, Watcom converts it to long and
-				// then to unsigned long. This is exactly what we want.
-				// Works with the others too. 
-				PUSH_INT_ARG
+				// atoms are converted to and rounded to 64-bit values, 
+				// this is lossess on both 32 and 64 bit.
+				PUSH_INT64_ARG((uint64_t)DBL_PTR(next_arg)->dbl);
 			}
 		}
 		else {
@@ -1289,10 +1366,6 @@ object call_c(int func, object proc_ad, object arg_list)
 	}    
 
 	// Make the Call
-	
-	is_double = (return_type == C_DOUBLE);
-	is_float = (return_type == C_FLOAT);
-
 	#if INTPTR_MAX == INT32_MAX
 		#ifdef push
 			// Make the Call - The C compiler thinks it's a 0-argument call
@@ -1329,6 +1402,8 @@ object call_c(int func, object proc_ad, object arg_list)
 				 	 type ## _result = type ## _std_func(long_proc_address, arg_op, arg_len)
 		#endif
 	#else
+		is_double = (return_type == C_DOUBLE);
+		is_float = (return_type == C_FLOAT);
 		/* I think you can safely change this such that there are no more conditions.  *
 		 * You'll need to rename those 64bit functions. */
 		#define call_routine(type) \
@@ -1340,16 +1415,14 @@ object call_c(int func, object proc_ad, object arg_list)
 		call_routine(double);
 		return NewDouble(double_result);
 	}
-	/* not supported in MINGW or ARM */
 	else if (return_type == C_LONGLONG ){
-		int64_t int64_t_result;
-#if defined(push) || INTPTR_MAX == INT32_MAX
+		#if INTPTR_MAX == INT32_MAX
+			long long int int64_t_result;
+		#else
+			#define int64_t_result int_result
+		#endif
 		call_routine(int64_t);
-#else
-		call_routine(int);
-		int64_t_result = int_result;
-#endif
-		if( (unsigned long long int)int64_t_result < (unsigned long long int)MAXINT ){
+		if( int64_t_result <= (long long int)MAXINT && int64_t_result >= (long long int)MININT ){
 			return (intptr_t) int64_t_result;
 		}
 		else{
@@ -1373,7 +1446,7 @@ object call_c(int func, object proc_ad, object arg_list)
 				return NewDouble((eudouble)(uintptr_t)int_result);
 			}
 		}
-		else if ((return_type & 0x000000FF) == 4) {
+		else if ((return_type & 0x000000FF) == 4 ) {
 			/* 4-byte integer - usual case */
 			// check if unsigned result is required 
 			if ((return_type & C_TYPE) == 0x02000000) {
@@ -1382,37 +1455,37 @@ object call_c(int func, object proc_ad, object arg_list)
 					return (intptr_t)(unsigned int)int_result;
 				}
 				else
-					return NewDouble((eudouble)(unsigned)int_result);
+					return NewDouble((eudouble)(unsigned int)int_result);
 			}
 			else {
 				// signed integer result
 				if (return_type >= E_INTEGER ||
-					((unsigned int)int_result >= (uintptr_t)MININT && (unsigned int)int_result <= (uintptr_t)MAXINT)) {
-					return (int)int_result;
+					((int)int_result >= MININT && (int)int_result <= MAXINT)) {
+					return (int) int_result;
 				}
 				else
 					return NewDouble((eudouble)(int)int_result);
 			}
 		}
-		else if ( (return_type & 0x000000FF) == 8) {
+		else if ((return_type & 0x000000FF) == 8) {
 			/* long integer */
 			// check if unsigned result is required
 			if ((return_type & C_TYPE) == 0x02000000) {
 				// unsigned integer result
-				if ((unsigned long int)int_result <= (unsigned long int)MAXINT) {
-					return (intptr_t)(unsigned long int)int_result;
+				if ((unsigned long int)int_result <= (uintptr_t)MAXINT) {
+					return (unsigned long int)int_result;
 				}
 				else
 					return NewDouble((eudouble)(unsigned long int)int_result);
 			}
 			else {
-				// signed integer result
+				// signed long result
 				if (return_type >= E_INTEGER ||
-					(int_result >= MININT && int_result <= MAXINT)) {
+					((long)int_result >= (intptr_t)MININT && (long)int_result <= (intptr_t)MAXINT)) {
 					return (long)int_result;
 				}
 				else
-					return NewDouble((eudouble)(long)int_result);
+					return NewDouble((eudouble) (long int)int_result);
 			}
 		}
 		else if (return_type == 0) {
@@ -1423,7 +1496,7 @@ object call_c(int func, object proc_ad, object arg_list)
 			return (unsigned char)int_result;
 		}
 		else if (return_type == C_CHAR) {
-			return (signed char)int_result;
+			return (signed char) int_result;
 		}
 		else if (return_type == C_USHORT) {
 			return (unsigned short)int_result;

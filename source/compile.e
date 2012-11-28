@@ -3759,7 +3759,14 @@ end procedure
 
 procedure opFLOOR()
 	CUnaryOp(pc, "e_floor", "FLOOR")
-	SetBBType(Code[pc+2], TYPE_ATOM, novalue, TYPE_OBJECT, HasDelete( Code[pc+1] ) )
+	if TypeIsIn(Code[pc+1], TYPES_SO) then
+		target_type = GType(Code[pc+1])
+	elsif GType(Code[pc+1]) = TYPE_INTEGER then
+		target_type = TYPE_INTEGER
+	else
+		target_type = TYPE_ATOM
+	end if
+	SetBBType(Code[pc+2], target_type, novalue, TYPE_OBJECT, HasDelete( Code[pc+1] ) )
 	pc += 3
 end procedure
 
@@ -7246,6 +7253,77 @@ procedure init_string( symtab_index tp )
 	end if
 end procedure
 
+procedure uninit_eu()
+	c_stmt0(`
+
+extern void *call_back_arg1;
+extern void *call_back_arg2;
+extern void *call_back_arg3;
+extern void *call_back_arg4;
+extern void *call_back_arg5;
+extern void *call_back_arg6;
+extern void *call_back_arg7;
+extern void *call_back_arg8;
+extern void *call_back_arg9;
+extern void *call_back_result;
+extern void *TempErrName;
+extern void **double_blocks;
+extern int  double_blocks_allocated;
+void _0cleanup_vars();
+
+
+`)
+	if TWINDOWS then
+		c_stmt0("\nvoid EuUninit(){\n")
+	else
+		c_stmt0("#define EFree free\n" )
+		c_stmt0("\nvoid __attribute__ ((destructor)) eu_uninit(){\n")
+	end if
+
+	integer literal_sym = literal_init
+	c_stmt0( "int i;\n" )
+	c_stmt0( "_0cleanup_vars();\n" )
+	while literal_sym != 0 do
+		c_stmt0( sprintf( "DeRef( _%d );\n", SymTab[literal_sym][S_TEMP_NAME] ))
+		literal_sym = SymTab[literal_sym][S_NEXT]
+	end while
+	for i = 1 to 9 do
+		c_stmt0( sprintf( "EFree( call_back_arg%d );\n", i ) )
+	end for
+	c_stmt0( "EFree( call_back_result );\n" )
+	c_stmt0( "EFree( TempErrName );\n" )
+	c_stmt0( "DeRefDS( _0switches );\n")
+
+	c_stmt0( "free( _02[0] );\n" )
+	c_stmt0( "free( _02 );\n" )
+	c_stmt0( "for( i = 0; i < double_blocks_allocated; ++i ){\n" )
+	c_stmt0( "EFree( double_blocks[i] );\n")
+	c_stmt0("}\n")
+	c_stmt0( "EFree( double_blocks );\n")
+	c_stmt0("}\n")
+end procedure
+
+--**
+-- Creates the initialize / uninitialize code for a translated dynamic library
+procedure init_dll()
+	
+	if TWINDOWS then
+		-- Lcc and WATCOM seem to need this instead
+		-- (Lcc had __declspec(dllexport))
+		c_stmt0("int __stdcall LibMain(int hDLL, int Reason, void *Reserved)\n")
+		c_stmt0("{\n")
+		c_stmt0("if (Reason == DLL_PROCESS_ATTACH){\n")
+		c_stmt0("EuInit();\n")
+		c_stmt0("}\n")
+		c_stmt0("else if (Reason == DLL_PROCESS_DETACH ){\n")
+		c_stmt0("EuUninit();\n" )
+		c_stmt0("}\n")
+		c_stmt0("return 1;\n")
+		c_stmt0("}\n")
+	end if
+	uninit_eu()
+end procedure
+
 --**
 -- Translate the IL into C
 procedure BackEnd(atom ignore)
@@ -7402,7 +7480,7 @@ procedure BackEnd(atom ignore)
 	if EXTRA_CHECK then
 		c_hputs("extern long bytes_allocated;\n")
 	end if
-
+	
 	if TWINDOWS then
 		if dll_option then
 			if sequence(wat_path) then
@@ -7546,22 +7624,16 @@ procedure BackEnd(atom ignore)
 	else
 		c_stmt0("Cleanup(0);\n")
 	end if
-
+	
 	c_stmt0("return 0;\n}\n")
 
-	if TWINDOWS then
 	if dll_option then
-		c_stmt0("\n")
-		-- Lcc and WATCOM seem to need this instead
-		-- (Lcc had __declspec(dllexport))
-		c_stmt0("int __stdcall LibMain(int hDLL, int Reason, void *Reserved)\n")
-		c_stmt0("{\n")
-		c_stmt0("if (Reason == 1)\n")
-		c_stmt0("EuInit();\n")
-		c_stmt0("return 1;\n")
-		c_stmt0("}\n")
+		init_dll()
+	elsif debug_option then
+		uninit_eu()
 	end if
-	end if
+
+	
 
 	-- Final walk through user-defined routines, generating C code
 	GenerateUserRoutines()  -- needs init_name_num

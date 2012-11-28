@@ -421,8 +421,8 @@ end function
 --                   ##source_arg## that are actually transformed.
 --   # ##to_set## : A sequence of objects representing the transformed equivalents
 --                 of those found in ##from_set##.
---   # ##one_level## : An integer. 0 (the default) means that mapping applies to
---                    every atom in every level of sub-sequences. 1 means that
+--   # ##one_level## : An integer. ##0## (the default) means that mapping applies to
+--                    every atom in every level of sub-sequences. ##1## means that
 --                    mapping only applies to the items at the first level
 --                    in ##source_arg##.
 --
@@ -436,9 +436,10 @@ end function
 --     sequence.
 --  ** This option required ##from_set## to only contain atoms and contain no
 --     sub-sequences.
+--
 -- * When ##one_level## is not zero, for each item in ##source_arg##,
 --  ** regardless of whether it is an atom or sequence, if it is found in ##from_set##
---     then it is mapped to the corresponding object in ##to_set##..
+--     then it is mapped to the corresponding object in ##to_set##.
 -- * Mapping occurs when an item in ##source_arg## is found in ##from_set##,
 --  then it is replaced by the corresponding object in ##to_set##.
 --
@@ -1703,7 +1704,7 @@ end function
 -- filter(data, "out", {3,8}, "()") --> {8,20,19,3,2,10}
 -- </eucode>
 --
--- Example 3:
+-- Example 2:
 -- <eucode>
 -- function quiksort(sequence s)
 -- 	if length(s) < 2 then
@@ -1903,7 +1904,9 @@ end function
 
 --**
 -- Signature:
+-- <eucode>
 -- public constant STDFLTR_ALPHA
+-- </eucode>
 --
 -- Description:
 -- Predefined routine_id for use with [[:filter]].

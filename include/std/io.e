@@ -181,7 +181,7 @@ public constant EOF = (-1)
 -- Comments:
 -- Watch out for the following common mistake. The intention is to
 -- output all the characters in the third argument but actually only 
--- outputs the first character:
+-- outputs the first character~:
 --
 -- <eucode>
 -- include std/io.e
@@ -195,7 +195,7 @@ public constant EOF = (-1)
 -- only one specifier so it uses the first item in the ##values## parameter, which
 -- is the character ##'J'##. To fix this situation, you must ensure that the first
 -- item in the ##values## parameter is the entire text string and not just a
---  character, so you need code this instead:
+--  character, so you need code this instead~:
 --
 -- <eucode>
 -- include std/io.e

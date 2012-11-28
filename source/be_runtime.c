@@ -31,6 +31,7 @@
 #  include <time.h>
 #  include <sys/ioctl.h>
 #  include <sys/types.h>
+#  include <dlfcn.h>
 #else
 #  include <io.h>
 #  if !defined(EMINGW)
@@ -725,7 +726,6 @@ void Append(object_ptr target, object s1, object a)
 							   (char *)(base + new_len + 2) - (char *)s1p);
 			new_s1p->base = (object_ptr)new_s1p +
 							 ((object_ptr)base - (object_ptr)s1p);
-
 			s1p = new_s1p;
 			s1p->postfill = new_len - len;
 
@@ -5721,34 +5721,80 @@ void Cleanup(int status)
 #ifdef EXTRA_STATS
 	Stats();
 #endif
-#if 0
+
+
+	// Note: ExitProcess() - frees all the dlls but won't flush the regular files
+	for (i = 0; i < open_dll_count; i++) {
+#ifdef EWINDOWS
+		FreeLibrary(open_dll_list[i]);
+#else
+		dlclose( open_dll_list[i] );
+#endif // EWINDOWS
+	}
+#if 1
 	{
-		symtab_ptr sym = TopLevelSub;
+		symtab_ptr sym;
+		intptr_t len, i;
+		sym = TopLevelSub;
 		while( sym ){
-			if( sym->mode = M_NORMAL &&
+			if( sym->mode = M_NORMAL ){
+				object x = sym->obj;
+				if( x >= NOVALUE ) /* do nothing */;
+				else if ( IS_ATOM_DBL( x ) && DBL_PTR( x )->cleanup != 0){
+					RefDS(x);
+					cleanup_double( DBL_PTR( x ) );
+				}
+				else if (IS_SEQUENCE( x ) && SEQ_PTR( x )->cleanup != 0 ){
+					RefDS(x);
+					cleanup_sequence( SEQ_PTR( x ) );
+				}
+			}
+			sym = sym->next;
+		}
+
+		sym = TopLevelSub;
+		while( sym ){
+			if( sym->mode == M_NORMAL ){
+				DeRef( sym->obj );
+				sym->obj = NOVALUE;
+			}
+			sym = sym->next;
+		}
+
+		sym = TopLevelSub;
+		while( sym ){
+			if( sym->mode == M_NORMAL &&
 				(sym->token == PROC ||
 				sym->token == FUNC ||
-				sym->token == TYPE)){
+				sym->token == TYPE) ){
 
-// 				EFree( sym->u.subp.code );
+				EFree( sym->u.subp.code - 1 );
 				EFree( sym->u.subp.linetab );
 			}
 			sym = sym->next;
 		}
+
+		// deal with M_CONSTANTs:
+		sym = fe.st;
+		if( sym ){
+			len = sym->obj;
+			++sym;
+			for( i = 1; i <= len; ++i, ++sym ){
+				if( sym->mode == M_CONSTANT ){
+					DeRef( sym->obj );
+					sym->obj = NOVALUE;
+				}
+			}
+		}
 	}
-	EFree( fe.st ); // = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
-	EFree( fe.sl ); //= (struct sline *) get_pos_int(w, *(x_ptr->base+2));
-	EFree( fe.misc ); // = (int *)        get_pos_int(w, *(x_ptr->base+3));
-#endif // 0
+	if( fe.st ){
+		EFree( fe.st[0].name );
+		EFree( fe.st ); // = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
+		EFree( fe.sl ); //= (struct sline *) get_pos_int(w, *(x_ptr->base+2));
+		EFree( fe.misc ); // = (int *)        get_pos_int(w, *(x_ptr->base+3));
+	}
+#endif
 #endif // ERUNTIME
-
-#ifdef EWINDOWS
-	// Note: ExitProcess() - frees all the dlls but won't flush the regular files
-	for (i = 0; i < open_dll_count; i++) {
-		FreeLibrary(open_dll_list[i]);
-	}
-#endif // EWINDOWS
-
 	exit(status);
 }
 

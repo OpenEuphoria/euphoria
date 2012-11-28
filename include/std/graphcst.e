@@ -1,4 +1,12 @@
 --****
+-- == Graphics Constants
+--
+-- <<LEVELTOC level=2 depth=4>>
+--
+
+
+
+--****
 -- === Error Code Constants
 --
 
@@ -227,7 +235,7 @@ end function
 
 
 --****
--- Color Set Selection
+-- === Color Set Selection
 --
 public enum
 	--** 

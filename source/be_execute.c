@@ -4188,7 +4188,7 @@ void do_exec(intptr_t *start_pc)
 					DBL_PTR(a)->cleanup = (cleanup_ptr) obj_ptr;
 				}
 				else{ // sequence
-					if( (!UNIQUE(SEQ_PTR(a)) && !DBL_PTR(a)->cleanup) ||
+					if( (!UNIQUE(SEQ_PTR(a)) && !SEQ_PTR(a)->cleanup) ||
 					(((symtab_ptr)pc[1])->mode == M_CONSTANT && ((symtab_ptr)pc[1])->name == 0) ){
 						a = MAKE_SEQ( SequenceCopy( SEQ_PTR(a) ) );
 						b = 0;

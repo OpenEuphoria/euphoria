@@ -119,8 +119,8 @@ Why do we call them atoms?  Why not just "numbers"? Well, an ##atom## //is//
 just a number, but we wanted to have a distinctive term that emphasizes that
 they are indivisible (that's what "atom" means in Greek). In the world of
 physics you can 'split' an atom into smaller parts, but you no
-longer have an atom{{{--}}}only various particles. You can 'split' a
-number into smaller parts, but you no longer have a number{{{--}}}only various
+longer have an atom~--only various particles. You can 'split' a
+number into smaller parts, but you no longer have a number~--only various
 digits.
 
 Atoms are the basic building blocks of all the
@@ -1265,7 +1265,7 @@ in memory (although there will still be just one shared copy of ##8.5## and
 ##"ABC"##). The same thing applies to
 "copies" of arguments passed in to subroutines.
 
-For a number of procedures or functions{{{--}}}see below{{{--}}}some parameters
+For a number of procedures or functions~--see below~--some parameters
 may have the same value in many cases. The most expected value for any parameter
 may be given a default value. To pass the default value, use a question mark ##?##,
 or omit the value.  When the parameter is not the last in the list to the routine,
@@ -1724,7 +1724,7 @@ and will sometimes read the element just //after// the end of the array.
 Whatever garbage is read, the algorithm will still work - this is probably why
 the bug was never caught. But what if there isn't any (virtual) memory just
 before or just after the array? Bentley later modifies the algorithm such that
-this bug goes away{{{--}}}but he presented this version as being correct.
+this bug goes away~--but he presented this version as being correct.
 **//Even the experts need subscript checking!//**
 
 ;**Performance Note~:**
@@ -3190,7 +3190,7 @@ end for
 </eucode>
 
 However, adding together floating point numbers that are not the ratio of an
-integer by a power of 2 {{{--}}}// 0.3 is not such a ratio//{{{--}}}leads to
+integer by a power of 2 ~--// 0.3 is not such a ratio//~--leads to
 some "fuzz" in the value of the index. In some cases, you might get unexpected
 results because of this fuzz, which arises
 from a common hardware limitation. For instance, ##floor(10*0.1)## is ##1## as
@@ -3482,7 +3482,7 @@ to a **retry** statement.
 === with entry statement
 
 It is often the case that the first iteration of a loop is somehow special.
-Some things have to be done before the loop starts{{{--}}}they are done before
+Some things have to be done before the loop starts~--they are done before
 the statement starting the loop.  Now, the problem is that, just as often, some
 things do not need to, or should not, be done at this initialization stage. The
 **entry keyword** is an alternative to setting flags relentlessly

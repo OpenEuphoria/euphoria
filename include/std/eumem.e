@@ -8,10 +8,16 @@
 
 namespace eumem
 
+
 --**
 -- The (pseudo) RAM heap space. Use [[:malloc]] to gain ownership to a heap location
 -- and [[:free]] to release it back to the system.
 export sequence ram_space = {}
+
+
+procedure cleanup_ram_space( object rs )
+	ram_space = {}
+end procedure
 
 integer ram_free_list = 0
 integer free_rid
@@ -86,11 +92,13 @@ end function
 -- </eucode>
 
 export procedure free(atom mem_p)
-	if mem_p < 1 then return end if
-	if mem_p > length(ram_space) then return end if
+	if object( ram_space ) then
+		if mem_p < 1 then return end if
+		if mem_p > length(ram_space) then return end if
 
-	ram_space[mem_p] = ram_free_list
-	ram_free_list = floor(mem_p)
+		ram_space[mem_p] = ram_free_list
+		ram_free_list = floor(mem_p)
+	end if
 end procedure
 free_rid = routine_id("free")
 
