@@ -231,7 +231,7 @@ export procedure transoptions()
 
 			case "build-dir" then
 				output_dir = val
-				if file_type( output_dir ) = FILETYPE_DIRECTORY then
+				if file_type( output_dir ) = FILETYPE_FILE then
 					ShowMsg( 2, BUILDDIR_IS_FILE )
 					abort(1)
 				end if
