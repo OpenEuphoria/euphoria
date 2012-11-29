@@ -231,8 +231,13 @@ export procedure transoptions()
 
 			case "build-dir" then
 				output_dir = val
-				if file_type( output_dir ) = FILETYPE_FILE then
+				integer filetype = file_type( output_dir )
+				
+				if filetype = FILETYPE_FILE then
 					ShowMsg( 2, BUILDDIR_IS_FILE )
+					abort(1)
+				elsif filetype = FILETYPE_UNDEFINED then
+					ShowMsg( 2, BUILDDIR_IS_UNDEFINED )
 					abort(1)
 				end if
 				if find(output_dir[$], "/\\") = 0 then
