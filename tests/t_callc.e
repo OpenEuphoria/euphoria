@@ -190,6 +190,20 @@ if lib818 then
 	
 end if
 
+constant
+	OBJECT_FUNC   = define_c_func( lib818, "+object_func", { E_OBJECT }, E_OBJECT ),
+	SEQUENCE_FUNC = define_c_func( lib818, "+object_func", { E_SEQUENCE }, E_SEQUENCE ),
+	ATOM_FUNC     = define_c_func( lib818, "+object_func", { E_ATOM }, E_ATOM )
+
+test_equal( "object func integer", 5, c_func( OBJECT_FUNC, {5} ) )
+test_equal( "object func double", 3.5, c_func( OBJECT_FUNC, {3.5} ) )
+test_equal( "object func sequence", "abc", c_func( OBJECT_FUNC, {"abc"}) )
+
+test_equal( "sequence func sequence", "abc", c_func( SEQUENCE_FUNC, {"abc"}) )
+
+test_equal( "atom func integer", 5, c_func( ATOM_FUNC, {5} ) )
+test_equal( "atom func double", 3.5, c_func( ATOM_FUNC, {3.5} ) )
+
 -- Should put some tests for argument passing as well : passing floating point, double, long long, etc..
 test_report()
 

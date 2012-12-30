@@ -5731,7 +5731,7 @@ void Cleanup(int status)
 		dlclose( open_dll_list[i] );
 #endif // EWINDOWS
 	}
-#if 1
+#if 0
 	{
 		symtab_ptr sym;
 		intptr_t len, i;
