@@ -49,7 +49,7 @@ if [ ! -e packaging/slackware/inst ]; then
 fi
 
 cd packaging/slackware
-if [ ! -e euphoria-4.0.5-1.tgz ] ; then
+if [ ! -e euphoria-4.0.6-1.tgz ] ; then
 	cd inst &&
-	makepkg ../euphoria-4.0.5-1.tgz 
+	makepkg ../euphoria-4.0.6-1.tgz 
 fi
