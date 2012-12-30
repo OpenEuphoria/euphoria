@@ -1,0 +1,8 @@
+euphoria:  euphoria (interpreted language)
+euphoria:  
+euphoria:  euphoria is a general purpose procedural programming language made 
+euphoria:  to be simple by the use of only one recursive data structure.
+euphoria:  
+euphoria:  You can find out more about euphoria at http://www.openeuphoria.org
+euphoria:  
+
