@@ -204,10 +204,11 @@ else ifeq "$(EMINGW)" "1"
 PLAT=WINDOWS
 endif
 
+# We mustn't use eui rather than $(EEXU) in these three lines below.   When this translates from Unix, the interpreter we call to do the translation must not have a .exe extension. 
 ifeq  "$(EUBIN)" ""
-EXE=$(EEXU)
+EXE=eui
 else
-EXE=$(EUBIN)/$(EEXU)
+EXE=$(EUBIN)/eui
 endif
 # The -i command with the include directory in the form we need the EUPHORIA binaries to see them. 
 # (Use a drive id 'C:')
@@ -230,7 +231,7 @@ CREOLE=creole
 endif
 
 ifeq "$(TRANSLATE)" "euc"
-	TRANSLATE=$(EECU)
+	TRANSLATE="euc"
 else
 #   We MUST pass these arguments to $(EXE), for $(EXE) is not and shouldn't be governed by eu.cfg in BUILDDIR.
 	TRANSLATE=$(EXE) $(CYPINCDIR) $(EC_DEBUG) $(CYPTRUNKDIR)/source/ec.ex
