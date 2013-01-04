@@ -22,19 +22,6 @@
 #include "be_runtime.h"
 #include "be_socket.h"
 
-/* Converts any atom to an integer object if the atom's value can be expressed as such, otherwise return unchanged. */
-object ATOM_TO_ATOM_INT( object X ) {
-	if ( IS_ATOM( X ) && !IS_ATOM_INT( X ) ) { 
-		double TMP_dbl = DBL_PTR( X )->dbl;
-		int TMP_x = (object)TMP_dbl;
-		if( (TMP_x + HIGH_BITS < 0) && (TMP_dbl == (double)TMP_x) ){
-			X = MAKE_INT((object)TMP_dbl);
-		}
-	}
-	return X;
-}
-
-
 /* return value as a C int irregardless whether it is a double pointed to by this as an encoded pointer, or if it in itself is an
   ATOM_INT.   This may return a bad result if x is an encoded double of an extreme value. */
 #define ATOM_INT_VAL(x) (int)(((((unsigned long)x) | 0xE0000000) == 0xA0000000) ? DBL_PTR(x)->dbl : x)
@@ -1569,7 +1556,7 @@ object eusock_socket(object x)
 
 	result_p = NewS1(2);
 	result_p->base[1] = MAKE_UINT((unsigned long)sock);
-	result_p->base[2] = MAKE_UINT((unsigned long)addr);
+	result_p->base[2] = MAKE_UINT((uintptr_t)addr);
 	
 	return MAKE_SEQ(result_p);
 }

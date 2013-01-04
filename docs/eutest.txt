@@ -9,7 +9,7 @@ interpreter and translator works properly by use of //unit tests//.  The
 unit tests are Euphoria //include// files that ##include unittest.e##
 at the top, several test-routines for comparison between expected value
 and true value and at the end of the program a call to
-##test_report()##.  There are error control files for when we expect
+##test_report##.  There are error control files for when we expect
 the interpreter to fail but we want it to fail with a particular error
 message. You may use this section as an outline for testing your own code.
 
@@ -110,8 +110,8 @@ The //OSNAME// is the name of the operating system.  Which is either
 UNIX or Win32.
 
 Now, if ##t_foo.d/Win32/control.err## exists, then the testing program
-eutest.ex expects t_foo.e to fail when run with the WINDOWS interpreter.
-However, this is not necessarily true for other platforms.  In WINDOWS,
+eutest.ex expects t_foo.e to fail when run with the //Windows// interpreter.
+However, this is not necessarily true for other platforms.  In //Windows//
 eutest runs it, watches it fail, then compares the ex.err file to
 ##t_foo.d/Win32/control.err##.  If they ex.err is different from
 control.err an error message is written to the log.  Now on, say NetBSD,
@@ -119,9 +119,9 @@ t_file.e is tested with the expectation it will return 0 and the tests
 will all pass unless ##t_foo.d/UNIX/control.err## or ##t_foo.d/control.err## 
 also exist.
 Thus you can have different expectations for differing platforms.
-Some feature that is not possible to implement under WINDOWS can be put into a 
+Some feature that is not possible to implement under //Windows// can be put into a 
 unit test and the
-resulting ##ex.err## file can be put into a control file for WINDOWS.
+resulting ##ex.err## file can be put into a control file for //Windows//.
 This means we do not need to have all of these errors that we expect to get
 drawing our attention away from errors that need our attention.
 On the other hand, if an unexpected error message not like 

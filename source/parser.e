@@ -188,6 +188,8 @@ procedure EnterTopLevel( integer end_line_table = 1 )
 	end if
 	LineTable = SymTab[TopLevelSub][S_LINETAB]
 	Code = SymTab[TopLevelSub][S_CODE]
+	SymTab[TopLevelSub][S_LINETAB] = 0
+	SymTab[TopLevelSub][S_CODE] = 0
 	previous_op = -1
 	CurrentSub = TopLevelSub
 	clear_last()
@@ -1171,7 +1173,7 @@ procedure Object_call( token tok )
 					putback(tok2)
 					tok_match(RIGHT_SQUARE)
 					subs_depth -= 1
-					current_sequence = current_sequence[1..$-1]
+					current_sequence = remove( current_sequence, length( current_sequence ) )
 					emit_op(RHS_SUBS)
 					-- current_sequence will be updated
 				end if
@@ -1179,7 +1181,7 @@ procedure Object_call( token tok )
 				lhs_subs_level = save_lhs_subs_level
 				tok2 = next_token()
 			end while
-			current_sequence = current_sequence[1..$-1]
+			current_sequence = remove( current_sequence, length( current_sequence ) )
 			putback(tok2)
 			--short_circuit += 1
 
@@ -1302,14 +1304,14 @@ procedure Factor()
 					putback(tok)
 					tok_match(RIGHT_SQUARE)
 					subs_depth -= 1
-					current_sequence = head( current_sequence, length( current_sequence ) - 1 )
+					current_sequence = remove( current_sequence, length( current_sequence ) )
 					emit_op(RHS_SUBS) -- current_sequence will be updated
 				end if
 				factors = save_factors
 				lhs_subs_level = save_lhs_subs_level
 				tok = next_token()
 			end while
-			current_sequence = head( current_sequence, length( current_sequence ) - 1 )
+			current_sequence = remove( current_sequence, length( current_sequence ) )
 			putback(tok)
 			short_circuit += 1
 
@@ -1645,7 +1647,7 @@ procedure Assignment(token left_var)
 		subs_depth += 1
 		if lhs_ptr then
 			-- multiple lhs subscripts, evaluate first n-1 of them with this
-			current_sequence = head( current_sequence, length( current_sequence ) - 1 )
+			current_sequence = remove( current_sequence, length( current_sequence ) )
 			if subs = 1 then
 				-- first subscript of 2 or more
 				subs1_patch = length(Code)+1
@@ -1791,7 +1793,7 @@ procedure Assignment(token left_var)
 		end if
 	end if
 
-	current_sequence = head( current_sequence, length( current_sequence ) - 1 )
+	current_sequence = remove( current_sequence, length( current_sequence ) )
 
 	if not TRANSLATE then
 		if OpTrace then
@@ -5034,6 +5036,10 @@ export procedure parser()
 	mark_final_targets()
 	resolve_unincluded_globals( 1 )
 	Resolve_forward_references( 1 )
+	SymTab[TopLevelSub][S_CODE] = Code
+	SymTab[TopLevelSub][S_LINETAB] = LineTable
+	Code = {}
+	LineTable = {}
 	inline_deferred_calls()
 	if not repl then
 	End_block( PROC )

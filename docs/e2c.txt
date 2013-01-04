@@ -19,7 +19,7 @@ front-end portion of the interpreter. The source code for the translator is in
 
 === C Compilers Supported
 
-The **Translator** currently works with GNU C on //Unix//-like OSes,
+The **Translator** currently works with GNU C on //Unix// OSes,
 GNU C on //Windows// from  [[http://www.mingw.org|MinGW]]  
 or [[http://en.wikipedia.org/wiki/Cygwin|Cygwin]] using the ##-gcc## option
 and with [[http://www.openwatcom.org|Watcom C]] (the default) on //Windows//.
@@ -47,7 +47,7 @@ Running the **Translator** is similar to running the **Interpreter**:
 euc -con allsorts.ex
 }}}
 
-Note: that on Unix, the demos might be installed to ##/usr/share/euphoria/demo##
+Note: that on //Unix// the demos might be installed to ##/usr/share/euphoria/demo##
 
 Instead of running the ##allsorts.ex## program, the **Translator** will
 create several C source files in a temporary build directory, compile them
@@ -74,6 +74,19 @@ created. If you want to look at these files, you'll need to run the translator a
 using either the ##-keep## or ##-makefile## options.
 
 === Command-Line Options
+
+==== -build-dir dir
+
+Use the specified directory to write translated C files and compiled objects. The final
+executable is still output by default to the current directory (or however the ##-o## flag
+specifies). When not specified, euphoria will create a temporary, randomly named build
+directory.
+
+The specified directory cannot contain any wildcards ('*', '?') or be an existing file.
+
+{{{
+$ euc -build-dir temp_dir myapp.ex
+}}}
 
 ==== -gcc, -wat
 
@@ -278,15 +291,15 @@ the shared dynamically loaded library.
 Any Euphoria program, whether translated or compiled or interpreted, can link
 with a Euphoria shared dynamically loading library using the same mechanism that
 lets you link with a shared dynamically loading library written in C. The 
-program first calls [[:open_dll]]() to open the
-file, then it calls [[:define_c_func]]() or [[:define_c_proc]]() for
-any routines that it wants to call. It calls these routines using [[:c_func]]()
-and [[:c_proc]]().
+program first calls [[:open_dll]] to open the
+file, then it calls [[:define_c_func]] or [[:define_c_proc]] for
+any routines that it wants to call. It calls these routines using [[:c_func]]
+and [[:c_proc]].
 
 The routine names exported from a Euphoria shared dynamically loading library 
 will vary depending on which C compiler you use.
 
-GNU C on Unix exports the names exactly as they appear in the C
+GNU C on //Unix// exports the names exactly as they appear in the C
 code produced by the **Translator**, e.g. a Euphoria routine
 
 {{{
@@ -300,7 +313,7 @@ include files are numbered in the order they are encountered by the compiler.
 You should check the C source to be sure.
 
 For Watcom, the **Translator** also creates an EXPORT command, added to 
-##objfiles.lnk## for each exported identifier, so ##foo()## would be exported as
+##objfiles.lnk## for each exported identifier, so ##foo## would be exported as
 "##foo##".
 
 With Watcom, if you specify the ##-makefile## option, you can edit the 
@@ -309,14 +322,14 @@ don't want to export.  Then build with the generated makefile.
 
 Having nice exported names is not critical, since the name need only appear
 once in each Euphoria program that uses the shared dynamically loading library, 
-i.e. in a single [[:define_c_func]]() or [[:define_c_proc]]() statement. The 
+i.e. in a single [[:define_c_func]] or [[:define_c_proc]] statement. The 
 author of a shared dynamically loading library
 should probably provide his users with a Euphoria include file containing the
-necessary [[:define_c_func]]() and [[:define_c_proc]]() statements, and he might
+necessary [[:define_c_func]] and [[:define_c_proc]] statements, and he might
 even provide a set of Euphoria "wrapper" routines to call the routines in the
 shared dynamically loading library.
 
-When you call [[:open_dll]](), any top-level Euphoria statements in the shared 
+When you call [[:open_dll]], any top-level Euphoria statements in the shared 
 dynamically loading library will be executed automatically, just like a normal 
 program. This gives the
 library a chance to initialize its data structures prior to the first call to
@@ -337,11 +350,11 @@ global constant
     E_OBJECT  = #09000004
 </eucode>
 
-Use these in ##define_c_proc##() and ##define_c_func##() just as you currently
+Use these in ##define_c_proc## and ##define_c_func## just as you currently
 use ##C_INT##, ##C_UINT## etc. to call C shared dynamically loading libraries.
 
-Currently, file numbers returned by [[:open]](), and routine id's returned by
-[[:routine_id]](), can be passed and returned, but the library and the main
+Currently, file numbers returned by [[:open]], and routine id's returned by
+[[:routine_id]], can be passed and returned, but the library and the main
 program each have their own separate ideas of what these numbers mean. Instead
 of passing the file number of an open file, you could instead pass the file
 name and let the shared dynamically loading library open it. Unfortunately there
@@ -595,7 +608,7 @@ of the supported C compilers, and the Translator is now quite stable.
 
 On //Windows//, if you call a C routine that uses the cdecl calling convention
 (instead of stdcall), you must specify a '##+##' character at the start of the
-routine's name in [[:define_c_proc]]() and [[:define_c_func]](). If you don't,
+routine's name in [[:define_c_proc]] and [[:define_c_func]]. If you don't,
 the call may not work when running the ##eui## Interpreter.
 
 In some cases a huge Euphoria routine is translated to C, and it proves to be

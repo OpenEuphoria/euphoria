@@ -218,6 +218,18 @@ static int MySetEnv(const char *name, const char *value, const int overwrite) {
 }
 #endif
 
+/* Converts any atom to an integer object if the atom's value can be expressed as such, otherwise return unchanged. */
+object ATOM_TO_ATOM_INT( object X ) {
+	if ( IS_ATOM( X ) && !IS_ATOM_INT( X ) ) { 
+		double TMP_dbl = DBL_PTR( X )->dbl;
+		int TMP_x = (object)TMP_dbl;
+		if( (TMP_x + HIGH_BITS < 0) && (TMP_dbl == (double)TMP_x) ){
+			X = MAKE_INT((object)TMP_dbl);
+		}
+	}
+	return X;
+}
+
 uintptr_t get_pos_int(char *where, object x)
 /* return a positive integer value if possible */
 {
@@ -2024,11 +2036,9 @@ object memory_set(object d, object v, object n)
 	return ATOM_1;
 }
 
-#ifdef EWINDOWS
-HINSTANCE *open_dll_list = NULL;
+DLL_PTR_TYPE *open_dll_list = NULL;
 int open_dll_size = 0;
 int open_dll_count = 0;
-#endif
 
 object OpenDll(object x)
 {
@@ -2037,7 +2047,7 @@ object OpenDll(object x)
 	static char message[81];
 	char *dll_string;
 	int message_len;
-	HINSTANCE lib;
+	DLL_PTR_TYPE lib;
 
 	/* x will be a sequence if called via open_dll() */
 
@@ -2054,18 +2064,23 @@ object OpenDll(object x)
 	}
 #ifdef EWINDOWS
 	lib = (HINSTANCE)LoadLibrary(dll_string);
+#else
+	// Linux
+
+	lib = dlopen(dll_string, RTLD_LAZY | RTLD_GLOBAL);
+#endif
 	// add to dll list so we can close it at end of execution
 	if (lib != NULL) {
 		if (open_dll_count >= open_dll_size) {
 			size_t newsize;
 
 			open_dll_size += 100;
-			newsize = open_dll_size * sizeof(HINSTANCE);
+			newsize = open_dll_size * sizeof(DLL_PTR_TYPE);
 			if (open_dll_list == NULL) {
-				open_dll_list = (HINSTANCE *)EMalloc(newsize);
+				open_dll_list = (DLL_PTR_TYPE *)EMalloc(newsize);
 			}
 			else {
-				open_dll_list = (HINSTANCE *)ERealloc((char *)open_dll_list, newsize);
+				open_dll_list = (DLL_PTR_TYPE *)ERealloc((char *)open_dll_list, newsize);
 			}
 			if (open_dll_list == NULL) {
 				RTFatal("Cannot allocate RAM (%d bytes) for dll list to add %s", newsize, dll_string);
@@ -2073,12 +2088,6 @@ object OpenDll(object x)
 		}
 		open_dll_list[open_dll_count++] = lib;
 	}
-#else
-	// Linux
-
-	lib = dlopen(dll_string, RTLD_LAZY | RTLD_GLOBAL);
-
-#endif
 	return MAKE_UINT(lib);
 }
 
@@ -2159,7 +2168,13 @@ object DefineC(object x)
 	}
 
 	routine_name = *(((s1_ptr)x)->base+2);
+#ifdef EWINDOWS
+	/* On Windows we normally expect routines to restore the stack when they return. */
 	convention = C_STDCALL;
+#else
+	/* On Unix like Operating Systems the caller must always restore the stack */
+	convention = C_CDECL;
+#endif
 
 	if (raw_addr) {
 		/* machine code routine */
@@ -2172,16 +2187,18 @@ object DefineC(object x)
 			/* {'+', addr} */
 			if (SEQ_PTR(routine_name)->length != 2)
 				RTFatal("expected {'+', address} as second argument of define_c_proc/func");
+
 			proc_address = (intptr_t (*)())*(SEQ_PTR(routine_name)->base+2);
+			if (!IS_ATOM((object)proc_address))
+				RTFatal("expected {'+', address} as second argument of define_c_proc/func");
 			proc_address = (intptr_t (*)())get_pos_int("define_c_proc/func", (object)proc_address);
-#ifdef EWINDOWS
+
 			t = (intptr_t)*(SEQ_PTR(routine_name)->base+1);
-			t = get_pos_int("define_c_proc/func", (object)t);
+			t = ATOM_TO_ATOM_INT((object)t);
 			if (t == '+')
-				convention = C_CDECL;
+				convention = C_CDECL; /* caller must restore stack */
 			else
 				RTFatal("unsupported calling convention - use '+' for CDECL");
-#endif
 		}
 		/* assign a sequence value to routine_ptr */
 		snprintf(TempBuff, TEMP_SIZE, "machine code routine at %p", proc_address);
@@ -2200,21 +2217,19 @@ object DefineC(object x)
 			RTFatal("routine name is too long");
 		routine_string = TempBuff;
 		MakeCString(routine_string, routine_name, TEMP_SIZE);
-#ifdef EWINDOWS
 		if (routine_string[0] == '+') {
 			routine_string++;
 			convention = C_CDECL;
 		}
+#ifdef EWINDOWS
 		proc_address = (intptr_t (*)())GetProcAddress((void *)lib, routine_string);
 		if (proc_address == NULL)
 			return ATOM_M1;
 
 #else
-#ifdef EUNIX
 		proc_address = (intptr_t (*)())dlsym((void *)lib, routine_string);
 		if (dlerror() != NULL)
 			return ATOM_M1;
-#endif
 #endif
 	}
 

@@ -16,7 +16,7 @@ include std/types.e
 --   <built-in> function compare(object compared, object reference)
 --
 -- Description:
---     Compare two items returning less than, equal or greater than.
+--     compares two items returning less than, equal or greater than.
 --
 -- Parameters:
 --		# ##compared## : the compared object
@@ -60,7 +60,7 @@ include std/types.e
 --     <built-in> function equal(object left, object right)
 --
 -- Description:
---     Compare two Euphoria objects to see if they are the same. 
+--     compares two Euphoria objects to see if they are the same. 
 --
 -- Parameters:
 --			# ##left## : one of the objects to test
@@ -101,7 +101,7 @@ include std/types.e
 --     <built-in> function find(object needle, sequence haystack, integer start)
 --
 -- Description:
---     Find the first occurrence of a "needle" as an element of a "haystack", starting from position "start"..
+--     finds the first occurrence of a "needle" as an element of a "haystack", starting from position "start".
 --
 -- Parameters:
 --		# ##needle## : an object whose presence is being queried
@@ -133,7 +133,7 @@ include std/types.e
 --     <built-in> function find_from(object needle, object haystack, integer start)
 --
 -- Deprecated:
---  Deprecated in version **4.0.0**
+--  Deprecated since version 4.0.0
 --
 --  In Euphoria 4.0.0 we have the ability to default parameters to procedures and functions.
 --  The built-in [[:find]] therefore now has a ##start## parameter that is defaulted to the
@@ -143,7 +143,7 @@ include std/types.e
 --
 
 --**
--- Find any element from a list inside a sequence. Returns the location of the first hit.
+-- finds any element from a list inside a sequence. Returns the location of the first hit.
 --
 -- Parameters:
 --		# ##needles## : a sequence, the list of items to look for
@@ -186,7 +186,7 @@ public function find_any(object needles, sequence haystack, integer start=1)
 end function
 
 --**
--- Determines if any element from ##needles## is in ##haystack##.
+-- determines if any element from ##needles## is in ##haystack##.
 --
 -- Parameters:
 --		# ##needles## : a sequence, the list of items to look for
@@ -223,7 +223,7 @@ public function match_any(sequence needles, sequence haystack, integer start=1)
 end function
 
 --**
--- Find all instances of any element from the needle sequence that occur in the
+-- finds all instances of any element from the needle sequence that occur in the
 -- haystack sequence. Returns a list of indexes.
 --
 -- Parameters:
@@ -269,7 +269,7 @@ public function find_each(sequence needles, sequence haystack, integer start=1)
 end function
 
 --**
--- Find all occurrences of an object inside a sequence, starting at some specified point.
+-- finds all occurrences of an object inside a sequence, starting at some specified point.
 --
 -- Parameters:
 --     # ##needle## : an object, what to look for
@@ -303,7 +303,7 @@ public function find_all(object needle, sequence haystack, integer start=1)
 end function
 
 --**
--- Find all non-occurrences of an object inside a sequence, starting at some specified point.
+-- finds all non-occurrences of an object inside a sequence, starting at some specified point.
 --
 -- Parameters:
 --     # ##needle## : an object, what to look for
@@ -362,7 +362,7 @@ public constant
 
 
 --**
--- Find any object (among a list) in a sequence of arbitrary shape at arbitrary nesting.
+-- finds any object (among a list) in a sequence of arbitrary shape at arbitrary nesting.
 --
 -- Parameters:
 --		# ##needle## : an object, either what to look up, or a list of items to look up
@@ -376,7 +376,7 @@ public constant
 -- Comments:
 -- Each item in the returned sequence is either a sequence of indexes, or a pair {sequence of indexes, index in ##needle##}.
 --
--- The following flags are available to fine tune the search:
+-- The following flags are available to fine tune the search~:
 -- * ##NESTED_BACKWARD## ~--  if on ##flags##, search is performed backward. Default is forward.
 -- * ##NESTED_ALL## ~-- if on ##flags##, all occurrences are looked for. Default is one hit only.
 -- * ##NESTED_ANY## ~-- if present on ##flags##, ##needle## is a list of items to look for. Not the default.
@@ -385,10 +385,10 @@ public constant
 --
 -- If ##s## is a single index list, or position, from the returned sequence, then ##fetch(haystack, s) = needle##.
 --
--- If a routine id is supplied, the routine must behave like [[:equal]]() if the NESTED_ANY
--- flag is not supplied, and like [[:find]]() if it is. The routine is being passed the current
+-- If a routine id is supplied, the routine must behave like [[:equal]] if the ##NESTED_ANY##
+-- flag is not supplied, and like [[:find]] if it is. The routine is being passed the current
 -- ##haystack## item and ##needle##. The returned integer is interpreted as if returned by
--- [[:equal]]() or [[:find]]().
+-- [[:equal]] or [[:find]].
 --
 -- If the ##NESTED_ANY## flag is specified, and ##needle## is an atom, then the flag is removed.
 --
@@ -510,7 +510,7 @@ public function find_nested(object needle, sequence haystack, integer flags=0, i
 end function
 
 --**
--- Find a needle in a haystack in reverse order.
+-- finds a needle in a haystack in reverse order.
 --
 -- Parameters:
 --   # ##needle## : an object to search for
@@ -525,8 +525,8 @@ end function
 --
 --   If ##start## is less than 1, it will be added once to length(##haystack##)
 --   to designate a position counted backwards. Thus, if ##start## is -1, the
---   first element to be queried in ##haystack## will be ##haystack##[$-1],
---   then ##haystack##[$-2] and so on.
+--   first element to be queried in ##haystack## will be ##haystack[$-1]##,
+--   then ##haystack[$-2]## and so on.
 --
 -- Example 1:
 -- <eucode>
@@ -568,7 +568,7 @@ public function rfind(object needle, sequence haystack, integer start=length(hay
 end function
 
 --**
--- Finds ##needle## in the ##haystack##, and replaces all or upto ##max## 
+-- finds a ##needle## in the ##haystack##, and replaces all or upto ##max## 
 -- occurrences with ##replacement##.
 --
 -- Parameters:
@@ -625,7 +625,7 @@ public function find_replace(object needle, sequence haystack, object replacemen
 end function
 
 --**
--- Finds a "needle" in a "haystack", and replace any, or only the first few, occurrences with a replacement.
+-- finds a "needle" in a "haystack", and replace any, or only the first few, occurrences with a replacement.
 --
 -- Parameters:
 --
@@ -725,7 +725,7 @@ public function match_replace(object needle, sequence haystack, object replaceme
 end function
 
 --**
--- Finds a "needle" in an ordered "haystack". Start and end point can be given for the search.
+-- finds a "needle" in an ordered "haystack". Start and end point can be given for the search.
 --
 -- Parameters:
 --		# ##needle## : an object to look for
@@ -745,8 +745,8 @@ end function
 --
 -- Comments:
 -- * If ##end_point## is not greater than zero, it is added to 
---   length(##haystack##) once only. Then, the end point of the search is
---   adjusted to length(haystack) if out of bounds.
+--   ##length(haystack)## once only. Then, the end point of the search is
+--   adjusted to ##length(haystack)## if out of bounds.
 -- * The start point is adjusted to 1 if below 1.
 -- * The way this function returns is very similar to what [[:db_find_key]]
 --   does. They use variants of the same algorithm. The latter is all the
@@ -804,7 +804,7 @@ end function
 --     <built-in> function match(sequence needle, sequence haystack, integer start)
 --
 -- Description:
---     Try to match a "needle" against some slice of a "haystack", starting at position "start".
+--     tries to match a "needle" against some slice of a "haystack", starting at position "start".
 --
 -- Parameters:
 --		# ##needle## : a sequence whose presence as a "substring" is being queried
@@ -832,7 +832,7 @@ end function
 --     <built-in> function match_from(sequence needle, sequence haystack, integer start)
 --
 -- Deprecated:
---  Deprecated in version **4.0.0**
+--  Deprecated since version 4.0.0
 --
 --  In Euphoria 4.0.0 we have the ability to default parameters to procedures and functions.
 --  The built-in [[:match]] therefore now has a ##start## parameter that is defaulted to the
@@ -846,7 +846,7 @@ end function
 --
 
 --**
--- Match all items of haystack in needle.
+-- matches all items of haystack in needle.
 --
 -- Parameters:
 --     # ##needle## : a non-empty sequence, what to look for
@@ -884,7 +884,7 @@ public function match_all(sequence needle, sequence haystack, integer start=1)
 end function
 
 --**
--- Try to match a needle against some slice of a haystack in reverse order.
+-- tries to match a needle against some slice of a haystack in reverse order.
 --
 -- Parameters:
 --   # ##needle## : a sequence to search for
@@ -896,10 +896,10 @@ end function
 --   ##start## equals ##needle##, else the highest lower index of such a slice.
 --
 -- Comments:
---   If ##start## is less than 1, it will be added once to length(##haystack##)
+--   If ##start## is less than 1, it will be added once to ##length(haystack)##
 --   to designate a position counted backwards. Thus, if ##start## is -1, the
---   first element to be queried in ##haystack## will be ##haystack##[$-1],
---   then ##haystack##[$-2] and so on.
+--   first element to be queried in ##haystack## will be ##haystack[$-1]##,
+--   then ##haystack[$-2]## and so on.
 --
 --   If a ##needle## is an empty sequence this will return 0.
 --
@@ -947,7 +947,7 @@ end function
 
 
 --**
--- Test whether a sequence is the head of another one.
+-- tests whether a sequence is the head of another one.
 -- 
 -- Parameters:
 --	# ##sub_text## : an object to be looked for
@@ -997,7 +997,7 @@ public function begins(object sub_text, sequence full_text)
 end function
 
 --**
--- Test whether a sequence ends another one.
+-- tests whether a sequence ends another one.
 --
 -- Parameters:
 --	# ##sub_text## : an object to be looked for
@@ -1006,7 +1006,7 @@ end function
 -- Returns:
 --		An **integer**, 1 if ##sub_text## ends ##full_text##, else 0.
 --
---- Comments:
+-- Comments:
 --  If ##sub_text## is an empty sequence, this returns 1 unless ##full_text## 
 --  is also an empty sequence.  When they are both empty sequences this returns 
 --  0.
@@ -1047,24 +1047,24 @@ public function ends(object sub_text, sequence full_text)
 end function
 
 --**
--- Tests to see if the ##item## is in a range of values supplied by ##range_limits##
+-- tests to see if the ##item## is in a range of values supplied by ##range_limits##.
 --
 -- Parameters:
 --   # ##item## : The object to test for.
 --   # ##range_limits## : A sequence of two or more elements. The first is assumed
 --    to be the smallest value and the last is assumed to be the highest value.
 --   # ##boundries##: a sequence. This determines if the range limits are inclusive
---                    or not. Must be one of "[]" (the default), "[)", "(]", or
---                    "()".
+--                    or not. Must be one of ##"[]"## (the default), ##"[)"##, ##"(]"##, or
+--                    ##"()"##.
 --
 -- Returns:
 --   An **integer**, 0 if ##item## is not in the ##range_limits## otherwise it returns 1.
 --
 -- Comments:
 -- * In ##boundries##, square brackets mean //inclusive// and round brackets
---   mean //exclusive//. Thus "[]" includes both limits in the range, while
---   "()" excludes both limits. And, "[)" includes the lower limit and excludes
---   the upper limits while "(]" does the reverse.
+--   mean //exclusive//. Thus ##"[]"## includes both limits in the range, while
+--   ##"()"## excludes both limits. And, ##"[)"## includes the lower limit and excludes
+--   the upper limits while ##"(]"## does the reverse.
 --
 -- Example 1:
 --   <eucode>
@@ -1119,7 +1119,7 @@ public function is_in_range(object item, sequence range_limits, sequence boundri
 end function
 
 --**
--- Tests to see if the ##item## is in a list of values supplied by ##list##
+-- tests to see if the ##item## is in a list of values supplied by ##list##.
 --
 -- Parameters:
 --   # ##item## : The object to test for.
@@ -1141,8 +1141,9 @@ public function is_in_list(object item, sequence list)
 end function
 
 --**
--- If the supplied item is in the source list, this returns the corresponding
--- element from the target list.
+-- returns the corresponding element from the target list if
+-- the supplied item is in the source list.
+--
 -- Parameters:
 -- # ##find_item##: an object that might exist in ##source_list##.
 -- # ##source_list##: a sequence that might contain ##pITem##.
@@ -1151,13 +1152,13 @@ end function
 -- is not in ##source_list## **and** ##target_list## is not longer than ##source_list##.
 --
 -- Returns:
--- an object
+-- An **object**
 -- * If ##find_item## is found in ##source_list## then this is the corresponding element
 -- from ##target_list##
 -- * If ##find_item## is not in ##source_list## then if ##target_list## is longer than ##source_list##
 -- then the last item in ##target_list## is returned otherwise ##def_value## is returned.
 --
--- Examples:
+-- Example 1:
 -- <eucode>
 -- lookup('a', "cat", "dog") --> 'o'
 -- lookup('d', "cat", "dogx") --> 'x'
@@ -1192,8 +1193,9 @@ public function lookup(object find_item, sequence source_list, sequence target_l
 end function
 
 --**
--- If the supplied item is in a source grid column, this returns the corresponding
--- element from the target column.
+-- returns the corresponding element from the target column
+-- if the supplied item is in a source grid column.
+--
 -- Parameters:
 -- # ##find_item##: an object that might exist in ##source_col##.
 -- # ##grid_data##: a 2D grid sequence that might contain ##pITem##.
@@ -1209,11 +1211,11 @@ end function
 -- * If a row's length is less than the ##source_col##, the row is ignored.
 --
 -- Returns:
--- an object
+-- An **object**,
 -- * If ##find_item## is found in the ##source_col## column then this is the corresponding element
 -- from the ##target_col## column.
 --
--- Examples:
+-- Example 1:
 -- <eucode>
 -- sequence grid
 -- grid = {

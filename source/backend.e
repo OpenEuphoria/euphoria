@@ -170,6 +170,7 @@ procedure BackEnd(integer il_file)
 	
 	-- convert symbol names to C strings in memory
 	nm = alloc_symbol_names( st, lit, string_size )
+	poke_pointer( st + ST_NAME, nm )
 	
 	if not has_coverage() then
 		SymTab = {}  -- free up some space

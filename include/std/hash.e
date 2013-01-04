@@ -26,36 +26,36 @@ public enum
 --   <built-in> function hash(object source, atom algo)
 --
 -- Description:
---     Calculates a hash value from //key// using the algorithm //algo//
+--     calculates a hash value for a //key// using the algorithm ##algo##.
 --
 -- Parameters:
 --		# ##source## : Any Euphoria object
 --		# ##algo## : A code indicating which algorithm to use.
--- ** HSIEH30 uses Hsieh. Returns a 30-bit (a Euphoria integer). Fast and good dispersion
--- ** HSIEH32 uses Hsieh. Returns a 32-bit value. Fast and very good dispersion
--- ** ADLER32 uses Adler. Very fast and reasonable dispersion, especially for small strings
--- ** FLETCHER32 uses Fletcher. Very fast and good dispersion
--- ** MD5 uses MD5 (not implemented yet) Slower but very good dispersion. 
+-- ** ##HSIEH30## uses Hsieh. Returns a 30-bit (a Euphoria integer). Fast and good dispersion
+-- ** ##HSIEH32## uses Hsieh. Returns a 32-bit value. Fast and very good dispersion
+-- ** ##ADLER32## uses Adler. Very fast and reasonable dispersion, especially for small strings
+-- ** ##FLETCHER32## uses Fletcher. Very fast and good dispersion
+-- ** ##MD5## uses MD5 (not implemented yet) Slower but very good dispersion. 
 --            Suitable for signatures.
--- ** SHA256 uses SHA256 (not implemented yet) Slow but excellent dispersion. 
+-- ** ##SHA256## uses SHA256 (not implemented yet) Slow but excellent dispersion. 
 --            Suitable for signatures. More secure than MD5.
 -- ** 0 and above (integers and decimals) and non-integers less than zero use
---          the cyclic variant (hash = hash * algo + c).
+--          the cyclic variant ##(hash = hash * algo + c)##.
 --          This is a fast and good to excellent
 --          dispersion depending on the value of //algo//. Decimals give better
 --          dispersion but are slightly slower.
 --
 -- Returns:
 --     An **atom**,
---        Except for the HSIEH30, MD5 and SHA256 algorithms, this is a 32-bit integer.\\
+--        Except for the ##HSIEH30##, ##MD5## and ##SHA256## algorithms, this is a 32-bit integer.\\
 --     An **integer**,
---        Except for the HSIEH30 algorithms, this is a 30-bit integer.\\
+--        Except for the ##HSIEH30## algorithms, this is a 30-bit integer.\\
 --     A **sequence**,
---        MD5 returns a 4-element sequence of integers\\
---        SHA256 returns a 8-element sequence of integers.
+--        ##MD5## returns a 4-element sequence of integers\\
+--        ##SHA256## returns a 8-element sequence of integers.
 --
 -- Comments:
--- * For //algo// values from zero to less than 1, that actual value used is (algo + 69096). 
+-- * For ##algo## values from zero to less than one, that actual value used is ##(algo + 69096)##. 
 --
 -- Example 1:
 -- <eucode>

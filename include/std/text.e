@@ -25,8 +25,7 @@ include std/serialize.e
 -- <built-in> function sprintf(sequence format, object values)
 --
 -- Description:
--- This is exactly the same as [[:printf]](), except that the output is returned as a sequence
--- of characters, rather than being sent to a file or device.
+-- returns the representation of any Euphoria object as a string of characters with formatting.
 --
 -- Parameters:
 --		# ##format## : a sequence, the text to print. This text may contain format specifiers.
@@ -36,13 +35,15 @@ include std/serialize.e
 -- A **sequence**, of printable characters, representing ##format## with the values in ##values## spliced in.
 --
 -- Comments:
+-- This is exactly the same as [[:printf]] except that the output is returned as a sequence
+-- of characters, rather than being sent to a file or device.
 --
 -- ##printf(fn, st, x)## is equivalent to ##puts(fn, sprintf(st, x))##.
 --
--- Some typical uses of ##sprintf()## are:
+-- Some typical uses of ##sprintf## are~:
 --
 -- # Converting numbers to strings.
--- # Creating strings to pass to system().
+-- # Creating strings to pass to ##system##.
 -- # Creating formatted error messages that can be passed to a common error message handler.
 --
 -- Example 1:
@@ -55,7 +56,7 @@ include std/serialize.e
 --   [[:printf]], [[:sprint]], [[:format]]
 
 --**
--- Returns the representation of any Euphoria object as a string of characters.
+-- returns the representation of any Euphoria object as a string of characters.
 --
 -- Parameters:
 --   # ##x## : Any Euphoria object.
@@ -66,10 +67,10 @@ include std/serialize.e
 -- Comments:
 --
 -- This is exactly the same as ##print(fn, x)##, except that the output is returned as a sequence of characters, rather
--- than being sent to a file or device. x can be any Euphoria object.
+-- than being sent to a file or device. ##x## can be any Euphoria object.
 --
--- The atoms contained within ##x## will be displayed to a maximum of 10 significant digits,
--- just as with [[:print]]().
+-- The atoms contained within ##x## will be displayed to a maximum of ten significant digits,
+-- just as with [[:print]].
 --
 -- Example 1:
 -- <eucode>
@@ -111,11 +112,11 @@ public function sprint(object x)
 end function
 
 --**
--- Trim all items in the supplied set from the leftmost (start or head) of a sequence.
+-- trims all items in the supplied set from the leftmost (start or head) of a sequence.
 --
 -- Parameters:
 --   # ##source## : the sequence to trim.
---   # ##what## : the set of item to trim from ##source## (defaults to " \t\r\n").
+--   # ##what## : the set of item to trim from ##source## (defaults to ##" \t\r\n"##).
 --   # ##ret_index## : If zero (the default) returns the trimmed sequence, otherwise
 --                    it returns the index of the leftmost item **not** in ##what##.
 --
@@ -159,11 +160,11 @@ public function trim_head(sequence source, object what=" \t\r\n", integer ret_in
 end function
 
 --**
--- Trim all items in the supplied set from the rightmost (end or tail) of a sequence.
+-- trims all items in the supplied set from the rightmost (end or tail) of a sequence.
 --
 -- Parameters:
 --   # ##source## : the sequence to trim.
---   # ##what## : the set of item to trim from ##source## (defaults to " \t\r\n").
+--   # ##what## : the set of item to trim from ##source## (defaults to ##" \t\r\n"##).
 --   # ##ret_index## : If zero (the default) returns the trimmed sequence, otherwise
 --                    it returns the index of the rightmost item **not** in ##what##.
 --
@@ -207,19 +208,19 @@ public function trim_tail(sequence source, object what=" \t\r\n", integer ret_in
 end function
 
 --**
--- Trim all items in the supplied set from both the left end (head/start) and right end (tail/end)
+-- trims all items in the supplied set from both the left end (head/start) and right end (tail/end)
 -- of a sequence.
 --
 -- Parameters:
 --   # ##source## : the sequence to trim.
---   # ##what## : the set of item to trim from ##source## (defaults to " \t\r\n").
+--   # ##what## : the set of item to trim from ##source## (defaults to ##" \t\r\n"##).
 --   # ##ret_index## : If zero (the default) returns the trimmed sequence, otherwise
 --                    it returns a 2-element sequence containing the index of the
 --                    leftmost item and rightmost item **not** in ##what##.
 --
 -- Returns:
 --   A **sequence**, if ##ret_index## is zero, which is the trimmed version of ##source##\\
---   A **2-element sequence**, if ##ret_index## is not zero, in the form {left_index, right_index}.
+--   A **2-element sequence**, if ##ret_index## is not zero, in the form ##{left_index, right_index}## .
 --
 -- Example 1:
 -- <eucode>
@@ -376,7 +377,7 @@ function load_code_page(sequence cpname)
 end function
 
 --**
--- Sets the table of lowercase and uppercase characters that is used by
+-- sets the table of lowercase and uppercase characters that is used by
 -- [[:lower]] and [[:upper]]
 --
 -- Parameters:
@@ -424,15 +425,15 @@ public procedure set_encoding_properties(sequence en = "", sequence lc = "", seq
 end procedure
 
 --**
--- Gets the table of lowercase and uppercase characters that is used by
--- [[:lower]] and [[:upper]]
+-- gets the table of lowercase and uppercase characters that is used by
+-- [[:lower]] and [[:upper]].
 --
 -- Parameters:
 -- none
 --
 -- Returns:
 -- A **sequence**, containing three items.\\
---   {Encoding_Name, LowerCase_Set, UpperCase_Set}
+--   ##{Encoding_Name, LowerCase_Set, UpperCase_Set}##
 --
 -- Example 1:
 -- <eucode>
@@ -497,7 +498,7 @@ ifdef WINDOWS then
 end ifdef
 
 --**
--- Convert an atom or sequence to lower case.
+-- converts an atom or sequence to lower case.
 --
 -- Parameters:
 --   # ##x## : Any Euphoria object.
@@ -506,14 +507,14 @@ end ifdef
 --   A **sequence**, the lowercase version of ##x##
 --
 -- Comments:
--- * For Windows systems, this uses the current code page for conversion
--- * For non-Windows, this only works on ASCII characters. It alters characters in
---   the 'a'..'z' range. If you need to do case conversion with other encodings
+-- * For //Windows// systems, this uses the current code page for conversion
+-- * For //Unix// this only works on ASCII characters. It alters characters in
+--   the ##'a'..'z'## range. If you need to do case conversion with other encodings
 --   use the [[:set_encoding_properties]] first.
 -- * ##x## may be a sequence of any shape, all atoms of which will be acted upon.
 --
 -- **WARNING**, When using ASCII encoding, this can also affect floating point
--- numbers in the range 65 to 90.
+-- numbers in the range ##65## to ##90##.
 --
 -- Example 1:
 -- <eucode>
@@ -543,7 +544,7 @@ public function lower(object x)
 end function
 
 --**
--- Convert an atom or sequence to upper case.
+-- converts an atom or sequence to upper case.
 --
 -- Parameters:
 --   # ##x## : Any Euphoria object.
@@ -552,14 +553,14 @@ end function
 --   A **sequence**, the uppercase version of ##x##
 --
 -- Comments:
--- * For Windows systems, this uses the current code page for conversion
--- * For non-Windows, this only works on ASCII characters. It alters characters in
---   the 'a'..'z' range. If you need to do case conversion with other encodings
+-- * For //Windows// systems, this uses the current code page for conversion
+-- * For //Unix// this only works on ASCII characters. It alters characters in
+--   the ##'a'..'z'## range. If you need to do case conversion with other encodings
 --   use the [[:set_encoding_properties]] first.
 -- * ##x## may be a sequence of any shape, all atoms of which will be acted upon.
 --
 -- **WARNING**, When using ASCII encoding, this can also affects floating point
--- numbers in the range 97 to 122.
+-- numbers in the range ##97## to ##122##.
 --
 -- Example 1:
 -- <eucode>
@@ -589,7 +590,7 @@ public function upper(object x)
 end function
 
 --**
--- Convert a text sequence to capitalized words.
+-- converts a text sequence to capitalized words.
 --
 -- Parameters:
 --   # ##x## : A text sequence.
@@ -694,7 +695,7 @@ public function proper(sequence x)
 end function
 
 --**
--- Converts a string containing Key/Value pairs into a set of
+-- converts a string containing Key/Value pairs into a set of
 -- sequences, one per K/V pair.
 --
 -- Parameters:
@@ -716,14 +717,14 @@ end function
 -- when ##false## it is assumed that each 'pair' is actually just a value.
 --
 -- Returns:
--- 		A **sequence**, of pairs. Each pair is in the form {key, value}.
+-- 		A **sequence**, of pairs. Each pair is in the form ##{key, value}##.
 --
 -- Comments:
 --
 -- String representations of atoms are not converted, either in the key or value part, but returned as any regular string instead.
 --
 -- If ##haskeys## is ##true##, but a substring only holds what appears to be a value, the key
--- is synthesized as ##p[n]##, where ##n## is the number of the pair. See example #2.
+-- is synthesized as ##p[n]##, where ##n## is the number of the pair. See Example 2.
 --
 -- By default, pairs can be delimited by either a comma or semi-colon ",;" and
 -- a key is delimited from its value by either an equal or a colon "=:".
@@ -731,17 +732,17 @@ end function
 --
 -- If you need to have one of the delimiters in the value data, enclose it in
 -- quotation marks. You can use any of single, double and back quotes, which
--- also means you can quote quotation marks themselves. See example #3.
+-- also means you can quote quotation marks themselves. See Example 3.
 --
 -- It is possible that the value data itself is a nested set of pairs. To do
 -- this enclose the value in parentheses. Nested sets can nested to any level.
--- See example #4.
+-- See Example 4.
 --
 -- If a sub-list has only data values and not keys, enclose it in either braces
--- or square brackets. See example #5.
+-- or square brackets. See Example 5.
 -- If you need to have a bracket as the first character in a data value, prefix
 -- it with a tilde. Actually a leading tilde will always just be stripped off
--- regardless of what it prefixes. See example #6.
+-- regardless of what it prefixes. See Example 6.
 --
 -- Example 1:
 -- <eucode>
@@ -1014,7 +1015,7 @@ public function keyvalues(sequence source, object pair_delim = ";,",
 end function
 
 --**
--- Escape special characters in a string
+-- escapes special characters in a string.
 --
 -- Parameters:
 --   # ##s##: string to escape
@@ -1050,7 +1051,7 @@ end function
 
 
 --**
--- Return a quoted version of the first argument.
+-- returns a quoted version of the first argument.
 --
 -- Parameters:
 --   # ##text_in## : The string or set of strings to quote.
@@ -1190,7 +1191,7 @@ public function quote( sequence text_in, object quote_pair = {"\"", "\""}, integ
 end function
 
 --**
--- Removes 'quotation' text from the argument.
+-- removes 'quotation' text from the argument.
 --
 -- Parameters:
 --   # ##text_in## : The string or set of strings to de-quote.
@@ -1275,7 +1276,7 @@ public function dequote(sequence text_in, object quote_pairs = {{"\"", "\""}}, i
 end function
 
 --**
--- Formats a set of arguments in to a string based on a supplied pattern.
+-- formats a set of arguments in to a string based on a supplied pattern.
 --
 -- Parameters:
 --   # ##format_pattern## : A sequence: the pattern string that contains zero or more tokens.
@@ -1290,13 +1291,14 @@ end function
 -- is the same as the format string except that each token is replaced by an
 -- item from the argument list.
 --
--- A token has the form **##[<Q>]##**, where <Q> is are optional qualifier codes.
+-- A token has the form **##[<Q>]##**, where ##<Q>## is are optional qualifier codes.
 --
 -- The qualifier. ##<Q>## is a set of zero or more codes that modify the default
 -- way that the argument is used to replace the token. The default replacement
--- method is to convert the argument to its shortest string representation and
+-- way is to convert the argument to its shortest string representation and
 -- use that to replace the token. This may be modified by the following codes,
 -- which can occur in any order.
+--
 -- |= Qualifier |= Usage                                              |
 -- |  N         | ('N' is an integer) The index of the argument to use|
 -- | {id}       | Uses the argument that begins with "id=" where "id" \\
@@ -1352,7 +1354,7 @@ end function
 -- following the token until the next non-whitespace character is not copied to
 -- the result string.
 --
--- Examples:
+-- Example 1:
 -- <eucode>
 -- format("Cannot open file '[]' - code []", {"/usr/temp/work.dat", 32})
 -- -- "Cannot open file '/usr/temp/work.dat' - code 32"
@@ -1994,13 +1996,13 @@ end function
 
 
 --**
--- Wrap text
+-- wraps text to a column width.
 --
 -- Parameters:
---   * ##content##   - sequence content to wrap
---   * ##width##     - width to wrap at, defaults to 78
---   * ##wrap_with## - sequence to wrap with, defaults to "\n"
---   * ##wrap_at##   - sequence of characters to wrap at, defaults to space and tab
+--   * ##content##   ~-- sequence content to wrap
+--   * ##width##     ~-- width to wrap at, defaults to 78
+--   * ##wrap_with## ~-- sequence to wrap with, defaults to ##"\n"##
+--   * ##wrap_at##   ~-- sequence of characters to wrap at, defaults to space and tab
 --
 -- Returns:
 --   Sequence containing wrapped text
