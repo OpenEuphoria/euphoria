@@ -1459,12 +1459,21 @@ object call_c(int func, object proc_ad, object arg_list)
 			}
 			else {
 				// signed integer result
-				if (return_type >= E_INTEGER ||
-					((int)int_result >= MININT && (int)int_result <= MAXINT)) {
-					return (int) int_result;
+				if( return_type == C_INT ){
+					if( ((intptr_t)(int)int_result) >= MININT && ((intptr_t)(int)int_result) <= MAXINT ){
+						return (intptr_t)(int)int_result;
+					}
+					else{
+						return NewDouble((eudouble)(int)int_result);
+					}
 				}
-				else
-					return NewDouble((eudouble)(int)int_result);
+				else if (return_type > E_INTEGER ||
+					((intptr_t)int_result >= MININT && (intptr_t)int_result <= MAXINT) ) {
+					return (object) int_result;
+				}
+				else {
+						return NewDouble((eudouble)(intptr_t)int_result);
+				}
 			}
 		}
 		else if ((return_type & 0x000000FF) == 8) {

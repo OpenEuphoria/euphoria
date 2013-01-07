@@ -75,6 +75,19 @@ using either the ##-keep## or ##-makefile## options.
 
 === Command-Line Options
 
+==== -build-dir dir
+
+Use the specified directory to write translated C files and compiled objects. The final
+executable is still output by default to the current directory (or however the ##-o## flag
+specifies). When not specified, euphoria will create a temporary, randomly named build
+directory.
+
+The specified directory cannot contain any wildcards ('*', '?') or be an existing file.
+
+{{{
+$ euc -build-dir temp_dir myapp.ex
+}}}
+
 ==== -gcc, -wat
 
 If you happen to have more than one C compiler for a given platform, you can

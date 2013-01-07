@@ -128,3 +128,7 @@ EXPORT double powsum(double d1, unsigned short n1,
 	double d5, unsigned short n5) {
 	return Dpow(d1,n1)+Dpow(d2,n2)+Dpow(d3,n3)+Dpow(d4,n4)+Dpow(d5,n5);
 }
+
+EXPORT object object_func( object foo ){
+	return foo;
+}
