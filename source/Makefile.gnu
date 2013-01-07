@@ -902,7 +902,7 @@ else
 endif
 
 $(BUILDDIR)/eudist-build/main-.c : eudist.ex
-	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eudist-build" \
+	$(TRANSLATE) -build-dir "$(BUILDDIR)/eudist-build" \
 		-o "$(BUILDDIR)/$(EUDIST)" \
 		-lib "$(BUILDDIR)/eu.a" \
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
@@ -914,7 +914,7 @@ $(BUILDDIR)/$(EUDIST) : $(TRUNKDIR)/source/eudist.ex translator library $(BUILDD
 $(BUILDDIR)/eudis-build/main-.c : $(TRUNKDIR)/source/dis.ex  $(TRUNKDIR)/source/dis.e $(TRUNKDIR)/source/dox.e
 $(BUILDDIR)/eudis-build/main-.c : $(EU_CORE_FILES) 
 $(BUILDDIR)/eudis-build/main-.c : $(EU_INTERPRETER_FILES) 
-	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eudis-build" \
+	$(TRANSLATE) -build-dir "$(BUILDDIR)/eudis-build" \
 		-o "$(BUILDDIR)/$(EUDIS)" \
 		-lib "$(BUILDDIR)/eu.a" \
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
@@ -924,7 +924,7 @@ $(BUILDDIR)/$(EUDIS) : translator library $(BUILDDIR)/eudis-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/eudis-build" -f dis.mak
 
 $(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/eubind.ex $(EU_INTERPRETER_FILES) $(EU_BACKEND_RUNNER_FILES)
-	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/bind-build" \
+	$(TRANSLATE) -build-dir "$(BUILDDIR)/bind-build" \
 		-o "$(BUILDDIR)/$(EUBIND)" \
 		-lib "$(BUILDDIR)/eu.a" \
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
@@ -934,7 +934,7 @@ $(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/bind-build" -f eubind.mak
 
 $(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/eushroud.ex  $(EU_INTERPRETER_FILES) $(EU_BACKEND_RUNNER_FILES)
-	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/shroud-build" \
+	$(TRANSLATE) -build-dir "$(BUILDDIR)/shroud-build" \
 		-o "$(BUILDDIR)/$(EUSHROUD)" \
 		-lib "$(BUILDDIR)/eu.a" \
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
@@ -944,7 +944,7 @@ $(BUILDDIR)/$(EUSHROUD) : $(BUILDDIR)/shroud-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/shroud-build" -f eushroud.mak
 
 $(BUILDDIR)/eutest-build/main-.c : $(TRUNKDIR)/source/eutest.ex
-	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eutest-build" \
+	$(TRANSLATE) -build-dir "$(BUILDDIR)/eutest-build" \
 		-o "$(BUILDDIR)/$(EUTEST)" \
 		-lib "$(BUILDDIR)/eu.a" \
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
@@ -954,7 +954,7 @@ $(BUILDDIR)/$(EUTEST) : $(BUILDDIR)/eutest-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/eutest-build" -f eutest.mak
 
 $(BUILDDIR)/eucoverage-build/main-.c : $(TRUNKDIR)/bin/eucoverage.ex
-	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eucoverage-build" \
+	$(TRANSLATE) -build-dir "$(BUILDDIR)/eucoverage-build" \
 		-o "$(BUILDDIR)/$(EUCOVERAGE)" \
 		-lib "$(BUILDDIR)/eu.a" \
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
