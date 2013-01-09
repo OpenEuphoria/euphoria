@@ -254,7 +254,7 @@ function execute_request(sequence host, integer port, sequence request, integer 
 				if header_end_pos then
 					-- we have a header, let's parse it and figure out
 					-- the content length.
-					sequence raw_header = content[1..header_end_pos]
+					sequence raw_header = content[1..header_end_pos-1]
 					content = content[header_end_pos + 4..$]
 
 					sequence header_lines = split(raw_header, "\r\n")
@@ -266,7 +266,7 @@ function execute_request(sequence host, integer port, sequence request, integer 
 						headers = append(headers, this_header)
 
 						if equal(lower(this_header[1]), "content-length") then
-							content_length = to_number(trim(this_header[2]))
+							content_length = to_number(this_header[2])
 						end if
 					end for
 
