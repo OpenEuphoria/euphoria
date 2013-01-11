@@ -83,7 +83,9 @@ enum
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant ANCHORED
+-- </eucode>
 --
 -- Description:
 -- Forces matches to be only from the first place it is asked to
@@ -93,7 +95,9 @@ enum
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant AUTO_CALLOUT
+-- </eucode>
 --
 -- Description:
 -- In C, this is called PCRE_AUTO_CALLOUT.
@@ -103,7 +107,9 @@ enum
 
 --****
 -- Signature:
+-- <eucode
 -- public constant BSR_ANYCRLF
+-- </eucode>
 --
 -- Description:
 -- With this option only ASCII new line sequences are recognized as newlines.  Other UNICODE
@@ -112,7 +118,9 @@ enum
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant BSR_UNICODE
+-- </eucode>
 --
 -- Description:
 -- With this option any UNICODE new line sequence is recognized as a newline.
@@ -121,7 +129,9 @@ enum
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant CASELESS
+-- </eucode>
 --
 -- Description:
 -- This will make your regular expression matches case insensitive.  With this
@@ -130,7 +140,9 @@ enum
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant DEFAULT
+-- </eucode>
 --
 -- Description:
 -- This is a value used for not setting any flags at all.  This can be passed to
@@ -138,21 +150,27 @@ enum
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant DFA_SHORTEST
+-- </eucode>
 --
 -- Description:
 -- This is NOT used by any standard library routine.
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant DFA_RESTART
+-- </eucode>
 --
 -- Description:
 -- This is NOT used by any standard library routine.
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant DOLLAR_ENDONLY
+-- </eucode>
 --
 -- Description:
 -- If this bit is set, a dollar sign metacharacter in the pattern matches only
@@ -167,7 +185,9 @@ enum
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant DOTALL
+-- </eucode>
 --
 -- Description:
 -- With this option the '.' character also matches a newline sequence.
@@ -175,7 +195,9 @@ enum
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant DUPNAMES
+-- </eucode>
 --
 -- Description:
 -- Allow duplicate names for named subpatterns.
@@ -184,7 +206,9 @@ enum
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant EXTENDED
+-- </eucode>
 --
 -- Description:
 -- Whitespace and characters beginning with a hash mark to the end of the line
@@ -194,7 +218,9 @@ enum
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant EXTRA
+-- </eucode>
 --
 -- Description:
 -- When an alphanumeric follows a backslash ( ##\## ) has no special meaning an
@@ -203,7 +229,9 @@ enum
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant FIRSTLINE
+-- </eucode>
 --
 -- Description:
 -- If ##PCRE_FIRSTLINE## is set, the match must happen before or at the first
@@ -212,7 +240,9 @@ enum
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant MULTILINE
+-- </eucode>
 --
 -- Description:
 -- When  ##MULTILINE##  is set the "start of line" and "end of line"
@@ -222,7 +252,9 @@ enum
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant NEWLINE_CR
+-- </eucode>
 --
 -- Description:
 -- Sets CR as the ##NEWLINE## sequence.
@@ -232,7 +264,9 @@ enum
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant NEWLINE_LF
+-- </eucode>
 --
 -- Description:
 -- Sets LF as the ##NEWLINE## sequence.
@@ -242,7 +276,9 @@ enum
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant NEWLINE_CRLF
+-- </eucode>
 --
 -- Description:
 -- Sets ##CRLF## as the ##NEWLINE## sequence
@@ -252,7 +288,9 @@ enum
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant NEWLINE_ANY
+-- </eucode>
 --
 -- Description:
 -- Sets ##ANY## newline sequence as the ##NEWLINE## sequence including
@@ -264,7 +302,9 @@ enum
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant NEWLINE_ANYCRLF
+-- </eucode>
 --
 -- Description:
 -- Sets ##ANY## newline sequence from ASCII.
@@ -274,7 +314,9 @@ enum
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant NOTBOL
+-- </eucode>
 --
 -- Description:
 -- This indicates that beginning of the passed string does NOTBOL ( **NOT** start
@@ -284,7 +326,9 @@ enum
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant NOTEOL
+-- </eucode>
 --
 -- Description:
 -- This indicates that end of the passed string does NOTEOL ( **NOT** end
@@ -294,7 +338,9 @@ enum
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant NO_AUTO_CAPTURE
+-- </eucode>
 --
 -- Description:
 -- Disables capturing subpatterns except when the subpatterns are
@@ -303,7 +349,9 @@ enum
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant NO_UTF8_CHECK
+-- </eucode>
 --
 -- Description:
 -- Turn off checking for the validity of your UTF string.  Use this
@@ -314,7 +362,9 @@ enum
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant NOTEMPTY
+-- </eucode>
 --
 -- Description:
 -- Here matches of empty strings will not be allowed.  In C, this is ##PCRE_NOTEMPTY##.
@@ -323,11 +373,13 @@ enum
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant PARTIAL
+-- </eucode>
 --
 -- Description:
 -- This option has no effect on whether a match will occur or not.
--- However, it does affect the error code generated by [[:find]] in the event of a failure:
+-- However, it does affect the error code generated by [[:find]] in the event of a failure~:
 -- If for some pattern ##re##, and two strings ##s1## and ##s2##,
 -- ##find( re, s1 & s2 )## would return a match
 -- but both ##find( re, s1 )## and ##find( re, s2 )## would not,
@@ -340,14 +392,18 @@ enum
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant STRING_OFFSETS
+-- </eucode>
 --
 -- Description:
 -- This is used by [[:matches]] and [[:all_matches]].
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant UNGREEDY
+-- </eucode>
 --
 -- Description:
 -- This is passed to [[:new]].
@@ -358,7 +414,9 @@ enum
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant UTF8
+-- </eucode>
 --
 -- Description:
 -- Makes strings passed in to be interpreted as a UTF8 encoded string.
@@ -707,17 +765,17 @@ end function
 -- escapes special regular expression characters that may be entered into a search
 -- string from user input.
 --
--- Notes:
---   Special regex characters are~:
---       {{{
---   . \ + * ? [ ^ ] $ ( ) { } = ! < > | : -
---       }}}
---
 -- Parameters:
 --   # ##s##: string sequence to escape
 --
 -- Returns:
 --   An escaped ##sequence## representing ##s##.
+--
+-- Note:
+--   Special regex characters are~:
+--       {{{
+--   . \ + * ? [ ^ ] $ ( ) { } = ! < > | : -
+--       }}}
 --
 -- Example 1:
 -- <eucode>
@@ -790,7 +848,7 @@ end function
 --   However, if the missing group is followed by a group that *does* match, ##{0,0}## will be 
 --   used as a place holder.
 --   You can ensure your groups match when your expression matches by keeping quantifiers 
---   inside your groups: 
+--   inside your groups~: 
 --   For example use: ##'([01]?)'## instead of ##'([01])?'##
 --
 --

@@ -171,6 +171,7 @@ ifdef EDEBUG
 DEBUG_FLAGS=-g3 -O0 -Wall
 CALLC_DEBUG=-g3
 EC_DEBUG=-D DEBUG
+EUC_DEBUG_FLAG=-debug
 else
 DEBUG_FLAGS=-fomit-frame-pointer $(EOSMING)
 endif
@@ -255,7 +256,7 @@ ifeq "$(TRANSLATE)" "euc"
 	TRANSLATE="euc"
 else
 #   We MUST pass these arguments to $(EXE), for $(EXE) is not and shouldn't be governed by eu.cfg in BUILDDIR.
-	TRANSLATE=$(HOST_EXE) $(CYPINCDIR) $(EC_DEBUG) $(EFLAG) $(CYPTRUNKDIR)/source/euc.ex
+	TRANSLATE=$(HOST_EXE) $(CYPINCDIR) $(EC_DEBUG) $(EFLAG) $(CYPTRUNKDIR)/source/euc.ex $(EUC_DEBUG_FLAG)
 endif
 
 ifeq "$(MANAGED_MEM)" "1"
@@ -801,6 +802,7 @@ coverage :
 		$(EXE) -i ../include $(CYPTRUNKDIR)/source/eutest.ex -i $(CYPTRUNKDIR)/include \
 		-exe "$(CYPBUILDDIR)/$(EEXU)" $(COVERAGE_ERASE) \
 		-coverage-db $(CYPBUILDDIR)/unit-test.edb -coverage $(CYPTRUNKDIR)/include/std \
+		-verbose \
 		 -coverage-pp "$(EXE) -i $(CYPTRUNKDIR)/include $(CYPTRUNKDIR)/bin/eucoverage.ex" $(TESTFILE)
 
 coverage-front-end :  ../tests/lib818.dll

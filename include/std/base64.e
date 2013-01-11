@@ -86,7 +86,7 @@ constant ldrop = { 2, 1, 1 }    --# to drop len by 4 every 3 output
 --     defaults to ##0## which is do not wrap
 --
 -- Returns:
--- A **sequence**,	 a base64 encoded sequence representing ##in##.
+-- A **sequence**, a base64 encoded sequence representing ##in##.
 --
 -- Example 1:
 -- <eucode>
@@ -148,7 +148,7 @@ public function encode(sequence in, integer wrap_column = 0)
 end function
 
 --**
--- decodes base64. 
+-- decodes from base64. 
 --
 -- Parameters:
 --	 # ##in## ~-- must be a simple sequence of length ##4## to ##76## .

@@ -1022,7 +1022,7 @@ end type
 -- Returns:
 --  TRUE if argument is a sequence that only contains zero or more characters.
 --
--- Comment:
+-- Comments:
 -- A **character** is defined as a positive integer or zero. This is a broad
 -- definition that may be refined once proper UNICODE support is implemented.
 --
@@ -1115,7 +1115,7 @@ end type
 -- Returns:
 --  TRUE if argument is a sequence that only contains zero or more ASCII characters.
 --
--- Comment:
+-- Comments:
 -- An ASCII 'character' is defined as a integer in the range [0 to 127].
 --
 -- Example 1:
@@ -1153,7 +1153,7 @@ end type
 -- Returns:
 --  TRUE if argument is a sequence that only contains zero or more byte characters.
 --
--- Comment:
+-- Comments:
 -- A byte 'character' is defined as a integer in the range [0 to 255].
 --
 -- Example 1:
@@ -1192,7 +1192,7 @@ end type
 -- Returns:
 --  TRUE if argument is a sequence that only contains zero or more non-null byte characters.
 --
--- Comment:
+-- Comments:
 -- A non-null byte 'character' is defined as a integer in the range [1 to 255].
 --
 -- Example 1:
@@ -1246,7 +1246,7 @@ constant
 -- Returns:
 -- TRUE if the argument is a valid 31-bit Euphoria integer.
 --
--- Comment:
+-- Comments:
 -- This function is the same as ##integer(o)## on 32-bit Euphoria,
 -- but is portable to 64-bit architectures.
 

@@ -5,3 +5,5 @@
 * [[ticket:801]] fix translator memory leak for ##[[:insert]]##
 * [[ticket:799]] fix memory leak in ##[[:gets]]## when reading EOF
 * [[ticket:819]] use operating system sleep functions for fractions of seconds to avoid needless CPU utilization
+* [[ticket:824]] fix OpenWatcom installer PCRE directory
+* [[ticket:823]] emit error in translator when user specifies a file for the build directory

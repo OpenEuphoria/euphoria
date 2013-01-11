@@ -12,6 +12,16 @@ extern int in_backend;
 #endif
 
 #ifdef EWINDOWS
+#define DLL_PTR_TYPE HINSTANCE
+#else
+#define DLL_PTR_TYPE void*
+#endif
+
+extern DLL_PTR_TYPE *open_dll_list;
+extern int open_dll_size;
+extern int open_dll_count;
+
+#ifdef EWINDOWS
 extern HINSTANCE *open_dll_list;
 extern int open_dll_size;
 extern int open_dll_count;

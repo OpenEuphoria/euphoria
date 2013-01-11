@@ -1416,7 +1416,11 @@ object call_c(int func, object proc_ad, object arg_list)
 		return NewDouble(double_result);
 	}
 	else if (return_type == C_LONGLONG ){
-		long long int int64_t_result;
+		#if INTPTR_MAX == INT32_MAX
+			long long int int64_t_result;
+		#else
+			#define int64_t_result int_result
+		#endif
 		call_routine(int64_t);
 		if( int64_t_result <= (long long int)MAXINT && int64_t_result >= (long long int)MININT ){
 			return (intptr_t) int64_t_result;
@@ -1455,12 +1459,21 @@ object call_c(int func, object proc_ad, object arg_list)
 			}
 			else {
 				// signed integer result
-				if (return_type >= E_INTEGER ||
-					((int)int_result >= MININT && (int)int_result <= MAXINT)) {
-					return (int) int_result;
+				if( return_type == C_INT ){
+					if( ((intptr_t)(int)int_result) >= MININT && ((intptr_t)(int)int_result) <= MAXINT ){
+						return (intptr_t)(int)int_result;
+					}
+					else{
+						return NewDouble((eudouble)(int)int_result);
+					}
 				}
-				else
-					return NewDouble((eudouble)(int)int_result);
+				else if (return_type > E_INTEGER ||
+					((intptr_t)int_result >= MININT && (intptr_t)int_result <= MAXINT) ) {
+					return (object) int_result;
+				}
+				else {
+						return NewDouble((eudouble)(intptr_t)int_result);
+				}
 			}
 		}
 		else if ((return_type & 0x000000FF) == 8) {

@@ -554,7 +554,7 @@ end function
 --     automatically freed when its reference count drops to zero, or
 --     when passed as a parameter to [[:delete]].
 --
--- Return:
+-- Returns:
 --   An **atom**, the address of the allocated memory or 0 if the memory
 --   can't be allocated. **NOTE** you must use either an atom or object to
 --   receive the returned value as sometimes the returned memory address is
@@ -1910,7 +1910,7 @@ end procedure
 -- code as 1-byte, 2-byte or 4-byte chunks if you wish.  If your machine code is byte
 -- code specify 1.  The default is 1.
 --
--- Return Value:
+-- Returns:
 -- An **address**,
 -- The function returns the address in memory of the code, that can be
 -- safely executed whether DEP is enabled or not or 0 if it fails.  On the
@@ -2033,7 +2033,7 @@ end procedure
 --
 -- You must not use [[:free]] on memory returned from this function, instead use [[:free_code]].
 -- 
--- See also:
+-- See Also:
 -- [[:Executable Memory]]
 public function allocate_protect( object data, memconst:valid_wordsize wordsize = 1, valid_memory_protection_constant protection )
 	-- set the actual protection for the OS to /true_protection/ in all cases
@@ -2358,7 +2358,7 @@ end type
 -- action is some bitwise-or combination of the following constants:
 -- A_READ, A_WRITE and A_EXECUTE.
 --
--- Return Value:
+-- Returns:
 -- When [[:Safe Mode]] is turned on, this
 -- returns true iff it is ok to perform action all addresses from start to start+len-1.
 -- 

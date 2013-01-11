@@ -987,6 +987,9 @@ long append_string(char *dest, char *src, size_t bufflen)
 	return 0;
 }
 
+free_block_ptr *double_blocks = 0;
+int double_blocks_allocated = 0;
+
 static void new_dbl_block(unsigned int cnt)
 {
 	free_block_ptr dbl_block;
@@ -1005,6 +1008,9 @@ static void new_dbl_block(unsigned int cnt)
 	dbl_block = (free_block_ptr)EMalloc( blksize );
 	assert(((uintptr_t)dbl_block & 7) == 0);
 
+	double_blocks = ERealloc( double_blocks, sizeof( free_block_ptr ) * ++double_blocks_allocated );
+	double_blocks[double_blocks_allocated-1] = dbl_block;
+	
 #ifdef HEAP_CHECK
 	Trash((char *)dbl_block, blksize);
 	q = (char *)dbl_block;

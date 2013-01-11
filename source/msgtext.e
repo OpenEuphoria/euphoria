@@ -25,6 +25,8 @@ export enum
 	WARNMSG_ENUM_MISMATCH_TYPES_FNCALL,
 	TRACE_LINES_CMD,
 	BAD_TRACE_LINES,
+	BUILDDIR_IS_FILE,
+	BUILDDIR_IS_UNDEFINED,
 	$
 
 -- don't change this please, but please look for -deleted- items before adding new options
@@ -399,6 +401,8 @@ constant StdErrMsgs = {
 	{MISSING_CMD_PARAMETER, "Command line argument [1] requires a parameter"},
 	{TRACE_LINES_CMD, "Specify the number of lines to use in ctrace.out"},
 	{BAD_TRACE_LINES, "the -trace-lines option requires a valid number\n"},
+	{BUILDDIR_IS_FILE, "Error: Specified build directory is a file"},
+	{BUILDDIR_IS_UNDEFINED, "Error: Specified build directory is undefined (wildcards are not allowed)"},
 	$
 }
 

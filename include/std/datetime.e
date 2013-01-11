@@ -944,7 +944,7 @@ constant date_now = now()
 --	A **datetime**, value.
 -- 
 -- Comments:
---   Only a subset of the format specification is currently supported:
+--   Only a subset of the format specification is currently supported~:
 --
 --   * ##%d## ~--  day of month (e.g, 01)
 --   * ##%H## ~--  hour (00..23)
@@ -985,6 +985,9 @@ constant date_now = now()
 --   | 33   | -77/+23 |  2033 |
 --   | 29   | -81/+19 |  2029 |
 --
+-- Note:
+--   * Since 4.0.1 ~-- 2-digit year parsing and ##yylower## parameter.
+--
 -- Example 1:
 -- <eucode>
 -- datetime d = parse("05/01/2009 10:20:30", "%m/%d/%Y %H:%M:%S")
@@ -996,9 +999,6 @@ constant date_now = now()
 -- datetime d = parse("05/01/44", "%m/%d/%y", -50) -- -50/+50 rule
 -- -- d is { 2044, 5, 14, 0, 0, 0 }
 -- </eucode>
---
--- Versioning:
---   * Since 4.0.1 ~-- 2-digit year parsing and ##yylower## parameter.
 --
 -- See Also:
 --   [[:format]]
