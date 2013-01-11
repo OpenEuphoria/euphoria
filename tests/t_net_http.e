@@ -7,6 +7,12 @@ include std/os.e
 ifdef not NOINET_TESTS then
 	object content
 
+	content = http_get("http://www.iana.org/")
+	test_not_equal("content readable with http_get slash only path", length(content[2]), 0)
+
+	content = http_get("http://www.iana.org")
+	test_not_equal("content readable with http_get no path", length(content[2]), 0)
+
 	content = http_get("http://www.iana.org/domains/example/")
 	if atom(content) then
 		test_fail("content readable from http_get")
