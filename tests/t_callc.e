@@ -18,6 +18,10 @@ constant MININT_EUPHORIA    = -0b0100 * BASE_PTR -- on 32-bit: -1_073_741_824
 constant MAXINT_EUPHORIA    =  0b0100 * BASE_PTR - 1
 integer gb = 5
 constant sum_mul_args = { 2, 5, 9, 3.125, 0.0625, 3, 8, 0.5  }
+-- use floor to avoid double / long double conversion issues
+-- we must ensure that the number can actually work out the exact number using 64-bit double floats.
+constant pow_sum_arg = floor({#BEEF1042/power(2,32)+#B32100,1,#044,3,#BEEF1042/power(2,32)+#B32100,1,#044,3,2,50})
+
 function minus_1_fn() 
 	return -1 
 end function 
@@ -73,7 +77,12 @@ end for
 function pow_sum(sequence s)
 	atom sum = 0
 	for i = 1 to length(s) by 2 do
-		sum += power(s[i],s[i+1])
+		atom p = 1
+		while s[i+1] > 0 do
+			p *= s[i]
+			s[i+1] -= 1
+		end while
+		sum += p
 	end for
 	return sum
 end function
@@ -103,7 +112,7 @@ end function
 constant lib818 = open_dll("./lib818.dll")
 
 assert( "can open lib818.dll", lib818 )
-constant c_sum_mul = define_c_func(lib818, "sum_mul", repeat( C_DOUBLE, 8), C_DOUBLE)
+constant c_sum_mul = define_c_func(lib818, "+sum_mul", repeat( C_DOUBLE, 8), C_DOUBLE)
 assert( "sum_mul present in dll", c_sum_mul != -1 ) 
 
 integer r_near_hashC, r_below_minimum_euphoria_integer, 
@@ -195,11 +204,10 @@ test_equal( "-(2**50): ", -power(2,50), -c_func(bit_repeat_r, {1, 50})-1)
 
 
 integer pow_sum_c = define_c_func(lib818, "+powsum", repeat_pattern( { C_DOUBLE, C_USHORT }, 5 ), C_DOUBLE )
--- use floor to avoid double / long double conversion issues
-sequence pow_sum_arg = floor({#BEEF1042/power(2,32)+#B32100,1,#0111/power(4,4)+#333,3,#BEEF1042/power(2,32)+#B32100,1,#0111/power(4,4)+#333,3,3,30})
-test_equal( "Can call and things are passed correctly for ten argument functions", pow_sum(pow_sum_arg), 
+test_equal( "Can call and things are passed correctly for ten argument functions", pow_sum( pow_sum_arg ), 
 	c_func( pow_sum_c, pow_sum_arg) )
 
+test_equal("We are working within the bits of the double", 1125899930950272, pow_sum( pow_sum_arg ))
 
 
 constant
