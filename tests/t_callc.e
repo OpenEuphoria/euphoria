@@ -17,7 +17,8 @@ constant MAXUBYTE           = #FF
 constant MININT_EUPHORIA    = -0b0100 * BASE_PTR -- on 32-bit: -1_073_741_824
 constant MAXINT_EUPHORIA    =  0b0100 * BASE_PTR - 1
 integer gb = 5
-constant sum_mul_args = { 2, 5, 9, 3.125, 0.0625, 3, 8, 0.5  }
+constant sum_mul8df_args = { 2, 5, 9, 3.125, 0.0625, 3, 8, 0.5  }
+constant sum_mul8df2lli_args = { 0.125-1, 0.750-2, 0.25-3, 0.375-4, -10-5, 3-6, 0.875-7, 1-8, 3-9, -9 }
 -- use floor to avoid double / long double conversion issues
 -- we must ensure that the number can actually work out the exact number using 64-bit double floats.
 constant pow_sum_arg = floor({#BEEF1042/power(2,32)+#B32100,1,#044,3,#BEEF1042/power(2,32)+#B32100,1,#044,3,2,50})
@@ -112,8 +113,9 @@ end function
 constant lib818 = open_dll("./lib818.dll")
 
 assert( "can open lib818.dll", lib818 )
-constant c_sum_mul = define_c_func(lib818, "+sum_mul", repeat( C_DOUBLE, 8), C_DOUBLE)
-assert( "sum_mul present in dll", c_sum_mul != -1 ) 
+constant c_sum_mul8df = define_c_func(lib818, "+sum_mul8df", repeat( C_DOUBLE, 8), C_DOUBLE)
+constant c_sum_mul8df2lli = define_c_func(lib818, "+sum_mul8df", repeat( C_DOUBLE, 8) & repeat(C_LONGLONG, 2), C_DOUBLE)
+assert( "sum_mul present in dll", c_sum_mul8df != -1 and c_sum_mul8df2lli != -1 )
 
 integer r_near_hashC, r_below_minimum_euphoria_integer, 
 	r_above_maximum_euphoria_integer, r_NOVALUE, r_half_MIN, r_half_MAX
@@ -196,7 +198,11 @@ for i = 1 to length(types) do
 	end for
 end for
 
+-- We must use fewer bits than 53 because we EUPHORIA doesn't keep more than 53 bits for numbers.
+-- So even if we return a number that is 63 bits long, and it works we wont be able to verify it as
+-- it would be comparing rounded off values to rounded off values.
 integer bit_repeat_r = define_c_func(lib818, "+bit_repeat", { C_BOOL, C_UBYTE }, C_LONGLONG)
+assert( "Can load bit_repeat_r from lib818", bit_repeat_r != -1)
 test_equal( "5  repeat bits: ", power(2,5)-1, c_func(bit_repeat_r, {1, 5}))
 test_equal( "40 repeating bits: ", power(2,40)-1, c_func(bit_repeat_r, { 1, 40 }))
 test_equal( "2**50: ", power(2,50), c_func(bit_repeat_r, {1, 50})+1)
@@ -206,7 +212,7 @@ test_equal( "-(2**50): ", -power(2,50), -c_func(bit_repeat_r, {1, 50})-1)
 integer pow_sum_c = define_c_func(lib818, "+powsum", repeat_pattern( { C_DOUBLE, C_USHORT }, 5 ), C_DOUBLE )
 test_equal( "Can call and things are passed correctly for ten argument functions", pow_sum( pow_sum_arg ), 
 	c_func( pow_sum_c, pow_sum_arg) )
-
+-- number calculated using arbitrary precision calculator ( a human being, Maple, Python )
 test_equal("We are working within the bits of the double", 1125899930950272, pow_sum( pow_sum_arg ))
 
 
@@ -224,7 +230,11 @@ test_equal( "sequence func sequence", "abc", c_func( SEQUENCE_FUNC, {"abc"}) )
 test_equal( "atom func integer", 5, c_func( ATOM_FUNC, {5} ) )
 test_equal( "atom func double", 3.5, c_func( ATOM_FUNC, {3.5} ) )
 
-test_equal( "Testing passing eight doubles only", c_func( c_sum_mul, sum_mul_args ), sum_mul( sum_mul_args ) )
+test_equal( "Testing passing eight doubles only", c_func( c_sum_mul8df, sum_mul8df_args ), sum_mul( sum_mul8df_args ) )
+
+-- -0.692138671875
+assert( "Testing expression can be calculated in EUPHORIA", -0.692138671875 = sum_mul( sum_mul8df2lli_args ) )
+test_equal( "Testing passing eight doubles only and two long long ints", -0.692138671875, c_func( c_sum_mul8df2lli, sum_mul8df2lli_args ) )
 
 -- Should put some tests for argument passing as well : passing floating point, double, long long, etc..
 

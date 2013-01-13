@@ -132,6 +132,11 @@ EXPORT double powsum(double d1, unsigned short n1,
 EXPORT object object_func( object foo ){
 	return foo;
 }
-EXPORT double sum_mul(double d1, double d2, double d3, double d4, double d5, double d6, double d7, double d8){
+
+EXPORT double sum_mul8df(double d1, double d2, double d3, double d4, double d5, double d6, double d7, double d8){
     return (d1+1)*(d2+2)*(d3+3)*(d4+4)*(d5+5)*(d6+6)*(d7+7)*(d8+8);
+}
+
+EXPORT double sum_mul8df2lli(double d1, double d2, double d3, double d4, double d5, double d6, double d7, double d8, long long l1, long long l2){
+    return (d1+1)*(d2+2)*(d3+3)*(d4+4)*(d5+5)*(d6+6)*(d7+7)*(d8+8)*(l1+9)*(l2+10);
 }
