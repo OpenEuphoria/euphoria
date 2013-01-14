@@ -377,8 +377,6 @@ end procedure
 public function http_post(sequence url, object data, object headers = 0,
 		integer follow_redirects = 10, integer timeout = 15)
 		
-	follow_redirects = follow_redirects -- Not used yet.
-	
 	if not sequence(data) or length(data) = 0 then
 		return ERR_INVALID_DATA
 	end if
@@ -425,7 +423,17 @@ public function http_post(sequence url, object data, object headers = 0,
 	request[R_REQUEST] &= "\r\n"
 	request[R_REQUEST] &= data
 
-	return execute_request(request[R_HOST], request[R_PORT], request[R_REQUEST], timeout)
+	object content = execute_request(request[R_HOST], request[R_PORT], request[R_REQUEST], timeout)
+	if length(content)=2 then
+		for i = 1 to length(content[1]) do
+			sequence headers_i = content[1][i]
+			if equal(headers_i[1],"location") and follow_redirects then
+				return http_post(headers_i[2], headers, follow_redirects-1, timeout)
+			end if
+		end for
+	end if
+	
+	return content
 end function
 
 --**
@@ -463,9 +471,9 @@ end function
 
 public function http_get(sequence url, object headers = 0, integer follow_redirects = 10,
 		integer timeout = 15)
-	object request = format_base_request("GET", url, headers)
-	
-	follow_redirects = follow_redirects -- Not used yet.
+	object request
+		
+	request = format_base_request("GET", url, headers)
 	
 	if atom(request) then
 		return request
@@ -474,5 +482,15 @@ public function http_get(sequence url, object headers = 0, integer follow_redire
 	-- No more work necessary, terminate the request with our ending CR LF
 	request[R_REQUEST] &= "\r\n"
 
-	return execute_request(request[R_HOST], request[R_PORT], request[R_REQUEST], timeout)
+	object content = execute_request(request[R_HOST], request[R_PORT], request[R_REQUEST], timeout)
+	if length(content)=2 then
+		for i = 1 to length(content[1]) do
+			sequence headers_i = content[1][i]
+			if equal(headers_i[1],"location") and follow_redirects then
+				return http_get(headers_i[2], headers, follow_redirects-1, timeout)
+			end if
+		end for
+	end if
+
+	return content	
 end function
