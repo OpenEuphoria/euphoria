@@ -181,7 +181,7 @@ for i = 1 to length(signed_types) do
 		{signed_type_names[i]}), {}, signed_types[i] )
 	if r_get_m100 != -1 then
 		atom expected_ptr = define_c_var( lib818, signed_type_names[i] & "_M100_value" )
-		if expected_ptr != 0 then
+		if expected_ptr > 0 then
 			test_equal(sprintf("Can get -100 like numbers from a function returning that number as a %s", 
 				{signed_type_names[i]}), peekf(expected_ptr, signed_types[i]), c_func(r_get_m100, {}))
 		end if
