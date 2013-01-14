@@ -114,7 +114,7 @@ constant lib818 = open_dll("./lib818.dll")
 
 assert( "can open lib818.dll", lib818 )
 constant c_sum_mul8df = define_c_func(lib818, "+sum_mul8df", repeat( C_DOUBLE, 8), C_DOUBLE)
-constant c_sum_mul8df2lli = define_c_func(lib818, "+sum_mul8df", repeat( C_DOUBLE, 8) & repeat(C_LONGLONG, 2), C_DOUBLE)
+constant c_sum_mul8df2lli = define_c_func(lib818, "+sum_mul8df2lli", repeat( C_DOUBLE, 8) & repeat(C_LONGLONG, 2), C_DOUBLE)
 assert( "sum_mul present in dll", c_sum_mul8df != -1 and c_sum_mul8df2lli != -1 )
 
 integer r_near_hashC, r_below_minimum_euphoria_integer, 
