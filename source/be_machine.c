@@ -22,7 +22,6 @@
 #endif
 #include <stdio.h>
 #include <math.h>
-#include <bits/inf.h>
 
 #include <be_ver.h>
 
