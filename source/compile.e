@@ -3647,7 +3647,14 @@ end procedure
 
 procedure opFLOOR()
 	CUnaryOp(pc, "e_floor", "FLOOR")
-	SetBBType(Code[pc+2], TYPE_ATOM, novalue, TYPE_OBJECT, HasDelete( Code[pc+1] ) )
+	if TypeIsIn(Code[pc+1], TYPES_SO) then
+		target_type = GType(Code[pc+1])
+	elsif GType(Code[pc+1]) = TYPE_INTEGER then
+		target_type = TYPE_INTEGER
+	else
+		target_type = TYPE_ATOM
+	end if
+	SetBBType(Code[pc+2], target_type, novalue, TYPE_OBJECT, HasDelete( Code[pc+1] ) )
 	pc += 3
 end procedure
 
