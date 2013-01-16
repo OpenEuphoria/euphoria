@@ -429,7 +429,7 @@ public function http_post(sequence url, object data, object headers = 0,
 		if length(content[1]) >= 1 then
 			if length(content[1][1]) >= 2 then
 				if find(content[1][1][2], {"301","302","303","307","308"}) then
-					if (find(content[1][1][2], {"301","302","303"}) then
+					if find(content[1][1][2], {"301","302","303"}) then
 						hit_get_redirect = 1
 					end if
 		for i = 1 to length(content[1]) do
