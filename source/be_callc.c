@@ -1033,10 +1033,12 @@ union xmm_param {
 		 */
 #		define MAX_INT_PARAM_REGISTERS 4
 #		define MAX_FP_PARAM_REGISTERS 4
-#		define INCREMENT_FP_ARGS ++xmm_i;
+#		define INCREMENT_FP_ARGS ++arg_i;
 #		define INCREMENT_INT_ARGS ++arg_i;
+#       define INT_ARG_COUNTER arg_i
+#       define FP_ARG_COUNTER INT_ARG_COUNTER
 #		define SIGNATURE_PARAM , signature
-#		define UPDATE_SIGNATURE signature |= (arg_i<<1);
+#		define UPDATE_SIGNATURE signature |= (1<<FP_ARG_COUNTER);
 #	else
 		/* The x86-64 calling convention uses 6 registers for the first 6 integer
 		 * parameters.  After that, parameters are pushed on the stack.  Also,
@@ -1051,6 +1053,8 @@ union xmm_param {
 #		define INCREMENT_INT_ARGS ;
 #		define SIGNATURE_PARAM
 #		define UPDATE_SIGNATURE
+#       define FP_ARG_COUNTER xmm_i
+#       define INT_ARG_COUNTER arg_i
 #	endif // Platform defines for argument pushes
 
 	/* Pushes the variable //arg// on to our argument stack, but not the
@@ -1062,8 +1066,7 @@ union xmm_param {
 	} \
 	else{ \
 		arg_op[arg_stack++] = arg; \
-	} \
-	INCREMENT_FP_ARGS
+	}
 
 /* PUSH_INT64_ARG :
    push a value as a 64-bit number */
@@ -1167,19 +1170,19 @@ object call_c(int func, object proc_ad, object arg_list)
 #if INTPTR_MAX == INT64_MAX
 #ifdef EWINDOWS
 	int signature = 0;
+#else
+	intptr_t xmm_i = 0;
 #endif
 	/* The x86-64 calling convention requires us to keep the first
 	 * few floating point values separate from the ints.  And the
 	 * floating point params could start overflowing onto the stack
 	 * before we have enough ints to go there.
 	 */
-	union xmm_param dbl_op[8];
-	intptr_t xmm_i = 0;
+	union xmm_param dbl_op[MAX_FP_PARAM_REGISTERS];
 	intptr_t arg_stack = MAX_INT_PARAM_REGISTERS;
 	int int_args = 0;
 	int is_double, is_float;
 #endif
-	
 	// Setup and Check for Errors
 	proc_index = get_pos_int("c_proc/c_func", proc_ad); 
 	if (proc_index >= (uintptr_t)c_routine_next) {
@@ -1241,7 +1244,6 @@ object call_c(int func, object proc_ad, object arg_list)
 	
 	for (i = 1; i <= arg_list_ptr->length; i++) {
 	
-
 		next_arg = value_stack_pop(&next_arg_ptr);
 		next_size = type_stack_pop(&next_size_ptr);
 		
@@ -1269,15 +1271,14 @@ object call_c(int func, object proc_ad, object arg_list)
 						
 				#elif INTPTR_MAX == INT64_MAX
 				
-					if( xmm_i < MAX_FP_PARAM_REGISTERS ) {
+					if( FP_ARG_COUNTER < MAX_FP_PARAM_REGISTERS ) {
 						UPDATE_SIGNATURE
-						dbl_op[xmm_i++].d = dbl_arg.dbl;
+						dbl_op[FP_ARG_COUNTER++].d = dbl_arg.dbl;
 					}
 					else{
 						arg_op[arg_stack++] = dbl_arg.int64;
 					}
 					int_args += 6;
-					INCREMENT_INT_ARGS;
 				#endif
 				
 			}
@@ -1288,15 +1289,15 @@ object call_c(int func, object proc_ad, object arg_list)
 					arg = (uintptr_t)flt_arg.int32;
 					PUSH_INT_ARG
 				#elif INTPTR_MAX == INT64_MAX
-					if( xmm_i < MAX_FP_PARAM_REGISTERS ){
+					if( FP_ARG_COUNTER < MAX_FP_PARAM_REGISTERS ){
 						UPDATE_SIGNATURE
-						dbl_op[xmm_i++].f = flt_arg.flt;
+						dbl_op[FP_ARG_COUNTER++].f = flt_arg.flt;
 					}
 					else{
 						arg_op[arg_stack++] = flt_arg.int32;
+						INCREMENT_FP_ARGS
 					}
 					int_args += 6;
-					INCREMENT_INT_ARGS;
 				#endif
 			}
 		}

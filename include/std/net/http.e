@@ -272,7 +272,7 @@ function execute_request(sequence host, integer port, sequence request, integer 
 				if header_end_pos then
 					-- we have a header, let's parse it and figure out
 					-- the content length.
-					sequence raw_header = content[1..header_end_pos]
+					sequence raw_header = content[1..header_end_pos-1]
 					content = content[header_end_pos + 4..$]
 
 					sequence header_lines = split(raw_header, "\r\n")
@@ -284,7 +284,7 @@ function execute_request(sequence host, integer port, sequence request, integer 
 						headers = append(headers, this_header)
 
 						if equal(lower(this_header[1]), "content-length") then
-							content_length = to_number(trim(this_header[2]))
+							content_length = to_number(this_header[2])
 						end if
 					end for
 
@@ -377,8 +377,6 @@ end procedure
 public function http_post(sequence url, object data, object headers = 0,
 		integer follow_redirects = 10, integer timeout = 15)
 		
-	follow_redirects = follow_redirects -- Not used yet.
-	
 	if not sequence(data) or length(data) = 0 then
 		return ERR_INVALID_DATA
 	end if
@@ -425,7 +423,28 @@ public function http_post(sequence url, object data, object headers = 0,
 	request[R_REQUEST] &= "\r\n"
 	request[R_REQUEST] &= data
 
-	return execute_request(request[R_HOST], request[R_PORT], request[R_REQUEST], timeout)
+	object hit_get_redirect = 0
+	object content = execute_request(request[R_HOST], request[R_PORT], request[R_REQUEST], timeout)
+	if length(content)=2 and length(content[1]) >= 1 and length(content[1][1]) >= 2 then
+		sequence code = content[1][1][2]
+		if find(code, {"301","302","303","307","308"}) then
+			if find(code, {"301","302","303"}) then
+				hit_get_redirect = 1
+			end if
+			for i = 1 to length(content[1]) do
+				sequence headers_i = content[1][i]
+				if equal(headers_i[1],"location") and follow_redirects then
+					if hit_get_redirect then
+						return http_get(headers_i[2], headers, follow_redirects-1, timeout)
+					else
+						return http_post(headers_i[2], headers, follow_redirects-1, timeout)
+					end if
+				end if
+			end for
+		end if
+	end if
+	
+	return content
 end function
 
 --**
@@ -463,9 +482,9 @@ end function
 
 public function http_get(sequence url, object headers = 0, integer follow_redirects = 10,
 		integer timeout = 15)
-	object request = format_base_request("GET", url, headers)
-	
-	follow_redirects = follow_redirects -- Not used yet.
+	object request
+		
+	request = format_base_request("GET", url, headers)
 	
 	if atom(request) then
 		return request
@@ -474,5 +493,21 @@ public function http_get(sequence url, object headers = 0, integer follow_redire
 	-- No more work necessary, terminate the request with our ending CR LF
 	request[R_REQUEST] &= "\r\n"
 
-	return execute_request(request[R_HOST], request[R_PORT], request[R_REQUEST], timeout)
+	object content = execute_request(request[R_HOST], request[R_PORT], request[R_REQUEST], timeout)
+	if length(content)=2 then
+		if length(content[1]) >= 1 then
+			if length(content[1][1]) >= 2 then
+				if find(content[1][1][2], {"301","302","303","307","308"}) then
+		for i = 1 to length(content[1]) do
+			sequence headers_i = content[1][i]
+			if equal(headers_i[1],"location") and follow_redirects then
+				return http_get(headers_i[2], headers, follow_redirects-1, timeout)
+			end if
+		end for
+				end if
+			end if
+		end if
+	end if
+
+	return content	
 end function

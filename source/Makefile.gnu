@@ -301,7 +301,10 @@ EU_CORE_FILES = \
 	reswords.e \
 	scanner.e \
 	shift.e \
+	syncolor.e \
 	symtab.e 
+
+# TODO XXX should syncolor.e really be in EU_INTERPRETER_FILES ?
 
 EU_INTERPRETER_FILES = \
 	backend.e \
@@ -1073,6 +1076,8 @@ ifdef PCRE_OBJECTS
 $(PREFIXED_PCRE_OBJECTS) : $(patsubst %.o,pcre/%.c,$(PCRE_OBJECTS)) pcre/config.h.unix pcre/pcre.h.unix
 	$(MAKE) -C pcre all CC="$(PCRE_CC)" PCRE_CC="$(PCRE_CC)" EOSTYPE="$(EOSTYPE)" EOSFLAGS="$(EOSPCREFLAGS)" CONFIG=../$(CONFIG) FPIC=$(FPIC)
 endif
+
+.IGNORE : test
 
 depend :
 	makedepend -fMakefile.gnu -Y. -I. *.c -p'$$(BUILDDIR)/intobj/back/'

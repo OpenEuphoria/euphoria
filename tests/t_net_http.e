@@ -7,21 +7,26 @@ include std/os.e
 ifdef not NOINET_TESTS then
 	object content
 
+	content = http_get("http://www.iana.org/")
+	test_not_equal("content readable with http_get slash only path", length(content[2]), 0)
+
+	content = http_get("http://www.iana.org")
+	test_not_equal("content readable with http_get no path", length(content[2]), 0)
+
 	content = http_get("http://www.iana.org/domains/example/")
 	if atom(content) then
-		test_fail("get_url 1")
+		test_fail("content readable from http_get")
 	else
-		test_true("get_url 1", length(content) = 2)
-		test_true("get_url 2", match("<title>", "" & content[2]))
+		test_true("content readable from http_get", length(content) = 2)
+		test_true("content in correct form from http_get", match("<title>", "" & content[2]))
 	end if
 
 	content = http_get("http://www.iana.org:80/domains/example/")
 	if atom(content) then
-		test_fail("get_url 2")
-		test_fail("get_url 3")
+		test_fail("content readable from http_get port 80")
 	else
-		test_true("get_url 3", length(content) = 2)
-		test_true("get_url 4", match("<title>", "" & content[2]))
+		test_true("content in correct form from http_get port 80", length(content)=2)
+		test_true("content correct from http_get port 80", match("<title>", "" & content[2]))
 	end if
 
 	-- Test nested sequence post data

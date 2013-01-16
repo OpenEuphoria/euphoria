@@ -3169,6 +3169,7 @@ object machine(object opcode, object x)
 				addr = (char *)EMalloc(SEQ_PTR(x)->length + 1);
 				MakeCString((char*)addr, x, SEQ_PTR(x)->length + 1);
 				screen_output(NULL, (char*)addr);
+				SetTColor(0);
 				return ATOM_1;
 				break;
 
