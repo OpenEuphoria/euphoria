@@ -48,3 +48,4 @@
 * Front end optimizations to reduce parsing time
 * Added dynamic library uninitialization to reduce memory leaks if a euphoria translated .dll or .so
   is unloaded
+* [[ticket:838]] Eutest now reports the date of the Interpreter, and when the test was completed.  
