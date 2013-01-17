@@ -394,6 +394,7 @@ clean :
 	-rm -r $(BUILDDIR)/html
 	-rm -r $(BUILDDIR)/coverage
 	-rm -r $(BUILDDIR)/manual
+	-rm $(TRUNKDIR)/tests/lib818.dll
 	
 
 clobber distclean : clean
@@ -689,7 +690,7 @@ test : EUCOMPILEDIR=$(TRUNKDIR)
 test : EUCOMPILEDIR=$(TRUNKDIR)	
 test : C_INCLUDE_PATH=$(TRUNKDIR):..:$(C_INCLUDE_PATH)
 test : LIBRARY_PATH=$(%LIBRARY_PATH)
-test : 
+test : ../tests/lib818.dll
 test :  
 	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
 		$(EXE) -i ../include ../source/eutest.ex -i ../include -cc gcc $(VERBOSE_TESTS) \
@@ -702,6 +703,7 @@ test :
 	$(EXE) -i ../include ../source/eutest.ex -process-log -html > $(CYPBUILDDIR)/test-report.html	
 	cd ../tests && sh check_diffs.sh
 
+testeu : ../tests/lib818.dll
 testeu : 
 	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) $(EXE) ../source/eutest.ex --nocheck -i ../include -cc gcc -exe "$(CYPBUILDDIR)/$(EEXU) -batch $(CYPTRUNKDIR)/source/eu.ex" $(TESTFILE)
 
@@ -722,6 +724,7 @@ coverage-311 :
 		-coverage-exclude std -coverage-exclude euphoria \
 		 -coverage-pp "$(EXE) -i $(CYPTRUNKDIR)/include $(CYPTRUNKDIR)/bin/eucoverage.ex" $(TESTFILE)
 
+coverage :  ../tests/lib818.dll
 coverage : 
 	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
 		$(EXE) -i ../include $(CYPTRUNKDIR)/source/eutest.ex -i $(CYPTRUNKDIR)/include \
@@ -729,6 +732,7 @@ coverage :
 		-coverage-db $(CYPBUILDDIR)/unit-test.edb -coverage $(CYPTRUNKDIR)/include/std \
 		 -coverage-pp "$(EXE) -i $(CYPTRUNKDIR)/include $(CYPTRUNKDIR)/bin/eucoverage.ex" $(TESTFILE)
 
+coverage-front-end :  ../tests/lib818.dll
 coverage-front-end : 
 	-rm $(CYPBUILDDIR)/front-end.edb
 	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
@@ -919,6 +923,18 @@ endif
 
 $(BUILDDIR)/%.res : %.rc
 	windres $< -O coff -o $@
+
+LIB818_FPIC=-fPIC
+
+$(BUILDDIR)/test818.o : test818.c
+	$(CC) -c $(LIB818_FPIC) -I ../include $(FE_FLAGS) -Wall -shared ../source/test818.c -o $(BUILDDIR)/test818.o
+
+lib818 :
+	touch test818.c
+	$(MAKE) ../tests/lib818.dll
+
+../tests/lib818.dll : $(BUILDDIR)/test818.o
+	$(CC)  $(MSIZE) $(LIB818_FPIC) -shared -o ../tests/lib818.dll $(CREATEDLLFLAGS) $(BUILDDIR)/test818.o
 	
 $(BUILDDIR)/$(OBJDIR)/%.o : $(BUILDDIR)/$(OBJDIR)/%.c
 	$(CC) $(EBSDFLAG) $(FE_FLAGS) $(BUILDDIR)/$(OBJDIR)/$*.c -I/usr/share/euphoria -o$(BUILDDIR)/$(OBJDIR)/$*.o
