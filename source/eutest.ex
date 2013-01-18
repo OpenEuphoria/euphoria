@@ -13,7 +13,7 @@
 -- in the SCM
 
 constant APP_VERSION = "1.1.0"
-
+close(0)
 include std/pretty.e
 include std/sequence.e
 include std/sort.e
@@ -30,7 +30,6 @@ include std/map.e
 include std/cmdline.e
 include std/eds.e
 include std/regex.e
-include std/pipeio.e as pipeio
 
 ifdef UNIX then
 	constant dexe = ""
@@ -1307,10 +1306,9 @@ end function
 -- with --version.  If cannot be done, it will return 0.
 function get_interpreter_version(sequence exe = executable)
 	if length(exe)=0 then
-		platform_init()
-		exe = executable
+		return ""
 	end if
-	system(exe & " --version > version.txt",1)
+	system(exe & " --version > version.txt",2)
 	return read_file("version.txt")	
 end function
 
