@@ -423,18 +423,16 @@ public function http_post(sequence url, object data, object headers = 0,
 	request[R_REQUEST] &= "\r\n"
 	request[R_REQUEST] &= data
 
-	object hit_get_redirect = 0
 	object content = execute_request(request[R_HOST], request[R_PORT], request[R_REQUEST], timeout)
 	if length(content)=2 and length(content[1]) >= 1 and length(content[1][1]) >= 2 then
-		sequence code = content[1][1][2]
-		if find(code, {"301","302","303","307","308"}) then
-			if find(code, {"301","302","303"}) then
-				hit_get_redirect = 1
-			end if
+		--sequence http_response_code = content[1][1][2]
+		integer status = find(content[1][1][2], {"301","302","303","307","308"})
+		if status then
 			for i = 1 to length(content[1]) do
 				sequence headers_i = content[1][i]
 				if equal(headers_i[1],"location") and follow_redirects then
-					if hit_get_redirect then
+					if status <= 3 then
+						-- (status <= 3) == (find(http_response_code, {"301","302","303"}) != 0)
 						return http_get(headers_i[2], headers, follow_redirects-1, timeout)
 					else
 						return http_post(headers_i[2], headers, follow_redirects-1, timeout)

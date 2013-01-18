@@ -8,25 +8,27 @@ ifdef not NOINET_TESTS then
 	object content
 
 	content = http_get("http://www.iana.org/")
-	test_not_equal("content readable with http_get slash only path", length(content[2]), 0)
+	assert("http_get content readable with http_get slash only path", length(content) > 1)
+	test_not_equal("http_get content non-empty with http_get slash only path", length(content[2]), 0)
 
 	content = http_get("http://www.iana.org")
-	test_not_equal("content readable with http_get no path", length(content[2]), 0)
+	assert("content readable http_get no path", length(content) > 1)
+	test_not_equal("content non-empty with http_get no path", length(content[2]), 0)
 
 	content = http_get("http://www.iana.org/domains/example/")
 	if atom(content) then
-		test_fail("content readable from http_get")
+		test_fail("content readable from http_get with a path")
 	else
-		test_true("content readable from http_get", length(content) = 2)
-		test_true("content in correct form from http_get", match("<title>", "" & content[2]))
+		assert("content readable from http_get with a path", length(content) = 2)
+		test_true("content correct form from http_get with a path", match("<title>", "" & content[2]))
 	end if
 
 	content = http_get("http://www.iana.org:80/domains/example/")
 	if atom(content) then
-		test_fail("content readable from http_get port 80")
+		test_fail("content readable from http_get with port and path")
 	else
-		test_true("content in correct form from http_get port 80", length(content)=2)
-		test_true("content correct from http_get port 80", match("<title>", "" & content[2]))
+		assert("content readable from http_get with port and path", length(content)=2)
+		test_true("content correct from http_get with port and path", match("<title>", "" & content[2]))
 	end if
 
 	-- Test nested sequence post data
@@ -35,39 +37,39 @@ ifdef not NOINET_TESTS then
 		{ "data", num }
 	}
     content = http_post("http://test.openeuphoria.org/post_test.ex", data)
-	if atom(content) then
-		test_fail("get_url post 1")
-		test_fail("get_url post 2")
+	if atom(content) or length(content) < 2 then
+		test_fail("http_post post #1")
 	else
-		test_true("get_url post 1", length(content))
-		test_equal("get_url post 2", "success", content[2])
+		test_equal("http_post post #1", "success", content[2])
 	end if
 
 	sequence headers = {
 		{ "Cache-Control", "no-cache" }
 	}
     content = http_get("http://test.openeuphoria.org/post_test.txt", headers)
-	if atom(content) then
-		test_fail("get_url post 3")
-		test_fail("get_url post 4")
-		test_fail("get_url post 5")
-		test_fail("get_url post 6")
-		test_fail("get_url post 7")
-		test_fail("get_url post 8")
+	if atom(content) or length(content) < 2 then
+		test_true("http_get with headers #2", sequence(content))
+		test_fail("http_get with headers #3")
+		test_fail("http_get with headers #4")
+		test_fail("http_get with headers #5")
+		test_fail("http_get with headers #6")
+		test_fail("http_get with headers #7")
+		test_fail("http_get with headers #8")
 	else
-		test_true("get_url post 3", length(content))
-		test_equal("get_url post 4", "data=" & num, content[2])
+		test_pass("http_get with headers #2")
+		assert("http_get with headers #3", length(content) = 2)
+		test_equal("http_get with headers #4", "data=" & num, content[2])
 
 		-- Test already encoded string
 		num = sprintf("%d", { rand_range(1000,10000) })
 		data = sprintf("data=%s", { num })
 		content = http_post("http://test.openeuphoria.org/post_test.ex", data)
-		test_true("get_url post 5", length(content))
-		test_equal("get_url post 6", "success", content[2])
+		assert("http_get with headers #5", length(content) = 2)
+		test_equal("http_get with headers #6", "success", content[2])
 
 		content = http_get("http://test.openeuphoria.org/post_test.txt", headers)
-		test_true("get_url post 7", length(content))
-		test_equal("get_url post 8", "data=" & num, content[2])
+		assert("http_get with headers #7", length(content) = 2)
+		test_equal("http_get with headers #8", "data=" & num, content[2])
 	end if
 
 	-- multipart form data
@@ -81,7 +83,7 @@ ifdef not NOINET_TESTS then
 	-- back SIZE\nDECODED_FILE_CONTENTS. The test script is written in Perl to test against
 	-- modules we did not code, i.e. CGI and Base64 in this case.
 	content = http_post("http://test.openeuphoria.org/post_file.cgi", { MULTIPART_FORM_DATA, data })
-	if atom(content) then
+	if atom(content) or length(content) < 2 then
 		test_fail("multipart form file upload")
 	else
 		test_equal("multipart form file upload", data[1][2] & "\n" & file_content, content[2])

@@ -13,7 +13,7 @@
 -- in the SCM
 
 constant APP_VERSION = "1.1.0"
-
+close(0)
 include std/pretty.e
 include std/sequence.e
 include std/sort.e
@@ -724,7 +724,7 @@ end procedure
 
 sequence unsummarized_files = {}
 
-constant ascii_table_final_summary =  repeat('*', 76) & "\n\n" & "Overall: Total Tests: %04d  Failed: %04d  Passed: %04d Time: %f\n\n" & repeat('*', 76) & "\n\n"
+constant ascii_table_final_summary =  repeat('*', 76) & "\n\n" & "Overall: Total Tests: %04d  Failed: %04d  Passed: %04d Time: %f%s.\nTesting Completed %04d-%02d-%02d %02d:%02d  \n\n" & repeat('*', 76) & "\n\n"
 
 procedure ascii_out(sequence data)
 	switch data[1] do
@@ -980,6 +980,10 @@ sequence html_table_final_summary = `
 	<td>%f</td>
   </tr>
 </table>
+<h2><pre>%s</pre></h2>
+<P>
+<h3>Testing Completed %04d-%02d-%02d %02d:%02d</h3>
+</P>
 </body>
 </html>`
 
@@ -1195,7 +1199,7 @@ procedure do_process_log( sequence cmds, sequence output_class)
 			call_proc(out_r, {{"summary",0,0,0,0}})
 		end if
 	end for
-	
+		
 	summarize_error(output_class, "Interpreted test files failed unexpectedly.: %d", E_INTERPRET)
 	summarize_error(output_class, "Test files could not be translated.........: %d", E_TRANSLATE)
 	summarize_error(output_class, "Translated test files could not be compiled: %d", E_COMPILE)  
@@ -1209,13 +1213,26 @@ procedure do_process_log( sequence cmds, sequence output_class)
 			{ error_list[1][find(E_EUTEST, error_list[3])], call_func(output_class[DOCUMENT_NL],{}) })
 	end if
 
+	object version_used = get_interpreter_version()
+	if atom(version_used) or length(version_used) = 1 then
+		version_used = "Euphoria"
+	end if
+	
+	object unittest_log = dir("unittest.log")
+	if atom(unittest_log) then
+		unittest_log = repeat(0, D_ALTNAME)
+	else
+		unittest_log = unittest_log[1]
+	end if
+	
 	if sequence(output_class[DOCUMENT_ENDING]) then
 		printf(html_fn, output_class[DOCUMENT_ENDING], {
 			total_passed + total_failed,
 			total_failed,
 			total_passed,
-			total_time
-		})
+			total_time,
+			version_used
+		} & unittest_log[D_YEAR..D_MINUTE])
 	end if
 	
 	call_proc(output_class[DOCUMENT_CLOSE], {})
@@ -1283,6 +1300,16 @@ function change_if_exists(sequence default, sequence new_path)
 	else
 		return default
 	end if
+end function
+
+-- returns the version information you get when you call the interpreter
+-- with --version.  If cannot be done, it will return 0.
+function get_interpreter_version(sequence exe = executable)
+	if length(exe)=0 then
+		return ""
+	end if
+	system(exe & " --version > version.txt",2)
+	return read_file("version.txt")	
 end function
 
 procedure main()
@@ -1493,9 +1520,9 @@ procedure main()
 	end if
 	
 	if map:has( opts, "process-log") then
+		platform_init()
 		do_process_log( files, output_format )
 		if map:has( opts, "retest" ) then
-			platform_init()
 			do_test( retest_files )
 		end if
 	else

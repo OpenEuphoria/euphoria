@@ -191,6 +191,19 @@ test_equal( "replace 8,4", "johndoeaaa", replace("johndoe", "aaa", 8,4 ))
 test_equal( "replace 8,5", "johndoeaaa", replace("johndoe", "aaa", 8,5 ))
 test_equal( "replace 8,8", "johndoeaaa", replace("johndoe", "aaa", 8,8 ))
 
+-- Ticket:830 memory leak in replace()
+integer deleted_830 = 0
+procedure deleted_replaced_830( object o )
+	deleted_830 += 1
+end procedure
+constant DR_830 = routine_id("deleted_replaced_830")
+sequence bar_830, baz_830
+bar_830 = delete_routine( "a" & "b", DR_830 )
+baz_830 = bar_830
+baz_830 = replace( bar_830, "c", 2, 2 )
+bar_830 = ""
+test_true( "replace() memory leak from ticket:830", deleted_830 )
+
 sequence shuffleOrig = {1,2,3,3,4,5,5,5,6,"TEST"}, shuffled = shuffle(shuffleOrig)
 -- Ensure that the result is the same length
 test_equal( "shuffle size", length(shuffleOrig), length(shuffled))
