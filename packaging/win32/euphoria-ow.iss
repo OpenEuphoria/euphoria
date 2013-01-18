@@ -146,7 +146,7 @@ Source: "cleanbranch\include\*.*"; DestDir: {app}\include\; Flags: ignoreversion
 ; Sources
 Source: "..\..\source\*.*"; DestDir: {app}\source\; Flags: ignoreversion; Components: comp_source
 Source: "..\..\source\codepage\*.*"; DestDir: {app}\source\; Flags: ignoreversion; Components: comp_source
-Source: "..\..\source\pcre\*.*"; DestDir: {app}\source\; Flags: ignoreversion; Components: comp_source
+Source: "..\..\source\pcre\*.*"; DestDir: {app}\source\pcre\; Flags: ignoreversion; Components: comp_source
 
 ; Test
 Source: "cleanbranch\tests\*.*"; DestDir: {app}\tests\; Flags: ignoreversion recursesubdirs; Components: comp_tests

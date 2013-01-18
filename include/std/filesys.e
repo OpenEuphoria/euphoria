@@ -1960,10 +1960,10 @@ public enum
 -- 
 -- Returns:
 --   An **integer**,
---     * -1 if file could be multiply defined
---     *  0 if filename does not exist
---     *  1 if filename is a file
---     *  2 if filename is a directory
+--     * FILETYPE_UNDEFINED (-1) if file could be multiply defined (i.e., contains any wildcards - '*' or '?')
+--     * FILETYPE_NOT_FOUND (0) if filename does not exist
+--     * FILETYPE_FILE (1) if filename is a file
+--     * FILETYPE_DIRECTORY (2) if filename is a directory
 --
 -- See Also:
 -- [[:dir]], [[:FILETYPE_DIRECTORY]], [[:FILETYPE_FILE]], [[:FILETYPE_NOT_FOUND]],
