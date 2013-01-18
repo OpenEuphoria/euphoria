@@ -6162,10 +6162,15 @@ void Replace( replace_ptr rb )
 				s1 = Copy_elements( start_pos, s2, 1 );
 			}
 			else {
-				if( target != copy_to ){
+				int replace_elements = target == copy_to;
+				if( !replace_elements ){
 					DeRef( target );
 				}
-				s1 = Copy_elements( start_pos, s2, (target == copy_to));
+				else if( !UNIQUE( SEQ_PTR( target ) ) ){
+					DeRef( target );
+					replace_elements = 0;
+				}
+				s1 = Copy_elements( start_pos, s2, replace_elements );
 			}
 			*rb->target = MAKE_SEQ( s1 );
 			if( c ){
