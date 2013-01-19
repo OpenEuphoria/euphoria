@@ -387,19 +387,15 @@ public function http_post(sequence url, object data, object headers = 0,
 	request[R_REQUEST] &= data
 
 	object content = execute_request(request[R_HOST], request[R_PORT], request[R_REQUEST], timeout)
-	if length(content)=2 and length(content[1]) >= 1 and length(content[1][1]) >= 2 then
-		--sequence http_response_code = content[1][1][2]
-		integer status = find(content[1][1][2], {"301","302","303","307","308"})
-		if status then
-			for i = 1 to length(content[1]) do
-				sequence headers_i = content[1][i]
+	if length(content)=2 then
+		sequence content_1 = content[1]
+		if length(content_1) >= 1 and length(content_1[1]) >= 2 and equal(content_1[2][2], "303") then
+			--sequence http_response_code = content[1][1][2]
+			-- 301, 302, 307 : must not be redirected without user interaction (RFC 2616)
+			for i = 1 to length(content_1) do
+				sequence headers_i = content_1[i]
 				if equal(headers_i[1],"location") and follow_redirects then
-					if status <= 3 then
-						-- (status <= 3) == (find(http_response_code, {"301","302","303"}) != 0)
-						return http_get(headers_i[2], headers, follow_redirects-1, timeout)
-					else
-						return http_post(headers_i[2], headers, follow_redirects-1, timeout)
-					end if
+					return http_get(headers_i[2], headers, follow_redirects-1, timeout)
 				end if
 			end for
 		end if
@@ -455,18 +451,14 @@ public function http_get(sequence url, object headers = 0, integer follow_redire
 	request[R_REQUEST] &= "\r\n"
 
 	object content = execute_request(request[R_HOST], request[R_PORT], request[R_REQUEST], timeout)
-	if length(content)=2 then
-		if length(content[1]) >= 1 then
-			if length(content[1][1]) >= 2 then
-				if find(content[1][1][2], {"301","302","303","307","308"}) then
-		for i = 1 to length(content[1]) do
-			sequence headers_i = content[1][i]
-			if equal(headers_i[1],"location") and follow_redirects then
-				return http_get(headers_i[2], headers, follow_redirects-1, timeout)
-			end if
-		end for
+	if length(content)=2 and length(content[1]) >= 1 and length(content[1][1]) >= 2 then
+		if find(content[1][1][2], {"301","302","303","307","308"}) then
+			for i = 1 to length(content[1]) do
+				sequence headers_i = content[1][i]
+				if equal(headers_i[1],"location") and follow_redirects then
+					return http_get(headers_i[2], headers, follow_redirects-1, timeout)
 				end if
-			end if
+			end for
 		end if
 	end if
 
