@@ -264,7 +264,11 @@ end function
 function lookup( object key, integer hashval = hash( key ), sequence slots )
 	integer mask = length( slots ) - 1
 	integer index = and_bits( hashval, mask ) + 1
-	integer index_hash = index
+	ifdef BITS64 then
+		integer index_hash = index
+	elsedef
+		atom index_hash = index
+	end ifdef
 	sequence slot
 
 	integer perturb = hashval
