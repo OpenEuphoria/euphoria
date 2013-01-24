@@ -13,7 +13,7 @@
 -- in the SCM
 
 constant APP_VERSION = "1.1.0"
-close(0)
+
 include std/pretty.e
 include std/sequence.e
 include std/sort.e
