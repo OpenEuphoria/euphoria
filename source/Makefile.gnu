@@ -386,7 +386,7 @@ clean :
 	-rm $(BUILDDIR)/*txt
 	-rm -r $(BUILDDIR)/*-build
 	-rm $(BUILDDIR)/eui$(EXE_EXT)
-	-rm $(BUILDDIR)/$(EECU)$(EXE_EXT)
+	-rm $(BUILDDIR)/$(EECU)
 	-rm $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW)
 	-rm $(BUILDDIR)/eu.a
 	-rm $(BUILDDIR)/eudbg.a
@@ -399,6 +399,9 @@ clean :
 	-rm -r $(BUILDDIR)/coverage
 	-rm -r $(BUILDDIR)/manual
 	-rm $(TRUNKDIR)/tests/lib818.dll
+ifeq "$(MINGW)" "1"
+	-rm -f $(BUILDDIR)/{$(EBACKENDW),$(EEXUW)}
+endif
 	
 
 clobber distclean : clean
