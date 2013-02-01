@@ -18,7 +18,7 @@ if [ ! -e packaging/slackware ]; then
 fi
 
 # Carefully clean most of the files
-# hg sta -umai | grep -v inst | grep -v linux-build | grep -v slackware | awk '{ print $2; }' | xargs rm -v
+hg sta -umai | grep -v inst | grep -v linux-build | grep -v slackware | awk '{ print $2; }' | xargs rm -v
 
 if [ ! -e linux-build ]; then
 	if [ -e linux-build.tar.gz ]; then
@@ -37,19 +37,30 @@ if [ ! -e linux-build ]; then
 	cd ..
 fi
 
-
+set INST=packaging/slackware/inst
+rm -fr packaging/slackware/inst
 if [ ! -e packaging/slackware/inst ]; then
-	mkdir -p packaging/slackware/inst/usr/{bin,include,doc,share/euphoria} &&
-	cp -r include/* packaging/slackware/inst/usr/include &&
-	cp -r bin/* packaging/slackware/inst/usr/bin &&
-	cp -r linux-build/{pdf/euphoria.pdf,html} packaging/slackware/inst/usr/doc &&
-	cp -r source demo tests tutorial packaging/slackware/inst/usr/share/euphoria &&
-	find linux-build -perm u=rwx,g=rx,o=rx -type f -exec strip '{}' ';' -a -exec cp '{}' packaging/slackware/inst/usr/bin ';' ;
-	cp packaging/slackware/slackware-eu.cfg packaging/slackware/inst/usr/bin/eu.cfg
+	mkdir -p packaging/slackware/inst/{install,etc/euphoria} packaging/slackware/inst/usr/{bin,share/euphoria,share/doc/euphoria} &&
+	mkdir -p packaging/slackware/inst/usr/share/euphoria/{bin,demo,include,source,tutorial};
+	cp -r include/* packaging/slackware/inst/usr/share/euphoria/include &&
+	cp -r linux-build/{pdf/euphoria.pdf,html} packaging/slackware/inst/usr/share/doc/euphoria &&
+	cp -r source demo tests include tutorial packaging/slackware/inst/usr/share/euphoria &&
+	find linux-build -perm u=rwx,g=rx,o=rx -type f -exec strip '{}' ';' -a -exec cp '{}' packaging/slackware/inst/usr/bin ';' &&
+	cp bin/* packaging/slackware/inst/usr/bin &&
+	cp bin/* packaging/slackware/inst/usr/share/euphoria/bin &&
+	cp packaging/slackware/slackware-eu.cfg packaging/slackware/inst/etc/euphoria/eu.cfg &&
+	cp packaging/slackware/slack-desc packaging/slackware/inst/install && 
+	cp packaging/slackware/doinst.sh  packaging/slackware/inst/install 
 fi
 
 cd packaging/slackware
-if [ ! -e euphoria-4.0.6-1.tgz ] ; then
-	cd inst &&
-	makepkg ../euphoria-4.0.6-1.tgz 
+if [ ! -e inst ] ; then
+	echo "problem! inst not found. "
+	exit
+fi
+rm -fr euphoria-4.0.5-2.tgz
+if [ ! -e euphoria-4.0.5-2.tgz ] ; then
+	cd inst
+	chown root.root -R inst
+	makepkg ../euphoria-4.0.5-2.tgz || echo 'Are you root?'
 fi
