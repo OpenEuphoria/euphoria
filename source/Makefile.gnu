@@ -171,8 +171,13 @@ else
 	CREATEDLLFLAGS=
 endif
 
-MKVER=$(BUILDDIR)/mkver$(HOST_EXE_EXT)
-EBACKENDU=eub$(EXE_EXT)
+
+MKVER=$(BUILDDIR)/mkver$(EXE_EXT)
+ifeq "$(EMINGW)" "1"
+	# Windowed backend
+	EBACKENDW=eubw$(EXE_EXT)
+endif
+# Console based backend
 EBACKENDC=eub$(EXE_EXT)
 EECU=euc$(EXE_EXT)
 EEXU=eui$(EXE_EXT)
@@ -428,9 +433,9 @@ clean :
 	-rm $(BUILDDIR)/*pdf
 	-rm $(BUILDDIR)/*txt
 	-rm -r $(BUILDDIR)/*-build
-	-rm $(BUILDDIR)/eui
-	-rm $(BUILDDIR)/euc
-	-rm $(BUILDDIR)/eub
+	-rm $(BUILDDIR)/eui$(EXE_EXT) $(BUILDDIR)/$(EEXUW)
+	-rm $(BUILDDIR)/$(EECU)
+	-rm $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW)
 	-rm $(BUILDDIR)/eu.a
 	-rm $(BUILDDIR)/eudbg.a
 	-rm $(BUILDDIR)/euso.a
@@ -438,12 +443,13 @@ clean :
 		rm $${f} ; \
 	done ;
 	-rm $(BUILDDIR)/ver.cache
-	-rm $(BUILDDIR)/mkver
+	-rm $(BUILDDIR)/mkver$(EXE_EXT)
+	-rm $(BUILDDIR)/eudist$(EXE_EXT) $(BUILDDIR)/echoversion$(EXE_EXT)
 	-rm -r $(BUILDDIR)/html
 	-rm -r $(BUILDDIR)/coverage
 	-rm -r $(BUILDDIR)/manual
-	-rm $(TRUNKDIR)/tests/lib818.dll
-	
+	-rm $(TRUNKDIR)/tests/lib818.dll	
+	-rm $(BUILDDIR)/*.res
 
 clobber distclean : clean
 	-rm -f $(CONFIG)
@@ -451,9 +457,6 @@ clobber distclean : clean
 	-rm -fr $(BUILDDIR)
 	-rm eu.cfg
 
-ifeq "$(MINGW)" "1"
-	-rm -f $(BUILDDIR)/{$(EBACKENDC),$(EEXUW)}
-endif
 	$(MAKE) -C pcre CONFIG=../$(CONFIG) clean
 	$(MAKE) -C pcre CONFIG=../$(CONFIG) FPIC=-fPIC clean
 	
@@ -634,22 +637,29 @@ $(BUILDDIR)/$(EECU) : $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) $(EUC_RES)
 	@$(ECHO) making $(EECU)
 	$(CC) $(EOSFLAGSCONSOLE) $(EUC_RES) $(EU_TRANSLATOR_OBJECTS) $(DEBUG_FLAGS) $(PROFILE_FLAGS) $(EU_BACKEND_OBJECTS) $(MSIZE) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EECU) 
 	
-
+backend : builddirs
+ifeq "$(EUPHORIA)" "1"
+	$(MAKE) backendsource EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG)  EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+endif	
+	$(MAKE) $(BUILDDIR)/$(EBACKENDC) EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+ifeq "$(EMINGW)" "1"
+	$(MAKE) $(BUILDDIR)/$(EBACKENDW) EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+endif
 
 ifeq "$(EMINGW)" "1"
 $(EUB_RES) : eub.rc version_info.rc eu.manifest
 $(EUBW_RES) : eubw.rc version_info.rc eu.manifest
 endif
 
-$(BUILDDIR)/$(EBACKENDU) : OBJDIR = backobj
-$(BUILDDIR)/$(EBACKENDU) : EU_TARGET = backend.ex
-$(BUILDDIR)/$(EBACKENDU) : EU_MAIN = $(EU_BACKEND_RUNNER_FILES)
-$(BUILDDIR)/$(EBACKENDU) : EU_OBJS = $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
-$(BUILDDIR)/$(EBACKENDU) : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) $(EUB_RES) $(EUBW_RES)
-	@$(ECHO) making $(EBACKENDU) $(OBJDIR)
-	$(CC) $(EOSFLAGS) $(EUBW_RES) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(DEBUG_FLAGS) $(MSIZE) $(PROFILE_FLAGS) -o $(BUILDDIR)/$(EBACKENDU)
+$(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) : OBJDIR = backobj
+$(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) : EU_TARGET = backend.ex
+$(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) : EU_MAIN = $(EU_BACKEND_RUNNER_FILES)
+$(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) : EU_OBJS = $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+$(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) $(EUB_RES) $(EUBW_RES)
+	@$(ECHO) making $(EBACKENDC) $(OBJDIR)
+	$(CC) $(EOSFLAGS) $(EUB_RES) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(DEBUG_FLAGS) $(MSIZE) $(PROFILE_FLAGS) -o $(BUILDDIR)/$(EBACKENDC)
 ifeq "$(EMINGW)" "1"
-	$(CC) $(EOSFLAGSCONSOLE) $(EUB_RES) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EBACKENDC)
+	$(CC) $(EOSFLAGS) $(EUBW_RES) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(DEBUG_FLAGS) $(MSIZE) $(PROFILE_FLAGS) -o $(BUILDDIR)/$(EBACKENDW)
 endif
 
 ifeq "$(HG)" ""
@@ -846,7 +856,7 @@ install :
 	install $(BUILDDIR)/$(EECUSODBGA) $(DESTDIR)$(PREFIX)/lib
 	install $(BUILDDIR)/$(EEXU) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EECU) $(DESTDIR)$(PREFIX)/bin
-	install $(BUILDDIR)/$(EBACKENDU) $(DESTDIR)$(PREFIX)/bin
+	install $(BUILDDIR)/$(EBACKENDC) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EUBIND) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EUSHROUD) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EUTEST) $(DESTDIR)$(PREFIX)/bin
@@ -854,7 +864,7 @@ install :
 	install $(BUILDDIR)/$(EUDIST) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EUCOVERAGE) $(DESTDIR)$(PREFIX)/bin
 ifeq "$(EMINGW)" "1"
-	install $(BUILDDIR)/$(EBACKENDC) $(DESTDIR)$(PREFIX)/bin
+	install $(BUILDDIR)/$(EBACKENDW) $(DESTDIR)$(PREFIX)/bin
 endif
 	install ../include/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include
 	install ../include/std/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std
@@ -1002,9 +1012,9 @@ install-docs :
 
 # This doesn't seem right. What about eushroud ?
 uninstall :
-	-rm $(PREFIX)/bin/$(EEXU) $(PREFIX)/bin/$(EECU) $(PREFIX)/lib/$(EECUA) $(PREFIX)/lib/$(EECUDBGA) $(PREFIX)/bin/$(EBACKENDU)
+	-rm $(PREFIX)/bin/$(EEXU) $(PREFIX)/bin/$(EECU) $(PREFIX)/lib/$(EECUA) $(PREFIX)/lib/$(EECUDBGA) $(PREFIX)/bin/$(EBACKENDC)
 ifeq "$(EMINGW)" "1"
-	-rm $(PREFIX)/lib/$(EBACKENDC)
+	-rm $(PREFIX)/lib/$(EBACKENDW)
 endif
 	-rm -r $(PREFIX)/share/euphoria
 
