@@ -286,7 +286,10 @@ EU_CORE_FILES = \
 	reswords.e \
 	scanner.e \
 	shift.e \
+	syncolor.e \
 	symtab.e 
+
+# TODO XXX should syncolor.e really be in EU_INTERPRETER_FILES ?
 
 EU_INTERPRETER_FILES = \
 	backend.e \

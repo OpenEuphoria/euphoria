@@ -4,7 +4,15 @@ include std/dll.e
 include std/machine.e
 include std/math.e
 include std/sequence.e
-constant pointer_size = sizeof(C_POINTER)
+include std/error.e
+
+ifdef not EU4_0 then
+	constant pointer_size = sizeof(C_POINTER)
+elsedef
+	constant C_LONGLONG = -1
+	constant pointer_size = 4
+end ifdef
+
 -- one nibble less in magnitude than the smallest number too big to fit into a pointer. 
 constant BASE_PTR           = #10 * power(#100,(pointer_size-1))
 constant BASE_4             = #10 * power(#100, 3)
@@ -28,12 +36,24 @@ function minus_1_fn()
 end function 
 
 function unsigned_to_signed(atom v, integer t)
-	integer sign_bit  = shift_bits(1,-sizeof(t) * 8+1)
-	if and_bits(sign_bit,v) then
-		return v-shift_bits(sign_bit,-1)
-	else
-		return v
-	end if
+	ifdef not EU4_0 then
+		integer sign_bit  = shift_bits(1,-sizeof(t) * 8+1)
+		if and_bits(sign_bit,v) then
+			return v-shift_bits(sign_bit,-1)
+		else
+			return v
+		end if
+	elsedef
+		if t = C_CHAR then
+			if and_bits(128,v) then
+				return v-256
+			else
+				return v
+			end if
+		else
+			crash("not supported")
+		end if
+	end ifdef
 end function
 
 constant ubyte_values = { ' ', 192, 172, ')'}
@@ -56,6 +76,15 @@ for i = 1 to length(minus_1_values) do
 end for
 
 constant byte_values = ' ' & -32 & -100 & ')'
+ifdef EU4_0 then
+	constant signed_types      = { C_CHAR,    C_BYTE,   C_SHORT,   C_INT,   C_BOOL,   C_LONG }
+	constant signed_type_names = { "C_CHAR", "C_BYTE", "C_SHORT", "C_INT", "C_BOOL", "C_LONG"}
+	constant signed_values     = { byte_values, byte_values,
+														-20_000 & 10_000 & 20_000,
+																	(2 & -2) * 1e9,
+																		true & false, (2 & -2) * power(2,20)}
+																			
+elsedef
 constant signed_types      = { C_CHAR,    C_BYTE,   C_SHORT,   C_INT,   C_BOOL,   C_LONG,   C_LONGLONG }
 constant signed_type_names = { "C_CHAR", "C_BYTE", "C_SHORT", "C_INT", "C_BOOL", "C_LONG", "C_LONGLONG"}
 constant signed_values     = { byte_values, byte_values,
@@ -63,7 +92,7 @@ constant signed_values     = { byte_values, byte_values,
 																(2 & -2) * 1e9,
 																	true & false, (2 & -2) * power(2,20),
 																							(3 & -2) * power(2,40)}
-																		
+end ifdef																		
 constant types = signed_types & unsigned_types
 constant type_names = signed_type_names & unsigned_type_names
 constant values = signed_values & unsigned_values
@@ -103,8 +132,12 @@ function peekf(atom expected_ptr, integer c_type)
 		case C_CHAR		then return unsigned_to_signed(peek( expected_ptr ), C_CHAR)
 		case C_SHORT	then return peek2s( expected_ptr )
 		case C_INT      then return peek4s( expected_ptr )
-		case C_LONG     then return peek_longs( expected_ptr )
-		case C_LONGLONG then return peek8s( expected_ptr )
+		ifdef not EU4_0 then	
+			case C_LONG     then return peek_longs( expected_ptr )
+			case C_LONGLONG then return peek8s( expected_ptr )
+		elsedef
+			case C_LONG then return peek4s( expected_ptr )
+		end ifdef
 		case else
 			return "Unexpected type" 
 	end switch
@@ -113,9 +146,6 @@ end function
 constant lib818 = open_dll("./lib818.dll")
 
 assert( "can open lib818.dll", lib818 )
-constant c_sum_mul8df = define_c_func(lib818, "+sum_mul8df", repeat( C_DOUBLE, 8), C_DOUBLE)
-constant c_sum_mul8df2lli = define_c_func(lib818, "+sum_mul8df2lli", repeat( C_DOUBLE, 8) & repeat(C_LONGLONG, 2), C_DOUBLE)
-assert( "sum_mul present in dll", c_sum_mul8df != -1 and c_sum_mul8df2lli != -1 )
 
 integer r_near_hashC, r_below_minimum_euphoria_integer, 
 	r_above_maximum_euphoria_integer, r_NOVALUE, r_half_MIN, r_half_MAX
@@ -123,7 +153,16 @@ object fs
 for i = 1 to length(signed_types) do
 	-- test that values get encoded well when coming out from C.
 	-- test special values and ranges in EUPHORIA
-	if sizeof(signed_types[i]) >= sizeof(E_OBJECT) and signed_types[i] != C_BOOL then
+	integer test_boundary_values
+	ifdef not EU4_0 then
+		-- we test bool because bool can be as big as an int. 
+		test_boundary_values = sizeof(signed_types[i]) >= sizeof(E_OBJECT) and signed_types[i] != C_BOOL
+	elsedef
+		-- In 4.0, C_BOOL , C_INT and C_LONG are all the same but we don't have C_BOOL.
+		-- We need to compare the strings.
+		test_boundary_values = find(signed_type_names[i], {"C_INT", "C_LONG"}) != 0
+	end ifdef
+	if test_boundary_values then
 		-- The underlying library will return values in C values that fit into thier values 
 		-- but are out of bounds amoung EUPHORIA integers. 
 		r_below_minimum_euphoria_integer = define_c_func( lib818, 
@@ -198,16 +237,17 @@ for i = 1 to length(types) do
 	end for
 end for
 
--- We must use fewer bits than 53 because we EUPHORIA doesn't keep more than 53 bits for numbers.
--- So even if we return a number that is 63 bits long, and it works we wont be able to verify it as
--- it would be comparing rounded off values to rounded off values.
-integer bit_repeat_r = define_c_func(lib818, "+bit_repeat", { C_BOOL, C_UBYTE }, C_LONGLONG)
-assert( "Can load bit_repeat_r from lib818", bit_repeat_r != -1)
-test_equal( "5  repeat bits: ", power(2,5)-1, c_func(bit_repeat_r, {1, 5}))
-test_equal( "40 repeating bits: ", power(2,40)-1, c_func(bit_repeat_r, { 1, 40 }))
-test_equal( "2**50: ", power(2,50), c_func(bit_repeat_r, {1, 50})+1)
-test_equal( "-(2**50): ", -power(2,50), -c_func(bit_repeat_r, {1, 50})-1)
-
+ifdef not EU4_0 then
+	-- We must use fewer bits than 53 because we EUPHORIA doesn't keep more than 53 bits for numbers.
+	-- So even if we return a number that is 63 bits long, and it works we wont be able to verify it as
+	-- it would be comparing rounded off values to rounded off values.
+	integer bit_repeat_r = define_c_func(lib818, "+bit_repeat", { C_BOOL, C_UBYTE }, C_LONGLONG)
+	assert( "Can load bit_repeat_r from lib818", bit_repeat_r != -1)
+	test_equal( "5  repeat bits: ", power(2,5)-1, c_func(bit_repeat_r, {1, 5}))
+	test_equal( "40 repeating bits: ", power(2,40)-1, c_func(bit_repeat_r, { 1, 40 }))
+	test_equal( "2**50: ", power(2,50), c_func(bit_repeat_r, {1, 50})+1)
+	test_equal( "-(2**50): ", -power(2,50), -c_func(bit_repeat_r, {1, 50})-1)
+end ifdef
 
 integer pow_sum_c = define_c_func(lib818, "+powsum", repeat_pattern( { C_DOUBLE, C_USHORT }, 5 ), C_DOUBLE )
 test_equal( "Can call and things are passed correctly for ten argument functions", pow_sum( pow_sum_arg ), 
@@ -230,12 +270,16 @@ test_equal( "sequence func sequence", "abc", c_func( SEQUENCE_FUNC, {"abc"}) )
 test_equal( "atom func integer", 5, c_func( ATOM_FUNC, {5} ) )
 test_equal( "atom func double", 3.5, c_func( ATOM_FUNC, {3.5} ) )
 
-test_equal( "Testing passing eight doubles only", c_func( c_sum_mul8df, sum_mul8df_args ), sum_mul( sum_mul8df_args ) )
-
--- -0.692138671875
-assert( "Testing expression can be calculated in EUPHORIA", -0.692138671875 = sum_mul( sum_mul8df2lli_args ) )
-test_equal( "Testing passing eight doubles only and two long long ints", -0.692138671875, c_func( c_sum_mul8df2lli, sum_mul8df2lli_args ) )
-
+ifdef not EU4_0 then
+	constant c_sum_mul8df = define_c_func(lib818, "+sum_mul8df", repeat(C_DOUBLE, 8), C_DOUBLE)
+	constant c_sum_mul8df2lli = define_c_func(lib818, "+sum_mul8df2lli", repeat(C_DOUBLE, 8) & repeat(C_LONGLONG, 2), C_DOUBLE)
+	assert( "sum_mul present in dll", c_sum_mul8df != -1 and c_sum_mul8df2lli != -1 )
+	test_equal( "Testing passing eight doubles only", c_func( c_sum_mul8df, sum_mul8df_args ), sum_mul( sum_mul8df_args ) )
+	
+	-- -0.692138671875
+	assert( "Testing expression can be calculated in EUPHORIA", -0.692138671875 = sum_mul( sum_mul8df2lli_args ) )
+	test_equal( "Testing passing eight doubles only and two long long ints", -0.692138671875, c_func( c_sum_mul8df2lli, sum_mul8df2lli_args ) )
+end ifdef
 -- Should put some tests for argument passing as well : passing floating point, double, long long, etc..
 
 test_report()
