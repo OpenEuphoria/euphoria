@@ -1,3 +1,11 @@
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|' on
+# the right side marks the last column you can put a character in.  You must make
+# exactly 11 lines for the formatting to be correct.  It's also customary to
+# leave one space after the ':'.
+
+        |-----handy-ruler------------------------------------------------------|
 euphoria:  euphoria (interpreted language)
 euphoria:  
 euphoria:  euphoria is a general purpose procedural programming language made 
@@ -5,4 +13,7 @@ euphoria:  to be simple by the use of only one recursive data structure.
 euphoria:  
 euphoria:  You can find out more about euphoria at http://www.openeuphoria.org
 euphoria:  
-
+euphoria:  
+euphoria:  
+euphoria:  
+euphoria:  
