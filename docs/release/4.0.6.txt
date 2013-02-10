@@ -10,3 +10,4 @@
 * [[ticket:781]] http_post and http_get now follow redirects
 * [[ticket:835]] translator properly handles sequences passed to ##floor##
 * [[ticket:830]] fixed memory leak in ##[[:replace]]##
+* [[ticket:847]] fixed memory leak in ##[[:remove]]##

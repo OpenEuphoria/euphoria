@@ -4221,7 +4221,6 @@ void do_exec(intptr_t *start_pc)
 				if (nvars < 2 ) {
 					if (end_pos >= seqlen) {   // return ""
 						*obj_ptr = MAKE_SEQ(NewS1(0));
-						Ref(*obj_ptr);
 						DeRef(top);
 					}
 				   	else
