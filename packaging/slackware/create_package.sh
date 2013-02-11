@@ -20,6 +20,14 @@ fi
 # Carefully clean most of the files
 # hg sta -umai | grep -v inst | grep -v linux-build | grep -v slackware | awk '{ print $2; }' | xargs rm -v
 
+cd packaging/slackware
+if [ -e clean_branch ] ; then
+	hg summary | grep parent  | awk '{ print $2; } ' | awk --field-separator=: '{ print $2;} '  | xargs  hg -R clean_branch update -r
+else
+	hg summary | grep parent  | awk '{ print $2; } ' | awk --field-separator=: '{ print $2;} '  | xargs hg clone ../.. clean_branch -u
+fi
+cd ../..
+
 if [ ! -e linux-build ]; then
 	if [ -e linux-build.tar.gz ]; then
 #		translating the sources alone creates exe files on Windows, make sure we don't keep them here.
@@ -37,19 +45,24 @@ if [ ! -e linux-build ]; then
 	cd ..
 fi
 
-
-if [ ! -e packaging/slackware/inst ]; then
-	mkdir -p packaging/slackware/inst/usr/{bin,include,doc,share/euphoria} &&
-	cp -r include/* packaging/slackware/inst/usr/include &&
-	cp -r bin/* packaging/slackware/inst/usr/bin &&
-	cp -r linux-build/{pdf/euphoria.pdf,html} packaging/slackware/inst/usr/doc &&
-	cp -r source demo tests tutorial packaging/slackware/inst/usr/share/euphoria &&
-	find linux-build -perm u=rwx,g=rx,o=rx -type f -exec strip '{}' ';' -a -exec cp '{}' packaging/slackware/inst/usr/bin ';' ;
-	cp packaging/slackware/slackware-eu.cfg packaging/slackware/inst/usr/bin/eu.cfg
-fi
-
+set INST=packaging/slackware/inst
 cd packaging/slackware
-if [ ! -e euphoria-4.0.6-1.tgz ] ; then
-	cd inst &&
-	makepkg ../euphoria-4.0.6-1.tgz 
+rm -fr inst
+if [ -e inst ] ; then
+	echo "please remove inst as root and run again. "
+        exit
 fi
+mkdir -p inst/usr
+make DESTDIR=`pwd`/inst PREFIX=/usr  -C ../../source install install-docs install-tools
+mkdir -p inst/etc/euphoria inst/install
+cp slackware-eu.cfg inst/etc/euphoria/eu.cfg
+cp slack-desc inst/install
+
+if [ ! -e inst ] ; then
+	echo "problem! inst not found. "
+	exit
+fi
+echo "become root, "
+echo "cd to inst and type "
+echo "'chown root.root -R *;makepkg ../euphoria-4.0.5-i486-4.tgz'"
+
