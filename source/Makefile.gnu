@@ -892,6 +892,7 @@ install-docs :
 	install  \
 		$(BUILDDIR)/html/*html \
 		$(BUILDDIR)/html/*css \
+		$(BUILDDIR)/html/search.dat \
 		$(DESTDIR)$(PREFIX)/share/doc/euphoria/html
 	install  \
 		$(BUILDDIR)/html/images/* \
@@ -900,6 +901,7 @@ install-docs :
 		$(BUILDDIR)/html/js/* \
 		$(DESTDIR)$(PREFIX)/share/doc/euphoria/html/js
 
+		
 # This doesn't seem right. What about eushroud ?
 uninstall :
 	-rm $(PREFIX)/bin/$(EEXU) $(PREFIX)/bin/$(EECU) $(PREFIX)/lib/$(EECUA) $(PREFIX)/lib/$(EECUDBGA) $(PREFIX)/bin/$(EBACKENDC)
