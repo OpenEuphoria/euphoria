@@ -260,7 +260,7 @@ if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
 	echo ARCH=ix86 >> "$PREFIX"${CONFIG_FILE}
 elif echo "$UNAME_MACHINE" | grep "x86_64" > /dev/null; then
 	echo ARCH=ix86 >> "$PREFIX"${CONFIG_FILE}
-elif echo "$UNAME_MACHINE" | grep ARM > /dev/null; then
+elif echo "$UNAME_MACHINE" | grep -i ARM > /dev/null; then
 	echo ARCH=ARM >> "$PREFIX"${CONFIG_FILE}
 fi
 
