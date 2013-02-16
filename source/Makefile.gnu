@@ -140,7 +140,11 @@ else
 endif
 
 MKVER=$(BUILDDIR)/mkver$(EXE_EXT)
-EBACKENDU=eub$(EXE_EXT)
+ifeq "$(EMINGW)" "1"
+	# Windowed backend
+	EBACKENDW=eubw$(EXE_EXT)
+endif
+# Console based backend
 EBACKENDC=eub$(EXE_EXT)
 EECU=euc$(EXE_EXT)
 EEXU=eui$(EXE_EXT)
@@ -204,10 +208,11 @@ else ifeq "$(EMINGW)" "1"
 PLAT=WINDOWS
 endif
 
+# We mustn't use eui rather than $(EEXU) in these three lines below.   When this translates from Unix, the interpreter we call to do the translation must not have a .exe extension. 
 ifeq  "$(EUBIN)" ""
-EXE=$(EEXU)
+EXE=eui
 else
-EXE=$(EUBIN)/$(EEXU)
+EXE=$(EUBIN)/eui
 endif
 # The -i command with the include directory in the form we need the EUPHORIA binaries to see them. 
 # (Use a drive id 'C:')
@@ -230,7 +235,7 @@ CREOLE=creole
 endif
 
 ifeq "$(TRANSLATE)" "euc"
-	TRANSLATE=$(EECU)
+	TRANSLATE="euc"
 else
 #   We MUST pass these arguments to $(EXE), for $(EXE) is not and shouldn't be governed by eu.cfg in BUILDDIR.
 	TRANSLATE=$(EXE) $(CYPINCDIR) $(EC_DEBUG) $(CYPTRUNKDIR)/source/ec.ex
@@ -380,20 +385,22 @@ clean :
 	-rm $(BUILDDIR)/*pdf
 	-rm $(BUILDDIR)/*txt
 	-rm -r $(BUILDDIR)/*-build
-	-rm $(BUILDDIR)/eui
-	-rm $(BUILDDIR)/euc
-	-rm $(BUILDDIR)/eub
+	-rm $(BUILDDIR)/eui$(EXE_EXT) $(BUILDDIR)/$(EEXUW)
+	-rm $(BUILDDIR)/$(EECU)
+	-rm $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW)
 	-rm $(BUILDDIR)/eu.a
 	-rm $(BUILDDIR)/eudbg.a
 	-for f in $(EU_TOOLS) ; do \
 		rm $${f} ; \
 	done ;
 	-rm $(BUILDDIR)/ver.cache
-	-rm $(BUILDDIR)/mkver
+	-rm $(BUILDDIR)/mkver$(EXE_EXT)
+	-rm $(BUILDDIR)/eudist$(EXE_EXT) $(BUILDDIR)/echoversion$(EXE_EXT)
 	-rm -r $(BUILDDIR)/html
 	-rm -r $(BUILDDIR)/coverage
 	-rm -r $(BUILDDIR)/manual
-	
+	-rm $(TRUNKDIR)/tests/lib818.dll	
+	-rm $(BUILDDIR)/*.res
 
 clobber distclean : clean
 	-rm -f $(CONFIG)
@@ -401,9 +408,6 @@ clobber distclean : clean
 	-rm -fr $(BUILDDIR)
 	-rm eu.cfg
 
-ifeq "$(MINGW)" "1"
-	-rm -f $(BUILDDIR)/{$(EBACKENDC),$(EEXUW)}
-endif
 	$(MAKE) -C pcre CONFIG=../$(CONFIG) clean
 	
 
@@ -558,22 +562,25 @@ backend : builddirs
 ifeq "$(EUPHORIA)" "1"
 	$(MAKE) backendsource EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG)  EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 endif	
-	$(MAKE) $(BUILDDIR)/$(EBACKENDU) EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+	$(MAKE) $(BUILDDIR)/$(EBACKENDC) EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+ifeq "$(EMINGW)" "1"
+	$(MAKE) $(BUILDDIR)/$(EBACKENDW) EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+endif
 
 ifeq "$(EMINGW)" "1"
 $(EUB_RES) : eub.rc version_info.rc eu.manifest
 $(EUBW_RES) : eubw.rc version_info.rc eu.manifest
 endif
 
-$(BUILDDIR)/$(EBACKENDU) : OBJDIR = backobj
-$(BUILDDIR)/$(EBACKENDU) : EU_TARGET = backend.ex
-$(BUILDDIR)/$(EBACKENDU) : EU_MAIN = $(EU_BACKEND_RUNNER_FILES)
-$(BUILDDIR)/$(EBACKENDU) : EU_OBJS = $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
-$(BUILDDIR)/$(EBACKENDU) : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) $(EUB_RES) $(EUBW_RES)
-	@$(ECHO) making $(EBACKENDU) $(OBJDIR)
-	$(CC) $(EOSFLAGS) $(EUBW_RES) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(DEBUG_FLAGS) $(MSIZE) $(PROFILE_FLAGS) -o $(BUILDDIR)/$(EBACKENDU)
+$(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) : OBJDIR = backobj
+$(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) : EU_TARGET = backend.ex
+$(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) : EU_MAIN = $(EU_BACKEND_RUNNER_FILES)
+$(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) : EU_OBJS = $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+$(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) $(EUB_RES) $(EUBW_RES)
+	@$(ECHO) making $(EBACKENDC) $(OBJDIR)
+	$(CC) $(EOSFLAGS) $(EUB_RES) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(DEBUG_FLAGS) $(MSIZE) $(PROFILE_FLAGS) -o $(BUILDDIR)/$(EBACKENDC)
 ifeq "$(EMINGW)" "1"
-	$(CC) $(EOSFLAGSCONSOLE) $(EUB_RES) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EBACKENDC)
+	$(CC) $(EOSFLAGS) $(EUBW_RES) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(DEBUG_FLAGS) $(MSIZE) $(PROFILE_FLAGS) -o $(BUILDDIR)/$(EBACKENDW)
 endif
 
 ifeq "$(HG)" ""
@@ -688,7 +695,7 @@ test : EUCOMPILEDIR=$(TRUNKDIR)
 test : EUCOMPILEDIR=$(TRUNKDIR)	
 test : C_INCLUDE_PATH=$(TRUNKDIR):..:$(C_INCLUDE_PATH)
 test : LIBRARY_PATH=$(%LIBRARY_PATH)
-test : 
+test : ../tests/lib818.dll
 test :  
 	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
 		$(EXE) -i ../include ../source/eutest.ex -i ../include -cc gcc $(VERBOSE_TESTS) \
@@ -701,6 +708,7 @@ test :
 	$(EXE) -i ../include ../source/eutest.ex -process-log -html > $(CYPBUILDDIR)/test-report.html	
 	cd ../tests && sh check_diffs.sh
 
+testeu : ../tests/lib818.dll
 testeu : 
 	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) $(EXE) ../source/eutest.ex --nocheck -i ../include -cc gcc -exe "$(CYPBUILDDIR)/$(EEXU) -batch $(CYPTRUNKDIR)/source/eu.ex" $(TESTFILE)
 
@@ -721,6 +729,7 @@ coverage-311 :
 		-coverage-exclude std -coverage-exclude euphoria \
 		 -coverage-pp "$(EXE) -i $(CYPTRUNKDIR)/include $(CYPTRUNKDIR)/bin/eucoverage.ex" $(TESTFILE)
 
+coverage :  ../tests/lib818.dll
 coverage : 
 	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
 		$(EXE) -i ../include $(CYPTRUNKDIR)/source/eutest.ex -i $(CYPTRUNKDIR)/include \
@@ -728,6 +737,7 @@ coverage :
 		-coverage-db $(CYPBUILDDIR)/unit-test.edb -coverage $(CYPTRUNKDIR)/include/std \
 		 -coverage-pp "$(EXE) -i $(CYPTRUNKDIR)/include $(CYPTRUNKDIR)/bin/eucoverage.ex" $(TESTFILE)
 
+coverage-front-end :  ../tests/lib818.dll
 coverage-front-end : 
 	-rm $(CYPBUILDDIR)/front-end.edb
 	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
@@ -761,11 +771,11 @@ install :
 	install $(BUILDDIR)/$(EECUDBGA) $(DESTDIR)$(PREFIX)/lib
 	install $(BUILDDIR)/$(EEXU) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EECU) $(DESTDIR)$(PREFIX)/bin
-	install $(BUILDDIR)/$(EBACKENDU) $(DESTDIR)$(PREFIX)/bin
+	install $(BUILDDIR)/$(EBACKENDC) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EUBIND) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EUSHROUD) $(DESTDIR)$(PREFIX)/bin
 ifeq "$(EMINGW)" "1"
-	install $(BUILDDIR)/$(EBACKENDC) $(DESTDIR)$(PREFIX)/bin
+	install $(BUILDDIR)/$(EBACKENDW) $(DESTDIR)$(PREFIX)/bin
 endif
 	install ../include/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include
 	install ../include/std/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std
@@ -882,6 +892,7 @@ install-docs :
 	install  \
 		$(BUILDDIR)/html/*html \
 		$(BUILDDIR)/html/*css \
+		$(BUILDDIR)/html/search.dat \
 		$(DESTDIR)$(PREFIX)/share/doc/euphoria/html
 	install  \
 		$(BUILDDIR)/html/images/* \
@@ -890,11 +901,12 @@ install-docs :
 		$(BUILDDIR)/html/js/* \
 		$(DESTDIR)$(PREFIX)/share/doc/euphoria/html/js
 
+		
 # This doesn't seem right. What about eushroud ?
 uninstall :
-	-rm $(PREFIX)/bin/$(EEXU) $(PREFIX)/bin/$(EECU) $(PREFIX)/lib/$(EECUA) $(PREFIX)/lib/$(EECUDBGA) $(PREFIX)/bin/$(EBACKENDU)
+	-rm $(PREFIX)/bin/$(EEXU) $(PREFIX)/bin/$(EECU) $(PREFIX)/lib/$(EECUA) $(PREFIX)/lib/$(EECUDBGA) $(PREFIX)/bin/$(EBACKENDC)
 ifeq "$(EMINGW)" "1"
-	-rm $(PREFIX)/lib/$(EBACKENDC)
+	-rm $(PREFIX)/lib/$(EBACKENDW)
 endif
 	-rm -r $(PREFIX)/share/euphoria
 
@@ -918,6 +930,18 @@ endif
 
 $(BUILDDIR)/%.res : %.rc
 	windres $< -O coff -o $@
+
+LIB818_FPIC=-fPIC
+
+$(BUILDDIR)/test818.o : test818.c
+	$(CC) -c $(LIB818_FPIC) -I ../include $(FE_FLAGS) -Wall -shared ../source/test818.c -o $(BUILDDIR)/test818.o
+
+lib818 :
+	touch test818.c
+	$(MAKE) ../tests/lib818.dll
+
+../tests/lib818.dll : $(BUILDDIR)/test818.o
+	$(CC)  $(MSIZE) $(LIB818_FPIC) -shared -o ../tests/lib818.dll $(CREATEDLLFLAGS) $(BUILDDIR)/test818.o
 	
 $(BUILDDIR)/$(OBJDIR)/%.o : $(BUILDDIR)/$(OBJDIR)/%.c
 	$(CC) $(EBSDFLAG) $(FE_FLAGS) $(BUILDDIR)/$(OBJDIR)/$*.c -I/usr/share/euphoria -o$(BUILDDIR)/$(OBJDIR)/$*.o
@@ -947,6 +971,8 @@ ifdef PCRE_OBJECTS
 $(PREFIXED_PCRE_OBJECTS) : $(patsubst %.o,pcre/%.c,$(PCRE_OBJECTS)) pcre/config.h.unix pcre/pcre.h.unix
 	$(MAKE) -C pcre all CC="$(PCRE_CC)" PCRE_CC="$(PCRE_CC)" EOSTYPE="$(EOSTYPE)" EOSFLAGS="$(EOSPCREFLAGS)" CONFIG=../$(CONFIG)
 endif
+
+.IGNORE : test
 
 depend :
 	makedepend -fMakefile.gnu -Y. -I. *.c -p'$$(BUILDDIR)/intobj/back/'

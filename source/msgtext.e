@@ -14,6 +14,8 @@ include common.e
 
 export enum
 	MISSING_CMD_PARAMETER = 353,
+	BUILDDIR_IS_FILE,
+	BUILDDIR_IS_UNDEFINED,
 	$
 
 -- don't change this please, but please look for -deleted- items before adding new options
@@ -373,6 +375,8 @@ constant StdErrMsgs = {
 	{351, "Create MinGW binaries in a Cygwin environment"},
 	{352, "There is no watcom instalation under specified Watom Path [1]"},
 	{MISSING_CMD_PARAMETER, "Command line argument [1] requires a parameter"},
+	{BUILDDIR_IS_FILE, "Error: Specified build directory is a file"},
+	{BUILDDIR_IS_UNDEFINED, "Error: Specified build directory is undefined (wildcards are not allowed)"},
 	$
 }
 

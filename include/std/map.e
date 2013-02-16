@@ -1495,8 +1495,8 @@ end procedure
 --      if the file failed to open, or **-2** if the file is incorrectly formatted.
 --
 -- Comments:
--- If ##file_name_p## is an already opened file handle, this routine will write
--- to that file and not close it. Otherwise, the named file will be created and
+-- If ##file_name_p## is an already opened file handle, this routine will read
+-- from that file and not close it. Otherwise, the named file will be opened and
 -- closed by this routine.
 --
 -- The input file can be either one created by the [[:save_map]] function or

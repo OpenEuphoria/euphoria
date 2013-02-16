@@ -1,0 +1,14 @@
+== Version 4.0.6 Date TBD
+
+=== Bug Fixes
+
+* [[ticket:801]] fix translator memory leak for ##[[:insert]]##
+* [[ticket:799]] fix memory leak in ##[[:gets]]## when reading EOF
+* [[ticket:819]] use operating system sleep functions for fractions of seconds to avoid needless CPU utilization
+* [[ticket:824]] fix OpenWatcom installer PCRE directory
+* [[ticket:823]] emit error in translator when user specifies a file for the build directory
+* [[ticket:781]] http_post and http_get now follow redirects
+* [[ticket:835]] translator properly handles sequences passed to ##floor##
+* [[ticket:830]] fixed memory leak in ##[[:replace]]##
+* [[ticket:847]] fixed memory leak in ##[[:remove]]##
+* [[ticket:837]] fixed documentation error involving ##[[:load_map]]##
