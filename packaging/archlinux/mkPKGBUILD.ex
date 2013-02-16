@@ -9,37 +9,66 @@ include std/io.e
 include std/search.e
 include std/filesys.e
 include std/os.e
-constant BUILD_DIR = search:find_replace("/","../../build",SLASH)
-constant tar_ball = search:find_replace("/",BUILD_DIR & "/euphoria-" & info:version_string_short() & ".tar.gz",SLASH)
+
+-- the maximum size we expect for the archive: Slackware's package is 11M but includes all of the binaries.
+constant archive_limit = 10_000_000 
+
+
+constant BUILD_DIR = "../../build"
+constant tar_ball = BUILD_DIR & "/euphoria-" & info:version_string_short() & ".tar.gz"
 object line = ""
+
+puts(1, "Program should be run by the version of the EUPHORIA you wish to create an installer for.\nPress ENTER")
+gets(0)
 
 ifdef not LINUX then
 	printf(1, "This should be used under Linux.  You have been warned.\n",{})
 end ifdef
 
 puts(1,"Generating PKGBUILD for " & info:version_string_short() & "...")
-with trace
-process md5sum_p,
-		awk_p    = pipeio:exec("gawk '{ print $1; }'", pipeio:create())
-if not file_exists(tar_ball) then
-	puts(1,"running tar...")
-	integer tar_ball_fd = open(tar_ball,"wb")
-	process tar_p = pipeio:exec(search:find_replace("/","tar  -cz -O ../win32/cleanbranch/{source,include,docs,bin,demo,tests,tutorial,file_id.diz,license.txt}",SLASH), pipeio:create())
-	md5sum_p = pipeio:exec("md5sum", pipeio:create())
-	while sequence(line) and length(line) entry do
-		puts(tar_ball_fd, line)
-		pipeio:write(md5sum_p[pipeio:STDIN], line)
-		puts(1,'.')
-	entry
-		line = pipeio:read(tar_p[pipeio:STDOUT], 10240)
-	end while
-	pipeio:close(tar_p[pipeio:STDIN])
-	close(tar_ball_fd)
+constant SIMPLE_RUN = 2 -- for use with system: run without clearing the screen or waiting for ENTER
+system(sprintf("rm -fr euphoria-%s", repeat(info:version_string_short(),1)), SIMPLE_RUN)
+if file_exists("../win32/cleanbranch") then
+	-- get up to date
+	system(sprintf("hg -R ../win32/cleanbranch pull", {}), SIMPLE_RUN)
+	-- update to the branch
+	system(sprintf("hg -R ../win32/cleanbranch update -r %s --clean", repeat(info:version_string_short(),1)), SIMPLE_RUN)
+	create_directory(sprintf("euphoria-%s", repeat(info:version_string_short(),1)), 7*64+5*8+5)
+	system("ln -sf `pwd`/../win32/cleanbranch/{source,include,bin,demo,docs,tests,tutorial,file_id.diz,License.txt} euphoria-" & info:version_string_short(), SIMPLE_RUN)
+	create_directory(sprintf("euphoria-%s/source/build", repeat(info:version_string_short(),1)))
+	delete_file("euphoria-" & info:version_string_short() & "/source/build/html")
+	system(sprintf("ln -sf `pwd`/../../source/build/html euphoria-%s/source/build/html", repeat(info:version_string_short(),1)), SIMPLE_RUN)
+	system(sprintf("ln -sf `pwd`/../../source/build/euphoria.pdf euphoria-%s/source/build/euphoria.pdf", repeat(info:version_string_short(),1)), SIMPLE_RUN)
 else
-	md5sum_p = pipeio:exec("md5sum " & tar_ball, pipeio:create())
+	puts(1, "Please clone this into ../win32/cleanbranch first")
+	abort(1)
 end if
 
+
+process md5sum_p,
+		awk_p    = pipeio:exec("gawk '{ print $1; }'", pipeio:create())
+puts(1,"archiving, compressing and creating md5sum...")
+integer tar_ball_fd = open(tar_ball,"wb")
+process tarz_p = pipeio:exec("tar -czh -O " &  
+	" euphoria-" & info:version_string_short(), pipeio:create())
+md5sum_p = pipeio:exec("md5sum", pipeio:create())
+integer size = 0
+while sequence(line) and length(line) and size < archive_limit entry do
+	puts(tar_ball_fd, line)
+	pipeio:write(md5sum_p[pipeio:STDIN], line)
+	puts(1,'.')
+entry
+	line = pipeio:read(tarz_p[pipeio:STDOUT], 10240)
+	size += 10240
+end while
+pipeio:close(tarz_p[pipeio:STDIN])
+close(tar_ball_fd)
 pipeio:close(md5sum_p[pipeio:STDIN])
+
+if size >= archive_limit then
+	puts(1, "Error!  Runaway archiving with tar: archive reached 40MB. (shouldn\'t happen)")
+        abort(1)
+end if
 
 sequence sum = ""
 while length(line) = 0 or find('\n',line)=0 entry do
