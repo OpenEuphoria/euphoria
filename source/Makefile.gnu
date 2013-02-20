@@ -134,9 +134,11 @@ else
 	ifdef EDEBUG
 		LIBRARY_NAME=eudbg.a
 	else
+		EOSMING=-ffast-math -O3 -Os
 		LIBRARY_NAME=eu.a
 	endif
 	MEM_FLAGS=-DESIMPLE_MALLOC
+	
 endif
 
 MKVER=$(BUILDDIR)/mkver$(EXE_EXT)
