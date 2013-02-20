@@ -250,7 +250,7 @@ public function GetPlatformDefines(integer for_translator = 0)
 			local_defines &= {"LONG64"}
 		end if
 	elsif (IARM and not for_translator) or (TARM and for_translator) then
-		local_defines &= {"ARM", "BITS32", "LONG64"}
+		local_defines &= {"ARM", "BITS32", "LONG32"}
 	end if
 	
 	-- So the translator knows what to strip from defines if translating
