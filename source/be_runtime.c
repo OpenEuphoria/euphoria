@@ -439,7 +439,13 @@ void debug_dbl(double num)
 	buff[dbg_dbl_len - 1] = 0; // ensure NULL
 	debug_msg(buff);
 }
-
+#ifdef EARM
+double maxplus1 = ((double)UINTPTR_MAX) + 1;
+uintptr_t doubletouintptrdiscardhighbits(double d)
+{
+	return d-(maxplus1*floor(d/maxplus1));
+}
+#endif
 
 #ifdef ERUNTIME
 int color_trace = 1;
@@ -1748,7 +1754,6 @@ object Dremainder(d_ptr a, d_ptr b)
 	return (object)NewDouble(fmod(a->dbl, b->dbl)); /* for now */
 }
 
-
 object and_bits(uintptr_t a, uintptr_t b)
 /* integer a AND b */
 {
@@ -1759,7 +1764,11 @@ object and_bits(uintptr_t a, uintptr_t b)
 object Dand_bits(d_ptr a, d_ptr b)
 /* double a AND b */
 {
+#ifdef EARM
+	return and_bits(doubletouintptrdiscardhighbits(a->dbl), doubletouintptrdiscardhighbits(b->dbl));
+#else
 	return and_bits( (uintptr_t)(a->dbl), (uintptr_t)(b->dbl));
+#endif
 }
 
 object or_bits(uintptr_t a, uintptr_t b)
@@ -1769,10 +1778,15 @@ object or_bits(uintptr_t a, uintptr_t b)
 	return MAKE_UINT(a);
 }
 
+
 object Dor_bits(d_ptr a, d_ptr b)
 /* double a OR b */
 {
+#ifdef EARM
+	return or_bits(doubletouintptrdiscardhighbits(a->dbl), doubletouintptrdiscardhighbits(b->dbl));
+#else
 	return or_bits( (uintptr_t)(a->dbl), (uintptr_t)(b->dbl));
+#endif
 }
 
 object xor_bits(uintptr_t a, uintptr_t b)
@@ -1782,11 +1796,15 @@ object xor_bits(uintptr_t a, uintptr_t b)
 	return MAKE_UINT(a);
 }
 
+
 object Dxor_bits(d_ptr a, d_ptr b)
 /* double a XOR b */
 {
-
+#ifdef EARM
+	return xor_bits(doubletouintptrdiscardhighbits(a->dbl), doubletouintptrdiscardhighbits(b->dbl));
+#else
 	return xor_bits((uintptr_t)(a->dbl), (uintptr_t)(b->dbl));
+#endif
 }
 
 object not_bits(uintptr_t a)
@@ -1796,10 +1814,15 @@ object not_bits(uintptr_t a)
 	return MAKE_UINT(a);
 }
 
+
 object Dnot_bits(d_ptr a)
 /* double bitwise NOT of a */
 {
+#ifdef EARM
+	return not_bits(doubletouintptrdiscardhighbits(a->dbl));
+#else
 	return not_bits((uintptr_t)(a->dbl));
+#endif
 }
 
 object power(object a, object b)

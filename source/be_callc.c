@@ -56,8 +56,8 @@
 #include "be_alloc.h"
 
 
-#if !defined(ARCH) || !defined(ARM) || !defined(ix86) || !defined(ix86_64)
-#	error "Missing required macros."
+#if !defined(EARM) && !defined(EX86) && !defined(EX86_64)
+#	error "Missing required architecture macros."
 #endif
 
 /*******************/
@@ -65,7 +65,7 @@
 /*******************/
 
 #if defined(__GNUC__)
-#if ARCH == ix86
+#ifdef EX86
 /** 
  * push the value arg on to the **runtime** stack.  You must make sure that as_offset is
  * equal to sum of all of the sizes of the data you push to the stack by the time you call pop below.

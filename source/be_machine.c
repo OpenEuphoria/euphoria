@@ -60,7 +60,7 @@
 
 // This is a workaround for ARM not recognizing INFINITY, which is included math.h
 // but is not recognized. This seems to be a bug/issue with Scratchbox and Maemo SDK
-#if ARCH == ARM
+#ifdef EARM
 #ifndef INFINITY
 #define INFINITY (1.0/0.0)
 #endif 
@@ -1869,8 +1869,7 @@ void init_fp_conversions(){
 }
 #endif
 
-
-#if ARCH == ARM
+#ifdef EARM
 void arm_float80_to_float64( unsigned char *a, unsigned char *b ){
 	int64_t exp_a, exp_b, sign;
 	int64_t mantissa_a, mantissa_b;
@@ -1918,7 +1917,7 @@ object float_to_atom(object x, int flen)
 	else{
 		#ifdef EWATCOM
 			(*convert_80_to_64)( &convert, &d );
-		#elif ARCH == ARM
+		#elif defined( EARM )
 			arm_float80_to_float64( (unsigned char*) &convert.fbuff, (unsigned char*)&d );
 		#else
 			d = (eudouble)convert.ldouble;
@@ -2294,7 +2293,7 @@ object DefineC(object x)
 	return c_routine_next++;
 }
 
-#if ARCH == ARM
+#ifdef EARM
         #define CALLBACK_SIZE (129)
 #else
 
@@ -2556,7 +2555,7 @@ object CallBack(object x)
 		}
 #if defined(EOSX) || (INTPTR_MAX == INT64_MAX)
 /* If OS/X ever gets ported to ARM ... */
-#if ARCH == ARM
+#ifdef EARM
 #error "misaligned comparison code" 
 #endif
 		else if( *((uintptr_t*)(copy_addr + i)) == general_ptr_magic ){

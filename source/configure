@@ -63,7 +63,7 @@ elif echo "$UNAME_MACHINE" | grep "x86_64" > /dev/null; then
 	ARCH=ix86_64
 	MFLAG=-m64
 	EFLAG=E64
-elif echo "$UNAME_MACHINE" | grep ARM > /dev/null; then
+elif echo "$UNAME_MACHINE" | grep -i ARM > /dev/null; then
 	ARCH=ARM
 	MFLAG=
 	EFLAG=E32
