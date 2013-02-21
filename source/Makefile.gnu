@@ -161,11 +161,8 @@ else
 			LIBRARY_NAME=eudbg.a
 		endif
 	else
-		ifdef FPIC
-			LIBRARY_NAME=euso.a
-		else
-			LIBRARY_NAME=eu.a
-		endif
+		EOSMING=-ffast-math -O3 -Os
+		LIBRARY_NAME=eu.a
 	endif
 	MEM_FLAGS=-DESIMPLE_MALLOC
 	CREATEDLLFLAGS=
@@ -280,7 +277,7 @@ endif
 
 ifeq "$(ARCH)" "ARM"
 ARCH_FLAG=-DEARM
-else ifeq "$(ARCH)" "X86"
+else ifeq "$(ARCH)" "ix86"
 ARCH_FLAG=-DEX86
 else ifeq "$(ARCH)" "ix86_64"
 ARCH_FLAG=-DEX86_64
@@ -1011,6 +1008,7 @@ install-docs :
 	install  \
 		$(BUILDDIR)/html/*html \
 		$(BUILDDIR)/html/*css \
+		$(BUILDDIR)/html/search.dat \
 		$(DESTDIR)$(PREFIX)/share/doc/euphoria/html
 	install  \
 		$(BUILDDIR)/html/images/* \
@@ -1019,6 +1017,7 @@ install-docs :
 		$(BUILDDIR)/html/js/* \
 		$(DESTDIR)$(PREFIX)/share/doc/euphoria/html/js
 
+		
 # This doesn't seem right. What about eushroud ?
 uninstall :
 	-rm $(PREFIX)/bin/$(EEXU) $(PREFIX)/bin/$(EECU) $(PREFIX)/lib/$(EECUA) $(PREFIX)/lib/$(EECUDBGA) $(PREFIX)/bin/$(EBACKENDC)

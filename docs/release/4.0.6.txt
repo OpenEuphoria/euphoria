@@ -11,3 +11,4 @@
 * [[ticket:835]] translator properly handles sequences passed to ##floor##
 * [[ticket:830]] fixed memory leak in ##[[:replace]]##
 * [[ticket:847]] fixed memory leak in ##[[:remove]]##
+* [[ticket:837]] fixed documentation error involving ##[[:load_map]]##
