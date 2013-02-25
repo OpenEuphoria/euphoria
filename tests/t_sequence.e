@@ -314,6 +314,7 @@ sequence s
 s={0,1,2,3,{"aaa",{{3},{1},{2}},"ccc"},4}
 test_equal("fetch",{2},fetch(s,{5,2,3}))
 test_equal("store",{0,1,2,3,{"aaa",{{3},{1},{98,98,98}},"ccc"},4},store(s,{5,2,3},"bbb"))
+test_equal("store single element",{1,100,3},store({1,2,3},{2},100))
 
 test_equal("repeat_pattern",{1,2,1,2,1,2,1,2},repeat_pattern({1,2},4))
 test_equal("repeat_pattern 1c", {}, repeat_pattern("it", 0))
