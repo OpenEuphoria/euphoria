@@ -12,3 +12,4 @@
 * [[ticket:830]] fixed memory leak in ##[[:replace]]##
 * [[ticket:847]] fixed memory leak in ##[[:remove]]##
 * [[ticket:837]] fixed documentation error involving ##[[:load_map]]##
+* Fix std/sequence.e so store() will correctly handle the one-element index case - it was duplicating the entire sequence before.
