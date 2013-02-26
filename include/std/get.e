@@ -41,10 +41,8 @@ natural string_next
 
 char ch  -- the current character
 
-
 procedure get_ch()
 -- set ch to the next character in the input stream (either string or file)
-
 	if sequence(input_string) then
 		if string_next <= length(input_string) then
 			ch = input_string[string_next]
@@ -110,6 +108,21 @@ function get_qchar()
 	end if
 end function
 
+function get_heredoc( sequence terminator )
+	sequence text = ""
+	integer ends_at = 1 - length( terminator )
+	while ends_at < 1 or not match( terminator, text, ends_at ) with entry do
+		if ch = GET_EOF then
+			return { GET_FAIL, 0 }
+		end if
+	entry
+		get_ch()
+		text &= ch
+		ends_at += 1
+	end while
+	return { GET_SUCCESS, head( text, length( text ) - length( terminator ) ) }
+end function
+
 function get_string()
 -- get a double-quoted character string
 -- ch is "live" at exit
@@ -122,6 +135,11 @@ function get_string()
 			return {GET_FAIL, 0}
 		elsif ch = '"' then
 			get_ch()
+			if length( text ) = 0 and ch = '"' then
+				if ch = '"' then
+					return get_heredoc( `"""` )
+				end if
+			end if
 			return {GET_SUCCESS, text}
 		elsif ch = '\\' then
 			get_ch()
@@ -133,6 +151,7 @@ function get_string()
 		text = text & ch
 	end while
 end function
+
 
 type plus_or_minus(integer x)
 	return x = -1 or x = +1
@@ -346,6 +365,8 @@ function Get()
 
 		elsif ch = '\"' then
 			return get_string()
+		elsif ch = '`' then
+			return get_heredoc("`")
 		elsif ch = '\'' then
 			return get_qchar()
 		else
@@ -441,6 +462,9 @@ function Get2()
 
 		elsif ch = '\"' then
 			e = get_string()
+			return e & {string_next-1-offset-(ch!=-1), leading_whitespace}
+		elsif ch = '`' then
+			e = get_heredoc("`")
 			return e & {string_next-1-offset-(ch!=-1), leading_whitespace}
 		elsif ch = '\'' then
 			e = get_qchar()
