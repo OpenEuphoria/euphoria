@@ -26,6 +26,18 @@ test_equal("value() scientific notation #4 no exponent", {GET_FAIL, 0}, value("+
 test_equal("value() no hex digits", {GET_FAIL, 0}, value("#"))
 test_equal("value() decimal point only", {GET_FAIL, 0}, value("."))
 
+constant
+	BACKTICK = `
+\12\t\b\ns sdf " sdflkj sdf
+`,
+	TRIPLE = """
+\ sdf\ ` ' " sdfs "
+
+"""
+
+test_equal("value() backtick", { GET_SUCCESS, BACKTICK }, value( '`' & BACKTICK & '`' ) )
+test_equal("value() triple quote", { GET_SUCCESS, TRIPLE }, value( `"""` & TRIPLE & `"""` ) )
+
 constant 
 	OBJECT = { 1, 2, 3, "foo", {-9},{}},
 	TEXT = "some text",

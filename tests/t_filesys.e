@@ -191,11 +191,21 @@ test_equal( "canonical_path() #11",current_dir() & SLASH, canonical_path(lower(c
 
 
 ifdef WINDOWS then
+	include std/dll.e
+	include std/machine.e
+	constant k32 = open_dll( "kernel32.dll" ),
+		GetShortPathNameA = define_c_proc( k32, "GetShortPathNameA", { C_POINTER, C_POINTER, C_UINT } )
+	function get_short_path( sequence path )
+		atom short_name = allocate( length( path ) + 1, 1 )
+		poke( short_name, 0 )
+		c_proc( GetShortPathNameA, { allocate_string( path, 1 ), short_name, length( path ) + 1 } )
+		return peek_string( short_name )
+	end function
+	
 	object program_files = getenv("ProgramFiles")
 	
 	if sequence(program_files) then
-		sequence fbpf = filebase(program_files)
-		sequence shortened = upper(fbpf[1..6]) & "~1"
+		sequence shortened = filebase( get_short_path( program_files ) )
 		test_equal( "canonical_path() #12", shortened, filebase(canonical_path(program_files,,TO_SHORT)))
 	end if
 end ifdef

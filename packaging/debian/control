@@ -1,13 +1,13 @@
 Source: euphoria
 Section: interpreters
 Priority: extra
-Maintainer: Matt Lewis <mattlewis@openeuphoria.org>
+Maintainer: Matt Lewis <mattlewis@users.sf.net>
 Build-Depends: libc6-dev (>= 2.6.1 ), linux-libc-dev (>= 2.6.22-14.47 )
 Standards-Version: 3.8.4
 
 Package: euphoria
 Architecture: %arch%
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: libc6 (>= 2.3.6-6~)
 Description: Intrepreted and compiled programming language
  Euphoria is a simple, flexible, and easy-to-learn programming 
  language. It lets you quickly and easily develop programs for 

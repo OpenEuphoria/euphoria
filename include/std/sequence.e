@@ -150,6 +150,11 @@ public function store(sequence target, sequence indexes, object x)
 	sequence partials,result,branch
 	object last_idx
 
+	if length(indexes) = 1 then
+		target[indexes[1]] = x
+		return target
+	end if
+
 	partials = repeat(target,length(indexes)-1)
 	branch = target
 	for i=1 to length(indexes)-1 do

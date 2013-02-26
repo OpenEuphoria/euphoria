@@ -11,6 +11,7 @@
 * Fix std/net/http.e that caused malformed HTTP GET requests
 * Updated demo/news.ex with up-to-date URLs for some news web sites.
 * Fix std/net/http.e so it can handle cases where the Content-Length header is not present
+* Fix std/sequence.e so store() will correctly handle the one-element index case - it was duplicating the entire sequence before.
 
 == Enhancements
 
