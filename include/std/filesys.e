@@ -1674,9 +1674,14 @@ public function canonical_path(sequence path_in, integer directory_given = 0, ca
 		if lPath[$] != SLASH then
 			sl = sl & {length(lPath)+1}
 		end if
-		
+
 		for i = length(sl)-1 to 1 by -1 label "partloop" do
-			sequence part = lPath[1..sl[i]-1]
+			ifdef WINDOWS then
+				sequence part = lDrive & lPath[1..sl[i]-1]
+			elsedef
+				sequence part = lPath[1..sl[i]-1]
+			end ifdef
+			
 			object list = dir( part & SLASH )
 			sequence supplied_name = lPath[sl[i]+1..sl[i+1]-1]
 			
