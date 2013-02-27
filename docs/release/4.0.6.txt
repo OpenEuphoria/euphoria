@@ -16,7 +16,8 @@
 * [[ticket:638]] ##[[:value]]## and ##[[:get]]## handle multi-line strings
 * [[ticket:836]] ##[[:canonical_path]]## works when path is not on the current drive on Windows
 * [[ticket:630]] shrouder ignores binder options that are not applicable
+* [[ticket:776]] Updated ##[[:walk_dir]]## parameter documentation
 
-== Enhancements
+=== Enhancements
 
 * command line help is now sorted by option

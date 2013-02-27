@@ -485,10 +485,16 @@ public integer my_dir = DEFAULT_DIR_SOURCE
 -- 	# ##path_name## : a sequence, the name of the directory to walk through
 -- 	# ##your_function## : the routine id of a function that will receive each path
 --                       returned from the result of ##dir_source##, one at a time.
+--                       Optionally, to include extra data for your function, ##your_function##
+--                       can be a 2 element sequence, with the routine_id as the first element and other data
+--                       as the second element.
 -- 	# ##scan_subdirs## : an optional integer, 1 to also walk though subfolders, 0 (the default) to skip them all.
 --  # ##dir_source## : an optional integer. A routine_id of a user-defined routine that 
 --                    returns the list of paths to pass to ##your_function##. If omitted,
---                    the [[:dir]]() function is used.   
+--                    the [[:dir]]() function is used. If your routine requires an extra parameter,
+--                    ##dir_source## may be a 2 element sequence where the first element is the
+--                    routine id and the second is the extra data to be passed as the second parameter
+--                    to your function.
 --
 -- Returns:
 -- An **object**,
@@ -559,7 +565,7 @@ public function walk_dir(sequence path_name, object your_function, integer scan_
 	object orig_func
 	sequence user_data = {path_name, 0}
 	object source_orig_func
-	object source_user_data
+	object source_user_data = ""
 	
 	orig_func = your_function
 	if sequence(your_function) then
