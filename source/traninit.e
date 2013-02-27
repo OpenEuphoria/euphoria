@@ -107,7 +107,7 @@ add_options( trans_opt_def )
 -- Process the translator command-line options
 
 export procedure transoptions()
-	sequence tranopts = get_options()
+	sequence tranopts = sort( get_options() )
 	
 	Argv = expand_config_options( Argv )
 	Argc = length(Argv)

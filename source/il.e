@@ -34,38 +34,23 @@ include error.e
 include msgtext.e
 include intinit.e
 
-ifdef SHROUDER then
-	constant OPTIONS = {
-		{ "list",        0, GetMsgText(305, 0), { } },
-		{ "full_debug",  0, GetMsgText(309, 0), { } },
-		{ "out",         0, GetMsgText(310, 0), { HAS_PARAMETER, "file" }  },
-		{ "i",           0, GetMsgText(311, 0), { MULTIPLE, HAS_PARAMETER, "file" }  },
-		{ "c",           0, GetMsgText(280, 0), { MULTIPLE, HAS_PARAMETER, "filename" } },
-		{ "d",           0, GetMsgText(282,0), { MULTIPLE, HAS_PARAMETER, "word" } },
-		{ "batch",       0, GetMsgText(279,0), { } },
-		{ "quiet",       0, GetMsgText(304, 0), { } },
-		{ "copyright",   0, GetMsgText(312, 0), { } },
-		{ "eudir",     0, GetMsgText(328,0), { HAS_PARAMETER, "dir" } },
-		$
-	}
-elsedef
-	constant OPTIONS = {
-		{ "list",        0, GetMsgText(305, 0), { } },
-		{ "icon",        0, GetMsgText(307, 0), { HAS_PARAMETER, "file" }  },
-		{ "con",         0, GetMsgText(308, 0), { } },
-		{ "full_debug",  0, GetMsgText(309, 0), { } },
-		{ "out",         0, GetMsgText(310, 0), { HAS_PARAMETER, "file" }  },
-		{ "i",           0, GetMsgText(311, 0), { MULTIPLE, HAS_PARAMETER, "file" }  },
-		{ "c",           0, GetMsgText(280, 0), { MULTIPLE, HAS_PARAMETER, "filename" } },
-		{ "d",           0, GetMsgText(282,0), { MULTIPLE, HAS_PARAMETER, "word" } },
-		{ "eub",         0, GetMsgText(345,0), { HAS_PARAMETER, "backend runner" } },
-		{ "batch",       0, GetMsgText(279,0), { } },
-		{ "quiet",       0, GetMsgText(304, 0), { } },
-		{ "copyright",   0, GetMsgText(312, 0), { } },
-		{ "eudir",     0, GetMsgText(328,0), { HAS_PARAMETER, "dir" } },
-		$
-	}	
-end ifdef
+
+constant OPTIONS = {
+	{ "batch",       0, GetMsgText(279,0), { } },
+	{ "c",           0, GetMsgText(280, 0), { MULTIPLE, HAS_PARAMETER, "filename" } },
+	{ "con",         0, GetMsgText(308, 0), { } },
+	{ "copyright",   0, GetMsgText(312, 0), { } },
+	{ "d",           0, GetMsgText(282,0), { MULTIPLE, HAS_PARAMETER, "word" } },
+	{ "eub",         0, GetMsgText(345,0), { HAS_PARAMETER, "backend runner" } },
+	{ "eudir",     0, GetMsgText(328,0), { HAS_PARAMETER, "dir" } },
+	{ "full_debug",  0, GetMsgText(309, 0), { } },
+	{ "i",           0, GetMsgText(311, 0), { MULTIPLE, HAS_PARAMETER, "file" }  },
+	{ "icon",        0, GetMsgText(307, 0), { HAS_PARAMETER, "file" }  },
+	{ "list",        0, GetMsgText(305, 0), { } },
+	{ "out",         0, GetMsgText(310, 0), { HAS_PARAMETER, "file" }  },
+	{ "quiet",       0, GetMsgText(304, 0), { } },
+	$
+}
 
 add_options( OPTIONS )
 
