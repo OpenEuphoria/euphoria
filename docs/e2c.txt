@@ -106,7 +106,7 @@ euc -gcc pretend.exw
 
 Note: //Watcom// is the default on //Windows// and -wat is assumed.
 
-=== -cc-prefix - Compiler prefix
+==== -cc-prefix - Compiler prefix
 
 Some compilers, especially MinGW (the Windows version of gcc) may prefix their
 normal names with platform prefixes.  The -cc-prefix switch allows the developer
@@ -273,6 +273,16 @@ You can also get a partial makefile using the ##-makefile-partial## switch.
 This generates a makefile that you can use to include into another makefile
 for a larger project.  This is useful for including the file dependencies
 for your code into the larger project.
+
+==== -extra-cflags - Extra Compiler Flags
+
+Supply extra compiler flags to suplement the flags used automatically by the translator or
+supplied via the -cflags option.
+
+==== -extra-lflags - Extra Linker Flags
+
+Supply extra linker flags to suplement the flags used automatically by the translator or
+supplied via the -lflags option.
 
 === Dynamic Link Libraries
 
