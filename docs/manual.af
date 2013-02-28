@@ -80,7 +80,7 @@ end ifdef
 ../docs/refman_2.txt
 
 ########
-:%%output=syntax
+:%%output=syntax_toc
 := Formal Syntax
 :<<LEVELTOC level=1 depth=2>>
 

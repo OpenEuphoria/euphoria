@@ -88,7 +88,11 @@
 #define CONTROL_Z 26
 #define CR 13
 #define LF 10
+#ifdef WINDOWS
 #define BS 8
+#else
+#define BS 127
+#endif
 
 #ifdef EWINDOWS
 static int winkbhit();
@@ -5928,13 +5932,28 @@ void key_gets(char *input_string, int buffsize)
 		if (c == CR || c == LF || c == numpad_enter)
 			break;
 
-		if (c == BS || c == left_arrow) {
+#ifndef WINDOWS
+		if( c == 27 ){
+			char d, e;
+			// escape code!
+			d = get_key(TRUE);
+			e = get_key(TRUE);
+			if( (d == 'O') &&  (e == 'D') ){
+				c = left_arrow;
+			}
+			else{
+				// just ignore it
+				continue;
+			}
+		}
+#endif
+
+		if (c == BS || c == left_arrow ) {
 			if (len > 0) {
 				// update buffer
 				ip--;
 				*ip = '\0';
 				len--;
-				
 				// update screen display
 				column--;
 				SetPosition(line, column);

@@ -685,8 +685,7 @@ $(MKVER): mkver.c
 
 $(BUILDDIR)/ver.cache : update-version-cache
 
-$(BUILDDIR)/include/be_ver.h:  $(BUILDDIR)/ver.cache
-	
+$(BUILDDIR)/include/be_ver.h:  $(BUILDDIR)/ver.cache $(BUILD_DIRS)
 
 ###############################################################################
 #
