@@ -939,7 +939,7 @@ void EraseSymbol(symtab_ptr sym)
 static void ShowName()
 /* display a requested variable name & value */
 {
-	char name[80];
+	char name[81];
 	symtab_ptr name_ptr;
 	int prompt, i, j, name_len;
 	struct EuViewPort vp;
@@ -960,14 +960,16 @@ static void ShowName()
 	screen_blank(NULL, vp.columns - 14);
 	flush_screen();
 	
-	SetPosition(prompt, 16); 
-
-	key_gets(name, sizeof(name));
+	SetPosition(prompt, 16);
+	
+	name[80] = 0;
+	key_gets(name, sizeof(name)-1);
 	/* ignore leading whitespace */
 	i = 0;
-	while (name[i] == ' ' || name[i] == '\t')
+	while (i < 80 && (name[i] == ' ' || name[i] == '\t')){
 		i++;    
-
+	}
+	
 	/* ignore trailing whitespace */
 	j = strlen(name)-1;
 	while (name[j] == '\n' || name[j] == ' ' || name[j] == '\t')
