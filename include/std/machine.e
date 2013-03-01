@@ -1321,6 +1321,60 @@ end function
 -- See Also:
 -- [[:Using Strings]], [[:peek]], [[:peek_wstring]], [[:allocate_string]]
 
+--****
+-- Signature:
+-- <built-in> function peek_pointer(object addr_n_length)
+
+-- Description:
+-- fetches an //unsigned// pointer size integer, or some //unsigned// pointer size integers,
+-- from an address in memory.
+--
+-- Parameters:
+--              # ##addr_n_length## : an object, either of
+--              ** an atom ##addr## ~-- to fetch one double word at ##addr##, or
+--              ** a pair {##addr,len}## ~-- to fetch ##len## pointers at ##addr##
+--
+-- Returns:
+-- An **object**, either an atom if the input was a single address, or a
+-- sequence of atoms if a sequence was passed. In both cases, atoms returned
+-- are based on the native size of a pointer.  On 32-bit
+-- architectures, the number will be in the range 0..power(2,32).
+-- On 64-bit architectures, the number will be in the range of
+-- 0..power(2,64).
+--
+-- Errors:
+--      Peeking in memory you do not own may be blocked by the OS, and cause
+-- a machine exception. If you use the define safe these routines will catch these problems with a Euphoria error.
+--
+-- When supplying a ##{address, count}## sequence, the count must not be negative.
+--
+-- Comments:
+--
+-- Since addresses are 32-bit numbers on 32-bit architectures, they can be larger than the largest
+-- value of type integer (31-bits). Variables that hold an address should
+-- therefore be declared as atoms.
+--
+-- It is faster to read several pointers at once using the second form
+-- of ##peek_pointer## than it is to read one integer at a time in a loop. The
+-- returned sequence has the length you asked for on input.
+--
+-- Remember that ##peek_pointer## takes just one argument, which in the second
+-- form is actually a 2-element sequence.
+--
+--
+-- Example 1:
+-- <eucode>
+-- -- The following are equivalent (on a 32-bit architecture):
+-- -- first way
+-- s = {peek_longu(100), peek4u(104), peek4u(108), peek4u(112)}
+--
+-- -- second way
+-- s = peek_pointer({100, 4})
+-- </eucode>
+--
+-- See Also:
+--  [[:Using Data Double Words]], [[:poke4]], [[:peek]], [[:peek4s]], [[:allocate]], [[:free]], [[:peek2u]],
+--  [[:peek2s]], [[:peek8u]], [[:peek8s]], [[:peek_longs]], [[:poke_long]]
 
 
 --**
@@ -1599,6 +1653,58 @@ end function
 --
 -- See Also:
 --     [[:Using Data Double Words]], [[:peek4s]], [[:peek4u]], [[:poke]], [[:poke2]], [[:allocate]], [[:free]], [[:call]]
+--
+
+--****
+-- Signature:
+-- <built-in> procedure poke_pointer(atom addr, object x)
+--
+-- Description:
+-- stores one or more pointers, starting at a memory location.
+--
+-- Parameters:
+--              # ##addr## : an atom, the address at which to store
+--              # ##x## : an object, either an integer or a non empty sequence of
+-- pointers.
+--
+-- Errors:
+--      Poking in memory you do not own may be blocked by the OS, and cause a
+-- machine exception. If you use the define safe these routines will catch these problems with a Euphoria error.
+--
+-- Comments:
+--
+-- There is no point in having ##poke_pointers## or ##poke_pointersu##. For example, both
+-- +power(2,31) and -power(2,31) are stored as ###F0000000## on a 32-bit
+-- architecture. It is up to whoever reads the value to figure it out.
+--
+-- On all  32-bit operating systems, the ##poke_pointer##
+-- uses 4-byte integers.  On 64-bit architectures using operating systems,
+-- ##poke_pointer## uses 8-byte integers.
+--
+-- It is faster to write several pointers at once by poking a sequence
+-- of values, than it is to write one double words at a time in a loop.
+--
+-- The 4-byte (or 8-byte) values to be stored can be negative or positive. You can read
+-- them back with either ##peek_pointer## or any other peek function of the correctsize. However, the results
+-- are unpredictable if you want to store values with a fractional part or a
+-- magnitude greater than the size of a native ##pointer##, even though Euphoria represents them
+-- all as atoms.
+--
+-- Example 1:
+-- <eucode>
+--  a = allocate(100)   -- allocate 100 bytes in memory
+--
+-- -- poke one 4-byte value at a time (on a 32-bit operating system):
+-- poke_pointer(a, 9712345)
+-- poke_pointer(a+4, #FF00FF00)
+-- poke_pointer(a+8, -12345)
+--
+-- -- poke 3 long int values at once:
+-- poke_pointer(a, {9712345, #FF00FF00, -12345})
+-- </eucode>
+--
+-- See Also:
+--     [[:Using Data Double Words]], [[:peek4s]], [[:peek4u]], [[:peek8u]], [[:peek8s]], [[:peek_pointer]] [[:poke]], [[:poke2]], [[:allocate]], [[:free]], [[:call]]
 --
 
 --**
