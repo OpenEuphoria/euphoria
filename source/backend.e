@@ -211,6 +211,7 @@ procedure BackEnd(integer il_file)
 		end if
 		
 		short = length(eentry) < 4
+		sequence started_file = repeat( 0, length( known_files ) )
 		for j = 1 to repcount do
 			poke2(addr + SL_LINE, eentry[LINE-short])  -- hits 4,5,6,7 
 											  -- 7 should be 0 unless 16 million
@@ -221,6 +222,12 @@ procedure BackEnd(integer il_file)
 						+ remainder(eentry[SRC], SOURCE_CHUNK)) -- store actual address
 				end if
 				poke(addr + SL_OPTIONS, eentry[OPTIONS]) -- else leave it 0
+			end if
+			if started_file[eentry[LOCAL_FILE_NO-short]] then
+				poke4( addr + SL_MULTILINE, -1 )
+			else
+				poke4( addr + SL_MULTILINE, 0 )
+				started_file[eentry[LOCAL_FILE_NO-short]] = 1
 			end if
 			addr += SL_SIZE
 			eentry[LINE-short] += 1

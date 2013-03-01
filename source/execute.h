@@ -148,7 +148,8 @@ struct sline {      /* source line table entry */
 #define OP_TRACE   0x01      /* statement trace */
 #define OP_PROFILE_STATEMENT 0x04  /* statement profile */
 #define OP_PROFILE_TIME 0x02       /* time profile */
-}; /* 8 bytes */
+	int multiline;          /* multiline token at EOL */
+}; /* 12 / 16 bytes  32/64 bit*/
 
 struct op_info {
 	object (*intfn)();

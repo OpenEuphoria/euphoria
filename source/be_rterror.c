@@ -288,7 +288,7 @@ static void DisplayLine(long n, int highlight)
 		}
 		
 		if (color_trace && COLOR_DISPLAY) 
-			DisplayColorLine(TempBuff, string_color);
+			slist[n].multiline = DisplayColorLine(TempBuff, string_color, get_prev_multiline( n ));
 		else 
 			screen_output(NULL, TempBuff);
 	}
@@ -299,6 +299,22 @@ static char blanks[BLANK_SIZE+1]={' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
 								  ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
 								  '\0'};
 static int prev_file_no = -1;
+
+/**
+ * Find the multiline token for the previous line in the
+ * file.
+ */
+int get_prev_multiline( long i ){
+	char file_no;
+
+	file_no = slist[i].file_no;
+	for( --i; i > 0; --i ){
+		if( slist[i].file_no == file_no && slist[i].multiline != -1 ){
+			return slist[i].multiline;
+		}
+	}
+	return 0;	
+}
 
 static void Refresh(long line_num, int vars_too)
 /* refresh trace lines centred at line_num */
@@ -379,7 +395,7 @@ static void Refresh(long line_num, int vars_too)
 		
 	for (i = first_line; i <= gline_number && i < first_line + vp.num_trace_lines;
 		 i++) {    
-		if (slist[i].options & OP_TRACE) 
+		if (slist[i].options & OP_TRACE)
 			DisplayLine(i, i == line_num);
 		else 
 			screen_output(NULL, "\n");

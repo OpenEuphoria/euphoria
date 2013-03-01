@@ -12,6 +12,8 @@
 * Updated demo/news.ex with up-to-date URLs for some news web sites.
 * Fix std/net/http.e so it can handle cases where the Content-Length header is not present
 * Fix std/sequence.e so store() will correctly handle the one-element index case - it was duplicating the entire sequence before.
+* [[ticket:710]] Updated tokenizer and syntax coloring to be able to preserve state between lines.
+  The euphoria trace screen and ed.ex now properly colorize multiline strings and comments.
 
 == Enhancements
 
