@@ -48,10 +48,16 @@ include std/dll.e
 -- === Floating Point Types
 
 public enum type floating_point
---** NATIVE: Use whatever is the appropriate format based upon the version of
+--**
+-- NATIVE
+-- Description:
+-- Use whatever is the appropriate format based upon the version of
 -- euphoria being used (DOUBLE for 32-bit, EXTENDED for 64-bit)
 	NATIVE,
---** DOUBLE: IEEE 754 double (64-bit) floating point format. 
+--**
+-- DOUBLE:
+-- Description
+-- IEEE 754 double (64-bit) floating point format.
 -- The native 32-bit euphoria floating point representation.
 	DOUBLE,
 --** EXTENDED: 80-bit floating point format.

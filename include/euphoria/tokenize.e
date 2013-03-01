@@ -212,8 +212,7 @@ public procedure reset(atom state = g_state)
 	eumem:ram_space[state] = default_state()
 end procedure
 
---**
--- Parse Euphoria code into tokens of like colors.
+
 --****
 -- === get/set options
 

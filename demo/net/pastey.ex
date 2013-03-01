@@ -22,6 +22,8 @@ include std/sequence.e
 sequence username, password, title
 
 without warning
+--**
+--@nodoc@
 override procedure abort(integer x, sequence msg = {}, sequence data = {})
 	if length(msg) then
     	printf(2, msg & "\n", data)

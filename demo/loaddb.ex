@@ -14,6 +14,9 @@ include std/filesys.e
 include std/console.e
 
 without warning
+without warning
+--**
+--@nodoc@
 override procedure abort(integer x)
 	maybe_any_key()
 	eu:abort(x)
