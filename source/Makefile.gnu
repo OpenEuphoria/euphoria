@@ -162,7 +162,11 @@ else
 		endif
 	else
 		EOSMING=-ffast-math -O3 -Os
-		LIBRARY_NAME=eu.a
+		ifdef FPIC
+			LIBRARY_NAME=euso.a
+		else
+			LIBRARY_NAME=eu.a
+		endif
 	endif
 	MEM_FLAGS=-DESIMPLE_MALLOC
 	CREATEDLLFLAGS=
