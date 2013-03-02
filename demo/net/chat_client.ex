@@ -11,6 +11,9 @@ include std/text.e
 include std/socket.e as slib
 without warning
 
+without warning
+--**
+--@nodoc@
 override procedure abort(integer x)
 	maybe_any_key()
 	eu:abort(x)

@@ -14,6 +14,8 @@ include std/console.e
 include std/net/http.e
 without warning
 
+--**
+--@nodoc@
 override procedure abort(integer x)
 	maybe_any_key()
 	eu:abort(x)

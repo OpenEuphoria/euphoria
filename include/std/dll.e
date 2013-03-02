@@ -87,6 +87,15 @@ public constant
 	--** object
 	E_OBJECT  = #09000004
 
+--****
+-- Signature:
+-- <built-in> function sizeof( atom data_type )
+--
+-- Parameters:
+--# ##data_type## A C data type constant
+--
+-- Description:
+-- Returns the size, in bytes of the specified data type.
 
 --****
 -- === Constants

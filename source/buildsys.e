@@ -176,9 +176,19 @@ atom cfile_check = 0
 export sequence cflags = ""
 
 --**
+-- Optional flags to append to default compiler options
+
+export sequence extra_cflags = ""
+
+--**
 -- Optional flags to pass to the linker
 
 export sequence lflags = ""
+
+--**
+-- Optional flags to append to default linker options
+
+export sequence extra_lflags = ""
 
 --**
 -- Force the build of even up-to-date source files
@@ -545,9 +555,17 @@ function setup_build()
 		c_flags = cflags
 	end if
 
+	if length(extra_cflags) then
+		c_flags &= " " & extra_cflags
+	end if
+
 	if length(lflags) then
 		l_flags = lflags
 		l_flags_begin = ""
+	end if
+
+	if length(extra_lflags) then
+		l_flags &= " " & extra_lflags
 	end if
 
 	return { 

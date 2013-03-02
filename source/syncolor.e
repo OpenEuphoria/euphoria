@@ -64,10 +64,10 @@ syncolor:keep_newlines(,synstate)
 				{"STRING", STRING_COLOR},
 				{"BRACKET", BRACKET_COLOR}})	
 
-public function DisplayColorLine(sequence pline, integer string_color)
+public function DisplayColorLine(sequence pline, integer string_color, integer multiline )
 	sequence line
 	syncolor:set_colors({{"STRING", string_color}})
-	line = syncolor:SyntaxColor(pline, synstate)
+	line = syncolor:SyntaxColor(pline, synstate, multiline)
 	for i = 1 to length(line) do
 		--graphics:text_color(line[i][1])
 		--machine_proc(9, line[i][1])
@@ -75,5 +75,5 @@ public function DisplayColorLine(sequence pline, integer string_color)
 		--puts(2, line[i][2])
 		machine_proc(200, line[i][2])
 	end for
-	return 0
+	return last_multiline_token()
 end function

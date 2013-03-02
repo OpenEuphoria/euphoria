@@ -36,21 +36,18 @@ public enum
 -- tasks, displaying information or waiting for user input.
 
 public enum type DEBUG_ROUTINE
---**** 
--- Signature:
+--****
 -- SHOW_DEBUG
 --Description: 
 -- a procedure that takes an integer parameter that represents the current line in the global line table
 	SHOW_DEBUG,
 --****
--- Signature:
 -- DISPLAY_VAR
 -- Description:
 -- A procedure that takes a pointer to the variable in the symbol table, and a flag to indicate whether the user requested this variable or not.  Euphoria generally
 -- calls this when a variable is assigned to.
 	DISPLAY_VAR,
 --****
--- Signature:
 -- UPDATE_GLOBALS
 -- Description:
 -- A procedure called when the debug screen should update the display of any non-private

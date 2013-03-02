@@ -12,11 +12,13 @@
 * Updated demo/news.ex with up-to-date URLs for some news web sites.
 * Fix std/net/http.e so it can handle cases where the Content-Length header is not present
 * Fix std/sequence.e so store() will correctly handle the one-element index case - it was duplicating the entire sequence before.
+* [[ticket:710]] Updated tokenizer and syntax coloring to be able to preserve state between lines.
+  The euphoria trace screen and ed.ex now properly colorize multiline strings and comments.
 
 == Enhancements
 
 * Euphoria can be built natively as a 64-bit programming language.
-* Added 8-byte memory access: [[:poke8], [[:peek8s]], [[:peek8u]]
+* Added 8-byte memory access: [[:poke8]], [[:peek8s]], [[:peek8u]]
 * eucoverage also outputs a file "big_routines.html" that shows covered routines
   from all files sorted by descending routine size
 * Added [[:poke_pointer]] and [[:peek_pointer]]
@@ -56,3 +58,4 @@
 * Much faster and simpler implementation of maps in std/map.e inspired by the implementation of python's
   dictionary object. Some functions and parameters have been deprecated (such as any distinction between
   small and large maps), as they no longer make sense for the new implementation.
+* [[ticket:532]] extra-cflags and extra-lflags for translator (thanks to Ira Hill)

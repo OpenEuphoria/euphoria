@@ -46,7 +46,7 @@ void init_class()
 	/* and calls it upon initialization, we don't need it here. */
 }
 
-void DisplayColorLine(char *pline, int string_color)
+int DisplayColorLine(char *pline, int string_color, int last_multi )
 /* Display a '\0'-terminated line with colors identifying the various
  * parts of the Euphoria language.
  * Each screen write has a lot of overhead, so we try to minimize
@@ -56,14 +56,14 @@ void DisplayColorLine(char *pline, int string_color)
 {
 	int scolor;
 	object line;
-
+	int multi = 0;
 	scolor = get_pos_int("DisplayColorLine", string_color);
 	line = NewString(pline);
 
 	if (syncolor != -1)
 	{
-		internal_general_call_back(syncolor,
-		line,scolor,0, 0,0,0, 0,0,0);
+		multi = internal_general_call_back(syncolor,
+		line,scolor,last_multi, 0,0,0, 0,0,0);
 	}
 	else
 	{
@@ -71,4 +71,5 @@ void DisplayColorLine(char *pline, int string_color)
 		** then we fall back to outputing the line without color */
 		screen_output(NULL, pline);
 	}
+	return multi;
 }

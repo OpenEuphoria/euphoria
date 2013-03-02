@@ -57,4 +57,5 @@ public constant
 	SL_LINE = offset( C_SHORT ),
 	SL_FILE_NO = offset( C_CHAR ),
 	SL_OPTIONS = offset( C_CHAR ),
+	SL_MULTILINE = offset( C_INT ),
 	SL_SIZE    = next_offset + remainder( next_offset, sizeof( C_POINTER ) ) -- padding

@@ -95,6 +95,8 @@ public enum
 -- this list of delimiters must match the order of the corresponding T_ codes above
 constant Delimiters = "+-*/<>!&" & "=(){}[]?,.:$" -- double & single ops
 
+--****
+-- === Token accessors
 public enum
 	TTYPE,
 	TDATA,
@@ -210,8 +212,7 @@ public procedure reset(atom state = g_state)
 	eumem:ram_space[state] = default_state()
 end procedure
 
---**
--- Parse Euphoria code into tokens of like colors.
+
 --****
 -- === get/set options
 
@@ -417,13 +418,16 @@ function scankeep_white(atom state = g_state)
 	return FALSE
 end function
 
-function scan_multicomment(atom state = g_state)
+function scan_multicomment(atom state = g_state, multiline_token multi = 0)
 	Token[TTYPE] = T_COMMENT
-	Token[TDATA] = "/"
+	if not multi then
+		Token[TDATA] = "/"
+	end if
 	Token[TFORM] = TF_COMMENT_MULTIPLE
 
 	while 1 do
 		if (Look = io:EOF) or (Look = EOL) then
+			last_multi = TF_COMMENT_MULTIPLE
 -- 			report_error(ERR_EOF)
 			return TRUE 
 		end if
@@ -503,7 +507,37 @@ function lookahead_for( object needle, integer look_at =  1 )
 	return TRUE
 end function
 
-function raw_string( sequence delimiter, atom state )
+public type multiline_token( object mlt )
+	if not atom( mlt ) then
+		return 0
+	end if
+	if mlt = 0
+	or mlt = TF_STRING_BACKTICK
+	or mlt = TF_STRING_TRIPLE
+	or mlt = TF_COMMENT_MULTIPLE then
+		return 1
+	end if
+	return 0
+end type
+
+multiline_token last_multi = 0
+
+--**
+--
+-- Returns:
+-- One of 0, TF_COMMENT_MULTIPLE, TF_STRING_BACKTICK, TF_STRING_TRIPLE.
+--
+-- Comments:
+-- After calling ##[[:tokenize_string]]##, this function will return a value of 0
+-- if the line did not end in the middle of a multiline construct, or the value
+-- for the respective token. This is meant to facilitate proper tokenizing of
+-- individual lines of code.
+
+public function last_multiline_token()
+	return last_multi
+end function
+
+function raw_string( sequence delimiter, atom state, multiline_token multi = 0 )
 	Token[TTYPE] = T_STRING
 	Token[TDATA] = ""
 
@@ -526,9 +560,16 @@ function raw_string( sequence delimiter, atom state )
 
 	if eumem:ram_space[state][STRING_KEEP_QUOTES] then
 		if Look = io:EOF then
-			Token[TDATA] = delimiter & Token[TDATA]
+			if not multi then
+				Token[TDATA] = delimiter & Token[TDATA]
+			end if
+			last_multi = Token[TFORM]
 		else
-			Token[TDATA] = delimiter & Token[TDATA] & delimiter
+			if multi then
+				Token[TDATA] = Token[TDATA] & delimiter
+			else
+				Token[TDATA] = delimiter & Token[TDATA] & delimiter
+			end if
 		end if
 	end if
 	
@@ -1101,13 +1142,26 @@ end procedure
 --****
 -- === Routines
 
-public function tokenize_string(sequence code, atom state = g_state, integer stop_on_error = TRUE)
+--**
+-- Tokenize euphoria source code
+--
+-- Parameters:
+-- # ##code## The code to be tokenized
+-- # ##state## (default g_state) the tokenizer returned by ##[[:new]]##
+-- # ##stop_on_error## (default TRUE)
+-- # ##multi## one of 0, TF_COMMENT_MULTIPLE, TF_STRING_BACKTICK, TF_STRING_TRIPLE
+--
+-- Returns:
+-- Sequence of tokens
+
+public function tokenize_string(sequence code, atom state = g_state, integer stop_on_error = TRUE, multiline_token multi = 0)
 	sequence tokens
 
 	ERR = FALSE
 	ERR_LNUM = 0
 	ERR_LPOS = 0
-
+	last_multi = 0
+	
 	tokens = {}
 
 	source_text = code
@@ -1124,7 +1178,21 @@ public function tokenize_string(sequence code, atom state = g_state, integer sto
 	Token[TLNUM] = 1
 	Token[TLPOS] = 1
 
-	if (Look = '#') and (lookahead(1) = '!') then
+	if multi then
+		sti = 0
+		switch multi do
+			case TF_STRING_BACKTICK then
+				raw_string( "`", state, multi )
+				
+			case TF_STRING_TRIPLE then
+				raw_string( `"""`, state, multi )
+			case TF_COMMENT_MULTIPLE then
+				scan_multicomment( state, multi )
+			case else
+				-- error?
+		end switch
+		tokens &= { Token }
+	elsif (Look = '#') and (lookahead(1) = '!') then
 		sti += 1
 		scan_char(state)
 		if eumem:ram_space[state][DELETE_WHITE] then
@@ -1179,7 +1247,7 @@ public constant token_names = {
 }
 
 public constant token_forms = {
-	"TF_HEX", "TF_INT", "TF_ATOM", "TF_STRING_SINGLE", "TF_STRING_TRIPPLE",
+	"TF_HEX", "TF_INT", "TF_ATOM", "TF_STRING_SINGLE", "TF_STRING_TRIPLE",
 	"TF_STRING_BACKTICK", "TF_STRING_HEX", "TF_COMMENT_SINGLE", "TF_COMMENT_MULTIPLE"
 }
 
