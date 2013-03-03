@@ -467,6 +467,11 @@ function setup_build()
 			l_exe = compiler_prefix & "gcc"
 			obj_ext = "o"
 
+			sequence m_flag = ""
+			if not TARM then
+				-- current gcc for ARM does not support -m32
+				m_flag = sprintf( "-m%d", bits )
+			end if
 			-- compiling object flags
 			if debug_option then
 				c_flags &= " -g3"
@@ -478,8 +483,8 @@ function setup_build()
 				c_flags &= " -fPIC"
 			end if
 
-			c_flags &= sprintf(" -c -w -fsigned-char -O2 -m%d -I%s -ffast-math",
-					{ bits, adjust_for_build_file(get_eucompiledir()) })
+			c_flags &= sprintf(" -c -w -fsigned-char -O2 %s -I%s -ffast-math",
+					{ m_flag, adjust_for_build_file(get_eucompiledir()) })
 			
 			if TWINDOWS and mno_cygwin then
 				-- we must use this compile flag here to ensure that we load the MINGW include
@@ -487,7 +492,7 @@ function setup_build()
 				c_flags &= " -mno-cygwin"
 			end if
 
-			l_flags = sprintf( " %s -m%d", { adjust_for_build_file(user_library), bits })
+			l_flags = sprintf( " %s %s", { adjust_for_build_file(user_library), m_flag })
 
 			if dll_option then
 				l_flags &= " -shared "
