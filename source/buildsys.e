@@ -205,7 +205,7 @@ export integer remove_output_dir = 0
 export integer mno_cygwin = 0
 
 enum SETUP_CEXE, SETUP_CFLAGS, SETUP_LEXE, SETUP_LFLAGS, SETUP_OBJ_EXT, SETUP_EXE_EXT,
-	SETUP_LFLAGS_BEGIN, SETUP_RC_COMPILER
+	SETUP_LFLAGS_BEGIN, SETUP_RC_COMPILER, SETUP_RUNTIME_LIBRARY
 
 --**
 -- Calculate a checksum to be used for detecting changes to generated c files.
@@ -369,10 +369,21 @@ end function
 -- etc...
 
 function setup_build()
-	sequence c_exe   = "", c_flags = "", l_exe   = "", l_flags = "", obj_ext = "",
-		exe_ext = "", l_flags_begin = "", rc_comp = "", l_names, l_ext, t_slash
+	sequence
+		c_exe   = "",
+		c_flags = "",
+		l_exe   = "",
+		l_flags = "",
+		obj_ext = "",
+		exe_ext = "",
+		l_flags_begin = "",
+		rc_comp = "",
+		l_names,
+		l_ext,
+		t_slash
 
-	if dll_option and length( user_pic_library ) > 0 then
+	if dll_option and length( user_pic_library ) > 0
+	and (TARM or (TX86_64 and not TWINDOWS)) then
 		user_library = user_pic_library
 	end if
 	
@@ -479,7 +490,7 @@ function setup_build()
 				c_flags &= " -fomit-frame-pointer"
 			end if
 
-			if dll_option then
+			if dll_option and (TARM or (TX86_64 and not TWINDOWS)) then
 				c_flags &= " -fPIC"
 			end if
 
@@ -492,7 +503,12 @@ function setup_build()
 				c_flags &= " -mno-cygwin"
 			end if
 
-			l_flags = sprintf( " %s %s", { adjust_for_build_file(user_library), m_flag })
+			if build_system_type != BUILD_DIRECT then
+				l_flags = sprintf( " $(RUNTIME_LIBRARY) %s", { m_flag })
+			else
+				l_flags = sprintf( " %s %s",
+								   { adjust_for_command_line_passing( user_library ), m_flag })
+			end if
 
 			if dll_option then
 				l_flags &= " -shared "
@@ -574,7 +590,7 @@ function setup_build()
 	end if
 
 	return { 
-		c_exe, c_flags, l_exe, l_flags, obj_ext, exe_ext, l_flags_begin, rc_comp
+		c_exe, c_flags, l_exe, l_flags, obj_ext, exe_ext, l_flags_begin, rc_comp, user_library
 	}
 end function
 
@@ -638,18 +654,27 @@ procedure write_objlink_file()
 	generated_files = append(generated_files, file0 & ".lnk")
 end procedure
 
+
 procedure write_makefile_srcobj_list(integer fh)
 	printf(fh, "%s_SOURCES =", { upper(file0) })
 	for i = 1 to length(generated_files) do
 		if generated_files[i][$] = 'c' then
+			if i > 1 then
+				printf(fh, " \\%s\t", { HOSTNL }  )
+			end if
 			puts(fh, " " & generated_files[i])
 		end if
 	end for
 	puts(fh, HOSTNL)
 
 	printf(fh, "%s_OBJECTS =", { upper(file0) })
+	integer file_count = 0
 	for i = 1 to length(generated_files) do
 		if match(".o", generated_files[i]) then
+			if file_count then
+				printf(fh, " \\%s\t", { HOSTNL }  )
+			end if
+			file_count += 1
 			puts(fh, " " & generated_files[i])
 		end if
 	end for
@@ -657,6 +682,9 @@ procedure write_makefile_srcobj_list(integer fh)
 
 	printf(fh, "%s_GENERATED_FILES = ", { upper(file0) })
 	for i = 1 to length(generated_files) do
+		if i > 1 then
+			printf(fh, " \\%s\t", { HOSTNL }  )
+		end if
 		puts(fh, " " & generated_files[i])
 	end for
 	puts(fh, HOSTNL)
@@ -738,7 +766,8 @@ procedure write_makefile_full()
 		puts(fh, HOSTNL)
 
 	else
-		printf(fh, "%s: $(%s_OBJECTS) %s %s" & HOSTNL, { adjust_for_build_file(exe_name[D_ALTNAME]), upper(file0), user_library, rc_file[D_ALTNAME] })
+		printf(fh, "RUNTIME_LIBRARY=%s\n", { settings[SETUP_RUNTIME_LIBRARY] } )
+		printf(fh, "%s: $(%s_OBJECTS) $(RUNTIME_LIBRARY) %s " & HOSTNL, { adjust_for_build_file(exe_name[D_ALTNAME]), upper(file0), rc_file[D_ALTNAME] })
 		if length(rc_file[D_ALTNAME]) then
 			writef(fh, "\t" & settings[SETUP_RC_COMPILER] & HOSTNL, { rc_file[D_ALTNAME], res_file[D_ALTNAME] })
 		end if

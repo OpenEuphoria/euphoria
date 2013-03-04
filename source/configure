@@ -2,6 +2,7 @@
 
 CONFIG_FILE=config.gnu
 PLAT="default platform"
+ARCH="default arch"
 
 UNAME_SYSTEM=`(uname -s) 2>/dev/null`  || UNAME_SYSTEM=unknown
 UNAME_MACHINE=`(uname -m) 2>/dev/null` || UNAME_MACHINE=unknown
@@ -506,6 +507,10 @@ if [ x"$PLAT" != "xdefault platform" ]; then
 	echo "-plat" $PLAT  >> $BUILDDIR/eu.cfg
 	echo PLAT=$PLAT >> "$PREFIX"${CONFIG_FILE}
 fi
+if [ x"$ARCH" != "xdefault arch" ]; then
+	echo "-arch" $ARCH >> $BUILDDIR/eu.cfg
+fi
+	
 echo "-$XLTTARGETCC " >> $BUILDDIR/eu.cfg
 echo "-con " >> $BUILDDIR/eu.cfg
 echo "-com" $CYPTRUNKDIR >> $BUILDDIR/eu.cfg
