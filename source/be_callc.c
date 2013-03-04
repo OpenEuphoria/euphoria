@@ -1042,7 +1042,7 @@ union xmm_param {
 #	else
 		/* The x86-64 calling convention uses 6 registers for the first 6 integer
 		 * parameters.  After that, parameters are pushed on the stack.  Also,
-		 * the first 5 floating point parameters are put into floating point
+		 * the first 8 floating point parameters are put into floating point
 		 * registers.  Either type of argument can start overflowing onto the
 		 * stack, so we have to track the number of args we're putting onto the
 		 * stack separately from what goes into the registers.
