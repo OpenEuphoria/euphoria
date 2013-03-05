@@ -82,7 +82,7 @@ MAKE_ID_FUNCTION(double, C_DOUBLE)
 
 	
 #define MAKE_GET_VAL_FN(ctype,etype,prefix,testvalue) \
-	ctype etype ## prefix ## _value = testvalue; \
+	EXPORT ctype etype ## prefix ## _value = testvalue; \
 	EXPORT ctype etype ## prefix() { return etype ## prefix ## _value; }
 	
 MAKE_GET_VAL_FN(char,      C_CHAR,     _BFF_FD, 0xC0 - 20)
@@ -139,4 +139,11 @@ EXPORT double sum_mul8df(double d1, double d2, double d3, double d4, double d5, 
 
 EXPORT double sum_mul8df2lli(double d1, double d2, double d3, double d4, double d5, double d6, double d7, double d8, long long l1, long long l2){
     return (d1+1)*(d2+2)*(d3+3)*(d4+4)*(d5+5)*(d6+6)*(d7+7)*(d8+8)*(l1+9)*(l2+10);
+}
+
+EXPORT double sum_8l6d(
+	long i1, long i2, long i3, long i4, long i5, long i6, long i7, long i8,
+	double d1, double d2, double d3, double d4, double d5, double d6 ){
+	return ((double)(i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8)) +
+		(d1 + d2 + d3 + d4 + d5 + d6);
 }

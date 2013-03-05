@@ -482,11 +482,20 @@ debug-library : builddirs
 library : builddirs
 	$(MAKE) $(BUILDDIR)/$(EECUA) OBJDIR=libobj ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG= EPROFILE=$(EPROFILE)
 
+
 shared-library :
+ifneq (,$(filter $(ARCH), "ARM", "ix86_64"))
+ifneq "$(EMINGW)" "1"
 	$(MAKE) $(BUILDDIR)/$(EECUSOA) OBJDIR=libobj-fPIC ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG= EPROFILE=$(EPROFILE) FPIC=-fPIC
+endif
+endif
 
 debug-shared-library : builddirs
+ifneq (,$(filter $(ARCH), "ARM", "ix86_64"))
+ifneq "$(EMINGW)" "1"
 	$(MAKE) $(BUILDDIR)/$(EECUSODBGA) OBJDIR=libobjdbg-fPIC ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE) FPIC=-fPIC
+endif
+endif
 
 # All code in Ming is position independent.  So simply link
 # to the other existing one.
@@ -529,10 +538,6 @@ interpreter :
 
 translator :
 	$(MAKE) translator OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
-
-backend :
-	$(MAKE) backend EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG)  EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
-
 else
 
 ifeq "$(EUPHORIA)" "1"
@@ -865,8 +870,12 @@ install :
 	mkdir -p $(DESTDIR)$(PREFIX)/lib
 	install $(BUILDDIR)/$(EECUA) $(DESTDIR)$(PREFIX)/lib
 	install $(BUILDDIR)/$(EECUDBGA) $(DESTDIR)$(PREFIX)/lib
+ifneq (,$(filter $(ARCH), "ARM", "ix86_64"))
+ifneq "$(EMINGW)" "1"
 	install $(BUILDDIR)/$(EECUSOA) $(DESTDIR)$(PREFIX)/lib
 	install $(BUILDDIR)/$(EECUSODBGA) $(DESTDIR)$(PREFIX)/lib
+endif
+endif
 	install $(BUILDDIR)/$(EEXU) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EECU) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EBACKENDC) $(DESTDIR)$(PREFIX)/bin

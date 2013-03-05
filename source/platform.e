@@ -147,7 +147,7 @@ public procedure set_target_arch( sequence arch )
 	TX86_64 = 0
 	IARM    = 0
 	TARM    = 0
-	switch arch do
+	switch upper( arch ) do
 		case "X86", "IX86" then
 			IX86    = 1
 			TX86    = 1

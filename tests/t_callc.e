@@ -220,7 +220,8 @@ for i = 1 to length(signed_types) do
 		{signed_type_names[i]}), {}, signed_types[i] )
 	if r_get_m100 != -1 then
 		atom expected_ptr = define_c_var( lib818, signed_type_names[i] & "_M100_value" )
-		if expected_ptr != 0 then
+		test_not_equal( signed_type_names[i] & "_M100_value", -1, expected_ptr )
+		if expected_ptr != -1 then
 			test_equal(sprintf("Can get -100 like numbers from a function returning that number as a %s", 
 				{signed_type_names[i]}), peekf(expected_ptr, signed_types[i]), c_func(r_get_m100, {}))
 		end if
@@ -281,6 +282,12 @@ ifdef not EU4_0 then
 	test_equal( "Testing passing eight doubles only and two long long ints", -0.692138671875, c_func( c_sum_mul8df2lli, sum_mul8df2lli_args ) )
 end ifdef
 -- Should put some tests for argument passing as well : passing floating point, double, long long, etc..
+
+constant
+	c_sum_8l6d = define_c_func( lib818, "+sum_8l6d", repeat( C_LONG, 8 ) & repeat( C_DOUBLE, 6 ), C_DOUBLE ),
+	SUM_8L6D_ARGS = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}
+test_equal( "8 longs, 6 doubles", sum( SUM_8L6D_ARGS ), c_func( c_sum_8l6d, SUM_8L6D_ARGS ) )
+
 
 test_report()
 
