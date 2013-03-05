@@ -998,9 +998,8 @@ end procedure
 -- other processes from using the file while your program is reading it
 -- or writing it.
 --
--- On //Unix// there are two types of locks that
--- you can request using the ##t## parameter. (On //Windows// the
--- parameter ##t## is ignored, but should be an integer.)
+-- There are two types of locks that
+-- you can request using the ##t## parameter.
 -- Ask for a **shared** lock when you intend to read a file, and you want to
 -- temporarily block other processes from writing it. Ask for an
 -- **exclusive** lock when you intend to write to a file and you want to temporarily

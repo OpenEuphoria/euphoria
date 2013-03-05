@@ -42,7 +42,7 @@ extern HANDLE console_output; // HANDLE for WIN32 console output
 extern HANDLE console_trace;  // HANDLE for WIN32 output to trace-screen
 extern HANDLE console_var_display; // HANDLE for WIN32 output to large sequence display
 extern HANDLE console_save;   // place to save console_output while in trace screen
-extern long int orig_console_mode; // Console modes in effect when program starts.
+extern DWORD orig_console_mode; // Console modes in effect when program starts.
 void EClearLines(int first_line, int last_line, int len, WORD attributes);
 
 #endif
