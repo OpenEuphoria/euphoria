@@ -1597,7 +1597,7 @@ end function
 -- -- Another console message
 -- writef(STDERR, "This is a []", "message")
 -- -- Outputs two numbers
--- writef(STDERR, "First [], second []", {65, 100},, 1) 
+-- writef(STDERR, "First [], second []", {65, 100}, 1)
 --      -- Note that {65, 100} is also "Ad"
 -- </eucode>
 --

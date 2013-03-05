@@ -224,5 +224,72 @@ delete_file("file.txt")
 delete_file("filea.txt")
 delete_file("fileb.txt")
 delete_file("filec.txt")
-test_report()
 
+writef("The date is [4], [u2:3] [3:02], [1:4].\n",
+       {2013, "March", 5, "Tuesday"}, "writef.test")
+
+fh = open( "writef.test", "a")
+writef( fh, "First [], second []\n", {65, 100}, 1)
+close(fh)
+
+writef("The date is [4], [u2:3] [3:02], [1:4].\n",
+       {2013, "March", 5, "Tuesday"}, {"writef.test", "a"})
+writef("The date is [4], [u2:3] [3:02], [1:4].\n",
+       {2013, "March", 5, "Tuesday"}, {"writef.test", 'a'})
+constant WRITEF = `
+The date is Tuesday, MAR 05, 2013.
+First 65, second 100
+The date is Tuesday, MAR 05, 2013.
+The date is Tuesday, MAR 05, 2013.
+
+`
+test_equal( "writef", WRITEF, read_file( "writef.test" ))
+delete_file( "writef.test" )
+
+fh = open( "dstring.test", "w" )
+puts( fh, {1, 2, 3, 4, 5, 6, 7,8,9, 0, 1, 2, 3, 4})
+close(fh)
+fh = open( "dstring.test", "rb" )
+test_equal( "dstring", {1, 2, 3, 4, 5, 6, 7,8,9}, get_dstring( fh, 0 ))
+delete_file( "dstring.test" )
+
+fh = open( "integer32.test", "w" )
+put_integer32( fh, 123456789 )
+close(fh)
+fh = open( "integer32.test", "rb" )
+test_equal( "get_integer32", 123456789, get_integer32( fh ) )
+close( fh )
+delete_file( "integer32.test" )
+
+fh = open( "integer16.test", "w" )
+put_integer16( fh, 56789 )
+close(fh)
+fh = open( "integer16.test", "rb" )
+test_equal( "get_integer16", 56789, get_integer16( fh ) )
+close( fh )
+delete_file( "integer16.test" )
+
+test_false( "byte_range( atom )",            byte_range( 1.1 ) )
+test_false( "byte_range( seq of len 1 )",    byte_range( {1} ) )
+test_false( "byte_range( seq len > 2 )",     byte_range( {1,2,3} ) )
+test_false( "byte_range( not atom 1 )",      byte_range( {{}, 0}) )
+test_false( "byte_range( not atom 2 )",      byte_range( {0,{}}) )
+test_false( "byte_range( first negative )",  byte_range( {-1, 0} ) )
+test_false( "byte_range( second negative )", byte_range( {0, -1} ) )
+test_false( "byte_range( high, low )",       byte_range( {1, 0}) )
+
+writefln("The date is [4], [u2:3] [3:02], [1:4].",
+       {2013, "March", 5, "Tuesday"}, "writef.test")
+
+fh = open( "writef.test", "a")
+writefln( fh, "First [], second []", {65, 100}, 1)
+close(fh)
+
+writefln("The date is [4], [u2:3] [3:02], [1:4].",
+       {2013, "March", 5, "Tuesday"}, {"writef.test", "a"})
+writefln("The date is [4], [u2:3] [3:02], [1:4].",
+       {2013, "March", 5, "Tuesday"}, {"writef.test", 'a'})
+
+test_equal( "writef", WRITEF, read_file( "writef.test" ))
+delete_file( "writef.test" )
+test_report()
