@@ -273,7 +273,7 @@ static int watch_count = 1;
 static void trace_command(object x)
 // perform trace(x)
 {
-	int i;
+	int i = 0;
 
 	if (IS_ATOM_INT(x)) {
 		i = x;
@@ -282,7 +282,7 @@ static void trace_command(object x)
 		i = (int)DBL_PTR(x)->dbl;
 	}
 	else
-		RTFatal("argument to trace() must be an atom");
+		RTFatal("argument to trace() must be an atom", i);
 
 #ifndef BACKEND
 		if (i == 0) {
@@ -1848,12 +1848,12 @@ void do_exec(intptr_t *start_pc)
 
 	/* address registers: (3 max) */
 	register intptr_t *pc;               /* program counter, kept in a register */
-	register object_ptr obj_ptr;    /* general pointer to an object */
+	register object_ptr obj_ptr = 0;    /* general pointer to an object */
 
 	/* data registers: (5 max) */
 	register object a;            /* another object */
 	volatile object v;            /* get compiler to do the right thing! */
-	register object top;          /* an object - hopefully kept in a register */
+	register object top = 0;          /* an object - hopefully kept in a register */
 	/*register*/ intptr_t i;           /* loop counter */
 
 	eudouble temp_dbl;

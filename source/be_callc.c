@@ -1149,22 +1149,25 @@ object call_c(int func, object proc_ad, object arg_list)
 		intptr_t arg_i = 0;
 #	endif
 #	if INTPTR_MAX == INT32_MAX
+		#if !defined(push)
 		intptr_t arg_len;
+		#endif
 #		if defined(__WIN32) && !defined(__WATCOMC__)
 			int cdecl_call;
 #		else
 #			define cdecl_call (1)
 #		endif
-#	endif
-
 	uintptr_t as_offset;   // used by pop()
 	uintptr_t last_offset; // used by push()
 
-	// this code relies on arg always being the first variable and last_offset 
+	// this code relies on arg always being the first variable and last_offset
 	// always being the last variable
 	last_offset = (uintptr_t)&arg;
 	as_offset = (uintptr_t)&argsize;
 	// as_offset = last_offset - 4;
+#	endif
+
+
 
 	
 #if INTPTR_MAX == INT64_MAX
@@ -1210,7 +1213,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	
 	return_type = c_routine[proc_index].return_size; // will be INT
 
-	#if INTPTR_MAX == INT32_MAX
+	#if INTPTR_MAX == INT32_MAX && !defined(push)
 		arg_len = arg_list_ptr->length;
 	#endif
 	

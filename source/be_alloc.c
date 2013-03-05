@@ -992,10 +992,10 @@ static void new_dbl_block(unsigned int cnt)
 	assert(((uintptr_t)dbl_block & 7) == 0);
 
 	if( double_blocks_allocated ){
-		double_blocks = ERealloc( double_blocks, sizeof( free_block_ptr ) * ++double_blocks_allocated );
+		double_blocks = (free_block_ptr*) ERealloc( (char*) double_blocks, sizeof( free_block_ptr ) * ++double_blocks_allocated );
 	}
 	else{
-		double_blocks = EMalloc( sizeof( free_block_ptr ) );
+		double_blocks = (free_block_ptr*) EMalloc( sizeof( free_block_ptr ) );
 		++double_blocks_allocated;
 	}
 	double_blocks[double_blocks_allocated-1] = dbl_block;

@@ -552,7 +552,7 @@ void call_crash_routines()
 	}
 }
 
-#ifdef EUNIX
+#if defined(EUNIX) || defined(EMINGW)
 static void SimpleRTFatal(char *msg, va_list ap) __attribute__ ((noreturn));
 #endif
 
@@ -1544,7 +1544,8 @@ void de_reference(s1_ptr a)
 					// end of sequence: back up a level
 					
 					p = (object_ptr)a->cleanup;
-					t = (object) *(object_ptr)&(a->ref);
+					temp = (intptr_t) &(a->ref);
+					t = *(object_ptr)temp;
 					EFree((char *)a);
 					a = (s1_ptr)t;
 					if ((((intptr_t) a) & ((intptr_t) 0xffffffff)) == 0)
@@ -3219,7 +3220,7 @@ object find(object a, s1_ptr b)
 	bp = b->base;
 
 	if (IS_ATOM_INT(a)) {
-		eudouble da;
+		eudouble da = (eudouble)0;
 		int daok = 0;
 		while (TRUE) {
 			bv = *(++bp);
@@ -4269,7 +4270,7 @@ object_ptr v_elem;
 	char c;
 	intptr_t dval;
 	uintptr_t uval;
-	eudouble gval;
+	eudouble gval = (eudouble)0;
 	char *sval;
 	char *sbuff;
 	int slength;
@@ -4422,7 +4423,7 @@ object EPrintf(object file_no, object format_obj, object values)
 {
 	object_ptr f_elem, f_last;
 	char c; /* avoid peep bug - no register decl */
-	object_ptr v_elem, v_last;
+	object_ptr v_elem, v_last = 0;
 	char *cstring;
 	char quick_alloc[LOCAL_SPACE]; // don't use TempBuff - FormatItem uses it
 	int free_cs;
@@ -4916,10 +4917,6 @@ char **make_arg_cv(char *cmdline, int *argc)
 {
 	int i, w, j;
 	char **argv;
-#ifdef EWINDOWS
-	int ns;
-	int bs;
-#endif
 	InitEMalloc();
 #ifdef EWINDOWS
 	if( cmdline == NULL ){
@@ -5021,7 +5018,7 @@ void system_call(object command, object wait)
 	}
 
 	MakeCString(string_ptr, command, len_used);
-	system(string_ptr);
+	len_used = system(string_ptr);
 	if (len > TEMP_SIZE)
 		EFree(string_ptr);
 
@@ -5071,7 +5068,7 @@ object system_exec_call(object command, object wait)
 
 #ifdef EUNIX
 	// this runs the shell - not really supposed to, but it gets exit code
-	exit_code = system(string_ptr);
+	exit_code = WEXITSTATUS( system(string_ptr) );
 #else
 	argv = make_arg_cv(string_ptr, &exit_code);
 	exit_code = spawnvp(P_WAIT, argv[0], (char * const *)argv);
@@ -5656,11 +5653,8 @@ void Cleanup(int status)
 	char *xterm;
 #endif
 
-#if defined(EWINDOWS) || !defined(ERUNTIME)
-	int i;
-#endif
-
 #ifndef ERUNTIME
+	int i;
 	long c;
 	FILE *wrnf = NULL;
 #endif
@@ -5849,10 +5843,9 @@ static int winkbhit()
 {
 	INPUT_RECORD pbuffer;
 	DWORD junk = 0;
-	int c;
 
 	while (TRUE) {
-		c = PeekConsoleInput(console_input, &pbuffer, 1, &junk);
+		PeekConsoleInput(console_input, &pbuffer, 1, &junk);
 		if (junk == 0)
 			return FALSE;
 		if (pbuffer.EventType == KEY_EVENT &&
@@ -6016,7 +6009,7 @@ object find_from(object a, object bobj, object c)
 	bp = b->base;
 	bp += c - 1;
 	if (IS_ATOM_INT(a)) {
-		eudouble da;
+		eudouble da = (eudouble)0;
 		int daok = 0;
 		while (TRUE) {
 			bv = *(++bp);

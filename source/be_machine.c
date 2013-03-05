@@ -264,6 +264,17 @@ char *name_ext(char *s)
 		return s;
 }
 
+uint64_t get_uint64( object x ){
+	if (IS_ATOM_INT(x)){
+		return x;
+	}
+
+	if (IS_ATOM(x)){
+		return (uint64_t)(DBL_PTR(x)->dbl);
+	}
+	RTFatal("an integer was expected, not a sequence");
+}
+
 object get_int(object x)
 /* return an integer value if possible, truncated to the size of an object. */
 {
@@ -1180,11 +1191,11 @@ static object Dir(object x)
 {
 	char path[MAX_FILE_NAME+1];
 	s1_ptr result, row;
-	struct dirent *direntp;
+	struct dirent *direntp = 0;
 	object_ptr obj_ptr, temp;
 
 	DIR *dirp;
-	int r;
+	int r = -1;
 #ifdef ELINUX
 	struct stat64 stbuf;
 #else
@@ -1542,14 +1553,15 @@ static object lock_file(object x)
 /* lock a file. x is {fn, t, {first-byte, last-byte}} */
 {
 	IFILE f;
-	int fd;
+	intptr_t fd;
 	int r;
-#ifdef EUNIX
 	int t;
-#else
-	uintptr_t first, last;
+#ifndef EUNIX
+	uint64_t first, last, bytes;
 	object s;
+	OVERLAPPED overlapped;
 #endif
+	
 	object fn;
 
 	// get 1st element of x - file number - assume x is a sequence of length 3
@@ -1558,49 +1570,67 @@ static object lock_file(object x)
 	f = which_file(fn, EF_READ | EF_WRITE);
 	fd = ifileno(f);
 
-#ifdef EUNIX
+#ifndef EUNIX
+	fd = _get_osfhandle( fd ); // need a HANDLE on Windows
+#endif
 	// get 2nd element of x - lock type
 	t = get_int(*(((s1_ptr)x)->base+2));
+#ifdef EUNIX
 	if (t == 1)
 		r = flock(fd, LOCK_SH | LOCK_NB);
 	else
 		r = flock(fd, LOCK_EX | LOCK_NB);
-#else // EUNIX
+#else
 	// get 3rd element of x - range - assume it's a sequence
 	s = *(((s1_ptr)x)->base+3);
 	s = (object)SEQ_PTR(s);
 	if (((s1_ptr)s)->length == 0) {
 		first = 0;
-		last = 0xFFFFFFFE;
+		last = 0xFFFFFFFFFFFFFFFE;
 	}
 	else if (((s1_ptr)s)->length == 2) {
-		first = get_int(*(((s1_ptr)s)->base+1));
-		last =  get_int(*(((s1_ptr)s)->base+2));
+		first = get_uint64(*(((s1_ptr)s)->base+1));
+		last =  get_uint64(*(((s1_ptr)s)->base+2));
 	}
 	else {
 		RTFatal("3rd argument to lock_file must be a sequence of length 0 or 2");
 	}
 	if (last < first)
 		return ATOM_0;
-#if defined(EMINGW)
-	r = 0;  // TODO: FOR NOW!
-#else // defined EMINGW
-	r = lock(fd, first, last - first + 1);
-#endif // defined EMINGW
-#endif // EUNIX
-	if (r == 0)
+
+	bytes = last - first + 1;
+	overlapped.hEvent = 0;
+	overlapped.Offset = (DWORD)(first & 0xffffffff);
+	overlapped.OffsetHigh = (DWORD)( (first & 0xffffffff00000000) << 32 );
+	r = LockFileEx(
+						(HANDLE)fd,
+						((t == 2) ? LOCKFILE_EXCLUSIVE_LOCK : 0) | LOCKFILE_FAIL_IMMEDIATELY,
+						0,
+						(DWORD)bytes & 0xffffffff,
+						(DWORD) ((bytes & 0xffffffff00000000) << 32),
+						&overlapped );
+
+#endif
+	
+#ifdef EUNIX
+	if (r == 0){
+#else
+	if (r != 0){
+#endif
 		return ATOM_1; // success
-	else
+	}
+	else{
 		return ATOM_0; // fail
+	}
 }
 
 static object unlock_file(object x)
 /* unlock a file */
 {
 	IFILE f;
-	int fd;
+	intptr_t fd;
 #ifdef EWINDOWS
-	uintptr_t first, last;
+	uint64_t first, last, bytes;
 	object s;
 #endif
 	object fn;
@@ -1613,26 +1643,29 @@ static object unlock_file(object x)
 #ifdef EUNIX
 	flock(fd, LOCK_UN);
 #else // EUNIX
+	fd = _get_osfhandle( fd );
 	// get 2nd element of x - range - assume it's a sequence
 	s = *(((s1_ptr)x)->base+2);
 	s = (object)SEQ_PTR(s);
 	if (((s1_ptr)s)->length == 0) {
 		first = 0;
-		last = 0xFFFFFFFE;
+		last = 0xFFFFFFFFFFFFFFFE;
 	}
 	else if (((s1_ptr)s)->length == 2) {
-		first = get_int(*(((s1_ptr)s)->base+1));
-		last =  get_int(*(((s1_ptr)s)->base+2));
+		first = get_uint64(*(((s1_ptr)s)->base+1));
+		last =  get_uint64(*(((s1_ptr)s)->base+2));
 	}
 	else {
 		RTFatal("2nd argument to unlock_file must be a sequence of length 0 or 2");
 	}
-#if defined(EMINGW)
-	/* do nothing */
-#else // defined EMINGW
-	if (last >= first)
-		unlock(fd, first, last - first + 1);
-#endif // EMINGW
+
+	bytes = last - first + 1;
+	UnlockFile(
+				(HANDLE)fd,
+				(DWORD)(first & 0xffffffff),
+				(DWORD)( (first & 0xffffffff00000000) << 32 ),
+				(DWORD)bytes & 0xffffffff,
+				(DWORD) ((bytes & 0xffffffff00000000) << 32));
 #endif // EUNIX
 	return ATOM_1; // ignored
 }
@@ -1774,6 +1807,9 @@ static object e_sleep(object x)
 		} else {
 			t = DBL_PTR(x)->dbl;
 		}
+	}
+	else{
+		t = (eudouble)0;
 	}
 	Wait((double)t);
 	return ATOM_1;
@@ -2585,7 +2621,6 @@ object internal_general_call_back(
 /* general call-back routine: 0 to 9 args */
 {
 	int num_args;
-	object result;
 	intptr_t (*addr)();
 
 // translator call-back

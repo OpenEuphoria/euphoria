@@ -80,7 +80,7 @@ HANDLE console_output; // HANDLE for WIN32 console output
 HANDLE console_trace;  // HANDLE for WIN32 output to trace-screen
 HANDLE console_var_display; // HANDLE for WIN32 output to large sequence display
 HANDLE console_save;   // place to save console_output while in trace screen
-long int orig_console_mode; // console modes in effect when program starts.
+DWORD orig_console_mode; // console modes in effect when program starts.
 
 #endif
 

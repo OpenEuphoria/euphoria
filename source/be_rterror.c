@@ -240,6 +240,24 @@ static int OffScreen(long line_num)
 		return FALSE;
 }
 
+static int prev_file_no = -1;
+
+/**
+ * Find the multiline token for the previous line in the
+ * file.
+ */
+static int get_prev_multiline( long i ){
+	char file_no;
+
+	file_no = slist[i].file_no;
+	for( --i; i > 0; --i ){
+		if( slist[i].file_no == file_no && slist[i].multiline != -1 ){
+			return slist[i].multiline;
+		}
+	}
+	return 0;
+}
+
 static void DisplayLine(long n, int highlight)
 /* display line n, possibly with highlighting */
 {
@@ -299,23 +317,6 @@ static void DisplayLine(long n, int highlight)
 static char blanks[BLANK_SIZE+1]={' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
 								  ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
 								  '\0'};
-static int prev_file_no = -1;
-
-/**
- * Find the multiline token for the previous line in the
- * file.
- */
-int get_prev_multiline( long i ){
-	char file_no;
-
-	file_no = slist[i].file_no;
-	for( --i; i > 0; --i ){
-		if( slist[i].file_no == file_no && slist[i].multiline != -1 ){
-			return slist[i].multiline;
-		}
-	}
-	return 0;	
-}
 
 static void Refresh(long line_num, int vars_too)
 /* refresh trace lines centred at line_num */
@@ -533,7 +534,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 /* display a variable and its value in debug area on screen */
 {
 	register int i, already_there;
-	int col, found, inc, len_required;
+	int col, found, inc, len_required = 0;
 	object val, screen_val;
 	struct EuViewPort vp;
 	

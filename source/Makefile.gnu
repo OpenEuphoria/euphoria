@@ -552,9 +552,6 @@ interpreter : builddirs $(EU_BACKEND_OBJECTS)
 translator  : builddirs $(EU_BACKEND_OBJECTS)
 	$(MAKE) $(BUILDDIR)/$(EECU) OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 
-backend     : builddirs $(EU_BACKEND_OBJECTS)
-	$(MAKE) $(BUILDDIR)/$(EBACKENDU) OBJDIR=backobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
-
 endif
 
 
