@@ -382,8 +382,9 @@ function setup_build()
 		l_ext,
 		t_slash
 
-	if dll_option and length( user_pic_library ) > 0
-	and (TARM or (TX86_64 and not TWINDOWS)) then
+	if dll_option
+	and length( user_pic_library ) > 0
+	and not TWINDOWS then
 		user_library = user_pic_library
 	end if
 	
@@ -399,7 +400,7 @@ function setup_build()
 		if TUNIX or compiler_type = COMPILER_GCC then
 			l_ext = "a"
 			t_slash = "/"
-			if dll_option then
+			if dll_option and not TWINDOWS then
 				for i = 1 to length( l_names ) do
 					-- use the -fPIC compiled library
 					l_names[i] &= "so"
@@ -490,7 +491,7 @@ function setup_build()
 				c_flags &= " -fomit-frame-pointer"
 			end if
 
-			if dll_option and (TARM or (TX86_64 and not TWINDOWS)) then
+			if dll_option and not TWINDOWS then
 				c_flags &= " -fPIC"
 			end if
 
