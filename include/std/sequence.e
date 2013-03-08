@@ -361,7 +361,7 @@ public function columnize(sequence source, object cols = {}, object defval = 0)
 	for i = 1 to length(collist) do
 		integer col = collist[i]
 		for j = 1 to length(source) do
-			if length(source[j]) < col then
+			if sequence(source[j]) and length(source[j]) < col then
 				result[i] = append(result[i], defval)
 			else
 				if atom(source[j]) then
