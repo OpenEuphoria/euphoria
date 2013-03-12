@@ -424,7 +424,7 @@ function scan_multicomment(atom state = g_state, multiline_token multi = 0)
 		Token[TDATA] = "/"
 	end if
 	Token[TFORM] = TF_COMMENT_MULTIPLE
-
+	
 	while 1 do
 		if (Look = io:EOF) or (Look = EOL) then
 			last_multi = TF_COMMENT_MULTIPLE
@@ -1184,6 +1184,7 @@ public function tokenize_string(sequence code, atom state = g_state, integer sto
 			case TF_STRING_TRIPLE then
 				raw_string( `"""`, state, multi )
 			case TF_COMMENT_MULTIPLE then
+				scan_char( state )
 				scan_multicomment( state, multi )
 			case else
 				-- error?
