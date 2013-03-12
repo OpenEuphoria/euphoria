@@ -484,17 +484,13 @@ library : builddirs
 
 
 shared-library :
-ifneq (,$(filter $(ARCH), "ARM", "ix86_64"))
 ifneq "$(EMINGW)" "1"
 	$(MAKE) $(BUILDDIR)/$(EECUSOA) OBJDIR=libobj-fPIC ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG= EPROFILE=$(EPROFILE) FPIC=-fPIC
 endif
-endif
 
 debug-shared-library : builddirs
-ifneq (,$(filter $(ARCH), "ARM", "ix86_64"))
 ifneq "$(EMINGW)" "1"
 	$(MAKE) $(BUILDDIR)/$(EECUSODBGA) OBJDIR=libobjdbg-fPIC ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE) FPIC=-fPIC
-endif
 endif
 
 # All code in Ming is position independent.  So simply link
@@ -867,11 +863,9 @@ install :
 	mkdir -p $(DESTDIR)$(PREFIX)/lib
 	install $(BUILDDIR)/$(EECUA) $(DESTDIR)$(PREFIX)/lib
 	install $(BUILDDIR)/$(EECUDBGA) $(DESTDIR)$(PREFIX)/lib
-ifneq (,$(filter $(ARCH), "ARM", "ix86_64"))
 ifneq "$(EMINGW)" "1"
 	install $(BUILDDIR)/$(EECUSOA) $(DESTDIR)$(PREFIX)/lib
 	install $(BUILDDIR)/$(EECUSODBGA) $(DESTDIR)$(PREFIX)/lib
-endif
 endif
 	install $(BUILDDIR)/$(EEXU) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EECU) $(DESTDIR)$(PREFIX)/bin

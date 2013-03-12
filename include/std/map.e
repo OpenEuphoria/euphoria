@@ -69,8 +69,6 @@ enum
 	SLOT_VALUE,
 	$
 
-constant BLANK_SLOT = { -1, 0, 0 }
-
 constant type_is_map   = "Eu:StdMap"
 
 
@@ -86,6 +84,18 @@ public enum
 	APPEND,
 	CONCAT,
 	LEAVE
+
+enum type EMPTY_KEY
+	EMPTY = -2,
+	REMOVED,
+	$
+end type
+
+
+constant
+	EMPTY_SLOT   = { EMPTY, 0, 0 },
+	REMOVED_SLOT = { REMOVED, 0, 0 },
+	$
 
 ifdef BITS32 then
 	constant DEFAULT_HASH = HSIEH30
@@ -152,7 +162,7 @@ function new_map_seq( integer size )
 			slots *= 2
 		end while
 	end if
-	return { 0, repeat( BLANK_SLOT, slots ), floor( size * 2/3 ) }
+	return { 0, repeat( EMPTY_SLOT, slots ), floor( size * 2/3 ) }
 end function
 
 --****
@@ -261,7 +271,7 @@ public function new( integer initial_size_p = DEFAULT_SIZE )
 	return eumem:malloc( new_map_seq( initial_size_p ) )
 end function
 
-function lookup( object key, integer hashval = hash( key ), sequence slots )
+function lookup( object key, integer hashval = hash( key ), sequence slots, EMPTY_KEY empty )
 	integer mask = length( slots ) - 1
 	integer index = and_bits( hashval, mask ) + 1
 	ifdef BITS64 then
@@ -274,6 +284,8 @@ function lookup( object key, integer hashval = hash( key ), sequence slots )
 	integer perturb = hashval
 	integer this_hash
 	object this_key
+	integer looks = 0
+	integer removed_slot = 0
 	while this_hash != hashval or not equal( this_key, key ) with entry do
 		index_hash *= 4
 		index_hash += index
@@ -286,11 +298,15 @@ function lookup( object key, integer hashval = hash( key ), sequence slots )
 	entry
 		slot = slots[index]
 		this_hash = slot[SLOT_HASH]
-		if this_hash = -1 then
+		if this_hash <= empty then
 			return index
+		elsif looks > length( slots ) then
+			return removed_slot
+		elsif this_hash = REMOVED then
+			removed_slot = index
 		end if
 		this_key = slot[SLOT_KEY]
-
+		looks += 1
 	end while
 	return index
 end function
@@ -323,7 +339,7 @@ function rehash_seq( sequence old_map, integer size = 0 )
 		sequence old_slot = old_slots[i]
 		integer old_hash = old_slot[SLOT_HASH]
 		if old_hash != -1 then
-			index = lookup( old_slot[SLOT_KEY], old_hash, slots )
+			index = lookup( old_slot[SLOT_KEY], old_hash, slots, REMOVED )
 			slots[index] = old_slot
 		end if
 	end for
@@ -447,7 +463,7 @@ end function
 public function has( map the_map_p, object key )
 	integer hashval = hash( key )
 	sequence slots = eumem:ram_space[the_map_p][MAP_SLOTS]
-	integer index = lookup( key, hashval, slots )
+	integer index = lookup( key, hashval, slots, EMPTY )
 
 	return hashval = slots[index][SLOT_HASH]
 end function
@@ -488,7 +504,7 @@ end function
 public function get( map the_map_p, object key, object default = 0 )
 	integer hashval = hash( key )
 	sequence slots = eumem:ram_space[the_map_p][MAP_SLOTS]
-	integer index = lookup( key, hashval, slots )
+	integer index = lookup( key, hashval, slots, EMPTY )
 	sequence slot = slots[index]
 	if hashval = slot[SLOT_HASH] then
 		return slot[SLOT_VALUE]
@@ -565,16 +581,16 @@ public procedure put( map the_map_p, object key, object val, object op = PUT, ob
 	eumem:ram_space[the_map_p] = 0
 	sequence slots = the_map_seq[MAP_SLOTS]
 
-	integer index = lookup( key, hashval, slots )
+	integer index = lookup( key, hashval, slots, REMOVED )
 	integer old_hash = slots[index][SLOT_HASH]
 
-	if old_hash = -1 then
+	if old_hash < 0 then
 		-- adding to the map, so check size
 		if the_map_seq[MAP_SIZE] > the_map_seq[MAP_MAX] then
 			slots = {}
 			the_map_seq = rehash_seq( the_map_seq )
 			slots = the_map_seq[MAP_SLOTS]
-			index = lookup( key, hashval, slots )
+			index = lookup( key, hashval, slots, REMOVED )
 			old_hash = slots[index][SLOT_HASH]
 		end if
 		the_map_seq[MAP_SIZE] += 1
@@ -586,48 +602,48 @@ public procedure put( map the_map_p, object key, object val, object op = PUT, ob
 		case PUT then
 			slots[index] = { hashval, key, val }
 		case ADD then
-			if old_hash = -1 then
+			if old_hash < 0 then
 				slots[index] = { hashval, key, val }
 			else
 				slots[index] = { hashval, key, val + slots[index][SLOT_VALUE] }
 			end if
 		case SUBTRACT then
-			if old_hash = -1 then
+			if old_hash < 0 then
 				slots[index] = { hashval, key, val }
 			else
 				slots[index] = { hashval, key, slots[index][SLOT_VALUE] - val }
 			end if
 
 		case MULTIPLY then
-			if old_hash = -1 then
+			if old_hash < 0 then
 				error:crash("Inappropriate initial operation given to map.e:put()")
 			else
 				slots[index] = { hashval, key, val * slots[index][SLOT_VALUE] }
 			end if
 
 		case DIVIDE then
-			if old_hash = -1 then
+			if old_hash < 0 then
 				error:crash("Inappropriate initial operation given to map.e:put()")
 			else
 				slots[index] = { hashval, key, slots[index][SLOT_VALUE] / val }
 			end if
 
 		case APPEND then
-			if old_hash = -1 then
+			if old_hash < 0 then
 				slots[index] = { hashval, key, {val} }
 			else
 				slots[index] = { hashval, key, append( slots[index][SLOT_VALUE], val ) }
 			end if
 
 		case CONCAT then
-			if old_hash = -1 then
+			if old_hash < 0 then
 				slots[index] = { hashval, key, val }
 			else
 				slots[index] = { hashval, key, slots[index][SLOT_VALUE] & val }
 			end if
 
 		case LEAVE then
-			if old_hash = -1 then
+			if old_hash < 0 then
 				slots[index] = { hashval, key, val }
 			end if
 		case else
@@ -714,18 +730,17 @@ end procedure
 -- See Also:
 --		[[:clear]], [[:has]]
 --
-
+include std/console.e
 public procedure remove( map the_map_p, object key )
 	integer hashval = hash( key )
 	sequence slots = eumem:ram_space[the_map_p][MAP_SLOTS]
 
-	integer index = lookup( key, hashval, slots )
+	integer index = lookup( key, hashval, slots, EMPTY )
 	if hashval = slots[index][SLOT_HASH] then
 		slots = {}
-		eumem:ram_space[the_map_p][MAP_SLOTS][index] = BLANK_SLOT
+		eumem:ram_space[the_map_p][MAP_SLOTS][index] = REMOVED_SLOT
 		eumem:ram_space[the_map_p][MAP_SIZE] -= 1
 	end if
-
 end procedure
 
 --**
@@ -755,7 +770,7 @@ end procedure
 --
 
 public procedure clear( map the_map_p )
-	eumem:ram_space[the_map_p][MAP_SLOTS] = repeat( BLANK_SLOT, length( eumem:ram_space[the_map_p][MAP_SLOTS] ) )
+	eumem:ram_space[the_map_p][MAP_SLOTS] = repeat( EMPTY_SLOT, length( eumem:ram_space[the_map_p][MAP_SLOTS] ) )
 	eumem:ram_space[the_map_p][MAP_SIZE]  = 0
 end procedure
 
@@ -842,11 +857,11 @@ public function statistics(map the_map_p)
 	sequence buckets = values( hashes )
 	if length( buckets ) then
 		statistic_set_[NUM_BUCKETS]     = length( buckets )
-		statistic_set_[NUM_IN_USE]      = math:sum( buckets )
-		statistic_set_[SMALLEST_BUCKET] = math:min( buckets )
-		statistic_set_[LARGEST_BUCKET]  = math:max( buckets )
-		statistic_set_[STDEV_BUCKET]    = stats:stdev( buckets )
-		statistic_set_[AVERAGE_BUCKET]  = stats:average( buckets )
+		statistic_set_[NUM_IN_USE]      = length( buckets )
+		statistic_set_[SMALLEST_BUCKET] = 1
+		statistic_set_[LARGEST_BUCKET]  = 1
+		statistic_set_[STDEV_BUCKET]    = 0
+		statistic_set_[AVERAGE_BUCKET]  = 1
 	end if
 	
 	return statistic_set_
@@ -889,7 +904,7 @@ public function keys( map the_map_p, integer sorted_result = 0 )
 	sequence keys = repeat( 0, eumem:ram_space[the_map_p][MAP_SIZE] )
 	integer kx = 0
 	for i = 1 to length( slots ) do
-		if slots[i][SLOT_HASH] != -1 then
+		if slots[i][SLOT_HASH] > 0 then
 			kx += 1
 			keys[kx] = slots[i][SLOT_KEY]
 			if kx = length( keys ) then
@@ -979,7 +994,7 @@ public function values( map the_map, object keys=0, object default_values=0 )
 	sequence values = repeat( 0, eumem:ram_space[the_map][MAP_SIZE] )
 	integer vx = 0
 	for i = 1 to length( slots ) do
-		if slots[i][SLOT_HASH] != -1 then
+		if slots[i][SLOT_HASH] > 0 then
 			vx += 1
 			values[vx] = slots[i][SLOT_VALUE]
 			if vx = length( values ) then
@@ -1033,7 +1048,7 @@ public function pairs( map the_map, integer sorted_result = 0 )
 	sequence pairs = repeat( 0, eumem:ram_space[the_map][MAP_SIZE] )
 	integer px = 0
 	for i = 1 to length( slots ) do
-		if slots[i][SLOT_HASH] != -1 then
+		if slots[i][SLOT_HASH] > 0 then
 			px += 1
 			pairs[px] = { slots[i][SLOT_KEY], slots[i][SLOT_VALUE] }
 			if px = length( pairs ) then
