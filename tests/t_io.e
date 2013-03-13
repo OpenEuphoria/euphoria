@@ -236,13 +236,19 @@ writef("The date is [4], [u2:3] [3:02], [1:4].\n",
        {2013, "March", 5, "Tuesday"}, {"writef.test", "a"})
 writef("The date is [4], [u2:3] [3:02], [1:4].\n",
        {2013, "March", 5, "Tuesday"}, {"writef.test", 'a'})
-constant WRITEF = `
+sequence WRITEF = `
 The date is Tuesday, MAR 05, 2013.
 First 65, second 100
 The date is Tuesday, MAR 05, 2013.
 The date is Tuesday, MAR 05, 2013.
 
 `
+
+ifdef WINDOWS then
+include std/search.e
+WRITEF = match_replace( "\n", WRITEF, "\r\n" )
+end ifdef
+
 test_equal( "writef", WRITEF, read_file( "writef.test" ))
 delete_file( "writef.test" )
 
