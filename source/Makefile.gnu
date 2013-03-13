@@ -405,7 +405,7 @@ EU_DOC_SOURCE = \
 	$(EU_STD_INC) \
 	$(DOCDIR)/manual.af \
 	$(wildcard $(DOCDIR)/*.txt) \
-	$(wildcard $(INCDIR)/euphoria/debug/*.e)
+	$(wildcard $(INCDIR)/euphoria/debug/*.e) \
 	$(wildcard $(DOCDIR)/release/*.txt)
 
 EU_TRANSLATOR_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/transobj/*.c))
