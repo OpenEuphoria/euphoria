@@ -354,7 +354,8 @@ DOCDIR = $(TRUNKDIR)/docs
 EU_DOC_SOURCE = \
 	$(EU_STD_INC) \
 	$(DOCDIR)/manual.af \
-	$(wildcard $(DOCDIR)/*.txt)
+	$(wildcard $(DOCDIR)/*.txt) \
+	$(wildcard $(DOCDIR)/release/*.txt)
 
 EU_TRANSLATOR_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/transobj/*.c))
 EU_BACKEND_RUNNER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/backobj/*.c))

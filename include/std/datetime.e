@@ -17,7 +17,7 @@ elsifdef OSX then
 	constant gmtime_ = dll:define_c_func(dll:open_dll("libc.dylib"), "gmtime", {dll:C_POINTER}, dll:C_POINTER)
 	constant time_ = dll:define_c_func(dll:open_dll("libc.dylib"), "time", {dll:C_POINTER}, dll:C_INT)
 elsifdef WINDOWS then
-	constant gmtime_ = dll:define_c_func(dll:open_dll("msvcrt.dll"), "gmtime", {dll:C_POINTER}, dll:C_POINTER)
+	constant gmtime_ = dll:define_c_func(dll:open_dll("msvcrt.dll"), "+gmtime", {dll:C_POINTER}, dll:C_POINTER)
 	constant time_ = dll:define_c_proc(dll:open_dll("kernel32.dll"), "GetSystemTimeAsFileTime", {dll:C_POINTER})
 elsifdef UNIX then
 	constant gmtime_ = dll:define_c_func(dll:open_dll("libc.so"), "gmtime", {dll:C_POINTER}, dll:C_POINTER)
