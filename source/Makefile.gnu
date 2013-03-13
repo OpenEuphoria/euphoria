@@ -409,6 +409,7 @@ EU_DOC_SOURCE = \
 	$(DOCDIR)/manual.af \
 	$(wildcard $(DOCDIR)/*.txt) \
 	$(wildcard $(INCDIR)/euphoria/debug/*.e)
+	$(wildcard $(DOCDIR)/release/*.txt)
 
 EU_TRANSLATOR_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/transobj/*.c))
 EU_BACKEND_RUNNER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/backobj/*.c))
