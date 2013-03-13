@@ -778,6 +778,8 @@ install :
 	install $(BUILDDIR)/$(EBACKENDC) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EUBIND) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EUSHROUD) $(DESTDIR)$(PREFIX)/bin
+	install -m 755 ../bin/*.ex $(DESTDIR)$(PREFIX)/bin
+	install -m 755 ../bin/ecp.dat $(DESTDIR)$(PREFIX)/bin
 ifeq "$(EMINGW)" "1"
 	install $(BUILDDIR)/$(EBACKENDW) $(DESTDIR)$(PREFIX)/bin
 endif
