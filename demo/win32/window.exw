@@ -5,71 +5,17 @@
 -- Most Euphoria programmers should simply use Win32Lib, wxWidgets, EuGTK or EuIUP!
 --
 
-include std/os.e
+
 include std/dll.e
 include std/machine.e
 include std/math.e
 include std/error.e
 include std/console.e
-
 include std/memstruct/windows.e
 
---****
--- === Windows Data Type constants for function/procedure calls
-
-public constant
-	C_BYTE = C_UCHAR,
-	C_BOOL = C_INT,
-	C_ATOM = C_USHORT,
-	C_WORD = C_USHORT,
-	C_DWORD=  C_ULONG,
-	C_WPARAM = C_POINTER,
-	C_LPARAM = C_POINTER,
-	C_HANDLE = C_POINTER,
-	C_HWND = C_POINTER,
-	C_LPSTR = C_POINTER,
-	C_COLORREF =  C_DWORD,    --0x00bbggrr
-	C_LANGID =  C_WORD,
-	$
-
-public constant C_LONG_PTR = C_POINTER
-
-public constant C_LRESULT = C_LONG_PTR
-
-
-
-
-constant CS_HREDRAW = 2,
-	CS_VREDRAW = 1
-
-constant SW_SHOWNORMAL = 1
-
-constant WM_CREATE = #01,
-	WM_PAINT  = #0F,
-	WM_DESTROY= #02
-
-constant SND_FILENAME = #00020000,
-	SND_ASYNC    = #00000001
-	
-constant DT_SINGLELINE = #0020,
-	DT_CENTER     = #0001,
-	DT_VCENTER    = #0004
-
-constant WS_OVERLAPPED  = #00000000,
-	WS_CAPTION     = #00C00000,
-	WS_SYSMENU     = #00080000,
-	WS_THICKFRAME  = #00040000,
-	WS_MINIMIZEBOX = #00020000,
-	WS_MAXIMIZEBOX = #00010000
+include winstruct.ew
 
 constant
-	IDC_ARROW = 32512,
-	IDI_APPLICATION = 3,
-	CW_USEDEFAULT = #80000000,
-	WS_OVERLAPPEDWINDOW = or_all({WS_OVERLAPPED, WS_CAPTION, WS_SYSMENU,
-					WS_THICKFRAME, WS_MINIMIZEBOX,
-				       WS_MAXIMIZEBOX}),
-	WHITE_BRUSH = 0,
 	LTGRAY_BRUSH = 1,
 	GRAY_BRUSH = 2,
 	DKGRAY_BRUSH = 3,
@@ -186,111 +132,6 @@ constant
 -- 	FW_BLACK = FW_HEAVY,
 	$
 
-integer LoadIcon, LoadCursor, GetStockObject, RegisterClassEx,
-	CreateWindow, ShowWindow, UpdateWindow, GetMessage,
-	TranslateMessage, DispatchMessage, PlaySound, BeginPaint,
-	GetClientRect, DrawText, EndPaint, PostQuitMessage, DefWindowProc,
-    GetSysColor, SelectObject, SetTextColor, SetBkColor,
-	xGetLastError, xSetLastError, xFormatMessage,
-    GetDeviceCaps, CreateFont, MulDiv
-
-procedure not_found(sequence name)
-	crash("Couldn't find " & name)
-end procedure
-
-
--- dynamically link a C routine as a Euphoria function
-function link_c_func(atom dll, sequence name, sequence args, atom result)
-    integer handle
-
-	handle = define_c_func(dll, name, args, result)
-	if handle = -1 then
-		not_found(name)
-	else
-		return handle
-	end if
-end function
-
--- dynamically link a C routine as a Euphoria procedure
-function link_c_proc(atom dll, sequence name, sequence args)
-	integer handle
-
-	handle = define_c_proc(dll, name, args)
-	if handle = -1 then
-		not_found(name)
-	else
-		return handle
-	end if
-end function
-
--- get handles to all dll routines that we need
-procedure link_dll_routines()
-	atom user32, gdi32, winmm, kernel32
-	
-	-- open the .DLL files
-	user32 = open_dll("user32.dll")
-	if user32 = NULL then
-		not_found("user32.dll")
-	end if
-	gdi32 = open_dll("gdi32.dll")
-	if gdi32 = NULL then
-		not_found("gdi32.dll")
-	end if
-	winmm = open_dll("winmm.dll")
-	if winmm = NULL then
-		not_found("winmm.dll")
-	end if
-	
-	kernel32 = open_dll( "kernel32.dll")
-	if kernel32 = NULL then
-		not_found("kernel32.dll")
-	end if
-
-	-- link the C routines
-	--new code would use LoadImage    
-	LoadIcon = link_c_func(user32, "LoadIconA", {C_HANDLE, C_LPSTR}, C_HANDLE)
-	LoadCursor = link_c_func(user32, "LoadCursorA", {C_HANDLE, C_LPSTR}, C_HANDLE)
-
-	GetStockObject = link_c_func(gdi32, "GetStockObject", {C_INT}, C_HANDLE)
-	RegisterClassEx = link_c_func(user32, "RegisterClassExA", {C_POINTER}, C_ATOM)
-	CreateWindow = link_c_func(user32, "CreateWindowExA",
-		{C_DWORD, C_LPSTR, C_LPSTR,C_DWORD,C_INT,C_INT,C_INT,C_INT,
-		C_HWND,C_HANDLE,C_HANDLE, C_POINTER},
-	C_HWND)
-	ShowWindow = link_c_proc(user32, "ShowWindow", {C_HWND, C_INT}) --BOOL
-	UpdateWindow = link_c_proc(user32, "UpdateWindow", {C_HWND}) --BOOL
-	GetMessage = link_c_func(user32, "GetMessageA",
-				{C_LPSTR, C_HWND, C_UINT, C_UINT}, C_BOOL)
-
-	TranslateMessage = link_c_proc(user32, "TranslateMessage", {C_LPSTR}) --BOOL
-	DispatchMessage = link_c_proc(user32, "DispatchMessageA", {C_LPSTR}) --LRESULT
-	PlaySound = link_c_proc(winmm, "PlaySound", {C_LPSTR, C_HANDLE, C_DWORD}) --BOOL
-	BeginPaint = link_c_func(user32, "BeginPaint", {C_HWND, C_POINTER}, C_HANDLE)
-	GetClientRect = link_c_proc(user32, "GetClientRect", {C_HWND, C_POINTER}) --BOOL
-	DrawText = link_c_proc(user32, "DrawTextA",
-			{C_HANDLE, C_LPSTR, C_INT, C_POINTER, C_UINT})  --INT
-	EndPaint = link_c_proc(user32, "EndPaint", {C_HWND, C_POINTER}) --BOOL
-	PostQuitMessage = link_c_proc(user32, "PostQuitMessage", {C_INT})
-	DefWindowProc = link_c_func(user32, "DefWindowProcA",
-				{C_HWND, C_UINT, C_WPARAM, C_LPARAM}, C_LRESULT)
-    GetSysColor = link_c_func(user32, "GetSysColor", {C_INT}, C_DWORD)
-    SelectObject = link_c_func(gdi32, "SelectObject", {C_HANDLE, C_HANDLE}, C_HANDLE)
-    SetTextColor = link_c_func(gdi32, "SetTextColor", {C_HANDLE, C_COLORREF}, C_COLORREF)
-    SetBkColor = link_c_func(gdi32, "SetBkColor", {C_HANDLE, C_COLORREF}, C_COLORREF)
-
-    GetDeviceCaps = link_c_func(gdi32, "GetDeviceCaps", {C_HANDLE, C_INT}, C_INT)
-    CreateFont = link_c_func(gdi32, "CreateFontA", {
-		C_INT, C_INT, C_INT, C_INT, C_INT, C_DWORD, C_DWORD, C_DWORD,
-		C_DWORD, C_DWORD, C_DWORD, C_DWORD, C_DWORD, C_LPSTR
-	},
-	C_HANDLE)
-	
-	MulDiv = link_c_func( kernel32, "MulDiv", { C_INT, C_INT, C_INT }, C_INT )
-
-end procedure
-
-link_dll_routines()
-
 atom
  --get_env(media?)
  wav_file = allocate_string(getenv("Windir")&`\Media\tada.wav`),
@@ -361,19 +202,6 @@ public function WndProc(atom hwnd, atom iMsg, atom wParam, atom lParam)
 		c_proc(DrawText, {hdc, Euphoria, -1, rect,
 				or_all({DT_SINGLELINE, DT_CENTER, DT_VCENTER})})
 		c_proc(EndPaint, {hwnd, ps})
-	return 0
-	if iMsg = WM_CREATE then
-		c_proc(PlaySound, {wav_file,
-				   NULL,
-				   or_bits(SND_FILENAME, SND_ASYNC)})
-		return 0
-
-	elsif iMsg = WM_PAINT then
-		hdc = c_func(BeginPaint, {hwnd, ps})
-		c_proc(GetClientRect, {hwnd, rect})
-		c_proc(DrawText, {hdc, Euphoria, -1, rect, 
-				  or_all({DT_SINGLELINE, DT_CENTER, DT_VCENTER})})
-		c_proc(EndPaint, {hwnd, ps})
 		return 0
 
 	elsif iMsg = WM_DESTROY then
@@ -404,6 +232,7 @@ procedure WinMain()
 	if id = -1 then
 		crash("routine_id failed!")
 	end if
+
 	WndProcAddress = call_back(id) -- get address for callback
 
 	wndclass.WNDCLASSEX.cbSize      = sizeof(WNDCLASSEX)
@@ -413,25 +242,8 @@ procedure WinMain()
 	wndclass.WNDCLASSEX.cbWndExtra  = 0
 	wndclass.WNDCLASSEX.hInstance   = 0
 
-	-- set icon in top-left of window
-	icon_handle = c_func(LoadIcon, {instance(), allocate_string( "eui", 1)})
-	if icon_handle = 0 then
-		c_proc( xSetLastError, {0} )
-		icon_handle = c_func(LoadIcon, {NULL, IDI_APPLICATION})
-	end if
-	wndclass.WNDCLASSEX.hIcon   = icon_handle
-	wndclass.WNDCLASSEX.hIconSm = icon_handle
-	
-	-- Wolfgang Fritz observes that you can set an icon
-	-- dynamically using:
-	-- sendMessage(YourWindow, WM_SETICON, 1, icon_handle)
-	-- where WM_SETICON is 128
-	wndclass.WNDCLASSEX.hCursor       = c_func(LoadCursor, {NULL, IDC_ARROW})
-	wndclass.WNDCLASSEX.hbrBackground = c_func(GetStockObject, {WHITE_BRUSH})
-	wndclass.WNDCLASSEX.lpszMenuName  = NULL
-	wndclass.WNDCLASSEX.lpszClassName = szAppName
+	class = register_class( wndclass, WndProcAddress, szAppName )
 
-	class = c_func(RegisterClassEx, {wndclass})
 	if class = 0 then
 		crash("could not register class")
 	end if
