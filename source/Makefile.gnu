@@ -385,8 +385,7 @@ clean :
 		rm -r $${f} ; \
 	done ;
 	-rm -r $(BUILDDIR)/pcre
-	-rm $(BUILDDIR)/*pdf
-	-rm $(BUILDDIR)/*txt
+	-rm -r $(BUILDDIR)/pdf
 	-rm -r $(BUILDDIR)/*-build
 	-rm $(BUILDDIR)/eui$(EXE_EXT) $(BUILDDIR)/$(EEXUW)
 	-rm $(BUILDDIR)/$(EECU)
@@ -396,9 +395,11 @@ clean :
 	-for f in $(EU_TOOLS) ; do \
 		rm $${f} ; \
 	done ;
+	rm -f $(BUILDDIR)/euphoria.{pdf,txt}
 	-rm $(BUILDDIR)/ver.cache
 	-rm $(BUILDDIR)/mkver$(EXE_EXT)
 	-rm $(BUILDDIR)/eudist$(EXE_EXT) $(BUILDDIR)/echoversion$(EXE_EXT)
+	-rm $(BUILDDIR)/test818.o
 	-rm -r $(BUILDDIR)/html
 	-rm -r $(BUILDDIR)/coverage
 	-rm -r $(BUILDDIR)/manual
