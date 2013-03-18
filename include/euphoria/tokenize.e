@@ -426,9 +426,8 @@ function scan_multicomment(atom state = g_state, multiline_token multi = 0)
 	Token[TFORM] = TF_COMMENT_MULTIPLE
 	
 	while 1 do
-		if (Look = io:EOF) or (Look = EOL) then
+		if (Look = io:EOF) then
 			last_multi = TF_COMMENT_MULTIPLE
--- 			report_error(ERR_EOF)
 			return TRUE 
 		end if
 
