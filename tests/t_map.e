@@ -658,4 +658,11 @@ procedure lookup_bug()
 end procedure
 lookup_bug()
 
+m1 = map:new()
+map:put( m1, "", 1234 )
+test_equal( "retrieve empty string (hashvalue 0) correctly", 1234, map:get( m1, "" ) )
+test_equal( "keys() handles hashval 0 correctly", {""}, map:keys( m1 ) )
+test_equal( "values() handles hashval 0 correctly", {1234}, map:values( m1 ) )
+test_equal( "pairs() handles hashval 0 correctly", {{"",1234}}, map:pairs( m1 ) )
+
 test_report()

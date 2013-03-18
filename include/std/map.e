@@ -904,7 +904,7 @@ public function keys( map the_map_p, integer sorted_result = 0 )
 	sequence keys = repeat( 0, eumem:ram_space[the_map_p][MAP_SIZE] )
 	integer kx = 0
 	for i = 1 to length( slots ) do
-		if slots[i][SLOT_HASH] > 0 then
+		if slots[i][SLOT_HASH] >= 0 then
 			kx += 1
 			keys[kx] = slots[i][SLOT_KEY]
 			if kx = length( keys ) then
@@ -994,7 +994,7 @@ public function values( map the_map, object keys=0, object default_values=0 )
 	sequence values = repeat( 0, eumem:ram_space[the_map][MAP_SIZE] )
 	integer vx = 0
 	for i = 1 to length( slots ) do
-		if slots[i][SLOT_HASH] > 0 then
+		if slots[i][SLOT_HASH] >= 0 then
 			vx += 1
 			values[vx] = slots[i][SLOT_VALUE]
 			if vx = length( values ) then
@@ -1048,7 +1048,7 @@ public function pairs( map the_map, integer sorted_result = 0 )
 	sequence pairs = repeat( 0, eumem:ram_space[the_map][MAP_SIZE] )
 	integer px = 0
 	for i = 1 to length( slots ) do
-		if slots[i][SLOT_HASH] > 0 then
+		if slots[i][SLOT_HASH] >= 0 then
 			px += 1
 			pairs[px] = { slots[i][SLOT_KEY], slots[i][SLOT_VALUE] }
 			if px = length( pairs ) then
