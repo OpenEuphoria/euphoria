@@ -990,7 +990,7 @@ function scan_include(atom state = g_state)
 
 	if not scan_string(state) then
 		-- scan until whitespace
-		while not White_Char(Look) do
+		while not White_Char(Look) and Look != EOF do
 			Token[TDATA] &= Look
 			scan_char(state)
 		end while
