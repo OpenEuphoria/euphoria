@@ -654,6 +654,11 @@ procedure lookup_bug()
 	remove_name( "flist")
 
 	validate_map( "editor", 1 )
+	
+	object files = map:get( init_routines, "editor" )
+	map:put( init_routines, "editor", -1, map:CONCAT )
+	test_equal( "put operates on correct bucket after a previous hash conflict removed",
+			   files & -1, map:get( init_routines, "editor" ) )
 
 end procedure
 lookup_bug()
