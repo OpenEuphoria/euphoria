@@ -271,7 +271,7 @@ public function new( integer initial_size_p = DEFAULT_SIZE )
 	return eumem:malloc( new_map_seq( initial_size_p ) )
 end function
 
-function lookup( object key, integer hashval = hash( key ), sequence slots, EMPTY_KEY empty )
+function lookup( object key, integer hashval = hash( key ), sequence slots )
 	integer mask = length( slots ) - 1
 	integer index = and_bits( hashval, mask ) + 1
 	ifdef BITS64 then
@@ -298,7 +298,7 @@ function lookup( object key, integer hashval = hash( key ), sequence slots, EMPT
 	entry
 		slot = slots[index]
 		this_hash = slot[SLOT_HASH]
-		if this_hash <= empty then
+		if this_hash = EMPTY then
 			return index
 		elsif looks > length( slots ) then
 			return removed_slot
@@ -339,7 +339,7 @@ function rehash_seq( sequence old_map, integer size = 0 )
 		sequence old_slot = old_slots[i]
 		integer old_hash = old_slot[SLOT_HASH]
 		if old_hash != -1 then
-			index = lookup( old_slot[SLOT_KEY], old_hash, slots, REMOVED )
+			index = lookup( old_slot[SLOT_KEY], old_hash, slots )
 			slots[index] = old_slot
 		end if
 	end for
@@ -463,7 +463,7 @@ end function
 public function has( map the_map_p, object key )
 	integer hashval = hash( key )
 	sequence slots = eumem:ram_space[the_map_p][MAP_SLOTS]
-	integer index = lookup( key, hashval, slots, EMPTY )
+	integer index = lookup( key, hashval, slots )
 
 	return hashval = slots[index][SLOT_HASH]
 end function
@@ -504,7 +504,7 @@ end function
 public function get( map the_map_p, object key, object default = 0 )
 	integer hashval = hash( key )
 	sequence slots = eumem:ram_space[the_map_p][MAP_SLOTS]
-	integer index = lookup( key, hashval, slots, EMPTY )
+	integer index = lookup( key, hashval, slots )
 	sequence slot = slots[index]
 	if hashval = slot[SLOT_HASH] then
 		return slot[SLOT_VALUE]
@@ -581,7 +581,7 @@ public procedure put( map the_map_p, object key, object val, object op = PUT, ob
 	eumem:ram_space[the_map_p] = 0
 	sequence slots = the_map_seq[MAP_SLOTS]
 
-	integer index = lookup( key, hashval, slots, REMOVED )
+	integer index = lookup( key, hashval, slots )
 	integer old_hash = slots[index][SLOT_HASH]
 
 	if old_hash < 0 then
@@ -590,7 +590,7 @@ public procedure put( map the_map_p, object key, object val, object op = PUT, ob
 			slots = {}
 			the_map_seq = rehash_seq( the_map_seq )
 			slots = the_map_seq[MAP_SLOTS]
-			index = lookup( key, hashval, slots, REMOVED )
+			index = lookup( key, hashval, slots )
 			old_hash = slots[index][SLOT_HASH]
 		end if
 		the_map_seq[MAP_SIZE] += 1
@@ -735,7 +735,7 @@ public procedure remove( map the_map_p, object key )
 	integer hashval = hash( key )
 	sequence slots = eumem:ram_space[the_map_p][MAP_SLOTS]
 
-	integer index = lookup( key, hashval, slots, EMPTY )
+	integer index = lookup( key, hashval, slots )
 	if hashval = slots[index][SLOT_HASH] then
 		slots = {}
 		eumem:ram_space[the_map_p][MAP_SLOTS][index] = REMOVED_SLOT
