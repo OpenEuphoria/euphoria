@@ -7,7 +7,7 @@
 namespace tokenize
 
 include std/convert.e
-include std/io.e
+public include std/io.e
 include std/eumem.e
 
 include keywords.e
@@ -359,6 +359,10 @@ end type
 procedure scan_char(atom state = g_state)
 	state = state -- supress warning
 	if Look = EOL then
+		if sti < length(source_text) and source_text[sti+1] = '\r' then
+			sti += 1
+			source_text[sti] = EOL
+		end if
 		LNum += 1
 		LPos = 0
 		if length(Token[TDATA]) = 0 then
@@ -1219,8 +1223,20 @@ public function tokenize_string(sequence code, atom state = g_state, integer sto
 	return { tokens, ERR, ERR_LNUM, ERR_LPOS }
 end function
 
-public function tokenize_file(sequence fname, atom state = g_state)
-	object txt = io:read_file(fname, io:TEXT_MODE)
+--**
+-- Tokenize euphoria source code
+--
+-- Parameters:
+-- # ##fname## the file to be read and tokenized
+-- # ##state## (default g_state) the tokenizer returned by ##[[:new]]##
+-- # ##mode## the mode in which to open the file. One of: io:BINARY_MODE (default) or io:TEXT_MODE. 
+--   Note that for large files with Windows line endings, text mode may be much slower. 
+--   See [[:io:read_file]] for more information.
+--
+-- Returns:
+-- Sequence of tokens
+public function tokenize_file(sequence fname, atom state = g_state, integer mode = io:BINARY_MODE )
+	object txt = io:read_file(fname, mode )
 	if atom(txt) and txt = -1 then
 		return {{}, ERR_OPEN, ERR_LNUM, ERR_LPOS}
 	end if
