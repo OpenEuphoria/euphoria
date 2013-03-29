@@ -1090,7 +1090,7 @@ union xmm_param {
 						argsize += 4;
 						
 #	else
-#		define PUSH_INT_ARG arg_op[arg_i++] = arg;
+#		define PUSH_INT_ARG arg_op[arg_i++] = arg; ++arg_len;
 
 #		define PUSH_INT64_ARG(x) \
 						dbl_arg.int64 = x;\
@@ -1326,7 +1326,11 @@ object call_c(int func, object proc_ad, object arg_list)
 			else if (IS_ATOM(next_arg)) {
 				// atoms are converted to and rounded to 64-bit values, 
 				// this is lossess on both 32 and 64 bit.
+				#ifdef EARM
+				PUSH_INT64_ARG((int64_t)DBL_PTR(next_arg)->dbl);
+				#else
 				PUSH_INT64_ARG((uint64_t)DBL_PTR(next_arg)->dbl);
+				#endif
 			}
 		}
 		else {
@@ -1356,11 +1360,13 @@ object call_c(int func, object proc_ad, object arg_list)
 			}
 			else if (IS_ATOM(next_arg)) {
 				// atoms are rounded to integers
+				#ifdef EARM
+				if( size == C_INT )
+					arg = (intptr_t)DBL_PTR(next_arg)->dbl; //correct
+				else
+				#endif
+				arg = (uintptr_t)DBL_PTR(next_arg)->dbl;
 				
-				arg = (uintptr_t)DBL_PTR(next_arg)->dbl; //correct
-				// if it's a -ve f.p. number, Watcom converts it to long and
-				// then to unsigned long. This is exactly what we want.
-				// Works with the others too. 
 				PUSH_INT_ARG
 			}
 			else {
