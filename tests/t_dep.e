@@ -70,7 +70,25 @@ elsedef
 	use_stdcall = 1
 end ifdef
 
-if sizeof( C_POINTER ) = 4 then
+ifdef ARM then
+	-- ARM hard float
+	multiply_code = {
+		0x04,0xB0,0x2D,0xE5, -- 591
+		0x00,0xB0,0x8D,0xE2, -- 595
+		0x14,0xD0,0x4D,0xE2, -- 599
+		0x08,0x00,0x0B,0xE5, -- 59D
+		0x05,0x0B,0x0B,0xED, -- 5A1
+		0x08,0x30,0x1B,0xE5, -- 5A5
+		0x90,0x3A,0x07,0xEE, -- 5A9
+		0xE7,0x6B,0xB8,0xEE, -- 5AD
+		0x05,0x7B,0x1B,0xED, -- 5B1
+		0x07,0x7B,0x26,0xEE, -- 5B5
+		0x47,0x0B,0xB0,0xEE, -- 5B9
+		0x00,0xD0,0x8B,0xE2, -- 5BD
+		0x00,0x08,0xBD,0xE8, -- 5C1
+		0x1E,0xFF,0x2F,0xE1, -- 5C5
+		$ }
+elsifdef BITS32 then
 	-- machine code taken from callmach.ex
 	multiply_code = {
 	-- int argument is at stack offset +4, double is at +8 
@@ -79,7 +97,7 @@ if sizeof( C_POINTER ) = 4 then
 	#C2, #0C * use_stdcall, #00  -- ret C -- pop 12 (or 0) bytes 
 						-- off the stack
 	}
-else
+elsedef
 	multiply_code = { 
 			#55,                     --  push   %rbp
 			#48, #89, #e5,           --  mov    %rsp,%rbp
@@ -91,7 +109,7 @@ else
 			#c3,                     --  retq   
 			$
 		}
-end if
+end ifdef
 
 crash_routine(routine_id("bad_failure"))
 crash_routine(routine_id("dep_is_enabled"))
