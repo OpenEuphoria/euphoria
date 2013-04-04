@@ -22,8 +22,7 @@ test_equal("Dec Lit 2", 1011, 0D1011)
 test_equal("Hex Lit 5", 4113, 0X1011)
 
 test_equal("Hex Lit 6", -1073741824, -0x4000_0000)
-? -0x4000_0000
-? 0 - 0x4000_0000
+
 /*-------------------------------------------------------
    Extended string literals.
    Make sure each /* allowable */ syntax form is permitted.
