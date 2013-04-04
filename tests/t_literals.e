@@ -7,7 +7,6 @@ test_equal("Hex Lit 1", -4275878552, -#FEDC_BA98)
 test_equal("Hex Lit 2", 1985229328, #7654_3210)
 test_equal("Hex Lit 3", 11259375, #aB_cDeF)
 
-
 test_equal("Integer Lit 1", 11259375, 11_259_375)
 
 test_equal("Float Lit 1", 11259.3756, 11_259.375_6)
@@ -22,6 +21,9 @@ test_equal("Octal Lit 2", 521, 0T1011)
 test_equal("Dec Lit 2", 1011, 0D1011)
 test_equal("Hex Lit 5", 4113, 0X1011)
 
+test_equal("Hex Lit 6", -1073741824, -0x4000_0000)
+? -0x4000_0000
+? 0 - 0x4000_0000
 /*-------------------------------------------------------
    Extended string literals.
    Make sure each /* allowable */ syntax form is permitted.
