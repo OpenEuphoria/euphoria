@@ -35,4 +35,14 @@ ptr = allocate_protect( {1,2,3}, 4, PAGE_EXECUTE )
 test_true( "allocate_protect wordsize 4", ptr )
 free_code( ptr, 12 )
 
+ptr = allocate( 4 )
+atom big = 0x4000_0000
+poke4( ptr, big )
+test_equal( "poke4 / peek4s atom", big, peek4s( ptr ) )
+test_equal( "poke4 / peek4u atom", big, peek4u( ptr ) )
+
+big *= -1
+poke4( ptr, big )
+test_equal( "poke4 / peek4s negative atom", big, peek4s( ptr ) )
+
 test_report()

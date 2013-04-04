@@ -689,7 +689,7 @@ static void do_poke4(object a, object top)
 		temp_dbl = DBL_PTR(top)->dbl;
 		if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 			RTFatal(POKE_LIMIT(4));
-		*poke4_addr = (uint32_t) temp_dbl;
+		*poke4_addr = (int32_t) temp_dbl;
 	}
 	else {
 		/* second arg is sequence */
@@ -707,7 +707,7 @@ static void do_poke4(object a, object top)
 				temp_dbl = DBL_PTR(top)->dbl;
 				if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 					RTFatal(POKE_LIMIT(4));
-				*poke4_addr = (uint32_t) temp_dbl;
+				*poke4_addr = (int32_t) temp_dbl;
 				++poke4_addr;
 			}
 			else {

@@ -1114,7 +1114,7 @@ procedure seg_poke4(integer source, boolean dbl)
 -- poke a 4-byte value into poke4_addr
 	-- WATCOM etc.
 	if dbl then
-		c_stmt("*poke4_addr = (uint32_t)DBL_PTR(@)->dbl;\n", source)
+		c_stmt("*poke4_addr = (int32_t)DBL_PTR(@)->dbl;\n", source)
 	else
 		c_stmt("*poke4_addr = (uint32_t)@;\n", source)
 	end if
@@ -5841,7 +5841,7 @@ procedure opPOKE()
 			case POKE8 then
 				c_stmt0("*poke8_addr++ = (uint64_t)_2;\n")
 			case POKE4 then
-				c_stmt0("*poke4_addr++ = (uint32_t)_2;\n")
+				c_stmt0("*poke4_addr++ = (int32_t)_2;\n")
 			case POKE2 then
 				c_stmt0("*poke2_addr++ = (uint16_t)_2;\n")
 			case else
