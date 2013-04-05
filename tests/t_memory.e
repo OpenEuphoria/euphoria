@@ -77,4 +77,9 @@ elsedef
 end ifdef
 free( p )
 
+p = allocate( 4 )
+poke4( p, 2203034759 )
+test_equal( "poke4/peek4u 2203034759", 2203034759, peek4u( p ) )
+free(p)
+
 test_report()

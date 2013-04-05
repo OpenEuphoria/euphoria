@@ -7,6 +7,7 @@ include std/machine.e
 test_equal("int_to_bytes +ve", {231, 3, 0, 0}, int_to_bytes(999))
 test_equal("int_to_bytes -ve",  {25,252,255,255}, int_to_bytes(-999))
 test_equal("int_to_bytes hex", {#CE, #FA, 0, 0}, int_to_bytes(#FACE))
+test_equal("int_to_bytes 2203034759", {135,164,79,131}, int_to_bytes( 2203034759, 4 ) )
 
 test_equal("bytes_to_int +ve", 999, bytes_to_int({231, 3, 0, 0}))
 test_equal("bytes_to_int -ve", 4294966297, bytes_to_int({-231, -4, -1, -1}))
