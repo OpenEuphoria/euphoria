@@ -674,6 +674,7 @@ static void do_poke4(object a, object top)
 	uint32_t *poke4_addr;
 	eudouble temp_dbl;
 	s1_ptr s1;
+	int32_t tmp_int;
 	object_ptr obj_ptr;
 
 	/* determine the address to be poked */
@@ -699,7 +700,17 @@ static void do_poke4(object a, object top)
 		temp_dbl = DBL_PTR(top)->dbl;
 		if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 			RTFatal(POKE_LIMIT(4));
+#ifdef __arm__
+		if( temp_dbl < 0.0 ){
+			tmp_int = (int32_t) temp_dbl;
+		}
+		else{
+			tmp_int = (int32_t)(uint32_t) temp_dbl;
+		}
+		*poke4_addr = (uint32_t) tmp_int;
+#else
 		*poke4_addr = (uint32_t) temp_dbl;
+#endif
 	}
 	else {
 		/* second arg is sequence */
@@ -717,7 +728,17 @@ static void do_poke4(object a, object top)
 				temp_dbl = DBL_PTR(top)->dbl;
 				if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 					RTFatal(POKE_LIMIT(4));
-				*poke4_addr = (int32_t) temp_dbl;
+#ifdef __arm__
+				if( temp_dbl < 0.0 ){
+					tmp_int = (int32_t) temp_dbl;
+				}
+				else{
+					tmp_int = (int32_t)(uint32_t) temp_dbl;
+				}
+				*poke4_addr = (uint32_t) tmp_int;
+#else
+				*poke4_addr = (uint32_t) temp_dbl;
+#endif
 				++poke4_addr;
 			}
 			else {
@@ -4831,7 +4852,12 @@ void do_exec(intptr_t *start_pc)
 					sub_addr = (void(*)())INT_VAL(a);
 				}
 				else if (IS_ATOM(a)) {
+#ifdef __arm__
+					tuint = (uintptr_t)(DBL_PTR(a)->dbl);
+					sub_addr = (void(*)())tuint;
+#else
 					sub_addr = (void(*)())(uintptr_t)(DBL_PTR(a)->dbl);
+#endif
 				}
 				else {
 					RTFatal("argument to call() must be an atom");

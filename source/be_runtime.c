@@ -3397,6 +3397,13 @@ void RHS_Slice( object a, object start, object end)
 	if (IS_ATOM_INT(end))
 		endval = INT_VAL(end);
 	else if (IS_ATOM_DBL(end)) {
+#ifdef __arm__
+		// Get consistent error messages..ARM FP casting is different than x86
+		if( DBL_PTR(end)->dbl > MAXINT_DBL ){
+			endval = INT32_MIN;
+		}
+		else
+#endif
 		endval = (int)(DBL_PTR(end)->dbl);
 		 /* f.p.: if the double is too big for
 			a long WATCOM produces the most negative number. This
@@ -5271,7 +5278,8 @@ uintptr_t general_call_back(
 	object *code[4+9]; // place to put IL: max 9 args
 	object *save_tpc;
 #endif
-
+	struct symtab_entry call_back_sym;
+	
 	if (gameover)
 		return (uintptr_t)0; // ignore messages after we decide to shutdown
 
@@ -5308,35 +5316,35 @@ uintptr_t general_call_back(
 	}
 	switch (num_args) {
 		case 0:
-			call_back_result->obj = (*addr)();
+			call_back_sym.obj = (*addr)();
 			break;
 		case 1:
-			call_back_result->obj = (*addr)(call_back_arg1->obj);
+			call_back_sym.obj = (*addr)(call_back_arg1->obj);
 			break;
 		case 2:
-			call_back_result->obj = (*addr)(call_back_arg1->obj,
+			call_back_sym.obj = (*addr)(call_back_arg1->obj,
 											call_back_arg2->obj);
 			break;
 		case 3:
-			call_back_result->obj = (*addr)(call_back_arg1->obj,
+			call_back_sym.obj = (*addr)(call_back_arg1->obj,
 											call_back_arg2->obj,
 											call_back_arg3->obj);
 			break;
 		case 4:
-			call_back_result->obj = (*addr)(call_back_arg1->obj,
+			call_back_sym.obj = (*addr)(call_back_arg1->obj,
 											call_back_arg2->obj,
 											call_back_arg3->obj,
 											call_back_arg4->obj);
 			break;
 		case 5:
-			call_back_result->obj = (*addr)(call_back_arg1->obj,
+			call_back_sym.obj = (*addr)(call_back_arg1->obj,
 											call_back_arg2->obj,
 											call_back_arg3->obj,
 											call_back_arg4->obj,
 											call_back_arg5->obj);
 			break;
 		case 6:
-			call_back_result->obj = (*addr)(call_back_arg1->obj,
+			call_back_sym.obj = (*addr)(call_back_arg1->obj,
 											call_back_arg2->obj,
 											call_back_arg3->obj,
 											call_back_arg4->obj,
@@ -5344,7 +5352,7 @@ uintptr_t general_call_back(
 											call_back_arg6->obj);
 			break;
 		case 7:
-			call_back_result->obj = (*addr)(call_back_arg1->obj,
+			call_back_sym.obj = (*addr)(call_back_arg1->obj,
 											call_back_arg2->obj,
 											call_back_arg3->obj,
 											call_back_arg4->obj,
@@ -5353,7 +5361,7 @@ uintptr_t general_call_back(
 											call_back_arg7->obj);
 			break;
 		case 8:
-			call_back_result->obj = (*addr)(call_back_arg1->obj,
+			call_back_sym.obj = (*addr)(call_back_arg1->obj,
 											call_back_arg2->obj,
 											call_back_arg3->obj,
 											call_back_arg4->obj,
@@ -5363,7 +5371,7 @@ uintptr_t general_call_back(
 											call_back_arg8->obj);
 			break;
 		case 9:
-			call_back_result->obj = (*addr)(call_back_arg1->obj,
+			call_back_sym.obj = (*addr)(call_back_arg1->obj,
 											call_back_arg2->obj,
 											call_back_arg3->obj,
 											call_back_arg4->obj,
@@ -5376,11 +5384,16 @@ uintptr_t general_call_back(
 	}
 
 #else
+	call_back_sym.obj = NOVALUE;
+	call_back_sym.next = 0;
+	call_back_sym.next_in_block = 0;
+	call_back_sym.mode = M_TEMP;
+	
 	/* Interpreter: set up a PROC opcode call */
 	code[0] = (intptr_t *)opcode(PROC);
 	code[1] = (intptr_t *)cb_routine;  // symtab_ptr of Euphoria routine
-
 	num_args = cb_routine->u.subp.num_args;
+
 	if (num_args >= 1) {
 	  DeRef(call_back_arg1->obj);
 	  call_back_arg1->obj = make_atom32((uintptr_t)arg1);
@@ -5426,8 +5439,8 @@ uintptr_t general_call_back(
 		}
 	  }
 	}
-
-	code[num_args+2] = (object *)call_back_result;
+	
+	code[num_args+2] = (object *)&call_back_sym;
 	code[num_args+3] = (object *)opcode(CALL_BACK_RETURN);
 
 	*expr_top++ = (object)tpc;    // needed for traceback
@@ -5446,10 +5459,10 @@ uintptr_t general_call_back(
 	// Don't do get_pos_int() for crash handler
 	if (crash_call_back) {
 		crash_call_back = FALSE;
-		return (object)(call_back_result->obj);
+		return (object)(call_back_sym.obj);
 	}
 	else {
-		return (object)get_pos_int("call-back", call_back_result->obj);
+		return (object)get_pos_int("call-back", call_back_sym.obj);
 	}
 }
 
