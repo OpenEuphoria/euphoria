@@ -1889,8 +1889,8 @@ export function Scanner()
 					CompileErr(97)
 				end if
 			else
+				d = i
 				if i >= MAXINT/32 then
-					d = i
 					is_int = FALSE
 					while TRUE do
 						ch = getch()  -- eventually END_OF_FILE_CHAR or new-line
@@ -1914,7 +1914,7 @@ export function Scanner()
 				if is_int and is_integer(i) then
 					return {ATOM, NewIntSym(i)}
 				else
-					if d <= MAXINT_DBL then            -- d is always >= 0
+					if d <= TMAXINT_DBL then            -- d is always >= 0
 						return {ATOM, NewIntSym(d)}
 					else
 						return {ATOM, NewDoubleSym(d)}

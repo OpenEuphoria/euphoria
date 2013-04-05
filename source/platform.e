@@ -167,6 +167,7 @@ public procedure set_target_arch( sequence arch )
 			ShowMsg( 2, 357, { arch, "X86, X86_64, ARM" } )
 			abort( 1 )
 	end switch
+	set_target_integer_size( TARGET_SIZEOF_POINTER )	
 end procedure
 
 public function GetPlatformDefines(integer for_translator = 0)
