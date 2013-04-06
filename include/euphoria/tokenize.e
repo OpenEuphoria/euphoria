@@ -479,7 +479,7 @@ function scan_qchar(atom state = g_state)
 		return TRUE
 	end if
 	scan_escaped_char(state)
-	while Look != '\'' and Look != EOL do
+	while Look != '\'' and Look != EOL and Look != EOF do
 		Token[TDATA] &= Look
 		scan_char( state )
 	end while
