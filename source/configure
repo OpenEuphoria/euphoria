@@ -4,6 +4,14 @@ CONFIG_FILE=config.gnu
 PLAT="default platform"
 ARCH="default arch"
 
+SOURCEDIR="`dirname \"$0\"`"              # relative
+SOURCEDIR="`( cd \"$SOURCEDIR\" && pwd )`"  # absolutized and normalized
+if [ -z "SOURCEDIR" ] ; then
+  # error; for some reason, the path is not accessible
+  # to the script (e.g. permissions re-evaled after suid)
+  exit 1  # fail
+fi
+
 UNAME_SYSTEM=`(uname -s) 2>/dev/null`  || UNAME_SYSTEM=unknown
 UNAME_MACHINE=`(uname -m) 2>/dev/null` || UNAME_MACHINE=unknown
 
@@ -103,7 +111,11 @@ echo EHOST=$EHOST >>  "$PREFIX"${CONFIG_FILE}
 
 # default use source
 export EC="eui euc.ex"
-export BUILDDIR=build
+if [ "$SOURCEDIR" = `pwd` ] ; then
+	export BUILDDIR=`pwd`/build
+else
+	export BUILDDIR=`pwd`
+fi
 export XLTTARGETCC=gcc
 export CC=gcc
 export EDEBUG=
@@ -331,7 +343,8 @@ while [ "$1" != "" ]; do
 		echo "Options:"
 		echo "   --without-euphoria"
 		echo "   --eubin value"
-		echo "   --build value       set the build directory"
+		echo "   --build value       Set the build directory. If called from outside the"
+		echo "                       source directory, the current directory is the default"
 		echo "   --full"
 		echo "   --release value     set the release type for the version string"
 		echo "   --debug             turn debugging on"
@@ -490,11 +503,13 @@ echo CYPBUILDDIR=$CYPBUILDDIR >> "$PREFIX"${CONFIG_FILE}
 echo XLTTARGETCC=$XLTTARGETCC >> "$PREFIX"${CONFIG_FILE}
 echo NO_CYGWIN=$NO_CYGWIN >> "$PREFIX"${CONFIG_FILE}
 
-$CC -o $BUILDDIR/echoversion$EXE echoversion.c
+$CC -o $BUILDDIR/echoversion$EXE $SOURCEDIR/echoversion.c
 echo VERSION=`$BUILDDIR/echoversion$EXE` >> "$PREFIX"${CONFIG_FILE}
 
+
+
 # Make a generic Makefile that simply includes Makefile.gnu
-echo include Makefile.gnu > Makefile
+echo include $SOURCEDIR/Makefile.gnu > Makefile
 
 echo Writing eu.cfg to $BUILDDIR/eu.cfg
 echo "[all]" > $BUILDDIR/eu.cfg

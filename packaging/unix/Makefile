@@ -3,10 +3,14 @@
 #
 # Usage:
 #       All binaries and docs must be built from the source directory first.
-#       $ make VERSION=$version
+#       $ make DIR=path/to/build/dir VERSION=$version
 
-# include the user's config file
-include ../../source/config.gnu
+
+ifeq $(DIR) ""
+DIR=../../source
+endif
+
+include $(DIR)/config.gnu
 
 ifeq "$(ELINUX)" "1"
 OS=Linux
