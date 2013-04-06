@@ -674,8 +674,10 @@ static void do_poke4(object a, object top)
 	uint32_t *poke4_addr;
 	eudouble temp_dbl;
 	s1_ptr s1;
-	int32_t tmp_int;
 	object_ptr obj_ptr;
+#ifdef __arm__
+	int32_t tmp_int;
+#endif
 
 	/* determine the address to be poked */
 	if (IS_ATOM_INT(a)) {
