@@ -1229,7 +1229,7 @@ end function
 -- Parameters:
 -- # ##fname## the file to be read and tokenized
 -- # ##state## (default g_state) the tokenizer returned by ##[[:new]]##
--- # ##mode## the mode in which to open the file. One of: io:BINARY_MODE (default) or io:TEXT_MODE. 
+-- # ##mode## the mode in which to open the file. One of: ##[[:io:BINARY_MODE]]## (default) or ##[[:io:TEXT_MODE]]##. 
 --   Note that for large files with Windows line endings, text mode may be much slower. 
 --   See [[:io:read_file]] for more information.
 --

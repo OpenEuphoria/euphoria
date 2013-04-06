@@ -57,5 +57,5 @@
   small and large maps), as they no longer make sense for the new implementation.
 * [[ticket:532]] extra-cflags and extra-lflags for translator (thanks to Ira Hill)
 * ##[[:lock_file]]## on Windows now supports ##LOCK_SHARED## and ##LOCK_EXCLUSIVE##
-* ##[[:tokenize_file]]## uses ##[[io:BINARY_MODE]]## by default instead of ##[[io:TEXT_MODE]], which
+* ##[[:tokenize_file]]## uses ##[[:io:BINARY_MODE]]## by default instead of ##[[:io:TEXT_MODE]]##, which
   improves performance on large files with Windows style newlines
