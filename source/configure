@@ -12,6 +12,7 @@ if [ -z "SOURCEDIR" ] ; then
   exit 1  # fail
 fi
 
+TRUNKDIR="`(cd \"$SOURCEDIR\" && cd .. && pwd)`"
 UNAME_SYSTEM=`(uname -s) 2>/dev/null`  || UNAME_SYSTEM=unknown
 UNAME_MACHINE=`(uname -m) 2>/dev/null` || UNAME_MACHINE=unknown
 
@@ -481,7 +482,7 @@ if [ ! -e "$PPWD"/source ] && [ -e "$PWD"/source ]; then
 	export PPWD=$PWD
 fi
 
-export TRUNKDIR=$PPWD
+# export TRUNKDIR=$PPWD
 
 mkdir -p $BUILDDIR
 export BUILDDIR=`cd "$BUILDDIR" && pwd $PWDARG`
@@ -543,4 +544,3 @@ fi
 echo "[bind]"  >> $BUILDDIR/eu.cfg
 echo "-eub" $CYPBUILDDIR/eub >> $BUILDDIR/eu.cfg
 
-cp $BUILDDIR/eu.cfg $TRUNKDIR/source/eu.cfg
