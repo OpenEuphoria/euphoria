@@ -9,4 +9,4 @@ makedepend -fMakefile.gnu -Y. -I. *.c -p'$(BUILDDIR)/libobj/back/' -a
 # the sed call fails when invoked from within a Makefile
 # we want to replace the actual directory with $(TRUNKDIR) so that everything will
 # work as expected
-sed -iold -re 's| ([^\.\$]\S+\.h\b)| $(TRUNKDIR)/source/\1|g' Makefile.gnu
+sed -iold -re 's| ([^\.\$ ]\S+\.h\b)| $(TRUNKDIR)/source/\1|g' Makefile.gnu
