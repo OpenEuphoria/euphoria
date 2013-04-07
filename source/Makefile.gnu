@@ -678,7 +678,7 @@ HG=hg
 endif
 
 .PHONY: update-version-cache
-update-version-cache : $(MKVER)
+update-version-cache : $(MKVER) $(BUILD_DIRS)
 	cd $(TRUNKDIR) && $(MKVER) "$(HG)" "$(BUILDDIR)/ver.cache" "$(BUILDDIR)/include/be_ver.h" "$(EREL_TYPE)$(RELEASE)"
 
 $(MKVER): $(TRUNKDIR)/source/mkver.c
