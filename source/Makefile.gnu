@@ -679,7 +679,7 @@ endif
 
 .PHONY: update-version-cache
 update-version-cache : $(MKVER)
-	$(MKVER) "$(HG)" "$(BUILDDIR)/ver.cache" "$(BUILDDIR)/include/be_ver.h" "$(EREL_TYPE)$(RELEASE)"
+	cd $(TRUNKDIR) && $(MKVER) "$(HG)" "$(BUILDDIR)/ver.cache" "$(BUILDDIR)/include/be_ver.h" "$(EREL_TYPE)$(RELEASE)"
 
 $(MKVER): $(TRUNKDIR)/source/mkver.c
 	$(HOSTCC) -o $@ $<
