@@ -3,10 +3,14 @@
 #
 # Usage:
 #       All binaries and docs must be built from the source directory first.
-#       $ make VERSION=$version
+#       $ make DIR=path/to/build/dir VERSION=$version
 
-# include the user's config file
-include ../../source/config.gnu
+
+ifeq "$(DIR)" ""
+DIR=../../source
+endif
+
+include $(DIR)/config.gnu
 
 ifeq "$(ELINUX)" "1"
 OS=Linux
@@ -56,14 +60,14 @@ all :
 	-rm $(REL_NAME)/bin/*.bat $(REL_NAME)/bin/*.ico $(REL_NAME)/bin/make31.exw $(REL_NAME)/bin/*.exe
 	for f in $(BINS) ; do \
 		cp $(BUILDDIR)/$${f} $(REL_NAME)/bin ; \
-		strip $(REL_NAME)/bin/$${f} ; \
+# 		strip $(REL_NAME)/bin/$${f} ; \
 	done ;
 	for f in $(LIBS) ; do \
 		cp $(BUILDDIR)/$${f} $(REL_NAME)/bin ; \
 	done ;
 	
-	cp $(BUILDDIR)/*.pdf $(REL_NAME)/docs
-	cp -r $(BUILDDIR)/html $(REL_NAME)/docs
+	-cp $(BUILDDIR)/*.pdf $(REL_NAME)/docs
+	-cp -r $(BUILDDIR)/html $(REL_NAME)/docs
 	tar czf ${REL_NAME}.tar.gz ${REL_NAME}
 	tar cjf ${REL_NAME}.tar.bz2 ${REL_NAME}
 

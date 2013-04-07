@@ -670,4 +670,8 @@ test_equal( "keys() handles hashval 0 correctly", {""}, map:keys( m1 ) )
 test_equal( "values() handles hashval 0 correctly", {1234}, map:values( m1 ) )
 test_equal( "pairs() handles hashval 0 correctly", {{"",1234}}, map:pairs( m1 ) )
 
+m1 = map:new()
+map:nested_put( m1, {1, 2, 3, 4}, 5 )
+test_equal( "ticket 861 nested_get index", 5, map:nested_get( m1, {1, 2, 3, 4} ) )
+
 test_report()

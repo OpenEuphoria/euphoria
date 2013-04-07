@@ -84,9 +84,10 @@ else
 			else
 				puts(1, " .. ")
 			end if
+			sleep(2)
 		end if
 	end for
-	
+	puts(1, "\n")
 	if _ = 0 then
 		sequence send_data = "Hello, "
 		test_equal("send w/o newline", length(send_data), sock:send(socket, send_data, MAYBE_MSG_NOSIGNAL))

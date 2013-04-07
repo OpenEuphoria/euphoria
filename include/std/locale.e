@@ -395,10 +395,9 @@ ifdef WINDOWS then
 elsifdef LINUX then
 	constant
 		lib = dll:open_dll(""),
-		f_strfmon = dll:define_c_func(lib, "strfmon", {P, L, P, dll:C_DOUBLE}, L),
-		f_strfnum = -1,
 		f_setlocale = dll:define_c_func(lib, "setlocale", {I, P}, P),
 		f_strftime = dll:define_c_func(lib, "strftime", {P, L, P, P}, L),
+		f_strfnum = -1,
 		LC_ALL      = 6,
 	--	LC_CTYPE    = 0,
 		LC_NUMERIC  = 1,
@@ -407,6 +406,19 @@ elsifdef LINUX then
 		LC_MONETARY = 4,
 	--	LC_MESSAGES = 5,
 		$
+	ifdef ARM then
+		include std/convert.e
+		-- ugly hack..this is a variadic function, and we pass a double,
+		-- which doesn't work with the ARM C calling implementation
+		constant
+			f_strfmon = dll:define_c_func(lib, "strfmon", {P, L, P, L, C_ULONG, C_ULONG}, L),
+			$
+	elsedef
+		constant
+			f_strfmon = dll:define_c_func(lib, "strfmon", {P, L, P, dll:C_DOUBLE}, L),
+			$
+	end ifdef
+	
 
 elsifdef BSD then
 	constant
@@ -565,7 +577,13 @@ public function money(object amount)
 		ifdef UNIX then
 			pResult = machine:allocate(4 * 160, 1)
 			pTmp = machine:allocate_string("%n", 1)
-			c_func(f_strfmon, {pResult, 4 * 160, pTmp, amount})
+			ifdef ARM then
+				sequence f = atom_to_float64( amount )
+				c_func(f_strfmon, {pResult, 4 * 160, pTmp, 0,bytes_to_int( f[1..4] ),  bytes_to_int( f[5..8] ) })
+			elsedef
+				c_func(f_strfmon, {pResult, 4 * 160, pTmp, amount})
+			end ifdef
+			
 		elsifdef WINDOWS then
 			pResult = machine:allocate(4 * 160, 1)
 			pTmp = machine:allocate_string(sprintf("%.8f", {amount}), 1)
@@ -610,7 +628,12 @@ public function number(object num)
 			else
 				pTmp = machine:allocate_string("%!n")
 			end if
-			c_func(f_strfmon, {pResult, 4 * 160, pTmp, num})
+			ifdef ARM then
+				sequence f = atom_to_float64( num )
+				c_func(f_strfmon, {pResult, 4 * 160, pTmp, 0,  bytes_to_int( f[1..4] ), bytes_to_int( f[5..8] ) })
+			elsedef
+				c_func(f_strfmon, {pResult, 4 * 160, pTmp, num})
+			end ifdef
 		else
 			return text:format("[,,]", num)
 		end if

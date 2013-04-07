@@ -1914,10 +1914,18 @@ void arm_float80_to_float64( unsigned char *a, unsigned char *b ){
 	exp_a = (a[8] | ((a[9] & 0x7f) << 8 )) - 0x3fff; // IEEE854_LONG_DOUBLE_BIAS
 	// chop off most significant bit
 	mantissa_a = 0x7fffffffffffffffLL & *((int64_t*)a);
-
+	if( exp_a == 0x4000 && mantissa_a == 0 ){
+		if( sign ){
+			*((double*)b) = -INFINITY;
+		}
+		else{
+			*((double*)b) = INFINITY;
+		}
+		return;
+	}
 	exp_b = (exp_a + 0x3ff ); // IEEE754_DOUBLE_BIAS
 	mantissa_b = (mantissa_a >> (11));
-
+	
 	*((int64_t*)b) = (mantissa_b & 0x7fffffffffffffLL) | (exp_b << 52)  | (sign << 63);
 }
 #endif
