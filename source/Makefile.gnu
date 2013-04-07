@@ -904,7 +904,7 @@ endif
 	           $(TRUNKDIR)/source/*.ex \
 	           $(TRUNKDIR)/source/*.e \
 	           $(TRUNKDIR)/source/be_*.c \
-                  $(TRUNKDIR)/source/ $(TRUNKDIR)/source/*.h \
+                   $(TRUNKDIR)/source/*.h \
 	           $(DESTDIR)$(PREFIX)/share/euphoria/source
 
 EUDIS=eudis
