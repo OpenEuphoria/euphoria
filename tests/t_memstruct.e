@@ -353,6 +353,7 @@ procedure recursive_assignment()
 	line.LINE.startPt = {5, 6 }
 	test_equal( "recursive_assignment #2", {{5,6},{3,4}}, line.LINE )
 end procedure
+recursive_assignment()
 
 memstruct char_array
 	int size
@@ -366,5 +367,11 @@ procedure test_char_array()
 	test_equal( "assign / read array inside memstruct", "12345", head( ptr.char_array.buffer, 5 ) )
 end procedure
 test_char_array()
+
+procedure ptr_in_seq()
+	sequence lines = { allocate( sizeof( LINE ),  1 ), allocate( sizeof( LINE ),  1 ) }
+	atom pt = lines[1].POINT.startPt
+end procedure
+ptr_in_seq()
 
 test_report()
