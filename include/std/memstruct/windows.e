@@ -60,6 +60,7 @@ public memtype
 	object as LPBYTE,
 	object as BSTR,
 	long as SCODE,
+	object as SIZE_T,
 	$
 	
 --****
@@ -929,4 +930,15 @@ public memstruct EXCEPINFO
 	PVOID   pvReserved
 	object  pfnDeferredFillIn -- HRESULT (__stdcall *pfnDeferredFillIn)(struct tagEXCEPINFO*)
 	SCODE   scode
+end memstruct
+
+public memstruct MEMORYSTATUS
+	DWORD  dwLength
+	DWORD  dwMemoryLoad
+	SIZE_T dwTotalPhys
+	SIZE_T dwAvailPhys
+	SIZE_T dwTotalPageFile
+	SIZE_T dwAvailPageFile
+	SIZE_T dwTotalVirtual
+	SIZE_T dwAvailVirtual
 end memstruct
