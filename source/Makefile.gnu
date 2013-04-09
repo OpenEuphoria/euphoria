@@ -928,6 +928,7 @@ endif
 
 $(BUILDDIR)/eudist-build/main-.c : $(TRUNKDIR)/source/eudist.ex
 	$(TRANSLATE) -build-dir "$(BUILDDIR)/eudist-build" \
+		-c "$(BUILDDIR)/eu.cfg" \
 		-o "$(BUILDDIR)/$(EUDIST)" \
 		-lib "$(BUILDDIR)/eu.a" \
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
@@ -940,6 +941,7 @@ $(BUILDDIR)/eudis-build/main-.c : $(TRUNKDIR)/source/dis.ex  $(TRUNKDIR)/source/
 $(BUILDDIR)/eudis-build/main-.c : $(EU_CORE_FILES) 
 $(BUILDDIR)/eudis-build/main-.c : $(EU_INTERPRETER_FILES) 
 	$(TRANSLATE) -build-dir "$(BUILDDIR)/eudis-build" \
+		-c "$(BUILDDIR)/eu.cfg" \
 		-o "$(BUILDDIR)/$(EUDIS)" \
 		-lib "$(BUILDDIR)/eu.a" \
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
@@ -950,6 +952,7 @@ $(BUILDDIR)/$(EUDIS) : translator library $(BUILDDIR)/eudis-build/main-.c
 
 $(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/eubind.ex $(EU_INTERPRETER_FILES) $(EU_BACKEND_RUNNER_FILES)
 	$(TRANSLATE) -build-dir "$(BUILDDIR)/bind-build" \
+		-c "$(BUILDDIR)/eu.cfg" \
 		-o "$(BUILDDIR)/$(EUBIND)" \
 		-lib "$(BUILDDIR)/eu.a" \
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
@@ -960,6 +963,7 @@ $(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c
 
 $(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/eushroud.ex  $(EU_INTERPRETER_FILES) $(EU_BACKEND_RUNNER_FILES)
 	$(TRANSLATE) -build-dir "$(BUILDDIR)/shroud-build" \
+		-c "$(BUILDDIR)/eu.cfg" \
 		-o "$(BUILDDIR)/$(EUSHROUD)" \
 		-lib "$(BUILDDIR)/eu.a" \
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
@@ -970,6 +974,7 @@ $(BUILDDIR)/$(EUSHROUD) : $(BUILDDIR)/shroud-build/main-.c
 
 $(BUILDDIR)/eutest-build/main-.c : $(TRUNKDIR)/source/eutest.ex
 	$(TRANSLATE) -build-dir "$(BUILDDIR)/eutest-build" \
+		-c "$(BUILDDIR)/eu.cfg" \
 		-o "$(BUILDDIR)/$(EUTEST)" \
 		-lib "$(BUILDDIR)/eu.a" \
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
@@ -980,6 +985,7 @@ $(BUILDDIR)/$(EUTEST) : $(BUILDDIR)/eutest-build/main-.c
 
 $(BUILDDIR)/eucoverage-build/main-.c : $(TRUNKDIR)/bin/eucoverage.ex
 	$(TRANSLATE) -build-dir "$(BUILDDIR)/eucoverage-build" \
+		-c "$(BUILDDIR)/eu.cfg" \
 		-o "$(BUILDDIR)/$(EUCOVERAGE)" \
 		-lib "$(BUILDDIR)/eu.a" \
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
@@ -1076,7 +1082,7 @@ $(BUILDDIR)/$(OBJDIR)/%.c : $(EU_MAIN)
 	@$(ECHO) Translating $(EU_TARGET) to create $(EU_MAIN)
 	rm -f $(BUILDDIR)/$(OBJDIR)/{*.c,*.o}
 	(cd $(BUILDDIR)/$(OBJDIR);$(TRANSLATE) -nobuild $(CYPINCDIR) -$(XLTTARGETCC) $(RELEASE_FLAG) $(TARGETPLAT)  \
-		-arch $(ARCH) \
+		-arch $(ARCH) -c "$(BUILDDIR)/eu.cfg" \
 		-c $(CYPTRUNKDIR)/source/eu.cfg $(CYPTRUNKDIR)/source/$(EU_TARGET) )
 	
 endif
