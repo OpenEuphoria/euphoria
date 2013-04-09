@@ -544,3 +544,6 @@ fi
 echo "[bind]"  >> $BUILDDIR/eu.cfg
 echo "-eub" $CYPBUILDDIR/eub >> $BUILDDIR/eu.cfg
 
+if [ -f "$TRUNKDIR/source/eu.cfg" ] ; then
+	rm "$TRUNKDIR/source/eu.cfg"
+fi

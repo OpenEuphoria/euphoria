@@ -1792,7 +1792,7 @@ export function Scanner()
 			d = my_sscanf(yytext)
 			if sequence(d) then
 				CompileErr(121)
-			elsif is_int and d <= MAXINT_DBL then
+			elsif is_int and d <= TMAXINT_DBL then
 				return {ATOM, NewIntSym(d)}  -- 1 to 1.07 billion
 			else
 				return {ATOM, NewDoubleSym(d)}
@@ -1865,7 +1865,7 @@ export function Scanner()
 		elsif class = NUMBER_SIGN then
 			i = 0
 			is_int = -1
-			while i < MAXINT/32 do
+			while i < TMAXINT/32 do
 				ch = getch()
 				if char_class[ch] = DIGIT then
 					if ch != '_' then
@@ -1899,7 +1899,7 @@ export function Scanner()
 				end if
 			else
 				d = i
-				if i >= MAXINT/32 then
+				if i >= TMAXINT/32 then
 					is_int = FALSE
 					while TRUE do
 						ch = getch()  -- eventually END_OF_FILE_CHAR or new-line
