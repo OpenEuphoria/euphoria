@@ -1114,10 +1114,10 @@ procedure seg_poke4(integer source, boolean dbl)
 -- poke a 4-byte value into poke4_addr
 	if dbl then
 		if TARM then
-			c_stmt("if( DBL_PTR(@)->dbl > MAXINT_DBL ) *poke4_addr = (uint32_t)DBL_PTR(@)->dbl; else\n", 
+			c_stmt("if( DBL_PTR(@)->dbl <= MAXINT_DBL ) *poke4_addr = (int32_t)DBL_PTR(@)->dbl; else\n", 
 				{source, source})
 		end if
-		c_stmt("*poke4_addr = (int32_t)DBL_PTR(@)->dbl;\n", source)
+		c_stmt("*poke4_addr = (uint32_t)DBL_PTR(@)->dbl;\n", source)
 	else
 		c_stmt("*poke4_addr = (uint32_t)@;\n", source)
 	end if
