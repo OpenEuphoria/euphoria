@@ -929,6 +929,8 @@ procedure machine_level()
 	free(addr)
 	ifdef ARM then
 		-- ??
+		addr = allocate_code({0xe52db004, 0xe8bd0800, 0xe12fff1e}, 4)
+		call(addr)
 	elsedef
 		addr = allocate_code({#C3}) -- RET instruction
 		call(addr)

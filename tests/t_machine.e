@@ -35,7 +35,7 @@ ptr = allocate_protect( {1,2,3}, 4, PAGE_EXECUTE )
 test_true( "allocate_protect wordsize 4", ptr )
 free_code( ptr, 12 )
 
-ptr = allocate( 4 )
+ptr = allocate( 32 )
 atom big = 0x4000_0000
 poke4( ptr, big )
 test_equal( "poke4 / peek4s atom", big, peek4s( ptr ) )
@@ -47,5 +47,14 @@ test_equal( "poke4 / peek4s negative atom", big, peek4s( ptr ) )
 
 poke( ptr, {77, -1, 5.1, -1.1})
 test_equal( "poke/peek negagive, doubles",{77, 255, 5, 255}, peek( ptr & 4 ) )
+
+poke2( ptr, {77, -1, 5.1, -1.1})
+test_equal( "poke2/peek2u negagive, doubles",{77, 0xffff, 5, 0xffff}, peek2u( ptr & 4 ) )
+
+poke4( ptr, {77, -1, 5.1, -1.1})
+test_equal( "poke4/peek4u negagive, doubles",{77, 0xffff_ffff, 5, 0xffff_ffff}, peek4u( ptr & 4 ) )
+
+poke8( ptr, {77, -1, 5.1, -1.1})
+test_equal( "poke8/peek8u negagive, doubles",{77, 0xffff_ffff_ffff_ffff, 5, 0xffff_ffff_ffff_ffff}, peek8u( ptr & 4 ) )
 
 test_report()

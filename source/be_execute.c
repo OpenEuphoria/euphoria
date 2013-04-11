@@ -587,7 +587,13 @@ static void do_poke2(object a, object top)
 		temp_dbl = DBL_PTR(top)->dbl;
 		if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 			RTFatal(POKE_LIMIT(2));
-		*poke2_addr = (uint16_t) temp_dbl;
+#ifdef __arm__
+			a == trunc( temp_dbl );
+			*poke2_addr = (uint16_t) a;
+#else
+			*poke2_addr = (uint16_t) temp_dbl;
+#endif
+		
 	}
 	else {
 		/* second arg is sequence */
@@ -603,9 +609,15 @@ static void do_poke2(object a, object top)
 				if (top == NOVALUE)
 					break;
 				temp_dbl = DBL_PTR(top)->dbl;
+		
 				if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 					RTFatal( POKE_LIMIT(2) );
+#ifdef __arm__
+				a = trunc( DBL_PTR(top)->dbl );
+				*poke2_addr = (uint16_t) a;
+#else
 				*poke2_addr = (uint16_t) temp_dbl;
+#endif
 				++poke2_addr;
 			}
 			else {
@@ -640,7 +652,12 @@ static void do_poke8(object a, object top)
 		temp_dbl = DBL_PTR(top)->dbl;
 		if (temp_dbl < MIN_LONGLONG_DBL || temp_dbl > MAX_LONGLONG_DBL)
 			RTFatal("poke8 is limited to 64-bit numbers");
+#ifdef __arm__
+		a = trunc( temp_dbl );
+		*poke8_addr = (uint64_t) a;
+#else
 		*poke8_addr = (uint64_t) temp_dbl;
+#endif
 	}
 	else {
 		/* second arg is sequence */
@@ -658,7 +675,12 @@ static void do_poke8(object a, object top)
 				temp_dbl = DBL_PTR(top)->dbl;
 				if (temp_dbl < MIN_LONGLONG_DBL || temp_dbl > MAX_LONGLONG_DBL)
 					RTFatal("poke8 is limited to 64-bit numbers");
+#ifdef __arm__
+				a = trunc( temp_dbl );
+				*poke8_addr = (uint64_t) a;
+#else
 				*poke8_addr = (uint64_t) temp_dbl;
+#endif
 				++poke8_addr;
 			}
 			else {
