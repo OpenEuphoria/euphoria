@@ -588,7 +588,13 @@ static void do_poke2(object a, object top)
 		temp_dbl = DBL_PTR(top)->dbl;
 		if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 			RTFatal(POKE_LIMIT(2));
-		*poke2_addr = (uint16_t) temp_dbl;
+#ifdef __arm__
+			a == trunc( temp_dbl );
+			*poke2_addr = (uint16_t) a;
+#else
+			*poke2_addr = (uint16_t) temp_dbl;
+#endif
+		
 	}
 	else {
 		/* second arg is sequence */
@@ -604,9 +610,15 @@ static void do_poke2(object a, object top)
 				if (top == NOVALUE)
 					break;
 				temp_dbl = DBL_PTR(top)->dbl;
+		
 				if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 					RTFatal( POKE_LIMIT(2) );
+#ifdef __arm__
+				a = trunc( DBL_PTR(top)->dbl );
+				*poke2_addr = (uint16_t) a;
+#else
 				*poke2_addr = (uint16_t) temp_dbl;
+#endif
 				++poke2_addr;
 			}
 			else {
@@ -641,7 +653,12 @@ static void do_poke8(object a, object top)
 		temp_dbl = DBL_PTR(top)->dbl;
 		if (temp_dbl < MIN_LONGLONG_DBL || temp_dbl > MAX_LONGLONG_DBL)
 			RTFatal("poke8 is limited to 64-bit numbers");
+#ifdef __arm__
+		a = trunc( temp_dbl );
+		*poke8_addr = (uint64_t) a;
+#else
 		*poke8_addr = (uint64_t) temp_dbl;
+#endif
 	}
 	else {
 		/* second arg is sequence */
@@ -659,7 +676,12 @@ static void do_poke8(object a, object top)
 				temp_dbl = DBL_PTR(top)->dbl;
 				if (temp_dbl < MIN_LONGLONG_DBL || temp_dbl > MAX_LONGLONG_DBL)
 					RTFatal("poke8 is limited to 64-bit numbers");
+#ifdef __arm__
+				a = trunc( temp_dbl );
+				*poke8_addr = (uint64_t) a;
+#else
 				*poke8_addr = (uint64_t) temp_dbl;
+#endif
 				++poke8_addr;
 			}
 			else {
@@ -4942,11 +4964,17 @@ void do_exec(intptr_t *start_pc)
 				b = top;
 
 				if (IS_ATOM_INT(b)) {
+					
 					*poke_addr = (uint8_t) b;
 				}
 				else if (IS_ATOM(b)) {
 					/* no check for overflow here.. hmm*/
+#ifdef __arm__
+					b = trunc( DBL_PTR(b)->dbl );
+					*poke_addr = (uint8_t) b;
+#else
 					*poke_addr = (uint8_t) DBL_PTR(b)->dbl;
+#endif
 				}
 				else {
 					/* second arg is sequence */
@@ -4960,7 +4988,12 @@ void do_exec(intptr_t *start_pc)
 						else if (IS_ATOM(b)) {
 							if (b == NOVALUE)
 								break;
+#ifdef __arm__
+							b = trunc( DBL_PTR(b)->dbl );
+							*poke_addr = (uint8_t) b;
+#else
 							*poke_addr = (uint8_t) DBL_PTR(b)->dbl;
+#endif
 						}
 						else {
 							RTFatal(
