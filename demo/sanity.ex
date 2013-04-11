@@ -927,8 +927,12 @@ procedure machine_level()
 	crash(generic_msg)
 	end if
 	free(addr)
-	addr = allocate_code({#C3}) -- RET instruction
-	call(addr)
+	ifdef ARM then
+		-- ??
+	elsedef
+		addr = allocate_code({#C3}) -- RET instruction
+		call(addr)
+	end ifdef
 	for x = 0 to +2000000 by 99999 do
 	if bytes_to_int(int_to_bytes(x)) != x then
 		crash(generic_msg)

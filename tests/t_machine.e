@@ -45,4 +45,7 @@ big *= -1
 poke4( ptr, big )
 test_equal( "poke4 / peek4s negative atom", big, peek4s( ptr ) )
 
+poke( ptr, {77, -1, 5.1, -1.1})
+test_equal( "poke/peek negagive, doubles",{77, 255, 5, 255}, peek( ptr & 4 ) )
+
 test_report()

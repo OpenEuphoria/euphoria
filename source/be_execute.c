@@ -4794,11 +4794,17 @@ void do_exec(intptr_t *start_pc)
 				b = top;
 
 				if (IS_ATOM_INT(b)) {
+					
 					*poke_addr = (uint8_t) b;
 				}
 				else if (IS_ATOM(b)) {
 					/* no check for overflow here.. hmm*/
+#ifdef __arm__
+					b = trunc( DBL_PTR(b)->dbl );
+					*poke_addr = (uint8_t) b;
+#else
 					*poke_addr = (uint8_t) DBL_PTR(b)->dbl;
+#endif
 				}
 				else {
 					/* second arg is sequence */
@@ -4812,7 +4818,12 @@ void do_exec(intptr_t *start_pc)
 						else if (IS_ATOM(b)) {
 							if (b == NOVALUE)
 								break;
+#ifdef __arm__
+							b = trunc( DBL_PTR(b)->dbl );
+							*poke_addr = (uint8_t) b;
+#else
 							*poke_addr = (uint8_t) DBL_PTR(b)->dbl;
+#endif
 						}
 						else {
 							RTFatal(

@@ -1094,7 +1094,13 @@ procedure seg_poke1(integer source, boolean dbl)
 -- poke a single byte value into poke_addr
 	-- WATCOM etc.
 	if dbl then
-		c_stmt("*poke_addr = (uint8_t)DBL_PTR(@)->dbl;\n", source)
+		if TARM then
+			c_stmt("_2 = trunc( DBL_PTR(@)->dbl );\n", source)
+			c_stmt0("*poke_addr = (uint8_t)_2;\n" )
+		else
+			c_stmt("*poke_addr = (uint8_t)DBL_PTR(@)->dbl;\n", source)
+		end if
+		
 	else
 		c_stmt("*poke_addr = (uint8_t)@;\n", source)
 	end if
@@ -1104,7 +1110,12 @@ end procedure
 procedure seg_poke2(integer source, boolean dbl)
 -- poke a word value into poke2_addr
 	if dbl then
-		c_stmt("*poke2_addr = (uint16_t)DBL_PTR(@)->dbl;\n", source)
+		if TARM then
+			c_stmt("_2 = trunc( DBL_PTR(@)->dbl );\n", source)
+			c_stmt0("*poke2_addr = (uint16_t)_2;\n" )
+		else
+			c_stmt("*poke2_addr = (uint16_t)DBL_PTR(@)->dbl;\n", source)
+		end if
 	else
 		c_stmt("*poke2_addr = (uint16_t)@;\n", source)
 	end if
@@ -5856,21 +5867,26 @@ procedure opPOKE()
 		c_stmt0("}\nelse if (_2 == NOVALUE) {\n")
 		c_stmt0("break;\n}\n")
 		c_stmt0("else {\n")
+		sequence _2 = "DBL_PTR(_2)->dbl"
+		if TARM then
+			_2 = "_2"
+			c_stmt0( "_2 = trunc( DBL_PTR(_2)->dbl );\n" )
+		end if
 		switch op do
 			case POKE_POINTER then
-				c_stmt0("*pokeptr_addr++ = (uintptr_t)DBL_PTR(_2)->dbl;\n")
+				c_stmt0( sprintf( "*pokeptr_addr++ = (uintptr_t)%s;\n", {_2}) )
 			
 			case POKE8 then
-				c_stmt0("*poke8_addr++ = (uint64_t)DBL_PTR(_2)->dbl;\n")
+				c_stmt0( sprintf( "*poke8_addr++ = (uint64_t)%s;\n", {_2}) )
 				
 			case POKE4 then
-				c_stmt0("*(object *)poke4_addr++ = (uint32_t)DBL_PTR(_2)->dbl;\n")
+				c_stmt0( sprintf( "*(object *)poke4_addr++ = (uint32_t)%s;\n", {_2}) )
 				
 			case POKE2 then
-					c_stmt0("*poke2_addr++ = (uint16_t)DBL_PTR(_2)->dbl;\n")
+					c_stmt0( sprintf( "*poke2_addr++ = (uint16_t)%s;\n", {_2}) )
 				
 			case else
-					c_stmt0("*poke_addr++ = (uint8_t)DBL_PTR(_2)->dbl;\n")
+					c_stmt0( sprintf( "*poke_addr++ = (uint8_t)%s;\n", {_2}) )
 				
 		end switch
 		c_stmt0("}\n")
