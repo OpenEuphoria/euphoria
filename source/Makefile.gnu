@@ -620,8 +620,8 @@ endif
 .PHONY : source
 
 ifeq "$(EMINGW)" "1"
-$(EUI_RES) : eui.rc version_info.rc eu.manifest
-$(EUIW_RES) : euiw.rc version_info.rc eu.manifest
+$(EUI_RES) :  $(TRUNKDIR)/source/eui.rc  $(TRUNKDIR)/source/version_info.rc  $(TRUNKDIR)/source/eu.manifest
+$(EUIW_RES) :  $(TRUNKDIR)/source/euiw.rc  $(TRUNKDIR)/source/version_info.rc  $(TRUNKDIR)/source/eu.manifest
 endif
 
 $(BUILDDIR)/$(EEXU) :  EU_TARGET = eui.ex
@@ -640,7 +640,7 @@ endif
 $(BUILDDIR)/$(OBJDIR)/back/be_machine.o : $(BUILDDIR)/include/be_ver.h
 
 ifeq "$(EMINGW)" "1"
-$(EUC_RES) : euc.rc version_info.rc eu.manifest
+$(EUC_RES) :  $(TRUNKDIR)/source/euc.rc  $(TRUNKDIR)/source/version_info.rc  $(TRUNKDIR)/source/eu.manifest
 endif
 
 $(BUILDDIR)/$(EECU) :  OBJDIR = transobj
@@ -661,8 +661,8 @@ ifeq "$(EMINGW)" "1"
 endif
 
 ifeq "$(EMINGW)" "1"
-$(EUB_RES) : eub.rc version_info.rc eu.manifest
-$(EUBW_RES) : eubw.rc version_info.rc eu.manifest
+$(EUB_RES) :  $(TRUNKDIR)/source/eub.rc  $(TRUNKDIR)/source/version_info.rc  $(TRUNKDIR)/source/eu.manifest
+$(EUBW_RES) :  $(TRUNKDIR)/source/eubw.rc  $(TRUNKDIR)/source/version_info.rc  $(TRUNKDIR)/source/eu.manifest
 endif
 
 $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) : OBJDIR = backobj
@@ -1061,7 +1061,7 @@ endif
 %back : %
 	mkdir -p $@
 
-$(BUILDDIR)/%.res : %.rc
+$(BUILDDIR)/%.res : $(TRUNKDIR)/source/%.rc
 	$(RC) $< -O coff -o $@
 	
 $(BUILDDIR)/$(OBJDIR)/%.o : $(BUILDDIR)/$(OBJDIR)/%.c
