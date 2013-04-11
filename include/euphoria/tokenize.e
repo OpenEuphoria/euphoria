@@ -1068,21 +1068,15 @@ procedure next_token(atom state = g_state)
 				scan_char(state)
 			else
 				-- .number
+				integer start_char = sti - 1
 				Token[TTYPE] = T_NUMBER
 				Token[TDATA] = scan_fraction(0, state)
 				Token[TFORM] = TF_ATOM
-				if ERR then
-					return
-				end if
 
 				Token[TDATA] = scan_exponent(Token[TDATA], state)
 
 				if eumem:ram_space[state][STRING_NUMBERS] then
-					if integer(Token[TDATA]) then
-						Token[TDATA] = sprintf("%d",{Token[TDATA]})
-					else
-						Token[TDATA] = sprintf("%g",{Token[TDATA]})
-					end if
+					Token[TDATA] = source_text[start_char..sti-1]
 				end if
 			end if
 
