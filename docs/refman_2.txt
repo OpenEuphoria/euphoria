@@ -1929,6 +1929,14 @@ Euphoria coded file.
 ==== Using namespaces
 @[namespace|]
 
+Euphoria namespaces are used to disambiguate between symbols (routines, variables,
+constants, etc) with the same names in different files. They may be declared as
+a default namespace in a file for the convenience of the users of that file,
+or they may be declared at the point where a file is included. Note that unlike
+namespaces in some other languages, this does not provide a sandbox around the
+symbols in the file. It is just an easy way to tell euphoria to look for a
+symbol in a particular file.
+
 Identifiers marked as ##global##, ##public## or ##export## are known as
 //exposed// variables because they can be used in files other than the one they
 were declared in.
