@@ -14,7 +14,9 @@
 * Fix std/sequence.e so store() will correctly handle the one-element index case - it was duplicating the entire sequence before.
 * [[ticket:710]] Updated tokenizer and syntax coloring to be able to preserve state between lines.
   The euphoria trace screen and ed.ex now properly colorize multiline strings and comments.
-* [[:tokenize_string]] had an infinite loop if the string ended with a single quote and a backslash
+* ##[[:tokenize_string]]## had an infinite loop if the string ended with a single quote and a backslash
+* euphoria/tokenizer.e does not add a leading zero to floating point numbers without one when
+  ##[[:string_numbers]]## is set
 
 == Enhancements
 
