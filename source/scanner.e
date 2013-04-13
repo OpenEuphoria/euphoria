@@ -1473,7 +1473,8 @@ end function
 
 export function Scanner()
 -- The scanner main routine: returns a lexical token
-	integer ch, i, sp, prev_Nne
+	integer ch, sp, prev_Nne
+	atom i
 	integer pch
 	integer cline
 	sequence yytext, namespaces  -- temporary buffer for a token

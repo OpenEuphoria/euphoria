@@ -1542,7 +1542,7 @@ procedure FinalDeRef(symtab_index sym)
 	end if
 end procedure
 
-function NotInRange(integer x, integer badval)
+function NotInRange(atom x, atom badval)
 -- return TRUE if x can't be badval
 	sequence range
 
