@@ -151,11 +151,14 @@ constant ERROR_STRING = {
 	$
 }
 
+integer report_and_stop_on_error = 0
 procedure report_error(integer err)
-	Look = io:EOF
-	ERR = err
-	ERR_LNUM = Token[TLNUM]
-	ERR_LPOS = Token[TLPOS]
+	if report_and_stop_on_error then
+		Look = io:EOF
+		ERR = err
+		ERR_LNUM = Token[TLNUM]
+		ERR_LPOS = Token[TLPOS]
+	end if
 end procedure
 
 --**
@@ -583,7 +586,7 @@ function scan_string(atom state = g_state)
 	if (Look = '`') then
 		return raw_string( "`", state )
 	end if
-	if (Look != '"') then 
+	if (Look != '"') then
 		return FALSE 
 	end if
 
@@ -605,7 +608,7 @@ function scan_string(atom state = g_state)
 			if eumem:ram_space[state][STRING_KEEP_QUOTES] then
 				Token[TDATA] = "\"" & Token[TDATA] -- & "\""
 			end if
-			report_error(ERR_EOL_STRING)
+--			report_error(ERR_EOL_STRING)
 			return TRUE
 		end if
 
@@ -1154,7 +1157,7 @@ end procedure
 
 public function tokenize_string(sequence code, atom state = g_state, integer stop_on_error = TRUE, multiline_token multi = 0)
 	sequence tokens
-
+	report_and_stop_on_error = stop_on_error
 	ERR = FALSE
 	ERR_LNUM = 0
 	ERR_LPOS = 0
