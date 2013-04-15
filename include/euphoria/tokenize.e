@@ -911,7 +911,7 @@ function scan_identifier(atom state = g_state)
 	end if
 
 	if find(Look, "xuU") then
-		nextch = lookahead(state, state)
+		nextch = lookahead( 1, state)
 		if nextch = '"' then
 			-- A special string token
 			integer whichhex = Look

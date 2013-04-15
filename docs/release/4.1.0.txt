@@ -17,6 +17,7 @@
 * ##[[:tokenize_string]]## had an infinite loop if the string ended with a single quote and a backslash
 * euphoria/tokenizer.e does not add a leading zero to floating point numbers without one when
   ##[[:string_numbers]]## is set
+* fixed detection of hex string tokens in ##[[:tokenize_string]]##
 
 == Enhancements
 
