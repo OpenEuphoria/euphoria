@@ -1211,7 +1211,7 @@ public function tokenize_string(sequence code, atom state = g_state, integer sto
 		while Token[TTYPE] != T_EOF do
 			tokens &= { Token }
 			next_token(state)
-			if stop_on_error and ERR thens
+			if stop_on_error and ERR then
 				exit
 			end if
 		end while
