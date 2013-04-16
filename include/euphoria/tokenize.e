@@ -604,11 +604,11 @@ function scan_string(atom state = g_state)
 	Token[TFORM] = TF_STRING_SINGLE
 
 	while (Look != '"') do
-		if (Look = EOL) then 
+		if (Look = EOL or Look = EOF) then 
 			if eumem:ram_space[state][STRING_KEEP_QUOTES] then
 				Token[TDATA] = "\"" & Token[TDATA] -- & "\""
 			end if
---			report_error(ERR_EOL_STRING)
+			report_error(ERR_EOL_STRING)
 			return TRUE
 		end if
 
