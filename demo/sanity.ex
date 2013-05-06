@@ -907,7 +907,7 @@ procedure machine_level()
 -- quick test of machine-level routines
 	atom addr, dest, src
 
-	if 9.99 != float64_to_atom(atom_to_float64(9.99)) then
+	if math:abs( 9.99 - float64_to_atom(atom_to_float64(9.99))) > 1e-15 then
 	crash(generic_msg)
 	end if
 	if -27 != float32_to_atom(atom_to_float32(-27)) then
