@@ -1372,8 +1372,13 @@ procedure Factor()
 					lhs_subs_level = save_lhs_subs_level
 					tok = next_token()
 				end while
+				
+				if tok[T_ID] = DOT then
+					MemStruct_access( Top(), FALSE )
+				else
+					putback(tok)
+				end if
 				current_sequence = remove( current_sequence, length( current_sequence ) )
-				putback(tok)
 			end if
 			
 			short_circuit += 1

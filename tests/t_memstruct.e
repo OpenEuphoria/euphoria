@@ -370,7 +370,7 @@ test_char_array()
 
 procedure ptr_in_seq()
 	sequence lines = { allocate( sizeof( LINE ),  1 ), allocate( sizeof( LINE ),  1 ) }
-	atom pt = lines[1].POINT.startPt
+	object y1 = lines[1].LINE.startPt.y
 end procedure
 ptr_in_seq()
 

@@ -929,7 +929,7 @@ end function
 
 export function resolve_members( sequence names, symtab_index struct_sym )
 	symtab_pointer parent = struct_sym
-	symtab_pointer sym
+	symtab_pointer sym = 0
 	for i = 1 to length( names ) do
 		sym = resolve_member( names[i], parent )
 		if not sym then
@@ -1031,7 +1031,7 @@ export procedure MemStruct_access( symtab_index sym, integer lhs )
 		return
 	end if
 	
-	sequence names = {}
+	sequence names = { sym_name( mem_struct )}
 
 	No_new_entry = 1
 	integer members = 0
