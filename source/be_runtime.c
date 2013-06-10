@@ -1758,7 +1758,7 @@ object and_bits(unsigned long a, unsigned long b)
 object Dand_bits(d_ptr a, d_ptr b)
 /* double a AND b */
 {
-	return and_bits( (unsigned long)(a->dbl), (unsigned long)(b->dbl));
+	return and_bits(INT_VAL((a->dbl)), INT_VAL((b->dbl)));
 }
 
 object or_bits(unsigned long a, unsigned long b)
@@ -1771,7 +1771,7 @@ object or_bits(unsigned long a, unsigned long b)
 object Dor_bits(d_ptr a, d_ptr b)
 /* double a OR b */
 {
-	return or_bits( (unsigned long)(a->dbl), (unsigned long)(b->dbl));
+	return or_bits(INT_VAL((a->dbl)), INT_VAL((b->dbl)));
 }
 
 object xor_bits(unsigned long a, unsigned long b)
@@ -1784,8 +1784,7 @@ object xor_bits(unsigned long a, unsigned long b)
 object Dxor_bits(d_ptr a, d_ptr b)
 /* double a XOR b */
 {
-
-	return xor_bits((unsigned long)(a->dbl), (unsigned long)(b->dbl));
+	return xor_bits(INT_VAL((a->dbl)), INT_VAL((b->dbl)));
 }
 
 object not_bits(unsigned long a)
@@ -1798,7 +1797,7 @@ object not_bits(unsigned long a)
 object Dnot_bits(d_ptr a)
 /* double bitwise NOT of a */
 {
-	return not_bits((unsigned long)(a->dbl));
+	return not_bits(INT_VAL(a->dbl));
 }
 
 object power(long a, long b)

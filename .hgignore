@@ -1,6 +1,7 @@
 ~
 ver.dat
 ex.err
+eu.cfg
 bin/bench
 bin/bench.exe
 bin/creole
@@ -38,6 +39,9 @@ tests/ecp.dat
 tests/eds-dump.txt
 tests/save_map.raw3
 tests/include_subdir/foo/test.err
+tests/ctc.log
+tests/serialize.dat
+tests/unittest.log
 
 regex:
 ^build/.*

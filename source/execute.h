@@ -10,21 +10,37 @@
 
 /* an object is represented as a 32-bit value as follows:
 
-		unused  : 011xxxxx xxxxxxxx xxxxxxxx xxxxxxxx
-		unused  : 010xxxxx xxxxxxxx xxxxxxxx xxxxxxxx
 
-		TOO_BIG:  01000000 00000000 00000000 00000000   (just too big for INT)
+	   +ATOM-INT: 000vvvvv vvvvvvvv vvvvvvvv vvvvvvvv   (31-bit integer value)
+                                                      = 0x00000000 - 0x01FFFFFF
 
 	   +ATOM-INT: 001vvvvv vvvvvvvv vvvvvvvv vvvvvvvv   (31-bit integer value)
-	   +ATOM-INT: 000vvvvv vvvvvvvv vvvvvvvv vvvvvvvv   (31-bit integer value)
-	   -ATOM-INT: 111vvvvv vvvvvvvv vvvvvvvv vvvvvvvv   (31-bit integer value)
-	   -ATOM-INT: 110vvvvv vvvvvvvv vvvvvvvv vvvvvvvv   (31-bit integer value)
+                                                      = 0x20000000 - 0x3FFFFFFF
 
-		NO VALUE: 10111111 11111111 11111111 11111111   (undefined object)
+		TOO_BIG:  01000000 00000000 00000000 00000000   (just too big for INT)
+                                                      = 0x40000000
 
-		ATOM-DBL: 101ppppp pppppppp pppppppp pppppppp   (29-bit pointer)
+		unused  : 010xxxxx xxxxxxxx xxxxxxxx xxxxxxxx
+                                                      = 0x40000000 - 0x5FFFFFFF
+
+		unused  : 011xxxxx xxxxxxxx xxxxxxxx xxxxxxxx
+                                                      = 0x60000000 - 0x7FFFFFFF
 
 		SEQUENCE: 100ppppp pppppppp pppppppp pppppppp   (29-bit pointer)
+                                                      = 0x80000000 - 0x9FFFFFFF
+
+		ATOM-DBL: 101ppppp pppppppp pppppppp pppppppp   (29-bit pointer)
+                                                      = 0xA0000000 - 0xBFFFFFFF
+
+	   -ATOM-INT: 110vvvvv vvvvvvvv vvvvvvvv vvvvvvvv   (31-bit integer value)
+                                                      = 0xC0000000 - 0xDFFFFFFF
+
+	   -ATOM-INT: 111vvvvv vvvvvvvv vvvvvvvv vvvvvvvv   (31-bit integer value)
+                                                      = 0xE0000000 - 0xFFFFFFFF
+
+		NO VALUE: 10111111 11111111 11111111 11111111   (undefined object)
+                                                      = 0xBFFFFFFF
+
 
    We ensure 8-byte alignment for s1 and dbl blocks - lower 3 bits
    aren't needed - only 29 bits are stored.
@@ -33,31 +49,6 @@
 /* NO VALUE objects can occur only in a few well-defined places,
    so we can simplify some tests. For speed we first check for ATOM-INT
    since that's what most objects are. */
-
-#define NOVALUE      ((long)0xbfffffffL)
-#define TOO_BIG_INT  ((long)0x40000000L)
-#define HIGH_BITS    ((long)0xC0000000L)
-#define IS_ATOM_INT(ob)       (((long)(ob)) > NOVALUE)
-#define IS_ATOM_INT_NV(ob)    ((long)(ob) >= NOVALUE)
-
-#define MAKE_UINT(x) ((object)(( ((unsigned long)x) <= ((unsigned long)0x3FFFFFFFL)) \
-                          ? (unsigned long)x : \
-                            (unsigned long)NewDouble((double)(unsigned long)x)))
-
-/* these are obsolete */
-#define INT_VAL(x)        ((int)(x))
-#define MAKE_INT(x)       ((object)(x))
-
-/* N.B. the following distinguishes DBL's from SEQUENCES -
-   must eliminate the INT case first */
-#define IS_ATOM_DBL(ob)         (((object)(ob)) >= (long)0xA0000000)
-
-#define IS_ATOM(ob)             (((long)(ob)) >= (long)0xA0000000)
-#define IS_SEQUENCE(ob)         (((long)(ob))  < (long)0xA0000000)
-
-#define ASEQ(s) (((unsigned long)s & (unsigned long)0xE0000000) == (unsigned long)0x80000000)
-
-#define IS_DBL_OR_SEQUENCE(ob)  (((long)(ob)) < NOVALUE)
 
 #undef MININT
 #define MININT     (long)0xC0000000
@@ -71,6 +62,46 @@
 #define ATOM_0     0
 #define ATOM_1     1
 #define ATOM_2     2
+#define NOVALUE      ((long)0xbfffffffL)
+#define ATOM_FLAG     ((long)0xA0000000L)
+#define TOO_BIG_INT  ((long)0x40000000L)
+#define HIGH_BITS    ((long)0xC0000000L)
+
+#define IS_ATOM_INT(ob)       (((long)(ob)) > NOVALUE)
+#define IS_ATOM_INT_NV(ob)    ((long)(ob) >= NOVALUE)
+
+/* cast to unsigned long can be undefined for doubles. See below.
+#define MAKE_UINT(x) ((object)(( ((unsigned long)x) <= ((unsigned long)0x3FFFFFFFL)) \
+                          ? (unsigned long)x : \
+                            (unsigned long)NewDouble((double)(unsigned long)x)))
+*/
+
+/*
+ * These two macros were labeled as obsolete. However they are still used in many
+ * places in the source still. Because casting a double to unsigned long
+ * implementation defined for negative values or values outside of the integer
+ * range, we need to promote values to long long and then trunacte them to
+ * long.
+ */
+#define INT_VAL(x)        ((long)(long long)(x))
+#define MAKE_INT(x)       ((object)(long long)(x))
+
+#define MAKE_UINT(x) \
+    (((unsigned long)(INT_VAL(x))) <= (((unsigned long)(MAXINT))) \
+        ? ((unsigned long)(INT_VAL(x))) \
+        : ((unsigned long)(INT_VAL(NewDouble((double)(unsigned long)INT_VAL(x))))))
+
+/* N.B. the following distinguishes DBL's from SEQUENCES -
+   must eliminate the INT case first */
+#define IS_ATOM_DBL(ob)         (((object)(ob)) >= (long)ATOM_FLAG)
+
+#define IS_ATOM(ob)             (((long)(ob)) >= (long)ATOM_FLAG)
+#define IS_SEQUENCE(ob)         (((long)(ob))  < (long)ATOM_FLAG)
+
+#define ASEQ(s) (((unsigned long)s & (unsigned long)0xE0000000) == (unsigned long)0x80000000)
+
+#define IS_DBL_OR_SEQUENCE(ob)  (((long)(ob)) < NOVALUE)
+
 
 
 #include "object.h"
