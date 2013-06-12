@@ -365,7 +365,7 @@ while [ "$1" != "" ]; do
 		echo "   --cc-prefix         Prefix to use with the compiler and other build binaries.  This"
 		echo "                       is generally used from cross compilers, or Windows MinGW"
 		echo "                       installations that use a prefix"
-		echo "   --roodir value      the root dir to use for checking the svn revision"
+		echo "   --rootdir value      the root dir to use for checking the svn revision"
 		echo "                       default is the parent directory"
 		echo "   --use-binary-translator"
 		echo "                       Use the already built translator rather"
