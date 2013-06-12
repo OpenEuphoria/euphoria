@@ -231,7 +231,7 @@ while [ "$1" != "" ]; do
 		echo "   --eubin value       Use this option to specify the location of the"
 		echo "   --cc value          set this to the name of your GNU C compiler file name if its "
 		echo "                       name is not 'gcc'"
-		echo "   --roodir value      the root dir to use for checking the svn revision"
+		echo "   --rootdir value      the root dir to use for checking the svn revision"
 		echo "                       default is the parent directory"
 		echo "   --use-binary-translator"
 		echo "                       Use the already built translator rather"
