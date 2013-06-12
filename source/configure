@@ -130,7 +130,7 @@ echo CONFIGURE_PARAMS=$@ >> "$PREFIX"${CONFIG_FILE}
 # parameters
 while [ "$1" != "" ]; do
     case $1 in
-	--plat*)
+	--plat*|--target)
 		VAL=`echo $1 | cut -d = -f 2`
 		if [ "$VAL" = "$1" ]; then
 			shift ; VAL=$1
@@ -171,6 +171,10 @@ while [ "$1" != "" ]; do
 	
 	--no-managed-mem )
 		export MANAGED_MEM=0
+		;;
+
+	--managed-mem)
+		export MANAGED_MEM=1
 		;;
 
 	--align4 )
@@ -227,10 +231,6 @@ while [ "$1" != "" ]; do
 
 	--use-source-translator )
 		export EC="eui euc.ex"
-		;;
-
-	--final)
-		echo EREL_TYPE=-DEREL_TYPE=1 >> ${CONFIG_FILE}
 		;;
 
 	--release*)
@@ -299,12 +299,12 @@ while [ "$1" != "" ]; do
 		fi
 		ARCH=$VAL
 		case $ARCH in
-			x86.64)
+			x86[_\-\.]64)
 				ARCH=ix86_64
 				MFLAG=-m64
 				EFLAG=E64
 			;;
-			x86)
+			x86|ix86)
 				ARCH=ix86
 				MFLAG=-m32
 				EFLAG=E32
@@ -342,49 +342,54 @@ while [ "$1" != "" ]; do
 		echo "configure [options]"
 		echo
 		echo "Options:"
-		echo "   --without-euphoria"
-		echo "   --eubin value"
-		echo "   --build value       Set the build directory. If called from outside the"
-		echo "                       source directory, the current directory is the default"
-		echo "   --full"
-		echo "   --release value     set the release type for the version string"
-		echo "   --debug             turn debugging on"
-		echo "   --prefix value      set the install directory (default /usr/local)"
-		echo "   --plat value        set the OS that we will translate to."
-		echo "                       values can be: WINDOWS, OSX, LINUX, FREEBSD, OPENBSD or NETBSD."
-		echo "   --watcom            set this so the translator will create C code for"
-		echo "                       Watcom C."
-		echo "   --no-managed-mem    disable managed memory"
-		echo "   --align4            malloc allocates addresses that are"
-		echo "                       always 4 byte aligned."
-		echo "   --eubin value       Use this option to specify the location of the"
-		echo "   --cc value          set this to the name of your GNU C compiler file name if its "
-		echo "                       name is not 'gcc'"
-		echo "   --rc value          Name of the windows resource compiler.  This is used with"
-		echo "                       MinGW builds."
-		echo "   --cc-prefix         Prefix to use with the compiler and other build binaries.  This"
-		echo "                       is generally used from cross compilers, or Windows MinGW"
-		echo "                       installations that use a prefix"
-		echo "   --rootdir value      the root dir to use for checking the svn revision"
-		echo "                       default is the parent directory"
+		echo "   --target value or --plat value"
+		echo "                       Set the OS that we will translate to."
+		echo "                       Values can be: WINDOWS, OSX, LINUX,"
+		echo "                       FREEBSD, OPENBSD or NETBSD."
+		echo "   --watcom            The translator will create C code"
+		echo "                       for the Watcom compiler."
+		echo "   --cc-prefix         Prefix to use with the compiler and"
+		echo "                       other build binaries.  This is"
+		echo "                       generally used from cross compilers,"
+		echo "                       or Windows MinGW installations that"
+		echo "                       use a prefix."
+		echo "   --cc value          The name of your GNU C compiler file name if its "
+		echo "                       name is not 'gcc'."
+		echo "   --rc value          Name of the windows resource compiler."
+		echo "                       This is used with MinGW builds."
+		echo "   --no-managed-mem    Disable managed memory. Used on Windows."
+		echo "   --align4            Malloc allocates addresses that are"
+		echo "                       always 4 byte aligned. Used on Windows."
+		# echo "   --without-euphoria"
+		echo "   --eubin value       Set the path of the precompiled"
+		echo "                       binaries used to intrepret and translate the sources."
+		echo "   --build value       Set the build directory. The default is"
+		echo "                       'build' off of the source directory."
+		echo "   --debug             Turn debugging on."
+		# echo "   --full"
+		echo "   --prefix value      Set the install directory (default /usr/local)."
 		echo "   --use-binary-translator"
 		echo "                       Use the already built translator rather"
-		echo "                       than interpreting its source           "
+		echo "                       than interpreting its source.           "
 		echo "   --use-source-translator                                    "
 		echo "                       Interpret the translator's source rather" 
 		#'" (comment to help display in some editors)
 		echo "                       than using the already built translator"
-		echo "                       (default)"
-		echo "   --verbose-tests     cause the 'test' target to use the verbose flag"
-		echo "                       with eutest"
+		echo "                       (default)."
+		echo "   --release value     Set the release type for the version string."
+		echo "   --verbose-tests     Cause the 'test' target to use the -verbose flag"
+		echo "                       with eutest."
+		echo "   --rootdir value     The root dir to use for checking the svn revision."
+		echo "                       The default is the parent directory."
 		echo "   --oe-username value Developer user name on openeuphoria.org for various scp"
-		echo "                       operations such as manual upload"
-		echo "   --scp-client value  SCP program to use for scp uploads (default scp -C)"
-		echo "   --ssh-client value  SSH program to use for ssh commands (default ssh -C)"
-		echo "   --hg value          Mercurial binary command (default 'which hg')"
-		echo "   --wine value        Path to wine (useful for cross compilation to windows)"
-		echo "   --no-cygwin         Use the -mno-cygwin flag with MinGW.  This flag is obsoltete,"
-		echo "                       and may cause errors on newer versions of MinGW."
+		echo "                       operations such as manual upload."
+		echo "   --scp-client value  SCP program to use for scp uploads (default scp -C)."
+		echo "   --ssh-client value  SSH program to use for ssh commands (default ssh -C)."
+		echo "   --hg value          Mercurial binary command (default 'which hg')."
+		echo "   --wine value        Path to wine (useful for cross compilation to windows)."
+		echo "   --no-cygwin         Use the -mno-cygwin flag with MinGW."
+		echo "                       This flag is obsoltete, and may cause errors"
+		echo "                       on newer versions of MinGW."
 		exit
 		;;
 	esac
