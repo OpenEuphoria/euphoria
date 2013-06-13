@@ -360,7 +360,7 @@ while [ "$1" != "" ]; do
 		echo "   --no-managed-mem    Disable managed memory. Used on Windows."
 		echo "   --align4            Malloc allocates addresses that are"
 		echo "                       always 4 byte aligned. Used on Windows."
-		# echo "   --without-euphoria"
+		echo "   --without-euphoria  Don't use a precompiled version of Euphoria to build."
 		echo "   --eubin value       Set the path of the precompiled"
 		echo "                       binaries used to intrepret and translate the sources."
 		echo "   --build value       Set the build directory. The default is"
@@ -423,19 +423,19 @@ echo EMINGW=$EMINGW >> "$PREFIX"${CONFIG_FILE}
 
 # if eui doesn't exist the error message goes into
 # the device file /dev/null. [works on Mingw too.]
-if [ "x$EUBIN" = "x" ]; then
-	if eui -? 1> /dev/null 2> /dev/null; then
-		if [ "x$EUPHORIA" = "x" ]; then
+if [ "x$EUPHORIA" = "x" ]; then
+	if [ "x$EUBIN" = "x" ]; then
+		if eui -? 1> /dev/null 2> /dev/null; then
 			export EUPHORIA=1
+		else
+			export EUPHORIA=0
 		fi
 	else
-		export EUPHORIA=0
+		export EUPHORIA=1
 	fi
-else
-	export EUPHORIA=1
 fi
 
-if [ "x$EUPHORIA" = "x1" ]; then
+if [ "$EUPHORIA" = "1" ]; then
 	echo EUPHORIA=1 >> "$PREFIX"${CONFIG_FILE}
 else
 	echo EUPHORIA=0 >> "$PREFIX"${CONFIG_FILE}

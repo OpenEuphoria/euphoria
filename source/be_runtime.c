@@ -5076,7 +5076,10 @@ object system_exec_call(object command, object wait)
 
 #ifdef EUNIX
 	// this runs the shell - not really supposed to, but it gets exit code
-	exit_code = WEXITSTATUS( system(string_ptr) );
+	// Assigning directly to WEXITSTATUS causes a compiler failure on BSD and OSX.
+	// Fix by adding a separate assignment.
+		exit_code = system(string_ptr);
+		exit_code = WEXITSTATUS( exit_code );
 #else
 	argv = make_arg_cv(string_ptr, &exit_code);
 	exit_code = spawnvp(P_WAIT, argv[0], (char * const *)argv);
