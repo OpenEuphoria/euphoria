@@ -386,6 +386,7 @@ while [ "$1" != "" ]; do
 		echo "   --scp-client value  SCP program to use for scp uploads (default scp -C)."
 		echo "   --ssh-client value  SSH program to use for ssh commands (default ssh -C)."
 		echo "   --hg value          Mercurial binary command (default 'which hg')."
+		echo "   --arch value        Set architecture to ARM, x86, or x86-64."
 		echo "   --wine value        Path to wine (useful for cross compilation to windows)."
 		echo "   --no-cygwin         Use the -mno-cygwin flag with MinGW."
 		echo "                       This flag is obsoltete, and may cause errors"
