@@ -284,13 +284,17 @@ export constant
 	MAXINT = max_int,
 	MININT = -MAXINT-1,   -- should be -ve
 	MININT_DBL = MININT,
-	MAXINT_DBL = MAXINT
+	MAXINT_DBL = MAXINT,
+	MINDBL_INT = #FFE0000000000000,
+	MAXDBL_INT = #0020000000000000
 
 export atom
 	TMAXINT,
 	TMININT,
 	TMININT_DBL,
-	TMAXINT_DBL
+	TMAXINT_DBL,
+	TMINDBL_INT,
+	TMAXDBL_INT
 
 export procedure set_target_integer_size( integer sizeof_pointer )
 	if sizeof_pointer = 4 then
@@ -302,7 +306,10 @@ export procedure set_target_integer_size( integer sizeof_pointer )
 	TMININT = -TMAXINT - 1
 	TMAXINT_DBL = TMAXINT
 	TMININT_DBL = TMININT
+	TMINDBL_INT = MINDBL_INT
+	TMAXDBL_INT = MAXDBL_INT
 end procedure
+
 set_target_integer_size( SIZEOF_POINTER )
 
 export function is_integer( object o )

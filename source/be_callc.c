@@ -1284,9 +1284,9 @@ object call_c(int func, object proc_ad, object arg_list)
 		next_size = type_stack_pop(&next_size_ptr);
 		
 		if (IS_ATOM_INT(next_size))
-			size = INT_VAL(next_size);
+			size = (uintptr_t)next_size;
 		else if (IS_ATOM(next_size))
-			size = (uintptr_t)DBL_PTR(next_size)->dbl;
+			size = (uintptr_t)DBL_TO_OBJ(DBL_PTR(next_size)->dbl);
 		else 
 			RTFatal("This C routine was defined using an invalid argument type");
 
@@ -1349,7 +1349,7 @@ object call_c(int func, object proc_ad, object arg_list)
 			else if (IS_ATOM(next_arg)) {
 				// atoms are rounded to integers
 				
-				arg = (uint64_t)(uintptr_t)DBL_PTR(next_arg)->dbl; //correct
+				arg = (uint64_t)(uintptr_t)DBL_TO_OBJ(DBL_PTR(next_arg)->dbl); //correct
 				// if it's a -ve f.p. number, Watcom converts it to long and
 				// then to unsigned long. This is exactly what we want.
 				// Works with the others too. 
@@ -1392,17 +1392,17 @@ object call_c(int func, object proc_ad, object arg_list)
 				PUSH_INT_ARG
 			} 
 			else if (IS_ATOM_INT(next_arg)) {
-				arg = (uintptr_t) next_arg;
+				arg = (uintptr_t)next_arg;
 				PUSH_INT_ARG
 			}
 			else if (IS_ATOM(next_arg)) {
 				// atoms are rounded to integers
 				#ifdef EARM
 				if( size == C_INT )
-					arg = (intptr_t)DBL_PTR(next_arg)->dbl; //correct
+					arg = (intptr_t)DBL_TO_OBJ(DBL_PTR(next_arg)->dbl); //correct
 				else
 				#endif
-				arg = (uintptr_t)DBL_PTR(next_arg)->dbl;
+				arg = (uintptr_t)DBL_TO_OBJ(DBL_PTR(next_arg)->dbl);
 				
 				PUSH_INT_ARG
 			}
@@ -1502,7 +1502,7 @@ object call_c(int func, object proc_ad, object arg_list)
 			// check if unsigned result is required 
 			if ((return_type & C_TYPE) == 0x02000000) {
 				// unsigned integer result
-				if ((unsigned)int_result <= (uintptr_t)MAXINT) {
+				if ((unsigned int)int_result <= (uintptr_t)MAXINT) {
 					return (intptr_t)(unsigned int)int_result;
 				}
 				else

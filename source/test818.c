@@ -101,7 +101,7 @@ MAKE_GET_VAL_FN(char,      C_CHAR,     _M100, -100)
 MAKE_GET_VAL_FN(short,     C_SHORT,    _M100, -10000)
 MAKE_GET_VAL_FN(int,       C_INT,      _M100, -1000000000)
 MAKE_GET_VAL_FN(long,      C_LONG,     _M100, ((sizeof(long) == sizeof(long long)) ? -1000000000000000000LL : -1000000000L) )
-MAKE_GET_VAL_FN(long long, C_LONGLONG, _M100, -1000000000000000000)
+MAKE_GET_VAL_FN(long long, C_LONGLONG, _M100, -1000000000000000000LL)
 
 EXPORT unsigned long long bit_repeat(Bool bit, unsigned char count) {
 	long long bit_vector = 0LL;

@@ -84,7 +84,7 @@
 #define LOCAL_SPACE 100 /* some local space */
 
 /* convert atom to char. *must avoid side effects in elem* */
-#define Char(elem) ((IS_ATOM_INT(elem)) ? ((char)INT_VAL(elem)) : doChar(elem))
+#define Char(elem) ((IS_ATOM_INT(elem)) ? ((char)elem) : doChar(elem))
 
 #define CONTROL_Z 26
 #define CR 13
@@ -444,7 +444,7 @@ void debug_dbl(double num)
 	buff[dbg_dbl_len - 1] = 0; // ensure NULL
 	debug_msg(buff);
 }
-#ifdef EARM
+#ifdef EARM /* Is this necessary? See DBL_TO_OBJ macro in execute.h. */
 double maxplus1 = ((double)UINTPTR_MAX) + 1;
 uintptr_t doubletouintptrdiscardhighbits(double d)
 {
@@ -657,7 +657,7 @@ static char doChar(object elem)
 	if (IS_ATOM_INT(elem))
 		return (char)elem;
 	if (IS_ATOM(elem))
-		return (char)(DBL_PTR(elem)->dbl);
+		return (char)DBL_TO_OBJ(DBL_PTR(elem)->dbl);
 	else {
 		RTFatal("sequence found inside character string");
 	}
@@ -1286,7 +1286,7 @@ object Repeat(object item, object repcount)
 	}
 
 	else if (IS_ATOM_DBL(repcount)) {
-		count = (long)(DBL_PTR(repcount)->dbl);
+		count = (long)DBL_TO_OBJ(DBL_PTR(repcount)->dbl);
 	}
 
 	else
@@ -1663,7 +1663,7 @@ object DoubleToInt(object d)
 		temp_dbl <= MAXINT_DBL &&
 		temp_dbl >= MININT_DBL) {
 			/* return it in integer repn */
-			return (object)temp_dbl;
+			return DBL_TO_OBJ(temp_dbl);
 	}
 	else{
 		return d; /* couldn't convert */
@@ -1690,9 +1690,9 @@ object add(object a, object b)
 
 	c = a + b;
 	if (c + HIGH_BITS < 0)
-		return MAKE_INT(c);
+		return c;
 	else
-		return (object)NewDouble((eudouble)c);
+		return NewDouble((eudouble)c);
 }
 
 object minus(object a, object b)
@@ -1702,9 +1702,9 @@ object minus(object a, object b)
 
 	c = a - b;
 	if (c + HIGH_BITS < 0)
-		return MAKE_INT(c);
+		return c;
 	else
-		return (object)NewDouble((eudouble)c);
+		return NewDouble((eudouble)c);
 }
 
 object multiply(object a, object b)
@@ -1716,10 +1716,10 @@ object multiply(object a, object b)
 		if ((b <= INT15 && b >= -INT15) ||
 		   (a == (char)a && b <= INT23 && b >= -INT23) ||
 		   (b == (short)b && a <= INT15 && a >= -INT15))
-			return MAKE_INT(a * b);
+			return (a * b);
 	}
 	else if (b == (char)b && a <= INT23 && a >= -INT23)
-		return MAKE_INT(a * b);
+		return (a * b);
 
 	return (object)NewDouble(a * (eudouble)b);
 }
@@ -1732,7 +1732,7 @@ object divide(object a, object b)
 	if (a % b != 0)
 		return (object)NewDouble((eudouble)a / b);
 	else
-		return MAKE_INT(a / b);
+		return (a / b);
 }
 
 object Ddivide(d_ptr a, d_ptr b)
@@ -1748,7 +1748,7 @@ object eremainder(object a, object b)  // avoid conflict with "remainder" math f
 {
 	if (b == 0)
 		RTFatal("can't get remainder of a number divided by 0");
-	return MAKE_INT(a % b);
+	return (a % b);
 }
 
 
@@ -1770,10 +1770,11 @@ object and_bits(uintptr_t a, uintptr_t b)
 object Dand_bits(d_ptr a, d_ptr b)
 /* double a AND b */
 {
-#ifdef EARM
+#ifdef EARM /*obsolete with DBL_TO_OBJ?*/
 	return and_bits(doubletouintptrdiscardhighbits(a->dbl), doubletouintptrdiscardhighbits(b->dbl));
 #else
-	return and_bits( (uintptr_t)(a->dbl), (uintptr_t)(b->dbl));
+	uint64_t c = (uint64_t)(a->dbl) & (uint64_t)(b->dbl);
+	return MAKE_UINT(c);
 #endif
 }
 
@@ -1788,10 +1789,11 @@ object or_bits(uintptr_t a, uintptr_t b)
 object Dor_bits(d_ptr a, d_ptr b)
 /* double a OR b */
 {
-#ifdef EARM
+#ifdef EARM /*obsolete with DBL_TO_OBJ?*/
 	return or_bits(doubletouintptrdiscardhighbits(a->dbl), doubletouintptrdiscardhighbits(b->dbl));
 #else
-	return or_bits( (uintptr_t)(a->dbl), (uintptr_t)(b->dbl));
+	uint64_t c = (uint64_t)(a->dbl) | (uint64_t)(b->dbl);
+	return MAKE_UINT(c);
 #endif
 }
 
@@ -1806,10 +1808,11 @@ object xor_bits(uintptr_t a, uintptr_t b)
 object Dxor_bits(d_ptr a, d_ptr b)
 /* double a XOR b */
 {
-#ifdef EARM
+#ifdef EARM /*obsolete with DBL_TO_OBJ?*/
 	return xor_bits(doubletouintptrdiscardhighbits(a->dbl), doubletouintptrdiscardhighbits(b->dbl));
 #else
-	return xor_bits((uintptr_t)(a->dbl), (uintptr_t)(b->dbl));
+	uint64_t c = (uint64_t)(a->dbl) ^ (uint64_t)(b->dbl);
+	return MAKE_UINT(c);
 #endif
 }
 
@@ -1824,21 +1827,23 @@ object not_bits(uintptr_t a)
 object Dnot_bits(d_ptr a)
 /* double bitwise NOT of a */
 {
-#ifdef EARM
+#ifdef EARM /*obsolete with DBL_TO_OBJ?*/
 	return not_bits(doubletouintptrdiscardhighbits(a->dbl));
 #else
-	return not_bits((uintptr_t)(a->dbl));
+	uint64_t c = ~(uint64_t)(a->dbl);
+	return MAKE_UINT(c);
 #endif
 }
 
 object power(object a, object b)
 /* integer a to the power b */
+/* change for 64-bit? */
 {
 	long i, p;
 
 	if (a == 2 && b >= 0 && b <= 29) {
 		/* positive power of 2 */
-		return MAKE_INT(1 << b);
+		return (object)(1 << b);
 	}
 	else if (a == 0 && b <= 0) {
 		RTFatal("can't raise 0 to power <= 0");
@@ -1850,10 +1855,10 @@ object power(object a, object b)
 		p = a;
 		for (i = 2; i <= b; i++)
 			p = p * a;
-		return MAKE_INT(p);
+		return (object)(p);
 	}
 	else
-		return (object)NewDouble(EUPOW((eudouble)a, (eudouble)b));
+		return NewDouble(EUPOW((eudouble)a, (eudouble)b));
 }
 
 object Dpower(d_ptr a, d_ptr b)
@@ -2045,7 +2050,7 @@ object uminus(object a)
 	if (a == MININT)
 		return (object)NewDouble((eudouble)-MININT);
 	else
-		return MAKE_INT(-a);
+		return -a;
 }
 
 object Duminus(d_ptr a)
@@ -2169,10 +2174,10 @@ object De_floor(d_ptr a)
 	temp = EUFLOOR(a->dbl);
 #ifndef ERUNTIME
 	if (fabs(temp) < MAXINT_DBL)
-		return MAKE_INT((object)temp);
+		return (object)(temp);
 	else
 #endif
-		return (object)NewDouble(temp);
+		return NewDouble(temp);
 }
 
 #define V(a,b) ((((a) << 1) | (a & 0x1)) ^ ((((b) >> 14) & 0x0000FFFF) | ((b) << 18)))
@@ -2271,7 +2276,7 @@ object Random(object a)
 {
 	if (a <= 0)
 		RTFatal("argument to rand must be >= 1");
-	return MAKE_INT((good_rand() % (uint32_t)a) + 1);
+	return (object)((good_rand() % (uint32_t)a) + 1);
 }
 
 
@@ -2282,9 +2287,9 @@ object DRandom(d_ptr a)
 
 	if (a->dbl < 1.0)
 		RTFatal("argument to rand must be >= 1");
-	if ((uint32_t)(a->dbl) <= 0)
+	if ((uint32_t)DBL_TO_OBJ (a->dbl) <= 0)
 		RTFatal("argument to rand is too large");
-	res = (1 + good_rand() % (uint32_t)(a->dbl));
+	res = (1 + good_rand() % (uint32_t)DBL_TO_OBJ(a->dbl));
 	return MAKE_UINT(res);
 }
 
@@ -2313,7 +2318,7 @@ object unary_op(int fn, object a)
 		while (TRUE) {
 			x = *(++ap);
 			if (IS_ATOM_INT(x)) {
-				*(++cp) = (*int_fn)(INT_VAL(x));
+				*(++cp) = (*int_fn)(x);
 			}
 			else {
 				if (x == NOVALUE)
@@ -2333,16 +2338,16 @@ object binary_op_a(int fn, object a, object b)
 
 	if (IS_ATOM_INT(a)) {
 		if (IS_ATOM_INT(b)){
-			return (*optable[fn].intfn)(INT_VAL(a), INT_VAL(b));
+			return (*optable[fn].intfn)(a, b);
 		}
 		else {
-			temp_d.dbl = (eudouble)INT_VAL(a);
+			temp_d.dbl = (eudouble)a;
 			return (*optable[fn].dblfn)(&temp_d, DBL_PTR(b));
 		}
 	}
 	else {
 		if (IS_ATOM_INT(b)) {
-			temp_d.dbl = (eudouble)INT_VAL(b);
+			temp_d.dbl = (eudouble)b;
 			return (*optable[fn].dblfn)(DBL_PTR(a), &temp_d);
 		}
 		else
@@ -2366,13 +2371,13 @@ object binary_op(int fn, object a, object b)
 	   n.b. IS_ATOM_DBL actually only distinguishes ATOMS from SEQUENCES */
 	if (IS_ATOM_INT(a) && IS_ATOM_DBL(b)) {
 		/* in test above b can't be an int if a is */
-		temp_d.dbl = (eudouble)INT_VAL(a);
+		temp_d.dbl = (eudouble)a;
 		return (*optable[fn].dblfn)(&temp_d, DBL_PTR(b));
 	}
 	else if (IS_ATOM_DBL(a)) {
 		/* a could be an int, but then b must be a sequence */
 		if (IS_ATOM_INT(b)) {
-			temp_d.dbl = (eudouble)INT_VAL(b);
+			temp_d.dbl = (eudouble)b;
 			return (*optable[fn].dblfn)(DBL_PTR(a), &temp_d);
 		}
 		else if (IS_ATOM_DBL(b))  {
@@ -2393,7 +2398,7 @@ object binary_op(int fn, object a, object b)
 			while (TRUE) {
 				x = *(++bp);
 				if (IS_ATOM_INT(x)) {
-					*(++cp) = (*int_fn)(INT_VAL(a), INT_VAL(x));
+					*(++cp) = (*int_fn)(a, x);
 				}
 				else {
 					if (x == NOVALUE)
@@ -2420,7 +2425,7 @@ object binary_op(int fn, object a, object b)
 			while (TRUE) {
 				x = *(++ap);
 				if (IS_ATOM_INT(x)) {
-					*(++cp) = (*int_fn)(INT_VAL(x), INT_VAL(b));
+					*(++cp) = (*int_fn)(x, b);
 				}
 				else {
 					if (x == NOVALUE)
@@ -2452,7 +2457,7 @@ object binary_op(int fn, object a, object b)
 		while (TRUE) {
 			x = *(++ap);
 			if (IS_ATOM_INT(x) && IS_ATOM_INT(*bp)) {
-				*(++cp) = (*int_fn)(INT_VAL(x), INT_VAL(*bp++));
+				*(++cp) = (*int_fn)(x, *bp++);
 			}
 			else {
 				if (x == NOVALUE)
@@ -2859,8 +2864,8 @@ unsigned int calc_fletcher32(object a)
 	}
 	else if (IS_ATOM_DBL(a)) {
 		double a_dbl = (DBL_PTR(a)->dbl);
-		if( a_dbl == (double)(object)a_dbl ){
-			a = (object) a_dbl;
+		if( a_dbl == (double)DBL_TO_OBJ(a_dbl)){
+			a = DBL_TO_OBJ(a_dbl);
 			lA +=  a;
 			lB +=  lA;
 		}
@@ -3136,7 +3141,7 @@ object calc_hash(object a, object b)
 		return NewDouble((eudouble)lHashValue);
 	}
 	else {
-		return (int32_t)MAKE_INT(lHashValue);
+		return (int32_t)lHashValue;
 	}
 
 }
@@ -3388,15 +3393,15 @@ void RHS_Slice( object a, object start, object end)
 	object save;
 
 	if (IS_ATOM_INT(start))
-		startval = INT_VAL(start);
+		startval = (int)start;
 	else if (IS_ATOM_DBL(start)) {
-		startval = (int)(DBL_PTR(start)->dbl);
+		startval = (int)(DBL_TO_OBJ(DBL_PTR(start)->dbl));
 	}
 	else
 		RTFatal("slice lower index is not an atom");
 
 	if (IS_ATOM_INT(end))
-		endval = INT_VAL(end);
+		endval = (int)end;
 	else if (IS_ATOM_DBL(end)) {
 #ifdef __arm__
 		// Get consistent error messages..ARM FP casting is different than x86
@@ -3405,7 +3410,7 @@ void RHS_Slice( object a, object start, object end)
 		}
 		else
 #endif
-		endval = (int)(DBL_PTR(end)->dbl);
+		endval = (int)(DBL_TO_OBJ(DBL_PTR(end)->dbl));
 		 /* f.p.: if the double is too big for
 			a long WATCOM produces the most negative number. This
 			will be caught as a bad subscript, although the value in the
@@ -3485,17 +3490,17 @@ void AssignSlice(object start, object end, object val)
 	seq_ptr = assign_slice_seq; /* "4th" arg */
 
 	if (IS_ATOM_INT(start))
-		startval = INT_VAL(start);
+		startval = (int)start;
 	else if (IS_ATOM_DBL(start)) {
-		startval = (int)(DBL_PTR(start)->dbl);
+		startval = (int)(DBL_TO_OBJ(DBL_PTR(start)->dbl));
 	}
 	else
 		RTFatal("slice lower index is not an atom");
 
 	if (IS_ATOM_INT(end))
-		endval = INT_VAL(end);
+		endval = (int)end;
 	else if (IS_ATOM_DBL(end)) {
-		endval = (int)(DBL_PTR(end)->dbl); /* see above comments on f.p. */
+		endval = (int)(DBL_TO_OBJ(DBL_PTR(end)->dbl)); /* see above comments on f.p. */
 	}
 	else
 		RTFatal("slice upper index is not an atom");
@@ -3552,14 +3557,14 @@ object Date()
 	local = localtime(&time_of_day);
 	result = NewS1(8);
 	obj_ptr = result->base;
-	obj_ptr[1] = MAKE_INT(local->tm_year);
-	obj_ptr[2] = MAKE_INT(local->tm_mon+1);
-	obj_ptr[3] = MAKE_INT(local->tm_mday);
-	obj_ptr[4] = MAKE_INT(local->tm_hour);
-	obj_ptr[5] = MAKE_INT(local->tm_min);
-	obj_ptr[6] = MAKE_INT(local->tm_sec);
-	obj_ptr[7] = MAKE_INT(local->tm_wday+1);
-	obj_ptr[8] = MAKE_INT(local->tm_yday+1);
+	obj_ptr[1] = (object)(local->tm_year);
+	obj_ptr[2] = (object)(local->tm_mon+1);
+	obj_ptr[3] = (object)(local->tm_mday);
+	obj_ptr[4] = (object)(local->tm_hour);
+	obj_ptr[5] = (object)(local->tm_min);
+	obj_ptr[6] = (object)(local->tm_sec);
+	obj_ptr[7] = (object)(local->tm_wday+1);
+	obj_ptr[8] = (object)(local->tm_yday+1);
 	return MAKE_SEQ(result);
 }
 
@@ -3626,7 +3631,7 @@ int CheckFileNumber(object a)
 	if (IS_ATOM_INT(a))
 		file_no = a;
 	else if (IS_ATOM_DBL(a))
-		file_no = (long)DBL_PTR(a)->dbl;
+		file_no = (long)DBL_TO_OBJ(DBL_PTR(a)->dbl);
 	else
 		RTFatal("file number must be an atom");
 	if (file_no < 0 || file_no >= MAX_USER_FILE) {
@@ -3783,7 +3788,7 @@ object EOpen(object filename, object mode_obj, object cleanup)
 				return cleanup;
 			}
 			else{
-				return MAKE_INT(i);
+				return (object)i;
 			}
 		}
 	}
@@ -3934,10 +3939,10 @@ void set_text_color(int c)
 	if (color_trace && COLOR_DISPLAY) {
 		if (c == 0 && !TEXT_MODE)
 			c = 8; /* graphics mode can't handle black (0) */
-		SetTColor(MAKE_INT(c));
+		SetTColor(c);
 	}
 	else {
-		SetTColor(MAKE_INT(7));
+		SetTColor(7);
 	}
 }
 
@@ -4345,7 +4350,7 @@ object_ptr v_elem;
 		if (c == 'x')
 			c = 'X';
 		if (IS_ATOM_INT(*v_elem))
-			dval = INT_VAL(*v_elem);
+			dval = (intptr_t)(*v_elem);
 		else {
 			gval = DBL_PTR(*v_elem)->dbl;
 			if (gval > INTPTR_MAX || gval < INTPTR_MIN) {
@@ -4397,7 +4402,7 @@ object_ptr v_elem;
 		cstring[flen++] = c;
 		cstring[flen] = '\0';
 		if (IS_ATOM_INT(*v_elem))
-			gval = (eudouble)INT_VAL(*v_elem);
+			gval = (eudouble)(*v_elem);
 		else
 			gval = DBL_PTR(*v_elem)->dbl;
 		if (NUM_SIZE + flen > TEMP_SIZE) {
@@ -4869,14 +4874,14 @@ void Position(object line, object col)
 	int line_val, col_val;
 
 	if (IS_ATOM_INT(line))
-		line_val = INT_VAL(line);
+		line_val = (int)line;
 	else {
-		line_val = (int)(DBL_PTR(line)->dbl);   /* need check here */
+		line_val = (int)DBL_TO_OBJ(DBL_PTR(line)->dbl);   /* need check here */
 	}
 	if (IS_ATOM_INT(col))
-		col_val = INT_VAL(col);
+		col_val = (int)col;
 	else {
-		col_val = (int)(DBL_PTR(col)->dbl);     /* need better check here too */
+		col_val = (int)DBL_TO_OBJ(DBL_PTR(col)->dbl);     /* need better check here too */
 	}
 	if (line_val < 1 ||
 #ifdef EWINDOWS
@@ -5009,9 +5014,9 @@ void system_call(object command, object wait)
 		RTFatal("first argument of system() must be a sequence");
 
 	if (IS_ATOM_INT(wait))
-		w = INT_VAL(wait);
+		w = (int)wait;
 	else if (IS_ATOM_DBL(wait))
-		w = (long)DBL_PTR(wait)->dbl;
+		w = (long)DBL_TO_OBJ(DBL_PTR(wait)->dbl);
 	else
 		RTFatal("second argument of system() must be an atom");
 
@@ -5054,9 +5059,9 @@ object system_exec_call(object command, object wait)
 		RTFatal("first argument of system_exec() must be a sequence");
 
 	if (IS_ATOM_INT(wait))
-		w = INT_VAL(wait);
+		w = (int)wait;
 	else if (IS_ATOM_DBL(wait))
-		w = (long)DBL_PTR(wait)->dbl;
+		w = (long)DBL_TO_OBJ(DBL_PTR(wait)->dbl);
 	else
 		RTFatal("second argument of system_exec() must be an atom");
 
@@ -5485,13 +5490,11 @@ uintptr_t __cdecl osx_cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t 
 	// this saves us the trouble of trying to calculate the offset of
 	// the callback copy from general_ptr and stuffing that into a LEA
 	// calculation
-	uintptr_t (*f)(uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
+	uintptr_t (*f)(symtab_ptr, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
 	uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)
-	= (uintptr_t (*)(uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
+	= (uintptr_t (*)(symtab_ptr, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
 	uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)) general_ptr_magic;
-	return (f)((symtab_ptr)CALLBACK_POINTER,
-									 arg1, arg2, arg3, arg4, arg5,
-									 arg6, arg7, arg8, arg9);
+	return (f)((symtab_ptr)CALLBACK_POINTER, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
 }
 #endif
 
@@ -6012,7 +6015,7 @@ object find_from(object a, object bobj, object c)
 		;
 	}
 	else if (IS_ATOM_DBL(c)) {
-		c = (object)(DBL_PTR(c)->dbl);
+		c = DBL_TO_OBJ(DBL_PTR(c)->dbl);
 	}
 	else
 		RTFatal("third argument of find/find_from() must be an atom");
@@ -6126,7 +6129,7 @@ object e_match_from(object aobj, object bobj, object c)
 		;
 	}
 	else if (IS_ATOM_DBL(c)) {
-		c = (object)(DBL_PTR(c)->dbl);
+		c = DBL_TO_OBJ(DBL_PTR(c)->dbl);
 	}
 	else
 		RTFatal("third argument of match/match_from() must be an atom");
@@ -6177,8 +6180,8 @@ void Replace( replace_ptr rb )
 	object copy_from, copy_to, target;
 	s1_ptr s1, s2;
 
-	start_pos = (IS_ATOM_INT(*rb->start)) ? *rb->start : (int)(DBL_PTR(*rb->start)->dbl);
-	end_pos = (IS_ATOM_INT(*rb->stop)) ? *rb->stop : (int)(DBL_PTR(*rb->stop)->dbl);
+	start_pos = (IS_ATOM_INT(*rb->start)) ? *rb->start : (int)(DBL_TO_OBJ(DBL_PTR(*rb->start)->dbl));
+	end_pos = (IS_ATOM_INT(*rb->stop)) ? *rb->stop : (int)(DBL_TO_OBJ(DBL_PTR(*rb->stop)->dbl));
 
 	copy_to   = *rb->copy_to;
 	copy_from = *rb->copy_from;
@@ -6419,7 +6422,7 @@ object eu_sizeof( object data_type ){
 		dt = data_type;
 	}
 	else if( IS_ATOM( data_type ) ){
-		dt = (long) DBL_PTR( data_type )->dbl;
+		dt = (long) DBL_TO_OBJ(DBL_PTR( data_type )->dbl);
 	}
 	else{
 		RTFatal("Argument to sizeof must be an atom");

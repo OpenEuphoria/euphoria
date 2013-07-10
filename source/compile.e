@@ -955,7 +955,7 @@ end procedure
 procedure seg_peek_string(integer target, integer source, integer mode)
 -- emit code for a single-byte peek  - uses _1 as a temp
 	if mode = 1 then
-		c_stmt("@ = NewString((char *)(uintptr_t)(DBL_PTR(@)->dbl));\n",
+		c_stmt("@ = NewString((char *)DBL_TO_OBJ(DBL_PTR(@)->dbl));\n",
 				{target, source})
 	else
 		c_stmt("@ =  NewString((char *)@);\n", {target, source})
@@ -966,7 +966,7 @@ end procedure
 procedure seg_peek_pointer(integer target, integer source, integer mode)
 -- emit code for a pointer sized peek
 	if mode = 1 then
-		c_stmt( "@ = *(uintptr_t *)(uintptr_t)(DBL_PTR(@)->dbl);\n", {target, source})
+		c_stmt( "@ = *(uintptr_t *)(uintptr_t)DBL_TO_OBJ(DBL_PTR(@)->dbl);\n", {target, source})
 	else
 		c_stmt( "@ = *(intptr_t *)@;\n", {target, source})
 	end if
@@ -991,7 +991,7 @@ procedure seg_peek1(integer target, integer source, integer mode)
 	end if
 	
 	if mode = 1 then
-		c_stmt(sprintf("@ = *(%sint8_t *)(uintptr_t)(DBL_PTR(@)->dbl);\n", {sign}),
+		c_stmt(sprintf("@ = *(%sint8_t *)(uintptr_t)DBL_TO_OBJ(DBL_PTR(@)->dbl);\n", {sign}),
 				{target, source})
 	else
 		c_stmt(sprintf("@ = *(%sint8_t *)@;\n",{sign}), {target, source})
@@ -1007,7 +1007,7 @@ procedure seg_peek2(integer target, integer source, integer mode)
 		sign = ""
 	end if
 	if mode = 1 then
-		c_stmt(sprintf("@ = *(%sint16_t *)(uintptr_t)(DBL_PTR(@)->dbl);\n",{sign}),
+		c_stmt(sprintf("@ = *(%sint16_t *)(uintptr_t)DBL_TO_OBJ(DBL_PTR(@)->dbl);\n",{sign}),
 				{target, source})
 	else
 		c_stmt(sprintf("@ = *(%sint16_t *)@;\n",{sign}), {target, source})
@@ -1024,7 +1024,7 @@ procedure seg_peek4(integer target, integer source, boolean dbl)
 		sign = ""
 	end if
 	if dbl then
-		c_stmt( sprintf( "@ = (object)*(%sint32_t *)(uintptr_t)(DBL_PTR(@)->dbl);\n", {sign} ),
+		c_stmt( sprintf( "@ = (object)*(%sint32_t *)(uintptr_t)DBL_TO_OBJ(DBL_PTR(@)->dbl);\n", {sign} ),
 				{target, source})
 
 	else
@@ -1033,7 +1033,7 @@ procedure seg_peek4(integer target, integer source, boolean dbl)
 	if Code[pc] = PEEK4S then
 		c_stmt("if (@ < MININT || @ > MAXINT){\n",
 					{target, target})
-		c_stmt("@ = NewDouble((eudouble)(object)@);\n",
+		c_stmt("@ = NewDouble((eudouble)@);\n",
 				{target, target})
 		c_stmt0("}\n")
 	else  -- PEEK4U */
@@ -1056,7 +1056,7 @@ procedure seg_peek8(integer target_sym, integer source, boolean dbl, integer op)
 		sign = ""
 	end if
 	if dbl then
-		c_stmt( sprintf( "peek8_longlong = *(%sint64_t *)(uintptr_t)(DBL_PTR(@)->dbl);\n", {sign} ), 
+		c_stmt( sprintf( "peek8_longlong = *(%sint64_t *)(uintptr_t)DBL_TO_OBJ(DBL_PTR(@)->dbl) ;\n", {sign} ), 
 			source)
 
 	else
@@ -1095,10 +1095,10 @@ procedure seg_poke1(integer source, boolean dbl)
 	-- WATCOM etc.
 	if dbl then
 		if TARM then
-			c_stmt("_2 = trunc( DBL_PTR(@)->dbl );\n", source)
+			c_stmt("_2 = DBL_TO_OBJ(trunc( DBL_PTR(@)->dbl ));\n", source)
 			c_stmt0("*poke_addr = (uint8_t)_2;\n" )
 		else
-			c_stmt("*poke_addr = (uint8_t)DBL_PTR(@)->dbl;\n", source)
+			c_stmt("*poke_addr = (uint8_t)DBL_TO_OBJ(DBL_PTR(@)->dbl);\n", source)
 		end if
 		
 	else
@@ -1111,10 +1111,10 @@ procedure seg_poke2(integer source, boolean dbl)
 -- poke a word value into poke2_addr
 	if dbl then
 		if TARM then
-			c_stmt("_2 = trunc( DBL_PTR(@)->dbl );\n", source)
+			c_stmt("_2 = DBL_TO_OBJ(trunc( DBL_PTR(@)->dbl ));\n", source)
 			c_stmt0("*poke2_addr = (uint16_t)_2;\n" )
 		else
-			c_stmt("*poke2_addr = (uint16_t)DBL_PTR(@)->dbl;\n", source)
+			c_stmt("*poke2_addr = (uint16_t)DBL_TO_OBJ(DBL_PTR(@)->dbl);\n", source)
 		end if
 	else
 		c_stmt("*poke2_addr = (uint16_t)@;\n", source)
@@ -1125,10 +1125,10 @@ procedure seg_poke4(integer source, boolean dbl)
 -- poke a 4-byte value into poke4_addr
 	if dbl then
 		if TARM then
-			c_stmt("if( DBL_PTR(@)->dbl <= MAXINT_DBL ) *poke4_addr = (int32_t)DBL_PTR(@)->dbl; else\n", 
+			c_stmt("if( DBL_PTR(@)->dbl <= MAXINT_DBL ) *poke4_addr = (int32_t)DBL_TO_OBJ(DBL_PTR(@)->dbl); else\n", 
 				{source, source})
 		end if
-		c_stmt("*poke4_addr = (uint32_t)DBL_PTR(@)->dbl;\n", source)
+		c_stmt("*poke4_addr = (uint32_t)DBL_TO_OBJ(DBL_PTR(@)->dbl);\n", source)
 	else
 		c_stmt("*poke4_addr = (uint32_t)@;\n", source)
 	end if
@@ -1139,7 +1139,7 @@ procedure seg_poke8(integer source, boolean dbl)
 -- poke an 8-byte value into poke8_addr
 	-- WATCOM etc.
 	if dbl then
-		c_stmt("*poke8_addr = (uint64_t)DBL_PTR(@)->dbl;\n", source)
+		c_stmt("*poke8_addr = (uint64_t)(DBL_PTR(@)->dbl);\n", source)
 	else
 		c_stmt("*poke8_addr = (uint64_t)@;\n", source)
 	end if
@@ -1150,7 +1150,7 @@ procedure seg_pokeptr(integer source, boolean dbl)
 -- poke an 8-byte value into poke8_addr
 	-- WATCOM etc.
 	if dbl then
-		c_stmt("*pokeptr_addr = (uintptr_t)DBL_PTR(@)->dbl;\n", source)
+		c_stmt("*pokeptr_addr = (uintptr_t)DBL_TO_OBJ(DBL_PTR(@)->dbl);\n", source)
 	else
 		c_stmt("*pokeptr_addr = (uintptr_t)@;\n", source)
 	end if
@@ -2515,7 +2515,7 @@ procedure opRHS_SUBS()
 	-- _2 has the sequence
 	if TypeIsNot( subs, TYPE_INTEGER) then
 		c_stmt("if (!IS_ATOM_INT(@)){\n", subs )
-		c_stmt("@ = (object)*(((s1_ptr)_2)->base + (object)(DBL_PTR(@)->dbl));\n",
+		c_stmt("@ = (object)*(((s1_ptr)_2)->base + DBL_TO_OBJ(DBL_PTR(@)->dbl));\n",
 				{ target, subs })
 		c_stmt0("}\n")
 		c_stmt0("else{\n")
@@ -2541,7 +2541,7 @@ procedure opRHS_SUBS()
 			if SeqElem( source ) != TYPE_INTEGER then
 				SetBBType( target, TYPE_OBJECT, novalue, TYPE_OBJECT, 0 )
 				c_stmt("if (!IS_ATOM_INT(@))\n", target )
-				c_stmt("@ = (object)DBL_PTR(@)->dbl;\n", { target, target } )
+				c_stmt("@ = DBL_TO_OBJ(DBL_PTR(@)->dbl);\n", { target, target } )
 			end if
 			CDeRefStr("_0")
 			SetBBType( target, TYPE_INTEGER, novalue, TYPE_OBJECT,
@@ -2553,7 +2553,7 @@ procedure opRHS_SUBS()
 				SetBBType( target, TYPE_OBJECT, novalue, TYPE_OBJECT,
 					HasDelete( target ) )
 				c_stmt("if (!IS_ATOM_INT(@)){\n", target )
-					c_stmt("@ = (object)DBL_PTR(@)->dbl;\n", { target, target } )
+					c_stmt("@ = DBL_TO_OBJ(DBL_PTR(@)->dbl);\n", { target, target } )
 				c_stmt0("}\n")
 			end if
 			CDeRefStr("_0")
@@ -2657,11 +2657,11 @@ procedure opSWITCH_I()
 		Goto( Code[pc+4] )
 		c_stmt0("}\n")
 		c_stmt( "if(!IS_ATOM_INT(@)){\n", Code[pc+1] )
-		c_stmt( "if( (DBL_PTR(@)->dbl != (eudouble) ((object) DBL_PTR(@)->dbl) ) ){\n",
+		c_stmt( "if( (DBL_PTR(@)->dbl != (eudouble) DBL_TO_OBJ(DBL_PTR(@)->dbl) ) ){\n",
 						repeat( Code[pc+1], 2) )
 		Goto( Code[pc+4] )
 		c_stmt0( "}\n" )
-		c_stmt( "_0 = (object) DBL_PTR(@)->dbl;\n", Code[pc+1] )
+		c_stmt( "_0 = DBL_TO_OBJ(DBL_PTR(@)->dbl);\n", Code[pc+1] )
 		c_stmt0( "}\n" )
 		c_stmt0( "else {\n" )
 		c_stmt( "_0 = @;\n", Code[pc+1] )
@@ -2885,7 +2885,7 @@ procedure opINTEGER_CHECK()
 	elsif BB_var_type(sym) != TYPE_INTEGER then
 		c_stmt("if (!IS_ATOM_INT(@)) {\n", sym)
 		LeftSym = TRUE
-		c_stmt("_1 = (object)(DBL_PTR(@)->dbl);\n", sym)
+		c_stmt("_1 = DBL_TO_OBJ(DBL_PTR(@)->dbl);\n", sym)
 		LeftSym = TRUE
 		c_stmt("DeRefDS(@);\n", sym)
 		c_stmt("@ = _1;\n", sym)
@@ -2946,7 +2946,7 @@ procedure opASSIGN_SUBS()
 
 	if TypeIsNot(Code[pc+2], TYPE_INTEGER) then
 		c_stmt("if (!IS_ATOM_INT(@))\n", Code[pc+2])
-		c_stmt("_2 = (object)(((s1_ptr)_2)->base + (object)(DBL_PTR(@)->dbl));\n",
+		c_stmt("_2 = (object)(((s1_ptr)_2)->base + DBL_TO_OBJ(DBL_PTR(@)->dbl));\n",
 				Code[pc+2])
 		c_stmt0("else\n")
 	end if
@@ -3345,12 +3345,12 @@ procedure opPLUS1()
 		if Code[pc] = PLUS1 then
 			c_stmt("@ = binary_op(PLUS, 1, @);\n", {Code[pc+3], Code[pc+1]})
 		else
-			c_stmt("@ = 1+(object)(DBL_PTR(@)->dbl);\n", {Code[pc+3], Code[pc+1]})
+			c_stmt("@ = 1+DBL_TO_OBJ(DBL_PTR(@)->dbl);\n", {Code[pc+3], Code[pc+1]})
 		end if
 		if target_is_int then
 			-- this could lead to overflow, but you should have found that while interpreting
 			c_stmt("if( !IS_ATOM_INT(@) ){\n", Code[pc+3] )
-			c_stmt("@ = (object)DBL_PTR(@)->dbl;\n", { Code[pc+3], Code[pc+3] })
+			c_stmt("@ = DBL_TO_OBJ(DBL_PTR(@)->dbl);\n", { Code[pc+3], Code[pc+3] })
 			c_stmt0("}\n")
 			c_stmt0("}\n")
 		end if
@@ -3437,7 +3437,7 @@ procedure opLHS_SUBS()
 
 	if TypeIsNot(Code[pc+2], TYPE_INTEGER) then
 		c_stmt("if (!IS_ATOM_INT(@))\n", Code[pc+2])
-		c_stmt("_3 = (object)(((s1_ptr)_2)->base + (object)(DBL_PTR(@)->dbl));\n",
+		c_stmt("_3 = (object)(((s1_ptr)_2)->base + DBL_TO_OBJ(DBL_PTR(@)->dbl));\n",
 				Code[pc+2])
 		c_stmt0("else\n")
 	end if
@@ -3789,7 +3789,7 @@ procedure opUMINUS()
 	gencode = "@ = unary_op(UMINUS, @);\n"
 	intcode2= "@1 = - @2;\n"    -- careful about -- occurring
 	intcode = "if ((uintptr_t)@2 == (uintptr_t)HIGH_BITS){\n" &
-			  "@1 = (object)NewDouble((eudouble) -HIGH_BITS);\n" &
+			  "@1 = NewDouble((eudouble) -HIGH_BITS);\n" &
 			  "}\nelse{\n" &
 			  "@1 = - @2;\n}\n"    -- careful about -- occurring
 	if GType(Code[pc+1]) = TYPE_INTEGER then
@@ -4043,7 +4043,7 @@ procedure opFLOOR_DIV()
 			   "}\n" &
 			   "else {\n" &
 			   "temp_dbl = EUFLOOR((eudouble)@2 / (eudouble)@3);\n" &
-			   "@1 = (object)temp_dbl;\n" &
+			   "@1 = DBL_TO_OBJ(temp_dbl);\n" &
 			   "}\n"
 
 	if GType(Code[pc+1]) = TYPE_INTEGER and
@@ -4059,7 +4059,7 @@ procedure opFLOOR_DIV()
 				  "else {\n" &
 				  "temp_dbl = EUFLOOR((eudouble)@2 / (eudouble)@3);\n" &
 				  "if (@2 != MININT)\n" &
-				  "@1 = (object)temp_dbl;\n" &
+				  "@1 = DBL_TO_OBJ(temp_dbl);\n" &
 				  "else\n" &
 				  "@1 = NewDouble(temp_dbl);\n" &
 				  "}\n"
@@ -4460,7 +4460,7 @@ procedure opENDFOR_GENERAL()
 
 	-- rvalue for CName should be ok - we've initialized loop var
 	intcode = "@1 = @2 + @3;\n" &
-			  "if ((object)((uintptr_t)@1 +(uintptr_t) HIGH_BITS) >= 0){\n" &
+			  "if ((object)((uintptr_t)@1 + (uintptr_t)HIGH_BITS) >= 0){\n" &
 			  "@1 = NewDouble((eudouble)@1);\n}\n"
 
 	if TypeIs(Code[pc+3], TYPE_INTEGER) and
@@ -5041,7 +5041,7 @@ procedure splins()
 	if TypeIs( Code[pc+3], TYPE_INTEGER ) then
 		c_stmt("insert_pos = @;\n", Code[pc+3] )
 	else
-		c_stmt("insert_pos = IS_ATOM_INT(@) ? @ : DBL_PTR(@)->dbl;\n",{Code[pc+3],Code[pc+3],Code[pc+3]})
+		c_stmt("insert_pos = IS_ATOM_INT(@) ? @ : (int)DBL_TO_OBJ(DBL_PTR(@)->dbl);\n",{Code[pc+3],Code[pc+3],Code[pc+3]})
 	end if
 
 -- 	CSaveStr("_0", Code[pc+4], Code[pc+1], Code[pc+2], 0)
@@ -5186,7 +5186,7 @@ procedure opHEAD()
 	--CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
 	c_stmt0("{\n")
 	c_stmt("int len = SEQ_PTR(@)->length;\n",{Code[pc+1]})
-	c_stmt("int size = (IS_ATOM_INT(@)) ? @ : (object)(DBL_PTR(@)->dbl);\n",repeat(Code[pc+2],3))
+	c_stmt("int size = (IS_ATOM_INT(@)) ? @ : (int)DBL_TO_OBJ(DBL_PTR(@)->dbl);\n",repeat(Code[pc+2],3))
 	c_stmt0("if (size <= 0){\n")
 	c_stmt("DeRef( @ );\n", {Code[pc+3]} )
 	c_stmt("@ = MAKE_SEQ(NewS1(0));\n", {Code[pc+3]})
@@ -5210,7 +5210,7 @@ end procedure
 procedure opTAIL()
 	c_stmt0("{\n")
 	c_stmt("int len = SEQ_PTR(@)->length;\n",{Code[pc+1]})
-	c_stmt("int size = (IS_ATOM_INT(@)) ? @ : (object)(DBL_PTR(@)->dbl);\n",repeat(Code[pc+2],3))
+	c_stmt("int size = (IS_ATOM_INT(@)) ? @ : (int)DBL_TO_OBJ(DBL_PTR(@)->dbl);\n",repeat(Code[pc+2],3))
 	c_stmt0("if (size <= 0) {\n")
 	c_stmt("DeRef(@);\n", {Code[pc+3]})
 	c_stmt("@ = MAKE_SEQ(NewS1(0));\n", {Code[pc+3]})
@@ -5233,8 +5233,8 @@ procedure opREMOVE()
 	c_stmt0("{\n")
 	c_stmt("s1_ptr assign_space = SEQ_PTR(@);\n", {Code[pc+1]})
 	c_stmt0("int len = assign_space->length;\n")
-	c_stmt("int start = (IS_ATOM_INT(@)) ? @ : (object)(DBL_PTR(@)->dbl);\n",repeat(Code[pc+2],3))
-	c_stmt("int stop = (IS_ATOM_INT(@)) ? @ : (object)(DBL_PTR(@)->dbl);\n",repeat(Code[pc+3],3))
+	c_stmt("int start = (IS_ATOM_INT(@)) ? @ : (int)DBL_TO_OBJ(DBL_PTR(@)->dbl);\n",repeat(Code[pc+2],3))
+	c_stmt("int stop = (IS_ATOM_INT(@)) ? @ : (int)DBL_TO_OBJ(DBL_PTR(@)->dbl);\n",repeat(Code[pc+3],3))
 	c_stmt0("if (stop > len){\n")
 		c_stmt0("stop = len;\n")
 	c_stmt0("}\n")
@@ -5500,7 +5500,7 @@ procedure opPEEK_STRING()
 			if Code[pc] = PEEK4S then
 				c_stmt("if (@ < MININT || @ > MAXINT)\n",
 							  {Code[pc+2], Code[pc+2]})
-				c_stmt("@ = NewDouble((eudouble)(object)@);\n",
+				c_stmt("@ = NewDouble((eudouble)@);\n",
 							  {Code[pc+2], Code[pc+2]})
 
 			elsif Code[pc] = PEEK4U then
@@ -5768,7 +5768,7 @@ procedure opPOKE()
 	end if
 
 	if TypeIsNotIn( ptr, TYPES_IS) then
-		sequence dbl_ptr = "(DBL_PTR(@)->dbl)"
+		sequence dbl_ptr = "DBL_PTR(@)->dbl"
 		if TARM then
 			if not TypeIsIn( ptr, TYPES_AO ) then
 				c_stmt0("{\n" )
@@ -5778,15 +5778,15 @@ procedure opPOKE()
 		end if
 		switch op do
 			case POKE_POINTER then
-				c_stmt(sprintf("pokeptr_addr = (uintptr_t *)(uintptr_t)%s;\n", {dbl_ptr}), ptr)
+				c_stmt(sprintf("pokeptr_addr = (uintptr_t *)(uintptr_t)DBL_TO_OBJ(%s);\n", {dbl_ptr}), ptr)
 			case POKE8 then
-				c_stmt(sprintf("poke8_addr = (uint64_t *)(uintptr_t)%s;\n", {dbl_ptr}), ptr)
+				c_stmt(sprintf("poke8_addr = (uint64_t *)(uintptr_t)DBL_TO_OBJ(%s);\n", {dbl_ptr}), ptr)
 			case POKE4 then
-				c_stmt(sprintf("poke4_addr = (uint32_t *)(uintptr_t)%s;\n", {dbl_ptr}), ptr)
+				c_stmt(sprintf("poke4_addr = (uint32_t *)(uintptr_t)DBL_TO_OBJ(%s);\n", {dbl_ptr}), ptr)
 			case POKE2 then
-				c_stmt(sprintf("poke2_addr = (uint16_t *)(uintptr_t)%s;\n", {dbl_ptr}),ptr)
+				c_stmt(sprintf("poke2_addr = (uint16_t *)(uintptr_t)DBL_TO_OBJ(%s);\n", {dbl_ptr}),ptr)
 			case else
-				c_stmt(sprintf("poke_addr = (uint8_t *)(uintptr_t)%s;\n", {dbl_ptr}), ptr)
+				c_stmt(sprintf("poke_addr = (uint8_t *)(uintptr_t)DBL_TO_OBJ(%s);\n", {dbl_ptr}), ptr)
 		end switch
 	end if
 	
@@ -5874,19 +5874,19 @@ procedure opPOKE()
 		end if
 		switch op do
 			case POKE_POINTER then
-				c_stmt0( sprintf( "*pokeptr_addr++ = (uintptr_t)%s;\n", {_2}) )
+				c_stmt0( sprintf( "*pokeptr_addr++ = (uintptr_t)DBL_TO_OBJ(%s);\n", {_2}) )
 			
 			case POKE8 then
 				c_stmt0( sprintf( "*poke8_addr++ = (uint64_t)%s;\n", {_2}) )
 				
 			case POKE4 then
-				c_stmt0( sprintf( "*(object *)poke4_addr++ = (uint32_t)%s;\n", {_2}) )
+				c_stmt0( sprintf( "*(object *)poke4_addr++ = (uint32_t)DBL_TO_OBJ(%s);\n", {_2}) )
 				
 			case POKE2 then
-					c_stmt0( sprintf( "*poke2_addr++ = (uint16_t)%s;\n", {_2}) )
+					c_stmt0( sprintf( "*poke2_addr++ = (uint16_t)DBL_TO_OBJ(%s);\n", {_2}) )
 				
 			case else
-					c_stmt0( sprintf( "*poke_addr++ = (uint8_t)%s;\n", {_2}) )
+					c_stmt0( sprintf( "*poke_addr++ = (uint8_t)DBL_TO_OBJ(%s);\n", {_2}) )
 				
 		end switch
 		c_stmt0("}\n")
@@ -5921,9 +5921,9 @@ end function
 
 procedure opCALL()
 	c_stmt("if (IS_ATOM_INT(@))\n", Code[pc+1])
-	c_stmt("_0 = (object)@;\n", Code[pc+1])
+	c_stmt("_0 = @;\n", Code[pc+1])
 	c_stmt0("else\n")
-	c_stmt("_0 = (object)(uintptr_t)(DBL_PTR(@)->dbl);\n", Code[pc+1])
+	c_stmt("_0 = DBL_TO_OBJ(DBL_PTR(@)->dbl);\n", Code[pc+1])
 	c_stmt0("(*(void(*)())_0)();\n")
 	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 2
@@ -5983,9 +5983,9 @@ procedure opCLOSE()
 
 	if TypeIsNot(Code[pc+1], TYPE_INTEGER) then
 		if Code[pc] = ABORT then
-			c_stmt("UserCleanup((object)DBL_PTR(@)->dbl);\n", Code[pc+1])
+			c_stmt("UserCleanup(DBL_TO_OBJ(DBL_PTR(@)->dbl));\n", Code[pc+1])
 		else
-			c_stmt("EClose((object)DBL_PTR(@)->dbl);\n", Code[pc+1])
+			c_stmt("EClose(DBL_TO_OBJ(DBL_PTR(@)->dbl));\n", Code[pc+1])
 		end if
 	end if
 	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )

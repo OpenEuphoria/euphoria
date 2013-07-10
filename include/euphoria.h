@@ -70,13 +70,26 @@ typedef int int128_t __attribute__((mode(TI)));
 #define IS_ATOM_INT(ob)       (((intptr_t) (ob)) > NOVALUE)
 #define IS_ATOM_INT_NV(ob)    ((intptr_t)(ob) >= NOVALUE)
 
+#ifdef __GNUC__
+#define MAKE_UINT(x) ((object)( \
+						{ uintptr_t _x = x; \
+							_x < (uintptr_t)TOO_BIG_INT \
+							? _x : NewDouble((eudouble)_x);}))
+#else
+/* Watch for side effects */
 #define MAKE_UINT(x) ((object)((uintptr_t)x < (uintptr_t)TOO_BIG_INT \
                           ? (uintptr_t)x : \
                             NewDouble((eudouble)(uintptr_t)x)))
+#endif
 
 /* these are obsolete */
+/*
 #define INT_VAL(x)        ((intptr_t)(x))
 #define MAKE_INT(x)       ((object)(x))
+*/
+
+#define DBL_TO_OBJ(d)	((object)(int64_t)(d))
+
 
 /* N.B. the following distinguishes DBL's from SEQUENCES -
    must eliminate the INT case first */

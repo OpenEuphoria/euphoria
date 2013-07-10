@@ -2331,7 +2331,11 @@ ifdef UNIX then
 		elsedef
 			stat_result[STAT_RETURN] = c_func(xStatFile, {psrc, psrcbuf})
 		end ifdef
-		stat_result[STAT_DEV]    = peek8u( psrcbuf + STAT_ST_DEV )
+		ifdef OSX then
+			stat_result[STAT_DEV] = peek4u( psrcbuf + STAT_ST_DEV )
+		elsedef
+			stat_result[STAT_DEV]    = peek8u( psrcbuf + STAT_ST_DEV )
+		end ifdef
 		stat_result[STAT_BLKSIZE] = peek_pointer( psrcbuf + STAT_ST_BLKSIZE )
 		return stat_result
 	end function
@@ -2354,11 +2358,9 @@ end ifdef
 --
 -- See Also:
 --   [[:rename_file]], [[:copy_file]]
-
 public function move_file(sequence src, sequence dest, integer overwrite=0)
 	atom psrc = 0, pdest = 0, ret
 	sequence tempfile = ""
-
 	if not file_exists(src) then
 		return 0
 	end if
