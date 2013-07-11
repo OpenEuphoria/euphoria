@@ -955,7 +955,7 @@ end procedure
 procedure seg_peek_string(integer target, integer source, integer mode)
 -- emit code for a single-byte peek  - uses _1 as a temp
 	if mode = 1 then
-		c_stmt("@ = NewString((char *)(DBL_PTR(@)->dbl));\n",
+		c_stmt("@ = NewString((char *)(uintptr_t)(DBL_PTR(@)->dbl));\n",
 				{target, source})
 	else
 		c_stmt("@ =  NewString((char *)@);\n", {target, source})
