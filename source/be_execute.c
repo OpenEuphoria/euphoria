@@ -278,7 +278,7 @@ static void trace_command(object x)
 		i = x;
 	}
 	else if (IS_ATOM(x)) {
-		i = (int)DBL_TO_OBJ(DBL_PTR(x)->dbl);
+		i = (int)(DBL_PTR(x)->dbl);
 	}
 	else
 		RTFatal("argument to trace() must be an atom", i);
@@ -321,7 +321,7 @@ static void profile_command(object x)
 		i = x;
 	}
 	else if (IS_ATOM(x)) {
-		i = (int)DBL_TO_OBJ(DBL_PTR(x)->dbl);
+		i = (int)(DBL_PTR(x)->dbl);
 	}
 	else
 		RTFatal("argument to profile() must be an atom");
@@ -350,7 +350,7 @@ static object do_peek2(object a, int b )
 		peek2_addr = (uint16_t *)a;
 	}
 	else if (IS_ATOM(a)) {
-		peek2_addr = (uint16_t *)(uintptr_t)DBL_TO_OBJ(DBL_PTR(a)->dbl);
+		peek2_addr = (uint16_t *)(uintptr_t)(DBL_PTR(a)->dbl);
 	}
 	else {
 		/* a sequence: {addr, nbytes} */
@@ -411,7 +411,7 @@ int i;
 		peek8_addr = (uint64_t *)a;
 	}
 	else if (IS_ATOM(a)) {
-		peek8_addr = (uint64_t *)(uintptr_t)DBL_TO_OBJ(DBL_PTR(a)->dbl);
+		peek8_addr = (uint64_t *)(uintptr_t)(DBL_PTR(a)->dbl);
 	}
 	else {
 		/* a sequence: {addr, nbytes} */
@@ -498,9 +498,9 @@ static object do_peek4(object a, int b )
 	else if (IS_ATOM(a)) {
 #ifdef __arm__
 		double d = DBL_PTR(a)->dbl;
-		peek4_addr = (uint32_t*)(uintptr_t)DBL_TO_OBJ(d);
+		peek4_addr = (uint32_t*)(uintptr_t)(d);
 #else
-		peek4_addr = (uint32_t *)(uintptr_t)DBL_TO_OBJ(DBL_PTR(a)->dbl);
+		peek4_addr = (uint32_t *)(uintptr_t)(DBL_PTR(a)->dbl);
 #endif
 	}
 	else {
@@ -574,7 +574,7 @@ static void do_poke2(object a, object top)
 		poke2_addr = (uint16_t *)a;
 	}
 	else if (IS_ATOM(a)) {
-		poke2_addr = (uint16_t *)(uintptr_t)DBL_TO_OBJ(DBL_PTR(a)->dbl);
+		poke2_addr = (uint16_t *)(uintptr_t)(DBL_PTR(a)->dbl);
 	}
 	else {
 		RTFatal("first argument to poke2 must be an atom");
@@ -589,9 +589,9 @@ static void do_poke2(object a, object top)
 			RTFatal(POKE_LIMIT(2));
 #ifdef __arm__
 			a == trunc( temp_dbl );
-			*poke2_addr = (uint16_t)DBL_TO_OBJ(a);
+			*poke2_addr = (uint16_t)(a);
 #else
-			*poke2_addr = (uint16_t)DBL_TO_OBJ(temp_dbl);
+			*poke2_addr = (uint16_t)(temp_dbl);
 #endif
 		
 	}
@@ -614,9 +614,9 @@ static void do_poke2(object a, object top)
 					RTFatal( POKE_LIMIT(2) );
 #ifdef __arm__
 				a = trunc( DBL_PTR(top)->dbl );
-				*poke2_addr = (uint16_t)DBL_TO_OBJ(a);
+				*poke2_addr = (uint16_t)(a);
 #else
-				*poke2_addr = (uint16_t)DBL_TO_OBJ(temp_dbl);
+				*poke2_addr = (uint16_t)(temp_dbl);
 #endif
 				++poke2_addr;
 			}
@@ -639,7 +639,7 @@ static void do_poke8(object a, object top)
 		poke8_addr = (uint64_t *)a;
 	}
 	else if (IS_ATOM(a)) {
-		poke8_addr = (uint64_t *)(uintptr_t)DBL_TO_OBJ(DBL_PTR(a)->dbl);
+		poke8_addr = (uint64_t *)(uintptr_t)(DBL_PTR(a)->dbl);
 	}
 	else {
 		RTFatal("first argument to poke8 must be an atom");
@@ -708,9 +708,9 @@ static void do_poke4(object a, object top)
 	else if (IS_ATOM(a)) {
 #ifdef __arm__
 		temp_dbl = DBL_PTR(a)->dbl;
-		poke4_addr = (uint32_t *)(uintptr_t)DBL_TO_OBJ(temp_dbl);
+		poke4_addr = (uint32_t *)(uintptr_t)(temp_dbl);
 #else
-		poke4_addr = (uint32_t *)(uintptr_t)DBL_TO_OBJ(DBL_PTR(a)->dbl);
+		poke4_addr = (uint32_t *)(uintptr_t)(DBL_PTR(a)->dbl);
 #endif
 	}
 	else {
@@ -733,7 +733,7 @@ static void do_poke4(object a, object top)
 		}
 		*poke4_addr = (uint32_t)tmp_int;
 #else
-		*poke4_addr = (uint32_t)DBL_TO_OBJ(temp_dbl);
+		*poke4_addr = (uint32_t)(temp_dbl);
 #endif
 	}
 	else {
@@ -761,7 +761,7 @@ static void do_poke4(object a, object top)
 				}
 				*poke4_addr = (uint32_t) tmp_int;
 #else
-				*poke4_addr = (uint32_t) DBL_TO_OBJ(temp_dbl);
+				*poke4_addr = (uint32_t)(temp_dbl);
 #endif
 				++poke4_addr;
 			}
@@ -892,7 +892,7 @@ static int recover_rhs_subscript(object subscript, s1_ptr s)
 		RangeReading(subscript, s->length);
 	}
 	else if (IS_ATOM_DBL(subscript)) {
-		subscripti = (intptr_t)DBL_TO_OBJ(DBL_PTR(subscript)->dbl);
+		subscripti = (intptr_t)(DBL_PTR(subscript)->dbl);
 		if ((uintptr_t)(subscripti - 1) < (uintptr_t)s->length)
 			return subscripti;
 		else
@@ -924,7 +924,7 @@ static int recover_lhs_subscript(object subscript, s1_ptr s)
 		BadSubscript(subscript, s->length);
 	}
 	else if (IS_ATOM_DBL(subscript))  {
-		subscripti = (intptr_t)DBL_TO_OBJ(DBL_PTR(subscript)->dbl);
+		subscripti = (intptr_t)(DBL_PTR(subscript)->dbl);
 		if ((uintptr_t)(subscripti - 1) < (uintptr_t)s->length)
 			return subscripti;
 		else
@@ -2360,9 +2360,9 @@ void do_exec(intptr_t *start_pc)
 				}
 				if( !IS_ATOM_INT( a ) ){
 					// have to check for integer value
-					top = (intptr_t) DBL_TO_OBJ(DBL_PTR( a )->dbl);
+					top = (intptr_t) (DBL_PTR( a )->dbl);
 					if( (eudouble)top == DBL_PTR( a )->dbl ){
-						a = (intptr_t) DBL_TO_OBJ(DBL_PTR( a )->dbl);
+						a = (intptr_t) (DBL_PTR( a )->dbl);
 					}
 					else{
 						pc = (intptr_t *) pc[4];
@@ -2395,9 +2395,9 @@ void do_exec(intptr_t *start_pc)
 				}
 				if( !IS_ATOM_INT( a ) ){
 					// have to check for integer value
-					top = (intptr_t) DBL_TO_OBJ(DBL_PTR( a )->dbl);
+					top = (intptr_t) (DBL_PTR( a )->dbl);
 					if( (eudouble)top == DBL_PTR( a )->dbl ){
-						a = (intptr_t) DBL_TO_OBJ(DBL_PTR( a )->dbl);
+						a = (intptr_t) (DBL_PTR( a )->dbl);
 					}
 					else{
 						pc = (intptr_t *) pc[4];
@@ -3273,7 +3273,7 @@ void do_exec(intptr_t *start_pc)
 						v = a;
 						temp_dbl = EUFLOOR((eudouble)v / (eudouble)b);
 						if (fabs(temp_dbl) <= MAXINT_DBL)
-							b = (intptr_t)DBL_TO_OBJ(temp_dbl);
+							b = (intptr_t)(temp_dbl);
 						else
 							b = (object)NewDouble(temp_dbl);
 					}
@@ -4254,11 +4254,11 @@ void do_exec(intptr_t *start_pc)
 				b = *(object_ptr)pc[2];  //start
 				if (IS_SEQUENCE(b))
 					RTFatal("Second argument to remove() must be an atom");
-				nvars = (IS_ATOM_INT(b)) ? b : (intptr_t)(DBL_TO_OBJ(DBL_PTR(b)->dbl));
+				nvars = (IS_ATOM_INT(b)) ? b : (intptr_t)(DBL_PTR(b)->dbl);
 				top = *(object_ptr)pc[3]; //stop
 				if (IS_SEQUENCE(top))
 					RTFatal("Third argument to remove() must be an atom");
-				end_pos = (IS_ATOM_INT(top)) ? top : (intptr_t)(DBL_TO_OBJ(DBL_PTR(top)->dbl));
+				end_pos = (IS_ATOM_INT(top)) ? top : (intptr_t)(DBL_PTR(top)->dbl);
 				if (end_pos > seqlen)
 					end_pos=seqlen;
 				obj_ptr = (object_ptr)pc[4];
@@ -4328,7 +4328,7 @@ void do_exec(intptr_t *start_pc)
 				b = *(object_ptr)pc[2];   // start
 				if (IS_SEQUENCE(b))
 					RTFatal("Second argument to head() must be an atom");
-				nvars = (IS_ATOM_INT(b)) ? b : (intptr_t)(DBL_TO_OBJ(DBL_PTR(b)->dbl));
+				nvars = (IS_ATOM_INT(b)) ? b : (intptr_t)(DBL_PTR(b)->dbl);
 				if (nvars < 0)
 					RTFatal("Second argument to head() must not be negative");
 				obj_ptr = (object_ptr)pc[3];
@@ -4362,7 +4362,7 @@ void do_exec(intptr_t *start_pc)
 				b = *(object_ptr)pc[2];  // length
 				if (IS_SEQUENCE(b))
 					RTFatal("Second argument to tail() must be an atom");
-				nvars = (!IS_ATOM_INT(b)) ? (intptr_t)(DBL_TO_OBJ(DBL_PTR(b)->dbl)) : b;
+				nvars = (!IS_ATOM_INT(b)) ? (intptr_t)(DBL_PTR(b)->dbl) : b;
 				if (nvars < 0)
 					RTFatal("Second argument to tail() must not be negative");
 
@@ -4419,7 +4419,7 @@ void do_exec(intptr_t *start_pc)
 				if (IS_SEQUENCE(*obj_ptr))
 					RTFatal("Third argument to splice/insert() must be an atom");
 				nvars = (IS_ATOM_INT(*obj_ptr)) ?
-					*obj_ptr : (intptr_t)DBL_TO_OBJ(DBL_PTR(*obj_ptr)->dbl);  //insertion point
+					*obj_ptr : (intptr_t)(DBL_PTR(*obj_ptr)->dbl);  //insertion point
 
 				b = *(object_ptr)pc[2]; //the stuff to insert
 				Ref(b);
@@ -4674,9 +4674,9 @@ void do_exec(intptr_t *start_pc)
 				else if (IS_ATOM(a)) {
 #ifdef __arm__
 					double d = DBL_PTR(a)->dbl;
-					poke_addr = (char*) (uintptr_t) DBL_TO_OBJ(d);
+					poke_addr = (char*) (uintptr_t) (d);
 #else
-					poke_addr = (char*) (uintptr_t) DBL_TO_OBJ(DBL_PTR(a)->dbl);
+					poke_addr = (char*) (uintptr_t) (DBL_PTR(a)->dbl);
 #endif
 				}
 				else { /* sequence */
@@ -4718,7 +4718,7 @@ void do_exec(intptr_t *start_pc)
 					poke_addr = (char *)a;
 				}
 				else if (IS_ATOM(a)) {
-					poke_addr = (char *)(uintptr_t)(DBL_TO_OBJ(DBL_PTR(a)->dbl));
+					poke_addr = (char *)(uintptr_t)(DBL_PTR(a)->dbl);
 				}
 				else {
 					/* a sequence: {addr, nbytes} */
@@ -4805,7 +4805,7 @@ void do_exec(intptr_t *start_pc)
 					poke_addr = (char *)a;
 				}
 				else if (IS_ATOM(a)) {
-					poke_addr = (char *)(uintptr_t)DBL_TO_OBJ(DBL_PTR(a)->dbl);
+					poke_addr = (char *)(uintptr_t)(DBL_PTR(a)->dbl);
 				}
 				else {
 					tpc = pc;
@@ -4822,9 +4822,9 @@ void do_exec(intptr_t *start_pc)
 					/* no check for overflow here.. hmm*/
 #ifdef __arm__
 					b = trunc( DBL_PTR(b)->dbl );
-					*poke_addr = (uint8_t) DBL_TO_OBJ(b);
+					*poke_addr = (uint8_t) (b);
 #else
-					*poke_addr = (uint8_t) DBL_TO_OBJ(DBL_PTR(b)->dbl);
+					*poke_addr = (uint8_t) (DBL_PTR(b)->dbl);
 #endif
 				}
 				else {
@@ -4841,9 +4841,9 @@ void do_exec(intptr_t *start_pc)
 								break;
 #ifdef __arm__
 							b = trunc( DBL_PTR(b)->dbl );
-							*poke_addr = (uint8_t) DBL_TO_OBJ(b);
+							*poke_addr = (uint8_t) (b);
 #else
-							*poke_addr = (uint8_t) DBL_TO_OBJ(DBL_PTR(b)->dbl);
+							*poke_addr = (uint8_t) (DBL_PTR(b)->dbl);
 #endif
 						}
 						else {
@@ -4887,10 +4887,10 @@ void do_exec(intptr_t *start_pc)
 				}
 				else if (IS_ATOM(a)) {
 #ifdef __arm__
-					tuint = (uintptr_t)DBL_TO_OBJ(DBL_PTR(a)->dbl);
+					tuint = (uintptr_t)(DBL_PTR(a)->dbl);
 					sub_addr = (void(*)())tuint;
 #else
-					sub_addr = (void(*)())(uintptr_t)DBL_TO_OBJ(DBL_PTR(a)->dbl);
+					sub_addr = (void(*)())(uintptr_t)(DBL_PTR(a)->dbl);
 #endif
 				}
 				else {
@@ -5411,7 +5411,7 @@ void do_exec(intptr_t *start_pc)
 					i = top;
 				}
 				else if (IS_ATOM(top)) {
-					i = (int)DBL_TO_OBJ(DBL_PTR(top)->dbl);
+					i = (int)(DBL_PTR(top)->dbl);
 				}
 				else
 					RTFatal("argument to abort() must be an atom");

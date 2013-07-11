@@ -76,15 +76,30 @@ typedef unsigned int uint128_t __attribute__((mode(TI)));
 #define IS_ATOM_INT_NV(ob)    ((intptr_t)(ob) >= NOVALUE)
 
 #ifdef __GNUC__
+#define INT_RANGE(x) ((int)( \
+						{ object _x = (object)(x); \
+							(_x <= MAXINT && _x >= MININT);}))
+
+#define MAKE_INT(x) ((object)( \
+						{ intptr_t _x = x; \
+							INT_RANGE(_x) ? _x : NewDouble((eudouble)_x);}))
+							
+
 #define MAKE_UINT(x) ((object)( \
 						{ uintptr_t _x = x; \
 							_x < (uintptr_t)TOO_BIG_INT \
 							? _x : NewDouble((eudouble)_x);}))
+
 #else
 /* Watch for side effects */
-#define MAKE_UINT(x) ((object)((uintptr_t)x < (uintptr_t)TOO_BIG_INT \
-                          ? (uintptr_t)x : \
-                            NewDouble((eudouble)(uintptr_t)x)))
+#define INT_RANGE(x) ((int)( \
+						((intptr_t)(x) <= MAXINT && (intptr_t)(x) >= MININT)))
+
+#define MAKE_INT(x) ((object)(INT_RANGE(x) ? (intptr_t)(x) : NewDouble((eudouble)(intptr_t)(x))))
+
+#define MAKE_UINT(x) ((object)((uintptr_t)(x) < (uintptr_t)TOO_BIG_INT \
+                          ? (uintptr_t)(x) : NewDouble((eudouble)(uintptr_t)(x))))
+
 #endif
 
 /* these are obsolete */

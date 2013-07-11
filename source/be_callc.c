@@ -1157,6 +1157,7 @@ object call_c(int func, object proc_ad, object arg_list)
 /* Call a C function in a DLL or shared library. 
    Alternatively, call a machine-code routine at a given address. */
 {
+	/* check for unnecessary or incorrect casts to arg JAG */
 	volatile uint64_t arg;  // !!!! magic var to push values on the stack
 	volatile int argsize;   // !!!! number of bytes to pop 
 	
@@ -1286,7 +1287,7 @@ object call_c(int func, object proc_ad, object arg_list)
 		if (IS_ATOM_INT(next_size))
 			size = (uintptr_t)next_size;
 		else if (IS_ATOM(next_size))
-			size = (uintptr_t)DBL_TO_OBJ(DBL_PTR(next_size)->dbl);
+			size = (uintptr_t)(DBL_PTR(next_size)->dbl);
 		else 
 			RTFatal("This C routine was defined using an invalid argument type");
 
@@ -1326,7 +1327,7 @@ object call_c(int func, object proc_ad, object arg_list)
 				/* C_FLOAT */
 				flt_arg.flt = (float)dbl_arg.dbl;
 				#if INTPTR_MAX == INT32_MAX && __ARM_PCS_VFP != 1
-					arg = (uintptr_t)flt_arg.int32;
+					arg = (uint64_t)(uintptr_t)flt_arg.int32;
 					PUSH_INT_ARG
 				#elif INTPTR_MAX == INT64_MAX || __ARM_PCS_VFP == 1
 					if( FP_ARG_COUNTER < MAX_FP_PARAM_REGISTERS ){
@@ -1343,13 +1344,13 @@ object call_c(int func, object proc_ad, object arg_list)
 		}
 		else if( size == C_POINTER ){
 			if (IS_ATOM_INT(next_arg)) {
-				arg = next_arg;
+				arg = (uint64_t)next_arg;
 				PUSH_INT_ARG
 			}
 			else if (IS_ATOM(next_arg)) {
 				// atoms are rounded to integers
 				
-				arg = (uint64_t)(uintptr_t)DBL_TO_OBJ(DBL_PTR(next_arg)->dbl); //correct
+				arg = (uint64_t)(uintptr_t)(DBL_PTR(next_arg)->dbl); //correct
 				// if it's a -ve f.p. number, Watcom converts it to long and
 				// then to unsigned long. This is exactly what we want.
 				// Works with the others too. 
@@ -1388,21 +1389,21 @@ object call_c(int func, object proc_ad, object arg_list)
 					}
 					RefDS(next_arg);
 				}
-				arg = (uintptr_t) next_arg;
+				arg = (uint64_t)(uintptr_t) next_arg;
 				PUSH_INT_ARG
 			} 
 			else if (IS_ATOM_INT(next_arg)) {
-				arg = (uintptr_t)next_arg;
+				arg = (uint64_t)(uintptr_t)next_arg;
 				PUSH_INT_ARG
 			}
 			else if (IS_ATOM(next_arg)) {
 				// atoms are rounded to integers
 				#ifdef EARM
 				if( size == C_INT )
-					arg = (intptr_t)DBL_TO_OBJ(DBL_PTR(next_arg)->dbl); //correct
+					arg = (uint64_t)(uintptr_t)(DBL_PTR(next_arg)->dbl); //correct
 				else
 				#endif
-				arg = (uintptr_t)DBL_TO_OBJ(DBL_PTR(next_arg)->dbl);
+				arg = (uint64_t)(int64_t)(DBL_PTR(next_arg)->dbl);
 				
 				PUSH_INT_ARG
 			}
@@ -1511,8 +1512,8 @@ object call_c(int func, object proc_ad, object arg_list)
 			else {
 				// signed integer result
 				if( return_type == C_INT ){
-					if( ((intptr_t)(int)int_result) >= MININT && ((intptr_t)(int)int_result) <= MAXINT ){
-						return (intptr_t)(int)int_result;
+					if( ((intptr_t)int_result) >= MININT && ((intptr_t)int_result) <= MAXINT ){
+						return (intptr_t)int_result;
 					}
 					else{
 						return NewDouble((eudouble)(int)int_result);

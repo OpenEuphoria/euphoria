@@ -60,7 +60,7 @@ object compile(object pattern, object eflags) {
 	if (IS_ATOM_INT(eflags)) {
 		pflags = eflags;
 	} else if (IS_ATOM(eflags)) {
-		pflags = (int)DBL_TO_OBJ(DBL_PTR(eflags)->dbl);
+		pflags = (int)(DBL_PTR(eflags)->dbl);
 	} else {
 		RTFatal("compile_pcre expected an atom as the second parameter, not a sequence");
 	}
@@ -140,7 +140,7 @@ object compile_pcre(object x, object flags) {
 			rcp->re = (struct real_pcre *) compiled_regex;
 		}
 		else {
-			rcp->re = (struct real_pcre *) (uintptr_t) DBL_TO_OBJ(DBL_PTR( compiled_regex )->dbl);
+			rcp->re = (struct real_pcre *) (uintptr_t) (DBL_PTR( compiled_regex )->dbl);
 		}
 		x = MAKE_SEQ( regex );
 	}

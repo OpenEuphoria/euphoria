@@ -223,9 +223,9 @@ static int MySetEnv(const char *name, const char *value, const int overwrite) {
 object ATOM_TO_ATOM_INT( object X ) {
 	if ( !IS_ATOM_INT( X ) && IS_ATOM( X ) ) { 
 		double TMP_dbl = DBL_PTR( X )->dbl;
-		int TMP_x = (int)DBL_TO_OBJ(TMP_dbl);
+		int TMP_x = (int)(TMP_dbl);
 		if( (IS_ATOM_INT(TMP_x)) && (TMP_dbl == (double)TMP_x) ){
-			X = TMP_x;
+			X = (object)TMP_x;
 		}
 	}
 	return X;
@@ -237,7 +237,7 @@ uintptr_t get_pos_int(char *where, object x)
 	if (IS_ATOM_INT(x))
 		return (uintptr_t)x;
 	else if (IS_ATOM(x))
-		return (uintptr_t)DBL_TO_OBJ(DBL_PTR(x)->dbl);
+		return (uintptr_t)(DBL_PTR(x)->dbl);
 	else {
 		RTFatal("%s: an integer was expected, not a sequence", where);
 	}
@@ -271,7 +271,7 @@ uint64_t get_uint64( object x ){
 	}
 
 	if (IS_ATOM(x)){
-		return (uint64_t)DBL_PTR(x)->dbl;
+		return (uint64_t)(DBL_PTR(x)->dbl);
 	}
 	RTFatal("an integer was expected, not a sequence");
 }
@@ -284,7 +284,7 @@ object get_int(object x)
 	}
 
 	if (IS_ATOM(x)){
-		return DBL_TO_OBJ(DBL_PTR(x)->dbl);
+		return (object)(int)(DBL_PTR(x)->dbl);
 	}
 	RTFatal("an integer was expected, not a sequence");
 
@@ -927,7 +927,7 @@ static object Seek(object x)
 		pos = (IOFF)x2;
 	}
 	else if (IS_ATOM(x2)) {
-		pos = (IOFF)DBL_PTR(x2)->dbl;
+		pos = (IOFF)(DBL_PTR(x2)->dbl);
 		if ( pos < 0) {
 			return ATOM_1; // -ve positions are not permitted.
 		}
@@ -2000,7 +2000,7 @@ static object atom_to_float80(object x)
 		d = (long double)x;
 	}
 	else if (IS_ATOM(x)) {
-		d = (long double) DBL_PTR(x)->dbl;
+		d = (long double)(DBL_PTR(x)->dbl);
 	}
 	else
 		len = 0;
@@ -2298,7 +2298,7 @@ object DefineC(object x)
 			t = *arg;
 		}
 		else if (IS_ATOM(*arg)) {
-			t = (uintptr_t)DBL_TO_OBJ(DBL_PTR(*arg)->dbl);
+			t = (uintptr_t)(DBL_PTR(*arg)->dbl);
 		}
 		else
 			RTFatal("argument type may not be a sequence");
@@ -2317,7 +2317,7 @@ object DefineC(object x)
 		t = return_size;
 	}
 	else if (IS_ATOM(return_size)) {
-		t = (uintptr_t)DBL_TO_OBJ(DBL_PTR(return_size)->dbl);
+		t = (uintptr_t)(DBL_PTR(return_size)->dbl);
 	}
 	else
 		RTFatal("return type must be an atom");

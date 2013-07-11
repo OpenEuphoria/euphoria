@@ -444,7 +444,7 @@ void debug_dbl(double num)
 	buff[dbg_dbl_len - 1] = 0; // ensure NULL
 	debug_msg(buff);
 }
-#ifdef EARM /* Is this necessary? See DBL_TO_OBJ macro in execute.h. */
+#ifdef EARM 
 double maxplus1 = ((double)UINTPTR_MAX) + 1;
 uintptr_t doubletouintptrdiscardhighbits(double d)
 {
@@ -657,7 +657,7 @@ static char doChar(object elem)
 	if (IS_ATOM_INT(elem))
 		return (char)elem;
 	if (IS_ATOM(elem))
-		return (char)DBL_TO_OBJ(DBL_PTR(elem)->dbl);
+		return (char)(DBL_PTR(elem)->dbl);
 	else {
 		RTFatal("sequence found inside character string");
 	}
@@ -1286,7 +1286,7 @@ object Repeat(object item, object repcount)
 	}
 
 	else if (IS_ATOM_DBL(repcount)) {
-		count = (long)DBL_TO_OBJ(DBL_PTR(repcount)->dbl);
+		count = (long)(DBL_PTR(repcount)->dbl);
 	}
 
 	else
@@ -1770,9 +1770,10 @@ object and_bits(uintptr_t a, uintptr_t b)
 object Dand_bits(d_ptr a, d_ptr b)
 /* double a AND b */
 {
-#ifdef EARM /*obsolete with DBL_TO_OBJ?*/
+#ifdef EARM
 	return and_bits(doubletouintptrdiscardhighbits(a->dbl), doubletouintptrdiscardhighbits(b->dbl));
 #else
+	/* Should work at least up to 53 bits */
 	uint64_t c = (uint64_t)(a->dbl) & (uint64_t)(b->dbl);
 	return MAKE_UINT(c);
 #endif
@@ -1789,9 +1790,10 @@ object or_bits(uintptr_t a, uintptr_t b)
 object Dor_bits(d_ptr a, d_ptr b)
 /* double a OR b */
 {
-#ifdef EARM /*obsolete with DBL_TO_OBJ?*/
+#ifdef EARM
 	return or_bits(doubletouintptrdiscardhighbits(a->dbl), doubletouintptrdiscardhighbits(b->dbl));
 #else
+	/* Should work at least up to 53 bits */
 	uint64_t c = (uint64_t)(a->dbl) | (uint64_t)(b->dbl);
 	return MAKE_UINT(c);
 #endif
@@ -1808,9 +1810,10 @@ object xor_bits(uintptr_t a, uintptr_t b)
 object Dxor_bits(d_ptr a, d_ptr b)
 /* double a XOR b */
 {
-#ifdef EARM /*obsolete with DBL_TO_OBJ?*/
+#ifdef EARM
 	return xor_bits(doubletouintptrdiscardhighbits(a->dbl), doubletouintptrdiscardhighbits(b->dbl));
 #else
+	/* Should work at least up to 53 bits */
 	uint64_t c = (uint64_t)(a->dbl) ^ (uint64_t)(b->dbl);
 	return MAKE_UINT(c);
 #endif
@@ -1827,9 +1830,10 @@ object not_bits(uintptr_t a)
 object Dnot_bits(d_ptr a)
 /* double bitwise NOT of a */
 {
-#ifdef EARM /*obsolete with DBL_TO_OBJ?*/
+#ifdef EARM
 	return not_bits(doubletouintptrdiscardhighbits(a->dbl));
 #else
+	/* Should work at least up to 53 bits */
 	uint64_t c = ~(uint64_t)(a->dbl);
 	return MAKE_UINT(c);
 #endif
@@ -2287,9 +2291,9 @@ object DRandom(d_ptr a)
 
 	if (a->dbl < 1.0)
 		RTFatal("argument to rand must be >= 1");
-	if ((uint32_t)DBL_TO_OBJ (a->dbl) <= 0)
+	if ((uint32_t)(a->dbl) <= 0)
 		RTFatal("argument to rand is too large");
-	res = (1 + good_rand() % (uint32_t)DBL_TO_OBJ(a->dbl));
+	res = (1 + good_rand() % (uint32_t)(a->dbl));
 	return MAKE_UINT(res);
 }
 
@@ -3395,7 +3399,7 @@ void RHS_Slice( object a, object start, object end)
 	if (IS_ATOM_INT(start))
 		startval = (int)start;
 	else if (IS_ATOM_DBL(start)) {
-		startval = (int)(DBL_TO_OBJ(DBL_PTR(start)->dbl));
+		startval = (int)((DBL_PTR(start)->dbl));
 	}
 	else
 		RTFatal("slice lower index is not an atom");
@@ -3410,7 +3414,7 @@ void RHS_Slice( object a, object start, object end)
 		}
 		else
 #endif
-		endval = (int)(DBL_TO_OBJ(DBL_PTR(end)->dbl));
+		endval = (int)(DBL_PTR(end)->dbl);
 		 /* f.p.: if the double is too big for
 			a long WATCOM produces the most negative number. This
 			will be caught as a bad subscript, although the value in the
@@ -3492,7 +3496,7 @@ void AssignSlice(object start, object end, object val)
 	if (IS_ATOM_INT(start))
 		startval = (int)start;
 	else if (IS_ATOM_DBL(start)) {
-		startval = (int)(DBL_TO_OBJ(DBL_PTR(start)->dbl));
+		startval = (int)(DBL_PTR(start)->dbl);
 	}
 	else
 		RTFatal("slice lower index is not an atom");
@@ -3500,7 +3504,7 @@ void AssignSlice(object start, object end, object val)
 	if (IS_ATOM_INT(end))
 		endval = (int)end;
 	else if (IS_ATOM_DBL(end)) {
-		endval = (int)(DBL_TO_OBJ(DBL_PTR(end)->dbl)); /* see above comments on f.p. */
+		endval = (int)(DBL_PTR(end)->dbl); /* see above comments on f.p. */
 	}
 	else
 		RTFatal("slice upper index is not an atom");
@@ -3631,7 +3635,7 @@ int CheckFileNumber(object a)
 	if (IS_ATOM_INT(a))
 		file_no = a;
 	else if (IS_ATOM_DBL(a))
-		file_no = (long)DBL_TO_OBJ(DBL_PTR(a)->dbl);
+		file_no = (long)(DBL_PTR(a)->dbl);
 	else
 		RTFatal("file number must be an atom");
 	if (file_no < 0 || file_no >= MAX_USER_FILE) {
@@ -4876,12 +4880,12 @@ void Position(object line, object col)
 	if (IS_ATOM_INT(line))
 		line_val = (int)line;
 	else {
-		line_val = (int)DBL_TO_OBJ(DBL_PTR(line)->dbl);   /* need check here */
+		line_val = (int)(DBL_PTR(line)->dbl);   /* need check here */
 	}
 	if (IS_ATOM_INT(col))
 		col_val = (int)col;
 	else {
-		col_val = (int)DBL_TO_OBJ(DBL_PTR(col)->dbl);     /* need better check here too */
+		col_val = (int)(DBL_PTR(col)->dbl);     /* need better check here too */
 	}
 	if (line_val < 1 ||
 #ifdef EWINDOWS
@@ -5016,7 +5020,7 @@ void system_call(object command, object wait)
 	if (IS_ATOM_INT(wait))
 		w = (int)wait;
 	else if (IS_ATOM_DBL(wait))
-		w = (long)DBL_TO_OBJ(DBL_PTR(wait)->dbl);
+		w = (long)(DBL_PTR(wait)->dbl);
 	else
 		RTFatal("second argument of system() must be an atom");
 
@@ -5061,7 +5065,7 @@ object system_exec_call(object command, object wait)
 	if (IS_ATOM_INT(wait))
 		w = (int)wait;
 	else if (IS_ATOM_DBL(wait))
-		w = (long)DBL_TO_OBJ(DBL_PTR(wait)->dbl);
+		w = (long)(DBL_PTR(wait)->dbl);
 	else
 		RTFatal("second argument of system_exec() must be an atom");
 
@@ -6180,8 +6184,8 @@ void Replace( replace_ptr rb )
 	object copy_from, copy_to, target;
 	s1_ptr s1, s2;
 
-	start_pos = (IS_ATOM_INT(*rb->start)) ? *rb->start : (int)(DBL_TO_OBJ(DBL_PTR(*rb->start)->dbl));
-	end_pos = (IS_ATOM_INT(*rb->stop)) ? *rb->stop : (int)(DBL_TO_OBJ(DBL_PTR(*rb->stop)->dbl));
+	start_pos = (IS_ATOM_INT(*rb->start)) ? *rb->start : (int)(DBL_PTR(*rb->start)->dbl);
+	end_pos = (IS_ATOM_INT(*rb->stop)) ? *rb->stop : (int)(DBL_PTR(*rb->stop)->dbl);
 
 	copy_to   = *rb->copy_to;
 	copy_from = *rb->copy_from;
@@ -6422,7 +6426,7 @@ object eu_sizeof( object data_type ){
 		dt = data_type;
 	}
 	else if( IS_ATOM( data_type ) ){
-		dt = (long) DBL_TO_OBJ(DBL_PTR( data_type )->dbl);
+		dt = (long) (DBL_PTR( data_type )->dbl);
 	}
 	else{
 		RTFatal("Argument to sizeof must be an atom");

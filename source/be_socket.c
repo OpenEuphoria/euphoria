@@ -42,9 +42,9 @@
 inline int ATOM_INT_VAL(object x)
 {
 	if (IS_ATOM_INT(x)) {
-		return x;
+		return (int)x;
 	} else if (IS_ATOM_DBL(x)) {
-		return DBL_TO_OBJ(DBL_PTR(x)->dbl);
+		return (int)(DBL_PTR(x)->dbl);
 	} else {
 		RTFatal("an integer was expected, not a sequence.");
 	}
