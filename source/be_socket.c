@@ -1574,8 +1574,8 @@ object eusock_socket(object x)
 	addr->sin_port   = 0;
 
 	result_p = NewS1(2);
-	result_p->base[1] = MAKE_UINT((unsigned long)sock);
-	result_p->base[2] = MAKE_UINT((uintptr_t)addr);
+	result_p->base[1] = UINT_TO_OBJ((unsigned long)sock);
+	result_p->base[2] = UINT_TO_OBJ((uintptr_t)addr);
 	
 	return MAKE_SEQ(result_p);
 }
@@ -1826,7 +1826,7 @@ object eusock_send(object x)
 		return eusock_geterror();
 	}
 
-	return MAKE_UINT(result);
+	return UINT_TO_OBJ(result);
 }
 
 /*
@@ -2062,7 +2062,7 @@ object eusock_accept(object x)
 	}
 
 	client_sock_p = NewS1(2);
-	client_sock_p->base[1] = MAKE_UINT(client);
+	client_sock_p->base[1] = UINT_TO_OBJ(client);
 	client_sock_p->base[2] = 0;
 
 	client_seq = NewS1(2);
@@ -2108,7 +2108,7 @@ object eusock_getsockopt(object x)
 		break;
 	}
 
-	return MAKE_UINT(optval);
+	return UINT_TO_OBJ(optval);
 }
 
 /*

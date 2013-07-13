@@ -859,7 +859,7 @@ static object user_allocate(object x)
 	addr = EMalloc(nbytes);
 #endif
 
-	return MAKE_UINT(addr);
+	return UINT_TO_OBJ(addr);
 }
 
 static object Where(object x)
@@ -2130,7 +2130,7 @@ object OpenDll(object x)
 		}
 		open_dll_list[open_dll_count++] = lib;
 	}
-	return MAKE_UINT(lib);
+	return UINT_TO_OBJ(lib);
 }
 
 object DefineCVar(object x)
@@ -2173,7 +2173,7 @@ object DefineCVar(object x)
 		return ATOM_M1;
 #endif
 	addr = (uintptr_t)variable_address;
-	return MAKE_UINT(addr);
+	return UINT_TO_OBJ(addr);
 }
 
 
@@ -2616,7 +2616,7 @@ object CallBack(object x)
 	addr = (uintptr_t)copy_addr;
 
 	/* Return new address. */
-	return MAKE_UINT(addr);
+	return UINT_TO_OBJ(addr);
 }
 
 object internal_general_call_back(

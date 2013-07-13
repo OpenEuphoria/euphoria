@@ -76,29 +76,20 @@ typedef unsigned int uint128_t __attribute__((mode(TI)));
 #define IS_ATOM_INT_NV(ob)    ((intptr_t)(ob) >= NOVALUE)
 
 #ifdef __GNUC__
-#define INT_RANGE(x) ((int)( \
-						{ object _x = (object)(x); \
-							(_x <= MAXINT && _x >= MININT);}))
+#define INT_TO_OBJ(x) (({ object _x = (object)(x); \
+							IS_ATOM_INT(_x) ? _x : NewDouble((eudouble)_x);}))
 
-#define MAKE_INT(x) ((object)( \
-						{ intptr_t _x = x; \
-							INT_RANGE(_x) ? _x : NewDouble((eudouble)_x);}))
-							
-
-#define MAKE_UINT(x) ((object)( \
-						{ uintptr_t _x = x; \
+#define UINT_TO_OBJ(x) ((object) \
+						({ uintptr_t _x = (uintptr_t)(x); \
 							_x < (uintptr_t)TOO_BIG_INT \
 							? _x : NewDouble((eudouble)_x);}))
 
 #else
-/* Watch for side effects */
-#define INT_RANGE(x) ((int)( \
-						((intptr_t)(x) <= MAXINT && (intptr_t)(x) >= MININT)))
+/* Without GNU extension for macro return values. Watch for side effects */
+#define INT_TO_OBJ(x)	((IS_ATOM_INT(x) ? (object)(x) : NewDouble((eudouble)(object)(x)))
 
-#define MAKE_INT(x) ((object)(INT_RANGE(x) ? (intptr_t)(x) : NewDouble((eudouble)(intptr_t)(x))))
-
-#define MAKE_UINT(x) ((object)((uintptr_t)(x) < (uintptr_t)TOO_BIG_INT \
-                          ? (uintptr_t)(x) : NewDouble((eudouble)(uintptr_t)(x))))
+#define UINT_TO_OBJ(x)	((object)((uintptr_t)(x) < (uintptr_t)TOO_BIG_INT \
+						? (uintptr_t)(x) : NewDouble((eudouble)(uintptr_t)(x))))
 
 #endif
 
@@ -109,7 +100,6 @@ typedef unsigned int uint128_t __attribute__((mode(TI)));
 */
 
 #define DBL_TO_OBJ(d)	((object)(int64_t)(d))
-
 
 /* N.B. the following distinguishes DBL's from SEQUENCES -
    must eliminate the INT case first */

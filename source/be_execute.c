@@ -3185,7 +3185,7 @@ void do_exec(intptr_t *start_pc)
 			deprintf("case L_AND_BITS:");
 				START_BIN_OP
 				tuint = (uintptr_t)a & (uintptr_t)top;
-				top = MAKE_UINT(tuint);
+				top = UINT_TO_OBJ(tuint);
 				END_BIN_OP(AND_BITS)
 				BREAK;
 
@@ -3193,7 +3193,7 @@ void do_exec(intptr_t *start_pc)
 			deprintf("case L_OR_BITS:");
 				START_BIN_OP
 				tuint = (uintptr_t)a | (uintptr_t)top;
-				top = MAKE_UINT(tuint);
+				top = UINT_TO_OBJ(tuint);
 				END_BIN_OP(OR_BITS)
 				BREAK;
 
@@ -3201,7 +3201,7 @@ void do_exec(intptr_t *start_pc)
 			deprintf("case L_XOR_BITS:");
 				START_BIN_OP
 				tuint = (uintptr_t)a ^ (uintptr_t)top;
-				top = MAKE_UINT(tuint);
+				top = UINT_TO_OBJ(tuint);
 				END_BIN_OP(XOR_BITS)
 				BREAK;
 

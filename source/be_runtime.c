@@ -1764,7 +1764,7 @@ object and_bits(uintptr_t a, uintptr_t b)
 /* integer a AND b */
 {
 	a = a & b;
-	return MAKE_UINT(a);
+	return UINT_TO_OBJ(a);
 }
 
 object Dand_bits(d_ptr a, d_ptr b)
@@ -1775,7 +1775,7 @@ object Dand_bits(d_ptr a, d_ptr b)
 #else
 	/* Should work at least up to 53 bits */
 	uint64_t c = (uint64_t)(a->dbl) & (uint64_t)(b->dbl);
-	return MAKE_UINT(c);
+	return UINT_TO_OBJ(c);
 #endif
 }
 
@@ -1783,7 +1783,7 @@ object or_bits(uintptr_t a, uintptr_t b)
 /* integer a OR b */
 {
 	a = a | b;
-	return MAKE_UINT(a);
+	return UINT_TO_OBJ(a);
 }
 
 
@@ -1795,7 +1795,7 @@ object Dor_bits(d_ptr a, d_ptr b)
 #else
 	/* Should work at least up to 53 bits */
 	uint64_t c = (uint64_t)(a->dbl) | (uint64_t)(b->dbl);
-	return MAKE_UINT(c);
+	return UINT_TO_OBJ(c);
 #endif
 }
 
@@ -1803,7 +1803,7 @@ object xor_bits(uintptr_t a, uintptr_t b)
 /* integer a XOR b */
 {
 	a = a ^ b;
-	return MAKE_UINT(a);
+	return UINT_TO_OBJ(a);
 }
 
 
@@ -1815,7 +1815,7 @@ object Dxor_bits(d_ptr a, d_ptr b)
 #else
 	/* Should work at least up to 53 bits */
 	uint64_t c = (uint64_t)(a->dbl) ^ (uint64_t)(b->dbl);
-	return MAKE_UINT(c);
+	return UINT_TO_OBJ(c);
 #endif
 }
 
@@ -1823,7 +1823,7 @@ object not_bits(uintptr_t a)
 /* integer bitwise NOT of a */
 {
 	a = ~a;
-	return MAKE_UINT(a);
+	return UINT_TO_OBJ(a);
 }
 
 
@@ -1835,7 +1835,7 @@ object Dnot_bits(d_ptr a)
 #else
 	/* Should work at least up to 53 bits */
 	uint64_t c = ~(uint64_t)(a->dbl);
-	return MAKE_UINT(c);
+	return UINT_TO_OBJ(c);
 #endif
 }
 
@@ -2294,7 +2294,7 @@ object DRandom(d_ptr a)
 	if ((uint32_t)(a->dbl) <= 0)
 		RTFatal("argument to rand is too large");
 	res = (1 + good_rand() % (uint32_t)(a->dbl));
-	return MAKE_UINT(res);
+	return UINT_TO_OBJ(res);
 }
 
 
@@ -2868,7 +2868,7 @@ unsigned int calc_fletcher32(object a)
 	}
 	else if (IS_ATOM_DBL(a)) {
 		double a_dbl = (DBL_PTR(a)->dbl);
-		if( a_dbl == (double)DBL_TO_OBJ(a_dbl)){
+		if( a_dbl == EUFLOOR(a_dbl)){
 			a = DBL_TO_OBJ(a_dbl);
 			lA +=  a;
 			lB +=  lA;
