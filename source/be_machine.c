@@ -2780,9 +2780,20 @@ object start_backend(object x)
 #endif
 
 	if (newpc == 0)
-	Execute(TopLevelSub->u.subp.code);
+	{
+		Execute(TopLevelSub->u.subp.code);
+	}
 	else
-	Execute((int*)newpc);
+	{
+		intptr_t * pc = (intptr_t*)newpc;
+		// signal to caller of new thread m func that the caller is now
+		// executing inside of a new thread
+		// akin to fork() returning 0 in the child process
+		*(object_ptr)pc[3] = -9999;
+		// move past the machine_func() that spawned this new thread
+		pc += 4;
+		Execute(pc);
+	}
 
 	return ATOM_1;
 }
@@ -2895,6 +2906,12 @@ object new_thread()
 		// akin to fork() returning 0 in the child process
 		is_new_thread = 0;
 		return -9999;
+		// Actually, it turns out we should never get into here.
+		// We simply jump over this call in the new thread (in
+		// start_backend()/new_start_backend() ) and manually store
+		// the expected "magic" return value in the right place
+		// before moving on to the next IL code to execute.
+		// This also makes is_new_thread obsolete.
 	}
 #ifdef EUNIX
 	new_thread_mutex = &new_thread_mutex_m;

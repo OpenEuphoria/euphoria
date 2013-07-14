@@ -74,10 +74,15 @@
 #define POINT5 0.5
 #define HUGE_LINE 1000000000
 
+// ugly hack here
+// Since in a new thread pc and tpc come up NULL, we simply reset them back to
+// start_pc
+// Rather than manually adding that check in every case statement, we do it
+// in this macro since it is already called in every case statement.
 #ifdef DEBUG_OPCODE_TRACE
-#define deprintf(s) do { printf(s); printf("\n"); } while (0)
+#define deprintf(s) do { printf(s); printf("\n"); if (pc == NULL) pc = start_pc; if (tpc == NULL) tpc = pc; } while (0)
 #else
-#define deprintf(s) do {  } while (0)
+#define deprintf(s) do { if (pc == NULL) pc = start_pc; if (tpc == NULL) tpc = pc; } while (0)
 #endif
 
 #define SYMTAB_INDEX(X) ((symtab_ptr)X) - fe.st
@@ -1378,6 +1383,10 @@ void symtab_deep_copy(intptr_t old)
 	olds++;
 	s++;  // point to first real entry
 	for (i = 1; i <= len; i++) {
+		if (s == NULL)
+		{
+			break;
+		}
 		switch (s->mode)
 		{
 			case M_TEMP:
