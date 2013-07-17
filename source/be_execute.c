@@ -278,7 +278,7 @@ static void trace_command(object x)
 		i = x;
 	}
 	else if (IS_ATOM(x)) {
-		i = (int)(DBL_PTR(x)->dbl);
+		i = (int)DBL_PTR(x)->dbl;
 	}
 	else
 		RTFatal("argument to trace() must be an atom", i);
@@ -321,7 +321,7 @@ static void profile_command(object x)
 		i = x;
 	}
 	else if (IS_ATOM(x)) {
-		i = (int)(DBL_PTR(x)->dbl);
+		i = (int)DBL_PTR(x)->dbl;
 	}
 	else
 		RTFatal("argument to profile() must be an atom");
@@ -498,7 +498,7 @@ static object do_peek4(object a, int b )
 	else if (IS_ATOM(a)) {
 #ifdef __arm__
 		double d = DBL_PTR(a)->dbl;
-		peek4_addr = (uint32_t*)(uintptr_t)(d);
+		peek4_addr = (uint32_t*)(uintptr_t)d;
 #else
 		peek4_addr = (uint32_t *)(uintptr_t)(DBL_PTR(a)->dbl);
 #endif
@@ -571,7 +571,7 @@ static void do_poke2(object a, object top)
 
 	/* determine the address to be poked */
 	if (IS_ATOM_INT(a)) {
-		poke2_addr = (uint16_t *)a;
+		poke2_addr = (uint16_t *)INT_VAL(a);
 	}
 	else if (IS_ATOM(a)) {
 		poke2_addr = (uint16_t *)(uintptr_t)(DBL_PTR(a)->dbl);
@@ -581,7 +581,7 @@ static void do_poke2(object a, object top)
 	}
 	/* look at the value to be poked */
 	if (IS_ATOM_INT(top)) {
-		*poke2_addr = (uint16_t)top;
+		*poke2_addr = (uint16_t) INT_VAL(top);
 	}
 	else if (IS_ATOM(top)) {
 		temp_dbl = DBL_PTR(top)->dbl;
@@ -589,9 +589,9 @@ static void do_poke2(object a, object top)
 			RTFatal(POKE_LIMIT(2));
 #ifdef __arm__
 			a == trunc( temp_dbl );
-			*poke2_addr = (uint16_t)(a);
+			*poke2_addr = (uint16_t) a;
 #else
-			*poke2_addr = (uint16_t)(temp_dbl);
+			*poke2_addr = (uint16_t) temp_dbl;
 #endif
 		
 	}
@@ -602,7 +602,7 @@ static void do_poke2(object a, object top)
 		while (TRUE) {
 			top = *(++obj_ptr);
 			if (IS_ATOM_INT(top)) {
-				*poke2_addr = (uint16_t)top;
+				*poke2_addr = (uint16_t) INT_VAL(top);
 				++poke2_addr;
 			}
 			else if (IS_ATOM(top)) {
@@ -614,9 +614,9 @@ static void do_poke2(object a, object top)
 					RTFatal( POKE_LIMIT(2) );
 #ifdef __arm__
 				a = trunc( DBL_PTR(top)->dbl );
-				*poke2_addr = (uint16_t)(a);
+				*poke2_addr = (uint16_t) a;
 #else
-				*poke2_addr = (uint16_t)(temp_dbl);
+				*poke2_addr = (uint16_t) temp_dbl;
 #endif
 				++poke2_addr;
 			}
@@ -636,7 +636,7 @@ static void do_poke8(object a, object top)
 
 	/* determine the address to be poked */
 	if (IS_ATOM_INT(a)) {
-		poke8_addr = (uint64_t *)a;
+		poke8_addr = (uint64_t *)INT_VAL(a);
 	}
 	else if (IS_ATOM(a)) {
 		poke8_addr = (uint64_t *)(uintptr_t)(DBL_PTR(a)->dbl);
@@ -703,12 +703,12 @@ static void do_poke4(object a, object top)
 
 	/* determine the address to be poked */
 	if (IS_ATOM_INT(a)) {
-		poke4_addr = (uint32_t *)a;
+		poke4_addr = (uint32_t *)INT_VAL(a);
 	}
 	else if (IS_ATOM(a)) {
 #ifdef __arm__
 		temp_dbl = DBL_PTR(a)->dbl;
-		poke4_addr = (uint32_t *)(uintptr_t)(temp_dbl);
+		poke4_addr = (uint32_t *)(uintptr_t)temp_dbl;
 #else
 		poke4_addr = (uint32_t *)(uintptr_t)(DBL_PTR(a)->dbl);
 #endif
@@ -718,7 +718,7 @@ static void do_poke4(object a, object top)
 	}
 	/* look at the value to be poked */
 	if (IS_ATOM_INT(top)) {
-		*poke4_addr = (uint32_t)top;
+		*poke4_addr = (uint32_t) INT_VAL(top);
 	}
 	else if (IS_ATOM(top)) {
 		temp_dbl = DBL_PTR(top)->dbl;
@@ -726,14 +726,14 @@ static void do_poke4(object a, object top)
 			RTFatal(POKE_LIMIT(4));
 #ifdef __arm__
 		if( temp_dbl < 0.0 ){
-			tmp_int = (int32_t)temp_dbl;
+			tmp_int = (int32_t) temp_dbl;
 		}
 		else{
-			tmp_int = (int32_t)(uint32_t)temp_dbl;
+			tmp_int = (int32_t)(uint32_t) temp_dbl;
 		}
-		*poke4_addr = (uint32_t)tmp_int;
+		*poke4_addr = (uint32_t) tmp_int;
 #else
-		*poke4_addr = (uint32_t)(temp_dbl);
+		*poke4_addr = (uint32_t) temp_dbl;
 #endif
 	}
 	else {
@@ -743,7 +743,7 @@ static void do_poke4(object a, object top)
 		while (TRUE) {
 			top = *(++obj_ptr);
 			if (IS_ATOM_INT(top)) {
-				*poke4_addr = (uint32_t)top;
+				*poke4_addr = (uint32_t) INT_VAL(top);
 				++poke4_addr;
 			}
 			else if (IS_ATOM(top)) {
@@ -761,7 +761,7 @@ static void do_poke4(object a, object top)
 				}
 				*poke4_addr = (uint32_t) tmp_int;
 #else
-				*poke4_addr = (uint32_t)(temp_dbl);
+				*poke4_addr = (uint32_t) temp_dbl;
 #endif
 				++poke4_addr;
 			}
@@ -1552,6 +1552,7 @@ void analyze_switch()
 					top = a;
 				}
 			}
+
 			if( top > max ) max = top;
 			if( top < min ) min = top;
 		}
@@ -2280,7 +2281,7 @@ void do_exec(intptr_t *start_pc)
 					top++;
 					if (top > MAXINT) {
 						b = top;
-						top = NewDouble((eudouble)b);
+						top = NewDouble((eudouble)(INT_VAL(b)));
 					}
 					if (IS_ATOM_INT_NV(*(object_ptr)a)) {
 						*(object_ptr)a = top;
@@ -2311,7 +2312,7 @@ void do_exec(intptr_t *start_pc)
 					}
 					b = top;
 					tpc = pc - 4;
-					*(object_ptr)a = NewDouble((eudouble)b);
+					*(object_ptr)a = NewDouble((eudouble)(INT_VAL(b)));
 				}
 				else {
 					tpc = pc - 4;
@@ -2360,9 +2361,9 @@ void do_exec(intptr_t *start_pc)
 				}
 				if( !IS_ATOM_INT( a ) ){
 					// have to check for integer value
-					top = (intptr_t) (DBL_PTR( a )->dbl);
+					top = (intptr_t) DBL_PTR( a )->dbl;
 					if( (eudouble)top == DBL_PTR( a )->dbl ){
-						a = (intptr_t) (DBL_PTR( a )->dbl);
+						a = (intptr_t) DBL_PTR( a )->dbl;
 					}
 					else{
 						pc = (intptr_t *) pc[4];
@@ -2395,9 +2396,9 @@ void do_exec(intptr_t *start_pc)
 				}
 				if( !IS_ATOM_INT( a ) ){
 					// have to check for integer value
-					top = (intptr_t) (DBL_PTR( a )->dbl);
+					top = (intptr_t) DBL_PTR( a )->dbl;
 					if( (eudouble)top == DBL_PTR( a )->dbl ){
-						a = (intptr_t) (DBL_PTR( a )->dbl);
+						a = (intptr_t) DBL_PTR( a )->dbl;
 					}
 					else{
 						pc = (intptr_t *) pc[4];
@@ -2425,7 +2426,7 @@ void do_exec(intptr_t *start_pc)
 				tpc = pc;
 				// find which case is met:
 				a = find(*(object_ptr)pc[1], (s1_ptr)*(object_ptr)pc[2]);
-				top = a;
+				top = MAKE_INT(a);
 				if( top ){
 					// a is the index in the jump table
 		  			a = SEQ_PTR(*(object_ptr)pc[3])->base[top];
@@ -2895,7 +2896,7 @@ void do_exec(intptr_t *start_pc)
 				top = *(object_ptr)pc[1];
 				tpc = pc;
 				if (IS_ATOM_INT(top))
-					top = (*optable[a].intfn)(top);
+					top = (*optable[a].intfn)(INT_VAL(top));
 				else
 					top = unary_op(a, top);
 				DeRef(*(object_ptr)pc[2]);
@@ -2955,10 +2956,10 @@ void do_exec(intptr_t *start_pc)
 			deprintf("case L_RAND:");
 				START_UNARY_OP
 				tpc = pc;
-				if (top <= 0) {
+				if (INT_VAL(top) <= 0) {
 					RTFatal("argument to rand() must be >= 1");
 				}
-				top = (object)((good_rand() % ((uint32_t)top)) + 1);
+				top = MAKE_INT((good_rand() % ((uint32_t)INT_VAL(top))) + 1);
 				END_UNARY_OP(RAND)
 				thread();
 				BREAK;
@@ -2969,7 +2970,7 @@ void do_exec(intptr_t *start_pc)
 			deprintf("case L_PLUS:");
 				START_BIN_OP
 					/* INT:INT case */
-					top = a + top;
+					top = INT_VAL(a) + INT_VAL(top);
 					// mwl: gcc 4.1 doesn't do this right unless you do the unsigned casts:
 					if ((intptr_t)((uintptr_t)top + (uintptr_t)HIGH_BITS) >= 0) {
 						goto dblplus;
@@ -2982,14 +2983,14 @@ void do_exec(intptr_t *start_pc)
 					tpc = pc;
 					if (IS_ATOM_INT(a) && IS_ATOM_DBL(top)) {
 						v = a;
-						temp_d.dbl = (eudouble)v;
+						temp_d.dbl = (eudouble)INT_VAL(v);
 						top = Dadd(&temp_d, DBL_PTR(top));
 						goto aresult;
 					}
 					else if (IS_ATOM_DBL(a)) { // true if a is INT - careful!
 						if (IS_ATOM_INT(top)) {
 							v = top;
-							temp_d.dbl = (eudouble)v;
+							temp_d.dbl = (eudouble)INT_VAL(v);
 							top = Dadd(DBL_PTR(a), &temp_d);
 							goto aresult;
 						}
@@ -3019,7 +3020,7 @@ void do_exec(intptr_t *start_pc)
 			deprintf("case L_PLUS_I:");
 				/* we know that the inputs and the output must be integers */
 				START_BIN_OP_I
-				top = a + top;
+				top = INT_VAL(a) + INT_VAL(top);
 				if ((intptr_t)((uintptr_t)top + (uintptr_t)HIGH_BITS) >= 0) {
 					goto dblplus_i;
 				}
@@ -3031,7 +3032,7 @@ void do_exec(intptr_t *start_pc)
 			deprintf("case L_MINUS:");
 				START_BIN_OP
 					/* INT:INT case L_*/
-					top = a - top;
+					top = INT_VAL(a) - INT_VAL(top);
 					if ((intptr_t)((uintptr_t)top + (uintptr_t)HIGH_BITS) >= 0) {
 						tpc = pc;
 						v = top;
@@ -3044,14 +3045,14 @@ void do_exec(intptr_t *start_pc)
 					tpc = pc;
 					if (IS_ATOM_INT(a) && IS_ATOM_DBL(top)) {
 						v = a;
-						temp_d.dbl = (eudouble)v;
+						temp_d.dbl = (eudouble)INT_VAL(v);
 						top = Dminus(&temp_d, DBL_PTR(top));
 						goto aresult;
 					}
 					else if (IS_ATOM_DBL(a)) {
 						if (IS_ATOM_INT(top)) {
 							v = top;
-							temp_d.dbl = (eudouble)v;
+							temp_d.dbl = (eudouble)INT_VAL(v);
 							top = Dminus(DBL_PTR(a), &temp_d);
 							goto aresult;
 						}
@@ -3093,7 +3094,7 @@ void do_exec(intptr_t *start_pc)
 					{
 						int128_t product = (int128_t)c * (int128_t)b;
 						if( product == (int128_t)( a = (intptr_t)product ) && IS_ATOM_INT( product ) ){
-							top = a;
+							top = MAKE_INT( a );
 						}
 						else{
 							tpc = pc;
@@ -3107,7 +3108,7 @@ void do_exec(intptr_t *start_pc)
 						if ((b <= INT15 && b >= -INT15) ||
 							(c == (char)c && b <= INT23 && b >= -INT23) ||
 							(b == (short)b && c <= INT15 && c >= -INT15)) {
-							top = (c * b);
+							top = MAKE_INT(c * b);
 						}
 						else {
 							tpc = pc;
@@ -3116,7 +3117,7 @@ void do_exec(intptr_t *start_pc)
 					}
 					else if (b == (char)b && c <= INT23 && c >= -INT23) {
 						/* b is 8-bit, c is 23-bit */
-						top = (c * b);
+						top = MAKE_INT(c * b);
 					}
 					else {
 						tpc = pc;
@@ -3131,14 +3132,14 @@ void do_exec(intptr_t *start_pc)
 					tpc = pc;
 					if (IS_ATOM_INT(a) && IS_ATOM_DBL(top)) {
 						v = a;
-						temp_d.dbl = (eudouble)v;
+						temp_d.dbl = (eudouble)INT_VAL(v);
 						top = Dmultiply(&temp_d, DBL_PTR(top));
 						goto aresult;
 					}
 					else if (IS_ATOM(a)) {   // was IS_ATOM_DBL
 						if (IS_ATOM_INT(top)) {
 							v = top;
-							temp_d.dbl = (eudouble)v;
+							temp_d.dbl = (eudouble)INT_VAL(v);
 							top = Dmultiply(DBL_PTR(a), &temp_d);
 							goto aresult;
 						}
@@ -3156,14 +3157,14 @@ void do_exec(intptr_t *start_pc)
 			case L_DIVIDE:
 			deprintf("case L_DIVIDE:");
 				START_BIN_OP
-				c = a;
+				c = INT_VAL(a);
 				tpc = pc;
-				if ((b = top) == 0)
+				if ((b = INT_VAL(top)) == 0)
 					RTFatal("attempt to divide by 0");
 				if (c % b != 0) /* could try in-line DIV call here for speed */
 					top = (object)NewDouble((eudouble)c / b);
 				else
-					top = (c / b);
+					top = MAKE_INT(c / b);
 				END_BIN_OP(DIVIDE)
 				BREAK;
 
@@ -3171,12 +3172,12 @@ void do_exec(intptr_t *start_pc)
 			case L_REMAINDER:
 			deprintf("case L_REMAINDER:");
 				START_BIN_OP
-				if ((b = top) == 0) {
+				if ((b = INT_VAL(top)) == 0) {
 					tpc = pc;
 					RTFatal("Can't get remainder of a number divided by 0");
 				}
 				else {
-					top = (a % b); /* a used in divide ok? */
+					top = MAKE_INT(INT_VAL(a) % b); /* a used in divide ok? */
 				}
 				END_BIN_OP(REMAINDER)
 				BREAK;
@@ -3185,7 +3186,7 @@ void do_exec(intptr_t *start_pc)
 			deprintf("case L_AND_BITS:");
 				START_BIN_OP
 				tuint = (uintptr_t)a & (uintptr_t)top;
-				top = UINT_TO_OBJ(tuint);
+				top = MAKE_UINT(tuint);
 				END_BIN_OP(AND_BITS)
 				BREAK;
 
@@ -3193,7 +3194,7 @@ void do_exec(intptr_t *start_pc)
 			deprintf("case L_OR_BITS:");
 				START_BIN_OP
 				tuint = (uintptr_t)a | (uintptr_t)top;
-				top = UINT_TO_OBJ(tuint);
+				top = MAKE_UINT(tuint);
 				END_BIN_OP(OR_BITS)
 				BREAK;
 
@@ -3201,7 +3202,7 @@ void do_exec(intptr_t *start_pc)
 			deprintf("case L_XOR_BITS:");
 				START_BIN_OP
 				tuint = (uintptr_t)a ^ (uintptr_t)top;
-				top = UINT_TO_OBJ(tuint);
+				top = MAKE_UINT(tuint);
 				END_BIN_OP(XOR_BITS)
 				BREAK;
 
@@ -3209,7 +3210,7 @@ void do_exec(intptr_t *start_pc)
 			deprintf("case L_POWER:");
 				START_BIN_OP
 				tpc = pc;
-				top = power(a, top);
+				top = power(INT_VAL(a), INT_VAL(top));
 				END_BIN_OP(POWER)
 				BREAK;
 
@@ -3273,7 +3274,7 @@ void do_exec(intptr_t *start_pc)
 						v = a;
 						temp_dbl = EUFLOOR((eudouble)v / (eudouble)b);
 						if (fabs(temp_dbl) <= MAXINT_DBL)
-							b = (intptr_t)(temp_dbl);
+							b = (intptr_t)temp_dbl;
 						else
 							b = (object)NewDouble(temp_dbl);
 					}
@@ -3666,7 +3667,7 @@ void do_exec(intptr_t *start_pc)
 					if (!IS_ATOM(a))
 						RTFatal("for-loop limit is not an atom");
 					if (IS_ATOM_INT(top))
-						going_up = (top >= 0);
+						going_up = (INT_VAL(top) >= 0);
 					else if (IS_ATOM_DBL(top))
 						going_up = (DBL_PTR(top)->dbl >= 0.0);
 					else
@@ -4419,7 +4420,7 @@ void do_exec(intptr_t *start_pc)
 				if (IS_SEQUENCE(*obj_ptr))
 					RTFatal("Third argument to splice/insert() must be an atom");
 				nvars = (IS_ATOM_INT(*obj_ptr)) ?
-					*obj_ptr : (intptr_t)(DBL_PTR(*obj_ptr)->dbl);  //insertion point
+					*obj_ptr : (intptr_t)DBL_PTR(*obj_ptr)->dbl;  //insertion point
 
 				b = *(object_ptr)pc[2]; //the stuff to insert
 				Ref(b);
@@ -4507,7 +4508,7 @@ void do_exec(intptr_t *start_pc)
 #ifdef HEAP_CHECK
 			case L_SPACE_USED:
 			deprintf("case L_SPACE_USED:");
-				top = (object)(bytes_allocated);
+				top = MAKE_INT(bytes_allocated);
 				DeRef(*(object_ptr)pc[1]);
 				*(object_ptr)pc[1] = top;
 				pc += 2;
@@ -4543,7 +4544,7 @@ void do_exec(intptr_t *start_pc)
 				}
 				else {
 					tpc = pc;
-					top = compare(a, top);
+					top = MAKE_INT(compare(a, top));
 					top = (top == ATOM_0);
 				}
 				obj_ptr = (object_ptr)pc[3];
@@ -4585,7 +4586,7 @@ void do_exec(intptr_t *start_pc)
 			deprintf("case L_FIND:");
 				tpc = pc;
 				a = find(*(object_ptr)pc[1], (s1_ptr)*(object_ptr)pc[2]);
-				top = a;
+				top = MAKE_INT(a);
 				DeRef(*(object_ptr)pc[3]);
 				*(object_ptr)pc[3] = top;
 				pc += 4;
@@ -4595,8 +4596,8 @@ void do_exec(intptr_t *start_pc)
 			case L_MATCH:
 			deprintf("case L_MATCH:");
 				tpc = pc;
-				top = e_match((s1_ptr)*(object_ptr)pc[1],
-									 (s1_ptr)*(object_ptr)pc[2]);
+				top = MAKE_INT(e_match((s1_ptr)*(object_ptr)pc[1],
+									 (s1_ptr)*(object_ptr)pc[2]));
 				DeRef(*(object_ptr)pc[3]);
 				*(object_ptr)pc[3] = top;
 				pc += 4;
@@ -4669,14 +4670,14 @@ void do_exec(intptr_t *start_pc)
 				a = *(object_ptr)pc[1]; /* the address */
 				tpc = pc;  // in case of machine exception
 				if (IS_ATOM_INT(a)) {
-					poke_addr = (char *)a;
+					poke_addr = (char *)INT_VAL(a);
 				}
 				else if (IS_ATOM(a)) {
 #ifdef __arm__
 					double d = DBL_PTR(a)->dbl;
-					poke_addr = (char*) (uintptr_t) (d);
+					poke_addr = (char*) (uintptr_t) d;
 #else
-					poke_addr = (char*) (uintptr_t) (DBL_PTR(a)->dbl);
+					poke_addr = (char*) (uintptr_t) DBL_PTR(a)->dbl;
 #endif
 				}
 				else { /* sequence */
@@ -4715,7 +4716,7 @@ void do_exec(intptr_t *start_pc)
 
 				/* check address */
 				if (IS_ATOM_INT(a)) {
-					poke_addr = (char *)a;
+					poke_addr = (char *)INT_VAL(a);
 				}
 				else if (IS_ATOM(a)) {
 					poke_addr = (char *)(uintptr_t)(DBL_PTR(a)->dbl);
@@ -4822,9 +4823,9 @@ void do_exec(intptr_t *start_pc)
 					/* no check for overflow here.. hmm*/
 #ifdef __arm__
 					b = trunc( DBL_PTR(b)->dbl );
-					*poke_addr = (uint8_t) (b);
+					*poke_addr = (uint8_t) b;
 #else
-					*poke_addr = (uint8_t) (DBL_PTR(b)->dbl);
+					*poke_addr = (uint8_t) DBL_PTR(b)->dbl;
 #endif
 				}
 				else {
@@ -4841,9 +4842,9 @@ void do_exec(intptr_t *start_pc)
 								break;
 #ifdef __arm__
 							b = trunc( DBL_PTR(b)->dbl );
-							*poke_addr = (uint8_t) (b);
+							*poke_addr = (uint8_t) b;
 #else
-							*poke_addr = (uint8_t) (DBL_PTR(b)->dbl);
+							*poke_addr = (uint8_t) DBL_PTR(b)->dbl;
 #endif
 						}
 						else {
@@ -4883,7 +4884,7 @@ void do_exec(intptr_t *start_pc)
 				tpc = pc;   // for better profiling and machine exception
 				/* check address */
 				if (IS_ATOM_INT(a)) {
-					sub_addr = (void(*)())(uintptr_t)a;
+					sub_addr = (void(*)())INT_VAL(a);
 				}
 				else if (IS_ATOM(a)) {
 #ifdef __arm__
@@ -5039,7 +5040,7 @@ void do_exec(intptr_t *start_pc)
 				if (current_screen != MAIN_SCREEN) {
 					MainScreen();
 				}
-				top = (object)(get_key(FALSE));
+				top = MAKE_INT(get_key(FALSE));
 				if (top == ATOM_M1 && TraceOn) {
 #ifdef EUNIX
 					struct tms buf;
@@ -5050,7 +5051,7 @@ void do_exec(intptr_t *start_pc)
 					while (clock()
 #endif
 						< c0 && top == ATOM_M1) {
-						top = (object)(get_key(FALSE));
+						top = MAKE_INT(get_key(FALSE));
 					}
 				}
 				DeRef(*(object_ptr)pc[1]);
@@ -5411,7 +5412,7 @@ void do_exec(intptr_t *start_pc)
 					i = top;
 				}
 				else if (IS_ATOM(top)) {
-					i = (int)(DBL_PTR(top)->dbl);
+					i = (int)DBL_PTR(top)->dbl;
 				}
 				else
 					RTFatal("argument to abort() must be an atom");
@@ -5426,7 +5427,7 @@ void do_exec(intptr_t *start_pc)
 			deprintf("case L_FIND_FROM:");
 					tpc = pc;
 					a = find_from(*(object_ptr)pc[1], *(object_ptr)pc[2], *(object_ptr)pc[3]);
-					top = a;
+					top = MAKE_INT(a);
 					DeRef(*(object_ptr)pc[4]);
 					*(object_ptr)pc[4] = top;
 					thread5();
@@ -5437,7 +5438,7 @@ void do_exec(intptr_t *start_pc)
 					tpc = pc;
 					a = e_match_from( *(object_ptr)pc[1], *(object_ptr)pc[2],
 							*(object_ptr) pc[3]);
-					top = a;
+					top = MAKE_INT(a);
 					DeRef(*(object_ptr)pc[4]);
 					*(object_ptr)pc[4] = top;
 

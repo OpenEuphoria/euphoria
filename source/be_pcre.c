@@ -140,7 +140,7 @@ object compile_pcre(object x, object flags) {
 			rcp->re = (struct real_pcre *) compiled_regex;
 		}
 		else {
-			rcp->re = (struct real_pcre *) (uintptr_t) (DBL_PTR( compiled_regex )->dbl);
+			rcp->re = (struct real_pcre *) (uintptr_t) DBL_PTR( compiled_regex )->dbl;
 		}
 		x = MAKE_SEQ( regex );
 	}

@@ -221,7 +221,7 @@ static void set_bk_color(int c)
 	else
 		RTInternal("bad color!");
 #endif
-	SetBColor(col);
+	SetBColor(MAKE_INT(col));
 }
 
 static int OffScreen(long line_num)
@@ -464,7 +464,7 @@ void MainScreen()
 	SetTColor(MainCol);
 	SetBColor(MainBkCol);
 #endif
-	Wrap((object)MainWrap);
+	Wrap(MAKE_INT(MainWrap));
 #endif // not BACKEND
 	current_screen = MAIN_SCREEN;
 }
@@ -558,7 +558,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 		if (val == NOVALUE) 
 			copy_string( val_string, "<no value>", DV_len);
 		else if (IS_ATOM_INT(val)) {
-			iv = (int)val;
+			iv = INT_VAL(val);
 			snprintf(val_string,  DV_len, "%ld", (long)iv);
 			if (iv >= ' ' && iv <= 127)
 				add_char = TRUE;

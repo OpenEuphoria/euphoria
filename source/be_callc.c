@@ -1157,7 +1157,6 @@ object call_c(int func, object proc_ad, object arg_list)
 /* Call a C function in a DLL or shared library. 
    Alternatively, call a machine-code routine at a given address. */
 {
-	/* check for unnecessary or incorrect casts to arg JAG */
 	volatile uint64_t arg;  // !!!! magic var to push values on the stack
 	volatile int argsize;   // !!!! number of bytes to pop 
 	
@@ -1285,9 +1284,9 @@ object call_c(int func, object proc_ad, object arg_list)
 		next_size = type_stack_pop(&next_size_ptr);
 		
 		if (IS_ATOM_INT(next_size))
-			size = (uintptr_t)next_size;
+			size = INT_VAL(next_size);
 		else if (IS_ATOM(next_size))
-			size = (uintptr_t)DBL_TO_OBJ(DBL_PTR(next_size)->dbl);
+			size = (uintptr_t)DBL_PTR(next_size)->dbl;
 		else 
 			RTFatal("This C routine was defined using an invalid argument type");
 
@@ -1327,7 +1326,7 @@ object call_c(int func, object proc_ad, object arg_list)
 				/* C_FLOAT */
 				flt_arg.flt = (float)dbl_arg.dbl;
 				#if INTPTR_MAX == INT32_MAX && __ARM_PCS_VFP != 1
-					arg = (uint64_t)(uintptr_t)flt_arg.int32;
+					arg = (uintptr_t)flt_arg.int32;
 					PUSH_INT_ARG
 				#elif INTPTR_MAX == INT64_MAX || __ARM_PCS_VFP == 1
 					if( FP_ARG_COUNTER < MAX_FP_PARAM_REGISTERS ){
@@ -1344,13 +1343,13 @@ object call_c(int func, object proc_ad, object arg_list)
 		}
 		else if( size == C_POINTER ){
 			if (IS_ATOM_INT(next_arg)) {
-				arg = (uint64_t)next_arg;
+				arg = next_arg;
 				PUSH_INT_ARG
 			}
 			else if (IS_ATOM(next_arg)) {
 				// atoms are rounded to integers
 				
-				arg = (uint64_t)DBL_TO_OBJ(DBL_PTR(next_arg)->dbl); //correct
+				arg = (uint64_t)(uintptr_t)DBL_PTR(next_arg)->dbl; //correct
 				// if it's a -ve f.p. number, Watcom converts it to long and
 				// then to unsigned long. This is exactly what we want.
 				// Works with the others too. 
@@ -1365,9 +1364,9 @@ object call_c(int func, object proc_ad, object arg_list)
 				// atoms are converted to and rounded to 64-bit values, 
 				// this is lossess on both 32 and 64 bit.
 				#ifdef EARM
-				PUSH_INT64_ARG((int64_t)(DBL_PTR(next_arg)->dbl));
+				PUSH_INT64_ARG((int64_t)DBL_PTR(next_arg)->dbl);
 				#else
-				PUSH_INT64_ARG((int64_t)(DBL_PTR(next_arg)->dbl));
+				PUSH_INT64_ARG((uint64_t)DBL_PTR(next_arg)->dbl);
 				#endif
 			}
 		}
@@ -1389,21 +1388,21 @@ object call_c(int func, object proc_ad, object arg_list)
 					}
 					RefDS(next_arg);
 				}
-				arg = (uint64_t)(uintptr_t) next_arg;
+				arg = (uintptr_t) next_arg;
 				PUSH_INT_ARG
 			} 
 			else if (IS_ATOM_INT(next_arg)) {
-				arg = (uint64_t)(uintptr_t)next_arg;
+				arg = (uintptr_t) next_arg;
 				PUSH_INT_ARG
 			}
 			else if (IS_ATOM(next_arg)) {
 				// atoms are rounded to integers
 				#ifdef EARM
 				if( size == C_INT )
-					arg = (uint64_t)DBL_TO_OBJ(DBL_PTR(next_arg)->dbl); //correct
+					arg = (intptr_t)DBL_PTR(next_arg)->dbl; //correct
 				else
 				#endif
-				arg = (uint64_t)DBL_TO_OBJ(DBL_PTR(next_arg)->dbl);
+				arg = (uintptr_t)DBL_PTR(next_arg)->dbl;
 				
 				PUSH_INT_ARG
 			}
@@ -1475,7 +1474,7 @@ object call_c(int func, object proc_ad, object arg_list)
 		#endif
 		call_routine(int64_t);
 		if( int64_t_result <= (long long int)MAXINT && int64_t_result >= (long long int)MININT ){
-			return (object) int64_t_result;
+			return (intptr_t) int64_t_result;
 		}
 		else{
 			return NewDouble( (eudouble) int64_t_result );
@@ -1492,7 +1491,7 @@ object call_c(int func, object proc_ad, object arg_list)
 		call_routine(int);
 		if (return_type == C_POINTER ){
 			if ((uintptr_t)int_result <= (uintptr_t)MAXINT) {
-				return (object)(uintptr_t)int_result;
+				return (intptr_t)(uintptr_t)int_result;
 			}
 			else{
 				return NewDouble((eudouble)(uintptr_t)int_result);
@@ -1503,8 +1502,8 @@ object call_c(int func, object proc_ad, object arg_list)
 			// check if unsigned result is required 
 			if ((return_type & C_TYPE) == 0x02000000) {
 				// unsigned integer result
-				if ((unsigned int)int_result <= (uintptr_t)MAXINT) {
-					return (object)(unsigned int)int_result;
+				if ((unsigned)int_result <= (uintptr_t)MAXINT) {
+					return (intptr_t)(unsigned int)int_result;
 				}
 				else
 					return NewDouble((eudouble)(unsigned int)int_result);
@@ -1512,15 +1511,15 @@ object call_c(int func, object proc_ad, object arg_list)
 			else {
 				// signed integer result
 				if( return_type == C_INT ){
-					if( ((int)int_result) >= (int)MININT && ((int)int_result) <= (int)MAXINT ){
-						return (object)(int)int_result;
+					if( ((intptr_t)(int)int_result) >= MININT && ((intptr_t)(int)int_result) <= MAXINT ){
+						return (intptr_t)(int)int_result;
 					}
 					else{
 						return NewDouble((eudouble)(int)int_result);
 					}
 				}
 				else if (return_type > E_INTEGER ||
-					((int)int_result >= (int)MININT && (int)int_result <= (int)MAXINT) ) {
+					((intptr_t)int_result >= MININT && (intptr_t)int_result <= MAXINT) ) {
 					return (object) int_result;
 				}
 				else {
@@ -1533,8 +1532,8 @@ object call_c(int func, object proc_ad, object arg_list)
 			// check if unsigned result is required
 			if ((return_type & C_TYPE) == 0x02000000) {
 				// unsigned integer result
-				if ((unsigned long int)int_result <= (unsigned long int)MAXINT) {
-					return (object)(unsigned long int)int_result;
+				if ((unsigned long int)int_result <= (uintptr_t)MAXINT) {
+					return (unsigned long int)int_result;
 				}
 				else
 					return NewDouble((eudouble)(unsigned long int)int_result);
@@ -1542,8 +1541,8 @@ object call_c(int func, object proc_ad, object arg_list)
 			else {
 				// signed long result
 				if (return_type >= E_INTEGER ||
-					((long)int_result >= (long)MININT && (long)int_result <= (long)MAXINT)) {
-					return (object)(long)int_result;
+					((long)int_result >= (intptr_t)MININT && (long)int_result <= (intptr_t)MAXINT)) {
+					return (long)int_result;
 				}
 				else
 					return NewDouble((eudouble) (long int)int_result);
@@ -1554,16 +1553,16 @@ object call_c(int func, object proc_ad, object arg_list)
 		}
 		/* less common cases */
 		else if (return_type == C_UCHAR) {
-			return (object)(unsigned char)int_result;
+			return (unsigned char)int_result;
 		}
 		else if (return_type == C_CHAR) {
-			return (object)(signed char) int_result;
+			return (signed char) int_result;
 		}
 		else if (return_type == C_USHORT) {
-			return (object)(unsigned short)int_result;
+			return (unsigned short)int_result;
 		}
 		else if (return_type == C_SHORT) {
-			return (object)(short)int_result;
+			return (short)int_result;
 		}
 		else
 			return 0; // unknown function return type

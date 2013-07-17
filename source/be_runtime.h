@@ -229,7 +229,7 @@ object eu_sizeof( object data_type );
 int getKBchar();
 
 #if INTPTR_MAX == INT32_MAX
-#define CALLBACK_POINTER (uintptr_t)0x12345678
+#define CALLBACK_POINTER 0x12345678
 #define general_ptr_magic 0xF001F001
 
 #elif INTPTR_MAX == INT64_MAX

@@ -21,35 +21,16 @@
 #include "be_machine.h"
 #include "be_runtime.h"
 #include "be_socket.h"
-#include "execute.h"
 
 /* return value as a C int irregardless whether it is a double pointed to by this as an encoded pointer, or if it in itself is an
   ATOM_INT.   This may return a bad result if x is an encoded double of an extreme value. */
-/* This won't work... Shouldn't it be '&' and not '|' ? Let's make it a function.
 #define ATOM_INT_VAL(x) (int)(((((unsigned long)x) | 0xE0000000) == 0xA0000000) ? DBL_PTR(x)->dbl : x)
-*/
 
 /* Return 1 iff this ATOM, x, has a fraction part. */
-/* Not used
 #define HAS_FRACTION_PART(x)  (((((unsigned long)x) | 0xE0000000) == 0xA0000000) ? (DBL_PTR(x)->dbl != (double)(int)DBL_PTR(x)->dbl) : 0)
-*/
 
 /* Return 0 iff this ATOM, x, has a fraction part */
-/* Not used
 #define DOESNT_HAVE_FRACTION_PART(x) (((((unsigned long)x) | 0xE0000000) == 0xA0000000) ? (DBL_PTR(x)->dbl == (double)(int)DBL_PTR(x)->dbl) : 1)
-*/
-
-inline int ATOM_INT_VAL(object x)
-{
-	if (IS_ATOM_INT(x)) {
-		return (int)x;
-	} else if (IS_ATOM_DBL(x)) {
-		return (int)(DBL_PTR(x)->dbl);
-	} else {
-		RTFatal("an integer was expected, not a sequence.");
-	}
-		
-}
 
 inline int NOT_USHORT_VALUE(object x) {
 	if IS_ATOM_INT(x) {
@@ -1340,7 +1321,7 @@ object eusock_getservbyname(object x)
 	result_s = NewS1(3); // official name, port
 	result_s->base[1] = NewString(ent->s_name);
 	result_s->base[2] = NewString(ent->s_proto);
-	result_s->base[3] = ntohs(ent->s_port);
+	result_s->base[3] = MAKE_INT(ntohs(ent->s_port));
 
 	return MAKE_SEQ(result_s);
 }
@@ -1376,7 +1357,7 @@ object eusock_getservbyport(object x)
 	}
 
 	// ent is static data, do not release
-	ent = getservbyport(htons(port), proto);
+	ent = getservbyport(htons(INT_VAL(port)), proto);
 
 	if (proto != 0)
 	{
@@ -1391,7 +1372,7 @@ object eusock_getservbyport(object x)
 	result_s = NewS1(3); // official name, port
 	result_s->base[1] = NewString(ent->s_name);
 	result_s->base[2] = NewString(ent->s_proto);
-	result_s->base[3] = ntohs(ent->s_port);
+	result_s->base[3] = MAKE_INT(ntohs(ent->s_port));
 
 	return MAKE_SEQ(result_s);
 }
@@ -1448,7 +1429,7 @@ object eusock_build_hostent(struct hostent *ent)
 	result_s->base[1] = NewString(ent->h_name);
 	result_s->base[2] = MAKE_SEQ(aliases_s);
 	result_s->base[3] = MAKE_SEQ(ips_s);
-	result_s->base[4] = ent->h_addrtype;
+	result_s->base[4] = MAKE_INT(ent->h_addrtype);
 
 	return MAKE_SEQ(result_s);
 }
@@ -1563,7 +1544,7 @@ object eusock_socket(object x)
 		RTFatal("third argument to socket must be an integer");
 
 
-	sock = socket((int)af, (int)type, (int)protocol);
+	sock = socket(INT_VAL(af), INT_VAL(type), INT_VAL(protocol));
 	if (sock == INVALID_SOCKET)
 	{
 		return eusock_geterror();
@@ -1574,8 +1555,8 @@ object eusock_socket(object x)
 	addr->sin_port   = 0;
 
 	result_p = NewS1(2);
-	result_p->base[1] = UINT_TO_OBJ((unsigned long)sock);
-	result_p->base[2] = UINT_TO_OBJ((uintptr_t)addr);
+	result_p->base[1] = MAKE_UINT((unsigned long)sock);
+	result_p->base[2] = MAKE_UINT((uintptr_t)addr);
 	
 	return MAKE_SEQ(result_p);
 }
@@ -1664,7 +1645,7 @@ object eusock_connect(object x)
 	s    = ATOM_INT_VAL(SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET]);
 	addr = (struct sockaddr_in *)get_pos_int("connect", SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKADDR]);
 
-	addr->sin_port = htons(he_port);
+	addr->sin_port = htons(INT_VAL(he_port));
 
 	address_s = SEQ_PTR(SEQ_PTR(x)->base[2]);
 	address   = EMalloc(address_s->length+1);
@@ -1720,8 +1701,8 @@ object eusock_select(object x)
 	socks_pwrite = SEQ_PTR(base[2]);
 	socks_perr = SEQ_PTR(base[3]);
 	socks_pall = SEQ_PTR(base[4]);
-	timeout_microsecs = (int)base[5];
-	timeout_sec = (int)base[6];
+	timeout_microsecs = INT_VAL(base[5]);
+	timeout_sec = INT_VAL(base[6]);
 	max_sock = 0;
 
 	// prepare our fd_set
@@ -1817,7 +1798,7 @@ object eusock_send(object x)
 	MakeCString(buf, SEQ_PTR(x)->base[2], buf_s->length + 1);
 
 	eusock_ensure_init();
-	result = send(s, buf, buf_s->length, flags);
+	result = send(s, buf, buf_s->length, INT_VAL(flags));
 
 	EFree(buf);
 
@@ -1826,7 +1807,7 @@ object eusock_send(object x)
 		return eusock_geterror();
 	}
 
-	return UINT_TO_OBJ(result);
+	return MAKE_UINT(result);
 }
 
 /*
@@ -1848,7 +1829,7 @@ object eusock_recv(object x)
 	s     = ATOM_INT_VAL(SEQ_PTR(base1)->base[SOCK_SOCKET]);
 	
 	eusock_ensure_init();
-	result = recv(s, buf, BUFF_SIZE - 1, flags);
+	result = recv(s, buf, BUFF_SIZE - 1, INT_VAL(flags));
 
 	if (result > 0) {
 		return NewSequence(buf, result);
@@ -1891,9 +1872,9 @@ object eusock_sendto(object x)
 		RTFatal("fifth argument to sendto must be an integer");
 
 	s     = ATOM_INT_VAL(SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET]);
-	flags = (int)xflags;
+	flags = INT_VAL(xflags);
     ip_s  = SEQ_PTR(SEQ_PTR(x)->base[4]);
-    port  = (int)xport;
+    port  = INT_VAL(xport);
 
 	buf_s = SEQ_PTR(SEQ_PTR(x)->base[2]);
 	buf   = EMalloc(buf_s->length+1);
@@ -2025,7 +2006,7 @@ object eusock_listen(object x)
 	s       = ATOM_INT_VAL(SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET]);
 
 	eusock_ensure_init();
-	if (listen(s, backlog) == SOCKET_ERROR)
+	if (listen(s, INT_VAL(backlog)) == SOCKET_ERROR)
 	{
 		return eusock_geterror();
 	}
@@ -2062,7 +2043,7 @@ object eusock_accept(object x)
 	}
 
 	client_sock_p = NewS1(2);
-	client_sock_p->base[1] = UINT_TO_OBJ(client);
+	client_sock_p->base[1] = MAKE_UINT(client);
 	client_sock_p->base[2] = 0;
 
 	client_seq = NewS1(2);
@@ -2108,7 +2089,7 @@ object eusock_getsockopt(object x)
 		break;
 	}
 
-	return UINT_TO_OBJ(optval);
+	return MAKE_UINT(optval);
 }
 
 /*
@@ -2141,6 +2122,6 @@ object eusock_setsockopt(object x)
 		return eusock_geterror();
 	}
 
-	return optval;
+	return MAKE_INT(optval);
 }
 

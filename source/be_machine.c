@@ -219,13 +219,12 @@ static int MySetEnv(const char *name, const char *value, const int overwrite) {
 #endif
 
 /* Converts any atom to an integer object if the atom's value can be expressed as such, otherwise return unchanged. */
-/* Convert this to macro? */
 object ATOM_TO_ATOM_INT( object X ) {
-	if ( !IS_ATOM_INT( X ) && IS_ATOM( X ) ) { 
+	if ( IS_ATOM( X ) && !IS_ATOM_INT( X ) ) { 
 		double TMP_dbl = DBL_PTR( X )->dbl;
-		int TMP_x = (int)(TMP_dbl);
-		if( (IS_ATOM_INT(TMP_x)) && (TMP_dbl == (double)TMP_x) ){
-			X = (object)TMP_x;
+		int TMP_x = (object)TMP_dbl;
+		if( (TMP_x + HIGH_BITS < 0) && (TMP_dbl == (double)TMP_x) ){
+			X = MAKE_INT((object)TMP_dbl);
 		}
 	}
 	return X;
@@ -235,9 +234,9 @@ uintptr_t get_pos_int(char *where, object x)
 /* return a positive integer value if possible */
 {
 	if (IS_ATOM_INT(x))
-		return (uintptr_t)x;
+		return INT_VAL(x);
 	else if (IS_ATOM(x))
-		return (uintptr_t)(DBL_PTR(x)->dbl);
+		return (unsigned long)(DBL_PTR(x)->dbl);
 	else {
 		RTFatal("%s: an integer was expected, not a sequence", where);
 	}
@@ -276,24 +275,27 @@ uint64_t get_uint64( object x ){
 	RTFatal("an integer was expected, not a sequence");
 }
 
-/* return an integer value if possible, truncated to the size of an object. */
 object get_int(object x)
+/* return an integer value if possible, truncated to the size of an object. */
 {
 	if (IS_ATOM_INT(x)){
 		return x;
 	}
 
 	if (IS_ATOM(x)){
-		return (object)(int)(DBL_PTR(x)->dbl);
+		if (DBL_PTR(x)->dbl <= 0.0){
+			return (object)(DBL_PTR(x)->dbl);
+		}
+		else{
+			return (object)(uintptr_t)(DBL_PTR(x)->dbl);
+		}
 	}
 	RTFatal("an integer was expected, not a sequence");
 
 }
 
 /* Note: side effects could happen from double eval of x */
-/* Not used.
 #define Get_Int(x) (IS_ATOM_INT(x) ? INT_VAL(x) : get_int(x))
-*/
 
 #ifdef EUNIX
 struct termios savetty; // initial tty state for STDIN
@@ -535,7 +537,7 @@ static object TextRows(object x)
 	UNUSED(x);
 #endif
 	NewConfig(TRUE);
-	return (object)line_max;
+	return MAKE_INT(line_max);
 }
 
 object Wrap(object x)
@@ -859,7 +861,7 @@ static object user_allocate(object x)
 	addr = EMalloc(nbytes);
 #endif
 
-	return UINT_TO_OBJ(addr);
+	return MAKE_UINT(addr);
 }
 
 static object Where(object x)
@@ -1141,7 +1143,7 @@ typedef struct _SYSTEMTIME {
 			if (file_info.nFileSizeLow > MAXINT) {
 				obj_ptr[3] = NewDouble((eudouble)file_info.nFileSizeLow);
 			} else {
-				obj_ptr[3] = (object)file_info.nFileSizeLow;
+				obj_ptr[3] = MAKE_INT((object)file_info.nFileSizeLow);
 			}
 		}
 		else
@@ -1268,7 +1270,7 @@ static object Dir(object x)
 		}
 		else {
 			if ((stbuf.st_mode & S_IFMT) == S_IFDIR)
-				Append(temp, *temp, (object)('d'));
+				Append(temp, *temp, MAKE_INT('d'));
 
 			if( stbuf.st_size > MAXINT ){
 				obj_ptr[3] = NewDouble( (eudouble) stbuf.st_size );
@@ -1527,8 +1529,8 @@ static object GetPosition()
 #endif
 
 	GetTextPositionP(&pos);
-	obj_ptr[1] = (object)(pos.row);
-	obj_ptr[2] = (object)(pos.col);
+	obj_ptr[1] = MAKE_INT(pos.row);
+	obj_ptr[2] = MAKE_INT(pos.col);
 
 	return MAKE_SEQ(result);
 }
@@ -1758,8 +1760,8 @@ static object warning_file(object x)
 	}
 	if IS_ATOM(x) {
 		TempWarningName = NULL;
-		if (!IS_ATOM_INT(x)) x = DBL_TO_OBJ(DBL_PTR(x)->dbl);
-		display_warnings = ((int)x >= 0)?1:0;
+		if (!IS_ATOM_INT(x)) x = (long)(DBL_PTR(x)->dbl);
+		display_warnings = (INT_VAL(x) >= 0)?1:0;
 	}
 	else {
 		TempWarningName = EMalloc(SEQ_PTR(x)->length + 1);
@@ -1801,7 +1803,7 @@ static object e_sleep(object x)
 
 	if IS_ATOM(x) {
 		if (IS_ATOM_INT(x)) {
-			t = (eudouble)x;
+			t = (eudouble)INT_VAL(x);
 		} else {
 			t = DBL_PTR(x)->dbl;
 		}
@@ -1997,10 +1999,10 @@ static object atom_to_float80(object x)
 	len = 10;
 
 	if (IS_ATOM_INT(x)) {
-		d = (long double)x;
+		d = (long double)INT_VAL(x);
 	}
 	else if (IS_ATOM(x)) {
-		d = (long double)(DBL_PTR(x)->dbl);
+		d = (long double) DBL_PTR(x)->dbl;
 	}
 	else
 		len = 0;
@@ -2021,7 +2023,7 @@ static object atom_to_float64(object x)
 
 	len = 8;
 	if (IS_ATOM_INT(x)) {
-		d = (double)x;
+		d = (double)INT_VAL(x);
 	}
 	else if (IS_ATOM(x)) {
 		d = DBL_PTR(x)->dbl;
@@ -2039,7 +2041,7 @@ static object atom_to_float32(object x)
 
 	len = 4;
 	if (IS_ATOM_INT(x)) {
-		f = (float)x;
+		f = (float)INT_VAL(x);
 	}
 	else if (IS_ATOM(x)) {
 		f = (float)(DBL_PTR(x)->dbl);
@@ -2130,7 +2132,7 @@ object OpenDll(object x)
 		}
 		open_dll_list[open_dll_count++] = lib;
 	}
-	return UINT_TO_OBJ(lib);
+	return MAKE_UINT(lib);
 }
 
 object DefineCVar(object x)
@@ -2173,7 +2175,7 @@ object DefineCVar(object x)
 		return ATOM_M1;
 #endif
 	addr = (uintptr_t)variable_address;
-	return UINT_TO_OBJ(addr);
+	return MAKE_UINT(addr);
 }
 
 
@@ -2298,7 +2300,7 @@ object DefineC(object x)
 			t = *arg;
 		}
 		else if (IS_ATOM(*arg)) {
-			t = (uintptr_t)(DBL_PTR(*arg)->dbl);
+			t = (uintptr_t)DBL_PTR(*arg)->dbl;
 		}
 		else
 			RTFatal("argument type may not be a sequence");
@@ -2317,7 +2319,7 @@ object DefineC(object x)
 		t = return_size;
 	}
 	else if (IS_ATOM(return_size)) {
-		t = (uintptr_t)(DBL_PTR(return_size)->dbl);
+		t = (uintptr_t)DBL_PTR(return_size)->dbl;
 	}
 	else
 		RTFatal("return type must be an atom");
@@ -2616,7 +2618,7 @@ object CallBack(object x)
 	addr = (uintptr_t)copy_addr;
 
 	/* Return new address. */
-	return UINT_TO_OBJ(addr);
+	return MAKE_UINT(addr);
 }
 
 object internal_general_call_back(
@@ -2939,7 +2941,7 @@ object machine(object opcode, object x)
 	while (TRUE) {
 		switch(opcode) {  /* tricky - could be atom or sequence */
 			case M_COMPLETE:
-				return (object)COMPLETE_MAGIC;
+				return MAKE_INT(COMPLETE_MAGIC);
 				break;
 				
 			case M_SET_T_COLOR:
@@ -3067,7 +3069,7 @@ object machine(object opcode, object x)
 			case M_CHECK_BREAK:
 				temp = control_c_count;
 				control_c_count = 0;
-				return (int)temp;
+				return MAKE_INT(temp);
 				break;
 				
 			case M_MEM_COPY:
@@ -3414,7 +3416,7 @@ object machine(object opcode, object x)
 					d = DBL_PTR(opcode)->dbl;
 					if (d < 0.0 || d >= MAXINT_DBL)
 						RTFatal("the first argument of machine_proc/func must be a small positive integer");
-					opcode = DBL_TO_OBJ(d);
+					opcode = (object)d;
 				}
 				else {
 					RTFatal("the first argument of machine_proc/func must be an integer");

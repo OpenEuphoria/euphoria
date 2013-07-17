@@ -16,21 +16,24 @@
 #include <stdio.h>
 #include <math.h>
 
-/******************************************************************************
+/***************************************************************************
+*
+*
  32 bit number range:
   0X8      0XA      0XC      0XE      0X0      0X2      0X4      0X6      0X8
--4*2^29  -3*2^29  -2*2^29   -1^29    0*2^29   1*2^29   2*2^29   3*2^29   4*2^29
+-4*2^29  -3*2^29  -2*2^29-1  -2^29   0*2^29   1*2^29   2*2^29   3*2^29 4*2^29 
    *--------*--------*--------*--------*--------*--------*--------*--------o
                      o NOVALUE = -2*2^29-1
-                     o<-----------ATOM_INT---------[-2*2^29..4*2^29)------>o
-            |<----------------ATOM_DBL-------[-3*2^29..4*2^29)------------>o
+		     o<-----------ATOM_INT---------[-2*2^29..4*2^29)------>o
+	    |<----------------ATOM_DBL-------[-3*2^29..4*2^29)------------>o
 -->|        |<-- IS_SEQUENCE [-4*2^29..-3*2^29)
 -->|                 o<--- IS_DBL_OR_SEQUENCE [-4*2^29..-2*2^29-1)
 -->|sequence|<-------
 ----------->| double |<-----------------------------------------------------
                      |<--------     integer    --------->|
-   |<--------------------- object ---------------------->|
-******************************************************************************/
+   |<--------------------- object ---------------------->|		     
+*
+****************************************************************************/
 
 #undef MININT
 
@@ -68,21 +71,15 @@ typedef int int128_t __attribute__((mode(TI)));
 #define IS_ATOM_INT_NV(ob)    ((intptr_t)(ob) >= NOVALUE)
 
 #ifdef __GNUC__
-#define INT_TO_OBJ(x) (({ object _x = (object)(x); \
-							IS_ATOM_INT(_x) ? _x : NewDouble((eudouble)_x);}))
-
-#define UINT_TO_OBJ(x) ((object) \
-						({ uintptr_t _x = (uintptr_t)(x); \
+#define MAKE_UINT(x) ((object)( \
+						{ uintptr_t _x = x; \
 							_x < (uintptr_t)TOO_BIG_INT \
 							? _x : NewDouble((eudouble)_x);}))
-
 #else
-/* Without GNU extension for macro return values. Watch for side effects */
-#define INT_TO_OBJ(x)	((IS_ATOM_INT(x) ? (object)(x) : NewDouble((eudouble)(object)(x)))
-
-#define UINT_TO_OBJ(x)	((object)((uintptr_t)(x) < (uintptr_t)TOO_BIG_INT \
-						? (uintptr_t)(x) : NewDouble((eudouble)(uintptr_t)(x))))
-
+/* Watch for side effects */
+#define MAKE_UINT(x) ((object)((uintptr_t)x < (uintptr_t)TOO_BIG_INT \
+                          ? (uintptr_t)x : \
+                            NewDouble((eudouble)(uintptr_t)x)))
 #endif
 
 /* these are obsolete */
@@ -92,6 +89,7 @@ typedef int int128_t __attribute__((mode(TI)));
 */
 
 #define DBL_TO_OBJ(d)	((object)(int64_t)(d))
+
 
 /* N.B. the following distinguishes DBL's from SEQUENCES -
    must eliminate the INT case first */
