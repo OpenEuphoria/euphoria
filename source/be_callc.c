@@ -1285,7 +1285,9 @@ object call_c(int func, object proc_ad, object arg_list)
 		
 		if (IS_ATOM_INT(next_size))
 			size = INT_VAL(next_size);
-		else if (IS_ATOM(next_size))
+		else if (IS_ATOM(next_size) && DBL_PTR(next_size)->dbl > 0.0)
+			// Do we need to verify the sign or can we assume > 0? JAG
+			// Do we need to check bounds? JAG
 			size = (uintptr_t)DBL_PTR(next_size)->dbl;
 		else 
 			RTFatal("This C routine was defined using an invalid argument type");
@@ -1346,14 +1348,19 @@ object call_c(int func, object proc_ad, object arg_list)
 				arg = next_arg;
 				PUSH_INT_ARG
 			}
-			else if (IS_ATOM(next_arg)) {
+			else if (IS_ATOM(next_arg) && DBL_PTR(next_arg)->dbl > 0.0
+					&& DBL_PTR(next_arg)->dbl <= (eudouble)UINT64_MAX) {
 				// atoms are rounded to integers
-				
+				// Do we really need both casts? Maybe do a sign check.
+				// We can usually assume that pointers > 0 but is that a
+				// valid assumption? Do we need to check bounds? JAG
 				arg = (uint64_t)(uintptr_t)DBL_PTR(next_arg)->dbl; //correct
 				// if it's a -ve f.p. number, Watcom converts it to long and
 				// then to unsigned long. This is exactly what we want.
 				// Works with the others too. 
 				PUSH_INT_ARG
+			}else{
+				RTFatal("argument out of range.");
 			}
 		}
 		else if( size == C_LONGLONG ){
@@ -1366,7 +1373,15 @@ object call_c(int func, object proc_ad, object arg_list)
 				#ifdef EARM
 				PUSH_INT64_ARG((int64_t)DBL_PTR(next_arg)->dbl);
 				#else
-				PUSH_INT64_ARG((uint64_t)DBL_PTR(next_arg)->dbl);
+				// fix cast conversion for sign and include unsigned long long JAG
+				if( DBL_PTR(next_arg)->dbl > (eudouble)INT64_MAX
+					&& DBL_PTR(next_arg)->dbl <= (eudouble)UINT64_MAX ) {
+					PUSH_INT64_ARG((uint64_t)DBL_PTR(next_arg)->dbl);
+				}else if( DBL_PTR(next_arg)->dbl >= (eudouble)INT64_MIN ) {
+					PUSH_INT64_ARG((int64_t)DBL_PTR(next_arg)->dbl);
+				}else{
+					RTFatal("argument out of range.");
+				}
 				#endif
 			}
 		}
@@ -1402,7 +1417,18 @@ object call_c(int func, object proc_ad, object arg_list)
 					arg = (intptr_t)DBL_PTR(next_arg)->dbl; //correct
 				else
 				#endif
-				arg = (uintptr_t)DBL_PTR(next_arg)->dbl;
+				// arg = (uintptr_t)DBL_PTR(next_arg)->dbl;
+				// fix cast conversion for sign and include unsigned long long JAG
+				// I may have broken this for ARM, but what's with the
+				// if statement? JAG
+				if( DBL_PTR(next_arg)->dbl > (eudouble)INT64_MAX
+					&& DBL_PTR(next_arg)->dbl <= (eudouble)UINT64_MAX ) {
+					arg = ((uint64_t)DBL_PTR(next_arg)->dbl);
+				}else if( DBL_PTR(next_arg)->dbl >= (eudouble)INT64_MIN ) {
+					arg = ((int64_t)DBL_PTR(next_arg)->dbl);
+				}else{
+					RTFatal("argument out of range.");
+				}
 				
 				PUSH_INT_ARG
 			}
@@ -1488,6 +1514,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	
 	else {
 		// expect integer to be returned
+		// Maybe this can be changed to a switch? JAG
 		call_routine(int);
 		if (return_type == C_POINTER ){
 			if ((uintptr_t)int_result <= (uintptr_t)MAXINT) {

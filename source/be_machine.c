@@ -2516,8 +2516,10 @@ object CallBack(object x)
 					RTFatal("routine has too many parameters for call-back");
 		}
 	}
-#ifdef EOSX
+#if (INTPTR_MAX == INT32_MAX) && defined EOSX
 	// always use the custom call back handler for OSX
+	// -- Use the normal cdecl on 64-bit, and the custom one on 32-bit.
+	// Clean this up if it works.
 	addr = (uintptr_t)&osx_cdecl_call_back;
 #endif
 
