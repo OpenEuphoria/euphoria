@@ -364,7 +364,7 @@ float float_std_func(intptr_t i, intptr_t * op, long len) {
 	    case 4: return ((ffunc4)i)(op[0],op[1],op[2],op[3]);
 	    case 5: return ((ffunc5)i)(op[0],op[1],op[2],op[3],op[4]);
 	    case 6: return ((ffunc6)i)(op[0],op[1],op[2],op[3],op[4],op[5]); 
-		case 7: return ((func7)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6]);
+		case 7: return ((ffunc7)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6]);
 	    case 8: return ((ffunc8)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7]);
 	    case 9: return ((ffunc9)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8]);
 	    case 10: return ((ffuncA)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8],op[9]);
@@ -410,7 +410,7 @@ double double_std_func(intptr_t i, intptr_t * op, long len) {
 	    case 4: return ((dfunc4)i)(op[0],op[1],op[2],op[3]);
 	    case 5: return ((dfunc5)i)(op[0],op[1],op[2],op[3],op[4]);
 	    case 6: return ((dfunc6)i)(op[0],op[1],op[2],op[3],op[4],op[5]); 
-		case 7: return ((func7)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6]);
+		case 7: return ((dfunc7)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6]);
 	    case 8: return ((dfunc8)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7]);
 	    case 9: return ((dfunc9)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8]);
 	    case 10: return ((dfuncA)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8],op[9]);
