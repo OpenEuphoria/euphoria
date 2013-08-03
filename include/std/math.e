@@ -1439,7 +1439,7 @@ end function
 --		# ##values## : an object, all atoms of which will be added up, no matter how nested.
 --
 -- Returns:
---		An **atom**, the result of or'ing all atoms in [[:flatten]](##values##).
+--		An **atom**, the result of bitwise or of all atoms in [[:flatten]](##values##).
 --
 -- Comments:
 --
@@ -1447,8 +1447,16 @@ end function
 --
 -- Example 1:
 --   <eucode>
---   a = sum({10, 7, 35})
---   -- a is 47
+--   a = or_all({10, 7, 35})
+--   -- a is 47 
+--   -- To see why notice:
+--   -- 10=0b1010, 7=0b111 and 35=0b100011.
+--   -- combining these gives:
+--   --               0b001010
+--   --      (or_bits)0b000111
+--   --               0b100011
+--   --               --------
+--   --               0b101111 = 47
 --   </eucode>
 --
 -- See Also:
