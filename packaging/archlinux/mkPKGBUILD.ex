@@ -33,7 +33,7 @@ if file_exists("../win32/cleanbranch") then
 	system(sprintf("hg -R ../win32/cleanbranch pull", {}), SIMPLE_RUN)
 	-- update to the branch
 	system(sprintf("hg -R ../win32/cleanbranch update -r %s --clean", repeat(info:version_string_short(),1)), SIMPLE_RUN)
-	create_directory(sprintf("euphoria-%s", repeat(info:version_string_short(),1)), 7*64+5*8+5)
+	create_directory(sprintf("euphoria-%s", repeat(info:version_string_short(),1)), 0t755)
 	system("ln -sf `pwd`/../win32/cleanbranch/{source,include,bin,demo,docs,tests,tutorial,file_id.diz,License.txt} euphoria-" & info:version_string_short(), SIMPLE_RUN)
 	create_directory(sprintf("euphoria-%s/source/build", repeat(info:version_string_short(),1)))
 	delete_file("euphoria-" & info:version_string_short() & "/source/build/html")
