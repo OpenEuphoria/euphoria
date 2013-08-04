@@ -2,6 +2,8 @@
 
 === Bug Fixes
 
+* [[ticket:872]] fix documentation error involving ##[[:or_all]]##
+* [[ticket:880]] fix documentaiton error involving ##[[:poke2]]##
 * [[ticket:801]] fix translator memory leak for ##[[:insert]]##
 * [[ticket:799]] fix memory leak in ##[[:gets]]## when reading EOF
 * [[ticket:819]] use operating system sleep functions for fractions of seconds to avoid needless CPU utilization

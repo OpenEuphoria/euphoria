@@ -1495,7 +1495,7 @@ end function
 -- poke2(a+4, -12345)
 --
 -- -- poke 3 2-byte values at once:
--- poke4(a, {12345, #FF00, -12345})
+-- poke2(a, {12345, #FF00, -12345})
 -- </eucode>
 -- 
 -- See Also:
