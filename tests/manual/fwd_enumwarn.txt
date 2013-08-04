@@ -1,0 +1,19 @@
+
+Warning { literal_mismatch }:
+    <0608>:: The value passed to check_result as parameter 1 has different associated literal set than what is expected: It is a architecture and should be a status.
+Warning { literal_mismatch }:
+    <0608>:: The value passed to good_result as parameter 3 has different associated literal set than what is expected: It is a boolean and should be a architecture.
+Warning { literal_mismatch }:
+    <0607>:: The two values have different associated literal sets: MB_OKCANCELRETRY is of type button_type but X86 is of type architecture.
+Warning { literal_mismatch }:
+    <0607>:: The two values have different associated literal sets: y is of type architecture but t is of type button_type.
+Warning { literal_mismatch }:
+    <0607>:: The two values have different associated literal sets: s888999 is of type status but X86_64 is of type architecture.
+Warning { literal_mismatch }:
+    <0607>:: The two values have different associated literal sets: ARM is of type architecture but s888999 is of type status.
+Warning { literal_mismatch }:
+    <0607>:: The two values have different associated literal sets: t is of type button_type but z is of type architecture.
+Warning { literal_mismatch }:
+    <0607>:: The two values have different associated literal sets: ID_OK is of type status but z is of type architecture.
+Warning { literal_mismatch }:
+    <0607>:: The two values have different associated literal sets: MB_OKCANCELRETRY is of type button_type but z is of type architecture.

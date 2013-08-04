@@ -20,6 +20,9 @@
 include std/unittest.e
 include std/get.e
 include std/convert.e
+include std/io.e
+include std/filesys.e
+include std/pipeio.e
 
 sequence buf
 
@@ -155,5 +158,40 @@ test_equal( "X86 name_of", "X86", name_of( X86 ) )
 test_equal( "X86_64 name_of", "X86_64", name_of( X86_64 ) )
 test_equal( "ARM name_of", "ARM", name_of( ARM ) )
 
+
+-- Make sure the Alternative Literals are used in the Crash File (ex.err)
+sequence cmd            = command_line()
+sequence program_name   = cmd[1]
+ifdef EUI then
+	delete_file("ex.err")
+	while file_exists("ex.err") do
+	end while
+	system(sprintf("%s -batch crashing_program.ex", cmd[1..1]), 0)
+	while not file_exists("ex.err") do
+	end while
+	object file_contents = read_file("ex.err")
+	test_true("ex.err has alternative literals", match("p = (URANUS)7", file_contents))
+	delete_file("ex.err")
+	while file_exists("ex.err") do
+	end while
+	
+	delete_file("warnings.txt")
+	while file_exists("warnings.txt") do
+	end while
+	system(sprintf("%s -batch manual/t_enumwarn.e 2>&1 > warnings.txt", cmd[1..1]),0)
+	while file_exists("warnings.txt") = 0 do
+	end while
+	file_contents = read_file("warnings.txt")
+	test_equal("unforwarded enum type warnings", read_file("manual/no_fwd_enumwarn.txt"), file_contents)
+	
+	delete_file("warnings.txt")
+	while file_exists("warnings.txt") do
+	end while
+	system(sprintf("%s -batch manual/t_enumwarn_fwd.e 2>&1 > warnings.txt", cmd[1..1]),0)
+	while file_exists("warnings.txt") = 0 do
+	end while
+	file_contents = read_file("warnings.txt")
+	test_equal("forward referenced enum type warnings", read_file("manual/fwd_enumwarn.txt"), file_contents)
+end ifdef
 
 test_report()

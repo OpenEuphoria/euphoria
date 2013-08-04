@@ -1,0 +1,21 @@
+
+Warning { literal_mismatch }:
+    <0607>:: The two values have different associated literal sets: s888999 is of type status but t is of type button_type.
+Warning { literal_mismatch }:
+    <0607>:: The two values have different associated literal sets: MB_OKCANCEL is of type button_type but s888999 is of type status.
+Warning { literal_mismatch }:
+    <0607>:: The two values have different associated literal sets: MB_OKCANCELRETRY is of type button_type but ID_CANCEL is of type status.
+Warning { literal_mismatch }:
+    <0607>:: The two values have different associated literal sets: MB_OKCANCELRETRY is of type button_type but ID_RETRY is of type status.
+Warning { literal_mismatch }:
+    <0607>:: The two values have different associated literal sets: t is of type button_type but s888999 is of type status.
+Warning { literal_mismatch }:
+    <0607>:: The two values have different associated literal sets: ID_OK is of type status but t is of type button_type.
+Warning { literal_mismatch }:
+    <0608>:: The value passed to good_result as parameter 1 has different associated literal set than what is expected: It is a button_type and should be a status.
+Warning { literal_mismatch }:
+    <0608>:: The value passed to good_result as parameter 2 has different associated literal set than what is expected: It is a boolean and should be a button_type.
+Warning { literal_mismatch }:
+    <0608>:: The value passed to good_result as parameter 3 has different associated literal set than what is expected: It is a button_type and should be a boolean.
+Warning { literal_mismatch }:
+    <0608>:: The value passed to check_result as parameter 1 has different associated literal set than what is expected: It is a button_type and should be a status.
