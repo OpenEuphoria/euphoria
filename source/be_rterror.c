@@ -474,9 +474,9 @@ unsigned int CopyLiteral(symtab_ptr s_ptr, char * val_string, unsigned int max_l
 		symtab_ptr ls_symptr;
 		object val = s_ptr->obj;
 		object lit = MAKE_INT(0);
-		if (max_len <= 4)
-			return 0;
-		if ((lsobj = (long)s_ptr->u.var.ls) &&
+		if ((val != NOVALUE) &&
+		    (max_len > 4) &&
+			(lsobj = (long)s_ptr->u.var.ls) &&
 			(ls_symptr = &fe.st[lsobj]) &&
 			(ls_symptr->obj != NOVALUE) &&
 			(ls = SEQ_PTR(ls_symptr->obj)) &&
