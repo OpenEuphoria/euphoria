@@ -158,15 +158,20 @@ test_equal( "X86 name_of", "X86", name_of( X86 ) )
 test_equal( "X86_64 name_of", "X86_64", name_of( X86_64 ) )
 test_equal( "ARM name_of", "ARM", name_of( ARM ) )
 
-
 -- Make sure the Alternative Literals are used in the Crash File (ex.err)
 sequence cmd            = command_line()
 sequence program_name   = cmd[1]
+-- The special "device" that always accepts input
+ifdef WINDOWS then
+	constant NUL = "NUL"
+elsedef
+	constant NUL = "/dev/null"
+end ifdef
 ifdef EUI then
 	delete_file("ex.err")
 	while file_exists("ex.err") do
 	end while
-	system(sprintf("%s -batch crashing_program.ex", cmd[1..1]), 0)
+	system(sprintf("%s -batch crashing_program.ex > %s", {program_name, NUL}), 0)
 	while not file_exists("ex.err") do
 	end while
 	object file_contents = read_file("ex.err")

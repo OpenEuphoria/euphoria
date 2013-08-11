@@ -7073,6 +7073,12 @@ procedure do_exec(integer start_pc)
 		dblfn = ""
 		intcode_extra = ""
 		ifdef DEBUG then
+			if opcode > length(opnames) then
+				printf(2, "Bad opcode: %d\n" , { opcode } )
+			end if
+			if CurrentSub > length(SymTab) then
+				printf(2, "Bad Subroutine value: %d\n", {CurrentSub})
+			end if
 			c_stmt0( sprintf("// SubProg %s pc: %d op: %s (%d)\n", { SymTab[CurrentSub][S_NAME], pc, opnames[opcode], opcode }))
 		end ifdef
 		call_proc(operation[opcode], {})

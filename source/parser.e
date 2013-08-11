@@ -4552,8 +4552,10 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 	SymTab[p][S_RESIDENT_TASK] = 0
 	SymTab[p][S_SAVED_PRIVATES] = {}
 	SymTab[p][S_DEPRECATED] = deprecated
-	
+		
+	symtab_index tmp1
 	if type_enum then
+		tmp1 = NewTempSym()
 		SymTab[p][S_FIRSTLINE] = type_enum_gline
 		real_gline = gline_number
 		gline_number = type_enum_gline
@@ -4721,8 +4723,95 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 	if type_enum then
 		integer elist_base
 		tok_match(RETURN)
-		-- Create the body ourselves
+		putback(zero)
+		if not TRANSLATE then
+			if OpTrace then
+				emit_op(ERASE_PRIVATE_NAMES)
+				emit_addr(CurrentSub)
+			end if
+		end if
+		Expr()
+		FuncReturn = TRUE
+		emit_op(RETURNF)
+		flush_temps()
+		InitDelete()
+		flush_temps()
+		tok_match(END)
+	else
+		-- Parse a list of statements
+		Statement_list()
+		-- parse routine end.
+		tok_match(END)
+	end if
+
+	-- parse routine end.
+	tok_match(prog_type, END)
+
+	if prog_type != PROCEDURE then
+		if not FuncReturn then
+			if prog_type = FUNCTION then
+				CompileErr(120)
+			else
+				CompileErr(149)
+			end if
+		end if
+		emit_op(BADRETURNF) -- function/type shouldn't reach here
+
+	else
+		StartSourceLine(TRUE)
+		if not TRANSLATE then
+			if OpTrace then
+				emit_op(ERASE_PRIVATE_NAMES)
+				emit_addr(p)
+			end if
+		end if
+		emit_op(RETURNP)
+		if TRANSLATE then
+			emit_op(BADRETURNF) -- just to mark end of procedure
+		end if
+	end if
+	Drop_block( pt )
+
+	if Strict_Override > 0 then
+		Strict_Override -= 1	-- Reset at the end of each routine.
+	end if
+
+	SymTab[p][S_STACK_SPACE] += temps_allocated + param_num
+	if temps_allocated + param_num > max_stack_per_call then
+		max_stack_per_call = temps_allocated + param_num
+	end if
+	param_num = -1
+	
+	StraightenBranches()
+	check_inline( p )
+	param_num = -1
+	EnterTopLevel()
+
+	if type_enum then
+		symtab_pointer first_arg = SymTab[p][S_NEXT]
+		-- Patch the code in SymTab[p] so that it doesn't just return 0.
+		-- We cannot return a temporary it must be copied to the first argument
+		-- parameter instead.
 		switch literal_set:get_access_method(ls)  do
+			case SEQUENCE_PAIR then
+				-- find(x,ls_data[1])
+				-- {RETURNF, 160, 166, zero, BADRETURNF}
+				--? SymTab[p][S_CODE]
+				SymTab[p][S_CODE] = {
+				-- literal_set[1] => tmp1
+				RHS_SUBS, literal_set:emit_literals_data_structure(ls), one[T_SYM]} & tmp1 &
+				-- find_from(i1, tmp1, 1) => tmp1
+				FIND_FROM & i1_sym[T_SYM] & tmp1 & one[T_SYM] & i1_sym[T_SYM] &
+				-- -- tmp1 != 0 => tmp1
+				-- NOTEQ & i1_sym[T_SYM] & zero[T_SYM] & i1_sym[T_SYM] &
+				-- return the argument back again.
+				SymTab[p][S_CODE][1..$-2] & i1_sym[T_SYM] & BADRETURNF
+				--? SymTab[p][S_CODE]
+			case INDEX_MAP then
+				fallthru
+			case else
+				crash("Not yet implemented")
+			/*
 			case INDEX_MAP then
 				-- 0
 				putback(zero)
@@ -4779,85 +4868,9 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 				
 				-- 0
 				putback(zero)
-				
-
-			case SEQUENCE_PAIR then
-				-- find(x,ls_data[1])
-				putback({RIGHT_ROUND,0})
-					putback({RIGHT_SQUARE,0})
-					putback(one)
-					putback({LEFT_SQUARE,0})
-				putback({VARIABLE,literal_set:emit_literals_data_structure(ls)})
-				putback({COMMA,0})
-				putback(i1_sym)
-				putback({LEFT_ROUND,0})
-				putback(keyfind("find",-1))
+				*/
 		end switch
-		if not TRANSLATE then
-			if OpTrace then
-				emit_op(ERASE_PRIVATE_NAMES)
-				emit_addr(CurrentSub)
-			end if
-		end if
-		Expr()
-		FuncReturn = TRUE
-		emit_op(RETURNF)
-		flush_temps()
-		InitDelete()
-		flush_temps()
-		if literal_set:get_access_method(ls) = INDEX_MAP then
-			tok_match(END)
-		end if
-	else
-		-- Parse a list of statements
-		Statement_list()
-		-- parse routine end.
-		tok_match(END)
 	end if
-
-	-- parse routine end.
-	tok_match(prog_type, END)
-
-	if prog_type != PROCEDURE then
-		if not FuncReturn then
-			if prog_type = FUNCTION then
-				CompileErr(120)
-			else
-				CompileErr(149)
-			end if
-		end if
-		emit_op(BADRETURNF) -- function/type shouldn't reach here
-
-	else
-		StartSourceLine(TRUE)
-		if not TRANSLATE then
-			if OpTrace then
-				emit_op(ERASE_PRIVATE_NAMES)
-				emit_addr(p)
-			end if
-		end if
-		emit_op(RETURNP)
-		if TRANSLATE then
-			emit_op(BADRETURNF) -- just to mark end of procedure
-		end if
-	end if
-	Drop_block( pt )
-
-	if Strict_Override > 0 then
-		Strict_Override -= 1	-- Reset at the end of each routine.
-	end if
-
-	SymTab[p][S_STACK_SPACE] += temps_allocated + param_num
-	if temps_allocated + param_num > max_stack_per_call then
-		max_stack_per_call = temps_allocated + param_num
-	end if
-	param_num = -1
-	
-	StraightenBranches()
-	check_inline( p )
-	param_num = -1
-	EnterTopLevel()
-
 	-- need to patch up the SYM_NEXT chain in case of enum type
 	if length( enum_syms ) then
 		SymTab[p][S_NEXT] = SymTab[enum_syms[$]][S_NEXT]
