@@ -272,7 +272,7 @@ static int watch_count = 1;
 static void trace_command(object x)
 // perform trace(x)
 {
-	int i;
+	int i = 0;
 
 	if (IS_ATOM_INT(x)) {
 		i = x;
@@ -281,7 +281,7 @@ static void trace_command(object x)
 		i = (int)DBL_PTR(x)->dbl;
 	}
 	else
-		RTFatal("argument to trace() must be an atom");
+		RTFatal("argument to trace() must be an atom", i);
 
 #ifndef BACKEND
 		if (i == 0) {
@@ -496,7 +496,12 @@ static object do_peek4(object a, int b )
 		peek4_addr = (uint32_t *)a;
 	}
 	else if (IS_ATOM(a)) {
+#ifdef __arm__
+		double d = DBL_PTR(a)->dbl;
+		peek4_addr = (uint32_t*)(uintptr_t)d;
+#else
 		peek4_addr = (uint32_t *)(uintptr_t)(DBL_PTR(a)->dbl);
+#endif
 	}
 	else {
 		/* a sequence: {addr, nbytes} */
@@ -582,7 +587,13 @@ static void do_poke2(object a, object top)
 		temp_dbl = DBL_PTR(top)->dbl;
 		if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 			RTFatal(POKE_LIMIT(2));
-		*poke2_addr = (uint16_t) temp_dbl;
+#ifdef __arm__
+			a == trunc( temp_dbl );
+			*poke2_addr = (uint16_t) a;
+#else
+			*poke2_addr = (uint16_t) temp_dbl;
+#endif
+		
 	}
 	else {
 		/* second arg is sequence */
@@ -598,9 +609,15 @@ static void do_poke2(object a, object top)
 				if (top == NOVALUE)
 					break;
 				temp_dbl = DBL_PTR(top)->dbl;
+		
 				if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 					RTFatal( POKE_LIMIT(2) );
+#ifdef __arm__
+				a = trunc( DBL_PTR(top)->dbl );
+				*poke2_addr = (uint16_t) a;
+#else
 				*poke2_addr = (uint16_t) temp_dbl;
+#endif
 				++poke2_addr;
 			}
 			else {
@@ -635,7 +652,12 @@ static void do_poke8(object a, object top)
 		temp_dbl = DBL_PTR(top)->dbl;
 		if (temp_dbl < MIN_LONGLONG_DBL || temp_dbl > MAX_LONGLONG_DBL)
 			RTFatal("poke8 is limited to 64-bit numbers");
+#ifdef __arm__
+		a = trunc( temp_dbl );
+		*poke8_addr = (uint64_t) a;
+#else
 		*poke8_addr = (uint64_t) temp_dbl;
+#endif
 	}
 	else {
 		/* second arg is sequence */
@@ -653,7 +675,12 @@ static void do_poke8(object a, object top)
 				temp_dbl = DBL_PTR(top)->dbl;
 				if (temp_dbl < MIN_LONGLONG_DBL || temp_dbl > MAX_LONGLONG_DBL)
 					RTFatal("poke8 is limited to 64-bit numbers");
+#ifdef __arm__
+				a = trunc( temp_dbl );
+				*poke8_addr = (uint64_t) a;
+#else
 				*poke8_addr = (uint64_t) temp_dbl;
+#endif
 				++poke8_addr;
 			}
 			else {
@@ -670,13 +697,21 @@ static void do_poke4(object a, object top)
 	eudouble temp_dbl;
 	s1_ptr s1;
 	object_ptr obj_ptr;
+#ifdef __arm__
+	int32_t tmp_int;
+#endif
 
 	/* determine the address to be poked */
 	if (IS_ATOM_INT(a)) {
 		poke4_addr = (uint32_t *)INT_VAL(a);
 	}
 	else if (IS_ATOM(a)) {
+#ifdef __arm__
+		temp_dbl = DBL_PTR(a)->dbl;
+		poke4_addr = (uint32_t *)(uintptr_t)temp_dbl;
+#else
 		poke4_addr = (uint32_t *)(uintptr_t)(DBL_PTR(a)->dbl);
+#endif
 	}
 	else {
 		RTFatal("first argument to poke4 must be an atom");
@@ -689,7 +724,17 @@ static void do_poke4(object a, object top)
 		temp_dbl = DBL_PTR(top)->dbl;
 		if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 			RTFatal(POKE_LIMIT(4));
+#ifdef __arm__
+		if( temp_dbl < 0.0 ){
+			tmp_int = (int32_t) temp_dbl;
+		}
+		else{
+			tmp_int = (int32_t)(uint32_t) temp_dbl;
+		}
+		*poke4_addr = (uint32_t) tmp_int;
+#else
 		*poke4_addr = (uint32_t) temp_dbl;
+#endif
 	}
 	else {
 		/* second arg is sequence */
@@ -707,7 +752,17 @@ static void do_poke4(object a, object top)
 				temp_dbl = DBL_PTR(top)->dbl;
 				if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 					RTFatal(POKE_LIMIT(4));
+#ifdef __arm__
+				if( temp_dbl < 0.0 ){
+					tmp_int = (int32_t) temp_dbl;
+				}
+				else{
+					tmp_int = (int32_t)(uint32_t) temp_dbl;
+				}
+				*poke4_addr = (uint32_t) tmp_int;
+#else
 				*poke4_addr = (uint32_t) temp_dbl;
+#endif
 				++poke4_addr;
 			}
 			else {
@@ -1795,12 +1850,12 @@ void do_exec(intptr_t *start_pc)
 
 	/* address registers: (3 max) */
 	register intptr_t *pc;               /* program counter, kept in a register */
-	register object_ptr obj_ptr;    /* general pointer to an object */
+	register object_ptr obj_ptr = 0;    /* general pointer to an object */
 
 	/* data registers: (5 max) */
 	register object a;            /* another object */
 	volatile object v;            /* get compiler to do the right thing! */
-	register object top;          /* an object - hopefully kept in a register */
+	register object top = 0;          /* an object - hopefully kept in a register */
 	/*register*/ intptr_t i;           /* loop counter */
 
 	eudouble temp_dbl;
@@ -4221,7 +4276,6 @@ void do_exec(intptr_t *start_pc)
 				if (nvars < 2 ) {
 					if (end_pos >= seqlen) {   // return ""
 						*obj_ptr = MAKE_SEQ(NewS1(0));
-						Ref(*obj_ptr);
 						DeRef(top);
 					}
 				   	else
@@ -4619,7 +4673,12 @@ void do_exec(intptr_t *start_pc)
 					poke_addr = (char *)INT_VAL(a);
 				}
 				else if (IS_ATOM(a)) {
-					poke_addr = (char *)(uintptr_t)(DBL_PTR(a)->dbl);
+#ifdef __arm__
+					double d = DBL_PTR(a)->dbl;
+					poke_addr = (char*) (uintptr_t) d;
+#else
+					poke_addr = (char*) (uintptr_t) DBL_PTR(a)->dbl;
+#endif
 				}
 				else { /* sequence */
 						RTFatal(
@@ -4757,11 +4816,17 @@ void do_exec(intptr_t *start_pc)
 				b = top;
 
 				if (IS_ATOM_INT(b)) {
+					
 					*poke_addr = (uint8_t) b;
 				}
 				else if (IS_ATOM(b)) {
 					/* no check for overflow here.. hmm*/
+#ifdef __arm__
+					b = trunc( DBL_PTR(b)->dbl );
+					*poke_addr = (uint8_t) b;
+#else
 					*poke_addr = (uint8_t) DBL_PTR(b)->dbl;
+#endif
 				}
 				else {
 					/* second arg is sequence */
@@ -4775,7 +4840,12 @@ void do_exec(intptr_t *start_pc)
 						else if (IS_ATOM(b)) {
 							if (b == NOVALUE)
 								break;
+#ifdef __arm__
+							b = trunc( DBL_PTR(b)->dbl );
+							*poke_addr = (uint8_t) b;
+#else
 							*poke_addr = (uint8_t) DBL_PTR(b)->dbl;
+#endif
 						}
 						else {
 							RTFatal(
@@ -4817,7 +4887,12 @@ void do_exec(intptr_t *start_pc)
 					sub_addr = (void(*)())INT_VAL(a);
 				}
 				else if (IS_ATOM(a)) {
+#ifdef __arm__
+					tuint = (uintptr_t)(DBL_PTR(a)->dbl);
+					sub_addr = (void(*)())tuint;
+#else
 					sub_addr = (void(*)())(uintptr_t)(DBL_PTR(a)->dbl);
+#endif
 				}
 				else {
 					RTFatal("argument to call() must be an atom");

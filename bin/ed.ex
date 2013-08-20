@@ -276,6 +276,8 @@ sequence buffer -- In-memory buffer where the file is manipulated.
 -- This is a sequence where each element is a sequence
 -- containing one line of text. Each line of text ends with '\n'
 
+sequence buffer_multi -- remember if the line ended with an open multiline token
+
 positive_int screen_length  -- number of lines on physical screen
 positive_int screen_width
 
@@ -343,6 +345,7 @@ boolean stop         -- indicates when to stop processing current buffer
 
 sequence kill_buffer -- kill buffer of deleted lines or characters
 kill_buffer = {}
+
 
 boolean adding_to_kill  -- TRUE if still accumulating deleted lines/chars
 
@@ -504,6 +507,32 @@ procedure set_absolute_position(natural window_line, positive_int column)
 	position(window_base + window_line, column)
 end procedure
 
+function get_multiline( integer bline )
+	if bline > 0 and bline < length( buffer_multi ) then
+		integer multi = buffer_multi[bline]
+		if not multiline_token( multi ) then
+			-- have to back up...
+			integer prev = bline - 1
+			while prev and not multiline_token( buffer_multi[prev] ) do
+				prev -= 1
+			end while
+			for re_line = prev + 1 to bline do
+				SyntaxColor( buffer[re_line], , get_multiline( re_line - 1 ) )
+				buffer_multi[re_line] = last_multiline_token()
+			end for
+			multi = buffer_multi[bline]
+		end if
+		return multi
+	end if
+	return 0
+end function
+
+procedure set_multiline( integer bline, multiline_token multi )
+	if bline > 0 and bline < length( buffer_multi ) then
+		buffer_multi[bline] = multi
+	end if
+end procedure
+
 procedure DisplayLine(buffer_line bline, window_line sline, boolean all_clear)
 -- display a buffer line on a given line on the screen
 -- if all_clear is TRUE then the screen area has already been cleared before getting here.
@@ -515,7 +544,8 @@ procedure DisplayLine(buffer_line bline, window_line sline, boolean all_clear)
 	set_absolute_position(sline, 1)
 	if multi_color then
 		-- color display
-		color_line = SyntaxColor(this_line)
+		color_line = SyntaxColor(this_line, ,get_multiline( bline - 1 ))
+		set_multiline( bline, last_multiline_token() )
 		last_pos = 0
 		
 		for i = 1 to length(color_line) do
@@ -648,6 +678,7 @@ function add_line(file_number file_no)
 	
 	line = convert_tabs(STANDARD_TAB_WIDTH, edit_tab_width, clean(line))
 	buffer = append(buffer, line)
+	buffer_multi &= -1
 	return TRUE
 end function
 
@@ -656,6 +687,7 @@ procedure new_buffer()
 	buffer_list &= 0 -- place holder for new buffer
 	buffer_number = length(buffer_list) 
 	buffer = {}
+	buffer_multi = {}
 end procedure
 
 procedure read_file(file_number file_no)
@@ -947,6 +979,12 @@ constant W_BUFFER_NUMBER = 1,
 		 W_WINDOW_LENGTH = 4,
 		 W_B_LINE = 11
 
+enum
+	B_BUFFER,
+	B_MODIFIED,
+	B_VERSION,
+	B_MULTILINE,
+	$
 procedure save_state()
 -- save current state variables for a window
 	window_list[window_number] = {buffer_number, buffer_version, window_base, 
@@ -954,7 +992,7 @@ procedure save_state()
 								  dot_e, control_chars, cr_removed, file_name, 
 								  b_line, b_col, s_line, s_col, s_shift, 
 								  edit_tab_width}
-	buffer_list[buffer_number] = {buffer, modified, buffer_version}
+	buffer_list[buffer_number] = {buffer, modified, buffer_version, buffer_multi}
 end procedure
 
 procedure restore_state(window_id w)
@@ -967,9 +1005,10 @@ procedure restore_state(window_id w)
 	window_number = w
 	buffer_number =  state[W_BUFFER_NUMBER]
 	buffer_info = buffer_list[buffer_number]
-	buffer = buffer_info[1]
-	modified = buffer_info[2]
-	buffer_version = buffer_info[3]
+	buffer         = buffer_info[B_BUFFER]
+	modified       = buffer_info[B_MODIFIED]
+	buffer_version = buffer_info[B_VERSION]
+	buffer_multi   = buffer_info[B_MULTILINE]
 	buffer_list[buffer_number] = 0 -- save space
 	
 	-- restore other variables
@@ -1075,7 +1114,7 @@ function delete_window()
 -- delete the current window    
 	boolean buff_in_use
 	
-	buffer_list[buffer_number] = {buffer, modified, buffer_version}
+	buffer_list[buffer_number] = {buffer, modified, buffer_version, buffer_multi}
 	window_list = window_list[1..window_number-1] & 
 				  window_list[window_number+1..length(window_list)]
 	buff_in_use = FALSE
@@ -1952,6 +1991,7 @@ procedure insert(char key)
 		-- truncate this line and create a new line using tail
 		buffer[b_line] = head( buffer[b_line], b_col-1) & '\n'
 		buffer = eu:insert( buffer, tail, b_line + 1 )
+		buffer_multi = eu:insert( buffer_multi, -1, b_line + 1 )
 		
 		if s_line = window_length then
 			arrow_down()
@@ -1993,6 +2033,7 @@ procedure insert_string(sequence text)
 			insert(text[i])
 		else
 			buffer[b_line] = splice( buffer[b_line], text[i], b_col )
+			buffer_multi[b_line] = splice( buffer_multi[b_line], -1, b_col )
 			b_col += 1
 			if i = length(text) then
 				DisplayLine(b_line, s_line, FALSE)
@@ -2077,7 +2118,8 @@ procedure insert_kill_buffer()
 		insert_string(kill_buffer)
 	else
 		-- inserting a sequence of lines
-		buffer = splice( buffer, kill_buffer, b_line )
+		buffer       = splice( buffer, kill_buffer, b_line )
+		buffer_multi = splice( buffer_multi, repeat( -1, length( kill_buffer ) ), b_line )
 		DisplayWindow(b_line, s_line)
 		b_col = 1
 		s_col = 1

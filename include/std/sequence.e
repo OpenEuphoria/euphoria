@@ -150,6 +150,11 @@ public function store(sequence target, sequence indexes, object x)
 	sequence partials,result,branch
 	object last_idx
 
+	if length(indexes) = 1 then
+		target[indexes[1]] = x
+		return target
+	end if
+
 	partials = repeat(target,length(indexes)-1)
 	branch = target
 	for i=1 to length(indexes)-1 do
@@ -356,7 +361,7 @@ public function columnize(sequence source, object cols = {}, object defval = 0)
 	for i = 1 to length(collist) do
 		integer col = collist[i]
 		for j = 1 to length(source) do
-			if length(source[j]) < col then
+			if sequence(source[j]) and length(source[j]) < col then
 				result[i] = append(result[i], defval)
 			else
 				if atom(source[j]) then

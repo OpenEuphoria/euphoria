@@ -1094,7 +1094,13 @@ procedure seg_poke1(integer source, boolean dbl)
 -- poke a single byte value into poke_addr
 	-- WATCOM etc.
 	if dbl then
-		c_stmt("*poke_addr = (uint8_t)DBL_PTR(@)->dbl;\n", source)
+		if TARM then
+			c_stmt("_2 = trunc( DBL_PTR(@)->dbl );\n", source)
+			c_stmt0("*poke_addr = (uint8_t)_2;\n" )
+		else
+			c_stmt("*poke_addr = (uint8_t)DBL_PTR(@)->dbl;\n", source)
+		end if
+		
 	else
 		c_stmt("*poke_addr = (uint8_t)@;\n", source)
 	end if
@@ -1104,7 +1110,12 @@ end procedure
 procedure seg_poke2(integer source, boolean dbl)
 -- poke a word value into poke2_addr
 	if dbl then
-		c_stmt("*poke2_addr = (uint16_t)DBL_PTR(@)->dbl;\n", source)
+		if TARM then
+			c_stmt("_2 = trunc( DBL_PTR(@)->dbl );\n", source)
+			c_stmt0("*poke2_addr = (uint16_t)_2;\n" )
+		else
+			c_stmt("*poke2_addr = (uint16_t)DBL_PTR(@)->dbl;\n", source)
+		end if
 	else
 		c_stmt("*poke2_addr = (uint16_t)@;\n", source)
 	end if
@@ -1112,8 +1123,11 @@ end procedure
 
 procedure seg_poke4(integer source, boolean dbl)
 -- poke a 4-byte value into poke4_addr
-	-- WATCOM etc.
 	if dbl then
+		if TARM then
+			c_stmt("if( DBL_PTR(@)->dbl <= MAXINT_DBL ) *poke4_addr = (int32_t)DBL_PTR(@)->dbl; else\n", 
+				{source, source})
+		end if
 		c_stmt("*poke4_addr = (uint32_t)DBL_PTR(@)->dbl;\n", source)
 	else
 		c_stmt("*poke4_addr = (uint32_t)@;\n", source)
@@ -1528,7 +1542,7 @@ procedure FinalDeRef(symtab_index sym)
 	end if
 end procedure
 
-function NotInRange(integer x, integer badval)
+function NotInRange(atom x, atom badval)
 -- return TRUE if x can't be badval
 	sequence range
 
@@ -5754,27 +5768,30 @@ procedure opPOKE()
 	end if
 
 	if TypeIsNotIn( ptr, TYPES_IS) then
+		sequence dbl_ptr = "(DBL_PTR(@)->dbl)"
+		if TARM then
+			if not TypeIsIn( ptr, TYPES_AO ) then
+				c_stmt0("{\n" )
+			end if
+			c_stmt("eudouble temp_dbl = DBL_PTR(@)->dbl;\n", ptr )
+			dbl_ptr = "temp_dbl"
+		end if
 		switch op do
 			case POKE_POINTER then
-				c_stmt("pokeptr_addr = (uintptr_t *)(uintptr_t)(DBL_PTR(@)->dbl);\n",
-							ptr)
+				c_stmt(sprintf("pokeptr_addr = (uintptr_t *)(uintptr_t)%s;\n", {dbl_ptr}), ptr)
 			case POKE8 then
-				c_stmt("poke8_addr = (uint64_t *)(uintptr_t)(DBL_PTR(@)->dbl);\n",
-							ptr)
+				c_stmt(sprintf("poke8_addr = (uint64_t *)(uintptr_t)%s;\n", {dbl_ptr}), ptr)
 			case POKE4 then
-				c_stmt("poke4_addr = (uint32_t *)(uintptr_t)(DBL_PTR(@)->dbl);\n",
-							ptr)
+				c_stmt(sprintf("poke4_addr = (uint32_t *)(uintptr_t)%s;\n", {dbl_ptr}), ptr)
 			case POKE2 then
-				c_stmt("poke2_addr = (uint16_t *)(uintptr_t)(DBL_PTR(@)->dbl);\n",
-							ptr)
+				c_stmt(sprintf("poke2_addr = (uint16_t *)(uintptr_t)%s;\n", {dbl_ptr}),ptr)
 			case else
-				c_stmt("poke_addr = (uint8_t *)(uintptr_t)(DBL_PTR(@)->dbl);\n",
-							ptr)
+				c_stmt(sprintf("poke_addr = (uint8_t *)(uintptr_t)%s;\n", {dbl_ptr}), ptr)
 		end switch
 	end if
 	
-	if TypeIsIn( ptr, TYPES_AO) then
-		c_stmt0("}\n" )
+	if TypeIsIn( ptr, TYPES_AO) or (TARM and TypeIsNotIn( ptr, TYPES_IS)) then
+		c_stmt0("}\n" )	
 	end if
 	
 	if TypeIsIn( val, TYPES_AO) then
@@ -5841,7 +5858,7 @@ procedure opPOKE()
 			case POKE8 then
 				c_stmt0("*poke8_addr++ = (uint64_t)_2;\n")
 			case POKE4 then
-				c_stmt0("*poke4_addr++ = (uint32_t)_2;\n")
+				c_stmt0("*poke4_addr++ = (int32_t)_2;\n")
 			case POKE2 then
 				c_stmt0("*poke2_addr++ = (uint16_t)_2;\n")
 			case else
@@ -5850,21 +5867,26 @@ procedure opPOKE()
 		c_stmt0("}\nelse if (_2 == NOVALUE) {\n")
 		c_stmt0("break;\n}\n")
 		c_stmt0("else {\n")
+		sequence _2 = "DBL_PTR(_2)->dbl"
+		if TARM then
+			_2 = "_2"
+			c_stmt0( "_2 = trunc( DBL_PTR(_2)->dbl );\n" )
+		end if
 		switch op do
 			case POKE_POINTER then
-				c_stmt0("*pokeptr_addr++ = (uintptr_t)DBL_PTR(_2)->dbl;\n")
+				c_stmt0( sprintf( "*pokeptr_addr++ = (uintptr_t)%s;\n", {_2}) )
 			
 			case POKE8 then
-				c_stmt0("*poke8_addr++ = (uint64_t)DBL_PTR(_2)->dbl;\n")
+				c_stmt0( sprintf( "*poke8_addr++ = (uint64_t)%s;\n", {_2}) )
 				
 			case POKE4 then
-				c_stmt0("*(object *)poke4_addr++ = (uint32_t)DBL_PTR(_2)->dbl;\n")
+				c_stmt0( sprintf( "*(object *)poke4_addr++ = (uint32_t)%s;\n", {_2}) )
 				
 			case POKE2 then
-					c_stmt0("*poke2_addr++ = (uint16_t)DBL_PTR(_2)->dbl;\n")
+					c_stmt0( sprintf( "*poke2_addr++ = (uint16_t)%s;\n", {_2}) )
 				
 			case else
-					c_stmt0("*poke_addr++ = (uint8_t)DBL_PTR(_2)->dbl;\n")
+					c_stmt0( sprintf( "*poke_addr++ = (uint8_t)%s;\n", {_2}) )
 				
 		end switch
 		c_stmt0("}\n")

@@ -31,6 +31,7 @@
 #  include <time.h>
 #  include <sys/ioctl.h>
 #  include <sys/types.h>
+#  include <sys/wait.h>
 #  include <dlfcn.h>
 #else
 #  include <io.h>
@@ -88,7 +89,11 @@
 #define CONTROL_Z 26
 #define CR 13
 #define LF 10
+#ifdef WINDOWS
 #define BS 8
+#else
+#define BS 127
+#endif
 
 #ifdef EWINDOWS
 static int winkbhit();
@@ -439,7 +444,13 @@ void debug_dbl(double num)
 	buff[dbg_dbl_len - 1] = 0; // ensure NULL
 	debug_msg(buff);
 }
-
+#ifdef EARM
+double maxplus1 = ((double)UINTPTR_MAX) + 1;
+uintptr_t doubletouintptrdiscardhighbits(double d)
+{
+	return d-(maxplus1*floor(d/maxplus1));
+}
+#endif
 
 #ifdef ERUNTIME
 int color_trace = 1;
@@ -542,7 +553,7 @@ void call_crash_routines()
 	}
 }
 
-#ifdef EUNIX
+#if defined(EUNIX) || defined(EMINGW)
 static void SimpleRTFatal(char *msg, va_list ap) __attribute__ ((noreturn));
 #endif
 
@@ -1518,7 +1529,8 @@ void de_reference(s1_ptr a)
 					// end of sequence: back up a level
 					
 					p = (object_ptr)a->cleanup;
-					t = (object) *(object_ptr)&(a->ref);
+					temp = (intptr_t) &(a->ref);
+					t = *(object_ptr)temp;
 					EFree((char *)a);
 					a = (s1_ptr)t;
 					if ((((intptr_t) a) & ((intptr_t) 0xffffffff)) == 0)
@@ -1732,7 +1744,6 @@ object Dremainder(d_ptr a, d_ptr b)
 	return (object)NewDouble(fmod(a->dbl, b->dbl)); /* for now */
 }
 
-
 object and_bits(uintptr_t a, uintptr_t b)
 /* integer a AND b */
 {
@@ -1743,7 +1754,11 @@ object and_bits(uintptr_t a, uintptr_t b)
 object Dand_bits(d_ptr a, d_ptr b)
 /* double a AND b */
 {
+#ifdef EARM
+	return and_bits(doubletouintptrdiscardhighbits(a->dbl), doubletouintptrdiscardhighbits(b->dbl));
+#else
 	return and_bits( (uintptr_t)(a->dbl), (uintptr_t)(b->dbl));
+#endif
 }
 
 object or_bits(uintptr_t a, uintptr_t b)
@@ -1753,10 +1768,15 @@ object or_bits(uintptr_t a, uintptr_t b)
 	return MAKE_UINT(a);
 }
 
+
 object Dor_bits(d_ptr a, d_ptr b)
 /* double a OR b */
 {
+#ifdef EARM
+	return or_bits(doubletouintptrdiscardhighbits(a->dbl), doubletouintptrdiscardhighbits(b->dbl));
+#else
 	return or_bits( (uintptr_t)(a->dbl), (uintptr_t)(b->dbl));
+#endif
 }
 
 object xor_bits(uintptr_t a, uintptr_t b)
@@ -1766,11 +1786,15 @@ object xor_bits(uintptr_t a, uintptr_t b)
 	return MAKE_UINT(a);
 }
 
+
 object Dxor_bits(d_ptr a, d_ptr b)
 /* double a XOR b */
 {
-
+#ifdef EARM
+	return xor_bits(doubletouintptrdiscardhighbits(a->dbl), doubletouintptrdiscardhighbits(b->dbl));
+#else
 	return xor_bits((uintptr_t)(a->dbl), (uintptr_t)(b->dbl));
+#endif
 }
 
 object not_bits(uintptr_t a)
@@ -1780,10 +1804,15 @@ object not_bits(uintptr_t a)
 	return MAKE_UINT(a);
 }
 
+
 object Dnot_bits(d_ptr a)
 /* double bitwise NOT of a */
 {
+#ifdef EARM
+	return not_bits(doubletouintptrdiscardhighbits(a->dbl));
+#else
 	return not_bits((uintptr_t)(a->dbl));
+#endif
 }
 
 object power(object a, object b)
@@ -3176,7 +3205,7 @@ object find(object a, s1_ptr b)
 	bp = b->base;
 
 	if (IS_ATOM_INT(a)) {
-		eudouble da;
+		eudouble da = (eudouble)0;
 		int daok = 0;
 		while (TRUE) {
 			bv = *(++bp);
@@ -3353,6 +3382,13 @@ void RHS_Slice( object a, object start, object end)
 	if (IS_ATOM_INT(end))
 		endval = INT_VAL(end);
 	else if (IS_ATOM_DBL(end)) {
+#ifdef __arm__
+		// Get consistent error messages..ARM FP casting is different than x86
+		if( DBL_PTR(end)->dbl > MAXINT_DBL ){
+			endval = INT32_MIN;
+		}
+		else
+#endif
 		endval = (int)(DBL_PTR(end)->dbl);
 		 /* f.p.: if the double is too big for
 			a long WATCOM produces the most negative number. This
@@ -3850,7 +3886,7 @@ object EGets(object file_no)
 	
 	if (oldc == EOF) {
 		// No input characters where actually read.
-		EFree( line );
+		EFree( (char*)line );
 		return (object)ATOM_M1;
 	}
 
@@ -4269,7 +4305,7 @@ object_ptr v_elem;
 	char c;
 	intptr_t dval;
 	uintptr_t uval;
-	eudouble gval;
+	eudouble gval = (eudouble)0;
 	char *sval;
 	char *sbuff;
 	int slength;
@@ -4422,7 +4458,7 @@ object EPrintf(object file_no, object format_obj, object values)
 {
 	object_ptr f_elem, f_last;
 	char c; /* avoid peep bug - no register decl */
-	object_ptr v_elem, v_last;
+	object_ptr v_elem, v_last = 0;
 	char *cstring;
 	char quick_alloc[LOCAL_SPACE]; // don't use TempBuff - FormatItem uses it
 	int free_cs;
@@ -5029,7 +5065,7 @@ void system_call(object command, object wait)
 	}
 
 	MakeCString(string_ptr, command, len_used);
-	system(string_ptr);
+	len_used = system(string_ptr);
 	if (len > TEMP_SIZE)
 		EFree(string_ptr);
 
@@ -5079,7 +5115,10 @@ object system_exec_call(object command, object wait)
 
 #ifdef EUNIX
 	// this runs the shell - not really supposed to, but it gets exit code
-	exit_code = system(string_ptr);
+	// Assigning directly to WEXITSTATUS causes a compiler failure on BSD and OSX.
+	// Fix by adding a separate assignment.
+		exit_code = system(string_ptr);
+		exit_code = WEXITSTATUS( exit_code );
 #else
 	argv = make_arg_cv(string_ptr, &exit_code);
 	exit_code = spawnvp(P_WAIT, argv[0], (char * const *)argv);
@@ -5276,7 +5315,8 @@ uintptr_t general_call_back(
 	object *code[4+9]; // place to put IL: max 9 args
 	object *save_tpc;
 #endif
-
+	struct symtab_entry call_back_sym;
+	
 	if (gameover)
 		return (uintptr_t)0; // ignore messages after we decide to shutdown
 
@@ -5313,35 +5353,35 @@ uintptr_t general_call_back(
 	}
 	switch (num_args) {
 		case 0:
-			call_back_result->obj = (*addr)();
+			call_back_sym.obj = (*addr)();
 			break;
 		case 1:
-			call_back_result->obj = (*addr)(call_back_arg1->obj);
+			call_back_sym.obj = (*addr)(call_back_arg1->obj);
 			break;
 		case 2:
-			call_back_result->obj = (*addr)(call_back_arg1->obj,
+			call_back_sym.obj = (*addr)(call_back_arg1->obj,
 											call_back_arg2->obj);
 			break;
 		case 3:
-			call_back_result->obj = (*addr)(call_back_arg1->obj,
+			call_back_sym.obj = (*addr)(call_back_arg1->obj,
 											call_back_arg2->obj,
 											call_back_arg3->obj);
 			break;
 		case 4:
-			call_back_result->obj = (*addr)(call_back_arg1->obj,
+			call_back_sym.obj = (*addr)(call_back_arg1->obj,
 											call_back_arg2->obj,
 											call_back_arg3->obj,
 											call_back_arg4->obj);
 			break;
 		case 5:
-			call_back_result->obj = (*addr)(call_back_arg1->obj,
+			call_back_sym.obj = (*addr)(call_back_arg1->obj,
 											call_back_arg2->obj,
 											call_back_arg3->obj,
 											call_back_arg4->obj,
 											call_back_arg5->obj);
 			break;
 		case 6:
-			call_back_result->obj = (*addr)(call_back_arg1->obj,
+			call_back_sym.obj = (*addr)(call_back_arg1->obj,
 											call_back_arg2->obj,
 											call_back_arg3->obj,
 											call_back_arg4->obj,
@@ -5349,7 +5389,7 @@ uintptr_t general_call_back(
 											call_back_arg6->obj);
 			break;
 		case 7:
-			call_back_result->obj = (*addr)(call_back_arg1->obj,
+			call_back_sym.obj = (*addr)(call_back_arg1->obj,
 											call_back_arg2->obj,
 											call_back_arg3->obj,
 											call_back_arg4->obj,
@@ -5358,7 +5398,7 @@ uintptr_t general_call_back(
 											call_back_arg7->obj);
 			break;
 		case 8:
-			call_back_result->obj = (*addr)(call_back_arg1->obj,
+			call_back_sym.obj = (*addr)(call_back_arg1->obj,
 											call_back_arg2->obj,
 											call_back_arg3->obj,
 											call_back_arg4->obj,
@@ -5368,7 +5408,7 @@ uintptr_t general_call_back(
 											call_back_arg8->obj);
 			break;
 		case 9:
-			call_back_result->obj = (*addr)(call_back_arg1->obj,
+			call_back_sym.obj = (*addr)(call_back_arg1->obj,
 											call_back_arg2->obj,
 											call_back_arg3->obj,
 											call_back_arg4->obj,
@@ -5381,11 +5421,16 @@ uintptr_t general_call_back(
 	}
 
 #else
+	call_back_sym.obj = NOVALUE;
+	call_back_sym.next = 0;
+	call_back_sym.next_in_block = 0;
+	call_back_sym.mode = M_TEMP;
+	
 	/* Interpreter: set up a PROC opcode call */
 	code[0] = (intptr_t *)opcode(PROC);
 	code[1] = (intptr_t *)cb_routine;  // symtab_ptr of Euphoria routine
-
 	num_args = cb_routine->u.subp.num_args;
+
 	if (num_args >= 1) {
 	  DeRef(call_back_arg1->obj);
 	  call_back_arg1->obj = make_atom32((uintptr_t)arg1);
@@ -5431,8 +5476,8 @@ uintptr_t general_call_back(
 		}
 	  }
 	}
-
-	code[num_args+2] = (object *)call_back_result;
+	
+	code[num_args+2] = (object *)&call_back_sym;
 	code[num_args+3] = (object *)opcode(CALL_BACK_RETURN);
 
 	*expr_top++ = (object)tpc;    // needed for traceback
@@ -5451,10 +5496,10 @@ uintptr_t general_call_back(
 	// Don't do get_pos_int() for crash handler
 	if (crash_call_back) {
 		crash_call_back = FALSE;
-		return (object)(call_back_result->obj);
+		return (object)(call_back_sym.obj);
 	}
 	else {
-		return (object)get_pos_int("call-back", call_back_result->obj);
+		return (object)get_pos_int("call-back", call_back_sym.obj);
 	}
 }
 
@@ -5473,10 +5518,10 @@ uintptr_t __cdecl osx_cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t 
 	// this saves us the trouble of trying to calculate the offset of
 	// the callback copy from general_ptr and stuffing that into a LEA
 	// calculation
-	uintptr_t (*f)(uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
+	uintptr_t (*f)(symtab_ptr, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
 	uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)
-	= (uintptr_t (*)(uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
-	uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)) general_ptr_magic;
+	= (uintptr_t (*)(symtab_ptr, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
+	uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)) (uintptr_t)general_ptr_magic;
 	return (f)((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, arg8, arg9);
@@ -5489,7 +5534,7 @@ uintptr_t __cdecl osx_cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t 
 
 // Need to force the compiler to use an absolute address
 typedef intptr_t (*cbfunc)();
-#define CALL_GENERAL_CALLBACK ((cbfunc)0xabcdefabcdefabcdLL)
+#define CALL_GENERAL_CALLBACK ((cbfunc)general_ptr_magic)
 #endif
 
 /* Windows cdecl - Need only one template.
@@ -5658,11 +5703,8 @@ void Cleanup(int status)
 	char *xterm;
 #endif
 
-#if defined(EWINDOWS) || !defined(ERUNTIME)
-	int i;
-#endif
-
 #ifndef ERUNTIME
+	int i;
 	long c;
 	FILE *wrnf = NULL;
 #endif
@@ -5851,10 +5893,9 @@ static int winkbhit()
 {
 	INPUT_RECORD pbuffer;
 	DWORD junk = 0;
-	int c;
 
 	while (TRUE) {
-		c = PeekConsoleInput(console_input, &pbuffer, 1, &junk);
+		PeekConsoleInput(console_input, &pbuffer, 1, &junk);
 		if (junk == 0)
 			return FALSE;
 		if (pbuffer.EventType == KEY_EVENT &&
@@ -5934,13 +5975,28 @@ void key_gets(char *input_string, int buffsize)
 		if (c == CR || c == LF || c == numpad_enter)
 			break;
 
-		if (c == BS || c == left_arrow) {
+#ifndef WINDOWS
+		if( c == 27 ){
+			char d, e;
+			// escape code!
+			d = get_key(TRUE);
+			e = get_key(TRUE);
+			if( (d == 'O') &&  (e == 'D') ){
+				c = left_arrow;
+			}
+			else{
+				// just ignore it
+				continue;
+			}
+		}
+#endif
+
+		if (c == BS || c == left_arrow ) {
 			if (len > 0) {
 				// update buffer
 				ip--;
 				*ip = '\0';
 				len--;
-				
 				// update screen display
 				column--;
 				SetPosition(line, column);
@@ -6003,7 +6059,7 @@ object find_from(object a, object bobj, object c)
 	bp = b->base;
 	bp += c - 1;
 	if (IS_ATOM_INT(a)) {
-		eudouble da;
+		eudouble da = (eudouble)0;
 		int daok = 0;
 		while (TRUE) {
 			bv = *(++bp);

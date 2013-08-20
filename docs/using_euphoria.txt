@@ -443,7 +443,7 @@ Euphoria source code that your program needs to create a single ##.il## file.
 For example, if your program is called "##myprog.ex##" you can create 
 "##myprog.exe##"
 which will run identically. For more information about shrouding and binding,
-see [[:Binding and Shrouding]].
+see [[:Shrouding and Binding]].
 
 Finally, with the [[:Euphoria To C Translator]], you can translate your
 Euphoria program into C and then compile it with a C compiler to get an

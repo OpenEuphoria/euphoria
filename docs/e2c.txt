@@ -75,6 +75,17 @@ using either the ##-keep## or ##-makefile## options.
 
 === Command-Line Options
 
+==== -arch - Set architecture
+
+The translator generally produces cross platform code.  However, the euphoria
+source code may have different code for different architectures.  The default
+is to use the architecture of the translator binary that is being used.  To
+target a different architecture, you can use one of three supported architectures:
+
+* X86
+* X86_64
+* ARM
+
 ==== -build-dir dir
 
 Use the specified directory to write translated C files and compiled objects. The final
@@ -87,6 +98,75 @@ The specified directory cannot contain any wildcards ('*', '?') or be an existin
 {{{
 $ euc -build-dir temp_dir myapp.ex
 }}}
+
+==== -cc-prefix - Compiler prefix
+
+Some compilers, especially MinGW (the Windows version of gcc) may prefix their
+normal names with platform prefixes.  The -cc-prefix switch allows the developer
+to specify this special prefix.  This can also be useful for having a system
+with both the 32bit and 64bit versions installed.  Cross compilers generally require this.
+
+For example, on Windows, to build with MinGW installed as i6856-w64-mingw32:
+
+{{{
+euc -gcc -cc-prefix i686-w64-mingw32- pretend.exw
+}}}
+
+==== -cflags FLAGS - Compiler Flags
+
+Specifies the flags to pass to the compiler.
+
+==== -com DIR - Compiler directory
+
+Tells the translator where to find include/euphoria.h, which is the header file required
+when translating code.
+
+==== -con - Console based program
+
+To make a //Windows// console program instead of a //Windows// GUI program,
+add ##-con## to the command line. e.g.
+
+{{{
+euc -con myprog.exw
+}}}
+
+When creating a Windows GUI program, if the ##-con## option is used, when running
+your Windows program, you will have a blank console window appear and remain the duration
+of your application. By default, a GUI program is assumed.
+
+==== -debug - Debug mode
+
+To compile your program with debugging information, usable with a debugger
+compatible with your compiler, use the ##-debug## option:
+
+{{{
+euc -debug myapp.ex
+}}}
+
+==== -dll / -so - Shared Library
+
+To make a shared dynamically loading library, just
+add ##-dll## to the command line. e.g.
+
+{{{
+euc -dll mylib.ew
+}}}
+
+Note: On *nix systems, you can also use ##-so##. Both will produce a *nix
+shared library.
+
+Please see [[:Dynamic Link Libraries]]
+
+==== -extra-cflags - Extra Compiler Flags
+
+Supply extra compiler flags to suplement the flags used automatically by the translator or
+supplied via the -cflags option.
+
+==== -extra-lflags - Extra Linker Flags
+
+Supply extra linker flags to suplement the flags used automatically by the translator or
+supplied via the -lflags option.
+
 
 ==== -gcc, -wat
 
@@ -106,20 +186,6 @@ euc -gcc pretend.exw
 
 Note: //Watcom// is the default on //Windows// and -wat is assumed.
 
-=== -cc-prefix - Compiler prefix
-
-Some compilers, especially MinGW (the Windows version of gcc) may prefix their
-normal names with platform prefixes.  The -cc-prefix switch allows the developer
-to specify this special prefix.  This can also be useful for having a system
-with both the 32bit and 64bit versions installed.  Cross compilers generally require this.
-
-For example, on Windows, to build with MinGW installed as i6856-w64-mingw32:
-
-{{{
-euc -gcc -cc-prefix i686-w64-mingw32- pretend.exw
-}}}
-
-
 ==== -keep
 
 Normally, after building your ##.exe## file, the translator will delete
@@ -131,74 +197,9 @@ e.g.
 euc -keep sanity.ex
 }}}
 
-==== -dll / -so - Shared Library
+==== -lflags FLAGS - Linker Flags
 
-To make a shared dynamically loading library, just
-add ##-dll## to the command line. e.g.
-
-{{{
-euc -dll mylib.ew
-}}}
-
-Note: On *nix systems, you can also use ##-so##. Both will produce a *nix 
-shared library.
-
-Please see [[:Dynamic Link Libraries]]
-
-==== -con - Console based program
-
-To make a //Windows// console program instead of a //Windows// GUI program,
-add ##-con## to the command line. e.g.
-
-{{{
-euc -con myprog.exw
-}}}
-
-When creating a Windows GUI program, if the ##-con## option is used, when running
-your Windows program, you will have a blank console window appear and remain the duration
-of your application. By default, a GUI program is assumed.
-
-==== -rc-file - Resource File
-
-On Windows, ##euc## can automatically compile and link in an application specific resource
-file. This resource file can contain product and version information, an application icon
-or any other valid resource data.
-
-{{{
-euc -rc-file myapp.rc myapp.ex
-}}}
-
-The resulting executable will contain all the resources from ##myapp.rc## compiled into 
-the executable. Please see [[:Using Resource Files]].
-
-==== -stack - Stack size
-
-To increase or decrease the total amount of stack space reserved for your
-program, add ##-stack nnnn## to the command line. e.g.
-
-{{{
-euc -stack 100000 myprog.ex
-}}}
-
-The total stack space (in bytes) that you specify will be divided up among all
-the tasks that you have running (assuming you have more than one). Each task
-has it's own private stack space. If it exceeds its allotment, you'll get a
-run-time error message identifying the task and giving the size of its stack
-space. Most non-recursive tasks can run with call stacks as small as 2000
-bytes, but to be safe, you should allow more than this. A deeply-recursive
-task could use a great deal of space. It all depends on the maximum levels of
-calls that a task might need. At run-time, as your program creates more
-simultaneously-active tasks, the stack space allotted to each task will tend
-to decrease.
-
-==== -debug - Debug mode
-
-To compile your program with debugging information, usable with a debugger
-compatible with your compiler, use the ##-debug## option:
-
-{{{
-euc -debug myapp.ex
-}}}
+Specifies the flags to pass to the linker.
 
 ==== -lib - User defined library
 
@@ -212,37 +213,17 @@ that only the default library is supplied. Use the ##-lib {library}## option:
 euc -lib decu.a myapp.ex
 }}}
 
-==== -plat - Set platform
 
-The translator has the capability of translating Euphoria code to C code for a platform
-other than the host platform. This can be done with the ##-plat## option. It takes
-one parameter, the platform code:
-* FREEBSD
-* LINUX
-* OSX
-* WINDOWS
-* NETBSD
-* OPENBSD
+==== -lib-pic - User defined library for PIC mode
 
-Use one of these options to translate code into C for the specified platform.  
-The default will always be the host platform of the translator that is executed, 
-so ##euc.exe## will default to //Windows//, and ##euc## will default to the platform 
-upon which it was built.
+Some platforms and architectures (e.g., x86-64) require that shared libraries be built in
+Position Independent Code mode, which requires that the euphoria run time
+library also be built with PIC. This option is similar to the [[:-lib - User defined library]]
+option, except that it specifies the library to use for PIC code:
 
-The resulting output can be compiled by the appropriate compiler on the
-specified platform, or, possibly a cross platform compiler, if you have
-one configured.
-
-==== -arch - Set architecture
-
-The translator generally produces cross platform code.  However, the euphoria
-source code may have different code for different architectures.  The default
-is to use the architecture of the translator binary that is being used.  To
-target a different architecture, you can use one of three supported architectures:
-
-* X86
-* X86_64
-* ARM
+{{{
+euc -lib-pic euso.a myapp.ex
+}}}
 
 ==== -makefile / -makefile-partial - Using makefiles
 
@@ -266,13 +247,77 @@ $ make -f myapp.mak
 }}}
 
 On Windows, when using Watcom, the message will refer to wmake, the Watcom
-version of make.  On BSD platforms, you may need to use ##gmake##, as the 
+version of make.  On BSD platforms, you may need to use ##gmake##, as the
 generated makefiles are in GNU format, not BSD.
 
 You can also get a partial makefile using the ##-makefile-partial## switch.
 This generates a makefile that you can use to include into another makefile
 for a larger project.  This is useful for including the file dependencies
 for your code into the larger project.
+
+==== -maxsize NUMBER
+
+Specifies the maximum number of C statements to go into a single file before
+the translated file is split into multiple C files.
+
+
+==== -plat - Set platform
+
+The translator has the capability of translating Euphoria code to C code for a platform
+other than the host platform. This can be done with the ##-plat## option. It takes
+one parameter, the platform code:
+* FREEBSD
+* LINUX
+* OSX
+* WINDOWS
+* NETBSD
+* OPENBSD
+
+Use one of these options to translate code into C for the specified platform.
+The default will always be the host platform of the translator that is executed,
+so ##euc.exe## will default to //Windows//, and ##euc## will default to the platform
+upon which it was built.
+
+The resulting output can be compiled by the appropriate compiler on the
+specified platform, or, possibly a cross platform compiler, if you have
+one configured.
+
+==== -rc-file - Resource File
+
+On Windows, ##euc## can automatically compile and link in an application specific resource
+file. This resource file can contain product and version information, an application icon
+or any other valid resource data.
+
+{{{
+euc -rc-file myapp.rc myapp.ex
+}}}
+
+The resulting executable will contain all the resources from ##myapp.rc## compiled into 
+the executable. Please see [[:Using Resource Files]].
+
+==== -silent
+
+Do not display status messages.
+
+==== -stack - Stack size
+
+To increase or decrease the total amount of stack space reserved for your
+program, add ##-stack nnnn## to the command line. e.g.
+
+{{{
+euc -stack 100000 myprog.ex
+}}}
+
+The total stack space (in bytes) that you specify will be divided up among all
+the tasks that you have running (assuming you have more than one). Each task
+has it's own private stack space. If it exceeds its allotment, you'll get a
+run-time error message identifying the task and giving the size of its stack
+space. Most non-recursive tasks can run with call stacks as small as 2000
+bytes, but to be safe, you should allow more than this. A deeply-recursive
+task could use a great deal of space. It all depends on the maximum levels of
+calls that a task might need. At run-time, as your program creates more
+simultaneously-active tasks, the stack space allotted to each task will tend
+to decrease.
 
 === Dynamic Link Libraries
 

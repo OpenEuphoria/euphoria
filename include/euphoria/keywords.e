@@ -146,6 +146,7 @@ public constant builtins = {
 	"routine_id",
 	"sequence",
 	"sin",
+	"sizeof",
 	"splice",
 	"sprintf",
 	"sqrt",

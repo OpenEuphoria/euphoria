@@ -1473,7 +1473,8 @@ end function
 
 export function Scanner()
 -- The scanner main routine: returns a lexical token
-	integer ch, i, sp, prev_Nne
+	integer ch, sp, prev_Nne
+	atom i
 	integer pch
 	integer cline
 	sequence yytext, namespaces  -- temporary buffer for a token
@@ -1783,7 +1784,7 @@ export function Scanner()
 			d = my_sscanf(yytext)
 			if sequence(d) then
 				CompileErr(121)
-			elsif is_int and d <= MAXINT_DBL then
+			elsif is_int and d <= TMAXINT_DBL then
 				return {ATOM, NewIntSym(d)}  -- 1 to 1.07 billion
 			else
 				return {ATOM, NewDoubleSym(d)}
@@ -1856,7 +1857,7 @@ export function Scanner()
 		elsif class = NUMBER_SIGN then
 			i = 0
 			is_int = -1
-			while i < MAXINT/32 do
+			while i < TMAXINT/32 do
 				ch = getch()
 				if char_class[ch] = DIGIT then
 					if ch != '_' then
@@ -1889,8 +1890,8 @@ export function Scanner()
 					CompileErr(97)
 				end if
 			else
-				if i >= MAXINT/32 then
-					d = i
+				d = i
+				if i >= TMAXINT/32 then
 					is_int = FALSE
 					while TRUE do
 						ch = getch()  -- eventually END_OF_FILE_CHAR or new-line
@@ -1914,7 +1915,7 @@ export function Scanner()
 				if is_int and is_integer(i) then
 					return {ATOM, NewIntSym(i)}
 				else
-					if d <= MAXINT_DBL then            -- d is always >= 0
+					if d <= TMAXINT_DBL then            -- d is always >= 0
 						return {ATOM, NewIntSym(d)}
 					else
 						return {ATOM, NewDoubleSym(d)}

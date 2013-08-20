@@ -81,7 +81,7 @@ end ifdef
 ../docs/literals.txt
 
 ########
-:%%output=syntax
+:%%output=syntax_toc
 := Formal Syntax
 :<<LEVELTOC level=1 depth=2>>
 

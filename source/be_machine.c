@@ -60,7 +60,7 @@
 
 // This is a workaround for ARM not recognizing INFINITY, which is included math.h
 // but is not recognized. This seems to be a bug/issue with Scratchbox and Maemo SDK
-#if ARCH == ARM
+#ifdef EARM
 #ifndef INFINITY
 #define INFINITY (1.0/0.0)
 #endif 
@@ -264,6 +264,17 @@ char *name_ext(char *s)
 		return s + i + 1;
 	else
 		return s;
+}
+
+uint64_t get_uint64( object x ){
+	if (IS_ATOM_INT(x)){
+		return x;
+	}
+
+	if (IS_ATOM(x)){
+		return (uint64_t)(DBL_PTR(x)->dbl);
+	}
+	RTFatal("an integer was expected, not a sequence");
 }
 
 object get_int(object x)
@@ -1182,11 +1193,11 @@ static object Dir(object x)
 {
 	char path[MAX_FILE_NAME+1];
 	s1_ptr result, row;
-	struct dirent *direntp;
+	struct dirent *direntp = 0;
 	object_ptr obj_ptr, temp;
 
 	DIR *dirp;
-	int r;
+	int r = -1;
 #ifdef ELINUX
 	struct stat64 stbuf;
 #else
@@ -1544,14 +1555,15 @@ static object lock_file(object x)
 /* lock a file. x is {fn, t, {first-byte, last-byte}} */
 {
 	IFILE f;
-	int fd;
+	intptr_t fd;
 	int r;
-#ifdef EUNIX
 	int t;
-#else
-	uintptr_t first, last;
+#ifndef EUNIX
+	uint64_t first, last, bytes;
 	object s;
+	OVERLAPPED overlapped;
 #endif
+	
 	object fn;
 
 	// get 1st element of x - file number - assume x is a sequence of length 3
@@ -1560,49 +1572,67 @@ static object lock_file(object x)
 	f = which_file(fn, EF_READ | EF_WRITE);
 	fd = ifileno(f);
 
-#ifdef EUNIX
+#ifndef EUNIX
+	fd = _get_osfhandle( fd ); // need a HANDLE on Windows
+#endif
 	// get 2nd element of x - lock type
 	t = get_int(*(((s1_ptr)x)->base+2));
+#ifdef EUNIX
 	if (t == 1)
 		r = flock(fd, LOCK_SH | LOCK_NB);
 	else
 		r = flock(fd, LOCK_EX | LOCK_NB);
-#else // EUNIX
+#else
 	// get 3rd element of x - range - assume it's a sequence
 	s = *(((s1_ptr)x)->base+3);
 	s = (object)SEQ_PTR(s);
 	if (((s1_ptr)s)->length == 0) {
 		first = 0;
-		last = 0xFFFFFFFE;
+		last = 0xFFFFFFFFFFFFFFFE;
 	}
 	else if (((s1_ptr)s)->length == 2) {
-		first = get_int(*(((s1_ptr)s)->base+1));
-		last =  get_int(*(((s1_ptr)s)->base+2));
+		first = get_uint64(*(((s1_ptr)s)->base+1));
+		last =  get_uint64(*(((s1_ptr)s)->base+2));
 	}
 	else {
 		RTFatal("3rd argument to lock_file must be a sequence of length 0 or 2");
 	}
 	if (last < first)
 		return ATOM_0;
-#if defined(EMINGW)
-	r = 0;  // TODO: FOR NOW!
-#else // defined EMINGW
-	r = lock(fd, first, last - first + 1);
-#endif // defined EMINGW
-#endif // EUNIX
-	if (r == 0)
+
+	bytes = last - first + 1;
+	overlapped.hEvent = 0;
+	overlapped.Offset = (DWORD)(first & 0xffffffff);
+	overlapped.OffsetHigh = (DWORD)( (first & 0xffffffff00000000) << 32 );
+	r = LockFileEx(
+						(HANDLE)fd,
+						((t == 2) ? LOCKFILE_EXCLUSIVE_LOCK : 0) | LOCKFILE_FAIL_IMMEDIATELY,
+						0,
+						(DWORD)bytes & 0xffffffff,
+						(DWORD) ((bytes & 0xffffffff00000000) << 32),
+						&overlapped );
+
+#endif
+	
+#ifdef EUNIX
+	if (r == 0){
+#else
+	if (r != 0){
+#endif
 		return ATOM_1; // success
-	else
+	}
+	else{
 		return ATOM_0; // fail
+	}
 }
 
 static object unlock_file(object x)
 /* unlock a file */
 {
 	IFILE f;
-	int fd;
+	intptr_t fd;
 #ifdef EWINDOWS
-	uintptr_t first, last;
+	uint64_t first, last, bytes;
 	object s;
 #endif
 	object fn;
@@ -1615,26 +1645,29 @@ static object unlock_file(object x)
 #ifdef EUNIX
 	flock(fd, LOCK_UN);
 #else // EUNIX
+	fd = _get_osfhandle( fd );
 	// get 2nd element of x - range - assume it's a sequence
 	s = *(((s1_ptr)x)->base+2);
 	s = (object)SEQ_PTR(s);
 	if (((s1_ptr)s)->length == 0) {
 		first = 0;
-		last = 0xFFFFFFFE;
+		last = 0xFFFFFFFFFFFFFFFE;
 	}
 	else if (((s1_ptr)s)->length == 2) {
-		first = get_int(*(((s1_ptr)s)->base+1));
-		last =  get_int(*(((s1_ptr)s)->base+2));
+		first = get_uint64(*(((s1_ptr)s)->base+1));
+		last =  get_uint64(*(((s1_ptr)s)->base+2));
 	}
 	else {
 		RTFatal("2nd argument to unlock_file must be a sequence of length 0 or 2");
 	}
-#if defined(EMINGW)
-	/* do nothing */
-#else // defined EMINGW
-	if (last >= first)
-		unlock(fd, first, last - first + 1);
-#endif // EMINGW
+
+	bytes = last - first + 1;
+	UnlockFile(
+				(HANDLE)fd,
+				(DWORD)(first & 0xffffffff),
+				(DWORD)( (first & 0xffffffff00000000) << 32 ),
+				(DWORD)bytes & 0xffffffff,
+				(DWORD) ((bytes & 0xffffffff00000000) << 32));
 #endif // EUNIX
 	return ATOM_1; // ignored
 }
@@ -1777,6 +1810,9 @@ static object e_sleep(object x)
 			t = DBL_PTR(x)->dbl;
 		}
 	}
+	else{
+		t = (eudouble)0;
+	}
 	Wait((double)t);
 	return ATOM_1;
 }
@@ -1871,7 +1907,7 @@ void init_fp_conversions(){
 }
 #endif
 
-#if ARCH == ARM
+#ifdef EARM
 void arm_float80_to_float64( unsigned char *a, unsigned char *b ){
 	int64_t exp_a, exp_b, sign;
 	int64_t mantissa_a, mantissa_b;
@@ -1880,10 +1916,18 @@ void arm_float80_to_float64( unsigned char *a, unsigned char *b ){
 	exp_a = (a[8] | ((a[9] & 0x7f) << 8 )) - 0x3fff; // IEEE854_LONG_DOUBLE_BIAS
 	// chop off most significant bit
 	mantissa_a = 0x7fffffffffffffffLL & *((int64_t*)a);
-
+	if( exp_a == 0x4000 && mantissa_a == 0 ){
+		if( sign ){
+			*((double*)b) = -INFINITY;
+		}
+		else{
+			*((double*)b) = INFINITY;
+		}
+		return;
+	}
 	exp_b = (exp_a + 0x3ff ); // IEEE754_DOUBLE_BIAS
 	mantissa_b = (mantissa_a >> (11));
-
+	
 	*((int64_t*)b) = (mantissa_b & 0x7fffffffffffffLL) | (exp_b << 52)  | (sign << 63);
 }
 #endif
@@ -1919,7 +1963,7 @@ static object float_to_atom(object x, int flen)
 	else{
 		#ifdef EWATCOM
 			(*convert_80_to_64)( &convert, &d );
-		#elif ARCH == ARM
+		#elif defined( EARM )
 			arm_float80_to_float64( (unsigned char*) &convert.fbuff, (unsigned char*)&d );
 		#else
 			d = (eudouble)convert.ldouble;
@@ -2295,7 +2339,7 @@ object DefineC(object x)
 	return c_routine_next++;
 }
 
-#if ARCH == ARM
+#ifdef EARM
         #define CALLBACK_SIZE (129)
 #else
 
@@ -2474,8 +2518,10 @@ object CallBack(object x)
 					RTFatal("routine has too many parameters for call-back");
 		}
 	}
-#ifdef EOSX
+#if (INTPTR_MAX == INT32_MAX) && defined EOSX
 	// always use the custom call back handler for OSX
+	// -- Use the normal cdecl on 64-bit, and the custom one on 32-bit.
+	// Clean this up if it works.
 	addr = (uintptr_t)&osx_cdecl_call_back;
 #endif
 
@@ -2557,7 +2603,7 @@ object CallBack(object x)
 		}
 #if defined(EOSX) || (INTPTR_MAX == INT64_MAX)
 /* If OS/X ever gets ported to ARM ... */
-#if ARCH == ARM
+#ifdef EARM
 #error "misaligned comparison code" 
 #endif
 		else if( *((uintptr_t*)(copy_addr + i)) == general_ptr_magic ){

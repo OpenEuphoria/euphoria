@@ -595,4 +595,83 @@ delete_file("save_map.raw2")
 delete_file("save_map.raw3")
 delete_file("xyz.cfg")
 
+map init_routines = map:new()
+
+sequence names = {}
+procedure register( sequence name, integer foo=0 )
+	map:put( init_routines, name, foo )
+	names = append( names, name )
+end procedure
+
+procedure validate_map( sequence name, integer has )
+	sequence keys = map:keys( init_routines, 1 )
+	integer kx = find( name, keys )
+	integer map_has = map:has( init_routines, name )
+	integer keys_match = equal( names, keys )
+	sequence text = ""
+	if has then
+		if not kx or not map_has or not keys_match then
+			text = sprintf( "expected to find %s: kx[%d] map_has[%d] keys_match[%d]", { name, kx, map_has, keys_match } )
+		end if
+	else
+		if kx or map_has or not keys_match then
+			text = sprintf("expected not to find %s: kx[%d] map_has[%d] keys_match[%d]", { name, kx, map_has, keys_match } )
+		end if
+	end if
+	test_equal( sprintf( "validate_map %s %d", {name, has}), "", text )
+end procedure
+
+procedure remove_name( sequence name )
+	validate_map( name, 1 )
+	map:remove( init_routines, name )
+	integer nx = find( name, names )
+	names = remove( names, nx )
+	validate_map( name, 0 )
+end procedure
+
+procedure lookup_bug()
+	register( "saved settings" )
+	register( "gui" )
+	register( "menu" )
+	register( "options" )
+	register( "main" )
+	register( "flist", routine_id("init_flist" ) )
+	register( "files" )
+	register( "docs" )
+	register( "editor", routine_id("init") )
+	register( "code_page", routine_id("init_code_page") )
+	register( "code_split", routine_id( "init_code_split" ) )
+	names = sort( names )
+
+	remove_name( "gui" )
+	remove_name( "options")
+	remove_name( "main")
+	remove_name( "saved settings")
+	remove_name( "menu")
+	remove_name( "docs")
+	remove_name( "code_split")
+	remove_name( "code_page")
+	remove_name( "flist")
+
+	validate_map( "editor", 1 )
+	
+	object files = map:get( init_routines, "editor" )
+	map:put( init_routines, "editor", -1, map:CONCAT )
+	test_equal( "put operates on correct bucket after a previous hash conflict removed",
+			   files & -1, map:get( init_routines, "editor" ) )
+
+end procedure
+lookup_bug()
+
+m1 = map:new()
+map:put( m1, "", 1234 )
+test_equal( "retrieve empty string (hashvalue 0) correctly", 1234, map:get( m1, "" ) )
+test_equal( "keys() handles hashval 0 correctly", {""}, map:keys( m1 ) )
+test_equal( "values() handles hashval 0 correctly", {1234}, map:values( m1 ) )
+test_equal( "pairs() handles hashval 0 correctly", {{"",1234}}, map:pairs( m1 ) )
+
+m1 = map:new()
+map:nested_put( m1, {1, 2, 3, 4}, 5 )
+test_equal( "ticket 861 nested_get index", 5, map:nested_get( m1, {1, 2, 3, 4} ) )
+
 test_report()

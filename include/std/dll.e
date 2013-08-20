@@ -50,10 +50,22 @@ public constant
 	C_SIZE_T  = C_ULONG,
 	--** any valid pointer
 	C_POINTER = #03000001,
+	--** longlong 64-bits
+	C_LONGLONG  = #03000002,
+	$
+ifdef BITS32 then
+public constant
+	--** signed integer sizeof pointer
+	C_LONG_PTR = C_LONG
+elsedef
+public constant
+	C_LONG_PTR = C_LONGLONG
+end ifdef
+public constant
 	--** handle sizeof pointer
-	C_HANDLE  = C_POINTER,
+	C_HANDLE  = C_LONG_PTR,
 	--** hwnd sizeof pointer
-	C_HWND    = C_POINTER,
+	C_HWND    = C_LONG_PTR,
 	--** dword 32-bits
 	C_DWORD   = C_UINT,
 	--** wparam sizeof pointer
@@ -67,9 +79,7 @@ public constant
 	--** double 64-bits
 	C_DOUBLE  = #03000008,
 	--** dwordlong 64-bits
-	C_DWORDLONG  = #03000002,
-	--** longlong 64-bits
-	C_LONGLONG  = C_DWORDLONG,
+	C_DWORDLONG  = C_LONGLONG,
 	$
 	
 --****
@@ -87,6 +97,15 @@ public constant
 	--** object
 	E_OBJECT  = #09000004
 
+--****
+-- Signature:
+-- <built-in> function sizeof( atom data_type )
+--
+-- Parameters:
+--# ##data_type## A C data type constant
+--
+-- Description:
+-- Returns the size, in bytes of the specified data type.
 
 --****
 -- === Constants

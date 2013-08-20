@@ -7,7 +7,7 @@
 namespace tokenize
 
 include std/convert.e
-include std/io.e
+public include std/io.e
 include std/eumem.e
 
 include keywords.e
@@ -95,6 +95,8 @@ public enum
 -- this list of delimiters must match the order of the corresponding T_ codes above
 constant Delimiters = "+-*/<>!&" & "=(){}[]?,.:$" -- double & single ops
 
+--****
+-- === Token accessors
 public enum
 	TTYPE,
 	TDATA,
@@ -149,11 +151,14 @@ constant ERROR_STRING = {
 	$
 }
 
+integer report_and_stop_on_error = 0
 procedure report_error(integer err)
-	Look = io:EOF
-	ERR = err
-	ERR_LNUM = Token[TLNUM]
-	ERR_LPOS = Token[TLPOS]
+	if report_and_stop_on_error then
+		Look = io:EOF
+		ERR = err
+		ERR_LNUM = Token[TLNUM]
+		ERR_LPOS = Token[TLPOS]
+	end if
 end procedure
 
 --**
@@ -210,8 +215,7 @@ public procedure reset(atom state = g_state)
 	eumem:ram_space[state] = default_state()
 end procedure
 
---**
--- Parse Euphoria code into tokens of like colors.
+
 --****
 -- === get/set options
 
@@ -358,6 +362,10 @@ end type
 procedure scan_char(atom state = g_state)
 	state = state -- supress warning
 	if Look = EOL then
+		if sti < length(source_text) and source_text[sti+1] = '\r' then
+			sti += 1
+			source_text[sti] = EOL
+		end if
 		LNum += 1
 		LPos = 0
 		if length(Token[TDATA]) = 0 then
@@ -417,14 +425,16 @@ function scankeep_white(atom state = g_state)
 	return FALSE
 end function
 
-function scan_multicomment(atom state = g_state)
+function scan_multicomment(atom state = g_state, multiline_token multi = 0)
 	Token[TTYPE] = T_COMMENT
-	Token[TDATA] = "/"
+	if not multi then
+		Token[TDATA] = "/"
+	end if
 	Token[TFORM] = TF_COMMENT_MULTIPLE
-
+	
 	while 1 do
-		if (Look = io:EOF) or (Look = EOL) then
--- 			report_error(ERR_EOF)
+		if (Look = io:EOF) then
+			last_multi = TF_COMMENT_MULTIPLE
 			return TRUE 
 		end if
 
@@ -472,7 +482,7 @@ function scan_qchar(atom state = g_state)
 		return TRUE
 	end if
 	scan_escaped_char(state)
-	while Look != '\'' and Look != EOL do
+	while Look != '\'' and Look != EOL and Look != EOF do
 		Token[TDATA] &= Look
 		scan_char( state )
 	end while
@@ -503,7 +513,37 @@ function lookahead_for( object needle, integer look_at =  1 )
 	return TRUE
 end function
 
-function raw_string( sequence delimiter, atom state )
+public type multiline_token( object mlt )
+	if not atom( mlt ) then
+		return 0
+	end if
+	if mlt = 0
+	or mlt = TF_STRING_BACKTICK
+	or mlt = TF_STRING_TRIPLE
+	or mlt = TF_COMMENT_MULTIPLE then
+		return 1
+	end if
+	return 0
+end type
+
+multiline_token last_multi = 0
+
+--**
+--
+-- Returns:
+-- One of 0, TF_COMMENT_MULTIPLE, TF_STRING_BACKTICK, TF_STRING_TRIPLE.
+--
+-- Comments:
+-- After calling ##[[:tokenize_string]]##, this function will return a value of 0
+-- if the line did not end in the middle of a multiline construct, or the value
+-- for the respective token. This is meant to facilitate proper tokenizing of
+-- individual lines of code.
+
+public function last_multiline_token()
+	return last_multi
+end function
+
+function raw_string( sequence delimiter, atom state, multiline_token multi = 0 )
 	Token[TTYPE] = T_STRING
 	Token[TDATA] = ""
 
@@ -526,9 +566,16 @@ function raw_string( sequence delimiter, atom state )
 
 	if eumem:ram_space[state][STRING_KEEP_QUOTES] then
 		if Look = io:EOF then
-			Token[TDATA] = delimiter & Token[TDATA]
+			if not multi then
+				Token[TDATA] = delimiter & Token[TDATA]
+			end if
+			last_multi = Token[TFORM]
 		else
-			Token[TDATA] = delimiter & Token[TDATA] & delimiter
+			if multi then
+				Token[TDATA] = Token[TDATA] & delimiter
+			else
+				Token[TDATA] = delimiter & Token[TDATA] & delimiter
+			end if
 		end if
 	end if
 	
@@ -539,7 +586,7 @@ function scan_string(atom state = g_state)
 	if (Look = '`') then
 		return raw_string( "`", state )
 	end if
-	if (Look != '"') then 
+	if (Look != '"') then
 		return FALSE 
 	end if
 
@@ -557,7 +604,7 @@ function scan_string(atom state = g_state)
 	Token[TFORM] = TF_STRING_SINGLE
 
 	while (Look != '"') do
-		if (Look = EOL) then 
+		if (Look = EOL or Look = EOF) then 
 			if eumem:ram_space[state][STRING_KEEP_QUOTES] then
 				Token[TDATA] = "\"" & Token[TDATA] -- & "\""
 			end if
@@ -867,7 +914,7 @@ function scan_identifier(atom state = g_state)
 	end if
 
 	if find(Look, "xuU") then
-		nextch = lookahead(state, state)
+		nextch = lookahead( 1, state)
 		if nextch = '"' then
 			-- A special string token
 			integer whichhex = Look
@@ -950,7 +997,7 @@ function scan_include(atom state = g_state)
 
 	if not scan_string(state) then
 		-- scan until whitespace
-		while not White_Char(Look) do
+		while not White_Char(Look) and Look != EOF do
 			Token[TDATA] &= Look
 			scan_char(state)
 		end while
@@ -1024,21 +1071,15 @@ procedure next_token(atom state = g_state)
 				scan_char(state)
 			else
 				-- .number
+				integer start_char = sti - 1
 				Token[TTYPE] = T_NUMBER
 				Token[TDATA] = scan_fraction(0, state)
 				Token[TFORM] = TF_ATOM
-				if ERR then
-					return
-				end if
 
 				Token[TDATA] = scan_exponent(Token[TDATA], state)
 
 				if eumem:ram_space[state][STRING_NUMBERS] then
-					if integer(Token[TDATA]) then
-						Token[TDATA] = sprintf("%d",{Token[TDATA]})
-					else
-						Token[TDATA] = sprintf("%g",{Token[TDATA]})
-					end if
+					Token[TDATA] = source_text[start_char..sti-1]
 				end if
 			end if
 
@@ -1098,13 +1139,26 @@ end procedure
 --****
 -- === Routines
 
-public function tokenize_string(sequence code, atom state = g_state, integer stop_on_error = TRUE)
-	sequence tokens
+--**
+-- Tokenize euphoria source code
+--
+-- Parameters:
+-- # ##code## The code to be tokenized
+-- # ##state## (default g_state) the tokenizer returned by ##[[:new]]##
+-- # ##stop_on_error## (default TRUE)
+-- # ##multi## one of 0, TF_COMMENT_MULTIPLE, TF_STRING_BACKTICK, TF_STRING_TRIPLE
+--
+-- Returns:
+-- Sequence of tokens
 
+public function tokenize_string(sequence code, atom state = g_state, integer stop_on_error = TRUE, multiline_token multi = 0)
+	sequence tokens
+	report_and_stop_on_error = stop_on_error
 	ERR = FALSE
 	ERR_LNUM = 0
 	ERR_LPOS = 0
-
+	last_multi = 0
+	
 	tokens = {}
 
 	source_text = code
@@ -1121,7 +1175,22 @@ public function tokenize_string(sequence code, atom state = g_state, integer sto
 	Token[TLNUM] = 1
 	Token[TLPOS] = 1
 
-	if (Look = '#') and (lookahead(1) = '!') then
+	if multi then
+		sti = 0
+		switch multi do
+			case TF_STRING_BACKTICK then
+				raw_string( "`", state, multi )
+				
+			case TF_STRING_TRIPLE then
+				raw_string( `"""`, state, multi )
+			case TF_COMMENT_MULTIPLE then
+				scan_char( state )
+				scan_multicomment( state, multi )
+			case else
+				-- error?
+		end switch
+		tokens &= { Token }
+	elsif (Look = '#') and (lookahead(1) = '!') then
 		sti += 1
 		scan_char(state)
 		if eumem:ram_space[state][DELETE_WHITE] then
@@ -1151,8 +1220,20 @@ public function tokenize_string(sequence code, atom state = g_state, integer sto
 	return { tokens, ERR, ERR_LNUM, ERR_LPOS }
 end function
 
-public function tokenize_file(sequence fname, atom state = g_state)
-	object txt = io:read_file(fname, io:TEXT_MODE)
+--**
+-- Tokenize euphoria source code
+--
+-- Parameters:
+-- # ##fname## the file to be read and tokenized
+-- # ##state## (default g_state) the tokenizer returned by ##[[:new]]##
+-- # ##mode## the mode in which to open the file. One of: ##[[:io:BINARY_MODE]]## (default) or ##[[:io:TEXT_MODE]]##. 
+--   Note that for large files with Windows line endings, text mode may be much slower. 
+--   See [[:io:read_file]] for more information.
+--
+-- Returns:
+-- Sequence of tokens
+public function tokenize_file(sequence fname, atom state = g_state, integer mode = io:BINARY_MODE )
+	object txt = io:read_file(fname, mode )
 	if atom(txt) and txt = -1 then
 		return {{}, ERR_OPEN, ERR_LNUM, ERR_LPOS}
 	end if
@@ -1176,7 +1257,7 @@ public constant token_names = {
 }
 
 public constant token_forms = {
-	"TF_HEX", "TF_INT", "TF_ATOM", "TF_STRING_SINGLE", "TF_STRING_TRIPPLE",
+	"TF_HEX", "TF_INT", "TF_ATOM", "TF_STRING_SINGLE", "TF_STRING_TRIPLE",
 	"TF_STRING_BACKTICK", "TF_STRING_HEX", "TF_COMMENT_SINGLE", "TF_COMMENT_MULTIPLE"
 }
 

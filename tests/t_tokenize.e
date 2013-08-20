@@ -74,5 +74,14 @@ test_equal("tokenize_string ticket #549, 2", 2, tokens[1][6][TDATA])
 test_equal("tokenize_string ticket #549, 3", T_SLICE, tokens[1][7][TTYPE])
 test_equal("tokenize_string ticket #549, 4", 3, tokens[1][8][TDATA])
 
+tokenize_string( "'\\" )
+test_pass("no infinite loop with a line ending in singlequote-backslash")
+tokenize_string( `"\` )
+test_pass("no infinite loop with a line ending in singlequote-backslash")
+
+string_numbers( 1 )
+{ tokens } = tokenize_string( ".1" )
+test_equal( "don't prepend zero to FP numbers", ".1", tokens[1][TDATA] )
+
 test_report()
 

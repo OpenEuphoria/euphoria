@@ -534,10 +534,16 @@ public integer my_dir = DEFAULT_DIR_SOURCE
 -- 	# ##path_name## : a sequence, the name of the directory to walk through
 -- 	# ##your_function## : the routine id of a function that will receive each path
 --                       returned from the result of ##dir_source##, one at a time.
--- 	# ##scan_subdirs## : an optional integer, ##1## to also walk though subfolders, ##0## (the default) to skip them all.
+--                       Optionally, to include extra data for your function, ##your_function##
+--                       can be a 2 element sequence, with the routine_id as the first element and other data
+--                       as the second element.
+-- # ##scan_subdirs## : an optional integer, ##1## to also walk though subfolders, ##0## (the default) to skip them all.
 --  # ##dir_source## : an optional integer. A routine_id of a user-defined routine that 
 --                    returns the list of paths to pass to ##your_function##. If omitted,
---                    the [[:dir]] function is used.   
+--                    the [[:dir]]() function is used. If your routine requires an extra parameter,
+--                    ##dir_source## may be a 2 element sequence where the first element is the
+--                    routine id and the second is the extra data to be passed as the second parameter
+--                    to your function.
 --
 -- Returns:
 -- An **object**,
@@ -614,7 +620,7 @@ public function walk_dir(sequence path_name, object your_function, integer scan_
 	object orig_func
 	sequence user_data = {path_name, 0}
 	object source_orig_func
-	object source_user_data
+	object source_user_data = ""
 	
 	orig_func = your_function
 	if sequence(your_function) then
@@ -1729,9 +1735,14 @@ public function canonical_path(sequence path_in, integer directory_given = 0, ca
 		if lPath[$] != SLASH then
 			sl = sl & {length(lPath)+1}
 		end if
-		
+
 		for i = length(sl)-1 to 1 by -1 label "partloop" do
-			sequence part = lPath[1..sl[i]-1]
+			ifdef WINDOWS then
+				sequence part = lDrive & lPath[1..sl[i]-1]
+			elsedef
+				sequence part = lPath[1..sl[i]-1]
+			end ifdef
+			
 			object list = dir( part & SLASH )
 			sequence supplied_name = lPath[sl[i]+1..sl[i+1]-1]
 			
@@ -2320,7 +2331,11 @@ ifdef UNIX then
 		elsedef
 			stat_result[STAT_RETURN] = c_func(xStatFile, {psrc, psrcbuf})
 		end ifdef
-		stat_result[STAT_DEV]    = peek8u( psrcbuf + STAT_ST_DEV )
+		ifdef OSX then
+			stat_result[STAT_DEV] = peek4u( psrcbuf + STAT_ST_DEV )
+		elsedef
+			stat_result[STAT_DEV]    = peek8u( psrcbuf + STAT_ST_DEV )
+		end ifdef
 		stat_result[STAT_BLKSIZE] = peek_pointer( psrcbuf + STAT_ST_BLKSIZE )
 		return stat_result
 	end function
@@ -2343,11 +2358,9 @@ end ifdef
 --
 -- See Also:
 --   [[:rename_file]], [[:copy_file]]
-
 public function move_file(sequence src, sequence dest, integer overwrite=0)
 	atom psrc = 0, pdest = 0, ret
 	sequence tempfile = ""
-
 	if not file_exists(src) then
 		return 0
 	end if

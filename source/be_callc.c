@@ -56,8 +56,8 @@
 #include "be_alloc.h"
 
 
-#if !defined(ARCH) || !defined(ARM) || !defined(ix86) || !defined(ix86_64)
-#	error "Missing required macros."
+#if !defined(EARM) && !defined(EX86) && !defined(EX86_64)
+#	error "Missing required architecture macros."
 #endif
 
 /*******************/
@@ -65,7 +65,7 @@
 /*******************/
 
 #if defined(__GNUC__)
-#if ARCH == ix86
+#ifdef EX86
 /** 
  * push the value arg on to the **runtime** stack.  You must make sure that as_offset is
  * equal to sum of all of the sizes of the data you push to the stack by the time you call pop below.
@@ -167,7 +167,7 @@ typedef union {
 /* Local variables */
 /*******************/
 
-#if INTPTR_MAX == INT32_MAX
+#if INTPTR_MAX == INT32_MAX && __ARM_PCS_VFP != 1
 
 // reenable when these crashes stop
 #define generate_typedefs(function_name, return_type, convention, namebase, default_value) typedef return_type (convention *namebase ## 0)();\
@@ -348,6 +348,11 @@ typedef double (__cdecl *cddfuncC)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,
 typedef double (__cdecl *cddfuncD)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
 typedef double (__cdecl *cddfuncE)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
 typedef double (__cdecl *cddfuncF)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfunc10)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfunc11)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfunc12)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfunc13)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfunc14)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
 
 float float_std_func(intptr_t i, intptr_t * op, long len) {
     
@@ -359,7 +364,7 @@ float float_std_func(intptr_t i, intptr_t * op, long len) {
 	    case 4: return ((ffunc4)i)(op[0],op[1],op[2],op[3]);
 	    case 5: return ((ffunc5)i)(op[0],op[1],op[2],op[3],op[4]);
 	    case 6: return ((ffunc6)i)(op[0],op[1],op[2],op[3],op[4],op[5]); 
-		case 7: return ((func7)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6]);
+		case 7: return ((ffunc7)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6]);
 	    case 8: return ((ffunc8)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7]);
 	    case 9: return ((ffunc9)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8]);
 	    case 10: return ((ffuncA)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8],op[9]);
@@ -405,7 +410,7 @@ double double_std_func(intptr_t i, intptr_t * op, long len) {
 	    case 4: return ((dfunc4)i)(op[0],op[1],op[2],op[3]);
 	    case 5: return ((dfunc5)i)(op[0],op[1],op[2],op[3],op[4]);
 	    case 6: return ((dfunc6)i)(op[0],op[1],op[2],op[3],op[4],op[5]); 
-		case 7: return ((func7)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6]);
+		case 7: return ((dfunc7)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6]);
 	    case 8: return ((dfunc8)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7]);
 	    case 9: return ((dfunc9)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8]);
 	    case 10: return ((dfuncA)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8],op[9]);
@@ -437,6 +442,13 @@ double double_cdecl_func(intptr_t i, intptr_t * op, long len) {
 	    case 13: return ((cddfuncD)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8],op[9],op[10],op[11],op[12]);
 	    case 14: return ((cddfuncE)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8],op[9],op[10],op[11],op[12],op[13]);
 	    case 15: return ((cddfuncF)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8],op[9],op[10],op[11],op[12],op[13],op[14]);
+		case 16: return ((cddfunc10)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8],op[9],op[10],op[11],op[12],op[13],op[14],op[15]);
+		case 17: return ((cddfunc11)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8],op[9],op[10],op[11],op[12],op[13],op[14],op[15],op[16]);
+		case 18: return ((cddfunc12)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8],op[9],op[10],op[11],op[12],op[13],op[14],op[15],op[16],op[17]);
+		case 19: return ((cddfunc13)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8],op[9],op[10],op[11],op[12],op[13],op[14],op[15],op[16],op[17],op[18]);
+		case 20: return ((cddfunc14)i)(op[0],op[1],op[2],op[3],op[4],op[5],op[6],op[7],op[8],op[9],op[10],op[11],op[12],op[13],op[14],op[15],op[16],op[17],op[18],op[19]);
+		default:
+			printf("ERRROR: %ld args not supported\n", len );
 	}
     return 0.0;
 }
@@ -613,17 +625,17 @@ typedef float (*fcall_sig13)( double, intptr_t, double, double, intptr_t, intptr
 typedef float (*fcall_sig14)( intptr_t, double, double, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
 typedef float (*fcall_sig15)( double, double, double, double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
 
-int64_t icall_x86_64( intptr_t func, double* xmm, int64_t *r, int args, int signature ){
+intptr_t icall_x86_64( intptr_t func, double* xmm, intptr_t *r, int args, int signature ){
 	switch( signature ){
 		case 0:
 			switch( args ){
-				case 0: return ((int64_t (*)())func)();
-				case 1: return ((int64_t (*)())func)( r[0] );
-				case 2: return ((int64_t (*)())func)( r[0], r[1] );
-				case 3: return ((int64_t (*)())func)( r[0], r[1], r[2] );
-				case 4: return ((int64_t (*)())func)( r[0], r[1], r[2], r[3] );
+				case 0: return ((intptr_t (*)())func)();
+				case 1: return ((intptr_t (*)())func)( r[0] );
+				case 2: return ((intptr_t (*)())func)( r[0], r[1] );
+				case 3: return ((intptr_t (*)())func)( r[0], r[1], r[2] );
+				case 4: return ((intptr_t (*)())func)( r[0], r[1], r[2], r[3] );
 				default:
-				return ((int64_t (*)())func)(
+				return ((intptr_t (*)())func)(
 						r[0], r[1], r[2], r[3], r[4], 
 						r[5], r[6], r[7], r[8], r[9],
 						r[10], r[11], r[12], r[13], 
@@ -741,7 +753,7 @@ int64_t icall_x86_64( intptr_t func, double* xmm, int64_t *r, int args, int sign
 }
 
 
-double dcall_x86_64( intptr_t func, double* xmm, int64_t *r, int signature ){
+double dcall_x86_64( intptr_t func, double* xmm, intptr_t *r, int signature ){
 	switch( signature ){
 		case 0:
 			return ((double (*)())func)(
@@ -861,7 +873,7 @@ double dcall_x86_64( intptr_t func, double* xmm, int64_t *r, int signature ){
 }
 
 
-float fcall_x86_64( intptr_t func, double* xmm, int64_t *r, int signature ){
+float fcall_x86_64( intptr_t func, double* xmm, intptr_t *r, int signature ){
 	switch( signature ){
 		case 0:
 			return ((float (*)())func)(
@@ -980,7 +992,7 @@ float fcall_x86_64( intptr_t func, double* xmm, int64_t *r, int signature ){
 	RTFatal("Illegal signature");
 }
 #else
-int64_t icall_x86_64( intptr_t func, double* xmm, int64_t *r, int args ){
+int64_t icall_x86_64( intptr_t func, double* xmm, intptr_t *r, int args ){
 	
 	switch( args ){
 		case 0: return ((int64_t (*)())func)();
@@ -999,7 +1011,7 @@ int64_t icall_x86_64( intptr_t func, double* xmm, int64_t *r, int args ){
 	}
 }
 
-double dcall_x86_64( intptr_t func, double* xmm, int64_t *r ){
+double dcall_x86_64( intptr_t func, double* xmm, intptr_t *r ){
 	return ((double (*)())func)( xmm[0], xmm[1], xmm[2], xmm[3], xmm[4], xmm[5], xmm[6], xmm[7],
 			r[0], r[1], r[2], r[3], r[4], 
 			r[5], r[6], r[7], r[8], r[9],
@@ -1007,7 +1019,7 @@ double dcall_x86_64( intptr_t func, double* xmm, int64_t *r ){
 			r[14], r[15], r[16]);
 }
 
-float fcall_x86_64( intptr_t func, double* xmm, int64_t *r ){
+float fcall_x86_64( intptr_t func, double* xmm, intptr_t *r ){
 	return ((float (*)())func)( xmm[0], xmm[1], xmm[2], xmm[3], xmm[4], xmm[5], xmm[6], xmm[7],
 			r[0], r[1], r[2], r[3], r[4], 
 			r[5], r[6], r[7], r[8], r[9],
@@ -1042,7 +1054,7 @@ union xmm_param {
 #	else
 		/* The x86-64 calling convention uses 6 registers for the first 6 integer
 		 * parameters.  After that, parameters are pushed on the stack.  Also,
-		 * the first 5 floating point parameters are put into floating point
+		 * the first 8 floating point parameters are put into floating point
 		 * registers.  Either type of argument can start overflowing onto the
 		 * stack, so we have to track the number of args we're putting onto the
 		 * stack separately from what goes into the registers.
@@ -1089,7 +1101,7 @@ union xmm_param {
 						push();\
 						argsize += 4;
 						
-#	else
+#	elif __ARM_PCS_VFP != 1
 #		define PUSH_INT_ARG arg_op[arg_i++] = arg;
 
 #		define PUSH_INT64_ARG(x) \
@@ -1097,11 +1109,32 @@ union xmm_param {
 						arg_op[arg_i++] = dbl_arg.ints[0];\
 						arg_op[arg_i++] = dbl_arg.ints[1];\
 						++arg_len;
-						
-		
-#	endif
-#	define PUSH_DOUBLE_ARG(x) PUSH_INT64_ARG(x)
 
+#	else
+	// ARM hardfloat
+	#define PUSH_INT_ARG \
+	++int_args; \
+	if( arg_i < MAX_INT_PARAM_REGISTERS ){ \
+		arg_op[arg_i++] = arg; \
+	} \
+	else{ \
+		arg_op[arg_stack++] = arg; \
+	}
+
+#		define PUSH_INT64_ARG(x) \
+			dbl_arg.int64 = (int64_t)x;\
+			arg = dbl_arg.ints[0]; PUSH_INT_ARG;\
+			arg = dbl_arg.ints[1]; PUSH_INT_ARG;
+
+#		define MAX_INT_PARAM_REGISTERS 4
+#		define MAX_FP_PARAM_REGISTERS 16
+#		define INCREMENT_FP_ARGS ;
+#		define INCREMENT_INT_ARGS ;
+#		define SIGNATURE_PARAM
+#		define UPDATE_SIGNATURE
+#       define FP_ARG_COUNTER xmm_i
+#       define INT_ARG_COUNTER arg_i
+#	endif
 #endif
 
 #ifndef value_stack_init
@@ -1145,29 +1178,32 @@ object call_c(int func, object proc_ad, object arg_list)
 	char NameBuff[100];
 
 #	ifndef push
-		intptr_t arg_op[16];
+		intptr_t arg_op[20];
 		intptr_t arg_i = 0;
 #	endif
-#	if INTPTR_MAX == INT32_MAX
+#	if INTPTR_MAX == INT32_MAX && __ARM_PCS_VFP != 1
+		#if !defined(push)
 		intptr_t arg_len;
+		#endif
 #		if defined(__WIN32) && !defined(__WATCOMC__)
 			int cdecl_call;
 #		else
 #			define cdecl_call (1)
 #		endif
-#	endif
-
 	uintptr_t as_offset;   // used by pop()
 	uintptr_t last_offset; // used by push()
 
-	// this code relies on arg always being the first variable and last_offset 
+	// this code relies on arg always being the first variable and last_offset
 	// always being the last variable
 	last_offset = (uintptr_t)&arg;
 	as_offset = (uintptr_t)&argsize;
 	// as_offset = last_offset - 4;
+#	endif
+
+
 
 	
-#if INTPTR_MAX == INT64_MAX
+#if INTPTR_MAX == INT64_MAX || __ARM_PCS_VFP == 1
 #ifdef EWINDOWS
 	int signature = 0;
 #else
@@ -1191,7 +1227,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	}
 	
 	long_proc_address = (intptr_t)(c_routine[proc_index].address);
-#	if INTPTR_MAX == INT32_MAX
+#	if INTPTR_MAX == INT32_MAX && __ARM_PCS_VFP != 1
 #		if defined(__WIN32) && !defined(__WATCOMC__)
 			cdecl_call = c_routine[proc_index].convention;
 #		endif
@@ -1210,7 +1246,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	
 	return_type = c_routine[proc_index].return_size; // will be INT
 
-	#if INTPTR_MAX == INT32_MAX
+	#if INTPTR_MAX == INT32_MAX && !defined(push) && __ARM_PCS_VFP != 1
 		arg_len = arg_list_ptr->length;
 	#endif
 	
@@ -1249,7 +1285,9 @@ object call_c(int func, object proc_ad, object arg_list)
 		
 		if (IS_ATOM_INT(next_size))
 			size = INT_VAL(next_size);
-		else if (IS_ATOM(next_size))
+		else if (IS_ATOM(next_size) && DBL_PTR(next_size)->dbl > 0.0)
+			// Do we need to verify the sign or can we assume > 0? JAG
+			// Do we need to check bounds? JAG
 			size = (uintptr_t)DBL_PTR(next_size)->dbl;
 		else 
 			RTFatal("This C routine was defined using an invalid argument type");
@@ -1265,18 +1303,22 @@ object call_c(int func, object proc_ad, object arg_list)
 			}
 
 			if (size == C_DOUBLE) {
-				#if INTPTR_MAX == INT32_MAX
+				#if INTPTR_MAX == INT32_MAX && __ARM_PCS_VFP != 1
 
 					PUSH_INT64_ARG(dbl_arg.int64)
 						
-				#elif INTPTR_MAX == INT64_MAX
+				#elif INTPTR_MAX == INT64_MAX || __ARM_PCS_VFP == 1
 				
 					if( FP_ARG_COUNTER < MAX_FP_PARAM_REGISTERS ) {
 						UPDATE_SIGNATURE
 						dbl_op[FP_ARG_COUNTER++].d = dbl_arg.dbl;
 					}
 					else{
+					#if __ARM_PCS_VFP == 1
+						PUSH_INT64_ARG( dbl_arg.int64 );
+					#else
 						arg_op[arg_stack++] = dbl_arg.int64;
+					#endif
 					}
 					int_args += 6;
 				#endif
@@ -1285,10 +1327,10 @@ object call_c(int func, object proc_ad, object arg_list)
 			else {
 				/* C_FLOAT */
 				flt_arg.flt = (float)dbl_arg.dbl;
-				#if INTPTR_MAX == INT32_MAX
+				#if INTPTR_MAX == INT32_MAX && __ARM_PCS_VFP != 1
 					arg = (uintptr_t)flt_arg.int32;
 					PUSH_INT_ARG
-				#elif INTPTR_MAX == INT64_MAX
+				#elif INTPTR_MAX == INT64_MAX || __ARM_PCS_VFP == 1
 					if( FP_ARG_COUNTER < MAX_FP_PARAM_REGISTERS ){
 						UPDATE_SIGNATURE
 						dbl_op[FP_ARG_COUNTER++].f = flt_arg.flt;
@@ -1306,14 +1348,19 @@ object call_c(int func, object proc_ad, object arg_list)
 				arg = next_arg;
 				PUSH_INT_ARG
 			}
-			else if (IS_ATOM(next_arg)) {
+			else if (IS_ATOM(next_arg) && DBL_PTR(next_arg)->dbl > 0.0
+					&& DBL_PTR(next_arg)->dbl <= (eudouble)UINT64_MAX) {
 				// atoms are rounded to integers
-				
+				// Do we really need both casts? Maybe do a sign check.
+				// We can usually assume that pointers > 0 but is that a
+				// valid assumption? Do we need to check bounds? JAG
 				arg = (uint64_t)(uintptr_t)DBL_PTR(next_arg)->dbl; //correct
 				// if it's a -ve f.p. number, Watcom converts it to long and
 				// then to unsigned long. This is exactly what we want.
 				// Works with the others too. 
 				PUSH_INT_ARG
+			}else{
+				RTFatal("argument out of range.");
 			}
 		}
 		else if( size == C_LONGLONG ){
@@ -1323,7 +1370,19 @@ object call_c(int func, object proc_ad, object arg_list)
 			else if (IS_ATOM(next_arg)) {
 				// atoms are converted to and rounded to 64-bit values, 
 				// this is lossess on both 32 and 64 bit.
-				PUSH_INT64_ARG((uint64_t)DBL_PTR(next_arg)->dbl);
+				#ifdef EARM
+				PUSH_INT64_ARG((int64_t)DBL_PTR(next_arg)->dbl);
+				#else
+				// fix cast conversion for sign and include unsigned long long JAG
+				if( DBL_PTR(next_arg)->dbl > (eudouble)INT64_MAX
+					&& DBL_PTR(next_arg)->dbl <= (eudouble)UINT64_MAX ) {
+					PUSH_INT64_ARG((uint64_t)DBL_PTR(next_arg)->dbl);
+				}else if( DBL_PTR(next_arg)->dbl >= (eudouble)INT64_MIN ) {
+					PUSH_INT64_ARG((int64_t)DBL_PTR(next_arg)->dbl);
+				}else{
+					RTFatal("argument out of range.");
+				}
+				#endif
 			}
 		}
 		else {
@@ -1353,11 +1412,24 @@ object call_c(int func, object proc_ad, object arg_list)
 			}
 			else if (IS_ATOM(next_arg)) {
 				// atoms are rounded to integers
+				#ifdef EARM
+				if( size == C_INT )
+					arg = (intptr_t)DBL_PTR(next_arg)->dbl; //correct
+				else
+				#endif
+				// arg = (uintptr_t)DBL_PTR(next_arg)->dbl;
+				// fix cast conversion for sign and include unsigned long long JAG
+				// I may have broken this for ARM, but what's with the
+				// if statement? JAG
+				if( DBL_PTR(next_arg)->dbl > (eudouble)INT64_MAX
+					&& DBL_PTR(next_arg)->dbl <= (eudouble)UINT64_MAX ) {
+					arg = ((uint64_t)DBL_PTR(next_arg)->dbl);
+				}else if( DBL_PTR(next_arg)->dbl >= (eudouble)INT64_MIN ) {
+					arg = ((int64_t)DBL_PTR(next_arg)->dbl);
+				}else{
+					RTFatal("argument out of range.");
+				}
 				
-				arg = (uintptr_t)DBL_PTR(next_arg)->dbl; //correct
-				// if it's a -ve f.p. number, Watcom converts it to long and
-				// then to unsigned long. This is exactly what we want.
-				// Works with the others too. 
 				PUSH_INT_ARG
 			}
 			else {
@@ -1367,7 +1439,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	}    
 
 	// Make the Call
-	#if INTPTR_MAX == INT32_MAX
+	#if INTPTR_MAX == INT32_MAX && __ARM_PCS_VFP != 1
 		#ifdef push
 			// Make the Call - The C compiler thinks it's a 0-argument call
 			// might be VOID C routine, but shouldn't crash
@@ -1417,10 +1489,14 @@ object call_c(int func, object proc_ad, object arg_list)
 		return NewDouble(double_result);
 	}
 	else if (return_type == C_LONGLONG ){
+		
 		#if INTPTR_MAX == INT32_MAX
 			long long int int64_t_result;
 		#else
 			#define int64_t_result int_result
+		#endif
+		#if __ARM_PCS_VFP == 1
+			int64_t_result = icall_x86_64( long_proc_address, (double*)dbl_op, arg_op, int_args SIGNATURE_PARAM );
 		#endif
 		call_routine(int64_t);
 		if( int64_t_result <= (long long int)MAXINT && int64_t_result >= (long long int)MININT ){
@@ -1438,6 +1514,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	
 	else {
 		// expect integer to be returned
+		// Maybe this can be changed to a switch? JAG
 		call_routine(int);
 		if (return_type == C_POINTER ){
 			if ((uintptr_t)int_result <= (uintptr_t)MAXINT) {

@@ -252,35 +252,30 @@ export enum
 	MIN,
 	MAX
 
-ifdef E32 or EU4_0 then
+constant
+	max_int32 = #3FFFFFFF
 
-	constant max_int = #3FFFFFFF
-	export constant SIZEOF_POINTER = 4
-
-elsifdef E64 then
-	
-	export constant SIZEOF_POINTER = 8
+ifdef not EU4_0 then
 	atom ptr = machine_func( 16, 8 )
 		poke( ptr, { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x3f } )
-	constant max_int = peek8s( ptr )
-	machine_proc( 17, ptr )
-
-elsedef
-	-- default to native...
-	export constant SIZEOF_POINTER = sizeof( #03000001 ) -- C_POINTER
-	integer max_int, min_int
-	if SIZEOF_POINTER = 4 then
-		max_int = #3FFFFFFF
-	else
-		-- the parser, in some cases, loses precision, probably due to
-		-- the way MULTIPLY ops are optimized, as 0x3fffffff_ffffffff
-		-- turns into a double and is rounded up to 0x40000000_00000000.
-		-- Using peek8s(), we get the proper integer under 64-bit euphoria.
-		atom ptr = machine_func( 16, 8 )
-		poke( ptr, { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x3f } )
-		max_int = peek8s( ptr )
+		constant
+			max_int64 = peek8s( ptr )
 		machine_proc( 17, ptr )
-	end if
+elsedef
+	constant
+		max_int64 = max_int32
+end ifdef
+
+ifdef E64 then
+	export constant
+		SIZEOF_POINTER = 8,
+		max_int        = max_int64,
+		$
+elsedef
+	export constant
+		SIZEOF_POINTER = 4,
+		max_int        = max_int32,
+		$
 end ifdef
 
 public integer TARGET_SIZEOF_POINTER = SIZEOF_POINTER
@@ -291,6 +286,24 @@ export constant
 	MININT_DBL = MININT,
 	MAXINT_DBL = MAXINT
 
+export atom
+	TMAXINT,
+	TMININT,
+	TMININT_DBL,
+	TMAXINT_DBL
+
+export procedure set_target_integer_size( integer sizeof_pointer )
+	if sizeof_pointer = 4 then
+		TMAXINT = max_int32
+	else
+		TMAXINT = max_int64
+	end if
+	
+	TMININT = -TMAXINT - 1
+	TMAXINT_DBL = TMAXINT
+	TMININT_DBL = TMININT
+end procedure
+set_target_integer_size( SIZEOF_POINTER )
 
 export function is_integer( object o )
 	if not atom( o ) then
@@ -298,7 +311,7 @@ export function is_integer( object o )
 	end if
 	
 	if o = floor( o ) then
-		if o <= MAXINT and o >= MININT then
+		if o <= TMAXINT and o >= TMININT then
 			return 1
 		end if
 	end if

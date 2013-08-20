@@ -364,7 +364,7 @@ export function NewSequenceSym(sequence s)
 	return p
 end function
 
-export function NewIntSym(integer int_val)
+export function NewIntSym(atom int_val)
 -- New integer symbol
 -- int_val must not be too big for a Euphoria int
 	symtab_index p

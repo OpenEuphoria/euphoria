@@ -2,6 +2,8 @@
 
 === Bug Fixes
 
+* [[ticket:872]] fix documentation error involving ##[[:or_all]]##
+* [[ticket:880]] fix documentaiton error involving ##[[:poke2]]##
 * [[ticket:801]] fix translator memory leak for ##[[:insert]]##
 * [[ticket:799]] fix memory leak in ##[[:gets]]## when reading EOF
 * [[ticket:819]] use operating system sleep functions for fractions of seconds to avoid needless CPU utilization
@@ -10,3 +12,16 @@
 * [[ticket:781]] http_post and http_get now follow redirects
 * [[ticket:835]] translator properly handles sequences passed to ##floor##
 * [[ticket:830]] fixed memory leak in ##[[:replace]]##
+* [[ticket:847]] fixed memory leak in ##[[:remove]]##
+* [[ticket:837]] fixed documentation error involving ##[[:load_map]]##
+* Fix std/sequence.e so store() will correctly handle the one-element index case - it was duplicating the entire sequence before.
+* [[ticket:638]] ##[[:value]]## and ##[[:get]]## handle multi-line strings
+* [[ticket:836]] ##[[:canonical_path]]## works when path is not on the current drive on Windows
+* [[ticket:630]] shrouder ignores binder options that are not applicable
+* [[ticket:776]] Updated ##[[:walk_dir]]## parameter documentation
+* functions imported from msvcrt.dll should use cdecl (affects ##[[:now_gmt]]##, ##[[:locale:get]]##,
+  ##[[:locale:set]]## and ##[[:locale:datetime]]##)
+
+=== Enhancements
+
+* command line help is now sorted by option
