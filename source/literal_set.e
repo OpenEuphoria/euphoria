@@ -15,16 +15,16 @@ constant METHODS_OTHER_THAN_SEQUENCE_PAIR_ACTUALLY_WORK = 0
 with type_check
 
 enum type literal_accessor 
-	NAME,
-	MAP,
-	ACCESS_METHOD,
-	NO_FRACTION,
-	CONTINUOUS,
-	MINIMUM, -- the sym_index that attains the lowest value
-	MAXIMUM, -- the sym_index that attains the higest value
-	DATA_SYMBOL,
-	UDT_SYMBOL,
-	MONOTONIC,
+	NAME,           -- name of the type routine
+	MAP,            -- map used for storing data used for type_check and name_of
+	ACCESS_METHOD,  -- describes how MAP is structured.
+	NO_FRACTION,    -- true if it contains no fractions
+	CONTINUOUS,     -- true if the data is continuous
+	MINIMUM, -- the sym_index that attains the lowest value or 0 if unknown
+	MAXIMUM, -- the sym_index that attains the higest value or 0 if unknown
+	DATA_SYMBOL, -- the sym_index that points to a data literal which is the same as the one in MAP: used for a type check or name_of call
+	UDT_SYMBOL,  -- the sym_index for the type routine?
+	MONOTONIC,   -- true if the data values are all increasing
 	$
 end type
 
@@ -137,6 +137,11 @@ export function new(
 		if sym_mode(syms[1]) != M_CONSTANT then
 			return 0 -- failure
 		end if
+		-- unless a major change is done to the way
+		-- enums are parsed this condition will never happen.
+		if sym_obj(syms[1]) = NOVALUE then
+			return 0
+		end if
 		min_sym = syms[1]
 		max_sym = syms[1]
 		ciif_min = syms[1]
@@ -146,7 +151,7 @@ export function new(
 		end if
 	end if
 	for i = 1 to length( syms ) do
-		if sym_mode(syms[i]) != M_CONSTANT then
+		if sym_mode(syms[i]) != M_CONSTANT or sym_obj(syms[1]) = NOVALUE then
 			return 0
 		end if
 		if i > 2 and compare(sym_obj(syms[i-1]),sym_obj(syms[i])) != direction then
