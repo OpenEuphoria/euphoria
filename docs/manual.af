@@ -29,7 +29,7 @@
 #
 
 # Output file generation options
-:@@(title Euphoria v4.1)@
+:@@(title Euphoria v4.0)@
 
 ifdef HTML
 :%%maxnumlevel = 4
@@ -54,6 +54,7 @@ end ifdef
 
 ../docs/welcome.txt
 ../docs/whatsnew4_1.txt
+../docs/whatsnew4_0.txt
 ../docs/licensing.txt
 ../License.txt <nowiki
 ../docs/credits.txt
@@ -78,7 +79,6 @@ end ifdef
 :<<LEVELTOC depth=2>>
 
 ../docs/refman_2.txt
-../docs/literals.txt
 
 ########
 :%%output=syntax_toc
@@ -169,7 +169,6 @@ end ifdef
 :<<LEVELTOC level=1 depth=2>>
 
 # General Index
-# be sure not to make any rows longer than the rest!
 ../docs/builtins.txt
 
 # General Routines
@@ -218,7 +217,6 @@ end ifdef
 ../include/std/stack.e
 ../include/std/scinot.e
 
-
 # Network Routines
 ../include/std/socket.e
 ../include/std/net/common.e
@@ -238,7 +236,6 @@ end ifdef
 ../include/std/graphics.e
 ../include/std/image.e
 
-
 # Euphoria Routines
 ../include/euphoria/info.e
 ../include/euphoria/keywords.e
@@ -253,7 +250,6 @@ end ifdef
 
 # Unsupported Features
 ../docs/unsupported.txt
-
 
 ########
 :%%output=relnotes

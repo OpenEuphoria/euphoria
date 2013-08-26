@@ -1189,30 +1189,31 @@ The following are Euphoria built-in routines. It is best if you do
 not use these for your own identifiers:
 
 <eucode>
-abort           getenv          peek4s          system
-and_bits        gets            peek4u          system_exec
-append          hash            peeks           tail
-arctan          head            platform        tan
-atom            include_paths   poke            task_clock_start
-c_func          insert          poke2           task_clock_stop
-c_proc          integer         poke4           task_create
-call            length          position        task_list
-call_func       log             power           task_schedule
-call_proc       machine_func    prepend         task_self
-clear_screen    machine_proc    print           task_status
-close           match           printf          task_suspend
-command_line    match_from      puts            task_yield
-compare         mem_copy        rand            time
-cos             mem_set         remainder       trace
-date            not_bits        remove          xor_bits
-delete          object          repeat          ?
-delete_routine  open            replace         &
-equal           option_switches routine_id      $
-find            or_bits         sequence        
-find_from       peek            sin             
-floor           peek_string     splice          
-get_key         peek2s          sprintf
-getc            peek2u          sqrt
+abort           getenv          peek2u            sqrt		
+and_bits        gets            peek4s            system
+append          hash            peek4u            system_exec
+arctan          head            peeks             tail
+atom            include_paths   platform          tan
+c_func          insert          poke              task_clock_start
+c_proc          integer         poke2             task_clock_stop
+call            length          poke4             task_create
+call_func       log             position          task_list
+call_proc       machine_func    power             task_schedule
+clear_screen    machine_proc    prepend           task_self
+close           match           print             task_status
+command_line    match_from      printf            task_suspend
+compare         mem_copy        puts              task_yield
+cos             mem_set         rand              time
+date            name_of         remainder         trace
+delete          not_bits        remove            xor_bits
+delete_routine  object          repeat            ?
+equal           open            replace           &
+find            option_switches routine_id        $
+find_from       or_bits         sequence        
+floor           peek            sin             
+get_key         peek_string     splice          
+getc            peek2s          sprintf
+                          	
 </eucode>
 
 
@@ -1497,7 +1498,7 @@ enum by / 2 A=5,B,C --> values are 5, 2.5, 1.25
 ==== enum type
 
 There is also a special form of ##enum##, an //enum type//. This is a simple way
-to write a user-defined type based on the set of values in a specific enum 
+to write a [[:udt|user-defined type]] based on the set of values in a specific enum 
 group.
 The type created this way can be used anywhere a normal user-defined type can be
 use.
@@ -1512,53 +1513,107 @@ procedure xyz( RGBA x, RGBA y)
 end procedure
 </eucode>
 
-However there is one significant difference when it comes to enum types. For
+However there are several significant differences when it comes to enum types. 
+For
 normal types, when calling the type function, it returns either ##0## or ##1##. 
 The enum type function returns ##0## if the argument is not a member of the 
 enum set, and it
-returns a positive integer when the argument is a member. The value returned is
-the ordinal number of
-the member in the enum's definition, regardless of what the member's value is.
-As an exception to this, if two enums share the same value, then they will
-share the same ordinal number. The ordinal numbers of enums surrounding these
-will continue to increment as if every enum had a unique ordinal number,
-causing some numbers to be skipped.
+returns a positive integer when the argument is a member.  The positive integer wont
+necessarily be ##1##, but it will be a valid true value for if statements, loops, etc.  
+When using a trace screen and also in an ex.err crash file, the variables defined with this type will display values using one of the 
+names of the defining constants used in the enum type statement.  You can use [[:The name_of Built-in]] to display
+these constants to the user.  The [[:Literal Mismatch Warning|Literal Mismatch Warning]] feature
+will alert you to bugs that runtime type checking may miss.
 
-For example,
-<eucode>
-enum type color RED=4, GREEN=7, BLACK=1, BLUE=3 , PINK=10 end type
+The value returned by the enum type is implementation dependent; except that we guarantee that for values
+not belonging to the type, the type returns 0 and for those that do belong, non-zero is returned.
 
-? color(RED)   --> 1
-? color(GREEN) --> 2
-? color(BLACK) --> 3
-? color(BLUE)  --> 4
-? color(PINK)  --> 5
-
-constant color_names = {"rouge", "vert", "noir", "bleu", "rose"}
-
-puts(1, color_names[color(BLUE)]) --> bleu
-
-</eucode>
-
-But with the exception, 
-<eucode>
-enum type color RED, GREEN=7, BLACK=1, BLUE=3 , PINK=10 end type
-? color(RED) --> 1
-? color(GREEN) --> 2
-? color(BLACK) --> 1
-? color(BLUE) --> 4
-? color(PINK) --> 5
-</eucode>
-
-Note that none of the enums have an ordinal number with a value of 3. This is
-simply skipped.
-
+For versions 4.0, the value returned by the type enum is the ordinal number of the member in the enum's definition, regardless of what the member's value is. As an exception to this, if two enums share the same value, then they will share the same ordinal number.  In 4.1, this may have changed however.
 
 When using type enum, you will be able to access the variable
 names later with the name_of built-in.  The name_of built-in gives you 
 back the literal name of a value according to what type it is.
-See [[:Alternative Literal Sets]].
+See below.
 
+
+===== The name_of Built-in
+
+There are times when a number, is better represented in some way other than using digits.  A number 3 is always just 3, whether we pass it to a DirectX function as a set of two flags or we compare it to the value of platform() to see if we are running on LINUX.  However, the representation "3" is not the best way to represent the value in the previous two cases.  This is why we have constants, and enumerated types.
+ 
+There are times when a programmer wants a way to display the variable names to the user, or in debugging, or in error reporting.  Having types keyed to some set of literals can also help catch at parse time a class of errors that would be missed by other forms of syntax checking.  The ##name_of## built-in gives the programmer a way of converting a variable and its value to a literal that corresponds to its type.
+
+Example 1:
+<eucode>
+
+type enum DDENUM_basis by * 2
+    DDENUM_ATTACHEDSECONDARYDEVICES,
+    DDENUM_DETACHEDSECONDARYDEVICES,
+    DDENUM_NONDISPLAYDEVICES
+end type
+
+DDENUM_basis dde_num_base = DDENUM_ATTACHEDSECONDARYDEVICES
+sequence s = name_of(dde_num_base)
+-- s is "DDENUM_ATTACHEDSECONDARYDEVICES"
+integer i = dde_num -- here type data doesn't go into i.
+s = name_of(i)
+-- s is now "1"
+</eucode>
+
+Example 2:
+
+<eucode>
+namespace here
+type enum std_window_response
+--** Abort button was selected.
+IDABORT = 3,
+--** Cancel button was selected.
+IDCANCEL = 2,
+--** Ignore button was selected.
+IDIGNORE = 5,
+--** No button was selected.
+IDNO = 7,
+--** OK button was selected.
+IDOK = 1,
+--** Retry button was selected.
+IDRETRY = 4,
+--** Yes button was selected.
+IDYES = 6     
+end type
+
+std_window_response ok = message_box("This box is a test", "Info", MB_OK)
+ok = message("You clicked " & name_of(ok), "Info", MB_OK)
+-- displays "You clicked IDOK in a Window.
+</eucode>
+
+
+Example 3:
+
+<eucode>
+integer i = 4
+sequence s = name_of(i)
+-- variables without special handling are given sensible output.
+-- Here s is "4"
+</eucode>
+
+===== Literal Mismatch Warning
+
+There are expressions that may be legal in EUPHORIA but do not make any semantic sense.  If you compare,or assign a variable to a constant that is not from its literal set, you will get an warning message.  In the following example, a variable that should be assigned an MS Windows Message Box Response ID is compared to a constant not from its enumerated type.  This produces a warning at parse time unless you disable this 'literal_mismatch'.
+
+<eucode>
+-- The following enum type includes things like IDOK, IDNO, etc...
+std_window_response ok = message_box("This box is a test", "Info", MB_OK)
+
+-- displays "You clicked IDOK" in a Window.
+ok = message("You clicked " & name_of(ok), "Info", MB_OK)
+
+-- WARNING 'literal_mismatch' here for this code is wrong.  
+-- It should be ok != IDOK.
+if ok != MB_OK then 
+	puts(2,"Error\n")
+end if
+</eucode>
+
+Even though MB_OK is out of the value range of the ID* constants, this is something that can be caught at parse-time rather than during testing, a preferable time to catch a problem.
 
 === Specifying the type of a variable
 
