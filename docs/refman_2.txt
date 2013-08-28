@@ -15,8 +15,8 @@ an extremely versatile data structure, capable of representing any sort of data.
 
 A sequence is represented by a list of objects in brace brackets **{ }**, separated by 
 commas with an optional sequence terminator, ##$##. Atoms can have any integer or 
-double-precision floating point value. They can range from approximately -1e300 (minus 
-one times 10 to the power 300) to +1e300 with 15 decimal digits of accuracy. Here are
+double-precision floating point value. They can range from approximately -1*10^^300^^ (minus 
+one times 10 to the power 300) to 10^^300^^ with 15 decimal digits of accuracy. Here are
 some Euphoria objects:
 
 <eucode>
@@ -1815,7 +1815,7 @@ An ##atom## can hold three kinds of data:
 * Large mathematical integers in the same range, but with a fuzz that grows
  with the magnitude of the integer.
 
-##power(2,53)## is slightly above 9.10^^15^^, ##power(2,1024)## is in the
+##power(2,53)## is slightly above 9*10^^15^^, ##power(2,1024)## is in the
 10^^308^^ range.
 
 Because of these constraints, which arise in part from common hardware
