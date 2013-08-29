@@ -2220,7 +2220,8 @@ void do_exec(intptr_t *start_pc)
 					BREAK;
 				}
 
-			case L_ENDFOR_INT_UP1:
+			/* for pc[3] = ? to pc[2] do (label pc[1]) */	
+			case L_ENDFOR_INT_UP1:  
 			deprintf("case L_ENDFOR_INT_UP1:");
 				obj_ptr = (object_ptr)pc[3]; /* loop var */
 				top = *obj_ptr + 1;
@@ -2234,7 +2235,8 @@ void do_exec(intptr_t *start_pc)
 				}
 				BREAK;
 
-			case L_ENDFOR_INT_UP:
+			/* for pc[3] = ? to pc[2] do by pc[4] (label pc[1]) */
+			case L_ENDFOR_INT_UP: 
 			deprintf("case L_ENDFOR_INT_UP:");
 				obj_ptr = (object_ptr)pc[3]; /* loop var */
 				top = *obj_ptr + *(object_ptr)pc[4]; /* increment */
