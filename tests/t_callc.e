@@ -294,6 +294,30 @@ constant
 	SUM_8L6D_ARGS = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}
 test_equal( "8 longs, 6 doubles", sum( SUM_8L6D_ARGS ), c_func( c_sum_8l6d, SUM_8L6D_ARGS ) )
 
+
+-- First, numbers used in order to avoid round off have been terminating
+-- binary decimals.  That is to say, that numbers like, 0.25 is one bit
+-- matissa without repeating decimals, and a hexadecimal number will also
+-- be a terminating binary decimal.  But a number like 0.04 is not a
+-- terminating binary decimal. 
+-- 
+-- Second, there are several rules for converting 4-byte to 8-byte doubles.
+-- Now, we could get some failures if we have different rounding schemes on
+-- different systems.   
+-- 
+-- The number 0x23_312_123_123 is too big for a 4-byte float but it rounds
+-- off to 0x23_312_140_000 rather than what truncation gives us
+-- 0x23_312_120_000.  It seems the processor of my computer follows the
+-- 'round up' mode. 
+-- 
+-- To avoid testing for what kind of round off method is used, in making
+-- tests values for floats should be six digits of hex and then at least
+-- one zero hex digit after that you can add as many digits as you like. 
+-- Fractions are possible, hex_text supports decimal point in the numbers.  
+-- So you can express fifteen sixteenths as '0.F'
+-- for example.  To compute by hand, you need to truncate the four-byte
+-- floats to the first six hex digits before adding.
+
 constant c_sum_C_FLOAT_C_DOUBLE = define_c_func( lib818, "+sum_C_FLOAT_C_DOUBLE", { C_FLOAT, C_DOUBLE }, C_DOUBLE )
 
 --     A3_312.123_123 becomes A3_312.1 because floats truncate.
@@ -312,7 +336,6 @@ test_equal("4-byte, 8-byte float sum #1",
 --    ---------------
 --     78 435 521 522
 --    
-
 test_equal("4-byte, 8-byte float sum #2", 
 	#78_435_521_522,
 	c_func( c_sum_C_FLOAT_C_DOUBLE, { hex_text("23_312_103_123"), hex_text("55_123_421_522") } )
