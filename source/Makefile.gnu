@@ -880,8 +880,8 @@ endif
 	install $(BUILDDIR)/$(EUDIS) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EUDIST) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EUCOVERAGE) $(DESTDIR)$(PREFIX)/bin
-	install -m 755 ../bin/*.ex $(DESTDIR)$(PREFIX)/bin
-	install -m 755 ../bin/ecp.dat $(DESTDIR)$(PREFIX)/bin
+	install -m 755 $(TRUNKDIR)/bin/*.ex $(DESTDIR)$(PREFIX)/bin
+	install -m 755 $(TRUNKDIR)/bin/ecp.dat $(DESTDIR)$(PREFIX)/bin
 ifeq "$(EMINGW)" "1"
 	install $(BUILDDIR)/$(EBACKENDW) $(DESTDIR)$(PREFIX)/bin
 endif
