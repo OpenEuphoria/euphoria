@@ -176,7 +176,7 @@ export constant
 	MAP_PRIVATE   = 2,
 	$
 
-    ifdef OSX then
+    ifdef OSX or BSD then
         --**
         -- @nodoc@
         export constant MAP_ANONYMOUS = 0x1000
