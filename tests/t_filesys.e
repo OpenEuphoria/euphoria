@@ -125,6 +125,7 @@ delete_file("fstesta.txt")
 delete_file("fstestb.txt")
 write_file("fstesta.txt", "move data", TEXT_MODE)
 test_true("file to move exists", file_exists( "fstesta.txt") )
+test_false("file to move to does not exist", file_exists( "fstestb.txt") )
 test_true("move_file #1", move_file("fstesta.txt", "fstestb.txt", 1))
 test_true("move_file #2", file_exists("fstestb.txt")) -- 'b' should now exist
 test_false("move_file #3", file_exists("fstesta.txt")) -- 'a' should now be gone
