@@ -1831,6 +1831,12 @@ object Dnot_bits(d_ptr a)
 #endif
 }
 
+#ifndef powl
+long double powl( long double a, long double b ){
+	return (long double) pow( (double) a, (double) b );
+}
+#endif
+
 object power(object a, object b)
 /* integer a to the power b */
 {
