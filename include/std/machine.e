@@ -2046,8 +2046,11 @@ end procedure
 -- See Also:
 -- [[:Executable Memory]], [[:allocate]], [[:free_code]], [[:allocate_protect]]
 public function allocate_code( object data, memconst:valid_wordsize wordsize = 1 )
-
-	return allocate_protect( data, wordsize, PAGE_EXECUTE )
+	ifdef FREEBSD and BITS32 then
+		return allocate_protect( data, wordsize, or_bits( PAGE_EXECUTE, PAGE_READONLY ) )
+	elsedef
+		return allocate_protect( data, wordsize, PAGE_EXECUTE )
+	end ifdef
 
 end function
 
