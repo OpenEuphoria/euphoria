@@ -153,6 +153,13 @@ end ifdef
 
 
 ifdef not WINDOWS then
+
+ifdef FREEBSD then
+	constant MMAP_OFFSET_SIZE = dll:C_LONGLONG
+elsedef
+	constant MMAP_OFFSET_SIZE = dll:C_LONG
+end ifdef
+
 include std/dll.e
 --**
 -- @nodoc@
@@ -163,7 +170,7 @@ export constant
 	--**
 	-- @nodoc@
 	MMAP     = dll:define_c_func( STDLIB, "mmap", 
-				{dll:C_POINTER, dll:C_LONG, dll:C_INT, dll:C_INT, dll:C_INT, dll:C_LONG}, 
+				{dll:C_POINTER, dll:C_LONG, dll:C_INT, dll:C_INT, dll:C_INT, MMAP_OFFSET_SIZE}, 
 				dll:C_POINTER ),
 	--**
 	-- @nodoc@
@@ -2231,6 +2238,7 @@ public function allocate_protect( object data, memconst:valid_wordsize wordsize 
 	
 	return eaddr
 end function
+
 
 function local_allocate_protected_memory( integer s, integer first_protection )
 	ifdef WINDOWS then     
