@@ -2298,8 +2298,8 @@ elsifdef UNIX then
 		elsifdef FREEBSD then
 			ifdef BITS32 then
 				constant
-					STAT_ST_BLKSIZE = 76,
-					SIZEOF_STAT     = 108,
+					STAT_ST_BLKSIZE = 64,
+					SIZEOF_STAT     = 96,
 					$
 			elsedef
 				constant
