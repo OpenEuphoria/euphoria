@@ -5176,7 +5176,7 @@ procedure opREMOVE()
 	c_stmt0("if (stop > len){\n")
 		c_stmt0("stop = len;\n")
 	c_stmt0("}\n")
-	c_stmt0("if (start > len || start > stop || stop<0) {\n")
+	c_stmt0("if (start > len || start > stop || stop<1) {\n")
 	if Code[pc+1] != Code[pc+4] then
 		-- only do this if it's a different target...
 		c_stmt("RefDS(@);\n", {Code[pc+1]})

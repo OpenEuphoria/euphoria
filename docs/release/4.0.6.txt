@@ -22,6 +22,7 @@
 * [[ticket:776]] Updated ##[[:walk_dir]]## parameter documentation
 * functions imported from msvcrt.dll should use cdecl (affects ##[[:now_gmt]]##, ##[[:locale:get]]##,
   ##[[:locale:set]]## and ##[[:locale:datetime]]##)
+* [[ticket:882]] Translated ##[[:remove]]## works correctly with empty sequence
 
 === Enhancements
 
