@@ -1831,6 +1831,12 @@ object Dnot_bits(d_ptr a)
 #endif
 }
 
+#if defined(EFREEBSD) && INTPTR_MAX != INT32_MAX
+long double powl( long double a, long double b ){
+	return (long double) pow( (double) a, (double) b );
+}
+#endif
+
 object power(object a, object b)
 /* integer a to the power b */
 {
@@ -5485,10 +5491,10 @@ uintptr_t __cdecl osx_cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t 
 	// this saves us the trouble of trying to calculate the offset of
 	// the callback copy from general_ptr and stuffing that into a LEA
 	// calculation
-	uintptr_t (*f)(uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
+	uintptr_t (*f)(symtab_ptr, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
 	uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)
-	= (uintptr_t (*)(uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
-	uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)) general_ptr_magic;
+	= (uintptr_t (*)(symtab_ptr, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
+	uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)) (uintptr_t)general_ptr_magic;
 	return (f)((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, arg8, arg9);
@@ -5501,7 +5507,7 @@ uintptr_t __cdecl osx_cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t 
 
 // Need to force the compiler to use an absolute address
 typedef intptr_t (*cbfunc)();
-#define CALL_GENERAL_CALLBACK ((cbfunc)0xabcdefabcdefabcdLL)
+#define CALL_GENERAL_CALLBACK ((cbfunc)general_ptr_magic)
 #endif
 
 /* Windows cdecl - Need only one template.

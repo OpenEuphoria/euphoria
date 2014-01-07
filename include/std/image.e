@@ -168,8 +168,9 @@ end function
 --   An **object**, on success, a sequence of the form ##{palette,image}##. On failure, an error code is returned.
 --
 -- Comments:
--- In the returned value, the first element is a list of mixtures, each of which defines 
--- a color, and the second, a list of point rows. Each pixel in a row is represented by its color index.
+-- In the returned value, the first element is a list of three membered sequences, each containing 
+-- three color intensity values in the range 0 to 255, and the second, a list of pixel rows. Each
+-- pixel in a row is represented by its color index in the said first element of the return value.
 --
 -- The file should be in the bitmap format. The most common variations of the format are supported. 
 --
@@ -402,10 +403,12 @@ end procedure
 -- 		An **integer**, 0 on success.
 --
 -- Comments:
---   This routine does the opposite of [[:read_bitmap]].
--- The first element of ##palette_n_image## is a sequence of [[:mixture]]s defining each 
--- color in the bitmap. The second element is a sequence of sequences of colors. The inner 
--- sequences must have the same length.
+--   This routine does the opposite of [[:read_bitmap]]().
+-- The first element of ##palette_n_image## is a list of sequences each sequence containing 
+-- exactly three color intensity values in the range 0 to 255. The second element is a list of 
+-- sequences of colors. The inner sequences must have the same length.  Each element in the 
+-- each inner sequence represents the color index in ##palette_n_image## of a pixel.  Each inner
+-- sequence is a row in the image.
 --
 -- The result will be one of the following codes~: 
 -- <eucode>

@@ -174,7 +174,6 @@ else
 	CREATEDLLFLAGS=
 endif
 
-
 MKVER=$(BUILDDIR)/mkver$(EXE_EXT)
 ifeq "$(EMINGW)" "1"
 	# Windowed backend
@@ -294,11 +293,11 @@ endif
 
 
 ifeq "$(MANAGED_MEM)" "1"
-FE_FLAGS =  $(ARCH_FLAG) $(COVERAGEFLAG) $(MSIZE) $(EPTRHEAD) -c -fsigned-char $(EOSTYPE) $(EOSMING) -ffast-math $(FP_FLAGS) $(EOSFLAGS) $(DEBUG_FLAGS) -I$(CYPTRUNKDIR)/source -I$(CYPTRUNKDIR) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE) $(MEM_FLAGS)
+FE_FLAGS =  $(ARCH_FLAG) $(COVERAGEFLAG) $(MSIZE) $(EPTHREAD) -c -fsigned-char $(EOSTYPE) $(EOSMING) -ffast-math $(FP_FLAGS) $(EOSFLAGS) $(DEBUG_FLAGS) -I$(CYPTRUNKDIR)/source -I$(CYPTRUNKDIR) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE) $(MEM_FLAGS)
 else
-FE_FLAGS =  $(ARCH_FLAG) $(COVERAGEFLAG) $(MSIZE) $(EPTRHEAD) -c -fsigned-char $(EOSTYPE) $(EOSMING) -ffast-math $(FP_FLAGS) $(EOSFLAGS) $(DEBUG_FLAGS) -I$(CYPTRUNKDIR)/source -I$(CYPTRUNKDIR) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE)
+FE_FLAGS =  $(ARCH_FLAG) $(COVERAGEFLAG) $(MSIZE) $(EPTHREAD) -c -fsigned-char $(EOSTYPE) $(EOSMING) -ffast-math $(FP_FLAGS) $(EOSFLAGS) $(DEBUG_FLAGS) -I$(CYPTRUNKDIR)/source -I$(CYPTRUNKDIR) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE)
 endif
-BE_FLAGS =  $(ARCH_FLAG) $(COVERAGEFLAG) $(MSIZE) $(EPTRHEAD) -c -Wall $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(FP_FLAGS) $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE) $(FPIC) -I$(TRUNKDIR)/source
+BE_FLAGS =  $(ARCH_FLAG) $(COVERAGEFLAG) $(MSIZE) $(EPTHREAD) -c -Wall $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(FP_FLAGS) $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE) $(FPIC) -I$(TRUNKDIR)/source
 
 EU_CORE_FILES = \
 	$(TRUNKDIR)/source/block.e \
@@ -461,9 +460,11 @@ clean :
 	-for f in $(EU_TOOLS) ; do \
 		rm $${f} ; \
 	done ;
+	rm -f $(BUILDDIR)/euphoria.{pdf,txt}
 	-rm $(BUILDDIR)/ver.cache
 	-rm $(BUILDDIR)/mkver$(EXE_EXT)
 	-rm $(BUILDDIR)/eudist$(EXE_EXT) $(BUILDDIR)/echoversion$(EXE_EXT)
+	-rm $(BUILDDIR)/test818.o
 	-rm -r $(BUILDDIR)/html
 	-rm -r $(BUILDDIR)/coverage
 	-rm -r $(BUILDDIR)/manual
@@ -882,6 +883,8 @@ endif
 	install $(BUILDDIR)/$(EUDIS) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EUDIST) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EUCOVERAGE) $(DESTDIR)$(PREFIX)/bin
+	install -m 755 $(TRUNKDIR)/bin/*.ex $(DESTDIR)$(PREFIX)/bin
+	install -m 755 $(TRUNKDIR)/bin/ecp.dat $(DESTDIR)$(PREFIX)/bin
 ifeq "$(EMINGW)" "1"
 	install $(BUILDDIR)/$(EBACKENDW) $(DESTDIR)$(PREFIX)/bin
 endif

@@ -2183,7 +2183,6 @@ public function copy_file(sequence src, sequence dest, integer overwrite = 0)
 		
 	elsedef
 		integer success = 0
-		
 		if file_exists(src) then
 			if overwrite or not file_exists( dest ) then
 				integer
@@ -2284,7 +2283,7 @@ ifdef LINUX then
 			end ifdef
 	
 elsifdef UNIX then
-		ifdef FREEBSD or OSX then
+		ifdef OSX then
 			ifdef BITS32 then
 				constant
 					STAT_ST_BLKSIZE = 76,
@@ -2296,7 +2295,18 @@ elsifdef UNIX then
 					SIZEOF_STAT     = 144,
 					$
 			end ifdef
-			
+		elsifdef FREEBSD then
+			ifdef BITS32 then
+				constant
+					STAT_ST_BLKSIZE = 64,
+					SIZEOF_STAT     = 96,
+					$
+			elsedef
+				constant
+					STAT_ST_BLKSIZE = 88,
+					SIZEOF_STAT     = 120,
+					$
+			end ifdef
 		elsifdef OPENBSD then
 			constant
 				STAT_ST_BLKSIZE = 72,
@@ -2331,8 +2341,16 @@ ifdef UNIX then
 		elsedef
 			stat_result[STAT_RETURN] = c_func(xStatFile, {psrc, psrcbuf})
 		end ifdef
-		stat_result[STAT_DEV]    = peek8u( psrcbuf + STAT_ST_DEV )
-		stat_result[STAT_BLKSIZE] = peek_pointer( psrcbuf + STAT_ST_BLKSIZE )
+		ifdef OSX or FREEBSD then
+			stat_result[STAT_DEV] = peek4u( psrcbuf + STAT_ST_DEV )
+		elsedef
+			stat_result[STAT_DEV]    = peek8u( psrcbuf + STAT_ST_DEV )
+		end ifdef
+		ifdef FREEBSD then
+			stat_result[STAT_BLKSIZE] = peek4u( psrcbuf + STAT_ST_BLKSIZE )
+		elsedef
+			stat_result[STAT_BLKSIZE] = peek_pointer( psrcbuf + STAT_ST_BLKSIZE )
+		end ifdef
 		return stat_result
 	end function
 end ifdef
@@ -2354,11 +2372,9 @@ end ifdef
 --
 -- See Also:
 --   [[:rename_file]], [[:copy_file]]
-
 public function move_file(sequence src, sequence dest, integer overwrite=0)
 	atom psrc = 0, pdest = 0, ret
 	sequence tempfile = ""
-
 	if not file_exists(src) then
 		return 0
 	end if

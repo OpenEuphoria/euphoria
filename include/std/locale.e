@@ -419,6 +419,21 @@ elsifdef LINUX then
 			$
 	end ifdef
 	
+elsifdef OSX then
+	constant
+		lib = dll:open_dll("libc.dylib"),
+		f_strfmon = dll:define_c_func(lib, "strfmon", {P, I, P, dll:C_DOUBLE}, I),
+		f_strfnum = -1,
+		f_setlocale = dll:define_c_func(lib, "setlocale", {I, P}, P),
+		f_strftime = dll:define_c_func(lib, "strftime", {P, I, P, P}, I),
+		LC_ALL      = 0,
+	--	LC_COLLATE  = 1,
+	-- 	LC_CTYPE    = 2,
+		LC_MONETARY = 3,
+		LC_NUMERIC  = 4,
+	--	LC_TIME     = 5,
+	--	LC_MESSAGES = 6,
+		$
 
 elsifdef BSD then
 	constant
@@ -436,22 +451,6 @@ elsifdef BSD then
 	--	LC_MESSAGES = 6,
 		$
 
-elsifdef OSX then
-	constant
-		lib = dll:open_dll("libc.dylib"),
-		f_strfmon = dll:define_c_func(lib, "strfmon", {P, I, P, dll:C_DOUBLE}, I),
-		f_strfnum = -1,
-		f_setlocale = dll:define_c_func(lib, "setlocale", {I, P}, P),
-		f_strftime = dll:define_c_func(lib, "strftime", {P, I, P, P}, I),
-		LC_ALL      = 0,
-	--	LC_COLLATE  = 1,
-	-- 	LC_CTYPE    = 2,
-		LC_MONETARY = 3,
-		LC_NUMERIC  = 4,
-	--	LC_TIME     = 5,
-	--	LC_MESSAGES = 6,
-		$
-	
 elsedef
 	constant
 		lib = -1,
@@ -470,6 +469,7 @@ elsedef
 		$
 
 end ifdef
+
 
 --****
 -- === Time and Number Translation

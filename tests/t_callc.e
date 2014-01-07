@@ -5,6 +5,7 @@ include std/machine.e
 include std/math.e
 include std/sequence.e
 include std/error.e
+include std/convert.e
 
 ifdef not EU4_0 then
 	constant pointer_size = sizeof(C_POINTER)
@@ -66,7 +67,10 @@ constant unsigned_values     = {ubyte_values, ubyte_values,
 																	4_000_000_000 & 420_000_000 & 42,
 																				#BEEFDEAD & #C001D00D}
 											
-
+constant floating_point_types = { C_FLOAT, C_DOUBLE },
+         floating_point_type_names = { "C_FLOAT", "C_DOUBLE" },
+         floating_point_values = { {42.013_183_593_75 /* 17 bits of matissa */},  {float64_to_atom({0, 0, 121, 212, 123, 200, 210, 123})} } 
+         
 enum false=0, true=1
 
 atom r_max_uint_fn
@@ -79,25 +83,23 @@ constant byte_values = ' ' & -32 & -100 & ')'
 ifdef EU4_0 then
 	constant signed_types      = { C_CHAR,    C_BYTE,   C_SHORT,   C_INT,   C_BOOL,   C_LONG }
 	constant signed_type_names = { "C_CHAR", "C_BYTE", "C_SHORT", "C_INT", "C_BOOL", "C_LONG"}
-	constant signed_values     = { byte_values, byte_values,
-														-20_000 & 10_000 & 20_000,
-																	(2 & -2) * 1e9,
-																		true & false, (2 & -2) * power(2,20)}
+	constant signed_values     = { byte_values, byte_values, 
+			-20_000 & 10_000 & 20_000, (2 & -2) * 1e9, true & false, (2 & -2) * power(2,20)}
 																			
 elsedef
 constant signed_types      = { C_CHAR,    C_BYTE,   C_SHORT,   C_INT,   C_BOOL,   C_LONG,   C_LONGLONG }
 constant signed_type_names = { "C_CHAR", "C_BYTE", "C_SHORT", "C_INT", "C_BOOL", "C_LONG", "C_LONGLONG"}
-constant signed_values     = { byte_values, byte_values,
-													-20_000 & 10_000 & 20_000,
-																(2 & -2) * 1e9,
-																	true & false, (2 & -2) * power(2,20),
-																							(3 & -2) * power(2,40)}
+constant signed_values     = { byte_values, byte_values, 
+			-20_000 & 10_000 & 20_000, (2 & -2) * 1e9, true & false, (2 & -2) * power(2,20), (3 & -2) * power(2,40)} 
 end ifdef																		
 constant types = signed_types & unsigned_types
 constant type_names = signed_type_names & unsigned_type_names
 constant values = signed_values & unsigned_values
 for i = 1 to length(signed_types) do
 	-- 32-bit callbacks don't return anything big enough to be a C_LONGLONG, so skip those
+	if find(signed_types[i], floating_point_types) then
+		continue
+	end if
 	if pointer_size = 8 or signed_types[i] != C_LONGLONG then
 		r_max_uint_fn = define_c_func( "", call_back( routine_id("minus_1_fn") ), {}, signed_types[i] )
 		test_equal( sprintf("return type %s preserves -1", {signed_type_names[i]}), -1, c_func(r_max_uint_fn, {}) )
@@ -138,6 +140,10 @@ function peekf(atom expected_ptr, integer c_type)
 		elsedef
 			case C_LONG then return peek4s( expected_ptr )
 		end ifdef
+		case C_FLOAT then
+			return float32_to_atom(peek( expected_ptr & 4 ))
+		case C_DOUBLE then
+			return float64_to_atom(peek( expected_ptr & 8 ))
 		case else
 			return "Unexpected type" 
 	end switch
@@ -289,5 +295,58 @@ constant
 test_equal( "8 longs, 6 doubles", sum( SUM_8L6D_ARGS ), c_func( c_sum_8l6d, SUM_8L6D_ARGS ) )
 
 
+-- First, numbers used in order to avoid round off have been terminating
+-- binary decimals.  That is to say, that numbers like, 0.25 is one bit
+-- matissa without repeating decimals, and a hexadecimal number will also
+-- be a terminating binary decimal.  But a number like 0.04 is not a
+-- terminating binary decimal. 
+-- 
+-- Second, there are several rules for converting 4-byte to 8-byte doubles.
+-- Now, we could get some failures if we have different rounding schemes on
+-- different systems.   
+-- 
+-- The number 0x23_312_123_123 is too big for a 4-byte float but it rounds
+-- off to 0x23_312_140_000 rather than what truncation gives us
+-- 0x23_312_120_000.  It seems the processor of my computer follows the
+-- 'round up' mode. 
+-- 
+-- To avoid testing for what kind of round off method is used, in making
+-- tests values for floats should be six digits of hex and then at least
+-- one zero hex digit after that you can add as many digits as you like. 
+-- Fractions are possible, hex_text supports decimal point in the numbers.  
+-- So you can express fifteen sixteenths as '0.F'
+-- for example.  To compute by hand, you need to truncate the four-byte
+-- floats to the first six hex digits before adding.
+
+constant c_sum_C_FLOAT_C_DOUBLE = define_c_func( lib818, "+sum_C_FLOAT_C_DOUBLE", { C_FLOAT, C_DOUBLE }, C_DOUBLE )
+
+--     A3_312.123_123 becomes A3_312.1 because floats truncate.
+--
+--     A3_312.1        (six digits is 24-bits) floats should get truncated.
+--    +55_123.421_522
+       --------------
+--     F8_435.521_522
+test_equal("4-byte, 8-byte float sum #1", 
+	hex_text("F8_435.521_522"),
+	c_func( c_sum_C_FLOAT_C_DOUBLE, { hex_text("A3_312.123_123"), hex_text("55_123.421_522") } )
+	 )
+
+--     23_312_10
+--   + 55_123_421_522
+--    ---------------
+--     78 435 521 522
+--    
+test_equal("4-byte, 8-byte float sum #2", 
+	#78_435_521_522,
+	c_func( c_sum_C_FLOAT_C_DOUBLE, { hex_text("23_312_103_123"), hex_text("55_123_421_522") } )
+	 )
+	 
+
+test_equal("4-byte, 8-byte float sum #3", 
+	0x23_312_000_000,
+	c_func( c_sum_C_FLOAT_C_DOUBLE, { 0x23_312_000_123, 0 } )
+	 )
+
+	 
 test_report()
 
