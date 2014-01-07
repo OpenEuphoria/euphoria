@@ -174,7 +174,6 @@ else
 	CREATEDLLFLAGS=
 endif
 
-
 MKVER=$(BUILDDIR)/mkver$(EXE_EXT)
 ifeq "$(EMINGW)" "1"
 	# Windowed backend

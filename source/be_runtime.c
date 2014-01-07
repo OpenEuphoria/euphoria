@@ -1831,7 +1831,7 @@ object Dnot_bits(d_ptr a)
 #endif
 }
 
-#if !defined(powl) && INTPTR_MAX != INT32_MAX
+#if defined(EFREEBSD) && INTPTR_MAX != INT32_MAX
 long double powl( long double a, long double b ){
 	return (long double) pow( (double) a, (double) b );
 }

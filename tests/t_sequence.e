@@ -112,6 +112,7 @@ test_equal("retain_all all match",{1,2,4,1,3,2,4,1,2,3} , retain_all( {1,2,3,4},
 test_equal("retain_all no objects",{} , retain_all( {}, {1,2,4,1,3,2,4,1,2,3} ))
 test_equal("retain_all 1c", {}, retain_all( {1,3,5}, {} ))
 
+
 test_equal("insert() integer sequence", {1,2,3}, insert({1,3}, 2, 2))
 test_equal("insert() string", {'J','o',"h",'n'}, insert("Jon", "h", 3))
 
@@ -591,6 +592,9 @@ in_place = remove( in_place, 2, 3 )
 test_equal( "remove in place 2,3", "367890", in_place )
 in_place = remove( in_place, 5, 6 )
 test_equal( "remove in place 5,6", "3678", in_place )
+
+in_place = {}
+test_equal( "remove( s, length( s) ) when s is empty", {}, remove( in_place, length( in_place ) ) )
 
 test_equal("columnize #1", {{1,3,5}, {2,4,6}}, columnize({{1, 2}, {3, 4}, {5, 6}}))
 test_equal("columnize #2", {{1,3,5}, {2,4,6}, {0,0,7}}, columnize({{1, 2}, {3, 4}, {5, 6, 7}}))
