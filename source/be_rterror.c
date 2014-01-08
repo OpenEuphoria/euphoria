@@ -53,6 +53,7 @@
 #include "be_task.h"
 #include "be_debug.h"
 
+
 /******************/
 /* Local defines  */
 /******************/
@@ -1149,6 +1150,141 @@ static void TracePrint(symtab_ptr proc, intptr_t *pc)
 	}
 }
 
+/**
+ * These are used for looking for subscript ops.
+ * They are initialized in is_subs()
+*/ 
+static intptr_t
+	assign_op_slice   = 0,
+	assign_op_subs    = 0,
+	assign_slice      = 0,
+	assign_subs       = 0,
+	assign_subs_check = 0,
+	assign_subs_i     = 0,
+	lhs_subs          = 0,
+	lhs_subs1         = 0,
+	lhs_subs1_copy    = 0,
+	passign_op_slice  = 0,
+	passign_op_subs   = 0,
+	passign_slice     = 0,
+	passign_subs      = 0,
+	rhs_slice         = 0,
+	rhs_subs          = 0,
+	rhs_subs_check    = 0,
+	rhs_subs_i        = 0;
+
+/**
+ * Returns true if the op is used for slicing a sequence
+ */
+static intptr_t is_slice( intptr_t op ){
+	return  op == assign_slice || op == passign_slice || op == rhs_slice
+		|| op == passign_slice|| op == rhs_slice 
+		|| op == assign_op_slice || op == passign_op_slice;
+}
+
+/**
+ * Returns true if the op is used for slicing or subscripting a sequence
+ */
+static intptr_t is_subs( intptr_t op ){
+	if( rhs_subs == 0 ){
+		assign_op_slice   = (intptr_t)opcode(ASSIGN_OP_SLICE);
+		assign_op_subs    = (intptr_t)opcode(ASSIGN_OP_SUBS);
+		assign_slice      = (intptr_t)opcode(ASSIGN_SLICE);
+		assign_subs_check = (intptr_t)opcode(ASSIGN_SUBS_CHECK);
+		assign_subs_i     = (intptr_t)opcode(ASSIGN_SUBS_I);
+		assign_subs       = (intptr_t)opcode(ASSIGN_SUBS);
+		lhs_subs1_copy    = (intptr_t)opcode(LHS_SUBS1_COPY);
+		lhs_subs1         = (intptr_t)opcode(LHS_SUBS1);
+		lhs_subs          = (intptr_t)opcode(LHS_SUBS);
+		passign_op_slice  = (intptr_t)opcode(PASSIGN_OP_SLICE);
+		passign_op_subs   = (intptr_t)opcode(PASSIGN_OP_SUBS);
+		passign_slice     = (intptr_t)opcode(PASSIGN_SLICE);
+		passign_subs      = (intptr_t)opcode(PASSIGN_SUBS);
+		rhs_slice         = (intptr_t)opcode(RHS_SLICE);
+		rhs_subs_check    = (intptr_t)opcode(RHS_SUBS_CHECK);
+		rhs_subs_i        = (intptr_t)opcode(RHS_SUBS_I);
+		rhs_subs          = (intptr_t)opcode(RHS_SUBS);
+	}
+	return op == rhs_subs || op == rhs_subs_check 
+		|| op == lhs_subs1 || op == lhs_subs || op == lhs_subs1_copy
+		|| op == passign_subs || op == assign_subs
+		|| op == assign_slice || op == assign_subs_check
+		|| op == rhs_subs_i || op == assign_subs_i || op == passign_op_subs
+		|| is_slice( op );
+}
+
+/**
+ * If the op is a subscript or slicing op, returns the size of the opcode.
+ * Otherwise, returns 1.
+ */
+static intptr_t subs_opsize( intptr_t op ){
+	if( op == rhs_subs || op == rhs_subs_check || op == passign_subs || op == assign_subs
+		|| op == assign_op_subs || op == assign_subs_check
+		|| op == assign_subs_i || op == passign_op_subs
+	){
+		return 4;
+	}
+	else if( op == lhs_subs1 || op == lhs_subs || op == lhs_subs1_copy
+		|| op == assign_slice || op == passign_slice || op == rhs_slice 
+		|| op == assign_op_slice || op == passign_op_slice
+		|| op == passign_slice
+	){
+		return 5;
+	}
+	return 1;
+}
+
+/**
+ * Returns the offset from the pointer to the opcode to the pointer
+ * to the symtab_ptr that holds the result.
+ */
+static intptr_t sub_dest_offset( intptr_t op ){
+	intptr_t offset = subs_opsize( op );
+	if( op == LHS_SUBS1 || op == LHS_SUBS1_COPY ){
+		--offset;
+	}
+	return offset;
+}
+
+/**
+ * Works back to find the original sequence and counts the number of subscripts / slices
+ * prior to the error.
+ */
+static void LookBackForSubscriptSymbol( intptr_t *pc, int sublevel, int has_slice ){
+	symtab_ptr sym;
+	sym = (symtab_ptr) *(pc+1);
+	has_slice |= is_slice( *pc );
+	if( sym->name ){
+		snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, " - in %s #%d of '%s'", has_slice ? "slice/subscript" : "subscript", sublevel, sym->name);
+		sf_output( TPTempBuff );
+	}
+	else{
+		// find the previous subscript / slice
+		intptr_t *start_pc = pc;
+		--pc;
+		while( !(is_subs( *pc ) && ( (*(pc + sub_dest_offset( *pc )) == (intptr_t)sym ) ) ) || start_pc <= (pc + sub_dest_offset( *pc ) ) ){
+			--pc;
+		}
+		
+		if( is_subs( *pc ) && ( (*(pc + sub_dest_offset( *pc )) == (intptr_t)sym ) ) ){
+			LookBackForSubscriptSymbol( pc, sublevel + 1, has_slice );
+		}
+	}
+}
+
+/**
+ * Checks to see if the error occurred in a subscripting op and emits information
+ * about which subscript / slice caused the problem.
+ */
+static void CheckSubsError(){
+	intptr_t new_pc;
+	new_pc = (intptr_t)*(tpc);
+	
+	if( is_subs( new_pc ) ){
+		LookBackForSubscriptSymbol( tpc, 1, 0 );
+	}
+}
+
 static void TraceBack(char *msg, symtab_ptr s_ptr)
 // stack traceback when an error occurs
 // Note: msg must be read in this routine, before TempBuff is written
@@ -1225,6 +1361,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 					Print(stderr,  s_ptr->obj, 1, 50, 0, FALSE);
 				Print(TempErrFile, s_ptr->obj, 1, 50, 0, FALSE);
 			}
+			CheckSubsError();
 		}
 		sf_output(" \n");
 		
