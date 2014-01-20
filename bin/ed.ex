@@ -2033,11 +2033,11 @@ procedure insert_string(sequence text)
 			insert(text[i])
 		else
 			buffer[b_line] = splice( buffer[b_line], text[i], b_col )
-			buffer_multi[b_line] = splice( buffer_multi[b_line], -1, b_col )
 			b_col += 1
 			if i = length(text) then
 				DisplayLine(b_line, s_line, FALSE)
 			end if
+			
 		end if
 	end for
 	goto_line(save_line, save_col)
