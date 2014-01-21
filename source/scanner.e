@@ -1009,10 +1009,13 @@ constant common_int_text = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "1
 constant common_ints     = { 0,   1,   2,   3,   4,   5,   6,   7,   8,   9,   10,   11,   12,   13,   20,   50,   100,   1000 }
 function MakeInt(sequence text, integer nBase = 10)
 -- make a non-negative integer out of a string of digits
-	integer num
+	ifdef BITS32 then
+		atom num, maxchk
+	elsedef
+		integer num, maxchk
+	end ifdef
 	atom fnum
 	integer digit
-	integer maxchk
 	
 	-- Quick scan for common integers
 	switch nBase do

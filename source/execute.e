@@ -401,6 +401,111 @@ procedure restore_privates(symtab_index this_routine)
 	end if
 end procedure
 
+constant 
+	SUB_OPS = {
+		ASSIGN_OP_SUBS,
+		ASSIGN_SUBS,
+		ASSIGN_SUBS_CHECK,
+		ASSIGN_SUBS_I,
+		LHS_SUBS,
+		LHS_SUBS1,
+		LHS_SUBS1_COPY,
+		PASSIGN_OP_SUBS,
+		PASSIGN_SUBS,
+		RHS_SUBS,
+		RHS_SUBS_CHECK,
+		RHS_SUBS_I,
+		$
+	},
+	SLICE_OPS = {
+		ASSIGN_OP_SLICE,
+		ASSIGN_SLICE,
+		PASSIGN_OP_SLICE,
+		PASSIGN_SLICE,
+		RHS_SLICE,
+		$
+	}
+
+function is_slice( integer op )
+	return find( op, SLICE_OPS )
+end function
+
+function is_subs( integer op )
+	if find( op, SUB_OPS ) then
+		return 1
+	else
+		return is_slice( op )
+	end if
+end function
+
+function subs_opsize( integer op )
+	if op = RHS_SUBS or op = RHS_SUBS_CHECK or op = PASSIGN_SUBS or op = ASSIGN_SUBS
+		or op = ASSIGN_OP_SUBS or op = ASSIGN_SUBS_CHECK
+		or op = ASSIGN_SUBS_I or op = PASSIGN_OP_SUBS
+	then
+		return 4
+	elsif op = LHS_SUBS1 or op = LHS_SUBS or op = LHS_SUBS1_COPY
+		or op = ASSIGN_SLICE or op = PASSIGN_SLICE or op = RHS_SLICE 
+		or op = ASSIGN_OP_SLICE or op = PASSIGN_OP_SLICE
+		or op = PASSIGN_SLICE
+	then
+		return 5
+	else
+		return 1
+	end if
+end function
+
+function sub_dest_offset( integer op )
+	integer offset = subs_opsize( op ) - 1
+	if op = LHS_SUBS1_COPY or op = LHS_SUBS1 then
+		offset -= 1
+	end if
+	return offset
+end function
+
+procedure LookBackForSubscriptSymbol( integer pc, integer sublevel, integer has_slice )
+
+	integer op = Code[pc]
+	integer start_pc = pc
+	symtab_pointer sym = Code[pc+1]
+	has_slice = has_slice or is_slice( op )
+	
+	if length( SymTab[sym] ) >= S_NAME and length( sym_name( sym ) ) then
+		sequence subtext
+		if has_slice then
+			subtext = "slice/subscript"
+		else
+			subtext = "subscript"
+		end if
+		both_printf(" - in %s #%d of '%s'", { subtext, sublevel, sym_name( sym ) } )
+		
+	else
+		-- find the previous subscript / slice
+		while pc > 1
+		and (not(
+				is_subs( op ) 
+				and (Code[pc + sub_dest_offset( op )] = sym) 
+			)
+		or start_pc <= (pc + subs_opsize( op )))
+		with entry do
+		entry
+			pc -= 1
+			op = Code[pc]
+		end while
+
+		if is_subs( op ) and (Code[pc + sub_dest_offset( op )] = sym) then
+			LookBackForSubscriptSymbol( pc, sublevel + 1, has_slice )
+		end if
+	end if
+end procedure
+
+procedure CheckSubsError()
+	integer op = Code[pc]
+	if is_subs( op ) then
+		LookBackForSubscriptSymbol( pc, 1, 0 )
+	end if
+end procedure
+
 procedure trace_back(sequence msg)
 -- display the call stack and variables after a crash
 	symtab_index sub, v
@@ -496,7 +601,9 @@ procedure trace_back(sequence msg)
 						clear_screen()
 						puts(2, crash_msg)
 					end if
-					both_puts(msg & " \n")
+					both_puts(msg)
+					CheckSubsError()
+					both_puts(" \n")
 					show_message = FALSE
 				end if
 

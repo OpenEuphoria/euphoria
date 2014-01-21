@@ -609,10 +609,11 @@ source-tarball :
 	echo building source-tarball for $(PLAT)
 	rm -rf $(BUILDDIR)/$(SOURCEDIR)
 	hg archive $(BUILDDIR)/$(SOURCEDIR)
-	cd $(BUILDDIR)/$(SOURCEDIR)/source && ./configure $(CONFIGURE_PARAMS)
-	$(MAKE) -C $(BUILDDIR)/$(SOURCEDIR)/source source
-	-rm $(BUILDDIR)/$(SOURCEDIR)/source/config.gnu
-	-rm $(BUILDDIR)/$(SOURCEDIR)/source/build/mkver$(EXE_EXT)
+	mkdir $(BUILDDIR)/$(SOURCEDIR)/build
+	cd $(BUILDDIR)/$(SOURCEDIR)/build && ../source/configure $(CONFIGURE_PARAMS)
+	$(MAKE) -C $(BUILDDIR)/$(SOURCEDIR)/build source
+	-rm $(BUILDDIR)/$(SOURCEDIR)/build/config.gnu
+	-rm $(BUILDDIR)/$(SOURCEDIR)/build/mkver$(EXE_EXT)
 	cd $(BUILDDIR) && tar -zcf $(SOURCEDIR)-src.tar.gz $(SOURCEDIR)
 ifneq "$(VERSION)" ""
 	cd $(BUILDDIR) && mkdir -p $(PLAT) && mv $(SOURCEDIR)-src.tar.gz $(PLAT)
