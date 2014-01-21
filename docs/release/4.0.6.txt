@@ -23,6 +23,7 @@
 * functions imported from msvcrt.dll should use cdecl (affects ##[[:now_gmt]]##, ##[[:locale:get]]##,
   ##[[:locale:set]]## and ##[[:locale:datetime]]##)
 * [[ticket:882]] Translated ##[[:remove]]## works correctly with empty sequence
+* [[ticket:885]] Translated ##[[:splice]]## properly counts references when splicing an atom
 
 === Enhancements
 
