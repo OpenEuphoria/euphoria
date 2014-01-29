@@ -1,17 +1,17 @@
-== Indirect routine calling
+== Indirect Routine Calling
 :<<LEVELTOC level=2 depth=4>>
 
 Euphoria does not have function pointers. However, it enables you to call
 any routine, including some internal to the interpreter, in an indirect way, 
 using two different sets of identifiers.
 
-=== Indirect calling a routine coded in Euphoria
+=== Indirect Calling a Routine Coded in Euphoria
 
 The following applies to any routine coded in Euphoria that your program uses, 
 whether it is defined in the standard library, any third party library or your 
 own code. It does not apply to routines implemented in the backend.
 
-==== Getting a routine identifier
+==== Getting a Routine Identifier
 
 Whenever a routine is in scope, you can supply its name to the builtin 
 ##routine_id## function, which returns a small integer:
@@ -29,12 +29,12 @@ You can then feed this integer to ##call_func## or ##call_proc## as
 appropriate. It does not matter whether the routine is still in scope at the 
 time you make that call. Once the id is gotten, it's valid.
 
-==== Calling Euphoria routines by id
+==== Calling Euphoria Routines by Id
 
 This is very similar to using [[:c_func]] or [[:c_proc]] to interface with 
 external code.
 
-===== Calling a function
+===== Function Calling
 
 This is done as follows:
 
@@ -61,7 +61,7 @@ This is equivalent to
 result = value("Model 36A", 6, GET_LONG_ANSWER)
 </eucode>
 
-===== Calling a procedure
+===== Procedure Calling
 
 The same formalism applies, but using ##call_proc## instead. The differences 
 are almost the same as between [[:c_func]] and [[:c_proc]].
@@ -85,7 +85,7 @@ The difference with [[:c_proc]] is that you can call an external function
 using [[:c_proc]] and thus ignore its return value, like in C. Note that you 
 cannot use ##call_proc## to invoke a Euphoria function, only C functions.
 
-==== Why call indirectly?
+==== Why Call Indirectly?
 
 Calling functions and procedures indirectly can seem more complicated and slower
 than just calling the routine directly, but indirect calls can be used when
@@ -130,7 +130,7 @@ One last word: when calling a routine indirectly, its **full** parameter list
 must be passed, even if some of its parameters are defaulted. This limitation 
 may be overcome in future versions.
 
-=== Calling Euphoria's internals
+=== Calling Euphoria Internals
 
 A number of Euphoria routines are defined in different ways depending on the 
 platform they will run on. It would be cumbersome, and at times downright 

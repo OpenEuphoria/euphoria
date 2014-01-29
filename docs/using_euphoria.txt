@@ -154,15 +154,16 @@ associations have been setup during the installation process.
 
 ==== Edit Sample Files
 
-Use the Euphoria editor, ##ed##, to edit a Euphoria file. Notice the use of 
-colors. You can adjust these colors along with the cursor size and many other 
-"user-modifiable" parameters by editing constant declarations in ##ed.ex##. Use 
-//Esc q// to quit the editor or //Esc h// for
-help. There are several, even better, Euphoria-oriented editors in
-[[http://www.rapideuphoria.com/edi.htm|The Archive]]. If you use a more sophisticated text
-editor, many have a highlighter file for Euphoria. You will find it either on the Archive or
-on the community page for that editor. Check 
+You can use any plain text editor for writing Euphoria source-code.
+
+Code-editors provide a syntax highlighter. The wiki lists many editors suitable for Euphoria. Check 
 [[wiki:Editors|the wiki for more information about Euphoria editors]].
+
+You can examine the source-code for the demonstration editor ##edx## to see how editors and highlighters work.
+Notice the use of colors. You can adjust these colors along with the cursor size and many other 
+"user-modifiable" parameters by editing constant declarations in ##edx.ex##. Use 
+//Esc q// to quit the editor or //Esc h// for help.
+
 
 ==== Benchmark
 
@@ -241,7 +242,7 @@ Try writing your own program in Euphoria. A program can be as simple as:
 ? 2+2
 </eucode>
 
-**Remember that after any error you can simply type:** ##ed## to jump into the editor at the
+**Remember that after any error you can simply type:** ##edx## to jump into the editor at the
 offending file and line.
 
 Once you get used to it, you'll be developing programs //much// faster in Euphoria than you
@@ -253,7 +254,7 @@ could in Perl, Java, C/C~+~+ or any other language that we are aware of.
 :<<LEVELTOC level=2 depth=4>>
 
 Euphoria programs can be written with //any// plain text editor. As a
-convenience Euphoria comes with ##ed##, an editor written in Euphoria, that
+convenience Euphoria comes with ##edx##, an editor written in Euphoria, that
 is handy for editing and executing Euphoria programs. Take a look at
 ##\euphoria\demo## and ##euphoria\tutorial## to see many example programs.
 
@@ -377,20 +378,22 @@ file to run it. The installer will perform this operation for you, if you wish.
 %%output=editing_source
 == Editing a Program
 
+If you have not selected your "favorite editor," then try ##edx##:
+
 You can use any text editor to edit a Euphoria program. However, Euphoria comes
-with its own special editor that is written entirely in Euphoria. Type: ##ed##
+with its own special editor that is written entirely in Euphoria. Type: ##edx##
 followed by the complete name of the file you wish to edit. You can use this
 editor to edit any kind of text file. When you edit a Euphoria file some extra
 features such as color syntax highlighting and auto-completion of certain
 statements are available to make your job easier.
 
 Whenever you run a Euphoria program and get an error message, during
-compilation or execution, you can simply type ##ed## with no file name and you
+compilation or execution, you can simply type ##edx## with no file name and you
 will be automatically positioned in the file containing the error, at the
 correct line and column, and with the error message displayed at the top of the
 screen.
 
-Under //Windows// you can associate ##ed.bat## with various kinds of text files
+Under //Windows// you can associate ##edx.bat## with various kinds of text files
 that you want to edit. Color syntax highlighting is provided for ##.ex##,
 ##.exw##, ##.exd##, ##.e## and ##.pro## ([[:Profiling "profile files"]]).
 
@@ -398,19 +401,21 @@ Most keys that you type are inserted into the file at the cursor position. Hit
 the ##Esc## key once to get a menu bar of special commands. The arrow keys, and
 the ##Insert/Delete/Home/End/PageUp/PageDown## keys are also active. Under
 //Linux/FreeBSD// some keys may not be available, and alternate keys are
-provided. See [[:Ed - Euphoria Editor]] for a complete description of
+provided. See [[:Edx, Euphoria Editor]] for a complete description of
 the editing commands.
 
+!! Check links for this
+
 If you need to understand or modify any detail of the editor's operation, you
-can edit the file ##ed.ex## in ##euphoria\bin## (be sure to make a backup copy
-so you don't lose your ability to edit).  If the name ##ed## conflicts with
+can edit the file ##edx.ex## in ##euphoria\bin## (be sure to make a backup copy
+so you don't lose your ability to edit).  If the name ##edx## conflicts with
 some other command on your system, simply rename the file
-##euphoria\bin\ed.bat## to something else. Because this editor is written in
+##euphoria\bin\edx.bat## to something else. Because this editor is written in
 Euphoria, it is remarkably concise and easy to understand. The same
 functionality implemented in a language like C, would take far more lines of
 code.
 
-##ed## is a simple text-mode editor that runs on all platforms and is
+##edx## is a simple text-mode editor that runs on all platforms and is
 distributed with Euphoria. There is a list of other editors at the
 [[wiki:Editors|OpenEuphoria web site]], many of which include extra
 features such as syntax highlighting.

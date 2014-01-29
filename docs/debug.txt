@@ -28,14 +28,14 @@ language like Euphoria since you can simply edit the source and rerun the
 program without waiting for a re-compile/re-link.
 @[trace|]
 
-==== The with / without trace directive
+==== Trace Directives: with, without 
 
 The interpreter provides you with additional powerful tools for debugging.
 Using ##trace(1)## you can **//trace//** the execution of your program on one
 screen while you witness the output of your program on another.  ##trace(2)## is
 the same as ##trace(1)## but the trace screen will be in monochrome. Finally, 
 using ##trace(3)##, you can log all executed statements to a file called 
-**ctrace.out**.
+##ctrace.out##.
 
 The **with/without trace** special statements select the parts
 of your program that are available for tracing. Often you will simply insert a
@@ -65,7 +65,7 @@ trace(1)
 </eucode>
 
 However, you cannot dynamically set or free breakpoints while tracing. You must 
-abort program, edit, change setting, save and run again.
+abort program, edit, change setting, save, and run again.
 
 At the top of your program, so you can start tracing from the beginning of
 execution. More commonly, you will want to trigger tracing when a certain
@@ -114,7 +114,7 @@ expression passed to ##trace##.
 Other values will cause ##trace## to fail.
 
 
-=== The Trace Screen
+=== Trace Screen
 
 When a ##trace(1)## or ##trace(2)## statement is
 executed by the interpreter, your main output screen is saved and a **trace
@@ -162,13 +162,13 @@ called you will be given 8 seconds to type a character, otherwise it is
 assumed that there is no input for this call to ##get_key##. This allows you 
 to test the case of input and also the case of no input for ##get_key##.
 
-=== The Trace File
+=== Trace File
 
 When your program calls ##trace(3)##, tracing to a file is activated.  The file,
-**##ctrace.out##** will be created in the current directory.  It contains the last
+##ctrace.out## will be created in the current directory.  It contains the last
 500 Euphoria statements that your program executed.  It is set up as a circular
 buffer that holds a maximum of 500 statements. Whenever the end of
-**ctrace.out** is reached, the next statement is written back at the beginning.
+##ctrace.out## is reached, the next statement is written back at the beginning.
 The very last statement executed is always followed by "=== THE END ===".
 Because it's circular, the last statement executed could appear anywhere in
 ##ctrace.out##.  The statement coming after "=== THE END ===" is the
@@ -185,7 +185,7 @@ bug in the interpreter or the translator.
 
 The source code for a statement is written to ##ctrace.out##, and flushed, just
 //before// the statement is performed, so the crash will likely have happened
-//during// execution of the final statement that you see in **ctrace.out**.
+//during// execution of the final statement that you see in ##ctrace.out##.
 
 === Profiling
 
@@ -219,8 +219,7 @@ enough to get a score of 0.01.
 Only statements compiled ##with profile## or ##with profile_time## are shown in 
 the listing. Normally you will specify either ##with profile## or 
 ##with profile_time## at
-the top of your main ##.ex##* file, so you can get a complete listing.  View
-this file with the Euphoria editor to see a color display.
+the top of your main ##.ex##* file, so you can get a complete listing.
 
 Profiling can help you in many ways:
 
@@ -249,7 +248,7 @@ program, the picture would not have been clear, as the lower-level routines
 would also have been used for moving ships, drawing phasors etc. ##profile## 
 can help in the same way when you do execution-count profiling.
 
-=== Some Further Notes on Time Profiling
+=== Time Profiling
 
 With each click of the system clock, an interrupt is generated. When you
 specify ##with profile_time## Euphoria will sample your program to see which

@@ -17,7 +17,7 @@ for each platform. The translator is also used in translating/compiling the
 front-end portion of the interpreter. The source code for the translator is in
 ##euphoria\source##. It is written 100% in Euphoria.
 
-=== C Compilers Supported
+=== Supported Compilers
 
 The **Translator** currently works with GNU C on //Unix// OSes,
 GNU C on //Windows// from  [[http://www.mingw.org|MinGW]]  
@@ -39,7 +39,7 @@ downloaded from their respective Web sites.
   may not produce the expected result with //GCC C//.
 * Currently, only 32-bit compilers are supported on 64-bit platforms.
 
-=== How to Run the Translator
+=== Run the Translator
 
 Running the **Translator** is similar to running the **Interpreter**:
 
@@ -363,7 +363,7 @@ For Watcom, the **Translator** also creates an EXPORT command, added to
 
 With Watcom, if you specify the ##-makefile## option, you can edit the 
 ##objfiles.lnk## file to rename the exported identifiers, or remove ones that you
-don't want to export.  Then build with the generated makefile.
+do not want to export.  Then build with the generated makefile.
 
 Having nice exported names is not critical, since the name need only appear
 once in each Euphoria program that uses the shared dynamically loading library, 
@@ -537,7 +537,7 @@ statements are extremely compact when stored in a bound file. They need more
 space after being translated to C, and compiled into machine code. Future
 versions of the **Translator** will produce faster and smaller executables.
 
-=== Interpreter vs. Translator
+=== Interpreter versus Translator
 
 All Euphoria programs can be translated to C, and with just a few exceptions
 noted below, will run the same as with the **Interpreter** (but hopefully
