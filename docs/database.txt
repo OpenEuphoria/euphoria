@@ -4,28 +4,33 @@
 === Introduction  
 
 While you can connect Euphoria to most databases 
-(MySQL, SQLite, PostgreSQL, etc.), sometimes you don't need that kind
-of power. The **Euphoria Database System** (EDS) is a simple, easy-to-use, 
-flexible, Euphoria-oriented database for storing data that works better for 
-cases where you need more than a text file and don't quite need or want the
+(such as: MySQL, SQLite, PostgreSQL), sometimes you do not need that kind
+of power. The **Euphoria Database System** (**EDS**) is "a simple, easy-to-use, 
+flexible, Euphoria-oriented database for storing data" that works better for 
+cases where you need more than a text file and do not quite need or want the
 power and complexity of larger database packages.
+ 
+=== EDS API
+
+More details on using EDS, including complete coverage of the EDS API, can be 
+found at [[:Euphoria Database (EDS)]]. 
  
 === EDS Database Structure
 
-In EDS, a **database** is "a single file with a ##.edb## file extension."  An EDS
-database contains zero or more **tables**. Each table has a **name**, and 
-contains zero or more **records**.  Each record consists of a **key** part, and 
-a **data** part. The key can be //any// Euphoria object~--an atom, a sequence, a
-deeply-nested sequence, whatever. Similarly the data can be //any// Euphoria
-object.  There are //no// constraints on the size or structure of the key or
+An **EDS database** is "a single file with a ##.edb## file extension."  Each
+**database** "contains zero or more tables." Each **table** has "a name, and 
+contains zero or more records."  Each **record** consists "of a key part, and 
+a data part." A **key** can be "//any// Euphoria object~--an atom, a sequence, a
+deeply-nested sequence, whatever." Similarly **data** can be "//any// Euphoria
+object."  There are //no// constraints on the size or structure of the key or
 data. Within a given table, the keys are all unique. That is, no two records in
 the same table can have the same key part.
  
 The records of a table are stored in ascending order of key value.  An
 efficient binary search is used when you refer to a record by key. You can also
 access a record directly, with no search, if you know its current 
-**record number** within the table. Record numbers are integers from one to the 
-length (current number of records) of the table. By incrementing the record 
+record number within the table. **Record numbers** are "integers from one to the 
+length (current number of records) of the table." By incrementing the record 
 number, you can efficiently step through all the records, in order of key. 
 Note however that a record's number can change whenever a new record is 
 inserted, or an existing record is deleted.
@@ -34,7 +39,7 @@ The keys and data parts are stored in a compact form, but //no// accuracy is
 lost when saving or restoring floating-point numbers or //any// other Euphoria 
 data.
 
-##std/eds.e## will work as is, on all platforms. EDS database files can be 
+The EDS database ##std/eds.e## will work as is, on all platforms. EDS database files can be 
 copied and shared between programs running on all platforms as well. When 
 sharing EDS database files, be sure to make an exact byte-for-byte copy using 
 "binary" mode copying, rather than "text" or "ASCII" mode, which could change 
@@ -54,29 +59,31 @@ database: "mydata.edb"
         record #3:  key: 134530    data: {"screw driver", 5.50, 1500}
 }}}
 
-It's up to you to interpret the meaning of the key and data. //In keeping with
+It is up to you to interpret the meaning of the key and data. //In keeping with
 the spirit of Euphoria, you have total flexibility.// Unlike most other
 database systems, an EDS record is //not// required to have either a fixed 
 number of fields, or fields with a preset maximum length.
  
 In many cases there will not be any natural key value for your records.  In
 those cases you should simply create a meaningless, but unique, integer to be
-the key. Remember that you can always access the data by record number. It's
+the key. Remember that you can always access the data by record number. It is
 easy to loop through the records looking for a particular field value.
 
 === Accessing Data
 
-To reduce the number of parameters that you have to pass, there is a notion of
-the **current database**, and **current table**. 
+To reduce the number of arguments that you have to pass, there is a notion of
+the current database, and current table. 
 
-==== Current Database.
+==== Current Database
 
+The **current database** is "the database that is active in the present time." 
 Any data operation or table operation assumes there is a current database being 
 defined. You set the current database by opening, creating or selecting a 
 database. Deleting the current database leaves the current database undefined.
 
-==== Current Table.
+==== Current Table
 
+The **current table** is "the table that is active in the present time."
 All data operations assume there is a current table being defined. You must 
 create, select or rename a table in order to make it current. Deleting the 
 current table leaves the current table undefined.
@@ -89,7 +96,7 @@ a database file, then selecting the table that you want to work with.
  
 You can map a key to a record number using [[:db_find_key]]. It uses an
 efficient binary search. Most of the other record-level routines expect the
-record number as a parameter. You can very quickly access any record, given
+record number as a argument. You can very quickly access any record, given
 it's number. You can access all the records by starting at record number one and
 looping through to the record number returned by [[:db_table_size]].
  
@@ -122,13 +129,10 @@ The binary search for keys should work reasonably well for large tables.
  
 Inserts and deletes take slightly longer as a table gets larger. 
  
-At the low end of the scale, it's possible to create extremely small databases
+At the low end of the scale, it is possible to create extremely small databases
 without incurring much disk space overhead.
 
-=== EDS API
 
-More details on using EDS, including complete coverage of the EDS API, can be 
-found at [[:Euphoria Database (EDS)]].
 
 === Disclaimer
 
@@ -143,6 +147,6 @@ transferring a ##.edb## file via FTP from one machine to another. You must also
 avoid loading a ##.edb## file into an editor and saving it. If you open a 
 ##.edb## file directly using Euphoria's ##open##, which is not recommended, 
 you must use binary
-mode, not text mode.  Failure to follow these rules could result in 10
-(line-feed) and 13 (carriage-return) bytes being changed, leading to subtle and
+mode (not text mode).  Failure to follow these rules could result in ##10##
+(line-feed) and ##13## (carriage-return) bytes being changed, leading to subtle and
 not-so-subtle forms of corruption in your database.
