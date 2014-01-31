@@ -96,6 +96,7 @@ ifdef HTML
 :%%output=demos
 :== Bundled Demos
 :<<LEVELTOC level=2 depth=3>>
+.../bin/edx.ex
 ../demo/allsorts.ex
 ../demo/animal.ex
 ../demo/ascii.ex
