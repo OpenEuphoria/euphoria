@@ -3,31 +3,31 @@
 		--            Rapid Deployment Software.                --
 		--                                                      --
 		-- Permission is freely granted to anyone to modify     --
-		-- and/or redistribute this editor (ed.ex, syncolor.e). --
+		-- and/or redistribute this editor (edx.ex, syncolor.e). --
 		----------------------------------------------------------
 
 -- This program can be run with:
---     eui  ed.ex (Windows or UNIX to use the current console Window)
+--     eui  edx.ex (Windows or UNIX to use the current console Window)
 -- or
---     euiw ed.ex (Windows will create a new Window you'll have to maximize)
+--     euiw edx.ex (Windows will create a new Window you'll have to maximize)
 --  
 -- On XP some control-key combinations aren't recognized)
 --
 -- How it Works:
--- * Using gets(), ed reads and appends each line of text into a 2-d "buffer",
+-- * Using gets(), edx reads and appends each line of text into a 2-d "buffer",
 --   i.e. a sequence of sequences where each (sub)sequence contains one line.
--- * ed waits for you to press a key, and then fans out to one of many small
+-- * edx waits for you to press a key, and then fans out to one of many small
 --   routines that each perform one editing operation.
 -- * Each editing operation is responsible for updating the 2-d buffer variable
 --   containing the lines of text, and for updating the screen to reflect any
 --   changes. This code is typically fairly simple, but there can be a lot
 --   of special cases to worry about.
--- * Finally, ed writes back each line, using puts()
+-- * Finally, edx writes back each line, using puts()
 -- * How multiple-windows works: When you switch to a new window, all the 
 --   variables associated with the current window are bundled together and 
 --   saved in a sequence, along with the 2-d text buffer for that window.
 --   When you switch back, all of these state variables, plus the 2-d text
---   buffer variable for that window are restored. Most of the code in ed is 
+--   buffer variable for that window are restored. Most of the code in edx is 
 --   not even "aware" that there can be multiple-windows.
 
 without type_check -- makes it a bit faster
@@ -383,7 +383,7 @@ window_number = 1
 buffer_id buffer_number -- current active buffer
 buffer_number = 0
 
-sequence key_queue -- queue of input characters forced by ed
+sequence key_queue -- queue of input characters forced by edx
 key_queue = {}
 
 procedure delay(atom n)
@@ -2392,10 +2392,10 @@ end procedure
 procedure ed(sequence command)
 -- editor main procedure 
 -- start editing a new file
--- ed.ex is executed by ed.bat
+-- edx.ex is executed by edx.bat
 -- command line will be:
---    eui ed.ex              - get filename from ex.err, or user
---    eui ed.ex filename     - filename specified
+--    eui edx.ex              - get filename from ex.err, or user
+--    eui edx.ex filename     - filename specified
 
 	file_number file_no
 
@@ -2519,7 +2519,7 @@ procedure ed_main()
 
 	while length(window_list) > 0 do
 		ed(cl)
-		cl = {"eui", "ed.ex" , file_name}
+		cl = {"eui", "edx.ex" , file_name}
 	end while
 
 	-- exit editor
@@ -2536,6 +2536,6 @@ end procedure
 
 ed_main()
 -- This abort statement reduces the chance of 
--- a syntax error when you edit ed.ex using itself: 
+-- a syntax error when you edit edx.ex using itself: 
 abort(0) 
 
