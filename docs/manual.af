@@ -29,7 +29,7 @@
 #
 
 # Output file generation options
-:@@(title Euphoria v4.0)@
+:@@(title Euphoria v4.1)@
 
 ifdef HTML
 :%%maxnumlevel = 4

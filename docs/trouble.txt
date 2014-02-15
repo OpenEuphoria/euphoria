@@ -7,7 +7,7 @@ If you get stuck, here are some things you can do:
 example, ##guru declare global include##
 # Check the list of common problems ([[:Common Problems and Solutions]]).
 # Read the relevant parts of the documentation, i.e. 
-[[:toc|Euphoria Programming Language v4.0]] or [[:API Reference]].
+[[:toc|Euphoria Programming Language v4.1]] or [[:API Reference]].
 # Try running your program with trace:
 <eucode>
 with trace
