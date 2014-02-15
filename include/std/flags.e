@@ -59,6 +59,7 @@ map:put(one_bit_numbers, 0b1000_0000_0000_0000_0000_0000_0000_0000, 32)
 --
 -- Example 1:
 -- <eucode>
+-- include std/flags.e
 -- ? which_bit(2) --> 2
 -- ? which_bit(0) --> 0
 -- ? which_bit(3) --> 0
@@ -107,6 +108,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
+-- include std/flags.e
 -- include std/console.e
 -- sequence s
 -- s = {
@@ -135,6 +137,7 @@ end function
 -- }
 -- display( flags_to_string( {#0C20000,2,9,0}, s,1))
 -- --> {
+-- -->   {
 -- -->     "WS_BORDER",
 -- -->     "WS_DLGFRAME",
 -- -->     "WS_MINIMIZEBOX"
