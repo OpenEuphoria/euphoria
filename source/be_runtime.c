@@ -4962,8 +4962,8 @@ char **make_arg_cv(char *cmdline, int *argc)
 		if (cmdline[i] == '\0')
 			break;
 		if (cmdline[i] == '\"') {
-			i++; // skip leading double-quote
 			argv[w++] = &cmdline[i]; // start of new quoted word
+            i++;
 			while (cmdline[i] != '\"' &&
 				   cmdline[i] != '\0') {
 
@@ -4976,7 +4976,8 @@ char **make_arg_cv(char *cmdline, int *argc)
 
 				i++;
 			}
-
+            if (cmdline[i] == '\"')
+                i++;
 		}
 		else {
 			argv[w++] = &cmdline[i]; // start of new unquoted word
@@ -5050,6 +5051,7 @@ object system_exec_call(object command, object wait)
 {
 #ifndef EUNIX
 	char **argv;
+    char *argvNDQ; // Without double-quote
 #endif
 	char *string_ptr;
 	int len, w, exit_code;
@@ -5088,11 +5090,19 @@ object system_exec_call(object command, object wait)
 		exit_code = WEXITSTATUS( exit_code );
 #else
 	argv = make_arg_cv(string_ptr, &exit_code);
-	exit_code = spawnvp(P_WAIT, argv[0], (char * const *)argv);
-
+	
+    argvNDQ = (char *)EMalloc(strlen(argv[0])+1);
+    if (argv[0][0] == '\"') { // Assume argument is surrounded by double-quote and remove them
+        copy_string(argvNDQ, argv[0]+1, strlen(argv[0])-1);
+    } else {
+        copy_string(argvNDQ, argv[0], strlen(argv[0])+1);
+    }
+    
+    exit_code = _spawnvp(P_WAIT, argvNDQ, (char const * const *)argv);
+    
 	#if INTPTR_MAX == INT32_MAX
 	// This causes a crash on Win64
-	EFree(argv[0]);		// free the 'process' name
+    EFree(argvNDQ);			// free the 'process' name
 	#endif
 	EFree((char *)argv); // free the list of arg addresses, but not the args themself.
 
