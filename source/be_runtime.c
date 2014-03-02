@@ -4923,7 +4923,7 @@ char *get_module_name(){
 }
 #endif
 
-char **make_arg_cv(char *cmdline, int *argc)
+char **make_arg_cv(char *cmdline, int *argc, int skip_leading_dquote)
 /* Convert command line string to argc, argv.
    If *argc is 1, then get program name from GetModuleFileName().
    When double-clicked under Windows, cmdline will
@@ -4962,8 +4962,11 @@ char **make_arg_cv(char *cmdline, int *argc)
 		if (cmdline[i] == '\0')
 			break;
 		if (cmdline[i] == '\"') {
+            if (skip_leading_dquote)
+                i++;
 			argv[w++] = &cmdline[i]; // start of new quoted word
-            i++;
+            if (!skip_leading_dquote)
+                i++;
 			while (cmdline[i] != '\"' &&
 				   cmdline[i] != '\0') {
 
@@ -4973,10 +4976,9 @@ char **make_arg_cv(char *cmdline, int *argc)
 					/* copy the rest of the string over the backslash */
 					for (j = ++i;(cmdline[j-1] = cmdline[j]); ++j) /* do nothing */;
 				}
-
 				i++;
 			}
-            if (cmdline[i] == '\"')
+            if (!skip_leading_dquote && cmdline[i] == '\"')
                 i++;
 		}
 		else {
@@ -5089,7 +5091,7 @@ object system_exec_call(object command, object wait)
 		exit_code = system(string_ptr);
 		exit_code = WEXITSTATUS( exit_code );
 #else
-	argv = make_arg_cv(string_ptr, &exit_code);
+	argv = make_arg_cv(string_ptr, &exit_code, 0);
 	
     argvNDQ = (char *)EMalloc(strlen(argv[0])+1);
     if (argv[0][0] == '\"') { // Assume argument is surrounded by double-quote and remove them
