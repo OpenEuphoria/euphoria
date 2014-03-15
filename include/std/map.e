@@ -54,7 +54,7 @@ include std/sort.e
 include std/stats.e as stats
 include std/text.e
 include std/types.e
-
+include std/console.e
 include euphoria/info.e
 
 enum
@@ -729,8 +729,6 @@ end procedure
 --
 -- See Also:
 --		[[:clear]], [[:has]]
---
-include std/console.e
 public procedure remove( map the_map_p, object key )
 	integer hashval = hash( key )
 	sequence slots = eumem:ram_space[the_map_p][MAP_SLOTS]
