@@ -1,5 +1,5 @@
 
-== eucdoc Documentation Tool
+== EuDOC Source Documentation Tool
 :<<LEVELTOC level=2 depth=4>>
 
 Writing and managing documentation for your programs is made 
