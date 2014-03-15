@@ -19,6 +19,9 @@
   ##[[:string_numbers]]## is set
 * fixed detection of hex string tokens in ##[[:tokenize_string]]##
 * tokenizing better respects the value of ##stop_on_error## parameter for ##[[:tokenize_string]]##
+* [[ticket:884]] 32-bit translator crash when translating a 64-bit target
+* [[ticket:886]] system_exec with quotes on Windows failed due to quotes being removed
+* [[ticket:887]] EDS: crash if create_table and clear_table init_records parameter was less than MAX_INDEX
 
 == Enhancements
 
@@ -66,3 +69,5 @@
 * ##[[:lock_file]]## on Windows now supports ##LOCK_SHARED## and ##LOCK_EXCLUSIVE##
 * ##[[:tokenize_file]]## uses ##[[:io:BINARY_MODE]]## by default instead of ##[[:io:TEXT_MODE]]##, which
   improves performance on large files with Windows style newlines
+* [[ticket:883]] Improved error messages on subscript / slice errors
+* ed.ex renamed edx.ex

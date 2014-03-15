@@ -153,6 +153,13 @@ end ifdef
 
 
 ifdef not WINDOWS then
+
+ifdef FREEBSD then
+	constant MMAP_OFFSET_SIZE = dll:C_LONGLONG
+elsedef
+	constant MMAP_OFFSET_SIZE = dll:C_LONG
+end ifdef
+
 include std/dll.e
 --**
 -- @nodoc@
@@ -163,7 +170,7 @@ export constant
 	--**
 	-- @nodoc@
 	MMAP     = dll:define_c_func( STDLIB, "mmap", 
-				{dll:C_POINTER, dll:C_LONG, dll:C_INT, dll:C_INT, dll:C_INT, dll:C_LONG}, 
+				{dll:C_POINTER, dll:C_LONG, dll:C_INT, dll:C_INT, dll:C_INT, MMAP_OFFSET_SIZE}, 
 				dll:C_POINTER ),
 	--**
 	-- @nodoc@
@@ -176,7 +183,7 @@ export constant
 	MAP_PRIVATE   = 2,
 	$
 
-    ifdef OSX then
+    ifdef OSX or BSD then
         --**
         -- @nodoc@
         export constant MAP_ANONYMOUS = 0x1000
@@ -2039,8 +2046,11 @@ end procedure
 -- See Also:
 -- [[:Executable Memory]], [[:allocate]], [[:free_code]], [[:allocate_protect]]
 public function allocate_code( object data, memconst:valid_wordsize wordsize = 1 )
-
-	return allocate_protect( data, wordsize, PAGE_EXECUTE )
+	ifdef FREEBSD and BITS32 then
+		return allocate_protect( data, wordsize, or_bits( PAGE_EXECUTE, PAGE_READONLY ) )
+	elsedef
+		return allocate_protect( data, wordsize, PAGE_EXECUTE )
+	end ifdef
 
 end function
 
@@ -2231,6 +2241,7 @@ public function allocate_protect( object data, memconst:valid_wordsize wordsize 
 	
 	return eaddr
 end function
+
 
 function local_allocate_protected_memory( integer s, integer first_protection )
 	ifdef WINDOWS then     

@@ -168,7 +168,6 @@ ifndef LIBRARY_NAME
 	CREATEDLLFLAGS=
 endif
 
-
 MKVER=$(BUILDDIR)/mkver$(EXE_EXT)
 ifeq "$(EMINGW)" "1"
 	# Windowed backend
@@ -602,10 +601,11 @@ source-tarball :
 	echo building source-tarball for $(PLAT)
 	rm -rf $(BUILDDIR)/$(SOURCEDIR)
 	hg archive $(BUILDDIR)/$(SOURCEDIR)
-	cd $(BUILDDIR)/$(SOURCEDIR)/source && ./configure $(CONFIGURE_PARAMS)
-	$(MAKE) -C $(BUILDDIR)/$(SOURCEDIR)/source source
-	-rm $(BUILDDIR)/$(SOURCEDIR)/source/config.gnu
-	-rm $(BUILDDIR)/$(SOURCEDIR)/source/build/mkver$(EXE_EXT)
+	mkdir $(BUILDDIR)/$(SOURCEDIR)/build
+	cd $(BUILDDIR)/$(SOURCEDIR)/build && ../source/configure $(CONFIGURE_PARAMS)
+	$(MAKE) -C $(BUILDDIR)/$(SOURCEDIR)/build source
+	-rm $(BUILDDIR)/$(SOURCEDIR)/build/config.gnu
+	-rm $(BUILDDIR)/$(SOURCEDIR)/build/mkver$(EXE_EXT)
 	cd $(BUILDDIR) && tar -zcf $(SOURCEDIR)-src.tar.gz $(SOURCEDIR)
 ifneq "$(VERSION)" ""
 	cd $(BUILDDIR) && mkdir -p $(PLAT) && mv $(SOURCEDIR)-src.tar.gz $(PLAT)
@@ -754,7 +754,7 @@ $(BUILDDIR)/pdf/euphoria.tex : $(BUILDDIR)/pdf/euphoria.txt $(TRUNKDIR)/docs/tem
 	cd $(TRUNKDIR)/docs && $(CREOLE) -f latex -A -t=$(TRUNKDIR)/docs/template.tex -o=$(BUILDDIR)/pdf $<
 
 $(BUILDDIR)/euphoria.pdf : $(BUILDDIR)/pdf/euphoria.tex
-	cd $(TRUNKDIR)/docs && pdflatex -output-directory=$(BUILDDIR)/pdf $(BUILDDIR)/pdf/euphoria.tex && cp $(BUILDDIR)/pdf/euphoria.pdf $(BUILDDIR)/
+	cd $(TRUNKDIR)/docs && pdflatex -output-directory=$(BUILDDIR)/pdf $(BUILDDIR)/pdf/euphoria.tex && pdflatex -output-directory=$(BUILDDIR)/pdf $(BUILDDIR)/pdf/euphoria.tex && cp $(BUILDDIR)/pdf/euphoria.pdf $(BUILDDIR)/
 	
 pdfdoc-initial : $(BUILDDIR)/euphoria.pdf
 	cd $(TRUNKDIR)/docs && pdflatex -output-directory=$(BUILDDIR)/pdf $(BUILDDIR)/pdf/euphoria.tex && cp $(BUILDDIR)/pdf/euphoria.pdf $(BUILDDIR)/
@@ -887,8 +887,8 @@ endif
 	install $(BUILDDIR)/$(EUDIS) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EUDIST) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EUCOVERAGE) $(DESTDIR)$(PREFIX)/bin
-	install -m 755 ../bin/*.ex $(DESTDIR)$(PREFIX)/bin
-	install -m 755 ../bin/ecp.dat $(DESTDIR)$(PREFIX)/bin
+	install -m 755 $(TRUNKDIR)/bin/*.ex $(DESTDIR)$(PREFIX)/bin
+	install -m 755 $(TRUNKDIR)/bin/ecp.dat $(DESTDIR)$(PREFIX)/bin
 ifeq "$(EMINGW)" "1"
 	install $(BUILDDIR)/$(EBACKENDW) $(DESTDIR)$(PREFIX)/bin
 endif

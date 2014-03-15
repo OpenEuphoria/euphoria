@@ -58,6 +58,8 @@ MAKE_BORDER_FUNCTIONS(int,C_INT)
 MAKE_BORDER_FUNCTIONS(long,C_LONG)
 #endif
 MAKE_BORDER_FUNCTIONS(long long,C_LONGLONG)
+MAKE_BORDER_FUNCTIONS(float, C_FLOAT)
+MAKE_BORDER_FUNCTIONS(double, C_DOUBLE)
 
 #define MAKE_ID_FUNCTION(ctype,etype) \
 	EXPORT ctype etype ## _id(ctype val) {\
@@ -102,6 +104,31 @@ MAKE_GET_VAL_FN(short,     C_SHORT,    _M100, -10000)
 MAKE_GET_VAL_FN(int,       C_INT,      _M100, -1000000000)
 MAKE_GET_VAL_FN(long,      C_LONG,     _M100, ((sizeof(long) == sizeof(long long)) ? -1000000000000000000LL : -1000000000L) )
 MAKE_GET_VAL_FN(long long, C_LONGLONG, _M100, -1000000000000000000LL)
+
+
+EXPORT double sum_C_FLOAT_C_DOUBLE(float f1, double d1) {
+	return f1 + d1;
+}
+
+EXPORT double sum_C_DOUBLE_C_FLOAT(double d1, float d2) {
+	return d1+d2;
+}
+
+EXPORT double sum_C_FLOAT_C_FLOAT_C_DOUBLE(float f1, float f2, double f3) {
+	return f1+f2+f3;
+}
+
+EXPORT double sum_C_FLOAT_C_DOUBLE_C_FLOAT_C_FLOAT_C_FLOAT_C_DOUBLE(float f1, double f2, float f3, float f4, float f5, double d6) {
+	return f1+f2+f3+f4+f5+d6;
+}
+
+EXPORT double sum_C_FLOAT_C_FLOAT_C_FLOAT_C_FLOAT_C_FLOAT_C_FLOAT_C_FLOAT_C_FLOAT(float f1, float f2, float f3, float f4, float f5, float f6, float f7, float f8) {
+	return f1+f2+f3+f4+f5+f6+f7+f8;	
+}
+
+EXPORT double sum_C_DOUBLE_C_DOUBLE_C_DOUBLE_C_DOUBLE_C_DOUBLE_C_DOUBLE_C_DOUBLE_C_DOUBLE(double f1, double f2, double f3, double f4, double f5, double f6, double f7, double f8) {
+	return f1+f2+f3+f4+f5+f6+f7+f8;	
+}
 
 EXPORT unsigned long long bit_repeat(Bool bit, unsigned char count) {
 	long long bit_vector = 0LL;

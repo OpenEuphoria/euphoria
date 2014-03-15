@@ -1,5 +1,5 @@
 t_c_slice_past_end_double.e:4
-slice upper index is less than 0 (-2147483648) 
+slice upper index is less than 0 (-2147483648) - in slice/subscript #1 of 's' 
 
 
 Global & Local Variables

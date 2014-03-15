@@ -1,11 +1,11 @@
-== EuDist - Distributing Programs
+== EuDist, Distributing Programs
 
 <<LEVELTOC level=2 depth=4>>
 
 === Introduction
 
 EuDist is a tool that makes distributing your program easier.
-It's designed to gather all of the Euphoria files that your program
+It is designed to gather all of the Euphoria files that your program
 uses and put them into a directory.  This can also be useful for
 sending example code for bug reports.
 
