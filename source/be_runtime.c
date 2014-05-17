@@ -1295,7 +1295,7 @@ object Repeat(object item, object repcount)
 	if (count < 0)
 		RTFatal("repetition count must not be less than 0");
 	if (count > MAXINT_DBL)
-		RTFatal("repetition count must not be more than 1073741823");
+		RTFatal("repetition count must not be more than %ld", MAXINT_DBL);
 
 
 	s1 = NewS1(count);
