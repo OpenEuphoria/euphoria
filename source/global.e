@@ -266,7 +266,7 @@ elsedef
 		max_int64 = max_int32
 end ifdef
 
-ifdef E64 then
+ifdef BITS64 then
 	export constant
 		SIZEOF_POINTER = 8,
 		max_int        = max_int64,

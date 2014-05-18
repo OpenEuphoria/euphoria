@@ -36,7 +36,7 @@ include coverage.e
 include block.e
 
 ifdef EU4_0 then
-	with define E32
+	with define BITS32
 end ifdef
 
 constant INCLUDE_LIMIT = 30   -- maximum depth of nested includes
@@ -987,14 +987,14 @@ export function IncludePop()
 	return TRUE
 end function
 
-ifdef E32 or EU4_0 then
+ifdef BITS32 or EU4_0 then
 	constant
 		MAXCHK2  = 0x1FFFFFFF,
 		MAXCHK8  = 0x07FFFFFF,
 		MAXCHK10 = 0x06666665,
 		MAXCHK16 = 0x03FFFFFF,
 		$
-elsifdef E64 then
+elsifdef BITS64 then
 	constant
 		MAXCHK2  = 0x1FFFFFFF_FFFFFFFD,
 		MAXCHK8  = 0x07FFFFFF_FFFFFFF7,
@@ -1182,9 +1182,9 @@ function my_sscanf(sequence yytext)
 
 	-- TODO need to find a way to error check this.
 	if find( 'e', yytext ) or find( 'E', yytext ) then
-		ifdef E32 then
+		ifdef BITS32 then
 			return scientific_to_atom( yytext, DOUBLE )
-		elsifdef E64 then
+		elsifdef BITS64 then
 			return scientific_to_atom( yytext, EXTENDED )
 		elsedef
 			InternalErr( 351, "Scanning scientific notation in my_sscanf" )

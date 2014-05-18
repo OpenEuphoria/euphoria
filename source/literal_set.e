@@ -75,10 +75,10 @@ constant binary_to_128 = {1,2,4,8,16,32,64,128}
 constant binary_to_2__32 = binary_to_128 & 256 * binary_to_128 & power(2,16) * binary_to_128 * power(2,24) * binary_to_128 -- the geometric series going up by 2 that constains exactly 32 members from 1 to power(2,31)
 
  -- a binary series that must contain at least the bits up to that that can be contained in an integer
-ifdef E32 or EU4_0 then
+ifdef BITS32 or EU4_0 then
 	constant binary_sequence = binary_to_2__32
 	constant integer_bits = 30
-elsifdef E64 then
+elsifdef BITS64 then
 	constant binary_sequence = binary_to_2__32 & #1_0000_0000 * binary_to_2__32
 	constant integer_bits = 62
 end ifdef
