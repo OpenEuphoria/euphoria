@@ -1,6 +1,7 @@
 -- t_literals.e
 
 include std/unittest.e
+include std/text.e
 
 -- Hexadecimal literals
 test_equal("Hex Lit 1", -4275878552, -#FEDC_BA98)
@@ -159,10 +160,9 @@ test_equal("utf32 strings - multiline", {0xAB,0x0D,0x0F012EF3}, U"
                                                                      
 
 enum type colors by * 2.3 BLUE, BLACK, WHITE=13, RED, GREEN, CYAN=94.3 end type
-constant colors_name = {"blue", "black", "white", "red", "green"}
 
 test_equal("enum values", {1, 2.3, 13, 29.9, 68.77, 94.3}, {BLUE, BLACK, WHITE, RED, GREEN, CYAN})
-test_equal("enum type func", "green", colors_name[colors(GREEN)])
+test_equal("enum type func", "green", text:lower(name_of(GREEN)))
 
 constant MINVAL_1 = 2.0  
 atom     MINVAL_2 = 2.0  

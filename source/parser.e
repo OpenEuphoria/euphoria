@@ -4803,7 +4803,7 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 				-- find_from(i1, tmp1, 1) => tmp1
 				FIND_FROM & i1_sym[T_SYM] & tmp1 & one[T_SYM] & i1_sym[T_SYM] &
 				-- -- tmp1 != 0 => tmp1
-				-- NOTEQ & i1_sym[T_SYM] & zero[T_SYM] & i1_sym[T_SYM] &
+				NOTEQ & i1_sym[T_SYM] & zero[T_SYM] & i1_sym[T_SYM] &
 				-- return the argument back again.
 				SymTab[p][S_CODE][1..$-2] & i1_sym[T_SYM] & BADRETURNF
 				--? SymTab[p][S_CODE]

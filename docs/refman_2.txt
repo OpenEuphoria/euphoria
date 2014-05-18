@@ -1529,7 +1529,7 @@ will alert you to bugs that runtime type checking may miss.
 The value returned by the enum type is implementation dependent; except that we guarantee that for values
 not belonging to the type, the type returns 0 and for those that do belong, non-zero is returned.
 
-For versions 4.0, the value returned by the type enum is the ordinal number of the member in the enum's definition, regardless of what the member's value is. As an exception to this, if two enums share the same value, then they will share the same ordinal number.  In 4.1, this may have changed however.
+For versions 4.1, the value returned by the type enum is 1.
 
 When using type enum, you will be able to access the variable
 names later with the name_of built-in.  The name_of built-in gives you 

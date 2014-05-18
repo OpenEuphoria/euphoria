@@ -23,6 +23,9 @@ include std/convert.e
 with trace
 sequence buf
 
+type enum boolean FALSE=0, TRUE, F=0, T
+end type
+
 constant SEQUENCE_PAIR = 2
 
 type enum weekday
@@ -34,7 +37,7 @@ type enum weekday
 	$
 end type
 test_equal("assigned values out of order integer (incomplete interval) enumerated type", {2,1,3,9,5}, {MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY})
-test_equal("type values out of order integer (incomplete interval) enumerated type", {1,2,3,4,5}, {weekday(MONDAY), weekday(TUESDAY), weekday(WEDNESDAY), weekday(THURSDAY), weekday(FRIDAY)})
+test_equal("type values out of order integer (incomplete interval) enumerated type", {T,T,T,T,T}, {weekday(MONDAY), weekday(TUESDAY), weekday(WEDNESDAY), weekday(THURSDAY), weekday(FRIDAY)})
 test_false("non-weekday in the numeric hull is false #1", weekday(4))
 test_false("non-weekday in the numeric hull is false #2", weekday(8))
 buf = value("9")
@@ -51,7 +54,7 @@ enum type inner_planet
 	MARS
 end type
 test_equal("assigned values in order stepping by one (complete interval) enumerated type", {1,2,3,4}, {MERCURY, VENUS, EARTH, MARS})
-test_equal("type values of in order integer (complete interval) enumerated type", {1,2,3,4}, {inner_planet(MERCURY), inner_planet(VENUS), inner_planet(EARTH), inner_planet(MARS)})
+test_equal("type values of in order integer (complete interval) enumerated type", {T,T,T,T}, {inner_planet(MERCURY), inner_planet(VENUS), inner_planet(EARTH), inner_planet(MARS)})
 
 -- continuous but non-monotonic enumerated type
 -- internally, the parser will implement name of by using a sequence of pairs indexed by 
@@ -146,7 +149,7 @@ test_equal("name_of works with defining constant from a in order (complete inter
 test_equal("name_of works with a variable from a in order (complete interval) enumerated type","MARS",name_of(mining_target))
 
 -- Test enum types from an included file:
-include enum_type.e
+include ../enum_type.e
 architecture x = 1
 test_equal( "X86 name_of via local variable", "X86", name_of( x ) )
 test_equal( "ARM name_of via included variable", "ARM", name_of( y ) )

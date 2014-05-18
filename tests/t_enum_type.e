@@ -35,7 +35,7 @@ type enum weekday
 	$
 end type
 test_equal("assigned values out of order integer (incomplete interval) enumerated type", {2,1,3,9,5}, {MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY})
-test_equal("type values out of order integer (incomplete interval) enumerated type", {1,2,3,4,5}, {weekday(MONDAY), weekday(TUESDAY), weekday(WEDNESDAY), weekday(THURSDAY), weekday(FRIDAY)})
+test_equal("type values out of order integer (incomplete interval) enumerated type", repeat(1,5), {weekday(MONDAY), weekday(TUESDAY), weekday(WEDNESDAY), weekday(THURSDAY), weekday(FRIDAY)})
 test_false("non-weekday in the numeric hull is false #1", weekday(4))
 test_false("non-weekday in the numeric hull is false #2", weekday(8))
 buf = value("9")
@@ -52,7 +52,7 @@ enum type inner_planet
 	MARS
 end type
 test_equal("assigned values in order stepping by one (complete interval) enumerated type", {1,2,3,4}, {MERCURY, VENUS, EARTH, MARS})
-test_equal("type values of in order integer (complete interval) enumerated type", {1,2,3,4}, {inner_planet(MERCURY), inner_planet(VENUS), inner_planet(EARTH), inner_planet(MARS)})
+test_equal("type values of in order integer (complete interval) enumerated type", repeat(1,4), {inner_planet(MERCURY), inner_planet(VENUS), inner_planet(EARTH), inner_planet(MARS)})
 
 -- continuous but non-monotonic enumerated type
 -- internally, the parser will implement name of by using a sequence of pairs indexed by 
@@ -66,7 +66,7 @@ enum type outer_planet
 	JUPITER=5
 end type
 test_equal("assigned values in continuous out of order integer interval (complete interval) enumerated type", {6,7,8,5}, {SATURN,URANUS,NEPTUNE,JUPITER})
-test_equal("type values out of order integer (complete interval) enumerated type", {1,2,3,4}, {outer_planet(SATURN),outer_planet(URANUS),outer_planet(NEPTUNE),outer_planet(JUPITER)})
+test_equal("type values out of order integer (complete interval) enumerated type", repeat(1,4), {outer_planet(SATURN),outer_planet(URANUS),outer_planet(NEPTUNE),outer_planet(JUPITER)})
 
 -- non-integer enumerated type
 -- Internally, the parser will implement this by using a pair of same length sequences.
@@ -81,7 +81,7 @@ type enum metric_prefix by * 1000
 	giga
 end type
 test_equal("assigned values non-integer enumerated type", {0.000_000_001, 0.000_001, 0.001, 1_000, 1_000_000, 1_000_000_000 }, {nano, micro, milli, kilo, mega, giga})
-test_equal("type values non-integer enumerated type", {1,2,3,4,5,6}, {metric_prefix(nano),
+test_equal("type values non-integer enumerated type", repeat(1,6), {metric_prefix(nano),
 	metric_prefix(micro),
 	metric_prefix(milli),
 	metric_prefix(kilo),
