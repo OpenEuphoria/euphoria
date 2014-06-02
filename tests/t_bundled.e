@@ -70,7 +70,7 @@ constant base_bins = {
 	"bench.ex",
 	"bugreport.ex",
 	"buildcpdb.ex",
-	"ed.ex",
+	"edx.ex",
 	"eucoverage.ex",
 	"euloc.ex",
 	$
