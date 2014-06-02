@@ -282,7 +282,6 @@ rem ============================================================
 echo [All] > %BUILDDIR%\eu.cfg
 echo -i %TRUNKDIR%\include >> %BUILDDIR%\eu.cfg
 echo -eudir %TRUNKDIR% >> %BUILDDIR%\eu.cfg
-echo -d E32 >> %BUILDDIR%\eu.cfg
 echo [translate] >> %BUILDDIR%\eu.cfg
 echo -com %TRUNKDIR% >> %BUILDDIR%\eu.cfg
 if "%DEBUG%" =="1" (
