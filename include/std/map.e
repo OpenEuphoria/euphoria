@@ -1515,7 +1515,7 @@ end procedure
 -- loaded = load_map(SavedMap)
 -- if equal(loaded, -1) then
 --     crash("Map '%s' failed to open", SavedMap)
--- end if
+-- end iF
 -- 
 -- -- By now we know that it was loaded and a new map created,
 -- -- so we can assign it to a 'map' variable.
@@ -1581,6 +1581,11 @@ public function load_map(object input_file_name)
 			if delim_pos > 0 then
 				data_key = text:trim(logical_line[1..delim_pos-1])
 				if length(data_key) > 0 then
+					data_key = search:match_replace("\\#2C", data_key, ",")
+					data_key = search:match_replace("\\#24", data_key, "$")
+					data_key = search:match_replace("\\#22", data_key, "\"")
+					data_key = search:match_replace("\\#3D", data_key, "=")
+					data_key = search:match_replace("\\#23", data_key, "#")
 					data_key = search:match_replace("\\-", data_key, "-")
 					if not t_alpha(data_key[1]) then
 						conv_res = stdget:value(data_key,,stdget:GET_LONG_ANSWER)
@@ -1592,6 +1597,11 @@ public function load_map(object input_file_name)
 					end if
 									
 					data_value = text:trim(logical_line[delim_pos+1..$])
+					data_value = search:match_replace("\\#2C", data_value, ",")
+					data_value = search:match_replace("\\#24", data_value, "$")
+					data_value = search:match_replace("\\#22", data_value, "\"")
+					data_value = search:match_replace("\\#3D", data_value, "=")
+					data_value = search:match_replace("\\#23", data_value, "#")
 					data_value = search:match_replace("\\-", data_value, "-")
 					conv_res = stdget:value(data_value,,stdget:GET_LONG_ANSWER)
 					if conv_res[1] = stdget:GET_SUCCESS then
@@ -1798,8 +1808,18 @@ public function save_map(map the_map_, object file_name_p, integer type_ = SM_TE
 	else
 		for i = 1 to length(keys_) do
 			keys_[i] = pretty:pretty_sprint(keys_[i], {2,0,1,0,"%d","%.15g",32,127,1,0})
+			keys_[i] = search:match_replace("#", keys_[i], "\\#23")
+			keys_[i] = search:match_replace("\"", keys_[i], "\\#22")
+			keys_[i] = search:match_replace("$", keys_[i], "\\#24")
+			keys_[i] = search:match_replace(",", keys_[i], "\\#2C")
+			keys_[i] = search:match_replace("=", keys_[i], "\\#3D")
 			keys_[i] = search:match_replace("-", keys_[i], "\\-")
 			values_[i] = pretty:pretty_sprint(values_[i], {2,0,1,0,"%d","%.15g",32,127,1,0})
+			values_[i] = search:match_replace("#", values_[i], "\\#23")
+			values_[i] = search:match_replace("\"", values_[i], "\\#22")
+			values_[i] = search:match_replace("$", values_[i], "\\#24")
+			values_[i] = search:match_replace(",", values_[i], "\\#2C")
+			values_[i] = search:match_replace("=", values_[i], "\\#3D")
 			values_[i] = search:match_replace("-", values_[i], "\\-")
 				
 			printf(file_handle_, "%s = %s\n", {keys_[i], values_[i]})
