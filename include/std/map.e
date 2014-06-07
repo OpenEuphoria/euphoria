@@ -1177,6 +1177,11 @@ public function load_map(object input_file_name)
 		file_handle = open(input_file_name, "r")
 
 		while sequence(logical_line) with entry do
+			logical_line = search:match_replace({-2}, logical_line, "\\#3D")
+			logical_line = search:match_replace({-3}, logical_line, "\\#23")
+			logical_line = search:match_replace({-4}, logical_line, "\\#24")
+			logical_line = search:match_replace({-5}, logical_line, "\\#2C")
+			logical_line = search:match_replace({-6}, logical_line, "\\-")
 			delim_pos = find('=', logical_line)
 			if delim_pos > 0 then
 				data_key = text:trim(logical_line[1..delim_pos-1])
@@ -1242,6 +1247,30 @@ public function load_map(object input_file_name)
 				end if
 			entry
 				line_in = gets(file_handle)
+			integer in_quote = 0, last_in = -1, cur_in = -1
+			if not equal(line_in, -1) then
+			for i = 1 to length(line_in) do
+				cur_in = line_in[i]
+				if cur_in = '"' then
+					in_quote = not in_quote
+				elsif in_quote then
+					if cur_in = '=' then
+						cur_in = -2 
+					elsif cur_in = '#' then
+						cur_in = -3 
+					elsif cur_in = '$' then
+						cur_in = -4
+					elsif cur_in = ',' then
+						cur_in = -5
+					elsif cur_in = '-' and last_in = '-' then
+						cur_in = -6
+						line_in[i-1] = -6
+					end if
+				end if
+				line_in[i] = cur_in
+				last_in = cur_in
+			end for
+			end if
 			end while
 		end while
 	else
