@@ -2447,15 +2447,19 @@ object binary_op(int fn, object a, object b)
 		a = (object)SEQ_PTR(a);
 		b = (object)SEQ_PTR(b);
 		length = ((s1_ptr)a)->length;
-		if (length != ((s1_ptr)b)->length) {
-			RTFatal("sequence lengths are not the same (%ld != %ld)",
-					length, ((s1_ptr)b)->length);
+		//if (length != ((s1_ptr)b)->length) {
+		if (length > ((s1_ptr)b)->length) {
+			length = ((s1_ptr)b)->length;
+			//RTFatal("sequence lengths are not the same (%ld != %ld)",
+					//length, ((s1_ptr)b)->length);
 		}
 		c = NewS1(length);
 		cp = c->base;
 		ap = ((s1_ptr)a)->base;
 		bp = ((s1_ptr)b)->base+1;
-		while (TRUE) {
+		//while (TRUE) {
+		while (length) {
+			length--;
 			x = *(++ap);
 			if (IS_ATOM_INT(x) && IS_ATOM_INT(*bp)) {
 				*(++cp) = (*int_fn)(INT_VAL(x), INT_VAL(*bp++));
