@@ -3296,146 +3296,494 @@ void do_exec(intptr_t *start_pc)
 
 			case L_EQUALS:
 			deprintf("case L_EQUALS:");
-				START_BIN_OP
+				/*START_BIN_OP
 				if (a == top)
 					top = ATOM_1;
 				else
 					top = ATOM_0;
 				END_BIN_OP(EQUALS)
+				BREAK;*/
+				a = *(object_ptr)pc[1];
+				top = *(object_ptr)pc[2];
+				if (IS_ATOM_INT(a) && IS_ATOM_INT(top)) {
+					top = (a < top) ? ATOM_M1: (a > top);
+				}
+				else {
+					tpc = pc;
+					top = compare(a, top);
+				}
+				top = (top == 0);
+				obj_ptr = (object_ptr)pc[3];
+				DeRefx(*obj_ptr);
+				pc += 4;
+				*obj_ptr = top;
+				thread();
 				BREAK;
 
 			case L_EQUALS_IFW:
 			deprintf("case L_EQUALS_IFW:");
-				START_BIN_OP
+				/*START_BIN_OP
 				if (a == top)
 				END_BIN_OP_IFW(EQUALS)
+				BREAK;*/
+				a = *(object_ptr)pc[1];
+				top = *(object_ptr)pc[2];
+				if (IS_ATOM_INT(a) && IS_ATOM_INT(top)) {
+					top = (a < top) ? ATOM_M1: (a > top);
+				}
+				else {
+					tpc = pc;
+					top = compare(a, top);
+				}
+				top = (top == 0);
+				if(!top)
+				{
+				   pc = (intptr_t *)pc[3];
+				BREAK;
+				}
+				//obj_ptr = (object_ptr)pc[3];
+				//DeRefx(*obj_ptr);
+				pc += 4;
+				//*obj_ptr = top;
+				thread();
 				BREAK;
 
 			case L_EQUALS_IFW_I:
 			deprintf("case L_EQUALS_IFW_I:");
-				START_BIN_OP_I
+				/*START_BIN_OP_I
 				if (a == top)
 				END_BIN_OP_IFW_I
+				BREAK;*/
+				a = *(object_ptr)pc[1];
+				top = *(object_ptr)pc[2];
+				if (IS_ATOM_INT(a) && IS_ATOM_INT(top)) {
+					top = (a < top) ? ATOM_M1: (a > top);
+				}
+				else {
+					tpc = pc;
+					top = compare(a, top);
+				}
+				top = (top == 0);
+				if(!top)
+				{
+				   pc = (intptr_t *)pc[3];
+				BREAK;
+				}
+				//obj_ptr = (object_ptr)pc[3];
+				//DeRefx(*obj_ptr);
+				pc += 4;
+				//*obj_ptr = top;
+				thread();
 				BREAK;
 
 			case L_LESS:
 			deprintf("case L_LESS:");
-				START_BIN_OP
+				/*START_BIN_OP
 				if (a < top)
 					top = ATOM_1;
 				else
 					top = ATOM_0;
 				END_BIN_OP(LESS)
+				BREAK;*/
+				a = *(object_ptr)pc[1];
+				top = *(object_ptr)pc[2];
+				if (IS_ATOM_INT(a) && IS_ATOM_INT(top)) {
+					top = (a < top) ? ATOM_M1: (a > top);
+				}
+				else {
+					tpc = pc;
+					top = compare(a, top);
+				}
+				top = (top < 0);
+				obj_ptr = (object_ptr)pc[3];
+				DeRefx(*obj_ptr);
+				pc += 4;
+				*obj_ptr = top;
+				thread();
 				BREAK;
 
 			case L_LESS_IFW:
 			deprintf("case L_LESS_IFW:");
-				START_BIN_OP
+				/*START_BIN_OP
 				if (a < top)
 				END_BIN_OP_IFW(LESS)
+				BREAK;*/
+				a = *(object_ptr)pc[1];
+				top = *(object_ptr)pc[2];
+				if (IS_ATOM_INT(a) && IS_ATOM_INT(top)) {
+					top = (a < top) ? ATOM_M1: (a > top);
+				}
+				else {
+					tpc = pc;
+					top = compare(a, top);
+				}
+				top = (top < 0);
+				if(!top)
+				{
+				   pc = (intptr_t *)pc[3];
+				BREAK;
+				}
+				//obj_ptr = (object_ptr)pc[3];
+				//DeRefx(*obj_ptr);
+				pc += 4;
+				//*obj_ptr = top;
+				thread();
 				BREAK;
 
 			case L_LESS_IFW_I:
 			deprintf("case L_LESS_IFW_I:");
-				START_BIN_OP_I
+				/*START_BIN_OP_I
 				if (a < top)
 				END_BIN_OP_IFW_I
+				BREAK;*/
+				a = *(object_ptr)pc[1];
+				top = *(object_ptr)pc[2];
+				if (IS_ATOM_INT(a) && IS_ATOM_INT(top)) {
+					top = (a < top) ? ATOM_M1: (a > top);
+				}
+				else {
+					tpc = pc;
+					top = compare(a, top);
+				}
+				top = (top < 0);
+				if(!top)
+				{
+				   pc = (intptr_t *)pc[3];
+				BREAK;
+				}
+				//obj_ptr = (object_ptr)pc[3];
+				//DeRefx(*obj_ptr);
+				pc += 4;
+				//*obj_ptr = top;
+				thread();
 				BREAK;
 
 			case L_GREATER:
 			deprintf("case L_GREATER:");
-				START_BIN_OP
+				/*START_BIN_OP
 				if (a > top)
 					top = ATOM_1;
 				else
 					top = ATOM_0;
 				END_BIN_OP(GREATER)
+				BREAK;*/
+				a = *(object_ptr)pc[1];
+				top = *(object_ptr)pc[2];
+				if (IS_ATOM_INT(a) && IS_ATOM_INT(top)) {
+					top = (a < top) ? ATOM_M1: (a > top);
+				}
+				else {
+					tpc = pc;
+					top = compare(a, top);
+				}
+				top = (top > 0);
+				obj_ptr = (object_ptr)pc[3];
+				DeRefx(*obj_ptr);
+				pc += 4;
+				*obj_ptr = top;
+				thread();
 				BREAK;
 
 			case L_GREATER_IFW:
 			deprintf("case L_GREATER_IFW:");
-				START_BIN_OP
+				/*START_BIN_OP
 				if (a > top)
 				END_BIN_OP_IFW(GREATER)
+				BREAK;*/
+				a = *(object_ptr)pc[1];
+				top = *(object_ptr)pc[2];
+				if (IS_ATOM_INT(a) && IS_ATOM_INT(top)) {
+					top = (a < top) ? ATOM_M1: (a > top);
+				}
+				else {
+					tpc = pc;
+					top = compare(a, top);
+				}
+				top = (top > 0);
+				if(!top)
+				{
+				   pc = (intptr_t *)pc[3];
+				BREAK;
+				}
+				//obj_ptr = (object_ptr)pc[3];
+				//DeRefx(*obj_ptr);
+				pc += 4;
+				//*obj_ptr = top;
+				thread();
 				BREAK;
 
 			case L_GREATER_IFW_I:
 			deprintf("case L_GREATER_IFW_I:");
-				START_BIN_OP_I
+				/*START_BIN_OP_I
 				if (a > top)
 				END_BIN_OP_IFW_I
+				BREAK;*/
+				a = *(object_ptr)pc[1];
+				top = *(object_ptr)pc[2];
+				if (IS_ATOM_INT(a) && IS_ATOM_INT(top)) {
+					top = (a < top) ? ATOM_M1: (a > top);
+				}
+				else {
+					tpc = pc;
+					top = compare(a, top);
+				}
+				top = (top > 0);
+				if(!top)
+				{
+				   pc = (intptr_t *)pc[3];
+				BREAK;
+				}
+				//obj_ptr = (object_ptr)pc[3];
+				//DeRefx(*obj_ptr);
+				pc += 4;
+				//*obj_ptr = top;
+				thread();
 				BREAK;
 
 			case L_NOTEQ:
 			deprintf("case L_NOTEQ:");
-				START_BIN_OP
+				/*START_BIN_OP
 				if (a != top)
 					top = ATOM_1;
 				else
 					top = ATOM_0;
 				END_BIN_OP(NOTEQ)
+				BREAK;*/
+				a = *(object_ptr)pc[1];
+				top = *(object_ptr)pc[2];
+				if (IS_ATOM_INT(a) && IS_ATOM_INT(top)) {
+					top = (a < top) ? ATOM_M1: (a > top);
+				}
+				else {
+					tpc = pc;
+					top = compare(a, top);
+				}
+				top = (top != 0);
+				obj_ptr = (object_ptr)pc[3];
+				DeRefx(*obj_ptr);
+				pc += 4;
+				*obj_ptr = top;
+				thread();
 				BREAK;
 
 			case L_NOTEQ_IFW:
 			deprintf("case L_NOTEQ_IFW:");
-				START_BIN_OP
+				/*START_BIN_OP
 				if (a != top)
 				END_BIN_OP_IFW(NOTEQ)
+				BREAK;*/
+				a = *(object_ptr)pc[1];
+				top = *(object_ptr)pc[2];
+				if (IS_ATOM_INT(a) && IS_ATOM_INT(top)) {
+					top = (a < top) ? ATOM_M1: (a > top);
+				}
+				else {
+					tpc = pc;
+					top = compare(a, top);
+				}
+				top = (top != 0);
+				if(!top)
+				{
+				   pc = (intptr_t *)pc[3];
+				BREAK;
+				}
+				//obj_ptr = (object_ptr)pc[3];
+				//DeRefx(*obj_ptr);
+				pc += 4;
+				//*obj_ptr = top;
+				thread();
 				BREAK;
 
 			case L_NOTEQ_IFW_I:
 			deprintf("case L_NOTEQ_IFW_I:");
-				START_BIN_OP_I
+				/*START_BIN_OP_I
 				if (a != top)
 				END_BIN_OP_IFW_I
+				BREAK;*/
+				a = *(object_ptr)pc[1];
+				top = *(object_ptr)pc[2];
+				if (IS_ATOM_INT(a) && IS_ATOM_INT(top)) {
+					top = (a < top) ? ATOM_M1: (a > top);
+				}
+				else {
+					tpc = pc;
+					top = compare(a, top);
+				}
+				top = (top != 0);
+				if(!top)
+				{
+				   pc = (intptr_t *)pc[3];
+				BREAK;
+				}
+				//obj_ptr = (object_ptr)pc[3];
+				//DeRefx(*obj_ptr);
+				pc += 4;
+				//*obj_ptr = top;
+				thread();
 				BREAK;
 
 			case L_LESSEQ:
 			deprintf("case L_LESSEQ:");
-				START_BIN_OP
+				/*START_BIN_OP
 				if (a <= top)
 					top = ATOM_1;
 				else
 					top = ATOM_0;
 				END_BIN_OP(LESSEQ)
+				BREAK;*/
+				a = *(object_ptr)pc[1];
+				top = *(object_ptr)pc[2];
+				if (IS_ATOM_INT(a) && IS_ATOM_INT(top)) {
+					top = (a < top) ? ATOM_M1: (a > top);
+				}
+				else {
+					tpc = pc;
+					top = compare(a, top);
+				}
+				top = (top <= 0);
+				obj_ptr = (object_ptr)pc[3];
+				DeRefx(*obj_ptr);
+				pc += 4;
+				*obj_ptr = top;
+				thread();
 				BREAK;
 
 			case L_LESSEQ_IFW:
 			deprintf("case L_LESSEQ_IFW:");
-				START_BIN_OP
+				/*START_BIN_OP
 				if (a <= top)
 				END_BIN_OP_IFW(LESSEQ)
+				BREAK;*/
+				a = *(object_ptr)pc[1];
+				top = *(object_ptr)pc[2];
+				if (IS_ATOM_INT(a) && IS_ATOM_INT(top)) {
+					top = (a < top) ? ATOM_M1: (a > top);
+				}
+				else {
+					tpc = pc;
+					top = compare(a, top);
+				}
+				top = (top <= 0);
+				if(!top)
+				{
+				   pc = (intptr_t *)pc[3];
+				BREAK;
+				}
+				//obj_ptr = (object_ptr)pc[3];
+				//DeRefx(*obj_ptr);
+				pc += 4;
+				//*obj_ptr = top;
+				thread();
 				BREAK;
 
 			case L_LESSEQ_IFW_I:
 			deprintf("case L_LESSEQ_IFW_I:");
-				START_BIN_OP_I
+				/*START_BIN_OP_I
 				if (a <= top)
 				END_BIN_OP_IFW_I
+				BREAK;*/
+				a = *(object_ptr)pc[1];
+				top = *(object_ptr)pc[2];
+				if (IS_ATOM_INT(a) && IS_ATOM_INT(top)) {
+					top = (a < top) ? ATOM_M1: (a > top);
+				}
+				else {
+					tpc = pc;
+					top = compare(a, top);
+				}
+				top = (top <= 0);
+				if(!top)
+				{
+				   pc = (intptr_t *)pc[3];
+				BREAK;
+				}
+				//obj_ptr = (object_ptr)pc[3];
+				//DeRefx(*obj_ptr);
+				pc += 4;
+				//*obj_ptr = top;
+				thread();
 				BREAK;
 
 			case L_GREATEREQ:
 			deprintf("case L_GREATEREQ:");
-				START_BIN_OP
+				/*START_BIN_OP
 				if (a >= top)
 					top = ATOM_1;
 				else
 					top = ATOM_0;
 				END_BIN_OP(GREATEREQ)
+				BREAK;*/
+				a = *(object_ptr)pc[1];
+				top = *(object_ptr)pc[2];
+				if (IS_ATOM_INT(a) && IS_ATOM_INT(top)) {
+					top = (a < top) ? ATOM_M1: (a > top);
+				}
+				else {
+					tpc = pc;
+					top = compare(a, top);
+				}
+				top = (top >= 0);
+				obj_ptr = (object_ptr)pc[3];
+				DeRefx(*obj_ptr);
+				pc += 4;
+				*obj_ptr = top;
+				thread();
 				BREAK;
 
 			case L_GREATEREQ_IFW:
 			deprintf("case L_GREATEREQ_IFW:");
-				START_BIN_OP
+				/*START_BIN_OP
 				if (a >= top)
 				END_BIN_OP_IFW(GREATEREQ)
+				BREAK;*/
+				a = *(object_ptr)pc[1];
+				top = *(object_ptr)pc[2];
+				if (IS_ATOM_INT(a) && IS_ATOM_INT(top)) {
+					top = (a < top) ? ATOM_M1: (a > top);
+				}
+				else {
+					tpc = pc;
+					top = compare(a, top);
+				}
+				top = (top >= 0);
+				if(!top)
+				{
+				   pc = (intptr_t *)pc[3];
+				BREAK;
+				}
+				//obj_ptr = (object_ptr)pc[3];
+				//DeRefx(*obj_ptr);
+				pc += 4;
+				//*obj_ptr = top;
+				thread();
 				BREAK;
 
 			case L_GREATEREQ_IFW_I:
 			deprintf("case L_GREATEREQ_IFW_I:");
-				START_BIN_OP_I
+				/*START_BIN_OP_I
 				if (a >= top)
 				END_BIN_OP_IFW_I
+				BREAK;*/
+				a = *(object_ptr)pc[1];
+				top = *(object_ptr)pc[2];
+				if (IS_ATOM_INT(a) && IS_ATOM_INT(top)) {
+					top = (a < top) ? ATOM_M1: (a > top);
+				}
+				else {
+					tpc = pc;
+					top = compare(a, top);
+				}
+				top = (top >= 0);
+				if(!top)
+				{
+				   pc = (intptr_t *)pc[3];
+				BREAK;
+				}
+				//obj_ptr = (object_ptr)pc[3];
+				//DeRefx(*obj_ptr);
+				pc += 4;
+				//*obj_ptr = top;
+				thread();
 				BREAK;
 
 			case L_AND:
@@ -3451,6 +3799,9 @@ void do_exec(intptr_t *start_pc)
 			case L_SC1_AND:
 			deprintf("case L_SC1_AND:");
 				top = *(object_ptr)pc[1];
+				if (IS_SEQUENCE(top)) {
+					top = SEQ_PTR(top)->length;
+				}
 				if (IS_ATOM_INT(top)) {
 					if (top == ATOM_0) {
 						DeRefx(*(object_ptr)pc[2]);
@@ -3479,6 +3830,9 @@ void do_exec(intptr_t *start_pc)
 			case L_SC1_AND_IF:  // no need to store ATOM_0
 			deprintf("case L_SC1_AND_IF:");
 				top = *(object_ptr)pc[1];
+				if (IS_SEQUENCE(top)) {
+					top = SEQ_PTR(top)->length;
+				}
 				if (IS_ATOM_INT(top)) {
 					if (top == ATOM_0) {
 						pc = (intptr_t *)pc[3];
@@ -3506,6 +3860,9 @@ void do_exec(intptr_t *start_pc)
 			deprintf("case L_SC2_AND:");
 				top = *(object_ptr)pc[1];
 				DeRefx(*(object_ptr)pc[2]);
+				if (IS_SEQUENCE(top)) {
+					top = SEQ_PTR(top)->length;
+				}
 				if (IS_ATOM_INT(top)) {
 					if (top == ATOM_0)
 						*(object_ptr)pc[2] = ATOM_0;
@@ -3549,6 +3906,9 @@ void do_exec(intptr_t *start_pc)
 			case L_SC1_OR:
 			deprintf("case L_SC1_OR:");
 				top = *(object_ptr)pc[1];
+				if (IS_SEQUENCE(top)) {
+					top = SEQ_PTR(top)->length;
+				}
 				if (IS_ATOM_INT(top)) {
 					if (top != ATOM_0) {
 						DeRefx(*(object_ptr)pc[2]);
@@ -3577,6 +3937,9 @@ void do_exec(intptr_t *start_pc)
 			case L_SC1_OR_IF: // no need to store ATOM_1
 			deprintf("case L_SC1_OR_IF:");
 				top = *(object_ptr)pc[1];
+				if (IS_SEQUENCE(top)) {
+					top = SEQ_PTR(top)->length;
+				}
 				if (IS_ATOM_INT(top)) {
 					if (top != ATOM_0) {
 						pc = (intptr_t *)pc[3];

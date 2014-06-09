@@ -2264,7 +2264,7 @@ end procedure
 procedure opGREATER_IFW()
 	a = Code[pc+1]
 	b = Code[pc+2]
-	if val[a] > val[b] then
+	if compare(val[a], val[b]) > 0 then
 		pc += 4
 	else
 		pc = Code[pc+3]
@@ -2274,7 +2274,7 @@ end procedure
 procedure opNOTEQ_IFW()
 	a = Code[pc+1]
 	b = Code[pc+2]
-	if val[a] != val[b] then
+	if compare(val[a], val[b]) != 0 then
 		pc += 4
 	else
 		pc = Code[pc+3]
@@ -2284,7 +2284,7 @@ end procedure
 procedure opLESSEQ_IFW()
 	a = Code[pc+1]
 	b = Code[pc+2]
-	if val[a] <= val[b] then
+	if compare(val[a], val[b]) <= 0 then
 		pc += 4
 	else
 		pc = Code[pc+3]
@@ -2294,7 +2294,7 @@ end procedure
 procedure opGREATEREQ_IFW()
 	a = Code[pc+1]
 	b = Code[pc+2]
-	if val[a] >= val[b] then
+	if compare(val[a], val[b]) >= 0 then
 		pc += 4
 	else
 		pc = Code[pc+3]
@@ -2305,10 +2305,7 @@ procedure opEQUALS_IFW()
 	a = Code[pc+1]
 	b = Code[pc+2]
 
-	if sequence( val[a] ) or sequence( val[b] ) then
-		RTFatal("true/false condition must be an ATOM")
-	end if
-	if val[a] = val[b] then
+	if compare(val[a], val[b]) = 0 then
 		pc += 4
 	else
 		pc = Code[pc+3]
@@ -2318,7 +2315,7 @@ end procedure
 procedure opLESS_IFW()
 	a = Code[pc+1]
 	b = Code[pc+2]
-	if val[a] < val[b] then
+	if compare(val[a], val[b]) < 0 then
 		pc += 4
 	else
 		pc = Code[pc+3]
@@ -2446,7 +2443,7 @@ procedure opLESS()
 	a = Code[pc+1]
 	b = Code[pc+2]
 	target = Code[pc+3]
-	val[target] = val[a] < val[b]
+	val[target] = compare(val[a], val[b]) < 0
 	pc += 4
 end procedure
 
@@ -2454,7 +2451,7 @@ procedure opGREATER()
 	a = Code[pc+1]
 	b = Code[pc+2]
 	target = Code[pc+3]
-	val[target] = val[a] > val[b]
+	val[target] = compare(val[a], val[b]) > 0
 	pc += 4
 end procedure
 
@@ -2462,7 +2459,7 @@ procedure opEQUALS()
 	a = Code[pc+1]
 	b = Code[pc+2]
 	target = Code[pc+3]
-	val[target] = val[a] = val[b]
+	val[target] = compare(val[a], val[b]) = 0
 	pc += 4
 end procedure
 
@@ -2470,7 +2467,7 @@ procedure opNOTEQ()
 	a = Code[pc+1]
 	b = Code[pc+2]
 	target = Code[pc+3]
-	val[target] = val[a] != val[b]
+	val[target] = compare(val[a], val[b]) != 0
 	pc += 4
 end procedure
 
@@ -2478,7 +2475,7 @@ procedure opLESSEQ()
 	a = Code[pc+1]
 	b = Code[pc+2]
 	target = Code[pc+3]
-	val[target] = val[a] <= val[b]
+	val[target] = compare(val[a], val[b]) <= 0
 	pc += 4
 end procedure
 
@@ -2486,7 +2483,7 @@ procedure opGREATEREQ()
 	a = Code[pc+1]
 	b = Code[pc+2]
 	target = Code[pc+3]
-	val[target] = val[a] >= val[b]
+	val[target] = compare(val[a], val[b]) >= 0
 	pc += 4
 end procedure
 
@@ -2495,15 +2492,15 @@ end procedure
 procedure opSC1_AND()
 	a = Code[pc+1]
 	b = Code[pc+2]
-	if atom(val[a]) then
-		if val[a] = 0 then
+	c = val[a]
+	if not atom(c) then
+		c = length(c)
+	end if
+		if c = 0 then
 			val[b] = 0
 			pc = Code[pc+3]
 			return
 		end if
-	else
-		RTFatal("true/false condition must be an ATOM")
-	end if
 	pc += 4
 end procedure
 
@@ -2511,29 +2508,29 @@ procedure opSC1_AND_IF()
 -- no need to store 0
 	a = Code[pc+1]
 	b = Code[pc+2]
-	if atom(val[a]) then
-		if val[a] = 0 then
+	c = val[a]
+	if not atom(c) then
+		c = length(c)
+	end if
+		if c = 0 then
 			pc = Code[pc+3]
 			return
 		end if
-	else
-		RTFatal("true/false condition must be an ATOM")
-	end if
 	pc += 4
 end procedure
 
 procedure opSC1_OR()
 	a = Code[pc+1]
 	b = Code[pc+2]
-	if atom(val[a]) then
-		if val[a] != 0 then
+	c = val[a]
+	if not atom(c) then
+		c = length(c)
+	end if
+		if c != 0 then
 			val[b] = 1
 			pc = Code[pc+3]
 			return
 		end if
-	else
-		RTFatal("true/false condition must be an ATOM")
-	end if
 	pc += 4
 end procedure
 
@@ -2541,15 +2538,15 @@ procedure opSC1_OR_IF()
 -- no need to store 1
 	a = Code[pc+1]
 	b = Code[pc+2]
-	if atom(val[a]) then
-		if val[a] != 0 then
+	c = val[a]
+	if not atom(c) then
+		c = length(c)
+	end if
+		if c != 0 then
 			val[b] = 1
 			pc = Code[pc+3]
 			return
 		end if
-	else
-		RTFatal("true/false condition must be an ATOM")
-	end if
 	pc += 4
 end procedure
 
@@ -2558,11 +2555,11 @@ procedure opSC2_OR()
 -- short-circuit op
 	a = Code[pc+1]
 	b = Code[pc+2]
-	if atom(val[a]) then
-		val[b] = val[a]
-	else
-		RTFatal("true/false condition must be an ATOM")
+	c = val[a]
+	if not atom(c) then
+		c = length(c)
 	end if
+		val[b] = c
 	pc += 3
 end procedure
 
