@@ -2446,6 +2446,9 @@ void do_exec(intptr_t *start_pc)
 			deprintf("case L_IF:");
 				top = *(object_ptr)pc[1];
 			if_check:
+				if (IS_SEQUENCE(top)) {
+					top = SEQ_PTR(top)->length;
+				}
 				if (top == ATOM_0) {
 					pc = (intptr_t *)pc[2];
 					thread();

@@ -1529,7 +1529,12 @@ end procedure
 
 procedure opIF()
 	a = Code[pc+1]
-	if val[a] = 0 then
+	if sequence(val[a]) then
+		b = length(val[a])
+	else
+		b = val[a]
+	end if
+	if b = 0 then
 		pc = Code[pc+2]
 	else
 		pc += 3
@@ -1629,7 +1634,12 @@ end procedure
 procedure opWHILE()
 -- sometimes emit.c optimizes this away
 	a = Code[pc+1]
-	if val[a] = 0 then
+	if sequence(val[a]) then
+		b = length(val[a])
+	else
+		b = val[a]
+	end if
+	if b = 0 then
 		pc = Code[pc+2]
 	else
 		pc += 3
