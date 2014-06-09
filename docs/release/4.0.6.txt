@@ -24,6 +24,7 @@
   ##[[:locale:set]]## and ##[[:locale:datetime]]##)
 * [[ticket:882]] Translated ##[[:remove]]## works correctly with empty sequence
 * [[ticket:885]] Translated ##[[:splice]]## properly counts references when splicing an atom
+* [[ticket:898]] fix ##[[:uname]]## to report Windows 8 correctly
 
 === Enhancements
 
