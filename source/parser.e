@@ -1963,7 +1963,6 @@ procedure Assignment(token left_var)
 		if assign_op = COLON then
 			CompileErr(133, {lname})
 		else
-			? 1/0
 			CompileErr(76, {lname})
 		end if
 	end if
