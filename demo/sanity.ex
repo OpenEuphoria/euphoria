@@ -907,7 +907,7 @@ procedure machine_level()
 -- quick test of machine-level routines
 	atom addr, dest, src
 
-	if 9.99 != float64_to_atom(atom_to_float64(9.99)) then
+	if math:abs( 9.99 - float64_to_atom(atom_to_float64(9.99))) > 1e-15 then
 	crash(generic_msg)
 	end if
 	if -27 != float32_to_atom(atom_to_float32(-27)) then
@@ -927,8 +927,14 @@ procedure machine_level()
 	crash(generic_msg)
 	end if
 	free(addr)
-	addr = allocate_code({#C3}) -- RET instruction
-	call(addr)
+	ifdef ARM then
+		-- ??
+		addr = allocate_code({0xe52db004, 0xe8bd0800, 0xe12fff1e}, 4)
+		call(addr)
+	elsedef
+		addr = allocate_code({#C3}) -- RET instruction
+		call(addr)
+	end ifdef
 	for x = 0 to +2000000 by 99999 do
 	if bytes_to_int(int_to_bytes(x)) != x then
 		crash(generic_msg)

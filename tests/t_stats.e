@@ -48,7 +48,15 @@ test_equal("avedev one number", 0, avedev( {1}, ST_ALLNUM ) )
 test_equal("sum central moments 1", -8.526512829e-14, sum_central_moments("the cat is the hatter", 1)) --> -8.526512829e-14
 test_equal("sum central moments 2", 19220.5714285714, sum_central_moments("the cat is the hatter", 2)) --> 19220.57143      
 test_equal("sum central moments 3", -811341.551020408, sum_central_moments("the cat is the hatter", 3)) --> -811341.551      
-test_equal("sum central moments 4", 56824083.708454810082912, sum_central_moments("the cat is the hatter", 4)) --> 56824083.71 ? 
+
+atom CENTRAL_MOMENT4 = 56824083.708454810082912
+ifdef BSD and BITS64 then
+	-- We don't have powl on BSD, so the calculation is slightly different due to floating point casts
+	CENTRAL_MOMENT4 = 56824083.7084547973681765143
+elsedef
+		
+end ifdef
+test_equal("sum central moments 4", CENTRAL_MOMENT4, sum_central_moments("the cat is the hatter", 4)) --> 56824083.71 ? 
 
 test_equal("central moment no numbers", 0, central_moment( {}, 1 ) )
 

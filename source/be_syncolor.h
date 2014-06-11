@@ -4,7 +4,7 @@
 extern int syncolor;
 
 void init_class();
-void DisplayColorLine(char *pline, int string_color);
+int DisplayColorLine(char *pline, int string_color, int last_multi);
 void set_syncolor(object);
 
 #endif

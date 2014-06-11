@@ -1,3 +1,4 @@
+namespace reserved
 -- (c) Copyright - See License.txt
 --
 -- IL opcodes, scanner tokens etc.
@@ -308,7 +309,10 @@ export enum
 	PUBLIC,
 	FALLTHRU,
 	ROUTINE,
-	DEPRECATE
+	DEPRECATE,
+	POKE_LONG,
+	PEEK_LONGU,
+	PEEK_LONGS
 
 export enum
 	FUNC = 501,

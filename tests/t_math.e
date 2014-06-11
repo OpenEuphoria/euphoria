@@ -2,8 +2,18 @@ include std/machine.e
 include std/math.e
 include std/unittest.e
 include std/convert.e
-test_equal("gcd", 17, gcd(1999*3*17,1993*17*7))
-test_equal("gcd 1c ", 1,  gcd(-4, -1)  )
+test_equal("gcd #1", 17, gcd(1999*3*17,1993*17*7))
+test_equal("gcd #2", 1,  gcd(-4, -1)  )
+test_equal("gcd #3", 38, gcd(76.3, -114))
+test_equal("gcd #4", 114,gcd(0, -114))
+test_equal("gcd #5", 0,  gcd(0, 0))
+
+sequence rgcd
+rgcd = {}
+for i = 0 to 13 do
+	rgcd &= gcd(i, 12)
+end for
+test_equal("gcd #6", {12,1,2,3,4,1,6,1,4,3,2,1,12,1}, rgcd)
 
 test_equal("is_even #1", 1, is_even(12) )
 test_equal("is_even #2", 0, is_even(7) )
@@ -297,6 +307,31 @@ function ticket_730()
 	return s[1]
 end function
 test_equal( "privates not initialized in BB when set to novalue", 2, ticket_730() )
+end ifdef
+
+ifdef BITS64 then
+
+-- correctly capture 64-bit multiplication and promotion of
+-- products that fix in 64-bit integers, but not 63-bit integers
+procedure bigmult64()
+	sequence V = {-70368744177665,7.036874418e+13,65536,65536}
+	atom ptr = machine_func( 16, 8 )
+	poke( ptr, { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x3f } )
+	atom max_int = peek8s( ptr )
+
+	atom
+		MAXINT = max_int,
+		MININT = -MAXINT-1,   -- should be -ve
+		MININT_DBL = MININT,
+		MAXINT_DBL = MAXINT
+	atom d1 = V[1] * V[3]
+	if d1 < MININT then
+		test_pass("no machine crash")
+	end if
+	test_pass("no machine crash")
+end procedure
+bigmult64()
+
 end ifdef
 
 test_report()

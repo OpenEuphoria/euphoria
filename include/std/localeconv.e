@@ -1,8 +1,15 @@
 namespace localconv
 
 --****
+-- ==  Locale Names
+--
+-- <<LEVELTOC level=2 depth=4>>
+
+
+
+--****
 -- === Constants
--- //Windows// locale names:
+-- //Windows// locale names~:
 --
 -- | af-ZA|  sq-AL|  gsw-FR|  am-ET|  ar-DZ|  ar-BH|  ar-EG|  ar-IQ| 
 -- | ar-JO|  ar-KW|  ar-LB|  ar-LY|  ar-MA|  ar-OM|  ar-QA|  ar-SA| 
@@ -243,7 +250,7 @@ public constant w32_names = {
 	}
 	
 --**
--- Canonical locale names for //WINDOWS//:
+-- Canonical locale names for //Windows//:
 -- 
 -- | Afrikaans_South Africa|  Afrikaans_South Africa| Afrikaans_South Africa| 
 -- | Afrikaans_South Africa|  Afrikaans_South Africa|  Afrikaans_South Africa| 
@@ -528,7 +535,7 @@ public constant w32_name_canonical = {
 }
 
 --**
--- POSIX locale names:
+-- POSIX locale names~:
 --
 -- | af_ZA|  sq_AL|  gsw_FR|   am_ET|  ar_DZ      | ar_BH      | ar_EG      | ar_IQ| 
 -- | ar_JO|  ar_KW|  ar_LB| ar_LY|  ar_MA|  ar_OM|  ar_QA|  ar_SA| 
@@ -823,7 +830,7 @@ public function canonical(sequence new_locale)
 end function
 
 --**
--- Get the translation of a locale string for current platform.
+-- gets the translation of a locale string for current platform.
 --
 -- Parameters:
 --		# ##new_locale##: a sequence, the string for the locale.
@@ -866,7 +873,7 @@ public function decanonical(sequence new_locale)
 end function
 
 --**
--- Get the translation of a canoncial locale string for the Windows platform.
+-- gets the translation of a canoncial locale string for the //Windows// platform.
 --
 -- Parameters:
 --		# ##new_locale##: a sequence, the string for the locale.

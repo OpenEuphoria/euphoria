@@ -7,6 +7,7 @@ include std/machine.e
 test_equal("int_to_bytes +ve", {231, 3, 0, 0}, int_to_bytes(999))
 test_equal("int_to_bytes -ve",  {25,252,255,255}, int_to_bytes(-999))
 test_equal("int_to_bytes hex", {#CE, #FA, 0, 0}, int_to_bytes(#FACE))
+test_equal("int_to_bytes 2203034759", {135,164,79,131}, int_to_bytes( 2203034759, 4 ) )
 
 test_equal("bytes_to_int +ve", 999, bytes_to_int({231, 3, 0, 0}))
 test_equal("bytes_to_int -ve", 4294966297, bytes_to_int({-231, -4, -1, -1}))
@@ -44,6 +45,16 @@ test_equal("float32_to_atom #2", 0, float32_to_atom({0,0,0,0}))
 test_equal("float32_to_atom #3", PINF, float32_to_atom({0,0,128,127}))
 test_equal("float32_to_atom #4", MINF, float32_to_atom({0,0,128,255}))
 
+test_equal("float80_to_atom #1", 157.82, float80_to_atom( {236,81,184,30,133,235,209,157,6,64}) )
+test_equal("float80_to_atom #2", PINF, float80_to_atom( {0,0,0,0,0,0,0,128,255,127}) )
+test_equal("float80_to_atom #3", MINF, float80_to_atom({0,0,0,0,0,0,0,128,255,255}) )
+
+ifdef BITS64 then
+	-- these tests only really make sense for 64-bits:
+	test_equal("atom_to_float80 #1", {236,81,184,30,133,235,209,157,6,64}, atom_to_float80( 157.82 ) )
+	test_equal("atom_to_float80 #2", {0,0,0,0,0,0,0,128,255,127}, atom_to_float80( PINF ) )
+	test_equal("atom_to_float80 #3", {0,0,0,0,0,0,0,128,255,255}, atom_to_float80( MINF ) )
+end ifdef
 
 test_equal("hex_text #1", -13562.003444492816925, hex_text("-#3_4FA.00E_1BD"))
 test_equal("hex_text #2", 3735928559, hex_text("DEADBEEF"))

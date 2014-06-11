@@ -1,0 +1,43 @@
+== What's new in 4.1?
+
+Euphoria v4.1 now runs on not only on Intel x86, but also now ARM and 64-bit Intel and compatible processors.  Included are several ifdefs and builtins for handling things that do not have the same size across architechtures.  Alternative Literals: Warnings are issued when we compare or assign values of distinct enumerated types.  Multiassign:  You can assign to multiple variables at a time.
+
+
+=== Language Enhancements
+
+*  [[:Literal Mismatch Warning|Warnings]] are displayed when two variables or literals of distinct enumerated types are compared or one is assigned to the other.
+* [[:name_of|name_of]] call added for display of alternative literals
+* Users can write their own debuggers and use them instead of the built in trace debugger.
+*  Scientific parsing code moved from the euphoria source directory and into the
+  standard library.  Routines in ##std/get.e## now return the proper precision data
+  based on the native platform (32 or 64 bits).
+* Added [[:deprecate]] keyword
+* Can [[assign to multiple variables -> :Multiple Assignment]] with one statement using sequence semantics.
+* Use ##?## to stand in for default parameters.
+* When downloading http content, std/net/http.e will yield to other tasks
+
+=== Architecture Enhancements
+
+* Euphoria can be used natively as a 64-bit programming language
+* Euphoria can be built for 32-bit ARM
+* [[get_integer{16,32}|:get_integer32]] will return -1 on EOF.
+* Added 8-byte memory access: [[:poke8]], [[:peek8s]], [[:peek8u]]
+* Added [[:poke_pointer]] and [[:peek_pointer]]
+* Added [[:poke_long]], [[:peek_longu]] and [[:peek_longs]]
+* New [[:sizeof]] built-in for determining size of certain data types.
+* [[Architecture ifdefs (X86, X86_64, ARM, BITS32, BITS64, LONG32, LONG64) |:ifdefstatement]]
+* -arch option for translator for cross translating
+
+=== Tool Additions / Enhancements
+
+* eucoverage also outputs a file "big_routines.html" that shows covered routines
+  from all files sorted by descending routine size
+* -cc-prefix option for translator
+* eudis now tabulates counts of forward references
+* gcc builds now include -fPIC (position independent code) runtime libraries for translating
+  euphoria code into shared objects.
+* -lib-pic switch for translator to specify the PIC runtime library to be used
+*  The number of lines to be used in ctrace.out by ##trace(3)## can be configured
+  using ##-trace-lines n## command line switch. See [[Command line switches -> :command line switches]]
+  for more information.
+

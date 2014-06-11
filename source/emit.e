@@ -323,7 +323,6 @@ export procedure emit_temp( object tempsym, integer referenced )
 			emitted_temps &= tempsym
 			emitted_temp_referenced &= referenced
 		end if
-
 	end if
 end procedure
 
@@ -593,6 +592,7 @@ procedure cont11ii(integer op, boolean ii)
 		TempInteger(c)
 	else
 		c = NewTempSym() -- allocate *after* checking opnd type
+		emit_temp( c, NEW_REFERENCE )
 	end if
 
 	Push(c)
@@ -612,6 +612,7 @@ procedure cont21d(integer op, integer a, integer b, boolean ii)
 		TempInteger(c)
 	else
 		c = NewTempSym() -- allocate *after* checking opnd types
+		emit_temp( c, NEW_REFERENCE )
 	end if
 	Push(c)
 	emit_addr(c)
@@ -730,18 +731,19 @@ export procedure emit_op(integer op)
 	-- 1 input, 0 outputs, can combine with previous op
 	switch op label "EMIT" do
 	case ASSIGN then
-		symtab_index temp = 0
+		sequence temp = {}
 		if not TRANSLATE and
 				(previous_op = RHS_SUBS_CHECK
 					or previous_op = RHS_SUBS )
 		then
-			if Code[$-1] = DEREF_TEMP and find( Code[$], derefs ) then
+			while Code[$-1] = DEREF_TEMP and find( Code[$], derefs ) do
 				/* the DEREF_TEMP op interferes with the ASSIGN op, so
 				 * we'll clean it up here and re-flush later */
-				temp = Code[$]
-				Code = Code[1..$-2]
+				temp &= Code[$]
+				Code = remove( Code, length(Code)-1, length(Code) )
 				emit_temp( temp, NEW_REFERENCE )
-			end if
+			end while
+			
 		end if
 
 		source = Pop()
@@ -815,9 +817,11 @@ export procedure emit_op(integer op)
 		assignable = FALSE
 		emit_addr(target)
 
-		if temp then
+		if length(temp) then
 			-- need to re-flush, since it was wiped out above
-			flush_temp( temp )
+			for i = 1 to length( temp ) do
+				flush_temp( temp[i] )
+			end for
 		end if
 
 	case RHS_SUBS then
@@ -843,6 +847,7 @@ export procedure emit_op(integer op)
 		assignable = TRUE
 		Push(target)
 		emit_addr(target)
+		emit_temp(target, NEW_REFERENCE)
 		current_sequence = append(current_sequence, target)
 		flush_temp( Code[$-2] )
 
@@ -957,6 +962,7 @@ export procedure emit_op(integer op)
 	        emit_addr(c)
 	    end for
 	    b = NewTempSym()
+		emit_temp(b, NEW_REFERENCE)
 	    Push(b)
 	    emit_addr(b)
 		last_op = RIGHT_BRACE_N
@@ -1199,14 +1205,34 @@ export procedure emit_op(integer op)
 			-- Note: LHS_SUBS1 might be patched later to LHS_SUBS1_COPY
 			lhs_target_temp = NewTempSym() -- use same temp for all subscripts
 			emit_addr(lhs_target_temp) -- target temp holds pointer to sequence
+			emit_temp(lhs_target_temp, NEW_REFERENCE )
 			Push(lhs_target_temp)
 			lhs_subs1_copy_temp = NewTempSym() -- place to copy (may be ignored)
 			emit_addr(lhs_subs1_copy_temp)
+			emit_temp( lhs_subs1_copy_temp, NEW_REFERENCE )
 		end if
 
 		current_sequence = append(current_sequence, lhs_target_temp)
 		assignable = FALSE  -- need to update current_sequence like in RHS_SUBS
 
+	case PEEK_LONGS then
+		if IWINDOWS or TWINDOWS or not (IX86_64 or TX86_64) then
+			op = PEEK4S
+		else
+			op = PEEK8S
+		end if
+		last_op = op
+		cont11ii(op, TRUE )
+		
+	case PEEK_LONGU then
+		if IWINDOWS or TWINDOWS or not (IX86_64 or TX86_64) then
+			op = PEEK4U
+		else
+			op = PEEK8U
+		end if
+		last_op = op
+		cont11ii(op, TRUE )
+	
 	-- 1 input, 1 output
 	case RAND, PEEK, PEEK4S, PEEK4U, NOT_BITS, NOT, PEEK8U, PEEK8S, SIZEOF,
 		TASK_STATUS, PEEK2U, PEEK2S, PEEKS, PEEK_STRING, PEEK_POINTER then
@@ -1260,7 +1286,7 @@ export procedure emit_op(integer op)
 
 	case IS_AN_INTEGER, IS_AN_ATOM, IS_A_SEQUENCE, IS_AN_OBJECT then
 		cont11ii(op, FALSE)
-		clear_temp( Code[$-1] )
+-- 		clear_temp( Code[$-1] )
 
 	-- special 1 input, 1 output - also emits CurrentSub
 	case ROUTINE_ID then
@@ -1303,6 +1329,15 @@ export procedure emit_op(integer op)
 		-- jump address to follow
 
 	-- 2 inputs, 0 outputs
+	case POKE_LONG then
+		if IWINDOWS or TWINDOWS or not (IX86_64 or TX86_64) then
+			op = POKE4
+		else
+			op = POKE8
+		end if
+		last_op = op
+		fallthru
+	
 	case SYSTEM, PUTS, PRINT, QPRINT, POSITION, MACHINE_PROC,
 		C_PROC, POKE, POKE4, TASK_SCHEDULE, POKE2, POKE8, POKE_POINTER then
 		emit_opcode(op)
@@ -1460,6 +1495,11 @@ export procedure emit_op(integer op)
 		emit_addr(b)
 		emit_addr(c)
 		c = NewTempSym()
+		if op = FIND or op = FIND_FROM or op = OPEN then
+			TempInteger( c )
+		else
+			emit_temp( c, NEW_REFERENCE )
+		end if
 		assignable = TRUE
 		Push(c)
 		emit_addr(c)
@@ -1475,6 +1515,7 @@ export procedure emit_op(integer op)
 		end for
 		c = NewTempSym()
 		emit_addr(c)
+		emit_temp( c, NEW_REFERENCE )
 		assignable = TRUE
 		Push(c)
 
@@ -1556,6 +1597,7 @@ export procedure emit_op(integer op)
 
 		d = NewTempSym()
 		emit_addr(d)   -- place to store result
+		emit_temp( d, NEW_REFERENCE )
 
 		Push(c)
 		Push(a)
@@ -1591,6 +1633,7 @@ export procedure emit_op(integer op)
 		c = NewTempSym()
 		Push(c)
 		emit_addr(c)     -- place to store result
+		emit_temp( c, NEW_REFERENCE )
 		assignable = TRUE
 
 	-- 4 inputs, 1 output
@@ -1622,6 +1665,7 @@ export procedure emit_op(integer op)
 		c = NewTempSym()
 		Push(c)
 		emit_addr(c)     -- place to store result
+		emit_temp( c, NEW_REFERENCE )
 
 		Push(b)
 		assignable = FALSE
@@ -1643,6 +1687,7 @@ export procedure emit_op(integer op)
 		c = NewTempSym()
 		Push(c)
 		emit_addr(c)
+		emit_temp( c, NEW_REFERENCE )
 
 	case EXIT_BLOCK then
 		emit_opcode( op )
@@ -1675,6 +1720,8 @@ export procedure emit_op(integer op)
 		assignable = TRUE
 		if op = GET_KEY then  -- it's in op_result as integer
 			TempInteger(c)
+		else
+			emit_temp( c, NEW_REFERENCE )
 		end if
 		Push(c)
 		emit_addr(c)

@@ -25,11 +25,11 @@ end type
 
 
 --****
--- === Sign and comparisons
+-- === Sign and Comparisons
 --
 
 --**
--- Returns the absolute value of numbers.
+-- returns the absolute value of numbers.
 --
 -- Parameters:
 --		# ##value## : an object, each atom is processed, no matter how deeply nested.
@@ -39,7 +39,7 @@ end type
 -- the result is the same if not less than zero, and the opposite value otherwise.
 --
 -- Comments:
---   This function may be applied to an atom or to all elements of a sequence
+--   This function may be applied to an atom or to all elements of a sequence.
 --
 -- Example 1:
 -- <eucode>
@@ -76,7 +76,7 @@ public function abs(object a)
 end function
 
 --**
--- Return -1, 0 or 1 for each element according to it being negative, zero or positive
+-- returns -1, 0 or 1 for each element according to it being negative, zero or positive.
 --
 -- Parameters:
 --		# ##value## : an object, each atom of which will be acted upon, no matter how deeply nested.
@@ -110,7 +110,7 @@ public function sign(object a)
 end function
 
 --**
--- Returns the larger of two objects.
+-- returns the larger of two objects.
 --
 -- Parameters:
 --		# ##objA## : an object.
@@ -118,16 +118,16 @@ end function
 -- Returns:
 --		Whichever of ##objA## and ##objB## is the larger one.
 --
--- Examples:
+-- Comments:
+-- Introduced in v4.0.3
+--
+-- Example 1:
 -- <eucode>
 -- ? larger_of(10, 15.4) -- returns 15.4
 -- ? larger_of("cat", "dog") -- returns "dog"
 -- ? larger_of("apple", "apes") -- returns "apple"
 -- ? larger_of(10, 10) -- returns 10
 -- </eucode>
---
--- Comments:
--- Introduced in v4.0.3
 --
 -- See Also:
 --		[[:max]], [[:compare]], [[:smaller_of]]
@@ -142,7 +142,7 @@ public function larger_of(object objA, object objB)
 end function
 
 --**
--- Returns the smaller of two objects.
+-- returns the smaller of two objects.
 --
 -- Parameters:
 --		# ##objA## : an object.
@@ -151,16 +151,16 @@ end function
 -- Returns:
 --		Whichever of ##objA## and ##objB## is the smaller one.
 --
--- Examples:
+-- Comments:
+-- Introduced in v4.0.3
+--
+-- Example 1:
 -- <eucode>
 -- ? smaller_of(10, 15.4) -- returns 10
 -- ? smaller_of("cat", "dog") -- returns "cat"
 -- ? smaller_of("apple", "apes") -- returns "apes"
 -- ? smaller_of(10, 10) -- returns 10
 -- </eucode>
---
--- Comments:
--- Introduced in v4.0.3
 --
 -- See Also:
 --		[[:min]], [[:compare]], [[:larger_of]]
@@ -174,7 +174,7 @@ public function smaller_of(object objA, object objB)
 end function
 
 --**
--- Computes the maximum value among all the argument's elements
+-- computes the maximum value among all the argument's elements.
 --
 -- Parameters:
 --		# ##values## : an object, all atoms of which will be inspected, no matter how deeply nested.
@@ -210,7 +210,7 @@ public function max(object a)
 end function
 
 --**
--- Computes the minimum value among all the argument's elements
+-- computes the minimum value among all the argument's elements.
 --
 -- Parameters:
 --		# ##values## : an object, all atoms of which will be inspected, no matter how deeply nested.
@@ -243,7 +243,7 @@ public function min(object a)
 end function
 
 --**
--- Ensures that the ##item## is in a range of values supplied by inclusive ##range_limits##
+-- ensures that the ##item## is in a range of values supplied by inclusive ##range_limits##.
 --
 -- Parameters:
 --   # ##item## : The object to test for.
@@ -281,7 +281,7 @@ public function ensure_in_range(object item, sequence range_limits)
 end function
 
 --**
--- Ensures that the ##item## is in a list of values supplied by ##list##
+-- ensures that the ##item## is in a list of values supplied by ##list##.
 --
 -- Parameters:
 --   # ##item## : The object to test for.
@@ -321,7 +321,7 @@ public function ensure_in_list(object item, sequence list, integer default=1)
 end function
 
 --****
--- === Roundings and remainders
+-- === Roundings and Remainders
 --
 
 --****
@@ -329,7 +329,7 @@ end function
 --   <built-in> function remainder(object dividend, object divisor)
 --
 -- Description:
--- Compute the remainder of the division of two objects using truncated division.
+-- computes the remainder of the division of two objects using truncated division.
 --
 -- Parameters:
 --		# ##dividend## : any Euphoria object.
@@ -350,8 +350,8 @@ end function
 -- * There is a integer ##N## such that ##dividend## = ##N## * ##divisor## + result. 
 -- * The result has the sign of ##dividend## and lesser magnitude than ##divisor##.
 -- *  The result has the same sign as the dividend.
--- * This differs from [[:mod]]() in that when the operands' signs are different
--- this function rounds ##dividend/divisior## towards zero whereas mod() rounds
+-- * This differs from [[:mod]] in that when the operands' signs are different
+-- this function rounds ##dividend/divisior## towards zero whereas ##mod## rounds
 -- away from zero.
 --
 -- The arguments to this function may be atoms or sequences. The rules for
@@ -385,7 +385,7 @@ end function
 
 
 --**
--- Compute the remainder of the division of two objects using floored division.
+-- computes the remainder of the division of two objects using floored division.
 --
 -- Parameters:
 --		# ##dividend## : any Euphoria object.
@@ -403,10 +403,10 @@ end function
 -- *  The result has the same sign as the dividend.
 -- * The arguments to this function may be atoms or sequences. The rules for
 -- [[:operations on sequences]] apply, and determine the shape of the returned object.
--- * When both arguments have the same sign, mod() and [[:remainder]]()
+-- * When both arguments have the same sign, mod() and [[:remainder]]
 -- return the same result. 
--- * This differs from [[:remainder]]() in that when the operands' signs are different
--- this function rounds ##dividend/divisior## away from zero whereas remainder() rounds
+-- * This differs from [[:remainder]] in that when the operands' signs are different
+-- this function rounds ##dividend/divisior## away from zero whereas ##remainder## rounds
 -- towards zero.
 --
 -- Example 1:
@@ -443,7 +443,7 @@ public function mod(object x, object y)
 end function
 
 --**
--- Return the integer portion of a number.
+-- returns the integer portion of a number.
 --
 -- Parameters:
 --		# ##value## : any Euphoria object.
@@ -454,7 +454,7 @@ end function
 -- in ##value## except with any fractional portion removed.
 --
 -- Comments:
--- * This is essentially done by always rounding towards zero. The [[:floor]]() function
+-- * This is essentially done by always rounding towards zero. The [[:floor]] function
 -- rounds towards negative infinity, which means it rounds towards zero for positive
 -- values and away from zero for negative values.
 -- * Note that ##trunc(x) + frac(x) = x##
@@ -478,7 +478,7 @@ end function
 
 
 --**
--- Return the fractional portion of a number.
+-- returns the fractional portion of a number.
 --
 -- Parameters:
 --		# ##value## : any Euphoria object.
@@ -513,7 +513,7 @@ end function
 
 
 --**
--- Return an integral division of two objects.
+-- returns an integral division of two objects.
 --
 -- Parameters:
 --		# ##divided## : any Euphoria object.
@@ -544,13 +544,15 @@ end function
 -- <built-in> function floor(object value)
 --
 -- Description:
--- Rounds ##value## down to the next integer less than or equal to ##value##. It
--- does not simply truncate the fractional part, but actually rounds towards
--- negative infinity.
+-- Rounds ##value## down to the next integer less than or equal to ##value##. 
 --
 -- Parameters:
 --		# ##value## : any Euphoria object; each atom in ##value## will be acted upon.
 -- 
+-- Comments:
+-- It does not simply truncate the fractional part, but actually rounds towards
+-- negative infinity.
+--
 -- Returns:
 -- An **object**, the same shape as ##value## but with each item guarenteed to be
 -- an integer less than or equal to the corresponding item in ##value##.
@@ -565,7 +567,7 @@ end function
 --		[[:ceil]], [[:round]]
 
 --**
--- Computes the next integer equal or greater than the argument. 
+-- computes the next integer equal or greater than the argument. 
 --
 -- Parameters:
 --		# ##value## : an object, each atom of which processed, no matter how deeply nested.
@@ -595,7 +597,7 @@ public function ceil(object a)
 end function
 
 --**
--- Return the argument's elements rounded to some precision
+-- returns the argument's elements rounded to some precision.
 --
 -- Parameters:
 --		# ##value## : an object, each atom of which will be acted upon, no matter how deeply nested.
@@ -680,7 +682,7 @@ end function
 -- <built-in> function arctan(object tangent)
 --
 -- Description:
---   Return an angle with given tangent.
+--   returns an angle with given tangent.
 --
 -- Parameters:
 --   # ##tangent## : an object, each atom of which will be converted, no matter how deeply nested.
@@ -690,11 +692,11 @@ end function
 --   the angle with smallest magnitude that has this atom as tangent is computed.
 --
 -- Comments:
---   All atoms in the returned value lie between -PI/2 and PI/2, exclusive.
+--   All atoms in the returned value lie between ##-PI/2## and ##PI/2##, exclusive.
 --
 --   This function may be applied to an atom or to all elements of a sequence (of sequence (...)).
 --
---   ##arctan##() is faster than ##[[:arcsin]]()## or ##[[:arccos]]()##.
+--   ##arctan## is faster than ##[[:arcsin]]## or ##[[:arccos]]##.
 --
 -- Example 1:
 --   <eucode>
@@ -709,7 +711,7 @@ end function
 -- <built-in> function tan(object angle)
 --
 -- Description:
---   Return the tangent of an angle, or a sequence of angles.
+--   returns the tangent of an angle, or a sequence of angles.
 --
 -- Parameters:
 --   # ##angle## : an object, each atom of which will be converted, no matter how deeply nested.
@@ -739,7 +741,7 @@ end function
 --   <built-in> function cos(object angle)
 --
 -- Description:
--- Return the cosine of an angle expressed in radians
+-- returns the cosine of an angle expressed in radians.
 --
 -- Parameters:
 --		# ##angle## : an object, each atom of which will be converted, no matter how deeply nested.
@@ -750,7 +752,7 @@ end function
 -- Comments:
 -- This function may be applied to an atom or to all elements of a sequence.
 --
--- The cosine of an angle is an atom between -1 and 1 inclusive. 0.0 is hit by odd multiples of PI/2 only.
+-- The cosine of an angle is an atom between -1 and 1 inclusive. 0.0 is hit by odd multiples of ##PI/2## only.
 --
 -- Example 1:
 -- <eucode>
@@ -766,7 +768,7 @@ end function
 -- <built-in> function sin(object angle)
 --
 -- Description:
--- Return the sine of an angle expressed in radians
+-- returns the sine of an angle expressed in radians.
 --
 -- Parameters:
 --   # ##angle## : an object, each atom in which will be acted upon.
@@ -779,7 +781,7 @@ end function
 -- This function may be applied to an atom or to all elements of a sequence.
 --
 -- The sine of an angle is an atom between -1 and 1 inclusive. 0.0 is hit by integer
--- multiples of PI only.
+-- multiples of ##PI## only.
 --
 -- Example 1:
 -- <eucode>
@@ -791,7 +793,7 @@ end function
 --		[[:cos]], [[:arcsin]], [[:PI]], [[:deg2rad]]
 
 --**
--- Return an angle given its cosine.
+-- returns an angle given its cosine.
 --
 -- Parameters:
 --   # ##value## : an object, each atom in which will be acted upon.
@@ -810,7 +812,7 @@ end function
 --
 -- This function may be applied to an atom or to all elements of a sequence.
 --
--- ##arccos##() is not as fast as [[:arctan]]().
+-- ##arccos## is not as fast as [[:arctan]].
 --
 -- Example 1:
 -- <eucode>
@@ -827,7 +829,7 @@ public function arccos(trig_range x)
 end function
 
 --**
--- Return an angle given its sine.
+-- returns an angle given its sine.
 --
 -- Parameters:
 --		# ##value## : an object, each atom in which will be acted upon.
@@ -839,11 +841,11 @@ end function
 --		If any atom in ##value## is not in the -1..1 range, it cannot be the sine of a real number, and an error occurs.
 --
 -- Comments:
--- A value between -PI/2 and +PI/2 (radians) inclusive will be returned.
+-- A value between ##-PI/2## and ##+PI/2## (radians) inclusive will be returned.
 --
 -- This function may be applied to an atom or to all elements of a sequence.
 --
--- ##arcsin##() is not as fast as [[:arctan]]().
+-- ##arcsin## is not as fast as [[:arctan]].
 --
 -- Example 1:
 -- <eucode>
@@ -860,7 +862,7 @@ public function arcsin(trig_range x)
 end function
 
 --**
--- Calculate the arctangent of a ratio.
+-- calculate the arctangent of a ratio.
 --
 -- Parameters:
 --		# ##y## : an atom, the numerator of the ratio
@@ -897,18 +899,18 @@ public function atan2(atom y, atom x)
 end function
 
 --**
--- Convert an angle measured in radians to an angle measured in degrees
+-- converts an angle measured in radians to an angle measured in degrees.
 --
 -- Parameters:
 --		# ##angle## : an object, all atoms of which will be converted, no matter how deeply nested.
 --
 -- Returns:
---		An **object**, the same shape as ##angle##, all atoms of which were multiplied by 180/PI.
+--		An **object**, the same shape as ##angle##, all atoms of which were multiplied by ##180/PI##.
 --
 -- Comments:
--- This function may be applied to an atom or sequence. A flat angle is PI radians and 180 degrees.
+-- This function may be applied to an atom or sequence. A flat angle is ##PI## radians and 180 degrees.
 --
--- [[:arcsin]](), [[:arccos]]() and [[:arctan]]() return angles in radians.
+-- [[:arcsin]], [[:arccos]] and [[:arctan]] return angles in radians.
 --
 -- Example 1:
 -- <eucode>
@@ -924,17 +926,17 @@ public function rad2deg (object x)
 end function
 
 --**
--- Convert an angle measured in degrees to an angle measured in radians
+-- converts an angle measured in degrees to an angle measured in radians.
 --
 -- Parameters:
 --		# ##angle## : an object, all atoms of which will be converted, no matter how deeply nested.
 --
 -- Returns:
---		An **object**, the same shape as ##angle##, all atoms of which were multiplied by PI/180.
+--		An **object**, the same shape as ##angle##, all atoms of which were multiplied by ##PI/180##.
 --
 -- Comments:
--- This function may be applied to an atom or sequence. A flat angle is PI radians and 180 degrees.
--- [[:sin]](), [[:cos]]() and [[:tan]]() expect angles in radians.
+-- This function may be applied to an atom or sequence. A flat angle is ##PI## radians and 180 degrees.
+-- [[:sin]], [[:cos]] and [[:tan]] expect angles in radians.
 --
 -- Example 1:
 -- <eucode>
@@ -949,7 +951,7 @@ public function deg2rad (object x)
 end function
 
 --****
--- === Logarithms and powers.
+-- === Logarithms and Powers
 --
 
 --****
@@ -957,10 +959,10 @@ end function
 -- <built-in> function log(object value)
 --
 -- Description:
--- Return the natural logarithm of a positive number.
+-- returns the natural logarithm of a positive number.
 --
 -- Parameters:
---		# ##value## : an object, any atom of which ##log##() acts upon.
+--		# ##value## : an object, any atom of which ##log## acts upon.
 --
 -- Returns:
 --		An **object**, the same shape as ##value##. For an atom, the returned atom is its logarithm of base E.
@@ -972,8 +974,8 @@ end function
 -- This function may be applied to an atom or to all elements
 -- of a sequence.
 --
--- To compute the inverse, you can use power(E, x)
--- where E is 2.7182818284590452, or equivalently [[:exp]](x). Beware that the logarithm grows very slowly with x, so that [[:exp]]() grows very fast.
+-- To compute the inverse, you can use ##power(E, x)##
+-- where E is 2.7182818284590452, or equivalently [[:exp]](x). Beware that the logarithm grows very slowly with x, so that [[:exp]] grows very fast.
 --
 -- Example 1:
 -- <eucode>
@@ -985,7 +987,7 @@ end function
 --
 
 --**
--- Return the base 10 logarithm of a number.
+-- returns the base 10 logarithm of a number.
 --
 -- Parameters:
 --		# ##value## : an object, each atom of which will be converted, no matter how deeply nested.
@@ -1000,7 +1002,7 @@ end function
 -- This function may be applied to an atom or to all elements
 -- of a sequence. 
 --
--- ##log10##() is proportional to ##log##() by a factor of ##1/log(10)##, 
+-- ##log10## is proportional to ##log## by a factor of ##1/log(10)##, 
 -- which is about ##0.435## .
 --
 -- Example 1:
@@ -1017,7 +1019,7 @@ public function log10(object x1)
 end function
 
 --**
--- Computes some power of E.
+-- computes some power of E.
 --
 -- Parameters:
 --		# ##value## : an object, all atoms of which will be acted upon, no matter how deeply nested.
@@ -1047,11 +1049,11 @@ end function
 -- <built-in> function power(object base, object exponent)
 --
 -- Description:
--- Raise a base value to some power.
+-- raises a base value to some power.
 --
 -- Parameters:
---		# ##base## : an object, the value(s) to raise to some power.
---		# ##exponent## : an object, the exponent(s) to apply to ##base##.
+--		# ##base## : an object, the value or values to raise to some power.
+--		# ##exponent## : an object, the exponent or exponents to apply to ##base##.
 --
 -- Returns:
 --		An **object**, the shape of which depends on ##base##'s and ##exponent##'s. For two atoms, this will be ##base## raised to the power ##exponent##.
@@ -1070,7 +1072,7 @@ end function
 --
 -- Powers of 2 are calculated very efficiently.
 --
--- Other languages have a ~** or ^ operator to perform the same action. But they don't have  sequences.
+-- Other languages have a ##~**## or ##^## operator to perform the same action. But they do not have  sequences.
 --
 -- Example 1:
 -- <eucode>
@@ -1104,7 +1106,7 @@ end function
 -- <built-in> function sqrt(object value)
 --
 -- Description:
--- Calculate the square root of a number.
+-- calculates the square root of a number.
 --
 -- Parameters:
 --		# ##value## : an object, each atom in which will be acted upon.
@@ -1129,7 +1131,7 @@ end function
 --
 
 --**
--- Computes the Nth Fibonacci Number
+-- computes the nth Fibonacci Number.
 --
 -- Parameters:
 --		# ##value## : an integer. The starting value to compute a Fibonacci Number from.
@@ -1140,7 +1142,7 @@ end function
 --
 -- Comments:
 -- * Note that due to the limitations of the floating point implementation,
--- only 'i' values less than 76 are accurate on Windows platforms, and 
+-- only 'i' values less than 76 are accurate on //Windows// platforms, and 
 -- 69 on other platforms (due to rounding differences in the native C
 -- runtime libraries).
 --
@@ -1156,11 +1158,11 @@ public function fib(integer i)
 end function
 
 --****
--- === Hyperbolic trigonometry
+-- === Hyperbolic Trigonometry
 --
 
 --**
--- Computes the hyperbolic cosine of an object.
+-- computes the hyperbolic cosine of an object.
 --
 -- Parameters:
 --		# ##x## : the object to process.
@@ -1188,7 +1190,7 @@ public function cosh(object a)
 end function
 
 --**
--- Computes the hyperbolic sine of an object.
+-- computes the hyperbolic sine of an object.
 --
 -- Parameters:
 --		# ##x## : the object to process.
@@ -1216,7 +1218,7 @@ public function sinh(object a)
 end function
 
 --**
--- Computes the hyperbolic tangent of an object.
+-- computes the hyperbolic tangent of an object.
 --
 -- Parameters:
 --		# ##x## : the object to process.
@@ -1228,7 +1230,7 @@ end function
 --
 -- The hyperbolic tangent takes values from -1 to +1.
 --
--- ##tanh##() is the ratio ##sinh() / cosh()##. Compare with ordinary trigonometry.
+-- ##tanh## is the ratio ##sinh / cosh##. Compare with ordinary trigonometry.
 --
 -- Example 1:
 -- <eucode>
@@ -1243,7 +1245,7 @@ public function tanh(object a)
 end function
 
 --**
--- Computes the reverse hyperbolic sine of an object.
+-- computes the reverse hyperbolic sine of an object.
 --
 -- Parameters:
 --		# ##x## : the object to process.
@@ -1280,7 +1282,7 @@ type not_below_1(object x)
 end type
 
 --**
--- Computes the reverse hyperbolic cosine of an object.
+-- computes the reverse hyperbolic cosine of an object.
 --
 -- Parameters:
 --		# ##x## : the object to process.
@@ -1320,7 +1322,7 @@ type abs_below_1(object x)
 end type
 
 --**
--- Computes the reverse hyperbolic tangent of an object.
+-- computes the reverse hyperbolic tangent of an object.
 --
 -- Parameters:
 --		# ##x## : the object to process.
@@ -1352,7 +1354,7 @@ end function
 --
 
 --**
--- Compute the sum of all atoms in the argument, no matter how deeply nested
+-- computes the sum of all atoms in the argument, no matter how deeply nested.
 --
 -- Parameters:
 --		# ##values## : an object, all atoms of which will be added up, no matter how nested.
@@ -1361,7 +1363,7 @@ end function
 --		An **atom**, the sum of all atoms in [[:flatten]](##values##).
 --
 -- Comments:
--- This function may be applied to an atom or to all elements of a sequence
+-- This function may be applied to an atom or to all elements of a sequence.
 --
 -- Example 1:
 --   <eucode>
@@ -1392,7 +1394,7 @@ public function sum(object a)
 end function
 
 --**
--- Compute the product of all the atom in the argument, no matter how deeply nested.
+-- computes the product of all the atom in the argument, no matter how deeply nested.
 --
 -- Parameters:
 --		# ##values## : an object, all atoms of which will be multiplied up, no matter how nested.
@@ -1433,22 +1435,30 @@ end function
 
 
 --**
--- Or's together all atoms in the argument, no matter how deeply nested.
+-- or's together all atoms in the argument, no matter how deeply nested.
 --
 -- Parameters:
 --		# ##values## : an object, all atoms of which will be added up, no matter how nested.
 --
 -- Returns:
---		An **atom**, the result of or'ing all atoms in [[:flatten]](##values##).
+--		An **atom**, the result of bitwise or of all atoms in [[:flatten]](##values##).
 --
 -- Comments:
 --
--- This function may be applied to an atom or to all elements of a sequence. It performs [[:or_bits]]() operations repeatedly.
+-- This function may be applied to an atom or to all elements of a sequence. It performs [[:or_bits]] operations repeatedly.
 --
 -- Example 1:
 --   <eucode>
---   a = sum({10, 7, 35})
---   -- a is 47
+--   a = or_all({10, 7, 35})
+--   -- a is 47 
+--   -- To see why notice:
+--   -- 10=0b1010, 7=0b111 and 35=0b100011.
+--   -- combining these gives:
+--   --               0b001010
+--   --      (or_bits)0b000111
+--   --               0b100011
+--   --               --------
+--   --               0b101111 = 47
 --   </eucode>
 --
 -- See Also:
@@ -1471,7 +1481,7 @@ public function or_all	(object a)
 end function
 
 --****
--- === Bitwise operations
+-- === Bitwise Operations
 --
 
 --****
@@ -1479,7 +1489,7 @@ end function
 -- <built-in> function and_bits(object a, object b)
 --
 -- Description:
--- Perform the bitwise AND operation on corresponding bits in two objects. A bit in the
+-- performs the bitwise AND operation on corresponding bits in two objects. A bit in the
 -- result will be 1 only if the corresponding bits in both arguments are 1.
 --
 -- Parameters:
@@ -1500,7 +1510,7 @@ end function
 -- Results are treated as signed numbers. They will be negative when the highest-order bit is 1. 
 --
 -- To understand the binary representation of a number you should display it in hexadecimal notation. 
--- Use the %x format of [[:printf]](). Using [[:int_to_bits]]() is an even more direct approach.
+-- Use the %x format of [[:printf]]. Using [[:int_to_bits]] is an even more direct approach.
 --  
 -- Example 1:  
 -- <eucode>
@@ -1532,7 +1542,7 @@ end function
 -- <built-in> function xor_bits(object a, object b)
 --
 -- Description:
--- Perform the bitwise XOR operation on corresponding bits in two objects. A bit in the
+-- performs the bitwise XOR operation on corresponding bits in two objects. A bit in the
 -- result will be 1 only if the corresponding bits in both arguments are different.
 --
 -- Parameters:
@@ -1564,7 +1574,7 @@ end function
 -- <built-in> function or_bits(object a, object b)
 --
 -- Description:
--- Perform the bitwise OR operation on corresponding bits in two objects. A bit in the
+-- performs the bitwise OR operation on corresponding bits in two objects. A bit in the
 -- result will be 1 only if the corresponding bits in both arguments are both 0.
 --
 -- Parameters:
@@ -1602,7 +1612,7 @@ end function
 -- <built-in> function not_bits(object a)
 --
 -- Description:
--- Perform the bitwise NOT operation on each bit in an object. A bit in the result will be 1
+-- performs the bitwise NOT operation on each bit in an object. A bit in the result will be 1
 -- when the corresponding bit in x1 is 0, and will be 0 when the corresponding bit in x1 is 1.
 --
 -- Parameters:
@@ -1632,14 +1642,14 @@ end function
 --   [[:and_bits]], [[:or_bits]], [[:xor_bits]], [[:int_to_bits]]
 
 --**
--- Moves the bits in the input value by the specified distance.
+-- moves the bits in the input value by the specified distance.
 --
 -- Parameters:
---   # ##source_number## : object: The value(s) whose bits will be be moved.
+--   # ##source_number## : object: The value or values whose bits will be be moved.
 --   # ##shift_distance## : integer: number of bits to be moved by. 
 -- Comments:
 -- * If ##source_number## is a sequence, each element is shifted.
--- * The value(s) in ##source_number## are first truncated to a 32-bit integer.
+-- * The value or values in ##source_number## are first truncated to a 32-bit integer.
 -- * The output is truncated to a 32-bit integer.
 -- * Vacated bits are replaced with zero.
 -- * If ##shift_distance## is negative, the bits in ##source_number## are moved left.
@@ -1647,7 +1657,7 @@ end function
 -- * If ##shift_distance## is zero, the bits in ##source_number## are not moved.
 --
 -- Returns:
--- Atom(s) containing a 32-bit integer. A single atom in ##source_number## is an atom, or
+-- Atom or atoms containing a 32-bit integer. A single atom in ##source_number## is an atom, or
 -- a sequence in the same form as ##source_number## containing 32-bit integers.
 --
 -- Example 1:
@@ -1705,10 +1715,10 @@ public function shift_bits(object source_number, integer shift_distance)
 end function
 
 --**
--- Rotates the bits in the input value by the specified distance.
+-- rotates the bits in the input value by the specified distance.
 --
 -- Parameters:
---   # ##source_number## : object: value(s) whose bits will be be rotated.
+--   # ##source_number## : object: value or values whose bits will be be rotated.
 --   # ##shift_distance## : integer: number of bits to be moved by. 
 -- Comments:
 -- * If ##source_number## is a sequence, each element is rotated.
@@ -1719,7 +1729,7 @@ end function
 -- * If ##shift_distance## is zero, the bits in ##source_number## are not rotated.
 --
 -- Returns:
--- Atom(s) containing a 32-bit integer. A single atom in ##source_number## is an atom, or
+-- Atom or atoms containing a 32-bit integer. A single atom in ##source_number## is an atom, or
 -- a sequence in the same form as ##source_number## containing 32-bit integers.
 --
 -- Example 1:
@@ -1775,67 +1785,78 @@ public function rotate_bits(object source_number, integer shift_distance)
 end function
 
 --****
--- Arithmetics
+-- Arithmetic
 --
 
 --**
--- Returns the greater common divisor of to atoms
+-- returns the greater common divisor of to atoms.
 --
 -- Parameters:
 --		# ##p## : one of the atoms to consider
 --		# ##q## : the other atom.
 --
 -- Returns:
--- A positive **atom**, without a fractional part, evenly dividing both parameters, and is the 
--- greatest value with those properties.
+-- A positive **integer**, which is the largest value that evenly divides
+-- into both parameters.
 --
 -- Comments:
 --
--- Signs are ignored. Atoms are rounded down to integers.
---
--- Any zero parameter causes 0 to be returned.
+-- * Signs are ignored. Atoms are rounded down to integers.
+-- * If both parameters are zero, 0 is returned.
+-- * If one parameter is zero, the other parameter is returned.
 --
 -- Parameters and return value are atoms so as to take mathematical integers up to ##power(2,53)##.
 --
 -- Example 1:
 -- <eucode>
--- ? gcd(76.3, -114) -- prints out gcd(76,114), which is 38
+-- ? gcd(76.3, -114) --> 38
+-- ? gcd(0, -114) --> 114
+-- ? gcd(0, 0) --> 0 (This is often regarded as an error condition)
 -- </eucode>
 --
 
 public function gcd(atom p, atom q)
 	atom r
+
+	-- Both arguments must be positive.	
+	if p < 0 then
+		p = -p
+	end if
+	if q < 0 then
+		q = -q
+	end if
 	
-	if p<0 then
-		p=floor(-p)
-	else
-		p=floor(p)
+	-- Strip off any fractional part.
+	p = floor(p)
+	q = floor(q)
+	
+	-- Ensure that 'p' is not smaller than 'q'
+	if p < q then
+		r = p
+		p = q
+		q = r
 	end if
-	if q<0 then
-		q=floor(-q)
-	else
-		q=floor(q)
-	end if
-	if p<q then
-		r=p
-		p=q
-		q=r
-	end if
-	if q<=1 then
-		return q
+	
+	-- Special case.
+	if q = 0 then
+		return p
 	end if
 
-    while 1 do
-		r=remainder(p,q)
-		if r=1 then
-			return r
-		elsif r=0 then
-			return q
-		else
-			p=q
-			q=r
-		end if
+	-- repeat until I get a remainder less than 2.
+    while r > 1 with entry do
+    	-- set up next cycle using denominator and remainder from previous cycle.
+		p = q
+		q = r
+	entry
+		-- get remainder after dividing p by q
+		r = remainder(p, q)
     end while
+    
+	if r = 1 then
+		return 1
+	else
+		return q
+	end if
 end function
 
 
@@ -1844,7 +1865,7 @@ end function
 --
 
 --**
--- Compares two (sets of) numbers based on approximate equality.
+-- compares two (sets of) numbers based on approximate equality.
 --
 -- Parameters:
 --		# ##p## : an object, one of the sets to consider
@@ -1863,7 +1884,7 @@ end function
 --
 -- Also, because of the way floating point numbers are stored, it not always possible
 -- express every real number exactly, especially after a series of arithmetic
--- operations. You can use ##approx()## to see if two floating point numbers
+-- operations. You can use ##approx## to see if two floating point numbers
 -- are almost the same value.
 --
 -- If ##p## and ##q## are both sequences, they must be the same length as each other.
@@ -1923,15 +1944,15 @@ public function approx(object p, object q, atom epsilon = 0.005)
 end function
 
 --**
--- Tests for power of 2
+-- tests for power of 2.
 --
 -- Parameters:
 --		# ##p## : an object. The item to test. This can be an integer, atom or sequence.
 --
 -- Returns:
 -- An **integer**,
--- * 1 for each item in ##p## that is a power of two, eg. 2,4,8,16,32, ...
--- * 0 for each item in ##p## that is **not** a power of two, eg. 3, 54.322, -2
+-- * 1 for each item in ##p## that is a power of two (like ## 2,4,8,16,32, ...##)
+-- * 0 for each item in ##p## that is **not** a power of two (like ##3, 54.322, -2##)
 --
 -- Example 1:
 -- <eucode>
@@ -1958,7 +1979,7 @@ end function
 
 
 --**
--- Test if the supplied integer is a even or odd number.
+-- tests if the supplied integer is a even or odd number.
 --
 -- Parameters:
 --		# ##test_integer## : an integer. The item to test.
@@ -1991,7 +2012,7 @@ public function is_even(integer test_integer)
 end function
 
 --**
--- Test if the supplied Euphoria object is even or odd.
+-- tests if the supplied Euphoria object is even or odd.
 --
 -- Parameters:
 --		# ##test_object## : any Euphoria object. The item to test.

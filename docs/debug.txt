@@ -13,7 +13,7 @@ The file ##ex.err## will also have a dump of all variable values, and
 optionally a list of the most recently executed statements. For extremely large
 sequences, only a partial dump is shown. If the name ##ex.err## is not 
 convenient, or if a nondefault path is required, you can choose another file 
-name, anywhere on your system, by calling [[:crash_file]]().
+name, anywhere on your system, by calling [[:crash_file]].
 
 In addition, you are able to create [[:udt "user-defined types"]] that precisely
 determine the set of legal values for each of your variables. An error report 
@@ -28,14 +28,14 @@ language like Euphoria since you can simply edit the source and rerun the
 program without waiting for a re-compile/re-link.
 @[trace|]
 
-==== The with / without trace directive
+==== Trace Directives: with, without 
 
 The interpreter provides you with additional powerful tools for debugging.
 Using ##trace(1)## you can **//trace//** the execution of your program on one
 screen while you witness the output of your program on another.  ##trace(2)## is
 the same as ##trace(1)## but the trace screen will be in monochrome. Finally, 
 using ##trace(3)##, you can log all executed statements to a file called 
-**ctrace.out**.
+##ctrace.out##.
 
 The **with/without trace** special statements select the parts
 of your program that are available for tracing. Often you will simply insert a
@@ -57,7 +57,7 @@ are executed, especially when ##trace(3)## is used.
 
 After you have predetermined the lines that are traceable, your program must
 then dynamically cause the trace facility to be activated by executing a 
-[[:trace]]() statement.  You could simply say:
+[[:trace]] statement.  You could simply say:
 
 <eucode>
 with trace
@@ -65,7 +65,7 @@ trace(1)
 </eucode>
 
 However, you cannot dynamically set or free breakpoints while tracing. You must 
-abort program, edit, change setting, save and run again.
+abort program, edit, change setting, save, and run again.
 
 At the top of your program, so you can start tracing from the beginning of
 execution. More commonly, you will want to trigger tracing when a certain
@@ -80,7 +80,7 @@ end if
 You can turn off tracing by executing a ##trace(0)##
 statement. You can also turn it off interactively by typing 'q' to quit
 tracing. Remember that with trace must appear **//outside//** of any routine,
-whereas ##trace##() can appear **//inside//** a routine **//or outside//**.
+whereas ##trace## can appear **//inside//** a routine **//or outside//**.
 
 You might want to turn on tracing from within a [[:type -> types]]. Suppose you 
 run your program and it fails, with the ##ex.err## file showing that one of your
@@ -101,20 +101,20 @@ type positive_int(integer x)
 end type
 </eucode>
 
-When ##positive_int()## returns, you will see the exact statement that caused 
+When ##positive_int## returns, you will see the exact statement that caused 
 your variable to be set to the strange value, and you will be able to check the
 values of other variables.  You will also be able to check the output screen to
-see what has happened up to this precise moment. If you define positive_int()
+see what has happened up to this precise moment. If you define ##positive_int##
 so it returns zero for the strange value (99) instead of one, you can force a
 diagnostic dump into ##ex.err##.
 
-Remember that the argument to ##trace()## does not need to be a constant. It 
+Remember that the argument to ##trace## does not need to be a constant. It 
 only needs to be 0, 1, 2 or 3, but these values may be the result from any 
-expression passed to ##trace##().
-Other values will cause ##trace()## to fail.
+expression passed to ##trace##.
+Other values will cause ##trace## to fail.
 
 
-=== The Trace Screen
+=== Trace Screen
 
 When a ##trace(1)## or ##trace(2)## statement is
 executed by the interpreter, your main output screen is saved and a **trace
@@ -132,7 +132,7 @@ values. The top line shows the commands that you can enter at this point:
 | down-arrow | continue execution and break when any statement coming after \\this one in the source listing is about to be executed. \\This lets you skip over subroutine calls. It also lets you stop on the first statement following the end of a loop\\ without having to witness all iterations of the loop. |
 | ? | display the value of a variable. After hitting **?** you will be prompted for the name of the variable.\\ Many variables are displayed for you automatically as they are assigned a value. If a variable is not currently being displayed, or is only partially displayed, you can ask for it.\\ Large sequences are limited to one line on the trace screen, but when you ask for the value of\\ a variable that contains a large sequence, the screen will clear, and you can scroll through\\ a pretty-printed display of the sequence. You will then be returned to the trace screen, \\where only one line of the variable is displayed. Variables that are not defined at this point\\ in the program cannot be shown. Variables that have not yet been initialized will have \\"< NO VALUE >" beside their name. Only variables, not general expressions, can be displayed.\\ As you step through execution of the program, the system will update any values showing\\ on the screen. Occasionally it will remove variables that are no longer in scope, or\\ that haven't been updated in a long time compared with newer, recently-updated variables. |
 | q | quit tracing and resume normal execution. Tracing will start again when the next trace(1) is executed. |
-| Q | quit tracing and let the program run freely to its normal completion. trace() statements will be ignored. |
+| Q | quit tracing and let the program run freely to its normal completion. ##trace## statements will be ignored. |
 | !| this will abort execution of your program. A traceback and dump of variable values will go to ##ex.err##. |
 
 As you trace your program, variable names and values appear automatically in
@@ -156,19 +156,19 @@ makes flipping between them quicker and easier.
 
 When a traced program requests keyboard input, the main output screen will
 appear, to let you type your input as you normally would. This works fine for a
-[[:gets]]() (read one line) input.  When a 
-[[:get_key]]() (quickly sample the keyboard) is
+[[:gets]] (read one line) input.  When a 
+[[:get_key]] (quickly sample the keyboard) is
 called you will be given 8 seconds to type a character, otherwise it is 
-assumed that there is no input for this call to ##get_key##(). This allows you 
-to test the case of input and also the case of no input for ##get_key##().
+assumed that there is no input for this call to ##get_key##. This allows you 
+to test the case of input and also the case of no input for ##get_key##.
 
-=== The Trace File
+=== Trace File
 
 When your program calls ##trace(3)##, tracing to a file is activated.  The file,
-**##ctrace.out##** will be created in the current directory.  It contains the last
+##ctrace.out## will be created in the current directory.  It contains the last
 500 Euphoria statements that your program executed.  It is set up as a circular
 buffer that holds a maximum of 500 statements. Whenever the end of
-**ctrace.out** is reached, the next statement is written back at the beginning.
+##ctrace.out## is reached, the next statement is written back at the beginning.
 The very last statement executed is always followed by "=== THE END ===".
 Because it's circular, the last statement executed could appear anywhere in
 ##ctrace.out##.  The statement coming after "=== THE END ===" is the
@@ -178,14 +178,14 @@ This form of tracing is supported by both the interpreter and the the Euphoria
 to C translator.  It is particularly useful when a machine-level error occurs
 that prevents Euphoria from writing out an ##ex.err## diagnostic file. By
 looking at the last statement executed, you may be able to guess why the
-program crashed. Perhaps the last statement was a ##poke##() into an 
+program crashed. Perhaps the last statement was a ##poke## into an 
 illegal area
 of memory. Perhaps it was a call to a C routine. In some cases it might be a
 bug in the interpreter or the translator.
 
 The source code for a statement is written to ##ctrace.out##, and flushed, just
 //before// the statement is performed, so the crash will likely have happened
-//during// execution of the final statement that you see in **ctrace.out**.
+//during// execution of the final statement that you see in ##ctrace.out##.
 
 === Profiling
 
@@ -219,8 +219,7 @@ enough to get a score of 0.01.
 Only statements compiled ##with profile## or ##with profile_time## are shown in 
 the listing. Normally you will specify either ##with profile## or 
 ##with profile_time## at
-the top of your main ##.ex##* file, so you can get a complete listing.  View
-this file with the Euphoria editor to see a color display.
+the top of your main ##.ex##* file, so you can get a complete listing.
 
 Profiling can help you in many ways:
 
@@ -246,10 +245,10 @@ explosions, and logging a lot of samples, just for the explosion effect. If
 samples were charged against other lower-level routines, we knew that those
 samples occurred during an explosion. If we had simply profiled the whole
 program, the picture would not have been clear, as the lower-level routines
-would also have been used for moving ships, drawing phasors etc. ##profile##() 
+would also have been used for moving ships, drawing phasors etc. ##profile## 
 can help in the same way when you do execution-count profiling.
 
-=== Some Further Notes on Time Profiling
+=== Time Profiling
 
 With each click of the system clock, an interrupt is generated. When you
 specify ##with profile_time## Euphoria will sample your program to see which
@@ -282,7 +281,7 @@ does not increase.
 
 By taking more samples you can get more accurate results. However, one
 situation to watch out for is the case where a program synchronizes itself to
-the clock interrupt, by waiting for ##[[:time]]##() to
+the clock interrupt, by waiting for ##[[:time]]## to
 advance. The statements executed just after the point where the clock advances
 might //never// be sampled, which could give you a very distorted picture. e.g.
 

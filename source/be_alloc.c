@@ -508,10 +508,7 @@ char *EMalloc(uintptr_t nbytes)
 
 	do {
 		p = malloc((long)nbytes+8);
-// 		assert(p);
 		if (p == NULL) {
-			printf("couldn't alloc %" PRIdPTR " bytes\n", nbytes );
-			// Only triggered if asserts are turned off.
 			p = Out_Of_Space(nbytes + 8);
 		}
 
@@ -879,21 +876,19 @@ object NewString(char *s)
 	return NewSequence(s, strlen(s));
 }
 
-object NewPreallocSeq(intptr_t size, object_ptr Objset)
-/* make a new sequence with a single reference count with the data preallocated.*/
-/* size is number of elements already in 'Objset'.
-   Note: The last element in Objset is given the value NOVALUE as an end marker. */
+object NewPreallocSeq(intptr_t size, s1_ptr s1)
+/* fill in bookkeeping data for a new sequence with a single reference count with the data preallocated.*/
+/* size is number of elements already in the data, which must start imediately after the s1 struct data.
+   Note: The last element in the sequence is given the value NOVALUE as an end marker. */
 {
-	register s1_ptr s1;
 
 	assert(size >= 0);
 	if ((unsigned long)size > MAX_SEQ_LEN) {
 		// Ensure it doesn't overflow
 		SpaceMessage();
 	}
-	s1 = (s1_ptr)EMalloc(sizeof(struct s1));
 	s1->ref = 1;
-	s1->base = Objset;
+	s1->base = (object_ptr) (s1 + 1);
 	s1->length = size-1;
 	s1->postfill = 0; /* there may be some available but don't waste time */
 					  /* prepend assumes this is set to 0 */
@@ -992,6 +987,9 @@ long append_string(char *dest, char *src, size_t bufflen)
 	return 0;
 }
 
+free_block_ptr *double_blocks = 0;
+int double_blocks_allocated = 0;
+
 static void new_dbl_block(unsigned int cnt)
 {
 	free_block_ptr dbl_block;
@@ -1010,6 +1008,15 @@ static void new_dbl_block(unsigned int cnt)
 	dbl_block = (free_block_ptr)EMalloc( blksize );
 	assert(((uintptr_t)dbl_block & 7) == 0);
 
+	if( double_blocks_allocated ){
+		double_blocks = (free_block_ptr*) ERealloc( (char*) double_blocks, sizeof( free_block_ptr ) * ++double_blocks_allocated );
+	}
+	else{
+		double_blocks = (free_block_ptr*) EMalloc( sizeof( free_block_ptr ) );
+		++double_blocks_allocated;
+	}
+	double_blocks[double_blocks_allocated-1] = dbl_block;
+	
 #ifdef HEAP_CHECK
 	Trash((char *)dbl_block, blksize);
 	q = (char *)dbl_block;

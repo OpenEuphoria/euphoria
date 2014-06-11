@@ -1,6 +1,8 @@
 --****
 -- == Syntax Coloring
 --
+-- <<LEVELTOC level=2 depth=4>>
+--
 --				Syntax Color
 -- Break Euphoria statements into words with multiple colors.
 -- The editor and pretty printer (eprint.ex) both use this file.
@@ -22,7 +24,7 @@ namespace syncolor
 include std/text.e
 include std/eumem.e
 
-include tokenize.e
+public include tokenize.e
 
 integer NORMAL_COLOR,
 		COMMENT_COLOR,
@@ -126,7 +128,7 @@ public function new()
 	return state
 end function
 
---**
+--
 -- Reset the state to begin parsing a new file
 --
 -- See Also:
@@ -149,8 +151,17 @@ public procedure keep_newlines(integer val = 1, atom state = g_state)
 	eumem:ram_space[state][S_KEEP_NEWLINES] = val
 end procedure
 
+
+
+
+
 --**
 -- Parse Euphoria code into tokens of like colors.
+--
+-- Parameters:
+-- # ##pline## the source code to color
+-- # ##state## (default g_state) the tokenizer to use
+-- # ##multi## the multiline token from the previous line
 --
 -- Break up a new-line terminated line into colored text segments identifying the
 -- various parts of the Euphoria language. They are broken into separate tokens.
@@ -161,8 +172,12 @@ end procedure
 --	 {{color1, "text1"}, {color2, "text2"}, ... }
 --   </eucode>
 --
+-- Comments:
+-- In order to properly color multiline syntax (strings and comments), you should pass
+-- a value for ##multi##. This value can be attained by calling ##[[:last_multiline_token]]##
+-- after coloring the previous line.
 
-public function SyntaxColor(sequence pline, atom state=g_state)
+public function SyntaxColor(sequence pline, atom state=g_state, multiline_token multi = 0)
 	integer class, last, i
 	sequence word, c
 	atom token = eumem:ram_space[state][S_TOKENIZER]
@@ -176,7 +191,7 @@ public function SyntaxColor(sequence pline, atom state=g_state)
 	tokenize:return_literal_string(,token)
 	tokenize:string_strip_quotes(0,token)
 
-	line = tokenize:tokenize_string(pline, token)
+	line = tokenize:tokenize_string(pline, token, 0, multi)
 	-- TODO error checking?
 	line = line[1]
 	current_color = DONT_CARE

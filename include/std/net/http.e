@@ -19,6 +19,10 @@ include std/net/url.e as url
 
 include euphoria/info.e
 
+ifdef not EUC_DLL then
+include std/task.e
+end ifdef
+
 constant USER_AGENT_HEADER = 
 	sprintf("User-Agent: Euphoria-HTTP/%d.%d\r\n", {
 		version_major(), version_minor() })
@@ -60,6 +64,11 @@ constant ENCODING_STRINGS = {
 	"multipart/form-data"
 }
 
+type natural(integer n)
+	return n>=0
+end type
+
+
 --
 -- returns: { host, port, path, base_reqest }
 --
@@ -67,7 +76,7 @@ constant ENCODING_STRINGS = {
 function format_base_request(sequence request_type, sequence url, object headers)
 	sequence request = ""
 	sequence formatted_request
-	integer noport = 0
+	natural noport = 0
 
 	object parsedUrl = url:parse(url)
 	if atom(parsedUrl) then
@@ -99,10 +108,10 @@ function format_base_request(sequence request_type, sequence url, object headers
 	-- some sites, such as euphoria.pastey.net, will break otherwise
 	if noport then
 		request = sprintf("%s %s HTTP/1.0\r\nHost: %s\r\n", {
-			request_type, url, path, host })
+			request_type, path, host })
 	else
 		request = sprintf("%s %s HTTP/1.0\r\nHost: %s:%d\r\n", {
-			request_type, url, host, port })
+			request_type, path, host, port })
 	end if
 
 	integer has_user_agent = 0
@@ -194,7 +203,7 @@ end function
 constant rand_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 constant rand_chars_len = length(rand_chars)
 
-function random_boundary(integer len)
+function random_boundary(natural len)
 	sequence boundary = repeat(0, len)
 	
 	for i = 1 to len do
@@ -236,7 +245,7 @@ function execute_request(sequence host, integer port, sequence request, integer 
 	end if
 
 	atom start_time = time()
-	integer got_header = 0, content_length = 0
+	integer got_header = 0, content_length = -1
 	sequence content = ""
 	sequence headers = {}
 	while time() - start_time < timeout label "top" do
@@ -258,13 +267,17 @@ function execute_request(sequence host, integer port, sequence request, integer 
 			end if
 
 			content &= data
+			ifdef not EUC_DLL then
+				-- tasking doesn't work currently with EU dlls
+				task_yield()
+			end ifdef
 
 			if not got_header then
 				integer header_end_pos = match("\r\n\r\n", content)
 				if header_end_pos then
 					-- we have a header, let's parse it and figure out
 					-- the content length.
-					sequence raw_header = content[1..header_end_pos]
+					sequence raw_header = content[1..header_end_pos-1]
 					content = content[header_end_pos + 4..$]
 
 					sequence header_lines = split(raw_header, "\r\n")
@@ -275,7 +288,7 @@ function execute_request(sequence host, integer port, sequence request, integer 
 						this_header[1] = lower(this_header[1])
 						headers = append(headers, this_header)
 
-						if equal(this_header[1], "content-length") then
+						if equal(lower(this_header[1]), "content-length") then
 							content_length = to_number(this_header[2])
 						end if
 					end for
@@ -367,10 +380,8 @@ end procedure
 --
 
 public function http_post(sequence url, object data, object headers = 0,
-		integer follow_redirects = 10, integer timeout = 15)
+		natural follow_redirects = 10, natural timeout = 15)
 		
-	follow_redirects = follow_redirects -- Not used yet.
-	
 	if not sequence(data) or length(data) = 0 then
 		return ERR_INVALID_DATA
 	end if
@@ -417,7 +428,22 @@ public function http_post(sequence url, object data, object headers = 0,
 	request[R_REQUEST] &= "\r\n"
 	request[R_REQUEST] &= data
 
-	return execute_request(request[R_HOST], request[R_PORT], request[R_REQUEST], timeout)
+	object content = execute_request(request[R_HOST], request[R_PORT], request[R_REQUEST], timeout)
+	if follow_redirects and length(content)=2 then
+		sequence content_1 = content[1]
+		if length(content_1) >= 1 and length(content_1[1]) >= 2 and equal(content_1[2][2], "303") then
+			--sequence http_response_code = content[1][1][2]
+			-- 301, 302, 307 : must not be redirected without user interaction (RFC 2616)
+			for i = 1 to length(content_1) do
+				sequence headers_i = content_1[i]
+				if equal(headers_i[1],"location") then
+					return http_get(headers_i[2], headers, follow_redirects-1, timeout)
+				end if
+			end for
+		end if
+	end if
+	
+	return content
 end function
 
 --**
@@ -453,11 +479,11 @@ end function
 --   [[:http_post]]
 --
 
-public function http_get(sequence url, object headers = 0, integer follow_redirects = 10,
-		integer timeout = 15)
-	object request = format_base_request("GET", url, headers)
-	
-	follow_redirects = follow_redirects -- Not used yet.
+public function http_get(sequence url, object headers = 0, natural follow_redirects = 10,
+		natural timeout = 15)
+	object request
+		
+	request = format_base_request("GET", url, headers)
 	
 	if atom(request) then
 		return request
@@ -466,5 +492,19 @@ public function http_get(sequence url, object headers = 0, integer follow_redire
 	-- No more work necessary, terminate the request with our ending CR LF
 	request[R_REQUEST] &= "\r\n"
 
-	return execute_request(request[R_HOST], request[R_PORT], request[R_REQUEST], timeout)
+	object content = execute_request(request[R_HOST], request[R_PORT], request[R_REQUEST], timeout)
+	if follow_redirects and length(content)=2 then
+		sequence content_1 = content[1] 
+		if length(content_1) >= 1 and length(content_1[1]) >= 2 and
+				find(content_1[1][2], {"301","302","303","307","308"}) then
+			for i = 1 to length(content_1) do
+				sequence headers_i = content_1[i]
+				if equal(headers_i[1],"location") then
+					return http_get(headers_i[2], headers, follow_redirects-1, timeout)
+				end if
+			end for
+		end if
+	end if
+
+	return content	
 end function

@@ -52,9 +52,15 @@ if file_exists(lower(home)) then
 	test_not_equal("dir() #2", dir(lower(home) & '*'),-1)
 	test_not_equal("dir() #3", dir(lower(home[1..$-1]) & '*'),-1)
 end if
+
 if file_exists(upper(home)) then
 	test_not_equal("dir() #4", dir(upper(home) & '*'),-1)
-	test_not_equal("dir() #5", dir(upper(home[1..$-1]) & '*'),-1)
+	ifdef not OSX then
+	    -- ls /USERS/NAME* does not work on OS X, OS X has some weird UPPER/lower file handling
+	    -- that doesn't always seem to be consistent. I do know the user can choose to make the
+	    -- file system case sensitive or insensitive.
+	    test_not_equal("dir() #5", dir(upper(home[1..$-1]) & '*'), -1)
+	end ifdef
 end if
 test_not_equal("dir() #6", dir(home[1..$-1] & '*'),-1)
 
@@ -119,6 +125,7 @@ delete_file("fstesta.txt")
 delete_file("fstestb.txt")
 write_file("fstesta.txt", "move data", TEXT_MODE)
 test_true("file to move exists", file_exists( "fstesta.txt") )
+test_false("file to move to does not exist", file_exists( "fstestb.txt") )
 test_true("move_file #1", move_file("fstesta.txt", "fstestb.txt", 1))
 test_true("move_file #2", file_exists("fstestb.txt")) -- 'b' should now exist
 test_false("move_file #3", file_exists("fstesta.txt")) -- 'a' should now be gone
@@ -185,11 +192,21 @@ test_equal( "canonical_path() #11",current_dir() & SLASH, canonical_path(lower(c
 
 
 ifdef WINDOWS then
+	include std/dll.e
+	include std/machine.e
+	constant k32 = open_dll( "kernel32.dll" ),
+		GetShortPathNameA = define_c_proc( k32, "GetShortPathNameA", { C_POINTER, C_POINTER, C_UINT } )
+	function get_short_path( sequence path )
+		atom short_name = allocate( length( path ) + 1, 1 )
+		poke( short_name, 0 )
+		c_proc( GetShortPathNameA, { allocate_string( path, 1 ), short_name, length( path ) + 1 } )
+		return peek_string( short_name )
+	end function
+	
 	object program_files = getenv("ProgramFiles")
 	
 	if sequence(program_files) then
-		sequence fbpf = filebase(program_files)
-		sequence shortened = upper(fbpf[1..6]) & "~1"
+		sequence shortened = filebase( get_short_path( program_files ) )
 		test_equal( "canonical_path() #12", shortened, filebase(canonical_path(program_files,,TO_SHORT)))
 	end if
 end ifdef

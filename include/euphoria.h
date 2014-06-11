@@ -70,13 +70,26 @@ typedef int int128_t __attribute__((mode(TI)));
 #define IS_ATOM_INT(ob)       (((intptr_t) (ob)) > NOVALUE)
 #define IS_ATOM_INT_NV(ob)    ((intptr_t)(ob) >= NOVALUE)
 
+#ifdef __GNUC__
+#define MAKE_UINT(x) ((object)( \
+						{ uintptr_t _x = x; \
+							_x < (uintptr_t)TOO_BIG_INT \
+							? _x : NewDouble((eudouble)_x);}))
+#else
+/* Watch for side effects */
 #define MAKE_UINT(x) ((object)((uintptr_t)x < (uintptr_t)TOO_BIG_INT \
                           ? (uintptr_t)x : \
                             NewDouble((eudouble)(uintptr_t)x)))
+#endif
 
 /* these are obsolete */
+/*
 #define INT_VAL(x)        ((intptr_t)(x))
 #define MAKE_INT(x)       ((object)(x))
+*/
+
+#define DBL_TO_OBJ(d)	((object)(int64_t)(d))
+
 
 /* N.B. the following distinguishes DBL's from SEQUENCES -
    must eliminate the INT case first */
@@ -241,7 +254,6 @@ struct replace_block {
 
 typedef struct replace_block *replace_ptr;
 
-int wingetch();
 object call_c(int,object,object);
 object Command_Line();
 void show_console();
@@ -261,7 +273,7 @@ double floor(double);
 double fabs(double);
 object binary_op_a(int, object, object);
 object binary_op(int, object, object);
-void *which_file(int, int);
+void *which_file(object, int);
 object unary_op(int, object);
 object NewS1(intptr_t);
 object compare(object, object);
@@ -309,7 +321,7 @@ object e_arctan(object);
 void AssignSlice(object, object, object);
 void StdPrint(object, object, int);
 void ClearScreen();
-void Position(int, int);
+void Position(object, object);
 object CommandLine(void);
 void system_call(object, object);
 void RTFatal(char *);
@@ -329,7 +341,8 @@ extern object last_w_file_no;
 extern IFILE last_w_file_ptr;
 extern object last_r_file_no;
 extern IFILE last_r_file_ptr;
-extern int insert_pos;;
+extern int insert_pos;
+extern int trace_lines;
 
 object find_from(object,object,object);
 object e_match_from(object aobj, object bobj, object c);

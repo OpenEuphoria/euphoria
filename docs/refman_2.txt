@@ -15,8 +15,8 @@ an extremely versatile data structure, capable of representing any sort of data.
 
 A sequence is represented by a list of objects in brace brackets **{ }**, separated by 
 commas with an optional sequence terminator, ##$##. Atoms can have any integer or 
-double-precision floating point value. They can range from approximately -1e300 (minus 
-one times 10 to the power 300) to +1e300 with 15 decimal digits of accuracy. Here are
+double-precision floating point value. They can range from approximately -1*10^^300^^ (minus 
+one times 10 to the power 300) to 10^^300^^ with 15 decimal digits of accuracy. Here are
 some Euphoria objects:
 
 <eucode>
@@ -119,8 +119,8 @@ Why do we call them atoms?  Why not just "numbers"? Well, an ##atom## //is//
 just a number, but we wanted to have a distinctive term that emphasizes that
 they are indivisible (that's what "atom" means in Greek). In the world of
 physics you can 'split' an atom into smaller parts, but you no
-longer have an atom{{{--}}}only various particles. You can 'split' a
-number into smaller parts, but you no longer have a number{{{--}}}only various
+longer have an atom~--only various particles. You can 'split' a
+number into smaller parts, but you no longer have a number~--only various
 digits.
 
 Atoms are the basic building blocks of all the
@@ -369,7 +369,7 @@ Special characters may be entered using a back-slash:
 | \u/hhhh/ | A 4-hex-digit value, e.g. "\u2A7C" ==> {10876} |
 | \U/hhhhhhhh/ | An 8-hex-digit value, e.g. "\U8123FEDC" ==> {2166619868} |
 
-For example, ##"Hello, World!\n"##, or ##'~\~\'##. The Euphoria editor displays character
+For example, ##"Hello, World!\n"##, or ##'~\~\'##. The demonstration editor ##edx## displays character
 strings in green.
 
 Note that you can use the underscore character ##'_'## inside the 
@@ -409,7 +409,7 @@ quick-sort -- must only consist of letters, digits or underscore.
 @[source_comments|]
 === Comments
 Comments are ignored by Euphoria and have no effect on execution speed.
-The editor displays comments in red.
+For example the ##edx## editor displays comments in red.
 
 There are three forms of comment text:
 
@@ -626,20 +626,20 @@ corresponding sequence elements, and the sequences must be the same length.
 When they are equal length, the result is a sequence of ones an zeros. When they
 are not equal length, the result is an error. Either way you'll get an error,
 since an if-condition must be an atom, not a sequence.  Instead you should use
-the ##equal()## built-in routine:
+the ##equal## built-in routine:
 
 <eucode>
 if equal("APPLE", "ORANGE") then  -- CORRECT
 </eucode>
 
-In general, you can do relational comparisons using the compare() built-in
+In general, you can do relational comparisons using the ##compare## built-in
 routine:
 
 <eucode>
 if compare("APPLE", "ORANGE") = 0 then  -- CORRECT
 </eucode>
 
-You can use compare() for other comparisons as well:
+You can use ##compare## for other comparisons as well:
 
 <eucode>
 if compare("APPLE", "ORANGE") < 0 then  -- CORRECT
@@ -685,7 +685,7 @@ where we have written the numbers in a way that makes the structure
 clearer. An expression of the form x[i][j] can be used to access any element.
 
 The two dimensions are not symmetric however, since an entire "row" can be
-selected with x[i], but you need to use [[:vslice]]() in the Standard Library
+selected with x[i], but you need to use [[:vslice]] in the Standard Library
 to select an entire column. Other logical structures, such as n-dimensional
 arrays, arrays of strings, structures, arrays of structures etc. can also be
 handled easily and flexibly:
@@ -739,7 +739,7 @@ employees = {
 -- employees[2][SALARY] would be 57000.
 </eucode>
 
-The ##length()## built-in function will tell you how many elements are in a
+The ##length## built-in function will tell you how many elements are in a
 sequence.  So the last element of a sequence ##s##, is:
 
 <eucode>
@@ -830,7 +830,7 @@ hard to declare in many other languages.
 
 Note that expressions in general may not be subscripted, just variables. For
 example: ##{5+2,6-1,7*8,8+1}[3]## is //not// supported, nor is something like:
-##date()[MONTH]##. You have to assign the sequence returned by ##date##() to a
+##date()[MONTH]##. You have to assign the sequence returned by ##date## to a
 variable, then subscript the variable to get the month.
 
 ==== Slicing of Sequences
@@ -1025,8 +1025,8 @@ The length of the new sequence is always one greater than the length of
 the original sequence. The item to be added to the sequence can be any atom or
 sequence.
 
-These two built-in functions, ##append()## and
-##prepend()##, have some similarities to the concatenate operator,
+These two built-in functions, ##append## and
+##prepend##, have some similarities to the concatenate operator,
 ##&##, but there are clear differences. e.g.
 
 <eucode>
@@ -1053,12 +1053,12 @@ s = insert({1,2,3},4,8.5)   -- s is {1,2,3,4}, like append()
 </eucode>
 
 The length of the returned sequence is one more than the one of ##in_what##.
-This is the same rule as for ##append()## and ##prepend()## above, which are
-actually special cases of ##insert()##.
+This is the same rule as for ##append## and ##prepend## above, which are
+actually special cases of ##insert##.
 
 ===== splice(sequence in_what, object what, atom position)
 
-If what is an ##atom##, this is the same as ##insert()##. But if what is a
+If what is an ##atom##, this is the same as ##insert##. But if what is a
 sequence, that sequence is inserted as successive elements into ##in_what##
 at ##position##. Example:
 
@@ -1183,36 +1183,38 @@ exit            procedure
 
 
 
-The Euphoria editor displays these words in blue
+
+For example, the ##edx## editor displays these words in blue.
 
 The following are Euphoria built-in routines. It is best if you do
 not use these for your own identifiers:
 
 <eucode>
-abort           getenv          peek4s          system
-and_bits        gets            peek4u          system_exec
-append          hash            peeks           tail
-arctan          head            platform        tan
-atom            include_paths   poke            task_clock_start
-c_func          insert          poke2           task_clock_stop
-c_proc          integer         poke4           task_create
-call            length          position        task_list
-call_func       log             power           task_schedule
-call_proc       machine_func    prepend         task_self
-clear_screen    machine_proc    print           task_status
-close           match           printf          task_suspend
-command_line    match_from      puts            task_yield
-compare         mem_copy        rand            time
-cos             mem_set         remainder       trace
-date            not_bits        remove          xor_bits
-delete          object          repeat          ?
-delete_routine  open            replace         &
-equal           option_switches routine_id      $
-find            or_bits         sequence        
-find_from       peek            sin             
-floor           peek_string     splice          
-get_key         peek2s          sprintf
-getc            peek2u          sqrt
+abort           getenv          peek2u            sqrt		
+and_bits        gets            peek4s            system
+append          hash            peek4u            system_exec
+arctan          head            peeks             tail
+atom            include_paths   platform          tan
+c_func          insert          poke              task_clock_start
+c_proc          integer         poke2             task_clock_stop
+call            length          poke4             task_create
+call_func       log             position          task_list
+call_proc       machine_func    power             task_schedule
+clear_screen    machine_proc    prepend           task_self
+close           match           print             task_status
+command_line    match_from      printf            task_suspend
+compare         mem_copy        puts              task_yield
+cos             mem_set         rand              time
+date            name_of         remainder         trace
+delete          not_bits        remove            xor_bits
+delete_routine  object          repeat            ?
+equal           open            replace           &
+find            option_switches routine_id        $
+find_from       or_bits         sequence        
+floor           peek            sin             
+get_key         peek_string     splice          
+getc            peek2s          sprintf
+                          	
 </eucode>
 
 
@@ -1265,7 +1267,7 @@ in memory (although there will still be just one shared copy of ##8.5## and
 ##"ABC"##). The same thing applies to
 "copies" of arguments passed in to subroutines.
 
-For a number of procedures or functions{{{--}}}see below{{{--}}}some parameters
+For a number of procedures or functions~--see below~--some parameters
 may have the same value in many cases. The most expected value for any parameter
 may be given a default value. To pass the default value, use a question mark ##?##,
 or omit the value.  When the parameter is not the last in the list to the routine,
@@ -1497,7 +1499,7 @@ enum by / 2 A=5,B,C --> values are 5, 2.5, 1.25
 ==== enum type
 
 There is also a special form of ##enum##, an //enum type//. This is a simple way
-to write a user-defined type based on the set of values in a specific enum 
+to write a [[:udt|user-defined type]] based on the set of values in a specific enum 
 group.
 The type created this way can be used anywhere a normal user-defined type can be
 use.
@@ -1512,53 +1514,107 @@ procedure xyz( RGBA x, RGBA y)
 end procedure
 </eucode>
 
-However there is one significant difference when it comes to enum types. For
+However there are several significant differences when it comes to enum types. 
+For
 normal types, when calling the type function, it returns either ##0## or ##1##. 
 The enum type function returns ##0## if the argument is not a member of the 
 enum set, and it
-returns a positive integer when the argument is a member. The value returned is
-the ordinal number of
-the member in the enum's definition, regardless of what the member's value is.
-As an exception to this, if two enums share the same value, then they will
-share the same ordinal number. The ordinal numbers of enums surrounding these
-will continue to increment as if every enum had a unique ordinal number,
-causing some numbers to be skipped.
+returns a positive integer when the argument is a member.  The positive integer wont
+necessarily be ##1##, but it will be a valid true value for if statements, loops, etc.  
+When using a trace screen and also in an ex.err crash file, the variables defined with this type will display values using one of the 
+names of the defining constants used in the enum type statement.  You can use [[:The name_of Built-in]] to display
+these constants to the user.  The [[:Literal Mismatch Warning|Literal Mismatch Warning]] feature
+will alert you to bugs that runtime type checking may miss.
 
-For example,
-<eucode>
-enum type color RED=4, GREEN=7, BLACK=1, BLUE=3 , PINK=10 end type
+The value returned by the enum type is implementation dependent; except that we guarantee that for values
+not belonging to the type, the type returns 0 and for those that do belong, non-zero is returned.
 
-? color(RED)   --> 1
-? color(GREEN) --> 2
-? color(BLACK) --> 3
-? color(BLUE)  --> 4
-? color(PINK)  --> 5
-
-constant color_names = {"rouge", "vert", "noir", "bleu", "rose"}
-
-puts(1, color_names[color(BLUE)]) --> bleu
-
-</eucode>
-
-But with the exception, 
-<eucode>
-enum type color RED, GREEN=7, BLACK=1, BLUE=3 , PINK=10 end type
-? color(RED) --> 1
-? color(GREEN) --> 2
-? color(BLACK) --> 1
-? color(BLUE) --> 4
-? color(PINK) --> 5
-</eucode>
-
-Note that none of the enums have an ordinal number with a value of 3. This is
-simply skipped.
-
+For versions 4.1, the value returned by the type enum is 1.
 
 When using type enum, you will be able to access the variable
 names later with the name_of built-in.  The name_of built-in gives you 
 back the literal name of a value according to what type it is.
-See [[:Alternative Literal Sets]].
+See below.
 
+
+===== The name_of Built-in
+
+There are times when a number, is better represented in some way other than using digits.  A number 3 is always just 3, whether we pass it to a DirectX function as a set of two flags or we compare it to the value of platform() to see if we are running on LINUX.  However, the representation "3" is not the best way to represent the value in the previous two cases.  This is why we have constants, and enumerated types.
+ 
+There are times when a programmer wants a way to display the variable names to the user, or in debugging, or in error reporting.  Having types keyed to some set of literals can also help catch at parse time a class of errors that would be missed by other forms of syntax checking.  The ##name_of## built-in gives the programmer a way of converting a variable and its value to a literal that corresponds to its type.
+
+Example 1:
+<eucode>
+
+type enum DDENUM_basis by * 2
+    DDENUM_ATTACHEDSECONDARYDEVICES,
+    DDENUM_DETACHEDSECONDARYDEVICES,
+    DDENUM_NONDISPLAYDEVICES
+end type
+
+DDENUM_basis dde_num_base = DDENUM_ATTACHEDSECONDARYDEVICES
+sequence s = name_of(dde_num_base)
+-- s is "DDENUM_ATTACHEDSECONDARYDEVICES"
+integer i = dde_num -- here type data doesn't go into i.
+s = name_of(i)
+-- s is now "1"
+</eucode>
+
+Example 2:
+
+<eucode>
+namespace here
+type enum std_window_response
+--** Abort button was selected.
+IDABORT = 3,
+--** Cancel button was selected.
+IDCANCEL = 2,
+--** Ignore button was selected.
+IDIGNORE = 5,
+--** No button was selected.
+IDNO = 7,
+--** OK button was selected.
+IDOK = 1,
+--** Retry button was selected.
+IDRETRY = 4,
+--** Yes button was selected.
+IDYES = 6     
+end type
+
+std_window_response ok = message_box("This box is a test", "Info", MB_OK)
+ok = message("You clicked " & name_of(ok), "Info", MB_OK)
+-- displays "You clicked IDOK in a Window.
+</eucode>
+
+
+Example 3:
+
+<eucode>
+integer i = 4
+sequence s = name_of(i)
+-- variables without special handling are given sensible output.
+-- Here s is "4"
+</eucode>
+
+===== Literal Mismatch Warning
+
+There are expressions that may be legal in EUPHORIA but do not make any semantic sense.  If you compare,or assign a variable to a constant that is not from its literal set, you will get an warning message.  In the following example, a variable that should be assigned an MS Windows Message Box Response ID is compared to a constant not from its enumerated type.  This produces a warning at parse time unless you disable this 'literal_mismatch'.
+
+<eucode>
+-- The following enum type includes things like IDOK, IDNO, etc...
+std_window_response ok = message_box("This box is a test", "Info", MB_OK)
+
+-- displays "You clicked IDOK" in a Window.
+ok = message("You clicked " & name_of(ok), "Info", MB_OK)
+
+-- WARNING 'literal_mismatch' here for this code is wrong.  
+-- It should be ok != IDOK.
+if ok != MB_OK then 
+	puts(2,"Error\n")
+end if
+</eucode>
+
+Even though MB_OK is out of the value range of the ID* constants, this is something that can be caught at parse-time rather than during testing, a preferable time to catch a problem.
 
 === Specifying the type of a variable
 
@@ -1588,7 +1644,7 @@ calculations on larger integer values, up to about ##15## decimal digits, but
 declare them as **atom**, rather than integer.
 
 ;**Note~:**
-:In a procedure or function parameter list like the one for ##fred()## above, 
+:In a procedure or function parameter list like the one for ##fred## above, 
 a type name may only be followed by a single parameter name.
 
 ;**Performance Note~:**
@@ -1634,12 +1690,12 @@ h2 = 25      -- error! program aborts with a message
 Variables ##h1## and ##h2## can only be assigned integer values in the range 
 ##0## to ##23##
 inclusive. After each assignment to ##h1## or ##h2## the interpreter will call 
-##hour##(),
+##hour##,
 passing the new value.  The value will first be checked to see if it is an
 integer (because of "integer x"). If it is, the return statement will be
 executed to test the value of ##x## (i.e. the new value of ##h1## or ##h2##).  
-If ##hour()##
-returns true, execution continues normally. If ##hour()## returns false then the
+If ##hour##
+returns true, execution continues normally. If ##hour## returns false then the
 program is aborted with a suitable diagnostic message.
 
 "hour" can be used to declare subroutine parameters as well:
@@ -1648,7 +1704,7 @@ program is aborted with a suitable diagnostic message.
 procedure set_time(hour h)
 </eucode>
 
-##set_time()## can only be called with a reasonable value for parameter ##h##,
+##set_time## can only be called with a reasonable value for parameter ##h##,
 otherwise the program will abort with a message.
 
 A variable's type will be checked after each assignment to the variable (except
@@ -1688,7 +1744,7 @@ might not be the case when you [[:poke]] directly
 !!zzzz-------------------------^^^^^^^^^
 into memory, or call routines written in C or machine code.//)
 
-Euphoria's method of defining types is simpler than what you will find in other
+Euphoria's way of defining types is simpler than what you will find in other
 languages, yet Euphoria provides the programmer with //greater// flexibility
 in defining the legal values for a type of data. Any algorithm can be used to
 include or exclude values. You can even declare a variable to be of type object
@@ -1733,7 +1789,7 @@ and will sometimes read the element just //after// the end of the array.
 Whatever garbage is read, the algorithm will still work - this is probably why
 the bug was never caught. But what if there isn't any (virtual) memory just
 before or just after the array? Bentley later modifies the algorithm such that
-this bug goes away{{{--}}}but he presented this version as being correct.
+this bug goes away~--but he presented this version as being correct.
 **//Even the experts need subscript checking!//**
 
 ;**Performance Note~:**
@@ -1760,7 +1816,7 @@ An ##atom## can hold three kinds of data:
 * Large mathematical integers in the same range, but with a fuzz that grows
  with the magnitude of the integer.
 
-##power(2,53)## is slightly above 9.10^^15^^, ##power(2,1024)## is in the
+##power(2,53)## is slightly above 9*10^^15^^, ##power(2,1024)## is in the
 10^^308^^ range.
 
 Because of these constraints, which arise in part from common hardware
@@ -1806,7 +1862,7 @@ in code safety and bug prevention far outweighs it.
 
 This type can hold any data Euphoria can handle, both atoms and sequences.
 
-The ##object##() type returns 0 if a variable is not initialized, else ##1##.
+The ##object## type returns 0 if a variable is not initialized, else ##1##.
 
 === Scope
 
@@ -1816,7 +1872,7 @@ The //scope// of an identifier is the portion of the program where its
 declaration is in effect, i.e. where that identifier is //visible//.
 
 Euphoria has many pre-defined procedures, functions and types.  These are
-defined automatically at the start of any program.  The Euphoria editor shows
+defined automatically at the start of any program.  For exmaple, the ##edx## editor shows
 them in magenta. These pre-defined names are not reserved. You can override
 them with your own variables or routines.
 
@@ -1828,8 +1884,8 @@ For example, procedures, functions and types can call themselves or one another
 recursion, where routine A calls routine B which directly or indirectly calls
 routine A, implies one of A or B being called before it is defined. This was
 traditionally the most frequent situation which required using the
-[[:routine_id()]] mechanism, but is now supported directly.
-See [[:Indirect Routine Calling]] for more details on the [[:routine_id()]]
+[[:routine_id]] mechanism, but is now supported directly.
+See [[:Indirect Routine Calling]] for more details on the [[:routine_id]]
 mechanism.
 
 ==== Defining the scope of an identifier
@@ -1923,7 +1979,7 @@ foo() -- ok, declared in some_lib.e
 bar() -- error! bar() is not declared here
 </eucode>
 
-Why not declare ##foo()## as global, as it is meant to be used anywhere? Well,
+Why not declare ##foo## as global, as it is meant to be used anywhere? Well,
 one could, but this will increase the risks of name conflicts. This is why, for
 instance, all public identifiers from the standard library have **public**
 scope. **global** should be used rarely, if ever. Because earlier versions of
@@ -1937,6 +1993,14 @@ Euphoria coded file.
 
 ==== Using namespaces
 @[namespace|]
+
+Euphoria namespaces are used to disambiguate between symbols (routines, variables,
+constants, etc) with the same names in different files. They may be declared as
+a default namespace in a file for the convenience of the users of that file,
+or they may be declared at the point where a file is included. Note that unlike
+namespaces in some other languages, this does not provide a sandbox around the
+symbols in the file. It is just an easy way to tell euphoria to look for a
+symbol in a particular file.
 
 Identifiers marked as ##global##, ##public## or ##export## are known as
 //exposed// variables because they can be used in files other than the one they
@@ -2617,7 +2681,17 @@ end if
 
 The <val> in a ##case## must be either an atom, literal string, constant or
 enum.  Multiple values for a single ##case## can be specified by separating the
-values by commas.  By default, control flows to the end of the ##switch## block
+values by commas. The same symbol (or literal) may not be used multiple times as
+a ##case## for the same ##switch##. If two different symbols used as ##case## values
+happen to have the same value, they must be in the same ##case...then## statement,
+or an error will occur. If the parser can determine all values when the ##switch##
+is parsed, then a compile time error will be thrown. Otherwise, the error will occur
+the first time that the switch is encountered. Likewise, when translating code, if
+the parser cannot determine all values at the time when the ##case## values are parsed,
+the compilation will fail due to mulitple ##case## values in the emitted C code (it is
+assumed that the programmer should work out this sort of bug in interpreted mode).
+
+By default, control flows to the end of the ##switch## block
 when the next ##case## is encountered.  The default behavior can be modified in
 two ways.  The default for a particular ##switch## block can be changed so that
 control passes to the next executable statement whenever a new case is
@@ -2783,12 +2857,12 @@ Euphoria predefines some words itself:
 ==== Euphoria Version Definitions
 
 * **EU4** - Major Euphoria Version
-* **EU4_0** - Major and Minor Euphoria Version
-* **EU4_0_4** - Major, Minor and Release Euphoria Version
+* **EU4_1** - Major and Minor Euphoria Version
+* **EU4_1_0** - Major, Minor and Release Euphoria Version
 
 Euphoria is released with the common version scheme of Major, Minor and Release
-version identifiers in the form of major.minor.release. When 4.0.5 is
-released, ##EU4_0_5## will be defined and ##EU4_0## will still be defined, but ##EU4_0_4## will no longer be defined.  When 4.1 is released, ##EU4_0## will no longer be defined, but ##EU4_1## will be defined. Finally, when 5.0 is released, ##EU4## will no longer be
+version identifiers in the form of major.minor.release. When 4.1.1 is
+released, ##EU4_1_1## will be defined and ##EU4_1## will still be defined, but ##EU4_1_0## will no longer be defined.  When 4.2 is released, ##EU4_1## will no longer be defined, but ##EU4_2## will be defined. Finally, when 5.0 is released, ##EU4## will no longer be
 defined, but ##EU5## will be defined.
 
 ==== Platform Definitions
@@ -2841,7 +2915,7 @@ program by ##eub##.
 ==== Library Definitions
 
 * **DATA_EXECUTE** - Application will always get executable memory from
-##allocate()## even when the system has Data Execute Protection enabled for the
+##allocate## even when the system has Data Execute Protection enabled for the
 Euphoria Interpreter.
 * **SAFE** - Enables safe runtime checks for operations for routines found in
 ##machine.e## and ##dll.e##
@@ -3189,7 +3263,7 @@ end for
 </eucode>
 
 However, adding together floating point numbers that are not the ratio of an
-integer by a power of 2 {{{--}}}// 0.3 is not such a ratio//{{{--}}}leads to
+integer by a power of 2 ~--// 0.3 is not such a ratio//~--leads to
 some "fuzz" in the value of the index. In some cases, you might get unexpected
 results because of this fuzz, which arises
 from a common hardware limitation. For instance, ##floor(10*0.1)## is ##1## as
@@ -3254,9 +3328,9 @@ if c = a then ...
 </eucode>
 
 But sometimes you need to leave a block that encloses the current one. Euphoria
-has two methods available for you to do this. The safest method, in terms of
+has two ways available for you to do this. The safest way, in terms of
 future maintenance, is to name the block you want to exit from and use that name
-on the exit statement. The other method is to use a number on the exit statement
+on the exit statement. The other way is to use a number on the exit statement
 that refers to the depth that you want to exit from.
 
 A block's name is always a string literal and only a string literal. You cannot
@@ -3316,7 +3390,7 @@ end for
 ? b
 </eucode>
 
-But using this method means you have to take more care when changing the program
+But using this way means you have to take more care when changing the program
 so that if you change the depth, you also need to change the //exit// statement.
 
 ;Note~:
@@ -3481,7 +3555,7 @@ to a **retry** statement.
 === with entry statement
 
 It is often the case that the first iteration of a loop is somehow special.
-Some things have to be done before the loop starts{{{--}}}they are done before
+Some things have to be done before the loop starts~--they are done before
 the statement starting the loop.  Now, the problem is that, just as often, some
 things do not need to, or should not, be done at this initialization stage. The
 **entry keyword** is an alternative to setting flags relentlessly
@@ -4061,7 +4135,7 @@ temporarily affected by the "##without warning strict##" directive.
                          Euphoria chooses the built-in.
 | ##not_used## |  A variable has not been used and is going out of scope.
 | ##no_value## | A variable never got assigned a value and is going out of scope.
-| ##custom## |  Any warning that was defined using the warning() procedure.
+| ##custom## |  Any warning that was defined using the ##warning## procedure.
 | ##not_reached## | After a keyword that branches unconditionally, the only
                     thing that should appear is an end of block keyword, or
                     possibly a label that a goto statement can target.

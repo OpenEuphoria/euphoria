@@ -9,7 +9,7 @@ The //mandatory// 'Hello World' program is a one-liner in Euphoria.
 puts(1, "Hello, World\n")
 </eucode>
 
-The built-in routine ##puts()## does the job of displaying text on a screen. It
+The built-in routine ##puts## does the job of displaying text on a screen. It
 requires two arguments. The first argument, ##1##,  directs the output to 
 STDOUT or the console. The second argument, is a string of text that will be 
 output.
@@ -78,28 +78,28 @@ The above example contains a number of statements that are processed in order.
 access to the public symbols declared in the file
 'std/console.e'. This is referred to as a //library//
 file. In our case here, the application will be using
-the ##display()## routine from console.e.
+the ##display## routine from ##console.e# .
 
 ; ##sequence original_list## 
 : This declares a variable that is not public but is 
 accessible from anywhere in this file. The datatype
 for the variable is a ##sequence##, which is a 
-variable-length array, and whose symbol name is
+variable-length "array," and whose symbol name is
 ##original_list##.
 
 ; ##function merge_sort(sequence x) ... end function## 
 : This declares and defines
 a function routine. Functions return values when called.
 This function must be passed a single parameter when
-called - a sequence.
+called ~-- a sequence.
 
-; ##procedure print_sorted_list() ... end procedure## 
+; ##procedure print_sorted_list() ... end procedure##
 : This declares and defines
 a procedure routine. Procedures never return values when called.
 This procedure must not be passed any parameters when
 called.
 
-; ##print_sorted_list()## 
+; ##print_sorted_list## 
 : This calls the routine called ##print_sorted_list##.
 
 The output from the program will be:
@@ -116,7 +116,7 @@ Number 84 was at position  5, now at  9
 Number 98 was at position  7, now at 10
 }}}
 
-Note that ##merge_sort()## will just as easily sort any list of data items ...
+Note that ##merge_sort## will just as easily sort any list of data items~:
 <eucode>
 {1.5, -9, 1e6, 100}
 {"oranges", "apples", "bananas"}
@@ -154,15 +154,16 @@ associations have been setup during the installation process.
 
 ==== Edit Sample Files
 
-Use the Euphoria editor, ##ed##, to edit a Euphoria file. Notice the use of 
-colors. You can adjust these colors along with the cursor size and many other 
-"user-modifiable" parameters by editing constant declarations in ##ed.ex##. Use 
-//Esc q// to quit the editor or //Esc h// for
-help. There are several, even better, Euphoria-oriented editors in
-[[http://www.rapideuphoria.com/edi.htm|The Archive]]. If you use a more sophisticated text
-editor, many have a highlighter file for Euphoria. You will find it either on the Archive or
-on the community page for that editor. Check 
+You can use any plain text editor for writing Euphoria source-code.
+
+Code-editors provide a syntax highlighter. The wiki lists many editors suitable for Euphoria. Check 
 [[wiki:Editors|the wiki for more information about Euphoria editors]].
+
+You can examine the source-code for the demonstration editor ##edx## to see how editors and highlighters work.
+Notice the use of colors. You can adjust these colors along with the cursor size and many other 
+"user-modifiable" parameters by editing constant declarations in ##edx.ex##. Use 
+//Esc q// to quit the editor or //Esc h// for help.
+
 
 ==== Benchmark
 
@@ -241,7 +242,7 @@ Try writing your own program in Euphoria. A program can be as simple as:
 ? 2+2
 </eucode>
 
-**Remember that after any error you can simply type:** ##ed## to jump into the editor at the
+**Remember that after any error you can simply type:** ##edx## to jump into the editor at the
 offending file and line.
 
 Once you get used to it, you'll be developing programs //much// faster in Euphoria than you
@@ -253,7 +254,7 @@ could in Perl, Java, C/C~+~+ or any other language that we are aware of.
 :<<LEVELTOC level=2 depth=4>>
 
 Euphoria programs can be written with //any// plain text editor. As a
-convenience Euphoria comes with ##ed##, an editor written in Euphoria, that
+convenience Euphoria comes with ##edx##, an editor written in Euphoria, that
 is handy for editing and executing Euphoria programs. Take a look at
 ##\euphoria\demo## and ##euphoria\tutorial## to see many example programs.
 
@@ -277,7 +278,7 @@ Depending on the platform you are using the interpreter could be called:
 The command-line may contain extra information. Following your program filename
 you may add extra words (known as //arguments//) that can used in your program
 to customize its behavior. These arguments are read within your program by the
-built-in function [[:command_line]]().
+built-in function [[:command_line]].
 
 Optionally, you may also use [[:command line switches]] that are typed between
 the interpreter name and the program name. Command line switches
@@ -285,7 +286,7 @@ customize  how the interpreter itself behaves.
 
 Unlike many other compilers and interpreters, there is no obligation for any
 special command-line options for ##eui## or ##euiw##. Only the
-name of you Euphoria file is expected, and if you don't supply it, Euphoria
+name of you Euphoria file is expected, and if you do not supply it, Euphoria
 will display all the command line options available.
 
 Euphoria doesn't care about your choice of file extensions. By
@@ -293,7 +294,7 @@ convention, however, console-based applications have an extension of ##.ex##,
 GUI-based applications have an extension of ##.exw## and include files have an
 extension of ##.e##. Note that a GUI application is not necessarily a
 //Windows// program. A GUI application can exist on Linux,
-OS X, FreeBSD, etc...
+OS X, FreeBSD, and so on.
 
 You can redirect standard input and standard output when you run a Euphoria
  program, for example:
@@ -314,9 +315,9 @@ eui myprog.ex %1 %2 %3 %4 %5 %6 %7 %8 %9
 </eucode>
 The first statement turns off echoing of commands to the screen. The second
 runs ##eui myprog.ex## with up to 9 command-line arguments. See
-[[:command_line]]() for an example of how to read these arguments. Having
+[[:command_line]] for an example of how to read these arguments. Having
 a .bat file will save you the minor inconvenience of typing ##eui##
-all the time; i.e., you can just type:
+all the time; for example you can just type:
 <eucode>
 myprog
 </eucode>
@@ -354,7 +355,7 @@ foo.ex
 
 to run your program. You could even shorten the name to simply "foo". Euphoria
 ignores the first line when it starts with **#!**.  Be careful though that
-your first line ends with the unix-style ##\n##, and not the
+your first line ends with the //Unix//-style ##\n##, and not the
 //Windows//-style ##\r\n##, or the unix shell might get confused. If your
 file is shrouded, you must give the path to ##eub##, not ##eui##.
 
@@ -377,20 +378,22 @@ file to run it. The installer will perform this operation for you, if you wish.
 %%output=editing_source
 == Editing a Program
 
+If you have not selected your "favorite editor," then try ##edx##:
+
 You can use any text editor to edit a Euphoria program. However, Euphoria comes
-with its own special editor that is written entirely in Euphoria. Type: ##ed##
+with its own special editor that is written entirely in Euphoria. Type: ##edx##
 followed by the complete name of the file you wish to edit. You can use this
 editor to edit any kind of text file. When you edit a Euphoria file some extra
 features such as color syntax highlighting and auto-completion of certain
 statements are available to make your job easier.
 
 Whenever you run a Euphoria program and get an error message, during
-compilation or execution, you can simply type ##ed## with no file name and you
+compilation or execution, you can simply type ##edx## with no file name and you
 will be automatically positioned in the file containing the error, at the
 correct line and column, and with the error message displayed at the top of the
 screen.
 
-Under //Windows// you can associate ##ed.bat## with various kinds of text files
+Under //Windows// you can associate ##edx.bat## with various kinds of text files
 that you want to edit. Color syntax highlighting is provided for ##.ex##,
 ##.exw##, ##.exd##, ##.e## and ##.pro## ([[:Profiling "profile files"]]).
 
@@ -398,19 +401,21 @@ Most keys that you type are inserted into the file at the cursor position. Hit
 the ##Esc## key once to get a menu bar of special commands. The arrow keys, and
 the ##Insert/Delete/Home/End/PageUp/PageDown## keys are also active. Under
 //Linux/FreeBSD// some keys may not be available, and alternate keys are
-provided. See [[:Ed - Euphoria Editor]] for a complete description of
+provided. See [[:Edx Demonstration Code Editor]] for a complete description of
 the editing commands.
 
+!! Check links for this
+
 If you need to understand or modify any detail of the editor's operation, you
-can edit the file ##ed.ex## in ##euphoria\bin## (be sure to make a backup copy
-so you don't lose your ability to edit).  If the name ##ed## conflicts with
+can edit the file ##edx.ex## in ##euphoria\bin## (be sure to make a backup copy
+so you don't lose your ability to edit).  If the name ##edx## conflicts with
 some other command on your system, simply rename the file
-##euphoria\bin\ed.bat## to something else. Because this editor is written in
+##euphoria\bin\edx.bat## to something else. Because this editor is written in
 Euphoria, it is remarkably concise and easy to understand. The same
 functionality implemented in a language like C, would take far more lines of
 code.
 
-##ed## is a simple text-mode editor that runs on all platforms and is
+##edx## is a simple text-mode editor that runs on all platforms and is
 distributed with Euphoria. There is a list of other editors at the
 [[wiki:Editors|OpenEuphoria web site]], many of which include extra
 features such as syntax highlighting.
@@ -426,16 +431,16 @@ Euphoria provides you with 4 distinct ways of distributing a program.
 * "translate" into a C-compiled executable
 
 
-In the first method you simply ship your users the interpreter along with your
+In the first way you simply ship your users the interpreter along with your
 Euphoria source files including any Euphoria includes that may be necessary
 from the ##euphoria/include## directory. If the Euphoria source files and the
 interpreter are placed together in one directory then your user can run your
 program by typing ##eui## followed by the path of your main executable source
-file. You might also provide a small ##.bat## file so people won't actually
-have to type the interpreter name. This method assumes that you are willing to
+file. You might also provide a small ##.bat## file so people will not actually
+have to type the interpreter name. This way assumes that you are willing to
 share your Euphoria source code with your users.
 
-The Binder gives you two more methods of distribution. You can ##shroud## your
+The Binder gives you two more ways of distribution. You can ##shroud## your
 program, or you can ##bind## your program. **Shrouding** combines all of the
 Euphoria source code that your program needs to create a single ##.il## file.
 **Binding** combines your shrouded program with the Euphoria backend
@@ -443,14 +448,14 @@ Euphoria source code that your program needs to create a single ##.il## file.
 For example, if your program is called "##myprog.ex##" you can create 
 "##myprog.exe##"
 which will run identically. For more information about shrouding and binding,
-see [[:Binding and Shrouding]].
+see [[:Shrouding and Binding]].
 
 Finally, with the [[:Euphoria To C Translator]], you can translate your
 Euphoria program into C and then compile it with a C compiler to get an
 executable program.
 
 %%output=command_switches
-== Command line switches
+== Command Line Switches
 :<<LEVELTOC level=2 depth=4>>
 
 You can launch Euphoria with some extra command line switches, in order to add
@@ -541,6 +546,10 @@ indicates that the referenced switch applies only to that execution mode.
   parameter which enables many editor/IDE programs to test the syntax of your
   Euphoria source in real time.
 
+; ##-TRACE-LINES n## (all)
+: Changes the number of lines that will be used in ctrace.out for lines traced
+  under ##trace(3)##.  The default is 500.
+
 ; ##-VERSION## (all)
 : Displays the version of euphoria that is running.
 
@@ -567,7 +576,7 @@ opposite of the ##-W## switch.
 
 The case of the switches is ignored, so ##-I## and ##-i## are equivalent.
 
-=== Further notes
+=== Further Notes
 
 * Included files are searched for in all included paths, in the following order:
 ## The current path

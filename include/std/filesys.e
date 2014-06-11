@@ -52,6 +52,16 @@ ifdef LINUX then
 		STAT_VER = 3
 	end if
 	constant xStatFile = dll:define_c_func(lib, "__xstat", {dll:C_INT, dll:C_POINTER, dll:C_POINTER}, dll:C_INT)
+elsifdef OSX then
+	function define_stat()
+		integer xStatFile = dll:define_c_func(lib, "stat64", {dll:C_POINTER, dll:C_POINTER}, dll:C_INT)
+		if xStatFile = -1 then
+			xStatFile = dll:define_c_func(lib, "stat", {dll:C_POINTER, dll:C_POINTER}, dll:C_INT)
+		end if
+		return xStatFile
+	end function
+	constant xStatFile = define_stat()
+	
 elsifdef UNIX then
 	constant xStatFile = dll:define_c_func(lib, "stat", {dll:C_POINTER, dll:C_POINTER}, dll:C_INT)
 end ifdef
@@ -89,18 +99,22 @@ end ifdef
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant SLASH
+-- </eucode>
 --
 -- Description:
 -- Current platform's path separator character
 --
 -- Comments:
--- When on //Windows//, '~\\'. When on //Unix//, '/'.
+-- When on //Windows//, ##'~\\'##. When on //Unix//, ##'/'##.
 --
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant SLASHES
+-- </eucode>
 --
 -- Description:
 -- Current platform's possible path separators. This is slightly different
@@ -110,7 +124,9 @@ end ifdef
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant SLASHES
+-- </eucode>
 --
 -- Description:
 -- Current platform's possible path separators. This is slightly different
@@ -120,14 +136,18 @@ end ifdef
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant EOLSEP
+-- </eucode>
 --
 -- Description:
 -- Current platform's newline string: ##"\n"## on //Unix//, else ##"\r\n"##.
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant EOL
+-- </eucode>
 --
 -- Description:
 -- All platform's newline character: ##'\n'##. When text lines are read the native
@@ -135,22 +155,28 @@ end ifdef
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant PATHSEP
+-- </eucode>
 --
 -- Description:
 -- Current platform's path separator character: ##:## on //Unix//, else ##;##.
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant NULLDEVICE
+-- </eucode>
 --
 -- Description:
 -- Current platform's null device path: ##/dev/null## on //Unix//, else ##NUL:##.
 
 --****
 -- Signature:
+-- <eucode>
 -- public constant SHARED_LIB_EXT
--- 
+-- </eucode>
+--
 -- Description:
 -- Current platform's shared library extension. For instance it can be ##dll##, 
 -- ##so## or ##dylib## depending on the platform.
@@ -195,8 +221,23 @@ public enum
 	D_MILLISECOND,
 	D_ALTNAME
 
---**
+
+--****
+-- Signature:
+-- <eucode>
+-- public constant W_BAD_PATH
+-- </eucode>
+--
+-- Description:
 -- Bad path error code. See [[:walk_dir]]
+
+--****
+-- Signature:
+-- <eucode>
+-- public constant W_SKIP_DIRECTORY
+-- </eucode>
+
+
 
 public constant 
 	W_BAD_PATH = -1, -- error code
@@ -217,7 +258,7 @@ function find_first_wildcard( sequence name, integer from = 1 )
 end function
 
 --**
--- Return directory information for the specified file or directory.
+-- returns directory information for the specified file or directory.
 --
 -- Parameters:
 --     # ##name## : a sequence, the name to be looked up in the file system.
@@ -226,23 +267,23 @@ end function
 --     An **object**,  -1 if no match found, else a sequence of sequence entries
 --
 -- Errors:
--- The length of ##name## should not exceed 1,024 characters.
+-- The length of ##name## should not exceed 1_024 characters.
 --
 -- Comments:
---     ##name## can also contain * and ? wildcards to select multiple files.
+--     ##name## can also contain ##*## and ##?## wildcards to select multiple files.
 --
 -- The returned information is similar to what you would get from the DIR command. A sequence
 -- is returned where each element is a sequence that describes one file or subdirectory.
 -- 
 -- If ##name## refers to a **directory** you may have entries for "." and "..", just as with the 
 -- DIR command. If it refers to an existing **file**, and has no wildcards, then the returned 
--- sequence will have just one entry, i.e. its length will be 1. If ##name## contains wildcards 
+-- sequence will have just one entry (that is its length will be ##1##). If ##name## contains wildcards 
 -- you may have multiple entries.
 -- 
 -- Each entry contains the name, attributes and file size as well as
 -- the time of the last modification.
 --
--- You can refer to the elements of an entry with the following constants:
+-- You can refer to the elements of an entry with the following constants~:
 --  
 -- <eucode>
 -- public constant 
@@ -260,7 +301,7 @@ end function
 --     D_ALTNAME    = 11
 -- </eucode>
 --
--- The attributes element is a string sequence containing characters chosen from:
+-- The attributes element is a string sequence containing characters chosen from~:
 --  
 -- || Attribute || Description ||
 -- | 'd'         | directory
@@ -279,19 +320,19 @@ end function
 -- | 'T'         | temporary file
 -- | 'V'         | virtual file
 --
--- A normal file without special attributes would just have an empty string, "", in this field.
+-- A normal file without special attributes would just have an empty string, ##""##, in this field.
 --
--- The top level directory, e.g. c:\ does not have "." or ".." entries.
+-- The top level directory ( therefore c:\ does not have "." or ".." entries).
 -- 
 -- This function is often used just to test if a file or directory exists.
 -- 
--- Under //WINDOWS//, the argument can have a long file or directory name anywhere in 
+-- Under //Windows//, the argument can have a long file or directory name anywhere in 
 -- the path.
 -- 
--- Under //Unix//, the only attribute currently available is 'd' and the milliseconds
+-- Under //Unix//, the only attribute currently available is ##'d'## and the milliseconds
 -- are always zero.
 -- 
--- //WINDOWS//: The file name returned in [D_NAME] will be a long file name. If [D_ALTNAME]
+-- //Windows//: The file name returned in ##[D_NAME]## will be a long file name. If ##[D_ALTNAME]##
 -- is not zero, it contains the 'short' name of the file.
 --
 -- Example 1:
@@ -407,7 +448,7 @@ end function
 --
 -- Comments:
 -- There will be no slash or backslash on the end of the current directory, except under
--- //Windows//, at the top-level of a drive, e.g. C:\
+-- //Windows//, at the top-level of a drive (such as ##C:\##).
 --
 -- Example 1:
 -- <eucode>
@@ -425,23 +466,23 @@ public function current_dir()
 end function
 
 --**
--- Set a new value for the current directory 
+-- sets a new value for the current directory.
 --
 -- Parameters:
 -- 		##newdir## : a sequence, the name for the new working directory.
 --
 -- Returns:
--- 		An **integer**, 0 on failure, 1 on success.
+-- 		An **integer**, ##0## on failure, ##1## on success.
 --
 -- Comments:
 -- By setting the current directory, you can refer to files in that directory using just
 -- the file name.
 -- 
--- The [[:current_dir]]() function will return the name of the current directory.
+-- The [[:current_dir]] function will return the name of the current directory.
 -- 
 -- On //Windows// the current directory is a public property shared
 -- by all the processes running under one shell. On //Unix// a subprocess
--- can change the current directory for itself, but this won't
+-- can change the current directory for itself, but this will not
 -- affect the current directory of its parent process.
 --
 -- Example 1:
@@ -493,16 +534,22 @@ public integer my_dir = DEFAULT_DIR_SOURCE
 -- 	# ##path_name## : a sequence, the name of the directory to walk through
 -- 	# ##your_function## : the routine id of a function that will receive each path
 --                       returned from the result of ##dir_source##, one at a time.
--- 	# ##scan_subdirs## : an optional integer, 1 to also walk though subfolders, 0 (the default) to skip them all.
+--                       Optionally, to include extra data for your function, ##your_function##
+--                       can be a 2 element sequence, with the routine_id as the first element and other data
+--                       as the second element.
+-- # ##scan_subdirs## : an optional integer, ##1## to also walk though subfolders, ##0## (the default) to skip them all.
 --  # ##dir_source## : an optional integer. A routine_id of a user-defined routine that 
 --                    returns the list of paths to pass to ##your_function##. If omitted,
---                    the [[:dir]]() function is used.   
+--                    the [[:dir]]() function is used. If your routine requires an extra parameter,
+--                    ##dir_source## may be a 2 element sequence where the first element is the
+--                    routine id and the second is the extra data to be passed as the second parameter
+--                    to your function.
 --
 -- Returns:
 -- An **object**,
--- * 0 on success
--- * W_BAD_PATH: an error occurred
--- * anything else: the custom function returned something to stop [[:walk_dir]]().
+-- * ##0## on success
+-- * ##W_BAD_PATH##  an error occurred
+-- * anything else the custom function returned something to stop [[:walk_dir]].
 --
 -- Comments:
 -- This routine will "walk" through a directory named ##path_name##. For each entry in the 
@@ -510,22 +557,22 @@ public integer my_dir = DEFAULT_DIR_SOURCE
 -- If ##scan_subdirs## is non-zero (TRUE), then the subdirectories in
 -- ##path_name## will be walked through recursively in the very same way.
 --
--- The routine that you supply should accept two sequences, the path name and dir() entry for 
--- each file and subdirectory. It should return 0 to keep going, W_SKIP_DIRECTORY to avoid
+-- The routine that you supply should accept two sequences, the //path name// and //dir// entry for 
+-- each file and subdirectory. It should return ##0## to keep going, ##W_SKIP_DIRECTORY## to avoid
 -- scan the contents of the supplied path name (if a directory), or non-zero to stop 
--- ##walk_dir##(). Returning ##W_BAD_PATH## is taken as denoting some error.
+-- ##walk_dir##. Returning ##W_BAD_PATH## is taken as denoting some error.
 --
 -- This mechanism allows you to write a simple function that handles one file at a time, 
--- while ##walk_dir##() handles the process of walking through all the files and subdirectories.
+-- while ##walk_dir## handles the process of walking through all the files and subdirectories.
 --
 -- By default, the files and subdirectories will be visited in alphabetical order. To use 
 -- a different order, use the ##dir_source## to pass the routine_id of your own modified
 -- [[:dir]] function that sorts the directory entries differently.
 --
--- The path that you supply to ##walk_dir()## must not contain wildcards (* or ?). Only a 
+-- The path that you supply to ##walk_dir## must not contain wildcards (##*## or ##?##). Only a 
 -- single directory (and its subdirectories) can be searched at one time.
 --
--- For non-unix systems, any '/' characters in ##path_name## are replaced with '\'.
+-- For //Windows// systems, any ##'/'## characters in ##path_name## are replaced with ##'\'##.
 --
 -- All trailing slash and whitespace characters are removed from ##path_name##.
 --
@@ -573,7 +620,7 @@ public function walk_dir(sequence path_name, object your_function, integer scan_
 	object orig_func
 	sequence user_data = {path_name, 0}
 	object source_orig_func
-	object source_user_data
+	object source_user_data = ""
 	
 	orig_func = your_function
 	if sequence(your_function) then
@@ -640,20 +687,20 @@ public function walk_dir(sequence path_name, object your_function, integer scan_
 end function
 
 --**
--- Create a new directory.
+-- creates a new directory.
 --
 -- Parameters:
 -- 		# ##name## : a sequence, the name of the new directory to create
 --		# ##mode## : on //Unix// systems, permissions for the new directory. Default is 
---		  448 (all rights for owner, none for others).
+--		  ##448## (all rights for owner, none for others).
 --      # ##mkparent## : If true (default) the parent directories are also created
 --        if needed. 
 --
 -- Returns:
---     An **integer**, 0 on failure, 1 on success.
+--     An **integer**, ##0## on failure, ##1## on success.
 --
 -- Comments:
--- 		##mode## is ignored on non-Unix platforms.
+-- 		##mode## is ignored on //Windows// platforms.
 --
 -- Example 1:
 -- <eucode>
@@ -716,7 +763,7 @@ end function
 -- 		# ##name## : a sequence, the name of the new file to create
 --
 -- Returns:
---     An **integer**, 0 on failure, 1 on success.
+--     An **integer**, ##0## on failure, ##1## on success.
 --
 -- Comments:
 -- * The created file will be empty, that is it has a length of zero.
@@ -742,13 +789,13 @@ public function create_file(sequence name)
 end function
 
 --**
--- Delete a file.
+-- deletes a file.
 --
 -- Parameters:
 -- 		# ##name## : a sequence, the name of the file to delete.
 --
 -- Returns:
---     An **integer**, 0 on failure, 1 on success.
+--     An **integer**, ##0## on failure, ##1## on success.
 
 public function delete_file(sequence name)
 
@@ -768,22 +815,22 @@ end function
 -- Returns the current directory, with a trailing SLASH
 --
 -- Parameters:
---		# ##drive_id## : For non-Unix systems only. This is the Drive letter to
+--		# ##drive_id## : For //Windows// systems only. This is the Drive letter to
 --      to get the current directory of. If omitted, the current drive is used.
 --
 -- Returns:
 --     A **sequence**, the current directory.
 --
--- Comment:
---  Windows maintain a current directory for each disk drive. You
+-- Comments:
+--  //Windows// maintains a current directory for each disk drive. You
 --  would use this routine if you wanted the current directory for a drive that
 --  may not be the current drive.
 --
---  For Unix systems, this is simply ignored because there is only one current
---  directory at any time on Unix.
+--  For //Unix// systems, this is simply ignored because there is only one current
+--  directory at any time on //Unix//.
 --
 -- Note: 
--- This always ensures that the returned value has a trailing SLASH
+-- This always ensures that the returned value has a trailing //SLASH//
 -- character.
 --
 -- Example 1:
@@ -830,7 +877,7 @@ end function
 sequence InitCurDir = curdir() -- Capture the original PWD
 
 --**
--- Returns the original current directory
+-- returns the original current directory.
 --
 -- Parameters:
 --		# None.
@@ -838,12 +885,12 @@ sequence InitCurDir = curdir() -- Capture the original PWD
 -- Returns:
 --     A **sequence**, the current directory at the time the program started running.
 --
--- Comment:
+-- Comments:
 -- You would use this if the program might change the current directory during
 -- its processing and you wanted to return to the original directory.
 --
 -- Note: 
--- This always ensures that the returned value has a trailing SLASH
+-- This always ensures that the returned value has a trailing ##SLASH##
 -- character.
 --
 -- Example 1:
@@ -859,19 +906,19 @@ end function
 --- copy_directory( srcpath, destpath, structonly = 0)
 
 --**
--- Clear (delete) a directory of all files, but retaining sub-directories.
+-- clears (deletes) a directory of all files, but retaining sub-directories.
 --
 -- Parameters:
 --		# ##name## : a sequence, the name of the directory whose files you want to remove.
 --		# ##recurse## : an integer, whether or not to remove files in the 
---        directory's sub-directories. If 0 then this function is identical
---        to remove_directory(). If 1, then we recursively delete the
---        directory and its contents. Defaults to 1.
+--        directory's sub-directories. If ##0## then this function is identical
+--        to ##remove_directory##. If ##1##, then we recursively delete the
+--        directory and its contents. Defaults to ##1## .
 --
 -- Returns:
---     An **integer**, 0 on failure, otherwise the number of files plus 1.
+--     An **integer**, ##0## on failure, otherwise the number of files plus ##1## .
 --
--- Comment:
+-- Comments:
 -- This never removes a directory. It only ever removes files. It is used to 
 -- clear a directory structure of all existing files, leaving the structure
 -- intact.
@@ -981,17 +1028,17 @@ public function clear_directory(sequence path, integer recurse = 1)
 end function
 
 --**
--- Remove a directory.
+-- removes a directory.
 --
 -- Parameters:
 --		# ##name## : a sequence, the name of the directory to remove.
---      # ##force## : an integer, if 1 this will also remove files and
+--      # ##force## : an integer, if ##1## this will also remove files and
 --                    sub-directories in the directory. The default is
---                   0, which means that it will only remove the
+--                   ##0##, which means that it will only remove the
 --                   directory if it is already empty.
 --
 -- Returns:
---     An **integer**, 0 on failure, 1 on success.
+--     An **integer**, ##0## on failure, ##1## on success.
 --
 -- Example 1:
 -- <eucode>
@@ -1090,7 +1137,7 @@ end function
 
 
 --****
--- === File name parsing
+-- === File Name Parsing
 
 public enum
 	PATH_DIR,
@@ -1100,13 +1147,13 @@ public enum
 	PATH_DRIVEID
 
 --**
--- Parse a fully qualified pathname.
+-- parses a fully qualified pathname.
 -- Parameters:
 -- 		# ##path## : a sequence, the path to parse
 --
 -- Returns:
--- 		A **sequence**, of length 5. Each of these elements is a string:
--- 		* The path name. For Windows, this excludes the drive id.
+-- 		A **sequence**, of length five. Each of these elements is a string:
+-- 		* The path name. For //Windows// this excludes the drive id.
 --		* The full unqualified file name
 --		* the file name, without extension
 --		* the file extension
@@ -1204,12 +1251,12 @@ public function pathinfo(sequence path, integer std_slash = 0)
 end function
 
 --**
--- Return the directory name of a fully qualified filename
+-- returns the directory name of a fully qualified filename.
 --
 -- Parameters:
 -- 		# ##path## : the path from which to extract information
 --      # ##pcd## : If not zero and there is no directory name in ##path##
---                 then "." is returned. The default (0) will just return
+--                 then "." is returned. The default (##0##) will just return
 --                 any directory name in ##path##.
 --
 -- Returns:
@@ -1239,12 +1286,12 @@ public function dirname(sequence path, integer pcd = 0)
 end function
 
 --**
--- Return the directory name of a fully qualified filename
+-- returns the directory name of a fully qualified filename.
 --
 -- Parameters:
 -- 		# ##path## : the path from which to extract information
 --      # ##pcd## : If not zero and there is no directory name in ##path##
---                 then "." is returned. The default (0) will just return
+--                 then "." is returned. The default (##0##) will just return
 --                 any directory name in ##path##.
 --
 -- Returns:
@@ -1274,7 +1321,7 @@ public function pathname(sequence path)
 end function
 
 --**
--- Return the file name portion of a fully qualified filename
+-- returns the file name portion of a fully qualified filename.
 --
 -- Parameters:
 -- 		# ##path## : the path from which to extract information
@@ -1303,7 +1350,7 @@ public function filename(sequence path)
 end function
 
 --**
--- Return the base filename of path.
+-- returns the base filename of path.
 --
 -- Parameters:
 -- 		# ##path## : the path from which to extract information
@@ -1331,7 +1378,7 @@ public function filebase(sequence path)
 end function
 
 --**
--- Return the file extension of a fully qualified filename
+-- returns the file extension of a fully qualified filename.
 --
 -- Parameters:
 -- 		# ##path## : the path from which to extract information
@@ -1358,7 +1405,7 @@ public function fileext(sequence path)
 end function
 	
 --**
--- Return the drive letter of the path on //WINDOWS// platforms.
+-- returns the drive letter of the path on //Windows// platforms.
 --
 -- Parameters:
 -- 		# ##path## : the path from which to extract information
@@ -1368,7 +1415,7 @@ end function
 --
 -- TODO: Test
 --
--- Example:
+-- Example 1:
 -- <eucode>
 -- letter = driveid("C:\\EUPHORIA\\Readme.txt")
 -- -- letter is "C"
@@ -1384,7 +1431,7 @@ public function driveid(sequence path)
 end function
 
 --**
--- Returns the supplied filepath with the supplied extension, if
+-- returns the supplied filepath with the supplied extension, if
 -- the filepath does not have an extension already.
 --
 -- Parameters:
@@ -1394,7 +1441,7 @@ end function
 -- Returns:
 -- 		A **sequence**, the path with an extension.
 --
--- Example:
+-- Example 1:
 -- <eucode>
 --  -- ensure that the supplied path has an extension, 
 --  -- but if it doesn't use "tmp".
@@ -1433,15 +1480,15 @@ public function defaultext( sequence path, sequence defext)
 end function
 
 --**
--- Determine if the supplied string is an absolute path or a relative path.
+-- determines if the supplied string is an absolute path or a relative path.
 --
 -- Parameters:
 --		# ##filename## : a sequence, the name of the file path
 --
 -- Returns:
---     An **integer**, 0 if ##filename## is a relative path or 1 otherwise.
+--     An **integer**, ##0## if ##filename## is a relative path or ##1## otherwise.
 --
--- Comment:
+-- Comments:
 -- A //relative// path is one which is relative to the current directory and
 -- an //absolute// path is one that doesn't need to know the current directory
 -- to find the file.
@@ -1507,7 +1554,7 @@ end type
 
 
 --**
--- Returns the full path and file name of the supplied file name.
+-- returns the full path and file name of the supplied file name.
 --
 -- Parameters:
 --	# ##path_in## : A sequence. This is the file name whose full path you want.
@@ -1520,26 +1567,26 @@ end type
 --                          other case flags to lowercase.
 --            CORRECT    =  If passed will correct the parts of the filepath that
 --                          exist in the current filesystem in parts of the filesystem
---                          that is case insensitive.  This should  work on WINDOWS
---                          or SMB mounted volumes on UNIX and all Mac OS filesystems.
+--                          that is case insensitive.  This should  work on //Windows//
+--                          or SMB mounted volumes on //Unix// and all OS X filesystems.
 --
 --           TO_LOWER    =  If passed alone the entire path is converted to lowercase.
 --           or_bits(TO_LOWER,CORRECT) = If these flags are passed together the the part that
 --                          exists has the case of that of the filesystem.  The part that
---                          doesn't is converted to lower case.
+--                          does not is converted to lower case.
 --           TO_SHORT    =  If passed the elements of the path that exist are also converted
---                          to their WINDOWS short names if avaliable.  
+--                          to their //Windows// short names if avaliable.  
 --
 -- Returns:
 --     A **sequence**, the full path and file name.
 --
--- Comment:
+-- Comments:
 -- * The supplied file/directory does not have to actually exist.
 -- * ##path_in## can be enclosed in quotes, which will be stripped off.
--- * If ##path_in## begins with a tilde '~~' then that is replaced by the
---   contents of $HOME in unix platforms and %HOMEDRIVE%%HOMEPATH% in Windows.
--- * In Windows, all '/' characters are replaced by '\' characters.
--- * Does not (yet) handle UNC paths or unix links.
+-- * If ##path_in## begins with a tilde ##'~~'## then that is replaced by the
+--   contents of ##$HOME## in //Unix// platforms and ##%HOMEDRIVE%%HOMEPATH%## in //Windows//.
+-- * In //Windows// all ##'/'## characters are replaced by ##'\'## characters.
+-- * Does not (yet) handle UNC paths or //Unix// links.
 --
 --
 -- Example 1:
@@ -1688,9 +1735,14 @@ public function canonical_path(sequence path_in, integer directory_given = 0, ca
 		if lPath[$] != SLASH then
 			sl = sl & {length(lPath)+1}
 		end if
-		
+
 		for i = length(sl)-1 to 1 by -1 label "partloop" do
-			sequence part = lPath[1..sl[i]-1]
+			ifdef WINDOWS then
+				sequence part = lDrive & lPath[1..sl[i]-1]
+			elsedef
+				sequence part = lPath[1..sl[i]-1]
+			end ifdef
+			
 			object list = dir( part & SLASH )
 			sequence supplied_name = lPath[sl[i]+1..sl[i+1]-1]
 			
@@ -1779,7 +1831,7 @@ end function
 
 
 --**
--- Returns a path string to the supplied file which is shorter than the 
+-- returns a path string to the supplied file which is shorter than the 
 -- given path string.
 --
 -- Parameters:
@@ -1792,7 +1844,7 @@ end function
 --     than the supplied path. If a shorter one cannot be formed, then the
 --     original path is returned.
 --
--- Comment:
+-- Comments:
 -- * This function is primarily used to get the shortest form of a file path
 --   for output to a file or screen.
 -- * It works by first trying to find if the ##orig_path## begins with any
@@ -1803,12 +1855,12 @@ end function
 -- * Next it checks if it can form a relative path from the current directory
 --   to the supplied file which is shorter than the parameter string.
 -- * Failing all of that, it returns the original parameter.
--- * In Windows, the shorter result has all '/' characters are replaced by '\'
+-- * In //Windows// the shorter result has all ##'/'## characters are replaced by ##'\'##
 --	 characters.
 -- * The supplied path does not have to actually exist.
 -- * ##orig_path## can be enclosed in quotes, which will be stripped off.
--- * If ##orig_path## begins with a tilde '~~' then that is replaced by the
---   contents of $HOME in unix platforms and %HOMEDRIVE%%HOMEPATH% in Windows.
+-- * If ##orig_path## begins with a tilde ##'~~'## then that is replaced by the
+--   contents of ##$HOME## in //Unix// platforms and ##%HOMEDRIVE%%HOMEPATH%## in //Windows//.
 --
 --
 -- Example 1:
@@ -1883,10 +1935,10 @@ public function abbreviate_path(sequence orig_path, sequence base_paths = {})
 end function
 
 --**
--- Split a filename into path segments
+-- split a filename into path segments.
 --
 -- Parameters:
---   * ##fname## - Filename to split
+--   * ##fname## ~-- Filename to split
 --
 -- Returns:
 --   A sequence of strings representing each path element found in ##fname##.
@@ -1912,7 +1964,7 @@ end function
 -- Join multiple path segments into a single path/filename
 --
 -- Parameters:
---   * ##path_elements## - Sequence of path elements
+--   * ##path_elements## ~-- Sequence of path elements
 --
 -- Returns:
 --   A string representing the path elements on the given platform
@@ -1967,17 +2019,17 @@ public enum
 	FILETYPE_DIRECTORY
 
 --**
--- Get the type of a file.
+-- gets the type of a file.
 --
 -- Parameters:
 --   # ##filename## : the name of the file to query. It must not have wildcards.
 -- 
 -- Returns:
 --   An **integer**,
---     * -1 if file could be multiply defined
---     *  0 if filename does not exist
---     *  1 if filename is a file
---     *  2 if filename is a directory
+--     * FILETYPE_UNDEFINED (-1) if file could be multiply defined (i.e., contains any wildcards - '*' or '?')
+--     * FILETYPE_NOT_FOUND (0) if filename does not exist
+--     * FILETYPE_FILE (1) if filename is a file
+--     * FILETYPE_DIRECTORY (2) if filename is a directory
 --
 -- See Also:
 -- [[:dir]], [[:FILETYPE_DIRECTORY]], [[:FILETYPE_FILE]], [[:FILETYPE_NOT_FOUND]],
@@ -2032,13 +2084,13 @@ public enum
 	EXT_SIZE
 
 --**
--- Check to see if a file exists
+-- checks to see if a file exists.
 --
 -- Parameters:
 --   # ##name## :  filename to check existence of
 --
 -- Returns:
---   An **integer**, 1 on yes, 0 on no
+--   An **integer**, ##1## on yes, ##0## on no.
 --
 -- Example 1:
 -- <eucode>
@@ -2073,13 +2125,13 @@ public function file_exists(object name)
 end function
 
 --**
--- Get the timestamp of the file
+-- gets the timestamp of the file.
 --
 -- Parameters:
 --   # ##name## : the filename to get the date of
 --	 
 -- Returns:
---   A valid **datetime type**, representing the files date and time or -1 if the
+--   A valid **datetime type**, representing the files date and time or ##-1## if the
 --	 file's date and time could not be read.
 -- 
 
@@ -2092,20 +2144,20 @@ public function file_timestamp(sequence fname)
 end function
 
 --**
--- Copy a file.
+-- copies a file.
 --
 -- Parameters:
 -- 		# ##src## : a sequence, the name of the file or directory to copy
 -- 		# ##dest## : a sequence, the new name or location of the file
--- 		# ##overwrite## : an integer; 0 (the default) will prevent an existing destination
+-- 		# ##overwrite## : an integer; ##0## (the default) will prevent an existing destination
 --                       file from being overwritten. Non-zero will overwrite the
 --                       destination file.
 --
 -- Returns:
---     An **integer**, 0 on failure, 1 on success.
+--     An **integer**, ##0## on failure, ##1## on success.
 --
 -- Comments:
---     If ##overwrite## is true, and if dest file already exists,
+--     If ##overwrite## is true, and if ##dest## file already exists,
 --     the function overwrites the existing file and succeeds.
 --
 -- See Also:
@@ -2131,7 +2183,6 @@ public function copy_file(sequence src, sequence dest, integer overwrite = 0)
 		
 	elsedef
 		integer success = 0
-		
 		if file_exists(src) then
 			if overwrite or not file_exists( dest ) then
 				integer
@@ -2158,16 +2209,16 @@ public function copy_file(sequence src, sequence dest, integer overwrite = 0)
 end function
 
 --**
--- Rename a file.
+-- rename a file.
 -- 
 -- Parameters:
 -- 		# ##old_name## : a sequence, the name of the file or directory to rename.
 -- 		# ##new_name## : a sequence, the new name for the renamed file
---		# ##overwrite## : an integer, 0 (the default) to prevent renaming if destination file exists,
---                                   1 to delete existing destination file first
+--		# ##overwrite## : an integer, ##0## (the default) to prevent renaming if destination file exists,
+--                                   ##1## to delete existing destination file first
 --
 -- Returns:
---     An **integer**, 0 on failure, 1 on success.
+--     An **integer**, ##0## on failure, ##1## on success.
 --
 -- Comments:
 -- 	*	If ##new_name## contains a path specification, this is equivalent to moving the file, as 
@@ -2219,37 +2270,111 @@ public function rename_file(sequence old_name, sequence new_name, integer overwr
 end function
 
 ifdef LINUX then
-	function xstat(atom psrc, atom psrcbuf)
-		return c_func(xStatFile, {STAT_VER, psrc, psrcbuf})
-	end function
+			ifdef BITS32 then
+				constant
+					STAT_ST_BLKSIZE = 48,
+					SIZEOF_STAT     = 88,
+					$
+			elsedef
+				constant
+					STAT_ST_BLKSIZE = 88,
+					SIZEOF_STAT     = 144,
+					$
+			end ifdef
+	
 elsifdef UNIX then
-	function xstat(atom psrc, atom psrcbuf)
-		return c_func(xStatFile, {psrc, psrcbuf})
+		ifdef OSX then
+			ifdef BITS32 then
+				constant
+					STAT_ST_BLKSIZE = 76,
+					SIZEOF_STAT     = 108,
+					$
+			elsedef
+				constant
+					STAT_ST_BLKSIZE = 112,
+					SIZEOF_STAT     = 144,
+					$
+			end ifdef
+		elsifdef FREEBSD then
+			ifdef BITS32 then
+				constant
+					STAT_ST_BLKSIZE = 64,
+					SIZEOF_STAT     = 96,
+					$
+			elsedef
+				constant
+					STAT_ST_BLKSIZE = 88,
+					SIZEOF_STAT     = 120,
+					$
+			end ifdef
+		elsifdef OPENBSD then
+			constant
+				STAT_ST_BLKSIZE = 72,
+				SIZEOF_STAT     = 112,
+				$
+		elsifdef NETBSD then
+			constant
+				STAT_ST_BLKSIZE = 80,
+				SIZEOF_STAT     = 100,
+				$
+			stat_t_offset = 80
+			stat_buf_size = 100
+		end ifdef
+end ifdef
+
+ifdef UNIX then
+	enum
+		STAT_DEV,
+		STAT_BLKSIZE,
+		STAT_RETURN,
+		$
+	
+	constant
+		STAT_ST_DEV = 0
+	
+	function stat( sequence src )
+		atom psrc = machine:allocate_string( src, 1 )
+		atom psrcbuf = machine:allocate( SIZEOF_STAT, 1 )
+		sequence stat_result = repeat( 0, STAT_RETURN )
+		ifdef LINUX then
+			stat_result[STAT_RETURN] = c_func(xStatFile, {STAT_VER, psrc, psrcbuf})
+		elsedef
+			stat_result[STAT_RETURN] = c_func(xStatFile, {psrc, psrcbuf})
+		end ifdef
+		ifdef OSX or FREEBSD then
+			stat_result[STAT_DEV] = peek4u( psrcbuf + STAT_ST_DEV )
+		elsedef
+			stat_result[STAT_DEV]    = peek8u( psrcbuf + STAT_ST_DEV )
+		end ifdef
+		ifdef FREEBSD then
+			stat_result[STAT_BLKSIZE] = peek4u( psrcbuf + STAT_ST_BLKSIZE )
+		elsedef
+			stat_result[STAT_BLKSIZE] = peek_pointer( psrcbuf + STAT_ST_BLKSIZE )
+		end ifdef
+		return stat_result
 	end function
 end ifdef
 
 --**
--- Move a file to another location.
+-- moves a file to another location.
 --
 -- Parameters:
 --   # ##src## : a sequence, the name of the file or directory to move
 --   # ##dest## : a sequence, the new location for the file
---   # ##overwrite## : an integer, 0 (the default) to prevent overwriting an existing destination file,
---                     1 to overwrite existing destination file
+--   # ##overwrite## : an integer, ##0## (the default) to prevent overwriting an existing destination file,
+--                     ##1## to overwrite existing destination file
 --
 -- Returns:
---   An **integer**, 0 on failure, 1 on success.
+--   An **integer**, ##0## on failure, ##1## on success.
 --
 -- Comments:
 --  If ##overwrite## was requested but the move fails, any existing destination file is preserved.
 --
 -- See Also:
 --   [[:rename_file]], [[:copy_file]]
-
 public function move_file(sequence src, sequence dest, integer overwrite=0)
 	atom psrc = 0, pdest = 0, ret
 	sequence tempfile = ""
-
 	if not file_exists(src) then
 		return 0
 	end if
@@ -2259,49 +2384,29 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 			return 0
 		end if
 	end if
-	
-	ifdef UNIX then
-		atom psrcbuf = 0, pdestbuf = 0
-		integer stat_t_offset, stat_buf_size
-	end ifdef
-	ifdef LINUX then
-		stat_t_offset = 0
-		stat_buf_size = 88 * 2
-	elsifdef FREEBSD or OSX then
-		stat_t_offset = 0
-		stat_buf_size = 96
-	elsifdef OPENBSD then
-		stat_t_offset = 0
-		stat_buf_size = 112
-	elsifdef NETBSD then
-		stat_t_offset = 0
-		stat_buf_size = 100
-	end ifdef
-	
 
 	ifdef UNIX then
-		psrcbuf = machine:allocate(stat_buf_size, 1)
-		psrc = machine:allocate_string(src, 1)
-		ret = xstat(psrc, psrcbuf)
+		sequence src_result, dest_result
+		src_result = stat( src )
+		ret = src_result[STAT_RETURN]
 		if ret then
 			return 0
 		end if
 		
-		pdestbuf = machine:allocate(stat_buf_size)
-		pdest = machine:allocate_string(dest)
-		ret = xstat(pdest, pdestbuf)
+		dest_result = stat( dest )
+		ret = dest_result[STAT_RETURN]
 		if ret then
 			-- Assume destination doesn't exist
 			atom pdir
 			if length(dirname(dest)) = 0 then
-				pdir = machine:allocate_string(current_dir(), 1)
+				dest_result = stat( current_dir() )
 			else
-				pdir = machine:allocate_string(dirname(dest), 1)
+				dest_result = stat( dirname( dest ) )
 			end if
-			ret = xstat(pdir, pdestbuf)
+			ret = dest_result[STAT_RETURN]
 		end if
 		
-		if not ret and not equal(peek(pdestbuf+stat_t_offset), peek(psrcbuf+stat_t_offset)) then
+		if not ret and dest_result[STAT_DEV] != src_result[STAT_DEV] then
 			-- on different filesystems, can not use rename
 			-- fall back on copy&delete
 			ret = copy_file(src, dest, overwrite)
@@ -2311,17 +2416,18 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
  			return (not ret)
 		end if
 		
-	elsedef		
-		psrc  = machine:allocate_string(src, 1)
-		pdest = machine:allocate_string(dest, 1)
 	end ifdef
+	
+	psrc  = machine:allocate_string(src, 1)
+	pdest = machine:allocate_string(dest, 1)
+	
 
 	if overwrite then
 		-- return value is ignored, we don't care if it existed or not
 		tempfile = temp_file(dest)
 		move_file(dest, tempfile)
 	end if
-
+	
 	ret = c_func(xMoveFile, {psrc, pdest})
 	
 	ifdef UNIX then
@@ -2340,16 +2446,16 @@ end function
 
 
 --**
--- Return the size of a file.
+-- returns the size of a file.
 --
 -- Parameters:
 -- 		# ##filename## : the name of the queried file
 --
 -- Returns:
--- 		An **atom**, the file size, or -1 if file is not found.
+-- 		An **atom**, the file size, or ##-1## if file is not found.
 --
 -- Comments:
---     This function does not compute the total size for a directory, and returns 0 instead.
+--     This function does not compute the total size for a directory, and returns ##0## instead.
 -- See Also:
 -- [[:dir]]
 
@@ -2363,12 +2469,12 @@ public function file_length(sequence filename)
 end function
 
 --**
--- Locates a file by looking in a set of directories for it.
+-- locates a file by looking in a set of directories for it.
 --
 -- Parameters:
 --		# ##filename## : a sequence, the name of the file to search for.
 --		# ##search_list## : a sequence, the list of directories to look in. By
---        default this is "", meaning that a predefined set of directories
+--        default this is ##""##, meaning that a predefined set of directories
 --        is scanned. See comments below.
 --      # ##subdir## : a sequence, the sub directory within the search directories
 --        to check. This is optional. 
@@ -2383,14 +2489,14 @@ end function
 -- If ##filename## is located, the full path of the file is returned.
 --
 -- If ##search_list## is supplied, it can be either a sequence of directory names,
--- of a string of directory names delimited by ':' in UNIX and ';' in Windows.
+-- of a string of directory names delimited by ##':'## in //Unix// and ##';'## in //Windows//.
 --
--- If the ##search_list## is omitted or "", this will look in the following places...
+-- If the ##search_list## is omitted or ##""##, this will look in the following places~:
 -- * The current directory
 -- * The directory that the program is run from.
--- * The directory in $HOME ($HOMEDRIVE & $HOMEPATH in Windows)
+-- * The directory in ##$HOME## (##$HOMEDRIVE & $HOMEPATH## in //Windows//)
 -- * The parent directory of the current directory
--- * The directories returned by include_paths()
+-- * The directories returned by ##include_paths##
 -- * $EUDIR/bin
 -- * $EUDIR/docs
 -- * $EUDIST/
@@ -2510,7 +2616,7 @@ public function locate_file(sequence filename, sequence search_list = {}, sequen
 end function
 
 --**
--- Returns some information about a disk drive.
+-- returns some information about a disk drive.
 --
 -- Parameters:
 --	# ##disk_path## : A sequence. This is the path that identifies the disk to inquire upon.
@@ -2554,28 +2660,13 @@ public function disk_metrics(object disk_path)
 		sequence size_of_disk = {0,0,0}
 
 		atom bytes_per_cluster
-		atom psrc, ret, psrcbuf
+		atom ret
 		integer stat_t_offset, stat_buf_size
 
-		ifdef LINUX then
-			stat_t_offset = 48
-			stat_buf_size = 88 * 2
-		elsifdef FREEBSD or OSX then
-			stat_t_offset = 64
-			stat_buf_size = 96
-		elsifdef OPENBSD then
-			stat_t_offset = 72
-			stat_buf_size = 112
-		elsifdef NETBSD then
-			stat_t_offset = 80
-			stat_buf_size = 100
-		end ifdef
+		sequence stat_result = stat( disk_path )
+		ret               = stat_result[STAT_RETURN]
+		bytes_per_cluster = stat_result[STAT_BLKSIZE]
 
-		psrc    = machine:allocate_string(disk_path, 1)
-		psrcbuf = machine:allocate(stat_buf_size, 1)
-		ret = xstat(psrc,psrcbuf)
-		bytes_per_cluster = peek4s(psrcbuf+stat_t_offset)
-		
 		if ret then
 			-- failure
 			return result 
@@ -2598,13 +2689,13 @@ public function disk_metrics(object disk_path)
 end function 
  
 --**
--- Returns the amount of space for a disk drive.
+-- returns the amount of space for a disk drive.
 --
 -- Parameters:
 --	# ##disk_path## : A sequence. This is the path that identifies the disk to inquire upon.
 --
 -- Returns:
---     A **sequence**, containing TOTAL_BYTES, USED_BYTES, FREE_BYTES, and a string which represents the filesystem name
+--     A **sequence**, containing ##TOTAL_BYTES##, ##USED_BYTES##, ##FREE_BYTES##, and a string which represents the filesystem name
 --
 -- Example 1:
 -- <eucode>
@@ -2738,25 +2829,25 @@ end function
 
 
 --**
--- Returns the amount of space used by a directory.
+-- returns the amount of space used by a directory.
 --
 -- Parameters:
 --	# ##dir_path## : A sequence. This is the path that identifies the directory to inquire upon.
---  # ##count_all## : An integer. Used by Windows systems. If zero (the default) 
+--  # ##count_all## : An integer. Used by //Windows// systems. If zero (the default) 
 --                    it will not include //system// or //hidden// files in the
 --                    count, otherwise they are included.
 --
 -- Returns:
---   A **sequence**, containing four elements; the number of sub-directories [COUNT_DIRS],
---   the number of files [COUNT_FILES], the total space used by the directory [COUNT_SIZE], 
---   and breakdown of the file contents by file extension [COUNT_TYPES].
+--   A **sequence**, containing four elements; the number of sub-directories ##[COUNT_DIRS]##,
+--   the number of files ##[COUNT_FILES]##, the total space used by the directory ##[COUNT_SIZE]##, 
+--   and breakdown of the file contents by file extension ##[COUNT_TYPES]##.
 --                  
 -- Comments:
 --  * The total space used by the directory does not include space used by any sub-directories.
 --  * The file breakdown is a sequence of three-element sub-sequences. Each sub-sequence
---    contains the extension [EXT_NAME], the number of files of this extension [EXT_COUNT],
---    and the space used by these files [EXT_SIZE]. The sub-sequences are presented in
---    extension name order. On Windows the extensions are all in lowercase.
+--    contains the extension ##[EXT_NAME]##, the number of files of this extension ##[EXT_COUNT]##,
+--    and the space used by these files ##[EXT_SIZE]##. The sub-sequences are presented in
+--    extension name order. On //Windows// the extensions are all in lowercase.
 --
 -- Example 1:
 -- <eucode>
@@ -2790,7 +2881,7 @@ public function dir_size(sequence dir_path, integer count_all = 0)
 end function
 
 --**
--- Returns a file name that can be used as a temporary file.
+-- returns a file name that can be used as a temporary file.
 --
 -- Parameters:
 --	# ##temp_location## : A sequence. A directory where the temporary file is expected
@@ -2798,16 +2889,16 @@ end function
 --            ** If omitted (the default) the 'temporary' directory
 --               will be used. The temporary directory is defined in the "TEMP" 
 --               environment symbol, or failing that the "TMP" symbol and failing
---               that "C:\TEMP\" is used in non-Unix systems and "/tmp/" is used
---               in Unix systems. 
+--               that "C:\TEMP\" is used on //Windows// systems and "/tmp/" is used
+--               on //Unix// systems. 
 --            ** If ##temp_location## was supplied, 
 --               *** If it is an existing file, that file's directory is used.
 --               *** If it is an existing directory, it is used.
 --               *** If it doesn't exist, the directory name portion is used.
 --  # ##temp_prefix## : A sequence: The is prepended to the start of the generated file name.
---               The default is "".
+--               The default is ##""## .
 --  # ##temp_extn## : A sequence: The is a file extention used in the generated file. 
---               The default is "_T_".
+--               The default is ##"_T_"## .
 --  # ##reserve_temp## : An integer: If not zero an empty file is created using the 
 --               generated name. The default is not to reserve (create) the file.
 --
@@ -2895,13 +2986,13 @@ end function
 
 
 --**
--- Returns a checksum value for the specified file.
+-- returns a checksum value for the specified file.
 --
 -- Parameters:
 --	# ##filename## : A sequence. The name of the file whose checksum you want.
 --  # ##size## : An integer. The number of atoms to return. Default is 4 
 --  # ##usename##: An integer. If not zero then the actual text of ##filename## will
---  affect the resulting checksum. The default (0) will not use the name of
+--  affect the resulting checksum. The default (##0##) will not use the name of
 --  the file.
 --  # ##return_text##: An integer. If not zero, the check sum is returned as a
 --  text string of hexadecimal digits otherwise (the default) the check sum

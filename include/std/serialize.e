@@ -6,22 +6,24 @@
 namespace serialize
 
 include std/convert.e
+include std/dll.e
+include std/error.e
 include std/machine.e
 
 -- Serialized format of Euphoria objects
 --
 -- First byte:
---          0..246    -- immediate small integer, -9 to 237
+--          0..248    -- immediate small integer, -9 to 239
 					  -- since small negative integers -9..-1 might be common
-constant I2B  = 247,   -- 2-byte signed integer follows
-		 I3B  = 248,   -- 3-byte signed integer follows
-		 I4B  = 249,   -- 4-byte signed integer follows
-		 I8B  = 250,   -- 4-byte signed integer follows
-		 F4B  = 251,   -- 4-byte f.p. number follows
-		 F8B  = 252,   -- 8-byte f.p. number follows
-		 F10B = 253,   -- 10-byte fp number bollows
-		 S1B  = 255,   -- sequence, 1-byte length follows, then elements
-		 S4B  = 255    -- sequence, 4-byte length follows, then elements
+constant I2B = 249,   -- 2-byte signed integer follows
+		 I3B = 250,   -- 3-byte signed integer follows
+		 I4B = 251,   -- 4-byte signed integer follows
+		 F4B = 252,   -- 4-byte f.p. number follows
+		 F8B = 253,   -- 8-byte f.p. number follows
+		 S1B = 254,   -- sequence, 1-byte length follows, then elements
+		 S4B = 255,   -- sequence, 4-byte length follows, then elements
+		 I8B = 0,     -- 8-byte integer, for 4.1 compatibility
+		 F10B= 1      -- 10-byte floating point, for 4.1 compatibility
 
 constant MIN1B = -9,
 		 MAX1B = 237,
@@ -93,9 +95,6 @@ function deserialize_file(integer fh, integer c)
 
 		case I4B then
 			return get4(fh) + MIN4B
-		
-		case I8B then
-			return get8(fh)
 
 		case F4B then
 			return convert:float32_to_atom({getc(fh), getc(fh),
@@ -103,13 +102,6 @@ function deserialize_file(integer fh, integer c)
 
 		case F8B then
 			return convert:float64_to_atom({getc(fh), getc(fh),
-				getc(fh), getc(fh),
-				getc(fh), getc(fh),
-				getc(fh), getc(fh)})
-		
-		case F10B then
-			return convert:float80_to_atom({getc(fh), getc(fh),
-				getc(fh), getc(fh),
 				getc(fh), getc(fh),
 				getc(fh), getc(fh),
 				getc(fh), getc(fh)})
@@ -124,17 +116,32 @@ function deserialize_file(integer fh, integer c)
 			if len < 0  or not integer(len) or len > MAX4B then
 				return 0
 			end if
-			s = repeat(0, len)
-			for i = 1 to len do
-				-- in-line small integer for greater speed on strings
-				c = getc(fh)
-				if c < I2B then
-					s[i] = c + MIN1B
+			if c = S4B and len < 256 then
+				if len = I8B then
+					return get8(fh)
+
+				elsif len = F10B then
+					return convert:float80_to_atom({getc(fh), getc(fh),
+						getc(fh), getc(fh),
+						getc(fh), getc(fh),
+						getc(fh), getc(fh),
+						getc(fh), getc(fh)})
 				else
-					s[i] = deserialize_file(fh, c)
+					error:crash( "Invalid sequence serialization" )
 				end if
-			end for
-			return s
+			else
+				s = repeat(0, len)
+				for i = 1 to len do
+					-- in-line small integer for greater speed on strings
+					c = getc(fh)
+					if c < I2B then
+						s[i] = c + MIN1B
+					else
+						s[i] = deserialize_file(fh, c)
+					end if
+				end for
+				return s
+			end if
 	end switch
 end function
 
@@ -180,9 +187,6 @@ function deserialize_object(sequence sdata, integer pos, integer c)
 		case I4B then
 			return {getp4(sdata, pos) + MIN4B, pos + 4}
 		
-		case I8B then
-			return { getp8(sdata, pos), pos + 8 }
-
 		case F4B then
 			return {convert:float32_to_atom({sdata[pos], sdata[pos+1],
 				sdata[pos+2], sdata[pos+3]}), pos + 4}
@@ -192,13 +196,6 @@ function deserialize_object(sequence sdata, integer pos, integer c)
 				sdata[pos+2], sdata[pos+3],
 				sdata[pos+4], sdata[pos+5],
 				sdata[pos+6], sdata[pos+7]}), pos + 8}
-
-		case F10B then
-			return {convert:float80_to_atom({sdata[pos], sdata[pos+1],
-				sdata[pos+2], sdata[pos+3],
-				sdata[pos+4], sdata[pos+5],
-				sdata[pos+6], sdata[pos+7],
-				sdata[pos+8], sdata[pos+9]}), pos + 10}
 		
 		case else
 			-- sequence
@@ -209,20 +206,34 @@ function deserialize_object(sequence sdata, integer pos, integer c)
 				len = getp4(sdata, pos)
 				pos += 4
 			end if
-			s = repeat(0, len)
-			for i = 1 to len do
-				-- in-line small integer for greater speed on strings
-				c = sdata[pos]
-				pos += 1
-				if c < I2B then
-					s[i] = c + MIN1B
+			if c = S4B and len < 256 then
+				if len = I8B then
+					return { getp8(sdata, pos), pos + 8 }
+				elsif len = F10B then
+					return {convert:float80_to_atom({sdata[pos], sdata[pos+1],
+							sdata[pos+2], sdata[pos+3],
+							sdata[pos+4], sdata[pos+5],
+							sdata[pos+6], sdata[pos+7],
+							sdata[pos+8], sdata[pos+9]}), pos + 10}
 				else
-					sequence temp = deserialize_object(sdata, pos, c)
-					s[i] = temp[1]
-					pos = temp[2]
+					error:crash( "Invalid sequence serialization" )
 				end if
-			end for
-			return {s, pos}
+			else
+				s = repeat(0, len)
+				for i = 1 to len do
+					-- in-line small integer for greater speed on strings
+					c = sdata[pos]
+					pos += 1
+					if c < I2B then
+						s[i] = c + MIN1B
+					else
+						sequence temp = deserialize_object(sdata, pos, c)
+						s[i] = temp[1]
+						pos = temp[2]
+					end if
+				end for
+				return {s, pos}
+			end if
 	end switch
 end function
 
@@ -230,7 +241,7 @@ end function
 -- === Routines
 
 --**
--- Convert a serialized object in to a standard Euphoria object.
+-- converts a serialized object in to a standard Euphoria object.
 --
 -- Parameters:
 -- # ##sdata## : either a sequence containing one or more concatenated serialized objects or
@@ -344,7 +355,7 @@ public function deserialize(object sdata, integer pos = 1)
 end function
 
 --**
--- Convert a standard Euphoria object in to a serialized version of it.
+-- converts a standard Euphoria object in to a serialized version of it.
 --
 -- Parameters:
 -- # ##euobj## : any Euphoria object.
@@ -418,7 +429,7 @@ public function serialize(object x)
 			return I4B & convert:int_to_bytes(x-MIN4B)
 		
 		else
-			return I8B & int_to_bytes(x, 8)
+			return S4B & I8B & repeat( 0, 3 ) & int_to_bytes(x, 8)
 		end if
 
 	elsif atom(x) then
@@ -432,7 +443,7 @@ public function serialize(object x)
 			if x = convert:float64_to_atom( x4 ) then
 				return F8B & convert:atom_to_float64(x)
 			else
-				return F10B & convert:atom_to_float80( x )
+				return S4B & F10B & repeat( 0, 3 ) & convert:atom_to_float80( x )
 			end if
 		end if
 
@@ -451,7 +462,7 @@ public function serialize(object x)
 end function
 
 --**
--- Saves a Euphoria object to disk in a binary format.
+-- saves a Euphoria object to disk in a binary format.
 --
 -- Parameters:
 -- # ##data## : any Euphoria object.
@@ -462,11 +473,11 @@ end function
 -- created file.
 -- 
 -- Comments:
--- If the named file doesn't exist it is created, otherwise it is overwritten.
+-- If the named file does not exist it is created, otherwise it is overwritten.
 --
 -- You can use the [[:load]] function to recover the data from the file.
 --
--- Example :
+-- Example 1:
 -- <eucode>
 -- include std/serialize.e
 -- integer size = dump(myData, theFileName) 
@@ -495,7 +506,7 @@ public function dump(sequence data, sequence filename)
 end function
 
 --**
--- Restores a Euphoria object that has been saved to disk by [[:dump]].
+-- restores a Euphoria object that has been saved to disk by [[:dump]].
 --
 -- Parameters:
 -- # ##filename## : the name of the file to restore it from.
@@ -509,7 +520,7 @@ end function
 -- This is used to load back data from a file created by the [[:dump]]
 -- function.
 --
--- Example :
+-- Example 1:
 -- <eucode>
 -- include std/serialize.e
 -- sequence mydata = load(theFileName) 

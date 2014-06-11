@@ -155,21 +155,22 @@ function unpack(sequence image, integer BitCount, integer Width, integer Height)
 end function
 
 --****
--- === Bitmap handling
+-- === Bitmap Handling
 --
 
 --**
--- Read a bitmap (.BMP) file into a 2-d sequence of sequences (image)
+-- reads a bitmap (##.BMP##) file into a 2-d sequence of sequences (image)
 --
 -- Parameters:
---		# ##file_name## : a sequence, the path to a .bmp file to read from. The extension is not assumed if missing.
+--		# ##file_name## : a sequence, the path to a ##.bmp## file to read from. The extension is not assumed if missing.
 --
 -- Returns:
 --   An **object**, on success, a sequence of the form ##{palette,image}##. On failure, an error code is returned.
 --
 -- Comments:
--- In the returned value, the first element is a list of mixtures, each of which defines 
--- a color, and the second, a list of point rows. Each pixel in a row is represented by its color index.
+-- In the returned value, the first element is a list of three membered sequences, each containing 
+-- three color intensity values in the range 0 to 255, and the second, a list of pixel rows. Each
+-- pixel in a row is represented by its color index in the said first element of the return value.
 --
 -- The file should be in the bitmap format. The most common variations of the format are supported. 
 --
@@ -191,9 +192,6 @@ end function
 -- <eucode>
 -- x = read_bitmap("c:\\windows\\arcade.bmp")
 -- </eucode>
---
--- Note: 
--- double backslash needed to get single backslash in a string
 --
 -- See Also: 
 --   [[:save_bitmap]]
@@ -395,10 +393,10 @@ procedure putImage1(sequence image)
 end procedure
 
 --**
--- Create a .BMP bitmap file, given a palette and a 2-d sequence of sequences of colors.
+-- create a ##.BMP## bitmap file, given a palette and a 2-d sequence of sequences of colors.
 --
 -- Parameters:
--- 		# ##palette_n_image## : a {palette, image} pair, like [[:read_bitmap()]] returns
+-- 		# ##palette_n_image## : a ##{palette, image}## pair, like [[:read_bitmap]] returns
 -- 		# ##file_name## : a sequence, the name of the file to save to.
 --
 -- Returns:
@@ -406,11 +404,13 @@ end procedure
 --
 -- Comments:
 --   This routine does the opposite of [[:read_bitmap]]().
--- The first element of ##palette_n_image## is a sequence of [[:mixture]]s defining each 
--- color in the bitmap. The second element is a sequence of sequences of colors. The inner 
--- sequences must have the same length.
+-- The first element of ##palette_n_image## is a list of sequences each sequence containing 
+-- exactly three color intensity values in the range 0 to 255. The second element is a list of 
+-- sequences of colors. The inner sequences must have the same length.  Each element in the 
+-- each inner sequence represents the color index in ##palette_n_image## of a pixel.  Each inner
+-- sequence is a row in the image.
 --
--- The result will be one of the following codes: 
+-- The result will be one of the following codes~: 
 -- <eucode>
 -- public constant
 --     BMP_SUCCESS = 0,
@@ -420,8 +420,8 @@ end procedure
 -- </eucode>
 --
 -- 
--- ##save_bitmap##() produces bitmaps of 2, 4, 16, or 256 colors and these can all be read with 
--- ##read_bitmap##(). Windows Paintbrush and some other tools do not support 4-color bitmaps.
+-- ##save_bitmap## produces bitmaps of 2, 4, 16, or 256 colors and these can all be read with 
+-- ##read_bitmap##. Windows Paintbrush and some other tools do not support 4-color bitmaps.
 --
 -- Example 1:
 -- <eucode>

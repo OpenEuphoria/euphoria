@@ -1,0 +1,4 @@
+
+Please run t_traced_enum_type.e and check to see that the variables use alternative literals.
+The trace screen should display thisday as equal to one of the week days, and mining_target
+should be displayed as one of the planets.

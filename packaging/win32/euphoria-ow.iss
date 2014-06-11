@@ -13,8 +13,8 @@
 
 [Setup]
 AppName=Euphoria
-AppVersion=4.0.4
-AppVerName=Euphoria v4.0.4
+AppVersion=4.0.5
+AppVerName=Euphoria v4.0.5
 AppPublisher=OpenEuphoria Group
 AppPublisherURL=http://openeuphoria.org
 AppSupportURL=http://openeuphoria.org
@@ -26,13 +26,16 @@ LicenseFile=..\..\license.txt
 DisableStartupPrompt=yes
 DisableReadyPage=yes
 OutputDir=.\
-OutputBaseFilename=euphoria-4.0.4-ow
+OutputBaseFilename=euphoria-4.0.5-ow
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
 ChangesEnvironment=yes
 InfoBeforeFile=before.txt
 InfoAfterFile=after.txt
+; set the minimum environment required to 
+; Windows 95 Original Equipment Manufacterer Service Release 2.5 (see ticket 665)
+MinVersion=4.0.1212,
 
 [Types]
 Name: "full"; Description: "Full installation";
@@ -134,8 +137,8 @@ Source: "cleanbranch\bin\*.exw"; DestDir: {app}\bin\; Flags: ignoreversion; Comp
 Source: "cleanbranch\demo\*.*"; DestDir: {app}\demo\; Flags: ignoreversion recursesubdirs; Components: comp_demos
 
 ; Docs
-Source: "..\..\build\*.pdf"; DestDir: {app}\docs\; Flags: ignoreversion; Components: comp_docs
-Source: "..\..\build\html\*.*"; DestDir: {app}\docs\html\; Flags: ignoreversion recursesubdirs; Components: comp_docs
+Source: "..\..\source\build\*.pdf"; DestDir: {app}\docs\; Flags: ignoreversion; Components: comp_docs
+Source: "..\..\source\build\html\*.*"; DestDir: {app}\docs\html\; Flags: ignoreversion recursesubdirs; Components: comp_docs
 
 ; Includes
 Source: "cleanbranch\include\*.*"; DestDir: {app}\include\; Flags: ignoreversion recursesubdirs; Components: comp_main
@@ -143,7 +146,7 @@ Source: "cleanbranch\include\*.*"; DestDir: {app}\include\; Flags: ignoreversion
 ; Sources
 Source: "..\..\source\*.*"; DestDir: {app}\source\; Flags: ignoreversion; Components: comp_source
 Source: "..\..\source\codepage\*.*"; DestDir: {app}\source\; Flags: ignoreversion; Components: comp_source
-Source: "..\..\source\pcre\*.*"; DestDir: {app}\source\; Flags: ignoreversion; Components: comp_source
+Source: "..\..\source\pcre\*.*"; DestDir: {app}\source\pcre\; Flags: ignoreversion; Components: comp_source
 
 ; Test
 Source: "cleanbranch\tests\*.*"; DestDir: {app}\tests\; Flags: ignoreversion recursesubdirs; Components: comp_tests
@@ -223,7 +226,7 @@ begin
 
 		ExpandConstant('SET EUDIR={app}') + #13#10 + 
 		ExpandConstant('SET WATCOM={app}\watcom') + #13#10 + 
-		'SET PATH=%EUDIR%\bin;%WATCOM\binw;%WATCOM%\binnt;%PATH%' + #13#10 + 
+		'SET PATH=%EUDIR%\bin;%WATCOM%\binw;%WATCOM%\binnt;%PATH%' + #13#10 + 
 		'SET INCLUDE=%WATCOM%\h;%WATCOM%\h\nt' + #13#10, 
 		True);
 end;

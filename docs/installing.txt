@@ -8,9 +8,9 @@ operating system.
 === Windows
 
 All versions other than Windows 95 work without problems.  To use Windows 95, it must have Internet Explorer version 4 or higher
-installed (included in service pack 2.5).  To use the new socket functions you will also need fully patched versions of Windows.
+installed (included in service pack 2.5).  To use the new socket functions you will also Windows 2000 or later.  To use all of the new standard library functions you will need at least Windows XP or later.
 
-EUPHORIA is frequently tested on versions Windows XP, Vista, 7.
+Euphoria is frequently tested on Windows versions: XP, Vista, 7.
 
 To install Euphoria on //Windows//, visit the following URL:
 
@@ -31,7 +31,7 @@ prompts to get Euphoria installed.
 The installer copies the required files; adds the binary subdirectory to 
 your path, if you leave 'update environment' checked; and if you leave 
 'Associate file extensions' checked, it associates icons and various actions to
-EUPHORIA file extensions.  Please do not open 'Euphoria Console Files' from Explorer;
+Euphoria file extensions.  Please do not open 'Euphoria Console Files' from Explorer;
 they are meant to be run from the command line.
 
 The installer does not set the environment variable **EUDIR** to the Euphoria 
@@ -39,7 +39,7 @@ directory even though many third-party programs expect that to be set.  This is
 so an older version of EUPHORIA can also still work on the same system.  To set this variable
 please see the section [[:manually_edit_your_environment| "How to manually edit your environment in Windows"]] below.
 
-==== Possible problems ... 
+==== Possible Problems 
 
 * On Windows XP/2000, be careful that your PATH and EUDIR do not conflict with autoexec.nt, which can also be used to set environment variables.
 * On WinME/98/95 if the install program fails to edit your autoexec.bat file, you will have to do it yourself. Follow the manual procedure  described below.
@@ -94,29 +94,36 @@ directory for the C:\EUPHORIA examples below.
 =====  More on editing environment variables
 
 
-* If your PATH is not set, you
- will have to create one that includes C:\EUPHORIA\BIN.
 * set EUDIR to the location of your Euphoria installation directory.
+* In PATH you need to include %EUDIR%\BIN.
 * There is another, optional, environment variable used by some experienced
- users of Euphoria. It is called EUINC (see the [[:include statement]] ). It determines the search path for
- included files. You might want to add it, or change it, when you install a new
- version of Euphoria.
+ users of Euphoria. It is called EUINC (see the [[:include statement]] ). It determines a search path for
+ included files and this variable is used by new and older versions of EUPHORIA. However, for 4.0 and above we now have a [[:set_up_the_euphoria_configuration_file|"configuration file"]] for adding include paths and other settings.
 
+@[:modifying_the_registry|]
 ==== Modifying the Registry
  
 Updating the environment is not enough, your old installation will still be called when you open a Euphoria program in explorer or invoke the Euphoria program on the command line without typing in the interpreter (eui euiw).  Do not type in the single quotes.
 
-You can set these in regedit:
+You can set these in regedit (replace C:\EUPHORIA with your Euphoria installation directory):
 {{{
-HKEY_CLASSES_ROOT\.exw\(Default) => 'EUWinApp'
-HKEY_CLASSES_ROOT\EuWinApp\(Default) => 'Euphoria Windows App'
-HKEY_CLASSES_ROOT\EUWinApp\shell\open\command\(Default) => 'C:\EUPHORIA\BIN\euiw.exe "%1"'
-HKEY_CLASSES_ROOT\EUWinApp\shell\translate\command\(Default) => 'C:\EUPHORIA\BIN\euc.exe "%1"'
+HKEY_CLASSES_ROOT\.exw\(Default) 
+    => 'EUWinApp'
+HKEY_CLASSES_ROOT\EuWinApp\(Default) 
+    => 'Euphoria Windows App'
+HKEY_CLASSES_ROOT\EUWinApp\shell\open\command\(Default) 
+    => 'C:\EUPHORIA\BIN\euiw.exe "%1"'
+HKEY_CLASSES_ROOT\EUWinApp\shell\translate\command\(Default) 
+    => 'C:\EUPHORIA\BIN\euc.exe "%1"'
 
-HKEY_CLASSES_ROOT\.ex\(Default) => 'EUConsoleApp'
-HKEY_CLASSES_ROOT\EUConsoleApp\(Default) => 'Euphoria Console App'
-HKEY_CLASSES_ROOT\EUConsoleApp\shell\open\command\(Default) => 'C:\EUPHORIA\BIN\eui.exe "%1"'
-HKEY_CLASSES_ROOT\EUConsoleApp\shell\translate\command\(Default) => 'C:\EUPHORIA\BIN\euc.exe -con "%1"'
+HKEY_CLASSES_ROOT\.ex\(Default) 
+   => 'EUConsoleApp'
+HKEY_CLASSES_ROOT\EUConsoleApp\(Default) 
+   => 'Euphoria Console App'
+HKEY_CLASSES_ROOT\EUConsoleApp\shell\open\command\(Default) 
+   => 'C:\EUPHORIA\BIN\eui.exe "%1"'
+HKEY_CLASSES_ROOT\EUConsoleApp\shell\translate\command\(Default) 
+   => 'C:\EUPHORIA\BIN\euc.exe -con "%1"'
 
 HKEY_CLASSES_ROOT\.e\(Default) => 'EUInc'
 HKEY_CLASSES_ROOT\EUInc\(Default) => 'Euphoria Include File'
@@ -125,18 +132,24 @@ HKEY_CLASSES_ROOT\.ew\(Default) => 'EUInc'
 
 You can also set an editor for your EUPHORIA programs this way:
 {{{
-HKEY_CLASSES_ROOT\EUWinApp\shell\edit\command"\(Default) => 'C:\EUPHORIA\BIN\euiw.exe C:\EUPHORIA\BIN\ed.ex "%1"'
-HKEY_CLASSES_ROOT\EUConsoleApp\shell\edit\command"\(Default) => 'C:\EUPHORIA\BIN\euiw.exe C:\EUPHORIA\BIN\ed.ex "%1"'
-HKEY_CLASSES_ROOT\EUInc\shell\edit\command"\(Default) => 'C:\EUPHORIA\BIN\euiw.exe C:\EUPHORIA\BIN\ed.ex "%1"'
+HKEY_CLASSES_ROOT\EUWinApp\shell\edit\command"\(Default) 
+   => 'C:\EUPHORIA\BIN\euiw.exe C:\EUPHORIA\BIN\edx.ex "%1"'
+HKEY_CLASSES_ROOT\EUConsoleApp\shell\edit\command"\(Default) 
+   => 'C:\EUPHORIA\BIN\euiw.exe C:\EUPHORIA\BIN\edx.ex "%1"'
+HKEY_CLASSES_ROOT\EUInc\shell\edit\command"\(Default) 
+   => 'C:\EUPHORIA\BIN\euiw.exe C:\EUPHORIA\BIN\edx.ex "%1"'
 }}}
 
 You can setup to allow the supplied editor program open to the line where the last failure occured in ex.err files:
 {{{
 HKEY_CLASSES_ROOT\.err\(Default) => 'EUError'
 HKEY_CLASSES_ROOT\EUError\(Default) => 'Error File'
-HKEY_CLASSES_ROOT\EUError\shell\debug => 'Debug what created this error file'
-HKEY_CLASSES_ROOT\EUError\shell\debug\command\(Default) => 'C:\EUPHORIA\BIN\eui.exe C:\EUPHORIA\BIN\ed.ex'
-HKEY_CLASSES_ROOT\EUError\DefaultIcon\(Default) => 'C:\Windows\system32\shell32.dll,78'
+HKEY_CLASSES_ROOT\EUError\shell\debug 
+    => 'Debug what created this error file'
+HKEY_CLASSES_ROOT\EUError\shell\debug\command\(Default) 
+    => 'C:\EUPHORIA\BIN\eui.exe C:\EUPHORIA\BIN\edx.ex'
+HKEY_CLASSES_ROOT\EUError\DefaultIcon\(Default) 
+    => 'C:\Windows\system32\shell32.dll,78'
 }}}
 
 
@@ -184,24 +197,6 @@ Look for an installation package for Apple installations.
 There is DOS support only up to Euphoria 3.1. DOS developers are 
 invited to contribute their skills.
 
-=== Nightly Builds
-
-
-You have access to the latest Euphoria source-code that the Developers are
-working on via the official OpenEuphoria Mercurial repository:
-http://scm.openeuphoria.org
-
-Binary files are called //Eubins//, and are automated "Nightly Builds" 
-produced from the latest code in the code repository:
-http://openeuphoria.org/eubins/
-
-A complete installation requires merging the original source files,
-and the contents of the eubins download. Then, the path to euphoria/bin
-must be set and a cfg file must be written.
-
-For the adventurous only.
-
-%%output=post_install
 == Post Install
 
 The directory maps will help you locate the Euphoria executables, documentation,
@@ -222,7 +217,7 @@ The default for the //Windows// installation, and optional for a
 |     Binder      (eubind, with eub)
 |     Translator  (euc.exe, if on Windows)
 |                 (euc, if on Unix)
-|     Utilities   (bugreport.ex, bench.ex, ed.ex, ...)
+|     Utilities   (bugreport.ex, bench.ex, edx.ex, ...)
 |
 |__ include 
 |   |             (original include files)
@@ -287,8 +282,8 @@ Before building.
 The "include", "demo" and "tutorial" directories are the same in
 //Windows// and //Unix//.
 
-
 %%output=configuration
+@[:set_up_the_euphoria_configuration_file|]
 == Set Up the Euphoria Configuration File (eu.cfg)
 
 Euphoria supports reading command line switches from configuration files. The 

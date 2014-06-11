@@ -1,0 +1,29 @@
+== Version 4.0.5 October 19, 2012
+
+=== Bug Fixes
+* [[ticket:777]] When invalid input is sent to 'match' or 'find' the error includes 'match' or 'find' in the error message repectively.
+* [[ticket:749]] Fix init checks for while-entry and goto
+* [[ticket:563]] Default values for arguments are always parsed and resolved as though they
+  were being evaluated from the point of the routine declaration, not the point where the
+  routine is called
+* [[ticket:763]] In some cases, the translator did not keep potential [[:routine_id]] targets
+  when dynamic routine names were used
+* [[ticket:665]] documented minimal requirements for various features in EUPHORIA on various platforms.
+* [[ticket:665]] set minimal version for Windows in its installer to avoid installing on computers that it wont work on.
+* [[ticket:767]] translated ##[[:insert]]()## could segfault when inserting an atom stored as an integer
+* [[ticket:744]] Duplicate case values in a switch block no longer result in a failed compile after being translated to C.
+* [[ticket:775]] Fixed potential memory leak when a temp is passed to one of the
+  native type check functions: [[:integer]](), [[:atom]](), [[:object]]() or [[:sequence]]()
+* [[ticket:778]] Translator keeps forward referenced routine_id routines in include files
+* [[ticket:789]] Make parser read Windows eols the same as unix eols on Linux.
+* [[ticket:795]] Corrected std/serialize.e to call define_c_proc correctly
+* [[ticket:795]] Corrected std/net/http.e to call do a case insensitive search for 'content-length'
+* [[ticket:796]] when binding and translating use different EXE names
+* Fixed memory leak in translator when calls to ##head()## result in an empty sequence
+
+=== Enhancements
+
+* [[ticket:768]] Backported support for deserializing 8-byte integers and 10-byte floating point.
+* Optimization of std/map.e ##remove()## to prevent unnecessary copy on write
+* [[ticket:787]] Document cases where you pass an empty sequence into search routines
+

@@ -8,15 +8,23 @@
 -- In a window, just close the window to stop it.
 --
 
+
+
 constant FULL_SCREEN = 0  -- 1 for full screen display
 
 without type_check
 include std/dll.e
 include std/machine.e
-include std/wildcard.e
-
+include std/math.e
+include std/sequence.e
+include std/console.e
+include std/error.e
 without warning
 
+include winstruct.ew
+
+
+ 
 constant X = 1, Y = 2, Z = 3
 
 global constant BLACK = 0,
@@ -52,298 +60,198 @@ constant PS_SOLID = 0
 
 sequence vc -- video configuration
 
-integer CreateDC, GetDC, MoveToEx, LineTo, CreatePen, SelectObject
-integer GetStockObject
-atom black_pen, white_pen, red_pen, green_pen, blue_pen
-atom gdi_dll, user_dll, hdc
-integer axis
-atom sin_angle, cos_angle
 
-integer LoadIcon, LoadCursor, RegisterClassEx,
-	CreateWindow, ShowWindow, UpdateWindow, GetMessage,
-	TranslateMessage, DispatchMessage, PlaySound, BeginPaint,
-	GetClientRect, DrawText, EndPaint, PostQuitMessage, DefWindowProc,
-	SetTimer, KillTimer, ReleaseDC
+atom black_pen, white_pen, red_pen, green_pen, blue_pen
+atom hdc
+
+
 
 type point(sequence x)
-    return length(x) = 3
+	return length(x) = 3
 end type
 
 type matrix(sequence x)
-    return length(x) = 4 and sequence(x[1])
+	return length(x) = 4 and sequence(x[1])
 end type
 
 type vector(sequence x)
-    return length(x) = 4 and atom(x[1])
+	return length(x) = 4 and atom(x[1])
 end type
 
 
 function product(sequence factor)
 -- matrix multiply a number of 4-vectors/4x4 matrices
 -- only the first one could be a vector
-    sequence a, c
-    matrix b
+	sequence a, c
+	matrix b
 
-    a = factor[1]
-    for f = 2 to length(factor) do
-	b = factor[f]
-	if atom(a[1]) then
-	    -- a is a vector
-	    c = repeat(0, 4)
-	    for j = 1 to 4 do
-		c[j] = a[1] * b[1][j] +
-		       a[2] * b[2][j] +
-		       a[3] * b[3][j] +
-		       a[4] * b[4][j]
-	    end for
-	else
-	    -- a is a matrix
-	    c = repeat(repeat(0, 4), 4)
-	    for i = 1 to 4 do
-		for j = 1 to 4 do
-		    for k = 1 to 4 do
-			c[i][j] += a[i][k] * b[k][j]
-		    end for
+	a = factor[1]
+	for f = 2 to length(factor) do
+		b = factor[f]
+		if atom(a[1]) then
+			-- a is a vector
+			c = repeat(0, 4)
+			for j = 1 to 4 do
+				c[j] = a[1] * b[1][j] +
+					   a[2] * b[2][j] +
+					   a[3] * b[3][j] +
+					   a[4] * b[4][j]
+			end for
+		else
+			-- a is a matrix
+			c = repeat(repeat(0, 4), 4)
+			for i = 1 to 4 do
+				for j = 1 to 4 do
+					for k = 1 to 4 do
+					c[i][j] += a[i][k] * b[k][j]
+					end for
+				end for
+			end for
+		end if
+		a = c
 		end for
-	    end for
-	end if
-	a = c
-    end for
-    return c
+	return c
 end function
 
-procedure not_found(sequence name)
-    puts(1, "Couldn't find " & name & '\n')
-    abort(1)
-end procedure
-
-function link_c_func(atom dll, sequence name, sequence args, atom result)
--- dynamically link a C routine as a Euphoria function
-    integer handle
-
-    handle = define_c_func(dll, name, args, result)
-    if handle = -1 then
-	not_found(name)
-    else
-	return handle
-    end if
-end function
-
-function link_c_proc(atom dll, sequence name, sequence args)
--- dynamically link a C routine as a Euphoria procedure
-    integer handle
-
-    handle = define_c_proc(dll, name, args)
-    if handle = -1 then
-	not_found(name)
-    else
-	return handle
-    end if
-end function
-
-procedure link_dll_routines()
--- get handles to all dll routines that we need
-    atom user32, gdi32, winmm
-    
-    -- open the .DLL files
-    user32 = open_dll("user32.dll")
-    if user32 = NULL then
-	not_found("user32.dll")
-    end if
-    
-    gdi32 = open_dll("gdi32.dll")
-    if gdi32 = NULL then
-	not_found("gdi32.dll")
-    end if
-    
-    winmm = open_dll("winmm.dll")
-    if winmm = NULL then
-	not_found("winmm.dll")
-    end if
-    
-    -- link the C routines
-    LoadIcon = link_c_func(user32, "LoadIconA", {C_POINTER, C_INT}, C_INT)
-    LoadCursor = link_c_func(user32, "LoadCursorA", {C_POINTER, C_INT}, C_INT)
-    GetStockObject = link_c_func(gdi32, "GetStockObject", {C_INT}, C_INT)
-    RegisterClassEx = link_c_func(user32, "RegisterClassExA", {C_POINTER}, C_INT)
-    CreateWindow = link_c_func(user32, "CreateWindowExA", 
-    {C_INT, C_INT,C_INT,C_INT,C_INT,C_INT,C_INT,C_INT,C_INT,C_INT,C_INT,C_INT},
-     C_INT)
-    ShowWindow = link_c_proc(user32, "ShowWindow", {C_INT, C_INT})
-    UpdateWindow = link_c_proc(user32, "UpdateWindow", {C_INT})
-    GetMessage = link_c_func(user32, "GetMessageA", 
-		  {C_INT, C_INT, C_INT, C_INT}, C_INT)
-    TranslateMessage = link_c_proc(user32, "TranslateMessage", {C_INT})
-    DispatchMessage = link_c_proc(user32, "DispatchMessageA", {C_INT})
-    PlaySound = link_c_proc(winmm, "PlaySound", {C_INT, C_INT, C_INT})
-    BeginPaint = link_c_func(user32, "BeginPaint", {C_INT, C_INT}, C_INT)
-    GetClientRect = link_c_proc(user32, "GetClientRect", {C_INT, C_INT})
-    DrawText = link_c_proc(user32, "DrawTextA", 
-	       {C_INT, C_INT, C_INT, C_INT, C_INT})
-    EndPaint = link_c_proc(user32, "EndPaint", {C_INT, C_INT})
-    PostQuitMessage = link_c_proc(user32, "PostQuitMessage", {C_INT})
-    DefWindowProc = link_c_func(user32, "DefWindowProcA", 
-	  {C_INT, C_INT, C_INT, C_INT}, C_INT)
-    SetTimer = link_c_proc(user32, "SetTimer", {C_INT, C_INT, C_INT, C_INT})
-    KillTimer = link_c_proc(user32, "KillTimer", {C_INT, C_INT})
-    GetDC = link_c_func(user32, "GetDC", {C_INT}, C_INT)
-    ReleaseDC = link_c_proc(user32, "ReleaseDC", {C_INT, C_INT})
-    CreateDC = link_c_func(gdi32, "CreateDCA", 
-			  {C_POINTER, C_POINTER, C_POINTER, C_POINTER},
-			  C_LONG)
-
-    MoveToEx = link_c_func(gdi32, "MoveToEx", 
-			  {C_LONG, C_LONG, C_LONG, C_POINTER}, C_LONG)
-
-    LineTo = link_c_func(gdi32, "LineTo", {C_LONG, C_LONG, C_LONG},
-			 C_LONG)
-
-    SelectObject = link_c_func(gdi32, "SelectObject",
-			       {C_LONG, C_LONG}, C_ULONG)
-
-    CreatePen = link_c_func(gdi32, "CreatePen",
-			       {C_LONG, C_LONG, C_LONG}, C_LONG)
-
-    GetStockObject = link_c_func(gdi32, "GetStockObject", {C_LONG}, C_LONG)
-end procedure
-
-link_dll_routines()
 
 procedure draw_line(integer color, sequence coords)
 -- WIN32 line drawing routine
-    atom ok
-    
-    if color = WHITE then
-	ok = c_func(SelectObject, {hdc, white_pen})
-    elsif color = RED or color = BRIGHT_RED then
-	ok = c_func(SelectObject, {hdc, red_pen})
-    elsif color = GREEN or color = BRIGHT_GREEN then
-	ok = c_func(SelectObject, {hdc, green_pen})
-    elsif color = BLUE or color = BRIGHT_BLUE then
-	ok = c_func(SelectObject, {hdc, blue_pen})
-    else
-	ok = c_func(SelectObject, {hdc, black_pen})
-    end if
-    
-    ok = c_func(MoveToEx, {hdc, coords[1][1], coords[1][2], NULL})
-    if not ok then
-	puts(1, "MoveToEx failed!\n")
-    end if
-    
-    ok = c_func(LineTo, {hdc, coords[2][1], coords[2][2]})
-    if not ok then
-	puts(1, "LineTo failed!\n")
-    end if
+	atom ok
+	
+	if color = WHITE then
+		ok = c_func(SelectObject, {hdc, white_pen})
+	elsif color = RED or color = BRIGHT_RED then
+		ok = c_func(SelectObject, {hdc, red_pen})
+	elsif color = GREEN or color = BRIGHT_GREEN then
+		ok = c_func(SelectObject, {hdc, green_pen})
+	elsif color = BLUE or color = BRIGHT_BLUE then
+		ok = c_func(SelectObject, {hdc, blue_pen})
+	else
+		ok = c_func(SelectObject, {hdc, black_pen})
+	end if
+	if not ok then
+		puts(1, "SelectObject failed!\n")
+	end if
+   
+	ok = c_func(MoveToEx, {hdc, coords[1][1], coords[1][2], NULL})
+	if not ok then
+		puts(1, "MoveToEx failed!\n")
+	end if
+	
+	ok = c_func(LineTo, {hdc, coords[2][1], coords[2][2]})
+	if not ok then
+		puts(1, "LineTo failed!\n")
+	end if
 end procedure
 
 procedure display(sequence old_coords, sequence coords)
 -- erase the old lines, draw the new ones
-    for i = 1 to length(old_coords) do
-	draw_line(WHITE, old_coords[i][1..2])
-    end for
-    for i = 1 to length(coords) do
-	draw_line(coords[i][3], coords[i][1..2])
-    end for
+	for i = 1 to length(old_coords) do
+		draw_line(WHITE, old_coords[i][1..2])
+	end for
+	for i = 1 to length(coords) do
+		draw_line(coords[i][3], coords[i][1..2])
+	end for
 end procedure
 
 function view(point view_point)
 -- compute initial view
-    matrix t1, t2, t3, t4, n
-    atom cos_theta, sin_theta, hyp, a_b
+	matrix t1, t2, t3, t4, n
+	atom cos_theta, sin_theta, hyp, a_b
 
-    -- change origin
-    t1 = {{1, 0, 0, 0},
+	-- change origin
+	t1 = {{1, 0, 0, 0},
 	  {0, 1, 0, 0},
 	  {0, 0, 1, 0},
 	  -view_point & 1}
 
-    -- get left-handed coordinate system
-    t2 = {{-1, 0,  0, 0},
+	-- get left-handed coordinate system
+	t2 = {{-1, 0,  0, 0},
 	  { 0, 0, -1, 0},
 	  { 0, 1,  0, 0},
 	  { 0, 0,  0, 1}}
 
-    -- rotate so Ze points properly
-    hyp = sqrt(view_point[1] * view_point[1] + view_point[2] * view_point[2])
-    sin_theta = view_point[1] / hyp
-    cos_theta = view_point[2] / hyp
-    t3 = {{cos_theta, 0, sin_theta, 0},
+	-- rotate so Ze points properly
+	hyp = sqrt(view_point[1] * view_point[1] + view_point[2] * view_point[2])
+	sin_theta = view_point[1] / hyp
+	cos_theta = view_point[2] / hyp
+	t3 = {{cos_theta, 0, sin_theta, 0},
 	  {        0, 1,         0, 0},
 	  {-sin_theta,0, cos_theta, 0},
 	  {        0, 0,         0, 1}}
 
-    -- rotate so Ze points at the origin (0, 0, 0)
-    t4 = {{1, 0, 0, 0},
+	-- rotate so Ze points at the origin (0, 0, 0)
+	t4 = {{1, 0, 0, 0},
 	  {0, cos_theta, -sin_theta, 0},
 	  {0, sin_theta, cos_theta, 0},
 	  {0, 0, 0, 1}}
 
-    a_b = 2
+	a_b = 2
 
-    n = {{a_b, 0, 0, 0},
+	n = {{a_b, 0, 0, 0},
 	 {0, a_b, 0, 0},
 	 {0, 0, 1, 0},
 	 {0, 0, 0, 1}}
 
-    return product({t1, t2, t3, t4, n})
+	return product({t1, t2, t3, t4, n})
 end function
 
 function new_coords(sequence overall, sequence shape)
 -- compute the screen coordinates from the 3-D coordinates
-    sequence screen_coords, final
-    point p
-    atom x2, y2
+	sequence screen_coords, final
+	point p
+	atom x2, y2
 
-    x2 = vc[VC_XPIXELS]/2
-    y2 = vc[VC_YPIXELS]/2
-    screen_coords = repeat({0, 0, 0}, length(shape))
-    for i = 1 to length(shape) do
-	for j = 1 to 2  do
-	    p = shape[i][j]
-	    final = product({p & 1, overall})
-	    screen_coords[i][j] = {x2*(final[X]/final[Z]+1),
-				   y2*(final[Y]/final[Z]+1)}
+	x2 = vc[VC_XPIXELS]/2
+	y2 = vc[VC_YPIXELS]/2
+	screen_coords = repeat({0, 0, 0}, length(shape))
+	for i = 1 to length(shape) do
+		for j = 1 to 2  do
+			p = shape[i][j]
+			final = product({p & 1, overall})
+			screen_coords[i][j] = {x2*(final[X]/final[Z]+1),
+					   y2*(final[Y]/final[Z]+1)}
+		end for
+		screen_coords[i][3] = shape[i][3]
 	end for
-	screen_coords[i][3] = shape[i][3]
-    end for
-    return screen_coords
+	return screen_coords
 end function
 
 function x_rotate(point p)
 -- compute x rotation of a point
-    return {p[X],
-	    p[Y] * cos_angle + p[Z] * sin_angle,
-	    p[Z] * cos_angle - p[Y] * sin_angle}
+	return {p[X],
+		p[Y] * cos_angle + p[Z] * sin_angle,
+		p[Z] * cos_angle - p[Y] * sin_angle}
 end function
 
 function y_rotate(point p)
 -- compute y rotation of a point
-    return {p[X] * cos_angle - p[Z] * sin_angle,
-	    p[Y],
-	    p[X] * sin_angle + p[Z] * cos_angle}
+	return {p[X] * cos_angle - p[Z] * sin_angle,
+		p[Y],
+		p[X] * sin_angle + p[Z] * cos_angle}
 end function
 
 function z_rotate(point p)
 -- compute z rotation matrix
-    return {p[X] * cos_angle + p[Y] * sin_angle,
-	    p[Y] * cos_angle - p[X] * sin_angle,
-	    p[Z]}
+	return {p[X] * cos_angle + p[Y] * sin_angle,
+		p[Y] * cos_angle - p[X] * sin_angle,
+		p[Z]}
 end function
 
 function compute_rotate(integer axis, sequence shape)
 -- rotate a shape
-    for i = 1 to length(shape) do
-	for j = 1 to 2 do
-	    if axis = X then
-		shape[i][j] = x_rotate(shape[i][j])
-	    elsif axis = Y then
-		shape[i][j] = y_rotate(shape[i][j])
-	    else
-		shape[i][j] = z_rotate(shape[i][j])
-	    end if
+	for i = 1 to length(shape) do
+		for j = 1 to 2 do
+			if axis = X then
+				shape[i][j] = x_rotate(shape[i][j])
+			elsif axis = Y then
+				shape[i][j] = y_rotate(shape[i][j])
+			else
+				shape[i][j] = z_rotate(shape[i][j])
+			end if
+		end for
 	end for
-    end for
-    return shape
+	return shape
 end function
 
 -- lines for a block E
@@ -401,237 +309,161 @@ white_pen = c_func(GetStockObject, {WHITE_PEN})
 green_pen = c_func(CreatePen, {PS_SOLID, 1, 255 * 256})
  blue_pen = c_func(CreatePen, {PS_SOLID, 1, 255 * 256 * 256})
 
-sequence history, coords, overall
-point view_point
-integer spread, r
-atom rot_speed
-sequence shape
+point view_point = {6, 8, 7.5} / 2.2
 
-view_point = {6, 8, 7.5} / 2.2
-overall = view(view_point)
-rot_speed = 0.09
-sin_angle = sin(rot_speed)
-cos_angle = cos(rot_speed)
-axis = Z
-history = {}
-spread = 0
-shape = E
+sequence
+	coords,
+	history = {},
+	overall = view(view_point),
+	shape = E
+
+integer
+	r,
+	spread = 0,
+	axis = Z
+
+atom
+	rot_speed = 0.09,
+	sin_angle = sin(rot_speed),
+	cos_angle = cos(rot_speed)
+
+	 
+sequence big = join(repeat(" Resize This Window! ", 300),"")
+
+atom 
+	ps = allocate(64),
+	rect = allocate(16),
+	wav = allocate_string(getenv("windir")&`\Media\notify.wav`),
+	big_string = allocate_string(big),
+	$
 
 procedure spin()
 -- spin a 3-D shape around on the screen in interesting ways
 -- each call makes one slight movement
-    coords = new_coords(overall, shape)
-    if length(history) > spread then
-	display(history[1], coords)
-	history = history[2..length(history)]
+	coords = new_coords(overall, shape)
 	if length(history) > spread then
-	    display(history[1], {})
-	    history = history[2..length(history)]
-	end if
-    else
-	display({}, coords)
-    end if
-    history = append(history, coords)
-	
-    r = rand(250)
-    if r = 1 then
-	axis = X
-    elsif r = 2 then
-	axis = Y
-    elsif r = 3 then
-	axis = Z
-    elsif r = 4 then
-	spread = 5 * rand(25)  -- leave behind many trailing wire images
-    elsif r = 5 or r = 6 then
-	spread = 0             -- reduce the images back to a sharp picture
-    elsif r = 7 then
-	if rand(2) = 1 then
-	    rot_speed = .04
-	    spread = 0
+		display(history[1], coords)
+		history = history[2..length(history)]
+		if length(history) > spread then
+			display(history[1], {})
+			history = history[2..length(history)]
+		end if
 	else
-	    rot_speed = .02 * rand(10)
+		display({}, coords)
 	end if
-	sin_angle = sin(rot_speed)
-	cos_angle = cos(rot_speed)
-    end if
-    shape = compute_rotate(axis, shape)
+	history = append(history, coords)
+	
+	r = rand(250)
+	if r = 1 then
+		axis = X
+	elsif r = 2 then
+		axis = Y
+	elsif r = 3 then
+		axis = Z
+	elsif r = 4 then
+		spread = 5 * rand(25)  -- leave behind many trailing wire images
+	elsif r = 5 or r = 6 then
+		spread = 0             -- reduce the images back to a sharp picture
+	elsif r = 7 then
+		if rand(2) = 1 then
+			rot_speed = .04
+			spread = 0
+		else
+			rot_speed = .02 * rand(10)
+		end if
+		sin_angle = sin(rot_speed)
+		cos_angle = cos(rot_speed)
+	end if
+	shape = compute_rotate(axis, shape)
 end procedure
 
-constant cbSize = 0,
-	 style  = 4,
-	 lpfnWndProc = 8,
-	 cbClsExtra = 12,
-	 cbWndExtra = 16,
-	 hInstance  = 20,
-	 hIcon      = 24,
-	 hCursor    = 28,
-	 hbrBackground = 32,
-	 lpszMenuName  = 36,
-	 lpszClassName = 40,
-	 hIconSm = 44,
-	 SIZE_OF_WNDCLASS = 48 -- (to be safe) 48
 
-constant SIZE_OF_MESSAGE = 40 -- (to be safe) 28
 
-constant CS_HREDRAW = 2,
-	 CS_VREDRAW = 1
 
-constant SW_SHOWNORMAL = 1
 
-constant WM_CREATE = #0001,
-	 WM_PAINT  = #000F,
-	 WM_DESTROY= #0002,
-	 WM_TIMER  = #0113,
-	 WM_SIZE   = #0005
-	 
-constant SND_FILENAME = #00020000,
-	 SND_ASYNC    = #00000001
-	 
-constant DT_SINGLELINE = #0020,
-	 DT_CENTER     = #0001,
-	 DT_VCENTER    = #0004,
-	 DT_WORDBREAK  = #0010
-
-function or_all(sequence s)
--- or together all elements of a sequence
-    atom result
-    
-    result = 0
-    for i = 1 to length(s) do
-	result = or_bits(result, s[i])
-    end for
-    return result
-end function
-
-constant WS_OVERLAPPED  = #00000000,
-	 WS_CAPTION     = #00C00000,
-	 WS_SYSMENU     = #00080000,
-	 WS_THICKFRAME  = #00040000,
-	 WS_MINIMIZEBOX = #00020000,
-	 WS_MAXIMIZEBOX = #00010000 
-
-constant IDI_APPLICATION = 32512, 
-	 IDC_ARROW = 32512, 
-	 WHITE_BRUSH = 0,
-	 CW_USEDEFAULT = #80000000,
-	 WS_OVERLAPPEDWINDOW = or_all({WS_OVERLAPPED, WS_CAPTION, WS_SYSMENU,
-				       WS_THICKFRAME, WS_MINIMIZEBOX, 
-				       WS_MAXIMIZEBOX})
-	 
-sequence big
-atom ps, rect, wav, big_string
-ps = allocate(64)
-rect = allocate(16) 
-wav = allocate_string("\\Windows\\Media\\notify.wav")
-big = ""
-for i = 1 to 300 do
-    big &= " Resize This Window! "
-end for
-big_string = allocate_string(big)
-
-global function WndProc(atom hwnd, atom iMsg, atom wParam, atom lParam)
+function WndProc(atom hwnd, atom iMsg, atom wParam, atom lParam)
 -- callback routine to handle Window class
-    
-    if iMsg = WM_CREATE then
-	return 0
-    
-    elsif iMsg = WM_PAINT then
-	hdc = c_func(BeginPaint, {hwnd, ps})
-	c_proc(GetClientRect, {hwnd, rect})
-	c_proc(DrawText, {hdc, big_string, -1, rect, DT_WORDBREAK})
-	c_proc(EndPaint, {hwnd, ps})
-	c_proc(SetTimer, {hwnd, 1, 10, NULL})
+	
+	if iMsg = WM_CREATE then
+		return 0
+	
+	elsif iMsg = WM_PAINT then
+		hdc = c_func(BeginPaint, {hwnd, ps})
+		c_proc(GetClientRect, {hwnd, rect})
+		c_proc(DrawText, {hdc, big_string, -1, rect, DT_WORDBREAK})
+		c_proc(EndPaint, {hwnd, ps})
+		c_proc(SetTimer, {hwnd, 1, 10, NULL})
+		return 0
+	
+	elsif iMsg = WM_SIZE then
+		c_proc(PlaySound, {wav,
+				   NULL,
+				   or_bits(SND_FILENAME, SND_ASYNC)})
+		vc[VC_XPIXELS] = and_bits(lParam, #FFFF)
+		vc[VC_YPIXELS] = and_bits(lParam/#10000, #FFFF)
+	
+	elsif iMsg = WM_TIMER then
+		hdc = c_func(GetDC, {hwnd})
+		-- make 5 iterations before giving control back to Windows
+		for i = 1 to 5 do
+			spin()
+		end for
+		c_proc(ReleaseDC, {hwnd, hdc})
+		return 0
+	
+	elsif iMsg = WM_DESTROY then
+		c_proc(PostQuitMessage, {0})
+		c_proc(KillTimer, {hwnd, 1})
 	return 0
 	
-    elsif iMsg = WM_SIZE then
-	c_proc(PlaySound, {wav,
-			   NULL,
-			   or_bits(SND_FILENAME, SND_ASYNC)})
-	vc[VC_XPIXELS] = and_bits(lParam, #FFFF)
-	vc[VC_YPIXELS] = and_bits(lParam/#10000, #FFFF)
-    
-    elsif iMsg = WM_TIMER then
-	hdc = c_func(GetDC, {hwnd})
-	-- make 5 iterations before giving control back to Windows
-	for i = 1 to 5 do
-	    spin()
-	end for
-	c_proc(ReleaseDC, {hwnd, hdc})
-	return 0
+	end if
 	
-    elsif iMsg = WM_DESTROY then
-	c_proc(PostQuitMessage, {0})
-	c_proc(KillTimer, {hwnd, 1})
-	return 0
-	
-    end if
-    
-    return c_func(DefWindowProc, {hwnd, iMsg, wParam, lParam})
+	return c_func(DefWindowProc, {hwnd, iMsg, wParam, lParam})
 end function
+
+
 
 procedure WinMain()
 -- main routine 
-    atom szAppName
-    atom hwnd
-    atom msg
-    atom wndclass
-    atom WndProcAddress
-    atom class
-    integer id
-    
-    wndclass = allocate(SIZE_OF_WNDCLASS)
-    msg = allocate(SIZE_OF_MESSAGE)
-    szAppName = allocate_string("HelloWin")
-    
-    id = routine_id("WndProc")
-    if id = -1 then
-	puts(1, "routine_id failed!\n")
-	abort(1)
-    end if
-    WndProcAddress = call_back(id) -- get 32-bit address for callback
-    
-    poke4(wndclass + cbSize, SIZE_OF_WNDCLASS)
-    poke4(wndclass + style, or_bits(CS_HREDRAW, CS_VREDRAW))
-    poke4(wndclass + lpfnWndProc, WndProcAddress)
-    poke4(wndclass + cbClsExtra, 0)
-    poke4(wndclass + cbWndExtra, 0)
-    poke4(wndclass + hInstance, 0) --hInstance
-    poke4(wndclass + hIcon, c_func(LoadIcon, {NULL, IDI_APPLICATION}))
-    poke4(wndclass + hCursor, c_func(LoadCursor, {NULL, IDC_ARROW}))
-    poke4(wndclass + hbrBackground, c_func(GetStockObject, {WHITE_BRUSH}))
-    poke4(wndclass + lpszMenuName, NULL)
-    poke4(wndclass + lpszClassName, szAppName)
-    poke4(wndclass + hIconSm, c_func(LoadIcon, {NULL, IDI_APPLICATION}))
 
-    class = c_func(RegisterClassEx, {wndclass})
-    if class = 0 then
-	puts(1, "Couldn't register class\n")
-	abort(1)
-    end if
-    hwnd = c_func(CreateWindow, {
-		    0,                       -- extended style
-		    szAppName,               -- window class name
-		    allocate_string("Euphoria for WIN32"), -- window caption
-		    WS_OVERLAPPEDWINDOW,     -- window style
-		    CW_USEDEFAULT,           -- initial x position
-		    CW_USEDEFAULT,           -- initial y position
-		    CW_USEDEFAULT,           -- initial x size
-		    CW_USEDEFAULT,           -- initial y size
-		    NULL,                    -- parent window handle
-		    NULL,                    -- window menu handle
-		    0 ,                 --hInstance // program instance handle
-		    NULL})              -- creation parameters
-    if hwnd = 0 then
-	puts(1, "Couldn't CreateWindow\n")
-	abort(1)
-    end if
-    c_proc(ShowWindow, {hwnd, SW_SHOWNORMAL})
-    c_proc(UpdateWindow, {hwnd})
+	atom wndclass = allocate(SIZE_OF_WNDCLASS,1)
+	atom msg = allocate(SIZE_OF_MESSAGE,1)
+	atom szAppName = allocate_string("HelloWin",1)
 
-    while c_func(GetMessage, {msg, NULL, 0, 0}) do
-	c_proc(TranslateMessage, {msg})
-	c_proc(DispatchMessage, {msg})
-    end while
+	integer id = routine_id("WndProc")
+	if id = -1 then
+		crash("routine_id failed!")
+	end if
+	atom WndProcAddress = call_back(id) -- get address for callback
+
+	atom class = register_class( wndclass, WndProcAddress, szAppName )
+	if class = 0 then
+		crash("Couldn't register class")
+	end if
+	atom hwnd = c_func(CreateWindow, {
+			0,                       -- extended style
+			szAppName,               -- window class name
+			allocate_string("Euphoria for Windows",1), -- window caption
+			WS_OVERLAPPEDWINDOW,     -- window style
+			CW_USEDEFAULT,           -- initial x position
+			CW_USEDEFAULT,           -- initial y position
+			CW_USEDEFAULT,           -- initial x size
+			CW_USEDEFAULT,           -- initial y size
+			NULL,                    -- parent window handle
+			NULL,                    -- window menu handle
+			0 ,                 --hInstance // program instance handle
+			NULL})              -- creation parameters
+	if hwnd = 0 then
+		crash("Couldn't CreateWindow")
+	end if
+	c_proc(ShowWindow, {hwnd, SW_SHOWNORMAL})
+	c_proc(UpdateWindow, {hwnd})
+
+	-- message loop
+	while c_func(GetMessage, {msg, NULL, 0, 0}) do
+		c_proc(TranslateMessage, {msg})
+		c_proc(DispatchMessage, {msg})
+	end while
 end procedure
 
 vc = {1, 257, 25, 80, 800, 600, 256, 1}
@@ -640,28 +472,27 @@ atom t
 
 procedure FullMain()
 -- Display graphics using the full screen
-    puts(1, "\nPress any key to stop.\n")
-    puts(1, "Make a full-screen DOS window\n")
-    puts(1, "to clear the screen...\n")
-    t = time()
-    while time() < t + 4 do
-    end while
-    hdc = c_func(CreateDC, {allocate_string("DISPLAY"), NULL, NULL, NULL})
-    if hdc = NULL then
-	puts(1, "CreateDC failed!\n")
-	abort(1)
-    end if
-    while get_key() = -1 do
-	spin()
-    end while
-    clear_screen()
+	puts(1, "\nPress any key to stop.\n")
+	puts(1, "Make a full-screen DOS window\n")
+	puts(1, "to clear the screen...\n")
+	t = time()
+	while time() < t + 4 do
+	end while
+	hdc = c_func(CreateDC, {allocate_string("DISPLAY",1), NULL, NULL, NULL})
+	if hdc = NULL then
+		crash("CreateDC failed!")
+	end if
+	while get_key() = -1 do
+		spin()
+	end while
+	clear_screen()
 end procedure
 
 -- execution starts here:
 if FULL_SCREEN then
-    FullMain()
-    clear_screen()
+	FullMain()
+	clear_screen()
 else
-    WinMain()
+	WinMain()
 end if
 

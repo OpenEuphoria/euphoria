@@ -12,18 +12,8 @@ include std/datetime.e
 
 object o1, o2, o3
 constant init_small_map_key = -75960.358941
-
 o1 = map:new(1)
 test_true("map new #1", map(o1) )
-ram_space[o1][4] = '?' -- MAP_TYPE corruption
-test_false("map new #1", map(o1) )
-
-
-o1 = map:threshold()
-o2 = map:threshold(60)
-o3 = map:threshold()
-test_equal("map get threshold #1", o1, o2 )
-test_equal("map get threshold #2", 60, o3 )
 
 
 map:map m1
@@ -47,13 +37,11 @@ test_equal("map m1 keys", {-5,-4,-3,-2,-1,0,1,2,3,4,5}, map:keys(m1, 1) )
 test_true ("map m1 has #1", map:has(m1, 0))
 test_false("map m1 has #2", map:has(m1, 9999))
 
-test_equal("map m1 type #1", SMALLMAP, map:type_of(m1))
 
 -- add 1000 integers, 5 of which are already in the map
 for i = 1 to 1000 do
 	map:put(m1, i, sprint(i))
 end for
-test_equal("map m1 type #2", LARGEMAP, map:type_of(m1))
 test_true ("map m1 has #3", map:has(m1, 0))
 test_false("map m1 has #4", map:has(m1, 9999))
 
@@ -73,6 +61,7 @@ for i = 1 to 1000 do
 	map:put(m1, 1e100+i*1e90, i)
 end for
 test_equal("map m1 get#1 -133.3333",           100, map:get(m1, -1.333333*100, 999) )
+
 
 ifdef BENCHMARK then
 for bb = 1 to 1000 do
@@ -100,7 +89,7 @@ o2 = statistics(m1)
 
 test_not_equal("Rehash works for large maps", o1, o2)
 
-rehash(m1, 50_000_000) -- Force timeout for prime number determination
+rehash(m1, 50_000) -- Force timeout for prime number determination
 
 
 test_equal("map m1 get#2 -133.3333",           100, map:get(m1, -1.333333*100, 999) )
@@ -119,21 +108,18 @@ optimize(opm)
 m1s = statistics(m1)
 opms = statistics(opm)
 
-test_true("map optimize #1", m1s[NUM_ENTRIES] = opms[NUM_ENTRIES]) -- total element unchanged
-
+test_equal("map optimize #1", m1s[NUM_IN_USE], opms[NUM_IN_USE]) -- total element unchanged
 optimize(m1, 0, 0)
 m1s = statistics(m1)
-test_true("map optimize #2", m1s[NUM_ENTRIES] = opms[NUM_ENTRIES]) -- total element unchanged
+test_equal("map optimize #2", m1s[NUM_IN_USE], opms[NUM_IN_USE]) -- total element unchanged
 
 
 clear(m1)
 test_equal( "map clear #1", 0, map:size(m1))
-test_equal( "map clear #2", LARGEMAP, map:type_of(m1))
 
 -- m2: strings and objects
-map:threshold(60)
 map:map m2
-m2 = map:new(map:threshold())	-- Create a small map
+m2 = map:new(60)	-- Create a small map
 
 
 for i = 1 to 33 do
@@ -142,7 +128,6 @@ end for
 o1 = statistics(m2)
 rehash(m2)
 o2 = statistics(m2)
-test_equal( "No rehash for small maps", o1, o2)
 
 test_equal("map m2 size#1", 33, map:size(m2))
 test_equal("map m2 get a", 1, map:get(m2, "a", 999))
@@ -168,9 +153,7 @@ m3 = map:new()
 map:put(m3, 1, 11)
 map:put(m3, 2, 22)
 map:put(m3, 3, 33)
-test_equal("map m3 type large", LARGEMAP, map:type_of(m3))
 map:remove(m3, 2)
-test_equal("map m3 type small", SMALLMAP, map:type_of(m3))
 test_equal("map m3 size#1", 2, map:size(m3))
 map:remove(m3, 2)
 test_equal("map m3 size#2", 2, map:size(m3))
@@ -268,7 +251,7 @@ map:put( m5, APPEND, "bar", APPEND )
 test_equal( "small put APPEND", {"foo","bar"}, map:get( m5, APPEND, "" ) )
 
 -- Now repeat for Large maps
-m5 = map:new(threshold() * 2) -- Force a large map type and make sure puts don't rehash it.
+m5 = map:new( 8 * 2) -- Force a large map type and make sure puts don't rehash it.
 map:put( m5, ADD, 1, PUT, 0 )
 map:put( m5, ADD, 1, ADD, 0 ) -- 2
 test_equal( "large put ADD", 2, map:get( m5, ADD, "" ) )
@@ -317,7 +300,6 @@ test_equal( "new_extra #2", m7, m8)
 
 clear(m1)
 test_equal( "map clear #1", 0, map:size(m1))
-test_equal( "map clear #2", SMALLMAP, map:type_of(m1))
 delete(m1)
 test_false( "delete #1", map:map(m1))
 
@@ -498,10 +480,10 @@ map:for_each(m1, routine_id("Process_B"), "List of Items", 1)
 
 sequence efer = {
 --	{"The map is empty",0,0,0,0},
-	{"application", "Euphoria", 0, 1},
-	{"version", "4.0", 0, 2},
-	{"genre", "programming language", 0, 3},
-	{"crc", "4F71AE10", 0, 4},
+	{"crc", "4F71AE10", 0, 1},
+	{"genre", "programming language", 0, 2},
+	{"version", "4.0", 0, 3},
+	{"application", "Euphoria", 0, 4},
 	{"START", "application", "Euphoria", "List of Items", 1},
 	{"application", "Euphoria", "List of Items", 1},
 	{"crc", "4F71AE10", "List of Items", 2},
@@ -545,9 +527,8 @@ map:for_each(m1, routine_id("Process_B"), "List of Items", 1, 1)
 test_equal("for_each with boundary", efer, fer)
 
 -- Testing the removal of items from a multi-item bucket
-map:threshold(50)
-m1 = map:new( map:threshold() + 1 )
-for i = 1 to map:threshold() * 5 do
+m1 = map:new()
+for i = 1 to 8 * 5 do
 	put(m1, sprintf("%d", i), i,, 0)
 end for
 
@@ -560,7 +541,6 @@ test_false("Gone #2", map:has(m1, "5"))
 m2 = map:new(map:threshold())	-- Create a small map
 map:put(m2, init_small_map_key, "Special Key")
 map:put(m2, "Special Key", init_small_map_key)
-test_equal("Ensure small map", SMALLMAP, type_of(m2))
 test_equal("small map magic number has #1", 1, map:has(m2, init_small_map_key))
 test_equal("small map magic number #1", "Special Key", map:get(m2, init_small_map_key))
 test_equal("small map magic number has #2", 1, map:has(m2, "Special Key"))
@@ -573,7 +553,6 @@ test_equal("no small map magic number has #1", 0, map:has(m2, init_small_map_key
 test_equal("no small map magic number #1", "No Key", map:get(m2, init_small_map_key, "No Key"))
 map:put(m2, "Key1", "1")
 map:put(m2, "Key2", "too")
-test_equal("Ensure small map", SMALLMAP, type_of(m2))
 test_equal("no small map magic number has #2", 0, map:has(m2, init_small_map_key))
 test_equal("no small map magic number #2", "No Key", map:get(m2, init_small_map_key, "No Key"))
 
@@ -585,9 +564,8 @@ test_equal("compare equality #5", 1, map:compare(m1, m2))
 
 m3 = map:new()
 map:put( m3, 1, 1, map:LEAVE )
-test_false( "LEAVE doesn't affect the map #1", map:has( m3, 1 ) )
+test_equal( "LEAVE adds a new value", 1, map:get( m3, 1 ) )
 
-map:put( m3, 1, 1, map:ADD )
 map:put( m3, 1, 2, map:LEAVE )
 test_equal( "LEAVE doesn't affect map #2", 1, map:get( m3, 1 ) )
 
@@ -616,5 +594,84 @@ delete_file("save_map.raw")
 delete_file("save_map.raw2")
 delete_file("save_map.raw3")
 delete_file("xyz.cfg")
+
+map init_routines = map:new()
+
+sequence names = {}
+procedure register( sequence name, integer foo=0 )
+	map:put( init_routines, name, foo )
+	names = append( names, name )
+end procedure
+
+procedure validate_map( sequence name, integer has )
+	sequence keys = map:keys( init_routines, 1 )
+	integer kx = find( name, keys )
+	integer map_has = map:has( init_routines, name )
+	integer keys_match = equal( names, keys )
+	sequence text = ""
+	if has then
+		if not kx or not map_has or not keys_match then
+			text = sprintf( "expected to find %s: kx[%d] map_has[%d] keys_match[%d]", { name, kx, map_has, keys_match } )
+		end if
+	else
+		if kx or map_has or not keys_match then
+			text = sprintf("expected not to find %s: kx[%d] map_has[%d] keys_match[%d]", { name, kx, map_has, keys_match } )
+		end if
+	end if
+	test_equal( sprintf( "validate_map %s %d", {name, has}), "", text )
+end procedure
+
+procedure remove_name( sequence name )
+	validate_map( name, 1 )
+	map:remove( init_routines, name )
+	integer nx = find( name, names )
+	names = remove( names, nx )
+	validate_map( name, 0 )
+end procedure
+
+procedure lookup_bug()
+	register( "saved settings" )
+	register( "gui" )
+	register( "menu" )
+	register( "options" )
+	register( "main" )
+	register( "flist", routine_id("init_flist" ) )
+	register( "files" )
+	register( "docs" )
+	register( "editor", routine_id("init") )
+	register( "code_page", routine_id("init_code_page") )
+	register( "code_split", routine_id( "init_code_split" ) )
+	names = sort( names )
+
+	remove_name( "gui" )
+	remove_name( "options")
+	remove_name( "main")
+	remove_name( "saved settings")
+	remove_name( "menu")
+	remove_name( "docs")
+	remove_name( "code_split")
+	remove_name( "code_page")
+	remove_name( "flist")
+
+	validate_map( "editor", 1 )
+	
+	object files = map:get( init_routines, "editor" )
+	map:put( init_routines, "editor", -1, map:CONCAT )
+	test_equal( "put operates on correct bucket after a previous hash conflict removed",
+			   files & -1, map:get( init_routines, "editor" ) )
+
+end procedure
+lookup_bug()
+
+m1 = map:new()
+map:put( m1, "", 1234 )
+test_equal( "retrieve empty string (hashvalue 0) correctly", 1234, map:get( m1, "" ) )
+test_equal( "keys() handles hashval 0 correctly", {""}, map:keys( m1 ) )
+test_equal( "values() handles hashval 0 correctly", {1234}, map:values( m1 ) )
+test_equal( "pairs() handles hashval 0 correctly", {{"",1234}}, map:pairs( m1 ) )
+
+m1 = map:new()
+map:nested_put( m1, {1, 2, 3, 4}, 5 )
+test_equal( "ticket 861 nested_get index", 5, map:nested_get( m1, {1, 2, 3, 4} ) )
 
 test_report()

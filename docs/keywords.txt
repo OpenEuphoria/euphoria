@@ -1,0 +1,17 @@
+== Euphoria Keywords
+
+The **keywords** are part of the Euphoria language and are //reserved// for the exclusive use of the interpreter. 
+You can not used them as identifiers for your own variables or routines.
+
+| ##[[:and]]## | ##[[:as]]## | ##[[:break]]## | ##[[:by]]## |
+| ##[[:case]]## | ##[[:constant]]## | ##[[:continue]]## | ##[[:deprecate]]## |
+| ##[[:do]]## | ##[[:else]]## | ##[[:elsedef]]## | ##[[:elsif]]## |
+| ##[[:elsifdef]]## | ##[[:end]]## | ##[[:entry]]## | ##[[:enum]]## |
+| ##[[:exit]]## | ##[[:export]]## | ##[[:fallthru]]## | ##[[:for]]## |
+| ##[[:function]]## | ##[[:global]]## | ##[[:goto]]## | ##[[:if]]## |
+| ##[[:ifdef]]## | ##[[:include]]## | ##[[:label]]## | ##[[:loop]]## |
+| ##[[:namespace]]## | ##[[:not]]## | ##[[:or]]## | ##[[:override]]## |
+| ##[[:procedure]]## | ##[[:public]]## | ##[[:retry]]## | ##[[:return]]## |
+| ##[[:routine]]## | ##[[:switch]]## | ##[[:then]]## | ##[[:to]]## |
+| ##[[:type]]## | ##[[:until]]## | ##[[:while]]## | ##[[:with]]## |
+| ##[[:without]]## | ##[[:xor]]##  |  |  | 

@@ -31,6 +31,8 @@
 #  include <time.h>
 #  include <sys/ioctl.h>
 #  include <sys/types.h>
+#  include <sys/wait.h>
+#  include <dlfcn.h>
 #else
 #  include <io.h>
 #  if !defined(EMINGW)
@@ -87,7 +89,11 @@
 #define CONTROL_Z 26
 #define CR 13
 #define LF 10
+#ifdef WINDOWS
 #define BS 8
+#else
+#define BS 127
+#endif
 
 #ifdef EWINDOWS
 static int winkbhit();
@@ -438,7 +444,13 @@ void debug_dbl(double num)
 	buff[dbg_dbl_len - 1] = 0; // ensure NULL
 	debug_msg(buff);
 }
-
+#ifdef EARM
+double maxplus1 = ((double)UINTPTR_MAX) + 1;
+uintptr_t doubletouintptrdiscardhighbits(double d)
+{
+	return d-(maxplus1*floor(d/maxplus1));
+}
+#endif
 
 #ifdef ERUNTIME
 int color_trace = 1;
@@ -541,7 +553,7 @@ void call_crash_routines()
 	}
 }
 
-#ifdef EUNIX
+#if defined(EUNIX) || defined(EMINGW)
 static void SimpleRTFatal(char *msg, va_list ap) __attribute__ ((noreturn));
 #endif
 
@@ -867,6 +879,10 @@ s1_ptr Copy_elements(int start,s1_ptr source, int replace )
 	}
 }
 
+/**
+  * Insert b into, the sequence, a at position pos.  If a has a ref > 1, Insert makes a copy of 
+  * a and inserts b into this copy and derefs a.  After that, this modified copy of a is returned. 
+  */
 object Insert(object a,object b,int pos)
 {
 	s1_ptr s1 = Add_internal_space(a,pos,1);
@@ -874,7 +890,10 @@ object Insert(object a,object b,int pos)
 	return MAKE_SEQ(s1);
 }
 
-
+/**
+  * Assigns to *target a sequence object which is comprised of the first reqlen-1 elements of s1.
+  * If s1->ref == 1 and *target == MAKESEQ(s1), the sequence will be processed in place.
+  */
 void Head(s1_ptr s1, int reqlen, object_ptr target)
 {
 	int i;
@@ -882,7 +901,7 @@ void Head(s1_ptr s1, int reqlen, object_ptr target)
 
 	if (s1->ref == 1 && *target == MAKE_SEQ(s1)) {
 		// Target is same as source and source only has one reference,
-		// so just use the existing allocation rather than creare a new sequence.
+		// so just use the existing allocation rather than create a new sequence.
 
 		// First, dereference all existing elements after the new end position.
 		for (op = (s1->base+reqlen), se = s1->base + s1->length + 1; op < se; op++)
@@ -1510,7 +1529,8 @@ void de_reference(s1_ptr a)
 					// end of sequence: back up a level
 					
 					p = (object_ptr)a->cleanup;
-					t = (object) *(object_ptr)&(a->ref);
+					temp = (intptr_t) &(a->ref);
+					t = *(object_ptr)temp;
 					EFree((char *)a);
 					a = (s1_ptr)t;
 					if ((((intptr_t) a) & ((intptr_t) 0xffffffff)) == 0)
@@ -1724,7 +1744,6 @@ object Dremainder(d_ptr a, d_ptr b)
 	return (object)NewDouble(fmod(a->dbl, b->dbl)); /* for now */
 }
 
-
 object and_bits(uintptr_t a, uintptr_t b)
 /* integer a AND b */
 {
@@ -1735,7 +1754,11 @@ object and_bits(uintptr_t a, uintptr_t b)
 object Dand_bits(d_ptr a, d_ptr b)
 /* double a AND b */
 {
+#ifdef EARM
+	return and_bits(doubletouintptrdiscardhighbits(a->dbl), doubletouintptrdiscardhighbits(b->dbl));
+#else
 	return and_bits( (uintptr_t)(a->dbl), (uintptr_t)(b->dbl));
+#endif
 }
 
 object or_bits(uintptr_t a, uintptr_t b)
@@ -1745,10 +1768,15 @@ object or_bits(uintptr_t a, uintptr_t b)
 	return MAKE_UINT(a);
 }
 
+
 object Dor_bits(d_ptr a, d_ptr b)
 /* double a OR b */
 {
+#ifdef EARM
+	return or_bits(doubletouintptrdiscardhighbits(a->dbl), doubletouintptrdiscardhighbits(b->dbl));
+#else
 	return or_bits( (uintptr_t)(a->dbl), (uintptr_t)(b->dbl));
+#endif
 }
 
 object xor_bits(uintptr_t a, uintptr_t b)
@@ -1758,11 +1786,15 @@ object xor_bits(uintptr_t a, uintptr_t b)
 	return MAKE_UINT(a);
 }
 
+
 object Dxor_bits(d_ptr a, d_ptr b)
 /* double a XOR b */
 {
-
+#ifdef EARM
+	return xor_bits(doubletouintptrdiscardhighbits(a->dbl), doubletouintptrdiscardhighbits(b->dbl));
+#else
 	return xor_bits((uintptr_t)(a->dbl), (uintptr_t)(b->dbl));
+#endif
 }
 
 object not_bits(uintptr_t a)
@@ -1772,11 +1804,22 @@ object not_bits(uintptr_t a)
 	return MAKE_UINT(a);
 }
 
+
 object Dnot_bits(d_ptr a)
 /* double bitwise NOT of a */
 {
+#ifdef EARM
+	return not_bits(doubletouintptrdiscardhighbits(a->dbl));
+#else
 	return not_bits((uintptr_t)(a->dbl));
+#endif
 }
+
+#if defined(EFREEBSD) && INTPTR_MAX != INT32_MAX
+long double powl( long double a, long double b ){
+	return (long double) pow( (double) a, (double) b );
+}
+#endif
 
 object power(object a, object b)
 /* integer a to the power b */
@@ -3168,7 +3211,7 @@ object find(object a, s1_ptr b)
 	bp = b->base;
 
 	if (IS_ATOM_INT(a)) {
-		eudouble da;
+		eudouble da = (eudouble)0;
 		int daok = 0;
 		while (TRUE) {
 			bv = *(++bp);
@@ -3345,6 +3388,13 @@ void RHS_Slice( object a, object start, object end)
 	if (IS_ATOM_INT(end))
 		endval = INT_VAL(end);
 	else if (IS_ATOM_DBL(end)) {
+#ifdef __arm__
+		// Get consistent error messages..ARM FP casting is different than x86
+		if( DBL_PTR(end)->dbl > MAXINT_DBL ){
+			endval = INT32_MIN;
+		}
+		else
+#endif
 		endval = (int)(DBL_PTR(end)->dbl);
 		 /* f.p.: if the double is too big for
 			a long WATCOM produces the most negative number. This
@@ -3740,6 +3790,7 @@ object EGets(object file_no)
 	long oldc;
 	IFILE f;
 	object_ptr line_ptr;
+	s1_ptr line;
 	object_ptr next_char_ptr;
 	object_ptr last_char_ptr;
 	int bufsize;
@@ -3760,7 +3811,8 @@ object EGets(object file_no)
 	if (current_screen != MAIN_SCREEN && might_go_screen(last_r_file_no))
 		MainScreen();
 
-	line_ptr = (object_ptr)EMalloc(bufsize * sizeof(object));
+	line = (s1_ptr)EMalloc(bufsize * sizeof(object) + sizeof( struct s1 ));
+	line_ptr = (object_ptr)(line + 1);
 	next_char_ptr = line_ptr - 1; // Point to the [-1] object.
 	last_char_ptr = line_ptr + (bufsize - 2); // Leave room for final NL and NOVALUE
 	i = 0;
@@ -3777,7 +3829,8 @@ object EGets(object file_no)
 				// No room in current buffer, so expand it.
 				bufsize = 64;	// Expansions use this value.
 				i = last_char_ptr - line_ptr;
-				line_ptr = (object_ptr)ERealloc((char *)line_ptr, (i + bufsize + 2) * sizeof(object));
+				line = (s1_ptr)ERealloc((char *)line, (i + bufsize + 2) * sizeof(object) + sizeof( struct s1) );
+				line_ptr = (object_ptr)(line + 1);
 				next_char_ptr = line_ptr + i;
 				last_char_ptr = next_char_ptr + bufsize; // Leave room for final NL and NOVALUE
 			}
@@ -3811,7 +3864,8 @@ object EGets(object file_no)
 				// No room in current buffer, so expand it.
 				bufsize = 64;	// Expansions use this value.
 				i = last_char_ptr - line_ptr;
-				line_ptr = (object_ptr)ERealloc((char *)line_ptr, (i + bufsize + 2) * sizeof(object));
+				line = (s1_ptr)ERealloc((char *)line, (i + bufsize + 2) * sizeof(object) + sizeof( struct s1 ) );
+				line_ptr = (object_ptr)(line + 1);
 				next_char_ptr = line_ptr + i;
 				last_char_ptr = next_char_ptr + bufsize;
 			}
@@ -3838,6 +3892,7 @@ object EGets(object file_no)
 	
 	if (oldc == EOF) {
 		// No input characters where actually read.
+		EFree( (char*)line );
 		return (object)ATOM_M1;
 	}
 
@@ -3854,10 +3909,11 @@ object EGets(object file_no)
 		
 
 	// Shrink buffer
-	line_ptr = (object_ptr)ERealloc((char *)line_ptr, i * sizeof(object));
+	line = (s1_ptr)ERealloc((char *)line, i * sizeof(object) + sizeof( struct s1 ) );
+	line_ptr = (object_ptr)(line + 1);
 
 	// Create the new sequence.
-	return NewPreallocSeq(i, line_ptr);
+	return NewPreallocSeq(i, line);
 
 }
 
@@ -4001,6 +4057,7 @@ s1_ptr concatonate_s1_with_string(s1_ptr s1,  char * poke_addr, int i )
 	*++obj_ptr = NOVALUE;	
 	return s1;
 }
+
 
 static void rPrint(object a)
 /* print any object in default numeric format either to the screen and if
@@ -4254,7 +4311,7 @@ object_ptr v_elem;
 	char c;
 	intptr_t dval;
 	uintptr_t uval;
-	eudouble gval;
+	eudouble gval = (eudouble)0;
 	char *sval;
 	char *sbuff;
 	int slength;
@@ -4407,7 +4464,7 @@ object EPrintf(object file_no, object format_obj, object values)
 {
 	object_ptr f_elem, f_last;
 	char c; /* avoid peep bug - no register decl */
-	object_ptr v_elem, v_last;
+	object_ptr v_elem, v_last = 0;
 	char *cstring;
 	char quick_alloc[LOCAL_SPACE]; // don't use TempBuff - FormatItem uses it
 	int free_cs;
@@ -4572,6 +4629,7 @@ int get_key(int wait)
 
 static int trace_line = 0;
 static IFILE trace_file;
+int trace_lines = 500;
 
 static void one_trace_line(char *line)
 /* write a line to the ctrace.out file */
@@ -4597,7 +4655,7 @@ void ctrace(char *line)
 		}
 		if (trace_file != NULL) {
 			trace_line++;
-			if (trace_line >= 500) {
+			if (trace_line >= trace_lines) {
 				one_trace_line("");
 				one_trace_line("               "); // erase THE END
 				trace_line = 0;
@@ -4892,31 +4950,39 @@ char *get_module_name(){
 }
 #endif
 
-char **make_arg_cv(char *cmdline, int *argc)
+char **make_arg_cv(char *cmdline, int *argc, int skip_leading_dquote)
 /* Convert command line string to argc, argv.
    If *argc is 1, then get program name from GetModuleFileName().
    When double-clicked under Windows, cmdline will
-   typically contain double-quoted strings. */
+   typically contain double-quoted strings. 
+   
+   The returned pointer should be later freed with EFree but the strings in the array should 
+   not be freed.
+   */
 {
 	int i, w, j;
 	char **argv;
 #ifdef EWINDOWS
+	static char * first_argument;
 	int ns;
 	int bs;
 #endif
 	InitEMalloc();
 #ifdef EWINDOWS
+	if (first_argument == NULL) {
+		first_argument = get_module_name();
+	}
 	if( cmdline == NULL ){
 		// Windows already did the work for us
 		*argc = __argc;
-		__argv[0] = get_module_name();
+		__argv[0] = first_argument;
 		return __argv;
 	}
 #endif
 	argv = (char **)EMalloc((strlen(cmdline)/2+3) * sizeof(char *));
 #ifdef EWINDOWS
 	if (*argc == 1) {
-		argv[0] = get_module_name();
+		argv[0] = first_argument;
 		w = 1;
 	}
 	else
@@ -4935,8 +5001,11 @@ char **make_arg_cv(char *cmdline, int *argc)
 		if (cmdline[i] == '\0')
 			break;
 		if (cmdline[i] == '\"') {
-			i++; // skip leading double-quote
+            if (skip_leading_dquote)
+                i++;
 			argv[w++] = &cmdline[i]; // start of new quoted word
+            if (!skip_leading_dquote)
+                i++;
 			while (cmdline[i] != '\"' &&
 				   cmdline[i] != '\0') {
 
@@ -4946,10 +5015,10 @@ char **make_arg_cv(char *cmdline, int *argc)
 					/* copy the rest of the string over the backslash */
 					for (j = ++i;(cmdline[j-1] = cmdline[j]); ++j) /* do nothing */;
 				}
-
 				i++;
 			}
-
+            if (!skip_leading_dquote && cmdline[i] == '\"')
+                i++;
 		}
 		else {
 			argv[w++] = &cmdline[i]; // start of new unquoted word
@@ -5005,7 +5074,7 @@ void system_call(object command, object wait)
 	}
 
 	MakeCString(string_ptr, command, len_used);
-	system(string_ptr);
+	len_used = system(string_ptr);
 	if (len > TEMP_SIZE)
 		EFree(string_ptr);
 
@@ -5023,6 +5092,7 @@ object system_exec_call(object command, object wait)
 {
 #ifndef EUNIX
 	char **argv;
+    char *argvNDQ; // Without double-quote
 #endif
 	char *string_ptr;
 	int len, w, exit_code;
@@ -5055,17 +5125,27 @@ object system_exec_call(object command, object wait)
 
 #ifdef EUNIX
 	// this runs the shell - not really supposed to, but it gets exit code
-	exit_code = system(string_ptr);
+	// Assigning directly to WEXITSTATUS causes a compiler failure on BSD and OSX.
+	// Fix by adding a separate assignment.
+		exit_code = system(string_ptr);
+		exit_code = WEXITSTATUS( exit_code );
 #else
-	argv = make_arg_cv(string_ptr, &exit_code);
-	exit_code = spawnvp(P_WAIT, argv[0], (char * const *)argv);
-
+    argv = make_arg_cv(string_ptr, &exit_code, 0);
+	
+    argvNDQ = (char *)EMalloc(strlen(argv[0])+1);
+    if (argv[0][0] == '\"') { // Assume argument is surrounded by double-quote and remove them
+        copy_string(argvNDQ, argv[0]+1, strlen(argv[0])-1);
+    } else {
+        copy_string(argvNDQ, argv[0], strlen(argv[0])+1);
+    }
+    
+    exit_code = _spawnvp(P_WAIT, argvNDQ, (char const * const *)argv);
+    
 	#if INTPTR_MAX == INT32_MAX
 	// This causes a crash on Win64
-	EFree(argv[0]);		// free the 'process' name
+    EFree(argvNDQ);			// free the 'process' name
 	#endif
-	EFree((char *)argv); // free the list of arg addresses, but not the args themself.
-
+    EFree((char *)argv); // free the list of arg addresses, but not the args themself.
 #endif
 	if (len > TEMP_SIZE)
 		EFree(string_ptr);
@@ -5258,7 +5338,8 @@ uintptr_t general_call_back(
 	object *code[4+9]; // place to put IL: max 9 args
 	object *save_tpc;
 #endif
-
+	struct symtab_entry call_back_sym;
+	
 	if (gameover)
 		return (uintptr_t)0; // ignore messages after we decide to shutdown
 
@@ -5295,35 +5376,35 @@ uintptr_t general_call_back(
 	}
 	switch (num_args) {
 		case 0:
-			call_back_result->obj = (*addr)();
+			call_back_sym.obj = (*addr)();
 			break;
 		case 1:
-			call_back_result->obj = (*addr)(call_back_arg1->obj);
+			call_back_sym.obj = (*addr)(call_back_arg1->obj);
 			break;
 		case 2:
-			call_back_result->obj = (*addr)(call_back_arg1->obj,
+			call_back_sym.obj = (*addr)(call_back_arg1->obj,
 											call_back_arg2->obj);
 			break;
 		case 3:
-			call_back_result->obj = (*addr)(call_back_arg1->obj,
+			call_back_sym.obj = (*addr)(call_back_arg1->obj,
 											call_back_arg2->obj,
 											call_back_arg3->obj);
 			break;
 		case 4:
-			call_back_result->obj = (*addr)(call_back_arg1->obj,
+			call_back_sym.obj = (*addr)(call_back_arg1->obj,
 											call_back_arg2->obj,
 											call_back_arg3->obj,
 											call_back_arg4->obj);
 			break;
 		case 5:
-			call_back_result->obj = (*addr)(call_back_arg1->obj,
+			call_back_sym.obj = (*addr)(call_back_arg1->obj,
 											call_back_arg2->obj,
 											call_back_arg3->obj,
 											call_back_arg4->obj,
 											call_back_arg5->obj);
 			break;
 		case 6:
-			call_back_result->obj = (*addr)(call_back_arg1->obj,
+			call_back_sym.obj = (*addr)(call_back_arg1->obj,
 											call_back_arg2->obj,
 											call_back_arg3->obj,
 											call_back_arg4->obj,
@@ -5331,7 +5412,7 @@ uintptr_t general_call_back(
 											call_back_arg6->obj);
 			break;
 		case 7:
-			call_back_result->obj = (*addr)(call_back_arg1->obj,
+			call_back_sym.obj = (*addr)(call_back_arg1->obj,
 											call_back_arg2->obj,
 											call_back_arg3->obj,
 											call_back_arg4->obj,
@@ -5340,7 +5421,7 @@ uintptr_t general_call_back(
 											call_back_arg7->obj);
 			break;
 		case 8:
-			call_back_result->obj = (*addr)(call_back_arg1->obj,
+			call_back_sym.obj = (*addr)(call_back_arg1->obj,
 											call_back_arg2->obj,
 											call_back_arg3->obj,
 											call_back_arg4->obj,
@@ -5350,7 +5431,7 @@ uintptr_t general_call_back(
 											call_back_arg8->obj);
 			break;
 		case 9:
-			call_back_result->obj = (*addr)(call_back_arg1->obj,
+			call_back_sym.obj = (*addr)(call_back_arg1->obj,
 											call_back_arg2->obj,
 											call_back_arg3->obj,
 											call_back_arg4->obj,
@@ -5363,11 +5444,16 @@ uintptr_t general_call_back(
 	}
 
 #else
+	call_back_sym.obj = NOVALUE;
+	call_back_sym.next = 0;
+	call_back_sym.next_in_block = 0;
+	call_back_sym.mode = M_TEMP;
+	
 	/* Interpreter: set up a PROC opcode call */
 	code[0] = (intptr_t *)opcode(PROC);
 	code[1] = (intptr_t *)cb_routine;  // symtab_ptr of Euphoria routine
-
 	num_args = cb_routine->u.subp.num_args;
+
 	if (num_args >= 1) {
 	  DeRef(call_back_arg1->obj);
 	  call_back_arg1->obj = make_atom32((uintptr_t)arg1);
@@ -5413,8 +5499,8 @@ uintptr_t general_call_back(
 		}
 	  }
 	}
-
-	code[num_args+2] = (object *)call_back_result;
+	
+	code[num_args+2] = (object *)&call_back_sym;
 	code[num_args+3] = (object *)opcode(CALL_BACK_RETURN);
 
 	*expr_top++ = (object)tpc;    // needed for traceback
@@ -5433,10 +5519,10 @@ uintptr_t general_call_back(
 	// Don't do get_pos_int() for crash handler
 	if (crash_call_back) {
 		crash_call_back = FALSE;
-		return (object)(call_back_result->obj);
+		return (object)(call_back_sym.obj);
 	}
 	else {
-		return (object)get_pos_int("call-back", call_back_result->obj);
+		return (object)get_pos_int("call-back", call_back_sym.obj);
 	}
 }
 
@@ -5455,10 +5541,10 @@ uintptr_t __cdecl osx_cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t 
 	// this saves us the trouble of trying to calculate the offset of
 	// the callback copy from general_ptr and stuffing that into a LEA
 	// calculation
-	uintptr_t (*f)(uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
+	uintptr_t (*f)(symtab_ptr, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
 	uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)
-	= (uintptr_t (*)(uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
-	uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)) 0xF001F001;
+	= (uintptr_t (*)(symtab_ptr, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
+	uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)) (uintptr_t)general_ptr_magic;
 	return (f)((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, arg8, arg9);
@@ -5471,7 +5557,7 @@ uintptr_t __cdecl osx_cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t 
 
 // Need to force the compiler to use an absolute address
 typedef intptr_t (*cbfunc)();
-#define CALL_GENERAL_CALLBACK ((cbfunc)0xabcdefabcdefabcdLL)
+#define CALL_GENERAL_CALLBACK ((cbfunc)general_ptr_magic)
 #endif
 
 /* Windows cdecl - Need only one template.
@@ -5640,11 +5726,8 @@ void Cleanup(int status)
 	char *xterm;
 #endif
 
-#if defined(EWINDOWS) || !defined(ERUNTIME)
-	int i;
-#endif
-
 #ifndef ERUNTIME
+	int i;
 	long c;
 	FILE *wrnf = NULL;
 #endif
@@ -5732,34 +5815,80 @@ void Cleanup(int status)
 #ifdef EXTRA_STATS
 	Stats();
 #endif
+
+
+	// Note: ExitProcess() - frees all the dlls but won't flush the regular files
+	for (i = 0; i < open_dll_count; i++) {
+#ifdef EWINDOWS
+		FreeLibrary(open_dll_list[i]);
+#else
+		dlclose( open_dll_list[i] );
+#endif // EWINDOWS
+	}
 #if 0
 	{
-		symtab_ptr sym = TopLevelSub;
+		symtab_ptr sym;
+		intptr_t len, i;
+		sym = TopLevelSub;
 		while( sym ){
-			if( sym->mode = M_NORMAL &&
+			if( sym->mode = M_NORMAL ){
+				object x = sym->obj;
+				if( x >= NOVALUE ) /* do nothing */;
+				else if ( IS_ATOM_DBL( x ) && DBL_PTR( x )->cleanup != 0){
+					RefDS(x);
+					cleanup_double( DBL_PTR( x ) );
+				}
+				else if (IS_SEQUENCE( x ) && SEQ_PTR( x )->cleanup != 0 ){
+					RefDS(x);
+					cleanup_sequence( SEQ_PTR( x ) );
+				}
+			}
+			sym = sym->next;
+		}
+
+		sym = TopLevelSub;
+		while( sym ){
+			if( sym->mode == M_NORMAL ){
+				DeRef( sym->obj );
+				sym->obj = NOVALUE;
+			}
+			sym = sym->next;
+		}
+
+		sym = TopLevelSub;
+		while( sym ){
+			if( sym->mode == M_NORMAL &&
 				(sym->token == PROC ||
 				sym->token == FUNC ||
-				sym->token == TYPE)){
+				sym->token == TYPE) ){
 
-// 				EFree( sym->u.subp.code );
+				EFree( sym->u.subp.code - 1 );
 				EFree( sym->u.subp.linetab );
 			}
 			sym = sym->next;
 		}
+
+		// deal with M_CONSTANTs:
+		sym = fe.st;
+		if( sym ){
+			len = sym->obj;
+			++sym;
+			for( i = 1; i <= len; ++i, ++sym ){
+				if( sym->mode == M_CONSTANT ){
+					DeRef( sym->obj );
+					sym->obj = NOVALUE;
+				}
+			}
+		}
 	}
-	EFree( fe.st ); // = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
-	EFree( fe.sl ); //= (struct sline *) get_pos_int(w, *(x_ptr->base+2));
-	EFree( fe.misc ); // = (int *)        get_pos_int(w, *(x_ptr->base+3));
-#endif // 0
+	if( fe.st ){
+		EFree( fe.st[0].name );
+		EFree( fe.st ); // = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
+		EFree( fe.sl ); //= (struct sline *) get_pos_int(w, *(x_ptr->base+2));
+		EFree( fe.misc ); // = (int *)        get_pos_int(w, *(x_ptr->base+3));
+	}
+#endif
 #endif // ERUNTIME
-
-#ifdef EWINDOWS
-	// Note: ExitProcess() - frees all the dlls but won't flush the regular files
-	for (i = 0; i < open_dll_count; i++) {
-		FreeLibrary(open_dll_list[i]);
-	}
-#endif // EWINDOWS
-
 	exit(status);
 }
 
@@ -5787,10 +5916,9 @@ static int winkbhit()
 {
 	INPUT_RECORD pbuffer;
 	DWORD junk = 0;
-	int c;
 
 	while (TRUE) {
-		c = PeekConsoleInput(console_input, &pbuffer, 1, &junk);
+		PeekConsoleInput(console_input, &pbuffer, 1, &junk);
 		if (junk == 0)
 			return FALSE;
 		if (pbuffer.EventType == KEY_EVENT &&
@@ -5870,13 +5998,28 @@ void key_gets(char *input_string, int buffsize)
 		if (c == CR || c == LF || c == numpad_enter)
 			break;
 
-		if (c == BS || c == left_arrow) {
+#ifndef WINDOWS
+		if( c == 27 ){
+			char d, e;
+			// escape code!
+			d = get_key(TRUE);
+			e = get_key(TRUE);
+			if( (d == 'O') &&  (e == 'D') ){
+				c = left_arrow;
+			}
+			else{
+				// just ignore it
+				continue;
+			}
+		}
+#endif
+
+		if (c == BS || c == left_arrow ) {
 			if (len > 0) {
 				// update buffer
 				ip--;
 				*ip = '\0';
 				len--;
-				
 				// update screen display
 				column--;
 				SetPosition(line, column);
@@ -5915,7 +6058,7 @@ object find_from(object a, object bobj, object c)
 	s1_ptr b;
 
 	if (!IS_SEQUENCE(bobj))
-		RTFatal("second argument of find_from() must be a sequence");
+		RTFatal("second argument of find/find_from() must be a sequence");
 
 	b = SEQ_PTR(bobj);
 	length = b->length;
@@ -5928,18 +6071,18 @@ object find_from(object a, object bobj, object c)
 		c = (object)(DBL_PTR(c)->dbl);
 	}
 	else
-		RTFatal("third argument of find_from() must be an atom");
+		RTFatal("third argument of find/find_from() must be an atom");
 
 	// we allow c to be $+1, just as we allow the lower limit
 	// of a slice to be $+1, i.e. the empty sequence
 	if (c < 1 || c > length+1) {
-		RTFatal("third argument of find_from() is out of bounds (%ld)", c);
+		RTFatal("third argument of find/find_from() is out of bounds (%ld)", c);
 	}
 
 	bp = b->base;
 	bp += c - 1;
 	if (IS_ATOM_INT(a)) {
-		eudouble da;
+		eudouble da = (eudouble)0;
 		int daok = 0;
 		while (TRUE) {
 			bv = *(++bp);
@@ -6022,17 +6165,17 @@ object e_match_from(object aobj, object bobj, object c)
 	s1_ptr a, b;
 
 	if (!IS_SEQUENCE(aobj))
-		RTFatal("first argument of match_from() must be a sequence");
+		RTFatal("first argument of match/match_from() must be a sequence");
 
 	if (!IS_SEQUENCE(bobj))
-		RTFatal("second argument of match_from() must be a sequence");
+		RTFatal("second argument of match/match_from() must be a sequence");
 
 	a = SEQ_PTR(aobj);
 	b = SEQ_PTR(bobj);
 
 	lengtha = a->length;
 	if (lengtha == 0)
-		RTFatal("first argument of match_from() must be a non-empty sequence");
+		RTFatal("first argument of match/match_from() must be a non-empty sequence");
 
 	// same rules as the lower limit on a slice
 	if (IS_ATOM_INT(c)) {
@@ -6042,14 +6185,14 @@ object e_match_from(object aobj, object bobj, object c)
 		c = (object)(DBL_PTR(c)->dbl);
 	}
 	else
-		RTFatal("third argument of match_from() must be an atom");
+		RTFatal("third argument of match/match_from() must be an atom");
 
 	lengthb = b->length;
 
 	// we allow c to be $+1, just as we allow the lower limit
 	// of a slice to be $+1, i.e. the empty sequence
 	if (c < 1 || c > lengthb+1) {
-		RTFatal("third argument of match_from() is out of bounds (%ld)", c);
+		RTFatal("third argument of match/match_from() is out of bounds (%ld)", c);
 	}
 
 	b1 = b->base;
@@ -6236,10 +6379,15 @@ void Replace( replace_ptr rb )
 				s1 = Copy_elements( start_pos, s2, 1 );
 			}
 			else {
-				if( target != copy_to ){
+				int replace_elements = target == copy_to;
+				if( !replace_elements ){
 					DeRef( target );
 				}
-				s1 = Copy_elements( start_pos, s2, (target == copy_to));
+				else if( !UNIQUE( SEQ_PTR( target ) ) ){
+					DeRef( target );
+					replace_elements = 0;
+				}
+				s1 = Copy_elements( start_pos, s2, replace_elements );
 			}
 			*rb->target = MAKE_SEQ( s1 );
 			if( c ){

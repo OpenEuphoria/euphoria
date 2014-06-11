@@ -10,9 +10,10 @@ elsedef
 end ifdef
 
 include std/cmdline.e
-include std/text.e
-include std/map.e as m
 include std/console.e
+include std/map.e as m
+include std/sort.e
+include std/text.e
 
 include global.e
 include cominit.e
@@ -44,7 +45,7 @@ export procedure intoptions()
 	Argv = expand_config_options(Argv)
 	Argc = length(Argv)
 	
-	sequence opts_array = get_options()
+	sequence opts_array = sort( get_options() )
 
 	m:map opts = cmd_parse( opts_array, 
 		{ NO_HELP_ON_ERROR, NO_VALIDATION_AFTER_FIRST_EXTRA, PAUSE_MSG, pause_msg }, Argv)

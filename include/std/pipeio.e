@@ -1,14 +1,14 @@
 --****
--- == Pipe Input/Output
+-- == Pipe Input and Output
 --
 -- <<LEVELTOC level=2 depth=4>>
 --
 -- === Notes
--- Due to a bug, Euphoria does not handle STDERR properly
--- STDERR cannot captured for Euphoria programs (other programs will work fully)
+-- Due to a bug, Euphoria does not handle ##STDERR## properly.
+-- ##STDERR## cannot captured for Euphoria programs (other programs will work fully)
 -- The IO functions currently work with file handles, a future version might wrap them in streams
 -- so that they can be used directly alongside other file/socket/other-streams with a
--- stream_select() function.
+-- ##stream_select## function.
 --
 
 namespace pipeio
@@ -94,7 +94,7 @@ public enum
 public enum
 	--** Set of pipes that are for the use of the parent
 	PARENT,
-	--** Set of pipes that are given to the child - should not be used by the parent
+	--** Set of pipes that are given to the child ~-- should not be used by the parent
 	CHILD
 
 --
@@ -110,7 +110,7 @@ function get_errno()
 end function
 
 --****
--- === Opening/Closing
+-- === Opening and Closing
 
 --**
 -- Process Type
@@ -128,7 +128,7 @@ public type process(object o)
 end type
 
 --**
--- Close handle fd
+-- closes handle ##fd##.
 --
 -- Returns:
 --   An **integer**, 0 on success, -1 on failure
@@ -157,10 +157,10 @@ public function close(atom fd)
 end function
 
 --**
--- Close pipes and kill process p with signal signal (default 15)
+-- closes pipes and kills process ##p## with signal signal (default 15).
 --
 -- Comments:
---   Signal is ignored on Windows.
+--   Signal is ignored on //Windows//.
 --
 -- Example 1:
 -- <eucode>
@@ -215,10 +215,10 @@ function os_pipe()
 end function
 
 --****
--- === Read/Write Process
+-- === Read and Write Process
 
 --**
--- Read ##bytes## bytes from handle ##fd##
+-- reads ##bytes## bytes from handle ##fd##.
 --
 -- Returns:
 --   A **sequence**, containing data, an empty sequence on EOF or an error code.
@@ -261,7 +261,7 @@ public function read(atom fd, integer bytes)
 end function
 
 --**
--- Write ##bytes## to handle ##fd##
+-- writes ##bytes## to handle ##fd##.
 --
 -- Returns:
 --   An **integer**, number of bytes written, or -1 on error
@@ -302,10 +302,10 @@ procedure error()
 end procedure
 
 --**
--- Get error no from last call to a pipe function
+-- gets error no from last call to a pipe function.
 --
 -- Comments:
---   Value returned will be OS-specific, and is not always set on Windows at least
+--   Value returned will be OS-specific, and is not always set on //Windows// at least
 --
 -- Example 1:
 -- <eucode>
@@ -363,7 +363,7 @@ ifdef WINDOWS then
 	end function
 
 	--**
-	-- Create pipes for inter-process communication
+	-- creates pipes for inter-process communication.
 	--
 	-- Returns:
 	--   A **handle**, process handles { {parent side pipes},{child side pipes} }
@@ -415,7 +415,7 @@ ifdef WINDOWS then
 	--WIN32 version of exec()
 
 	--**
-	-- Open process with command line cmd
+	-- opens process with command line cmd.
 	--
 	-- Returns:
 	--   A **handle**, process handles { [[:PID]], [[:STDIN]], [[:STDOUT]], [[:STDERR]] }

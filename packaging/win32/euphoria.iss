@@ -12,9 +12,9 @@
 ; 6. /docs/refman_2.txt (Euphoria Version Definitions)
 
 [Setup]
-AppName=Euphoria
-AppVersion=4.0.4
-AppVerName=Euphoria v4.0.4
+AppName=Euphoria with Alternative Literals
+AppVersion=4.1.0
+AppVerName=Euphoria v4.1a
 AppPublisher=OpenEuphoria Group
 AppPublisherURL=http://openeuphoria.org
 AppSupportURL=http://openeuphoria.org
@@ -26,13 +26,16 @@ LicenseFile=..\..\license.txt
 DisableStartupPrompt=yes
 DisableReadyPage=yes
 OutputDir=.\
-OutputBaseFilename=euphoria-4.0.4
+OutputBaseFilename=euphoria-4.1a
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
 ChangesEnvironment=yes
 InfoBeforeFile=before.txt
 InfoAfterFile=after.txt
+; set the minimum environment required to 
+; Windows 95 Original Equipment Manufacterer Service Release 2.5 (see ticket 665)
+MinVersion=4.0.1212,
 
 [Types]
 Name: "full"; Description: "Full installation";
@@ -81,7 +84,7 @@ Source: "{app}\file_id.diz"; DestDir: "{code:GetBackupPath}"; Flags: external sk
 
 ; Temporary Programs used to update AUTOEXEC.BAT in Windows 95, 98 and ME,
 ; create the docs, and euiw.exe (see [Run] section below)
-Source: "..\..\bin\euiw.exe"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: "..\..\source\build\euiw.exe"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
 
 ; We temporarily need these includes as well, but EUDIR will not have been set.
 Source: "cleanbranch\include\wildcard.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
@@ -100,17 +103,17 @@ Source: "cleanbranch\file_id.diz"; DestDir: {app}; Flags: ignoreversion;
 Source: "cleanbranch\license.txt"; DestDir: {app}; Flags: ignoreversion;
 
 ; Windows Binaries
-Source: "..\..\bin\eu.a"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eu.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eub.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eubind.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eubw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\euc.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eudbg.a"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eudbg.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eui.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main; AfterInstall: InstallEuCfg
-Source: "..\..\bin\euiw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eushroud.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\eu.a"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\eu.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\eub.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\eubind.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+;Source: "..\..\source\build\eubw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\euc.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\eudbg.a"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\eudbg.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\eui.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main; AfterInstall: InstallEuCfg
+Source: "..\..\source\build\euiw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\eushroud.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "cleanbranch\source\eufile.ico"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "cleanbranch\source\euphoria.ico"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 
@@ -132,7 +135,7 @@ Source: "cleanbranch\bin\*.exw"; DestDir: {app}\bin\; Flags: ignoreversion; Comp
 Source: "cleanbranch\demo\*.*"; DestDir: {app}\demo\; Flags: ignoreversion recursesubdirs; Components: comp_demos
 
 ; Docs
-Source: "..\..\source\build\euphoria.pdf"; DestDir: {app}\docs\; Flags: ignoreversion; Components: comp_docs
+;Source: "..\..\source\build\euphoria.pdf"; DestDir: {app}\docs\; Flags: ignoreversion; Components: comp_docs
 Source: "..\..\source\build\html\*.*"; DestDir: {app}\docs\html\; Flags: ignoreversion recursesubdirs; Components: comp_docs
 
 ; Includes
@@ -188,7 +191,7 @@ Root: HKCR; Subkey: "EUWinApp\shell\translate\command"; ValueType: string; Value
 Root: HKCR; Subkey: ".ex"; ValueType: string; ValueName: ""; ValueData: "EUConsoleApp"; Flags: deletekey uninsdeletevalue createvalueifdoesntexist; Tasks: associate
 Root: HKCR; Subkey: "EUConsoleApp"; ValueType: string; ValueName: ""; ValueData: "Euphoria Console App"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
 Root: HKCR; Subkey: "EUConsoleApp\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\eufile.ico"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
-Root: HKCR; Subkey: "EUConsoleApp\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\eui.exe"" ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: "EUConsoleApp\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\eui.exe"" ""%1"" %*"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
 Root: HKCR; Subkey: "EUConsoleApp\shell\translate\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\euc.exe"" -con ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
 
 ;create an icon link for .e files

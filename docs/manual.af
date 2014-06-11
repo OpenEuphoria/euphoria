@@ -29,7 +29,7 @@
 #
 
 # Output file generation options
-:@@(title Euphoria v4.0)@
+:@@(title Euphoria v4.1)@
 
 ifdef HTML
 :%%maxnumlevel = 4
@@ -48,11 +48,12 @@ end ifdef
 
 ########
 :%%output=eu_intro
-:= Euphoria Programming Language v4.0
+:= Euphoria Programming Language v4.1
 :@[toc|]
 :<<LEVELTOC level=1 depth=4>>
 
 ../docs/welcome.txt
+../docs/whatsnew4_1.txt
 ../docs/whatsnew4_0.txt
 ../docs/licensing.txt
 ../License.txt <nowiki
@@ -78,10 +79,9 @@ end ifdef
 :<<LEVELTOC depth=2>>
 
 ../docs/refman_2.txt
-../docs/literals.txt
 
 ########
-:%%output=syntax
+:%%output=syntax_toc
 := Formal Syntax
 :<<LEVELTOC level=1 depth=2>>
 
@@ -158,7 +158,7 @@ end ifdef
 
 ../docs/eutest.txt
 ../docs/eudoc.txt
-../docs/ed.txt
+../docs/edx.txt
 ../docs/dis.txt
 ../docs/eudist.txt
 
@@ -255,8 +255,9 @@ end ifdef
 :%%output=relnotes
 := Release Notes
 :<<LEVELTOC level=1 depth=2>>
-
 ../docs/release/4.1.0.txt
+../docs/release/4.0.6.txt
+../docs/release/4.0.5.txt
 ../docs/release/4.0.4.txt
 ../docs/release/4.0.3.txt
 ../docs/release/4.0.2.txt

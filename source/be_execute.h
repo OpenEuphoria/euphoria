@@ -51,4 +51,8 @@ void Execute(intptr_t *start_index);
 void InitStack(int size, int toplevel);
 void InitExecute( void );
 
+extern int map_new;
+extern int map_put;
+extern int map_get;
+
 #endif

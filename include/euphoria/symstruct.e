@@ -10,36 +10,36 @@ function offset( atom data_type, integer use_offset = next_offset )
 end function
 
 public constant
-	ST_OBJ            = offset( E_OBJECT ), -- 0
-	ST_NEXT           = offset( C_POINTER ), -- 4
-	ST_NEXT_IN_BLOCK  = offset( C_POINTER ), -- 8
-	ST_MODE           = offset( C_CHAR ), -- 12
-	ST_SCOPE          = offset( C_CHAR ), -- 13
-	ST_FILE_NO        = offset( C_CHAR ), -- 14,
-	ST_DUMMY          = offset( C_CHAR ), -- 15,
-	ST_TOKEN          = offset( C_INT ), -- 20,
-	ST_NAME           = offset( C_POINTER ), --16,
+	ST_OBJ            = offset( E_OBJECT ), 
+	ST_NEXT           = offset( C_POINTER ), 
+	ST_NEXT_IN_BLOCK  = offset( C_POINTER ), 
+	ST_MODE           = offset( C_CHAR ), 
+	ST_SCOPE          = offset( C_CHAR ), 
+	ST_FILE_NO        = offset( C_CHAR ), 
+	ST_DUMMY          = offset( C_CHAR ), 
+	ST_TOKEN          = offset( C_INT ), 
+	ST_NAME           = offset( C_POINTER ), 
 	
 	
-	-- var:
-	ST_DECLARED_IN    = offset( C_POINTER ), -- 24,
-	ST_LITERAL_SET    = offset( C_POINTER ), -- 28
-	ST_LS_ACCESS_METHOD = offset( C_INT ),   -- 30
 	
-	-- block:
-	ST_FIRST_LINE     = offset( C_INT, ST_DECLARED_IN ), -- 24,
-	ST_LAST_LINE      = offset( C_INT ), -- 28,
+	ST_DECLARED_IN    = offset( C_POINTER ), 
+	ST_LITERAL_SET    = offset( C_POINTER ), 
+	ST_LS_ACCESS_METHOD = offset( C_INT ),   
 	
-	-- routine:
-	ST_CODE           = offset( C_POINTER, ST_DECLARED_IN ), -- 24,
-	ST_TEMPS          = offset( C_POINTER ), -- 36,
-	ST_SAVED_PRIVATES = offset( C_POINTER ), --48,
-	ST_BLOCK          = offset( C_POINTER ), --56
-	ST_LINETAB        = offset( C_POINTER ), -- 28,
-	ST_FIRSTLINE      = offset( C_UINT ), -- 32,
-	ST_NUM_ARGS       = offset( C_UINT ), -- 40,
-	ST_RESIDENT_TASK  = offset( C_INT ), --44,
-	ST_STACK_SPACE    = offset( C_UINT ), -- 52,
+	
+	ST_FIRST_LINE     = offset( C_INT, ST_DECLARED_IN ), 
+	ST_LAST_LINE      = offset( C_INT ), 
+	
+	
+	ST_CODE           = offset( C_POINTER, ST_DECLARED_IN ), 
+	ST_TEMPS          = offset( C_POINTER ), 
+	ST_SAVED_PRIVATES = offset( C_POINTER ), 
+	ST_BLOCK          = offset( C_POINTER ), 
+	ST_LINETAB        = offset( C_POINTER ), 
+	ST_FIRSTLINE      = offset( C_UINT ), 
+	ST_NUM_ARGS       = offset( C_UINT ), 
+	ST_RESIDENT_TASK  = offset( C_INT ), 
+	ST_STACK_SPACE    = offset( C_UINT ), 
 	
 	ST_ENTRY_SIZE = next_offset  -- size (bytes) of back-end symbol table entry
 							 -- for interpreter. Fixed size for all entries.
@@ -49,4 +49,5 @@ public constant
 	SL_LINE = offset( C_SHORT ),
 	SL_FILE_NO = offset( C_CHAR ),
 	SL_OPTIONS = offset( C_CHAR ),
+	SL_MULTILINE = offset( C_INT ),
 	SL_SIZE    = next_offset + remainder( next_offset, sizeof( C_POINTER ) ) -- padding

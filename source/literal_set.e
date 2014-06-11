@@ -15,16 +15,16 @@ constant METHODS_OTHER_THAN_SEQUENCE_PAIR_ACTUALLY_WORK = 0
 with type_check
 
 enum type literal_accessor 
-	NAME,
-	MAP,
-	ACCESS_METHOD,
-	NO_FRACTION,
-	CONTINUOUS,
-	MINIMUM, -- the sym_index that attains the lowest value
-	MAXIMUM, -- the sym_index that attains the higest value
-	DATA_SYMBOL,
-	UDT_SYMBOL,
-	MONOTONIC,
+	NAME,           -- name of the type routine
+	MAP,            -- map used for storing data used for type_check and name_of
+	ACCESS_METHOD,  -- describes how MAP is structured.
+	NO_FRACTION,    -- true if it contains no fractions
+	CONTINUOUS,     -- true if the data is continuous
+	MINIMUM, -- the sym_index that attains the lowest value or 0 if unknown
+	MAXIMUM, -- the sym_index that attains the higest value or 0 if unknown
+	DATA_SYMBOL, -- the sym_index that points to a data literal which is the same as the one in MAP: used for a type check or name_of call
+	UDT_SYMBOL,  -- the sym_index for the type routine?
+	MONOTONIC,   -- true if the data values are all increasing
 	$
 end type
 
@@ -75,10 +75,10 @@ constant binary_to_128 = {1,2,4,8,16,32,64,128}
 constant binary_to_2__32 = binary_to_128 & 256 * binary_to_128 & power(2,16) * binary_to_128 * power(2,24) * binary_to_128 -- the geometric series going up by 2 that constains exactly 32 members from 1 to power(2,31)
 
  -- a binary series that must contain at least the bits up to that that can be contained in an integer
-ifdef E32 or EU4_0 then
+ifdef BITS32 or EU4_0 then
 	constant binary_sequence = binary_to_2__32
 	constant integer_bits = 30
-elsifdef E64 then
+elsifdef BITS64 then
 	constant binary_sequence = binary_to_2__32 & #1_0000_0000 * binary_to_2__32
 	constant integer_bits = 62
 end ifdef
@@ -137,6 +137,11 @@ export function new(
 		if sym_mode(syms[1]) != M_CONSTANT then
 			return 0 -- failure
 		end if
+		-- unless a major change is done to the way
+		-- enums are parsed this condition will never happen.
+		if sym_obj(syms[1]) = NOVALUE then
+			return 0
+		end if
 		min_sym = syms[1]
 		max_sym = syms[1]
 		ciif_min = syms[1]
@@ -146,7 +151,7 @@ export function new(
 		end if
 	end if
 	for i = 1 to length( syms ) do
-		if sym_mode(syms[i]) != M_CONSTANT then
+		if sym_mode(syms[i]) != M_CONSTANT or sym_obj(syms[1]) = NOVALUE then
 			return 0
 		end if
 		if i > 2 and compare(sym_obj(syms[i-1]),sym_obj(syms[i])) != direction then

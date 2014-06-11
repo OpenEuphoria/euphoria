@@ -1094,7 +1094,13 @@ procedure seg_poke1(integer source, boolean dbl)
 -- poke a single byte value into poke_addr
 	-- WATCOM etc.
 	if dbl then
-		c_stmt("*poke_addr = (uint8_t)DBL_PTR(@)->dbl;\n", source)
+		if TARM then
+			c_stmt("_2 = trunc( DBL_PTR(@)->dbl );\n", source)
+			c_stmt0("*poke_addr = (uint8_t)_2;\n" )
+		else
+			c_stmt("*poke_addr = (uint8_t)DBL_PTR(@)->dbl;\n", source)
+		end if
+		
 	else
 		c_stmt("*poke_addr = (uint8_t)@;\n", source)
 	end if
@@ -1104,7 +1110,12 @@ end procedure
 procedure seg_poke2(integer source, boolean dbl)
 -- poke a word value into poke2_addr
 	if dbl then
-		c_stmt("*poke2_addr = (uint16_t)DBL_PTR(@)->dbl;\n", source)
+		if TARM then
+			c_stmt("_2 = trunc( DBL_PTR(@)->dbl );\n", source)
+			c_stmt0("*poke2_addr = (uint16_t)_2;\n" )
+		else
+			c_stmt("*poke2_addr = (uint16_t)DBL_PTR(@)->dbl;\n", source)
+		end if
 	else
 		c_stmt("*poke2_addr = (uint16_t)@;\n", source)
 	end if
@@ -1112,8 +1123,11 @@ end procedure
 
 procedure seg_poke4(integer source, boolean dbl)
 -- poke a 4-byte value into poke4_addr
-	-- WATCOM etc.
 	if dbl then
+		if TARM then
+			c_stmt("if( DBL_PTR(@)->dbl <= MAXINT_DBL ) *poke4_addr = (int32_t)DBL_PTR(@)->dbl; else\n", 
+				{source, source})
+		end if
 		c_stmt("*poke4_addr = (uint32_t)DBL_PTR(@)->dbl;\n", source)
 	else
 		c_stmt("*poke4_addr = (uint32_t)@;\n", source)
@@ -1293,7 +1307,7 @@ procedure main_temps()
 end procedure
 
 export sequence LL_suffix = ""
-if SIZEOF_POINTER = 8 then
+if TARGET_SIZEOF_POINTER = 8 then
 	LL_suffix = "LL"
 end if
 function FoldInteger(integer op, integer target, integer left, integer right)
@@ -1528,7 +1542,7 @@ procedure FinalDeRef(symtab_index sym)
 	end if
 end procedure
 
-function NotInRange(integer x, integer badval)
+function NotInRange(atom x, atom badval)
 -- return TRUE if x can't be badval
 	sequence range
 
@@ -1640,19 +1654,19 @@ function IntegerMultiply(integer a, integer b)
 	dblcode = "@1 = NewDouble(@2 * (eudouble)@3);\n"
 
 	-- test_a
-	if SIZEOF_POINTER = 4 then
+	if TARGET_SIZEOF_POINTER = 4 then
 		test_a = int32_mult_testa( range_a )
 		
 	else
 		test_a = int64_mult_testa( range_a )
 	end if
 	
-	if atom( test_a ) and SIZEOF_POINTER = 4 then
+	if atom( test_a ) and TARGET_SIZEOF_POINTER = 4 then
 		return dblcode
 	end if
 	
 	-- test_b1
-	if SIZEOF_POINTER = 4 then
+	if TARGET_SIZEOF_POINTER = 4 then
 		test_b1 = int32_mult_testb1( range_b )
 	else
 		test_b1 = int64_mult_testb1( range_b )
@@ -1663,7 +1677,7 @@ function IntegerMultiply(integer a, integer b)
 	
 	
 	-- test_b2
-	if SIZEOF_POINTER = 4 then
+	if TARGET_SIZEOF_POINTER = 4 then
 		test_b2 = int32_mult_testb2( range_b )
 	else
 		test_b2 = int64_mult_testb2( range_b )
@@ -1693,11 +1707,11 @@ function IntegerMultiply(integer a, integer b)
 		multiply_code &= "){\n" &
 						 "@1 = @2 * @3;\n}\n" &
 						 "else{\n"
-		if SIZEOF_POINTER = 4 then
+		if TARGET_SIZEOF_POINTER = 4 then
 			multiply_code &= "@1 = NewDouble(@2 * (eudouble)@3);\n}\n"
 		else
 			multiply_code  = "{\nint128_t p128 = (int128_t)@2 * (int128_t)@3;\n"
-			multiply_code &= "if( p128 != (int128_t)(@1 = (intptr_t)p128) ){\n"
+			multiply_code &= "if( p128 != (int128_t)(@1 = (intptr_t)p128) || !IS_ATOM_INT( p128 ) ){\n"
 			multiply_code &= "@1 = NewDouble( (eudouble)p128 );\n"
 			multiply_code &= "}\n}\n"
 		end if
@@ -2586,6 +2600,14 @@ procedure opINTERNAL_ERROR()
 end procedure
 
 sequence switch_stack = {}
+-- for each i, switch_stack[i][4] is a stack of actual case values used in the switch statement that have so far been converted into C code.
+
+enum
+	SWITCH_OP,
+	SWITCH_PC,
+	SWITCH_VAR_TYPE,
+	SWITCH_VALUES,
+	$
 
 procedure opSWITCH_I()
 	-- pc+1 = switch value
@@ -2595,12 +2617,12 @@ procedure opSWITCH_I()
 
 	integer var_type = GType( Code[pc+1] )
 
-	switch_stack = append( switch_stack, { Code[pc], pc, var_type } )
+	switch_stack = append( switch_stack, { Code[pc], pc, var_type, {} } )
 	if var_type != TYPE_INTEGER then
 
 		if var_type = TYPE_SEQUENCE then
 			-- it will never work
-			switch_stack[$][3] = -1
+			switch_stack[$][SWITCH_VAR_TYPE] = -1
 
 			-- The commented code below is meant to avoid emitting the switch
 			-- block, since we know it won't work.  The problem occurs if
@@ -2628,6 +2650,7 @@ procedure opSWITCH_I()
 				min = cases[i]-1
 			end if
 		end for
+		-- min is now a value that is not a value in cases.
 
 		-- it's possibly an atom or a sequence, so we have extra checking to do
 		c_stmt("if (IS_SEQUENCE(@) ){\n", Code[pc+1] )
@@ -2658,7 +2681,7 @@ procedure opSWITCH()
 	-- pc+2 = cases seq
 	-- pc+3 = jump table  (ignored)
 	-- pc+4 = else offset (ignored)
-	switch_stack = append( switch_stack, { Code[pc], pc, 0 } )
+	switch_stack = append( switch_stack, { Code[pc], pc, 0, {} } )
 	c_stmt("_1 = find(@, @);\n", { Code[pc+1], Code[pc+2]})
 	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 	c_stmt0("switch ( _1 ){ \n" )
@@ -2731,12 +2754,12 @@ end procedure
 procedure opCASE()
 	integer caseval = Code[pc+1]
 	integer stmt = 1
-	if find( switch_stack[$][1], {SWITCH_I, SWITCH_SPI}) then
+	if find( switch_stack[$][SWITCH_OP], {SWITCH_I, SWITCH_SPI}) then
 		-- Get the actual value from the case sequence
 		if caseval = 0 then
-			if switch_stack[$][3] != -1 then
+			if switch_stack[$][SWITCH_VAR_TYPE] != -1 then
 				c_stmt0( "default:\n" )
-				if switch_stack[$][3] != TYPE_SEQUENCE then
+				if switch_stack[$][SWITCH_VAR_TYPE] != TYPE_SEQUENCE then
 					-- this label might throw off the optimization
 					-- and emit needless code
 					Label( pc )
@@ -2750,30 +2773,46 @@ procedure opCASE()
 			end if
 
 		else
-			if switch_stack[$][3] = -1 then
+			if switch_stack[$][SWITCH_VAR_TYPE] = -1 then
 				-- the switch has been optimized away, so don't emit the case
 				stmt = 0
 			else
-				integer sym = Code[switch_stack[$][2] + 2]
+				integer sym = Code[switch_stack[$][SWITCH_PC] + 2]
 				caseval = SymTab[sym][S_OBJ][Code[pc+1]]
+-- 				if find(caseval, switch_stack[$][4]) then
+-- 					-- case has been emitted already.  So, don't do it again.
+-- 					stmt = 0
+-- 				else
+-- 					switch_stack[$][4] = append( switch_stack[$][4], caseval )
+-- 				end if
 			end if
 		end if
 
 	end if
+
+	if Code[pc-2] = CASE then
+		if find( caseval, switch_stack[$][SWITCH_VALUES] ) then
+			stmt = 0
+		end if
+	else
+		switch_stack[$][SWITCH_VALUES] = {}
+	end if
+	
 	if stmt then
 		c_stmt0( sprintf("case %d:\n", caseval) )
+		switch_stack[$][SWITCH_VALUES] = append( switch_stack[$][SWITCH_VALUES], caseval )
 	end if
 	NewBB(0, E_ALL_EFFECT, 0)
 	pc += 2
 end procedure
 
 procedure opNOPSWITCH()
-	if switch_stack[$][3] != -1 then
+	if switch_stack[$][SWITCH_VAR_TYPE] != -1 then
 		c_stmt0( ";}" )
 	end if
 
 	Label( pc + 1 )
-	switch_stack = switch_stack[1..$-1]
+	switch_stack = head( switch_stack, length( switch_stack ) -1 )
 	pc += 1
 end procedure
 
@@ -3670,7 +3709,14 @@ end procedure
 
 procedure opFLOOR()
 	CUnaryOp(pc, "e_floor", "FLOOR")
-	SetBBType(Code[pc+2], TYPE_ATOM, novalue, TYPE_OBJECT, HasDelete( Code[pc+1] ) )
+	if TypeIsIn(Code[pc+1], TYPES_SO) then
+		target_type = GType(Code[pc+1])
+	elsif GType(Code[pc+1]) = TYPE_INTEGER then
+		target_type = TYPE_INTEGER
+	else
+		target_type = TYPE_ATOM
+	end if
+	SetBBType(Code[pc+2], target_type, novalue, TYPE_OBJECT, HasDelete( Code[pc+1] ) )
 	pc += 3
 end procedure
 
@@ -5046,7 +5092,7 @@ procedure opSPLICE()
 		c_stmt("@ = MAKE_SEQ( assign_space );\n",{target_pc})
 	c_stmt0("}\n")
 	c_stmt0( "else {\n" )
-		c_stmt( "if( @ != @ && SEQ_PTR( @ )->ref != 1 ){\n", {target_pc, source_pc, source_pc})
+		c_stmt( "if( @ == @ && SEQ_PTR( @ )->ref == 1 ){\n", {target_pc, source_pc, source_pc})
 			c_stmt("@ = Insert( @, @, insert_pos);\n", {target_pc, source_pc, splice_pc})
 		c_stmt0("}\n")
 		c_stmt0("else {\n")
@@ -5080,14 +5126,20 @@ procedure opINSERT()
 	c_stmt( "Prepend(&@,@,@);\n", {Code[pc+4],Code[pc+1],Code[pc+2]})
 	c_stmt0( "}\n" )
 
-	if TypeIs( Code[pc+2], TYPE_SEQUENCE ) or TypeIs( Code[pc+2], TYPE_ATOM ) then
+	if TypeIs( Code[pc+2], TYPE_SEQUENCE ) or TypeIs( Code[pc+2], TYPE_DOUBLE ) then
 		c_stmt("else if (insert_pos > SEQ_PTR(@)->length) {\n",{Code[pc+1]})
 		c_stmt("RefDS( @ );\n", { Code[pc+2] } )
 		c_stmt("Append(&@,@,@);\n",{ Code[pc+4], Code[pc+1], Code[pc+2] })
 		c_stmt0("}\n")
 		c_stmt0("else {\n" )
 		c_stmt("RefDS( @ );\n", { Code[pc+2] } )
-		c_stmt("RefDS( @ );\n", { Code[pc+1] } )
+		if Code[pc+1] = Code[pc+4] then
+			c_stmt("if( SEQ_PTR( @ )->ref > 1 ){\n", {Code[pc+1]} )
+		end if
+		c_stmt("RefDS( @ );\n", Code[pc+1] )
+		if Code[pc+1] = Code[pc+4] then
+			c_stmt0("}\n" )
+		end if
 		c_stmt("@ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
 		c_stmt0("}\n")
 	elsif TypeIs( Code[pc+2], TYPE_INTEGER ) then
@@ -5095,7 +5147,13 @@ procedure opINSERT()
 		c_stmt("Append(&@,@,@);\n", { Code[pc+4], Code[pc+1], Code[pc+2] } )
 		c_stmt0( "}\n" )
 		c_stmt0( "else {\n" )
+		if Code[pc+1] = Code[pc+4] then
+			c_stmt("if( SEQ_PTR( @ )->ref > 1 ){\n", {Code[pc+1]} )
+		end if
 		c_stmt("RefDS( @ );\n", Code[pc+1] )
+		if Code[pc+1] = Code[pc+4] then
+			c_stmt0("}\n" )
+		end if
 		c_stmt("@ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
 		c_stmt0( "}\n" )
 	else
@@ -5105,7 +5163,13 @@ procedure opINSERT()
 		c_stmt0("}\n")
 		c_stmt0("else {\n" )
 		c_stmt("Ref( @ );\n", { Code[pc+2] } )
+		if Code[pc+1] = Code[pc+4] then
+			c_stmt("if( SEQ_PTR( @ )->ref > 1 ){\n", {Code[pc+1]} )
+		end if
 		c_stmt("RefDS( @ );\n", Code[pc+1] )
+		if Code[pc+1] = Code[pc+4] then
+			c_stmt0("}\n" )
+		end if
 		c_stmt("@ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
 		c_stmt0("}\n")
 	end if
@@ -5123,13 +5187,18 @@ procedure opHEAD()
 	c_stmt0("{\n")
 	c_stmt("int len = SEQ_PTR(@)->length;\n",{Code[pc+1]})
 	c_stmt("int size = (IS_ATOM_INT(@)) ? @ : (object)(DBL_PTR(@)->dbl);\n",repeat(Code[pc+2],3))
-	c_stmt("if (size <= 0) @ = MAKE_SEQ(NewS1(0));\n", {Code[pc+3]})
+	c_stmt0("if (size <= 0){\n")
+	c_stmt("DeRef( @ );\n", {Code[pc+3]} )
+	c_stmt("@ = MAKE_SEQ(NewS1(0));\n", {Code[pc+3]})
+	c_stmt0("}\n")
 	c_stmt0("else if (len <= size) {\n")
 	c_stmt("RefDS(@);\n", {Code[pc+1]})
 	c_stmt("DeRef(@);\n", {Code[pc+3]})
 	c_stmt("@ = @;\n",{Code[pc+3], Code[pc+1]})
 	c_stmt0("}\n")
-	c_stmt("else Head(SEQ_PTR(@),size+1,&@);\n",{Code[pc+1], Code[pc+3]})
+	c_stmt0("else{\n" )
+	c_stmt("Head(SEQ_PTR(@),size+1,&@);\n",{Code[pc+1], Code[pc+3]})
+	c_stmt0("}\n")
 	c_stmt0("}\n")
 	SetBBType(Code[pc+3], TYPE_SEQUENCE, novalue, SeqElem(Code[pc+1]),
 		HasDelete( Code[pc+1] ) )
@@ -5169,7 +5238,7 @@ procedure opREMOVE()
 	c_stmt0("if (stop > len){\n")
 		c_stmt0("stop = len;\n")
 	c_stmt0("}\n")
-	c_stmt0("if (start > len || start > stop || stop<0) {\n")
+	c_stmt0("if (start > len || start > stop || stop<1) {\n")
 	if Code[pc+1] != Code[pc+4] then
 		-- only do this if it's a different target...
 		c_stmt("RefDS(@);\n", {Code[pc+1]})
@@ -5699,27 +5768,30 @@ procedure opPOKE()
 	end if
 
 	if TypeIsNotIn( ptr, TYPES_IS) then
+		sequence dbl_ptr = "(DBL_PTR(@)->dbl)"
+		if TARM then
+			if not TypeIsIn( ptr, TYPES_AO ) then
+				c_stmt0("{\n" )
+			end if
+			c_stmt("eudouble temp_dbl = DBL_PTR(@)->dbl;\n", ptr )
+			dbl_ptr = "temp_dbl"
+		end if
 		switch op do
 			case POKE_POINTER then
-				c_stmt("pokeptr_addr = (uintptr_t *)(uintptr_t)(DBL_PTR(@)->dbl);\n",
-							ptr)
+				c_stmt(sprintf("pokeptr_addr = (uintptr_t *)(uintptr_t)%s;\n", {dbl_ptr}), ptr)
 			case POKE8 then
-				c_stmt("poke8_addr = (uint64_t *)(uintptr_t)(DBL_PTR(@)->dbl);\n",
-							ptr)
+				c_stmt(sprintf("poke8_addr = (uint64_t *)(uintptr_t)%s;\n", {dbl_ptr}), ptr)
 			case POKE4 then
-				c_stmt("poke4_addr = (uint32_t *)(uintptr_t)(DBL_PTR(@)->dbl);\n",
-							ptr)
+				c_stmt(sprintf("poke4_addr = (uint32_t *)(uintptr_t)%s;\n", {dbl_ptr}), ptr)
 			case POKE2 then
-				c_stmt("poke2_addr = (uint16_t *)(uintptr_t)(DBL_PTR(@)->dbl);\n",
-							ptr)
+				c_stmt(sprintf("poke2_addr = (uint16_t *)(uintptr_t)%s;\n", {dbl_ptr}),ptr)
 			case else
-				c_stmt("poke_addr = (uint8_t *)(uintptr_t)(DBL_PTR(@)->dbl);\n",
-							ptr)
+				c_stmt(sprintf("poke_addr = (uint8_t *)(uintptr_t)%s;\n", {dbl_ptr}), ptr)
 		end switch
 	end if
 	
-	if TypeIsIn( ptr, TYPES_AO) then
-		c_stmt0("}\n" )
+	if TypeIsIn( ptr, TYPES_AO) or (TARM and TypeIsNotIn( ptr, TYPES_IS)) then
+		c_stmt0("}\n" )	
 	end if
 	
 	if TypeIsIn( val, TYPES_AO) then
@@ -5786,7 +5858,7 @@ procedure opPOKE()
 			case POKE8 then
 				c_stmt0("*poke8_addr++ = (uint64_t)_2;\n")
 			case POKE4 then
-				c_stmt0("*poke4_addr++ = (uint32_t)_2;\n")
+				c_stmt0("*poke4_addr++ = (int32_t)_2;\n")
 			case POKE2 then
 				c_stmt0("*poke2_addr++ = (uint16_t)_2;\n")
 			case else
@@ -5795,21 +5867,26 @@ procedure opPOKE()
 		c_stmt0("}\nelse if (_2 == NOVALUE) {\n")
 		c_stmt0("break;\n}\n")
 		c_stmt0("else {\n")
+		sequence _2 = "DBL_PTR(_2)->dbl"
+		if TARM then
+			_2 = "_2"
+			c_stmt0( "_2 = trunc( DBL_PTR(_2)->dbl );\n" )
+		end if
 		switch op do
 			case POKE_POINTER then
-				c_stmt0("*pokeptr_addr++ = (uintptr_t)DBL_PTR(_2)->dbl;\n")
+				c_stmt0( sprintf( "*pokeptr_addr++ = (uintptr_t)%s;\n", {_2}) )
 			
 			case POKE8 then
-				c_stmt0("*poke8_addr++ = (uint64_t)DBL_PTR(_2)->dbl;\n")
+				c_stmt0( sprintf( "*poke8_addr++ = (uint64_t)%s;\n", {_2}) )
 				
 			case POKE4 then
-				c_stmt0("*(object *)poke4_addr++ = (uint32_t)DBL_PTR(_2)->dbl;\n")
+				c_stmt0( sprintf( "*(object *)poke4_addr++ = (uint32_t)%s;\n", {_2}) )
 				
 			case POKE2 then
-					c_stmt0("*poke2_addr++ = (uint16_t)DBL_PTR(_2)->dbl;\n")
+					c_stmt0( sprintf( "*poke2_addr++ = (uint16_t)%s;\n", {_2}) )
 				
 			case else
-					c_stmt0("*poke_addr++ = (uint8_t)DBL_PTR(_2)->dbl;\n")
+					c_stmt0( sprintf( "*poke_addr++ = (uint8_t)%s;\n", {_2}) )
 				
 		end switch
 		c_stmt0("}\n")
@@ -7018,6 +7095,12 @@ procedure do_exec(integer start_pc)
 		dblfn = ""
 		intcode_extra = ""
 		ifdef DEBUG then
+			if opcode > length(opnames) then
+				printf(2, "Bad opcode: %d\n" , { opcode } )
+			end if
+			if CurrentSub > length(SymTab) then
+				printf(2, "Bad Subroutine value: %d\n", {CurrentSub})
+			end if
 			c_stmt0( sprintf("// SubProg %s pc: %d op: %s (%d)\n", { SymTab[CurrentSub][S_NAME], pc, opnames[opcode], opcode }))
 		end ifdef
 		call_proc(operation[opcode], {})
@@ -7148,6 +7231,77 @@ procedure init_string( integer destination, symtab_index tp )
 	
 end procedure
 
+
+procedure uninit_eu()
+	c_stmt0(`
+
+extern void *call_back_arg1;
+extern void *call_back_arg2;
+extern void *call_back_arg3;
+extern void *call_back_arg4;
+extern void *call_back_arg5;
+extern void *call_back_arg6;
+extern void *call_back_arg7;
+extern void *call_back_arg8;
+extern void *call_back_arg9;
+extern void *call_back_result;
+extern void *TempErrName;
+extern void **double_blocks;
+extern int  double_blocks_allocated;
+void _0cleanup_vars();
+
+
+`)
+	if TWINDOWS then
+		c_stmt0("\nvoid EuUninit(){\n")
+	else
+		c_stmt0("#define EFree free\n" )
+		c_stmt0("\nvoid __attribute__ ((destructor)) eu_uninit(){\n")
+	end if
+
+	integer literal_sym = literal_init
+	c_stmt0( "int i;\n" )
+	c_stmt0( "_0cleanup_vars();\n" )
+	while literal_sym != 0 do
+		c_stmt0( sprintf( "DeRef( _%d );\n", SymTab[literal_sym][S_TEMP_NAME] ))
+		literal_sym = SymTab[literal_sym][S_NEXT]
+	end while
+	for i = 1 to 9 do
+		c_stmt0( sprintf( "EFree( call_back_arg%d );\n", i ) )
+	end for
+	c_stmt0( "EFree( call_back_result );\n" )
+	c_stmt0( "EFree( TempErrName );\n" )
+	c_stmt0( "DeRefDS( _0switches );\n")
+
+	c_stmt0( "free( _02[0] );\n" )
+	c_stmt0( "free( _02 );\n" )
+	c_stmt0( "for( i = 0; i < double_blocks_allocated; ++i ){\n" )
+	c_stmt0( "EFree( double_blocks[i] );\n")
+	c_stmt0("}\n")
+	c_stmt0( "EFree( double_blocks );\n")
+	c_stmt0("}\n")
+end procedure
+
+--**
+-- Creates the initialize / uninitialize code for a translated dynamic library
+procedure init_dll()
+	
+	if TWINDOWS then
+		-- Lcc and WATCOM seem to need this instead
+		-- (Lcc had __declspec(dllexport))
+		c_stmt0("int __stdcall LibMain(int hDLL, int Reason, void *Reserved)\n")
+		c_stmt0("{\n")
+		c_stmt0("if (Reason == DLL_PROCESS_ATTACH){\n")
+		c_stmt0("EuInit();\n")
+		c_stmt0("}\n")
+		c_stmt0("else if (Reason == DLL_PROCESS_DETACH ){\n")
+		c_stmt0("EuUninit();\n" )
+		c_stmt0("}\n")
+		c_stmt0("return 1;\n")
+		c_stmt0("}\n")
+	end if
+	uninit_eu()
+end procedure
 
 --**
 -- Translate the IL into C
@@ -7304,7 +7458,7 @@ procedure BackEnd(atom ignore)
 	if EXTRA_CHECK then
 		c_hputs("extern long bytes_allocated;\n")
 	end if
-
+	
 	if TWINDOWS then
 		if dll_option then
 			if sequence(wat_path) then
@@ -7342,7 +7496,7 @@ procedure BackEnd(atom ignore)
 			c_stmt0("default_heap = GetProcessHeap();\n")
 			c_stmt0("argc = 1;\n")
 			c_stmt0("Argc = 1;\n")
-			c_stmt0("argv = make_arg_cv(szCmdLine, &argc);\n")
+			c_stmt0("argv = make_arg_cv(szCmdLine, &argc, 1);\n")
 			c_stmt0("if( hInstance ){\n")
 			c_stmt0("winInstance = hInstance;\n")
 			c_stmt0("}\n")
@@ -7401,6 +7555,8 @@ procedure BackEnd(atom ignore)
 		c_stmt0("eu_startup(_00, _01, _02, (object)CLOCKS_PER_SEC, (object)sysconf(_SC_CLK_TCK));\n")
 		c_puts("#endif\n")
 	end if
+	
+	c_stmt0( sprintf( "trace_lines = %d;\n", trace_lines ) )
 
 	-- options_switch initialization
 	switches = get_switches()
@@ -7446,22 +7602,16 @@ procedure BackEnd(atom ignore)
 	else
 		c_stmt0("Cleanup(0);\n")
 	end if
-
+	
 	c_stmt0("return 0;\n}\n")
 
-	if TWINDOWS then
 	if dll_option then
-		c_stmt0("\n")
-		-- Lcc and WATCOM seem to need this instead
-		-- (Lcc had __declspec(dllexport))
-		c_stmt0("int __stdcall LibMain(int hDLL, int Reason, void *Reserved)\n")
-		c_stmt0("{\n")
-		c_stmt0("if (Reason == 1)\n")
-		c_stmt0("EuInit();\n")
-		c_stmt0("return 1;\n")
-		c_stmt0("}\n")
+		init_dll()
+	elsif debug_option then
+		uninit_eu()
 	end if
-	end if
+
+	
 
 	-- Final walk through user-defined routines, generating C code
 	GenerateUserRoutines()  -- needs init_name_num

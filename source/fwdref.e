@@ -13,6 +13,8 @@ without type_check
 include std/filesys.e
 include std/sort.e
 include std/search.e
+include std/machine.e
+include std/types.e
 
 include global.e
 include parser.e
@@ -48,7 +50,7 @@ enum
 	FR_HASHVAL,
 --	FR_PRIVATE_LIST, -- not used yet
 	FR_DATA,  -- extra info
-	FR_PROPERTIES
+	FR_PROPERTIES -- used by get_property, set_property, del_property
 
 constant FR_SIZE = FR_PROPERTIES
 
@@ -100,7 +102,28 @@ procedure resolved_reference( integer ref )
 		tx = 0,
 		ax = 0,
 		sp = 0
+
+	ifdef DEBUG then
+		object property_ptrs = get_property( ref, test_literal_match_pair_key )
 	
+		if sequence(property_ptrs) then
+			-- I am finding what seem to be properties here. If the property pointers are 
+			-- referenced by other forward referenced values this is not a problem. As an 
+			-- extra check, if this condition is enabled. We shouldn't ever see the 
+			-- 'This forward reference...' message displayed.
+			sequence property = property_ptrs
+			for i = 1 to length(property_ptrs) do
+				property[i] = peek4s(property_ptrs[i] & 6)
+				integer nl = find(1, property[i]  < 0 )
+				if nl and equal(forward_references[-property[i][nl]],0) then
+					printf(1, "\tThis forward reference at %d has been cleared.\n")
+				end if
+			end for
+		end if
+	end ifdef
+		
+	del_property( ref, test_literal_match_pair_key )
+
 	if forward_references[ref][FR_SUBPROG] = TopLevelSub then
 		tx = find( ref, toplevel_references[file] )
 	else
@@ -142,32 +165,44 @@ sequence patch_code_temp = {}
 sequence patch_linetab_temp = {}
 symtab_index patch_code_sub
 symtab_index patch_current_sub
+
+-- Sets the Code and LineTable variables according to what is set for this forward reference ref.
 procedure set_code( integer ref )
 	patch_code_sub = forward_references[ref][FR_SUBPROG]
-	
 	if patch_code_sub != CurrentSub then
+		-- we're patching a routine other than the current one
 		patch_code_temp = Code
 		patch_linetab_temp = LineTable
 		
 		Code = SymTab[patch_code_sub][S_CODE]
 		SymTab[patch_code_sub][S_CODE] = 0
 		LineTable = SymTab[patch_code_sub][S_LINETAB]
+		SymTab[patch_code_sub][S_LINETAB] = 0
 		
 		patch_current_sub = CurrentSub
 		CurrentSub = patch_code_sub
 	else
 		patch_current_sub = patch_code_sub
+		if sequence( SymTab[patch_current_sub][S_CODE] ) then
+			SymTab[patch_code_sub][S_CODE] = 0
+			SymTab[patch_code_sub][S_LINETAB] = 0
+		end if
 	end if
 end procedure
 
 procedure reset_code( )
-	SymTab[patch_code_sub][S_CODE] = Code
-	SymTab[patch_code_sub][S_LINETAB] = LineTable
 	if patch_code_sub != patch_current_sub then
+		-- put the patched code back into the symtab
+		SymTab[patch_code_sub][S_CODE] = Code
+		SymTab[patch_code_sub][S_LINETAB] = LineTable
+
+		-- reset to where we were before set_code() was called
 		CurrentSub = patch_current_sub
 		Code = patch_code_temp
 		LineTable = patch_linetab_temp
 	end if
+
+	-- clear the references on these
 	patch_code_temp = {}
 	patch_linetab_temp = {}
 end procedure
@@ -183,12 +218,45 @@ end procedure
 atom property_value = 1999
 constant property_multiplier = 1993
 public integer property_count = 0
+
+--**
+-- Create a special key for associating data with for forward references 
+-- (passed as a positive value)
+--
+-- Parameters:
+--   # this function takes no parameters
+--
+-- Returns:
+--   the said special key.  The key will be a positive integer. 
+--
+-- Errors:
+--   
+--
+-- Comments:
+--    Because the (add,get,set)_data routines already have a use for the data they contain,
+--  it has become necessary to create yet another field which we call properties.  This is a
+--  function for creating property types for all of the forward references.
 export function new_property_type()
 	property_value *= property_multiplier
 	property_value = remainder( property_value, #7FFF_FFFF)
 	return property_value
 end function
 
+
+
+--**
+-- Get a property for a particular forward reference and a key.
+--
+-- Parameters:
+--   # ##ref## is the forward reference passed as a positive integer
+--   # ##key## is the special key which identifies the property
+--
+-- Returns:
+--   The property value or 0 if this property is not set for this forward reference.
+--
+-- Errors:
+--   returns 0 if there is no properties for this forward reference
+--
 export function get_property( positive_integer ref, atom key )
 	sequence pairs = forward_references[ref][FR_PROPERTIES]
 	integer i1 = find(key,pairs[1])
@@ -198,9 +266,25 @@ export function get_property( positive_integer ref, atom key )
 	return pairs[2][i1]
 end function
 
+--**
+-- Delete a property of forward reference, ref and a key.
+--
+-- Parameters:
+--   # ##ref## is the forward reference passed as a positive integer
+--   # ##key## is the special key which identifies the property
+--
+-- Errors:
+--   
+--
+-- Comments:
+--   Removes the property of ##ref## and ##key##.
+--
 export procedure del_property( positive_integer ref, atom key )
 	sequence pair = forward_references[ref][FR_PROPERTIES]
 	integer loc = find( key, pair[1] )
+	if not loc then
+		return
+	end if
 	forward_references[ref][FR_PROPERTIES] = 0
 	pair[1] = remove(pair[1],loc)
 	pair[2] = remove(pair[2],loc)
@@ -208,6 +292,20 @@ export procedure del_property( positive_integer ref, atom key )
 	forward_references[ref][FR_PROPERTIES] = pair
 end procedure
 	
+--**
+-- Sets a property of forward reference, ref and a key.
+--
+-- Parameters:
+--   # ##ref## is the forward reference passed as a positive integer
+--   # ##key## is the special key which identifies the property
+--   # ##data## can be any data.
+--
+-- Errors:
+--   
+--
+-- Comments:
+--   Sets the property of ##ref## and ##key## to ##data##.
+--
 export procedure set_property( positive_integer ref, atom key, object data )
 	sequence pair = forward_references[ref][FR_PROPERTIES]
 	forward_references[ref][FR_PROPERTIES] = 0
@@ -222,7 +320,128 @@ export procedure set_property( positive_integer ref, atom key, object data )
 	forward_references[ref][FR_PROPERTIES] = pair
 end procedure
 
+--** 
+-- Comments:
+--   This data is for keeping track of both assignments, comparisons and parameter passing.
+--   Everywhere we test for a alternative literal match. The property it points to via
+--   [[:set_property]] and [[:get_property]], is a sequence of pointers. The pointers will be freed
+--   by EUPHORIA's cleanup system. Each pointer points to six signed 4-byte values. Which are, in
+--   order, this order routine_id (0 if not applicable), parameter number (0 if not applicable),
+--   left symbol value, right symbol value, left symbol type, and right symbol type. The symbols
+--   that are encoded as negative values are forward references. Those that are encoded as 0. The
+--   symbols that are encoded as positive values are symtab_indexes. The same pointer may be set as
+--   a property for distinct forward references. We can update these six values as we resolve these
+--   references when we have all of the data we need we check to see if the types are both
+--   enumerated and if they match and issue a warning if they don't.
+--      
 export constant test_literal_match_pair_key = new_property_type()
+
+
+--** 
+-- append a new pointer to a forward reference in its match pair information unless it already
+-- has that pointer in the list.
+export procedure include_match_pair(positive_integer ref, atom ptr)
+	object match_data = get_property( ref, test_literal_match_pair_key )
+	if atom(match_data) then
+		match_data = {}
+	end if
+	if not find(ptr, match_data) then
+		match_data = append(match_data, ptr)
+	end if
+	set_property( ref, test_literal_match_pair_key, match_data )
+end procedure
+
+
+--** 
+-- Creates a new space for match pair data to go and returns its pointer
+-- The pointer should not be freed.
+export function new_match_pair_data()
+	return allocate(4 * 6, TRUE)
+end function
+
+--**
+-- Gets the routine symbol for nth match pair entry
+--
+export function get_match_pair_data_routine(atom ptr)
+	return peek4s(ptr)
+end function
+
+--**
+-- Gets the routine index for the nth match pair entry
+export function get_match_pair_data_index(atom ptr)
+	return peek4s(ptr+4)
+end function
+
+--**
+-- Gets the left value for the nth match pair entry
+export function get_match_pair_data_left_value(atom ptr)
+	sequence data = peek4s({ptr,6})
+	return data[3]
+end function
+
+--**
+-- Gets the right value for the nth match pair entry
+export function get_match_pair_data_right_value(atom ptr)
+	sequence data = peek4s({ptr,6})
+	return data[4]
+end function
+
+--**
+-- Gets the left hand symbol value in ptr
+export function get_match_pair_data_left_type(atom ptr)
+	sequence data = peek4s({ptr,6})
+	return data[5]
+end function
+
+--**
+-- Gets the right hand symbol type in ptr
+export function get_match_pair_data_right_type(atom ptr)
+	
+	sequence data = peek4s({ptr,6})
+	return data[6]
+end function
+	
+--**
+-- Sets the routine right hand symbol type symbol in ptr
+export procedure set_match_pair_data_right_type(atom ptr, symtab_pointer p)
+	
+	poke4(ptr+5*4,p)
+end procedure
+
+--**
+-- Sets the routine right hand symbol type symbol in ptr
+export procedure set_match_pair_data_left_type(atom ptr, symtab_pointer p)
+	
+	poke4(ptr+4*4,p)
+end procedure
+
+--**
+-- Sets the routine right hand symbol type symbol in ptr
+export procedure set_match_pair_data_right_value(atom ptr, symtab_pointer p)
+	
+	poke4(ptr+3*4,p)
+end procedure
+
+--**
+-- Sets the routine right hand symbol type symbol in ptr
+export procedure set_match_pair_data_left_value(atom ptr, symtab_pointer p)
+	
+	poke4(ptr+2*4,p)
+end procedure
+
+--**
+-- Sets the routine right hand symbol type symbol in ptr
+export procedure set_match_pair_data_index(atom ptr, symtab_pointer p)
+	
+	poke4(ptr+4,p)
+end procedure
+
+--**
+-- Sets the routine right hand symbol type symbol in ptr
+export procedure set_match_pair_data_routine(atom ptr, symtab_pointer p)
+	
+	poke4(ptr,p)
+end procedure
 
 export procedure set_line( integer ref, integer line_no, sequence this_line, integer bp )
 	forward_references[ref][FR_LINE] = line_no
@@ -298,6 +517,8 @@ procedure patch_forward_nameof( token tok, integer ref )
 	reset_code()
 end procedure
 
+
+-- patches the function call pointed to by ref with the function definition that it has found at tok
 procedure patch_forward_call( token tok, integer ref )
 	-- Format of IL:
 	-- pc   OPCODE
@@ -306,14 +527,26 @@ procedure patch_forward_call( token tok, integer ref )
 	-- pc+3 Args... [/ Func target]
 	
 	sequence fr = forward_references[ref]
-	integer code_sub = fr[FR_SUBPROG]
 	symtab_index sub = tok[T_SYM]
+
+	if sequence( fr[FR_DATA] ) then
+		sequence defarg = fr[FR_DATA][1]
+		symtab_index paramsym = defarg[2]
+		token old = { RECORDED, defarg[3] }
+		integer tx = find( old, SymTab[paramsym][S_CODE] )
+		SymTab[paramsym][S_CODE][tx] = tok
+		resolved_reference( ref )
+		return
+	end if
+	
+	integer code_sub = fr[FR_SUBPROG]
+	
 	integer args = SymTab[sub][S_NUM_ARGS]
 	integer is_func = (SymTab[sub][S_TOKEN] = FUNC) or (SymTab[sub][S_TOKEN] = TYPE)
 	
 	integer real_file = current_file_no
 	current_file_no = fr[FR_FILE]
-	
+
 	set_code( ref )
 	sequence code = Code
 	integer temp_sub = CurrentSub
@@ -322,8 +555,7 @@ procedure patch_forward_call( token tok, integer ref )
 	integer next_pc = pc
 	integer supplied_args = code[pc+2]
 	sequence name = fr[FR_NAME]
-	
-	patch_type_mismatch_warning( tok, ref )
+
 	if Code[pc] != FUNC_FORWARD and Code[pc] != PROC_FORWARD then
 		prep_forward_error( ref )
 		CompileErr( "The forward call to [4] wasn't where we thought it would be: [1]:[2]:[3]",
@@ -371,6 +603,7 @@ procedure patch_forward_call( token tok, integer ref )
 	sequence params = repeat( 0, args )
 	sequence orig_code = code
 	sequence orig_linetable = LineTable
+	LineTable = {}
 	Code = {}
 	
 	
@@ -403,20 +636,13 @@ procedure patch_forward_call( token tok, integer ref )
 			params[defarg] = Pop()
 		else
 			extra_default_args = 0
-			ifdef DEBUG then
-				if symtab_index(param_sym) and symtab_index(sym_type(param_sym)) then
-					printf(1, "%s is of type %s routine %s.\n", { sym_name(param_sym), sym_name(sym_type(param_sym)), sym_name(code_sub)})
-				else
-					printf(1, "%d is not a symtab index.\n", {code[i]})
-				end if
-				object rprops = get_property( ref, test_literal_match_pair_key )
-				if sequence(rprops) then
-					printf(1, "Properties had been set for this routine %s.\n", sym_name(code_sub))
-				end if
-			end ifdef
+			if code[i] < 0 then
+				forward_type_mismatch_warning(code[i], param_sym, sub, i - (pc + 2))
+			else
+				type_mismatch_warning(code[i], param_sym, sub, i - (pc + 2))
+			end if
 			add_private_symbol( code[i], SymTab[param_sym][S_NAME] )
-			params[defarg] = code[i]
-			
+			params[defarg] = code[i]			
 		end if
 	end for
 	
@@ -431,7 +657,9 @@ procedure patch_forward_call( token tok, integer ref )
 	
 	sequence new_code = Code
 	Code = orig_code
+	orig_code = {}
 	LineTable = orig_linetable
+	orig_linetable = {}
 	set_dont_read( 0 )
 	current_file_no = real_file
 	
@@ -491,12 +719,17 @@ procedure patch_type_mismatch_warning( token tok, positive_integer ref )
 	end if
 	for i = 1 to length(test_parameter_ptrs) do
 	
-		sequence test_parameter_data = peek4s(test_parameter_ptrs[i] & 6)
+		sequence old_parameter_data, test_parameter_data = peek4s(test_parameter_ptrs[i] & 6)
 		integer ref_location = find( -ref, test_parameter_data )
 		if ref_location = 0 then
+				-- no negative numbers in test_parameter_data, then we missed this before and should have got rid of it.
+				if find(1, test_parameter_data < 0) = 0 then 
+					test_parameter_ptrs[i] = 0
+				end if
 				continue
 		end if
 	
+		old_parameter_data = test_parameter_data
 		test_parameter_data[ref_location] = tok[T_SYM]
 		poke4(test_parameter_ptrs[i]+(ref_location-1)*4, tok[T_SYM])
 		integer routine_sym = test_parameter_data[1]
@@ -505,28 +738,24 @@ procedure patch_type_mismatch_warning( token tok, positive_integer ref )
 		integer rsym = test_parameter_data[4]
 		integer lsym_type = test_parameter_data[5]
 		integer rsym_type = test_parameter_data[6]
-		if symtab_index(lsym) and lsym > 0 then
+		if symtab_index(tok[T_SYM]) and lsym > 0 then
+			if lsym_type < 0 and sym_type(lsym) > 0 then
+				del_property( -lsym_type, test_literal_match_pair_key )
+			end if
 			lsym_type = sym_type(lsym)
 			if lsym_type < 0 then
-				object lprops = get_property( -lsym_type,  test_literal_match_pair_key )
-				if equal(0,lprops) then
-					lprops = {}
-				end if
-				poke4(test_parameter_ptrs[i]+4*4, lsym_type)
-				lprops = append(lprops, test_parameter_ptrs[i])
-				set_property( -lsym_type, test_literal_match_pair_key, lprops )
+				set_match_pair_data_left_type(test_parameter_ptrs[i], lsym_type)
+				include_match_pair( -lsym_type, test_parameter_ptrs[i] )
 			end if
 		end if
 		if symtab_index(rsym) and rsym > 0 then
+			if rsym_type < 0 and sym_type(rsym) > 0 then
+				del_property( -rsym_type, test_literal_match_pair_key )
+			end if
 			rsym_type = sym_type(rsym)
 			if rsym_type < 0 then
-				object rprops = get_property( -rsym_type,  test_literal_match_pair_key )
-				if equal(0,rprops) then
-					rprops = {}
-				end if
-				poke4(test_parameter_ptrs[i]+4*5, rsym_type)
-				rprops = append(rprops, test_parameter_ptrs[i])
-				set_property( -rsym_type, test_literal_match_pair_key, rprops )
+				set_match_pair_data_right_type(test_parameter_ptrs[i], rsym_type)
+				include_match_pair( -rsym_type, test_parameter_ptrs[i])
 			end if
 		end if
 		
@@ -588,6 +817,20 @@ procedure patch_forward_variable( token tok, integer ref )
 		end while
 		resolved_reference( ref )
 	end if
+
+	if sequence( fr[FR_DATA] ) then
+		for i = 1 to length( fr[FR_DATA] ) do
+			object d = fr[FR_DATA][i]
+			if sequence( d ) and d[1] = PAM_RECORD then
+				-- resolving default parameter tokens
+				symtab_index param = d[2]
+				token old = {RECORDED, d[3]}
+				token new = {VARIABLE, sym}
+				SymTab[param][S_CODE] = find_replace( old, SymTab[param][S_CODE], new )
+			end if
+		end for
+		resolved_reference( ref )
+	end if
 	reset_code()
 end procedure
 
@@ -595,8 +838,15 @@ procedure patch_forward_init_check( token tok, integer ref )
 -- forward reference for a variable
 	sequence fr = forward_references[ref]
 	set_code( ref )
-	Code[fr[FR_PC]+1] = tok[T_SYM]
-	resolved_reference( ref )
+	if sequence( fr[FR_DATA] ) then
+		-- init check in default param code
+		resolved_reference( ref )
+	elsif fr[FR_PC] > 0 then
+		Code[fr[FR_PC]+1] = tok[T_SYM]
+		resolved_reference( ref )
+	else
+		forward_error( tok, ref )
+	end if
 	reset_code()
 end procedure
 
@@ -675,10 +925,10 @@ procedure patch_forward_case( token tok, integer ref )
 	end if
 	
  	ifdef DEBUG then	
-	if not cx then
-		prep_forward_error( ref )
-		InternalErr( 261, { fr[FR_NAME] } )
-	end if
+		if not cx then
+			prep_forward_error( ref )
+			InternalErr( 261, { fr[FR_NAME] } )
+		end if
 	end ifdef
 	
 	integer negative = 0
@@ -887,6 +1137,7 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 	integer 
 		ref, 
 		len = length( inactive_references )
+
 	
 	if len then
 		ref = inactive_references[len]
@@ -934,28 +1185,29 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 	-- If we're recording tokens (for a default parameter), this ref will never 
 	-- get resolved.  So ignore it for now, and when someone actually calls
 	-- the routine, it will be resolved normally then.
-	if  Parser_mode != PAM_RECORD then
-		if CurrentSub = TopLevelSub then
-			if length( toplevel_references ) < current_file_no then
-				toplevel_references &= repeat( {}, current_file_no - length( toplevel_references ) )
-			end if
-			toplevel_references[current_file_no] &= ref
-		else
-			if length( active_references ) < current_file_no then
-				active_references &= repeat( {}, current_file_no - length( active_references ) )
-				active_subprogs   &= repeat( {}, current_file_no - length( active_subprogs ) )
-			end if
-			integer sp = find( CurrentSub, active_subprogs[current_file_no] )
-			if not sp then
-				active_subprogs[current_file_no] &= CurrentSub
-				sp = length( active_subprogs[current_file_no] )
-				
-				active_references[current_file_no] = append( active_references[current_file_no], {} )
-			end if
-			active_references[current_file_no][sp] &= ref
+	
+	if CurrentSub = TopLevelSub then
+		if length( toplevel_references ) < current_file_no then
+			toplevel_references &= repeat( {}, current_file_no - length( toplevel_references ) )
 		end if
-		fwdref_count += 1
+		toplevel_references[current_file_no] &= ref
+	else
+		add_active_reference( ref )
+
+		if Parser_mode = PAM_RECORD then
+			symtab_pointer default_sym = CurrentSub
+			symtab_pointer param = 0
+			while default_sym with entry do
+				if sym_scope( default_sym ) = SC_PRIVATE then
+					param = default_sym
+				end if
+			entry
+				default_sym = sym_next( default_sym )
+			end while
+			set_data( ref, {{ PAM_RECORD, param, length( Recorded_sym ) }} )
+		end if
 	end if
+	fwdref_count += 1
 	
 	ifdef EUDIS then
 		sequence name = forward_references[ref][FR_NAME]
@@ -973,8 +1225,28 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 	return ref
 end function
 
+procedure add_active_reference( integer ref, integer file_no = current_file_no )
+	if length( active_references ) < file_no then
+		active_references &= repeat( {}, file_no - length( active_references ) )
+		active_subprogs   &= repeat( {}, file_no - length( active_subprogs ) )
+	end if
+	integer sp = find( CurrentSub, active_subprogs[file_no] )
+	if not sp then
+		active_subprogs[file_no] &= CurrentSub
+		sp = length( active_subprogs[file_no] )
+
+		active_references[file_no] = append( active_references[file_no], {} )
+	end if
+	active_references[file_no][sp] &= ref
+end procedure
+
+procedure remove_active_reference( integer ref, integer file_no = current_file_no )
+	integer sp = find( CurrentSub, active_subprogs[file_no] )
+	active_references[file_no][sp] = remove( active_references[file_no][sp],
+											length( active_references[file_no][sp] ) )
+end procedure
+
 function resolve_file( sequence refs, integer report_errors, integer unincluded_ok )
-	
 	sequence errors = {}
 	for ar = length( refs ) to 1 by -1 do
 		integer ref = refs[ar]
@@ -983,12 +1255,13 @@ function resolve_file( sequence refs, integer report_errors, integer unincluded_
 		if include_matrix[fr[FR_FILE]][current_file_no] = NOT_INCLUDED and not unincluded_ok then
 			continue
 		end if
+		
 		token tok = find_reference( fr )
 		if tok[T_ID] = IGNORED then
 			errors &= ref
 			continue
 		end if
-		
+
 		-- found a match...
 		integer code_sub = fr[FR_SUBPROG]
 		integer fr_type  = fr[FR_TYPE]
@@ -1022,6 +1295,7 @@ function resolve_file( sequence refs, integer report_errors, integer unincluded_
 					errors &= ref
 					continue
 				end if
+				
 				switch sym_tok do
 					case CONSTANT, ENUM, VARIABLE then
 						patch_forward_variable( tok, ref )
@@ -1094,7 +1368,6 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 		if (length( active_subprogs[i] ) or length(toplevel_references[i])) 
 		and (i = current_file_no or finished_files[i] or unincluded_ok)
 		then
-			
 			for j = length( active_references[i] ) to 1 by -1 do
 				errors &= resolve_file( active_references[i][j], report_errors, unincluded_ok )
 			end for
@@ -1104,7 +1377,7 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 		
 	if report_errors and length( errors ) then
 		sequence msg = ""
-		sequence errloc
+		sequence errloc = "Internal Error - Unknown Error Message"
 		
 		for e = length(errors) to 1 by -1 do
 			sequence ref = forward_references[errors[e]]

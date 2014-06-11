@@ -7,6 +7,7 @@ bin/bench.exe
 bin/creole
 bin/creole.exe
 bin/eu.a
+bin/eu.cfg
 bin/eu.lib
 bin/eub
 bin/eub.exe
@@ -14,6 +15,8 @@ bin/eubind
 bin/eubind.exe
 bin/euc
 bin/euc.exe
+bin/eucoverage
+bin/eucoverage.exe
 bin/eudbg.a
 bin/eudbg.lib
 bin/eudis
@@ -49,6 +52,7 @@ tests/save_map.raw3
 tests/include_subdir/foo/test.err
 
 regex:
+\.DS_Store
 ^build/.*
 ^build40/.*
 ^build_mingw/.*
@@ -69,3 +73,4 @@ regex:
 ^packaging/debian/.*dsc
 ^packaging/debian/.*changes
 ^packaging/debian/.*gz
+^packaging/osx/euphoria-.*

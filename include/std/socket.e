@@ -38,7 +38,7 @@ constant M_SOCK_INFO = 4
 --
 
 --**
--- Get the error code.
+-- gets the error code.
 --
 -- Returns:
 --   Integer [[:OK]] on no error, otherwise any one of the ##ERR_## constants to
@@ -562,7 +562,7 @@ public constant
 	SO_PEERCRED = sockinfo[ESO_PEERCRED]
 
 --****
--- =====  - Security levels - as per NRL IPv6 - don't actually do anything
+-- ====  - Security levels - as per NRL IPv6 - do not actually do anything
 public constant
 	SO_SECURITY_AUTHENTICATION = sockinfo[ESO_SECURITY_AUTHENTICATION],
 	SO_SECURITY_ENCRYPTION_TRANSPORT = sockinfo[ESO_SECURITY_ENCRYPTION_TRANSPORT],
@@ -610,17 +610,17 @@ public constant
 	MSG_PEEK = #2,
 
 	--**
-	-- Don't use a gateway to send out the packet, only send to hosts on
+	-- Do not use a gateway to send out the packet, only send to hosts on
     -- directly connected networks.  This is usually used only by diagnostic
     -- or routing programs.  This is only defined for protocol families that
-    -- route; packet sockets don't.
+    -- route; packet sockets do not.
 
 	MSG_DONTROUTE = #4,
 
 	MSG_TRYHARD = #4,
 
 	--**
-	-- indicates that some control data were discarded due to lack of space in
+	-- Indicates that some control data were discarded due to lack of space in
     -- the buffer for ancillary data.
 
 	MSG_CTRUNC = #8,
@@ -628,7 +628,7 @@ public constant
 	MSG_PROXY = #10,
 
 	--**
-	-- indicates that the trailing portion of a datagram was discarded because
+	-- Indicates that the trailing portion of a datagram was discarded because
     -- the datagram was larger than the buffer supplied.
 
 	MSG_TRUNC = #20,
@@ -669,7 +669,7 @@ public constant
 	MSG_RST = #1000,
 
 	--**
-	-- indicates that no data was received but an extended error from the
+	-- Indicates that no data was received but an extended error from the
     -- socket error queue.
 
 	MSG_ERRQUEUE = #2000,
@@ -689,7 +689,7 @@ public constant
 	MSG_MORE = #8000
 
 --****
--- === Server and Client sides
+-- === Server and Client Sides
 --
 
 -- **
@@ -748,21 +748,21 @@ end procedure
 integer delete_socket_rid = routine_id("delete_socket")
 
 --**
--- Create a new socket
+-- creates a new socket.
 --
 -- Parameters:
 --   # ##family##: an integer
 --   # ##sock_type##: an integer, the type of socket to create
 --   # ##protocol##: an integer, the communication protocol being used
 --
--- ##family## options:
+-- ##family## options~:
 --   * [[:AF_UNIX]]
 --   * [[:AF_INET]]
 --   * [[:AF_INET6]]
 --   * [[:AF_APPLETALK]]
 --   * [[:AF_BTH]]
 --
--- ##sock_type## options:
+-- ##sock_type## options~:
 --   * [[:SOCK_STREAM]]
 --   * [[:SOCK_DGRAM]]
 --   * [[:SOCK_RAW]]
@@ -771,6 +771,10 @@ integer delete_socket_rid = routine_id("delete_socket")
 --
 -- Returns:
 --   An **object**, an atom, representing an integer code on failure, else a sequence representing a valid socket id.
+--
+-- Comments:
+--   On //Windows// you must have Windows Sockets version 2.2 or greater installed.  This means at
+--   least Windows 2000 Professional or Windows 2000 Server.
 --
 -- Example 1:
 -- <eucode>
@@ -787,7 +791,7 @@ public function create(integer family, integer sock_type, integer protocol)
 end function
 
 --**
--- Closes a socket.
+-- closes a socket.
 --
 -- Parameters:
 --   # ##sock##: the socket to close
@@ -804,20 +808,20 @@ public function close(socket sock)
 end function
 
 --**
--- Partially or fully close a socket.
+-- partially or fully close a socket.
 --
 -- Parameters:
 --   # ##sock## : the socket to shutdown
---   # ##method## : the method used to close the socket
+--   # ##method## : the way used to close the socket
 --
 -- Returns:
 --   An **integer**, 0 on success and -1 on error.
 --
 -- Comments:
 --   Three constants are defined that can be sent to ##method##:
---   * [[:SD_SEND]] - shutdown the send operations.
---   * [[:SD_RECEIVE]] - shutdown the receive operations.
---   * [[:SD_BOTH]] - shutdown both send and receive operations.
+--   * [[:SD_SEND]] ~-- shutdown the send operations.
+--   * [[:SD_RECEIVE]] ~-- shutdown the receive operations.
+--   * [[:SD_BOTH]] ~-- shutdown both send and receive operations.
 --
 --  It may take several minutes for the OS to declare the socket as closed.
 --
@@ -827,15 +831,7 @@ public function shutdown(socket sock, atom method=SD_BOTH)
 end function
 
 --**
--- Determine the read, write and error status of one or more sockets.
---
--- Using select, you can check to see if a socket has data waiting and
--- is read to be read, if a socket can be written to and if a socket has
--- an error status.
---
--- select allows for fine-grained control over your sockets, allow you
--- to specify that a given socket only be checked for reading or for only
--- reading and writing, etc.
+-- determines the read, write and error status of one or more sockets.
 --
 -- Parameters:
 --   # ##sockets_read## : either one socket or a sequence of sockets to check for reading.
@@ -846,10 +842,20 @@ end function
 --
 -- Returns:
 --   A **sequence**, of the same size of all unique sockets containing
---   { socket, read_status, write_status, error_status } for each socket passed
+--   ##{ socket, read_status, write_status, error_status }## for each socket passed
 --  2 to the function.
 --   Note that the sockets returned are not guaranteed to be in any particular order.
 --
+-- Comments:
+-- Using select, you can check to see if a socket has data waiting and
+-- is read to be read, if a socket can be written to and if a socket has
+-- an error status.
+--
+-- ##select## allows for fine-grained control over your sockets; it allows you
+-- to specify that a given socket only be checked for reading or for only
+-- reading and writing, etc.
+--
+
 
 public function select(object sockets_read, object sockets_write,
 		object sockets_err, integer timeout=0,
@@ -882,7 +888,7 @@ public function select(object sockets_read, object sockets_write,
 end function
 
 --**
--- Send TCP data to a socket connected remotely.
+-- sends TCP data to a socket connected remotely.
 --
 -- Parameters:
 --   # ##sock## : the socket to send data to
@@ -898,7 +904,7 @@ public function send(socket sock, sequence data, atom flags=0)
 end function
 
 --**
--- Receive data from a bound socket.
+-- receives data from a bound socket.
 --
 -- Parameters:
 --   # ##sock## : the socket to get data from
@@ -922,7 +928,7 @@ public function receive(socket sock, atom flags=0)
 end function
 
 --**
--- Get options for a socket.
+-- gets options for a socket.
 --
 -- Parameters:
 --   # ##sock## : the socket
@@ -936,8 +942,8 @@ end function
 --
 -- Comments:
 --   Primarily for use in multicast or more advanced socket
---   applications.  Level is the option level, and option_name is the
---   option for which values are being sought. Level is usually
+--   applications.  ##Level## is the option level, and ##option_name## is the
+--   option for which values are being sought. ##Level## is usually
 --   [[:SOL_SOCKET]].
 --
 -- Returns:
@@ -945,7 +951,7 @@ end function
 --  A **sequence** or **atom**,   On success, either an atom or
 --   a sequence containing the option value.
 --
--- See also:
+-- See Also:
 --   [[:get_option]]
 --
 
@@ -954,7 +960,7 @@ public function get_option(socket sock, integer level, integer optname)
 end function
 
 --**
--- Set options for a socket.
+-- sets options for a socket.
 --
 -- Parameters:
 --   # ##sock## : an atom, the socket id
@@ -967,8 +973,8 @@ end function
 --
 -- Comments:
 --   Primarily for use in multicast or more advanced socket
---   applications.  Level is the option level, and option_name is the
---   option for which values are being set.  Level is usually
+--   applications.  ##Level## is the option level, and ##option_name## is the
+--   option for which values are being set.  ##Level## is usually
 --   [[:SOL_SOCKET]].
 --
 -- See Also:
@@ -979,10 +985,10 @@ public function set_option(socket sock, integer level, integer optname, object v
 end function
 
 --****
--- === Client side only
+-- === Client Side Only
 
 --**
--- Establish an outgoing connection to a remote computer. Only works with TCP sockets.
+-- establishes an outgoing connection to a remote computer. Only works with TCP sockets.
 --
 -- Parameters:
 --   # ##sock## : the socket
@@ -1011,10 +1017,10 @@ public function connect(socket sock, sequence address, integer port=-1)
 end function
 
 --****
--- === Server side only
+-- === Server Side Only
 
 --**
--- Joins a socket to a specific local internet address and port so
+-- joins a socket to a specific local internet address and port so
 -- later calls only need to provide the socket.
 --
 -- Parameters:
@@ -1043,7 +1049,7 @@ public function bind(socket sock, sequence address, integer port=-1)
 end function
 
 --**
--- Start monitoring a connection. Only works with TCP sockets.
+-- starts monitoring a connection. Only works with TCP sockets.
 --
 -- Parameters:
 --   # ##sock## : the socket
@@ -1061,7 +1067,7 @@ end function
 --   and the amount of time it takes the program to process each
 --   connection request.
 --
---   This function must be executed after [[:bind]]().
+--   This function must be executed after [[:bind]].
 --
 
 public function listen(socket sock, integer backlog)
@@ -1069,7 +1075,7 @@ public function listen(socket sock, integer backlog)
 end function
 
 --**
--- Produces a new socket for an incoming connection.
+-- produces a new socket for an incoming connection.
 --
 -- Parameters:
 --   # ##sock##: the server socket
@@ -1085,7 +1091,7 @@ end function
 --   "side channel" while the main server socket remains available
 --   for new connections.
 --
---   ##accept##() must be called after ##bind##() and ##listen##().
+--   ##accept## must be called after ##bind## and ##listen##.
 --
 
 public function accept(socket sock)
@@ -1093,11 +1099,11 @@ public function accept(socket sock)
 end function
 
 --****
--- === UDP only
+-- === UDP Only
 --
 
 --**
--- Send a UDP packet to a given socket
+-- sends a UDP packet to a given socket.
 --
 -- Parameters:
 --   # ##sock##: the server socket
@@ -1122,7 +1128,7 @@ public function send_to(socket sock, sequence data, sequence address, integer po
 end function
 
 --**
--- Receive a UDP packet from a given socket
+-- receives a UDP packet from a given socket.
 --
 -- Parameters:
 --   # ##sock##: the server socket
@@ -1143,14 +1149,14 @@ end function
 -- === Information
 
 --**
--- Get service information by name.
+-- gets service information by name.
 --
 -- Parameters:
 --   # ##name## : service name.
 --   # ##protocol## : protocol. Default is not to search by protocol.
 --
 -- Returns:
---   A **sequence**, containing { official protocol name, protocol, port number } or
+--   A **sequence**, containing ##{ official protocol name, protocol, port number }## or
 --   an atom indicating the error code.
 --
 -- Example 1:
@@ -1167,14 +1173,14 @@ public function service_by_name(sequence name, object protocol=0)
 end function
 
 --**
--- Get service information by port number.
+-- gets service information by port number.
 --
 -- Parameters:
 --   # ##port## : port number.
 --   # ##protocol## : protocol. Default is not to search by protocol.
 --
 -- Returns:
---   A **sequence**, containing { official protocol name, protocol, port number } or
+--   A **sequence**, containing ##{ official protocol name, protocol, port number }## or
 --   an atom indicating the error code.
 --
 -- Example 1:
@@ -1191,7 +1197,7 @@ public function service_by_port(integer port, object protocol=0)
 end function
 
 --**
--- Get constant definitions from the backend.
+-- gets constant definitions from the backend.
 --
 -- Parameters:
 --   # ##type## : The type of information requested.

@@ -7,7 +7,7 @@ If you get stuck, here are some things you can do:
 example, ##guru declare global include##
 # Check the list of common problems ([[:Common Problems and Solutions]]).
 # Read the relevant parts of the documentation, i.e. 
-[[:toc|Euphoria Programming Language v4.0]] or [[:API Reference]].
+[[:toc|Euphoria Programming Language v4.1]] or [[:API Reference]].
 # Try running your program with trace:
 <eucode>
 with trace
@@ -113,7 +113,7 @@ Did you remember to define the routine as ##public##, ##export## or possibly
 
 ==== After user input, left margin problem
 
-//After inputting a string from the user with ##gets##(), the next line that 
+//After inputting a string from the user with ##gets##, the next line that 
 comes out on the screen does not start at the left margin.//
 
 Your program should output a //new-line// character e.g.
@@ -130,10 +130,10 @@ puts(SCREEN, '\n')
 Intel CPU's, and most other CPU's, use binary numbers to represent
 fractions. Decimal fractions such as 0.1, 0.01 and
 similar numbers can't be represented precisely. For example, 0.1 might
-be stored internally as 0.0999999999999999. That means that 10 * 0.1
-might come out as 0.999999999999999, and floor(10 * 0.1) might be 0,
-not 1 as you'd expect. This can be a nuisance when you are dealing
-with money calculations, but it's not a Euphoria problem. It's a
+be stored internally as ##0.0999999999999999## . That means that ##10 * 0.1##
+might come out as ##0.999999999999999##, and ##floor(10 * 0.1)## might be ##0##,
+not ##1## as you would expect. This can be a nuisance when you are dealing
+with money calculations, but it is not a Euphoria problem. It's a
 general problem that you must face in most programming languages.
 Always remember: floating-point numbers are just an approximation
 to the "real" numbers in mathematics. Assume that any floating-point calculation

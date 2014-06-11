@@ -98,6 +98,8 @@ sequence trans_opt_def = {
 	{ "no-cygwin",        0, GetMsgText(355,0), { } },
 	{ "arch",             0, GetMsgText(356),   { HAS_PARAMETER, "architecture" } },
 	{ "cc-prefix",        0, GetMsgText( MSG_CC_PREFIX ), { HAS_PARAMETER, "prefix" } },
+	{ "extra-cflags",     0, GetMsgText(276,0), { HAS_PARAMETER, "extra_cflags"} },
+	{ "extra-lflags",     0, GetMsgText(317,0), { HAS_PARAMETER, "extra_lflags"} },
 	$
 }
 
@@ -107,7 +109,7 @@ add_options( trans_opt_def )
 -- Process the translator command-line options
 
 export procedure transoptions()
-	sequence tranopts = get_options()
+	sequence tranopts = sort( get_options() )
 	
 	Argv = expand_config_options( Argv )
 	Argc = length(Argv)
@@ -142,8 +144,14 @@ export procedure transoptions()
 			case "cflags" then
 				cflags = val
 
+			case "extra-cflags" then
+				extra_cflags = val
+
 			case "lflags" then
 				lflags = val
+
+			case "extra-lflags" then
+				extra_lflags = val
 
 			case "wat" then
 				compiler_type = COMPILER_WATCOM
@@ -231,6 +239,15 @@ export procedure transoptions()
 
 			case "build-dir" then
 				output_dir = val
+				integer filetype = file_type( output_dir )
+				
+				if filetype = FILETYPE_FILE then
+					ShowMsg( 2, BUILDDIR_IS_FILE )
+					abort(1)
+				elsif filetype = FILETYPE_UNDEFINED then
+					ShowMsg( 2, BUILDDIR_IS_UNDEFINED )
+					abort(1)
+				end if
 				if find(output_dir[$], "/\\") = 0 then
 					output_dir &= '/'
 				end if

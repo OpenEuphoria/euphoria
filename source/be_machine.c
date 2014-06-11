@@ -60,7 +60,7 @@
 
 // This is a workaround for ARM not recognizing INFINITY, which is included math.h
 // but is not recognized. This seems to be a bug/issue with Scratchbox and Maemo SDK
-#if ARCH == ARM
+#ifdef EARM
 #ifndef INFINITY
 #define INFINITY (1.0/0.0)
 #endif 
@@ -126,6 +126,8 @@ extern eudouble eustart_time; /* from be_runtime.c */
 /* 30-bit magic #s for old Complete & PD Edition binds */
 #define COMPLETE_MAGIC ('1' + ('2'<< 8) + ('3' << 16) + ('O' << 24))
 unsigned char * new_page();
+// Enough space for writing a number to a string.
+#define NUMSIZE 30
 
 /**********************/
 /* Exported variables */
@@ -218,6 +220,18 @@ static int MySetEnv(const char *name, const char *value, const int overwrite) {
 }
 #endif
 
+/* Converts any atom to an integer object if the atom's value can be expressed as such, otherwise return unchanged. */
+object ATOM_TO_ATOM_INT( object X ) {
+	if ( IS_ATOM( X ) && !IS_ATOM_INT( X ) ) { 
+		double TMP_dbl = DBL_PTR( X )->dbl;
+		int TMP_x = (object)TMP_dbl;
+		if( (TMP_x + HIGH_BITS < 0) && (TMP_dbl == (double)TMP_x) ){
+			X = MAKE_INT((object)TMP_dbl);
+		}
+	}
+	return X;
+}
+
 uintptr_t get_pos_int(char *where, object x)
 /* return a positive integer value if possible */
 {
@@ -250,6 +264,17 @@ char *name_ext(char *s)
 		return s + i + 1;
 	else
 		return s;
+}
+
+uint64_t get_uint64( object x ){
+	if (IS_ATOM_INT(x)){
+		return x;
+	}
+
+	if (IS_ATOM(x)){
+		return (uint64_t)(DBL_PTR(x)->dbl);
+	}
+	RTFatal("an integer was expected, not a sequence");
 }
 
 object get_int(object x)
@@ -1168,11 +1193,11 @@ static object Dir(object x)
 {
 	char path[MAX_FILE_NAME+1];
 	s1_ptr result, row;
-	struct dirent *direntp;
+	struct dirent *direntp = 0;
 	object_ptr obj_ptr, temp;
 
 	DIR *dirp;
-	int r;
+	int r = -1;
 #ifdef ELINUX
 	struct stat64 stbuf;
 #else
@@ -1530,14 +1555,15 @@ static object lock_file(object x)
 /* lock a file. x is {fn, t, {first-byte, last-byte}} */
 {
 	IFILE f;
-	int fd;
+	intptr_t fd;
 	int r;
-#ifdef EUNIX
 	int t;
-#else
-	uintptr_t first, last;
+#ifndef EUNIX
+	uint64_t first, last, bytes;
 	object s;
+	OVERLAPPED overlapped;
 #endif
+	
 	object fn;
 
 	// get 1st element of x - file number - assume x is a sequence of length 3
@@ -1546,49 +1572,67 @@ static object lock_file(object x)
 	f = which_file(fn, EF_READ | EF_WRITE);
 	fd = ifileno(f);
 
-#ifdef EUNIX
+#ifndef EUNIX
+	fd = _get_osfhandle( fd ); // need a HANDLE on Windows
+#endif
 	// get 2nd element of x - lock type
 	t = get_int(*(((s1_ptr)x)->base+2));
+#ifdef EUNIX
 	if (t == 1)
 		r = flock(fd, LOCK_SH | LOCK_NB);
 	else
 		r = flock(fd, LOCK_EX | LOCK_NB);
-#else // EUNIX
+#else
 	// get 3rd element of x - range - assume it's a sequence
 	s = *(((s1_ptr)x)->base+3);
 	s = (object)SEQ_PTR(s);
 	if (((s1_ptr)s)->length == 0) {
 		first = 0;
-		last = 0xFFFFFFFE;
+		last = 0xFFFFFFFFFFFFFFFE;
 	}
 	else if (((s1_ptr)s)->length == 2) {
-		first = get_int(*(((s1_ptr)s)->base+1));
-		last =  get_int(*(((s1_ptr)s)->base+2));
+		first = get_uint64(*(((s1_ptr)s)->base+1));
+		last =  get_uint64(*(((s1_ptr)s)->base+2));
 	}
 	else {
 		RTFatal("3rd argument to lock_file must be a sequence of length 0 or 2");
 	}
 	if (last < first)
 		return ATOM_0;
-#if defined(EMINGW)
-	r = 0;  // TODO: FOR NOW!
-#else // defined EMINGW
-	r = lock(fd, first, last - first + 1);
-#endif // defined EMINGW
-#endif // EUNIX
-	if (r == 0)
+
+	bytes = last - first + 1;
+	overlapped.hEvent = 0;
+	overlapped.Offset = (DWORD)(first & 0xffffffff);
+	overlapped.OffsetHigh = (DWORD)( (first & 0xffffffff00000000) << 32 );
+	r = LockFileEx(
+						(HANDLE)fd,
+						((t == 2) ? LOCKFILE_EXCLUSIVE_LOCK : 0) | LOCKFILE_FAIL_IMMEDIATELY,
+						0,
+						(DWORD)bytes & 0xffffffff,
+						(DWORD) ((bytes & 0xffffffff00000000) << 32),
+						&overlapped );
+
+#endif
+	
+#ifdef EUNIX
+	if (r == 0){
+#else
+	if (r != 0){
+#endif
 		return ATOM_1; // success
-	else
+	}
+	else{
 		return ATOM_0; // fail
+	}
 }
 
 static object unlock_file(object x)
 /* unlock a file */
 {
 	IFILE f;
-	int fd;
+	intptr_t fd;
 #ifdef EWINDOWS
-	uintptr_t first, last;
+	uint64_t first, last, bytes;
 	object s;
 #endif
 	object fn;
@@ -1601,26 +1645,29 @@ static object unlock_file(object x)
 #ifdef EUNIX
 	flock(fd, LOCK_UN);
 #else // EUNIX
+	fd = _get_osfhandle( fd );
 	// get 2nd element of x - range - assume it's a sequence
 	s = *(((s1_ptr)x)->base+2);
 	s = (object)SEQ_PTR(s);
 	if (((s1_ptr)s)->length == 0) {
 		first = 0;
-		last = 0xFFFFFFFE;
+		last = 0xFFFFFFFFFFFFFFFE;
 	}
 	else if (((s1_ptr)s)->length == 2) {
-		first = get_int(*(((s1_ptr)s)->base+1));
-		last =  get_int(*(((s1_ptr)s)->base+2));
+		first = get_uint64(*(((s1_ptr)s)->base+1));
+		last =  get_uint64(*(((s1_ptr)s)->base+2));
 	}
 	else {
 		RTFatal("2nd argument to unlock_file must be a sequence of length 0 or 2");
 	}
-#if defined(EMINGW)
-	/* do nothing */
-#else // defined EMINGW
-	if (last >= first)
-		unlock(fd, first, last - first + 1);
-#endif // EMINGW
+
+	bytes = last - first + 1;
+	UnlockFile(
+				(HANDLE)fd,
+				(DWORD)(first & 0xffffffff),
+				(DWORD)( (first & 0xffffffff00000000) << 32 ),
+				(DWORD)bytes & 0xffffffff,
+				(DWORD) ((bytes & 0xffffffff00000000) << 32));
 #endif // EUNIX
 	return ATOM_1; // ignored
 }
@@ -1763,6 +1810,9 @@ static object e_sleep(object x)
 			t = DBL_PTR(x)->dbl;
 		}
 	}
+	else{
+		t = (eudouble)0;
+	}
 	Wait((double)t);
 	return ATOM_1;
 }
@@ -1857,6 +1907,31 @@ void init_fp_conversions(){
 }
 #endif
 
+#ifdef EARM
+void arm_float80_to_float64( unsigned char *a, unsigned char *b ){
+	int64_t exp_a, exp_b, sign;
+	int64_t mantissa_a, mantissa_b;
+
+	sign  = 0x80 == (a[9] & 0x80);
+	exp_a = (a[8] | ((a[9] & 0x7f) << 8 )) - 0x3fff; // IEEE854_LONG_DOUBLE_BIAS
+	// chop off most significant bit
+	mantissa_a = 0x7fffffffffffffffLL & *((int64_t*)a);
+	if( exp_a == 0x4000 && mantissa_a == 0 ){
+		if( sign ){
+			*((double*)b) = -INFINITY;
+		}
+		else{
+			*((double*)b) = INFINITY;
+		}
+		return;
+	}
+	exp_b = (exp_a + 0x3ff ); // IEEE754_DOUBLE_BIAS
+	mantissa_b = (mantissa_a >> (11));
+	
+	*((int64_t*)b) = (mantissa_b & 0x7fffffffffffffLL) | (exp_b << 52)  | (sign << 63);
+}
+#endif
+
 static object float_to_atom(object x, int flen)
 /* convert a sequence of 4, 8 or 10 bytes in IEEE format to an atom */
 /* must avoid type casts from floating point values that may not be 8-byte aligned. */
@@ -1888,6 +1963,8 @@ static object float_to_atom(object x, int flen)
 	else{
 		#ifdef EWATCOM
 			(*convert_80_to_64)( &convert, &d );
+		#elif defined( EARM )
+			arm_float80_to_float64( (unsigned char*) &convert.fbuff, (unsigned char*)&d );
 		#else
 			d = (eudouble)convert.ldouble;
 		#endif
@@ -2005,11 +2082,9 @@ object memory_set(object d, object v, object n)
 	return ATOM_1;
 }
 
-#ifdef EWINDOWS
-HINSTANCE *open_dll_list = NULL;
+DLL_PTR_TYPE *open_dll_list = NULL;
 int open_dll_size = 0;
 int open_dll_count = 0;
-#endif
 
 object OpenDll(object x)
 {
@@ -2018,7 +2093,7 @@ object OpenDll(object x)
 	static char message[81];
 	char *dll_string;
 	int message_len;
-	HINSTANCE lib;
+	DLL_PTR_TYPE lib;
 
 	/* x will be a sequence if called via open_dll() */
 
@@ -2035,18 +2110,23 @@ object OpenDll(object x)
 	}
 #ifdef EWINDOWS
 	lib = (HINSTANCE)LoadLibrary(dll_string);
+#else
+	// Linux
+
+	lib = dlopen(dll_string, RTLD_LAZY | RTLD_GLOBAL);
+#endif
 	// add to dll list so we can close it at end of execution
 	if (lib != NULL) {
 		if (open_dll_count >= open_dll_size) {
 			size_t newsize;
 
 			open_dll_size += 100;
-			newsize = open_dll_size * sizeof(HINSTANCE);
+			newsize = open_dll_size * sizeof(DLL_PTR_TYPE);
 			if (open_dll_list == NULL) {
-				open_dll_list = (HINSTANCE *)EMalloc(newsize);
+				open_dll_list = (DLL_PTR_TYPE *)EMalloc(newsize);
 			}
 			else {
-				open_dll_list = (HINSTANCE *)ERealloc((char *)open_dll_list, newsize);
+				open_dll_list = (DLL_PTR_TYPE *)ERealloc((char *)open_dll_list, newsize);
 			}
 			if (open_dll_list == NULL) {
 				RTFatal("Cannot allocate RAM (%d bytes) for dll list to add %s", newsize, dll_string);
@@ -2054,12 +2134,6 @@ object OpenDll(object x)
 		}
 		open_dll_list[open_dll_count++] = lib;
 	}
-#else
-	// Linux
-
-	lib = dlopen(dll_string, RTLD_LAZY | RTLD_GLOBAL);
-
-#endif
 	return MAKE_UINT(lib);
 }
 
@@ -2140,7 +2214,13 @@ object DefineC(object x)
 	}
 
 	routine_name = *(((s1_ptr)x)->base+2);
+#ifdef EWINDOWS
+	/* On Windows we normally expect routines to restore the stack when they return. */
 	convention = C_STDCALL;
+#else
+	/* On Unix like Operating Systems the caller must always restore the stack */
+	convention = C_CDECL;
+#endif
 
 	if (raw_addr) {
 		/* machine code routine */
@@ -2153,16 +2233,18 @@ object DefineC(object x)
 			/* {'+', addr} */
 			if (SEQ_PTR(routine_name)->length != 2)
 				RTFatal("expected {'+', address} as second argument of define_c_proc/func");
+
 			proc_address = (intptr_t (*)())*(SEQ_PTR(routine_name)->base+2);
+			if (!IS_ATOM((object)proc_address))
+				RTFatal("expected {'+', address} as second argument of define_c_proc/func");
 			proc_address = (intptr_t (*)())get_pos_int("define_c_proc/func", (object)proc_address);
-#ifdef EWINDOWS
+
 			t = (intptr_t)*(SEQ_PTR(routine_name)->base+1);
-			t = get_pos_int("define_c_proc/func", (object)t);
+			t = ATOM_TO_ATOM_INT((object)t);
 			if (t == '+')
-				convention = C_CDECL;
+				convention = C_CDECL; /* caller must restore stack */
 			else
 				RTFatal("unsupported calling convention - use '+' for CDECL");
-#endif
 		}
 		/* assign a sequence value to routine_ptr */
 		snprintf(TempBuff, TEMP_SIZE, "machine code routine at %p", proc_address);
@@ -2181,21 +2263,19 @@ object DefineC(object x)
 			RTFatal("routine name is too long");
 		routine_string = TempBuff;
 		MakeCString(routine_string, routine_name, TEMP_SIZE);
-#ifdef EWINDOWS
 		if (routine_string[0] == '+') {
 			routine_string++;
 			convention = C_CDECL;
 		}
+#ifdef EWINDOWS
 		proc_address = (intptr_t (*)())GetProcAddress((void *)lib, routine_string);
 		if (proc_address == NULL)
 			return ATOM_M1;
 
 #else
-#ifdef EUNIX
 		proc_address = (intptr_t (*)())dlsym((void *)lib, routine_string);
 		if (dlerror() != NULL)
 			return ATOM_M1;
-#endif
 #endif
 	}
 
@@ -2259,12 +2339,12 @@ object DefineC(object x)
 	return c_routine_next++;
 }
 
-#if ARCH == ARM
+#ifdef EARM
         #define CALLBACK_SIZE (129)
 #else
 
 #ifdef EOSX
-	#define CALLBACK_SIZE (108)
+	#define CALLBACK_SIZE (300)
 #else
 	#if __GNUC__ == 4
 		#if INTPTR_MAX == INT32_MAX
@@ -2336,11 +2416,6 @@ void set_page_to_read_write_execute(page_ptr page_addr) {
 }
 /* addressable version of CALLBACK_POINTER constant for use with memcmp */
 const uintptr_t callback_pointer_magic = (uintptr_t) CALLBACK_POINTER;
-#if defined(EOSX)
-	const uintptr_t general_ptr_magic = 0xF001F001;
-#elif (INTPTR_MAX == INT64_MAX)
-	const uintptr_t general_ptr_magic = 0xabcdefabcdefabcdLL;
-#endif
 object CallBack(object x)
 /* return either a call-back address for routine id x
    x can be the routine id for stdcall, or {'+', routine_id} for cdecl
@@ -2443,8 +2518,10 @@ object CallBack(object x)
 					RTFatal("routine has too many parameters for call-back");
 		}
 	}
-#ifdef EOSX
+#if (INTPTR_MAX == INT32_MAX) && defined EOSX
 	// always use the custom call back handler for OSX
+	// -- Use the normal cdecl on 64-bit, and the custom one on 32-bit.
+	// Clean this up if it works.
 	addr = (uintptr_t)&osx_cdecl_call_back;
 #endif
 
@@ -2526,7 +2603,7 @@ object CallBack(object x)
 		}
 #if defined(EOSX) || (INTPTR_MAX == INT64_MAX)
 /* If OS/X ever gets ported to ARM ... */
-#if ARCH == ARM
+#ifdef EARM
 #error "misaligned comparison code" 
 #endif
 		else if( *((uintptr_t*)(copy_addr + i)) == general_ptr_magic ){
@@ -2548,7 +2625,7 @@ object CallBack(object x)
 	return MAKE_UINT(addr);
 }
 
-uintptr_t internal_general_call_back(
+object internal_general_call_back(
 		  intptr_t cb_routine,
 						   uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 						   uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
@@ -2657,8 +2734,9 @@ uintptr_t internal_general_call_back(
 			break;
 	}
 
+	return call_back_result->obj;
 	// Don't do get_pos_int() for crash handler
-	return (uintptr_t)get_pos_int("internal-call-back", call_back_result->obj);
+// 	return (uintptr_t)get_pos_int("internal-call-back", call_back_result->obj);
 }
 
 int *crash_list = NULL;    // list of routines to call when there's a crash
@@ -2792,8 +2870,9 @@ object start_backend(object x)
 
 	x_ptr = SEQ_PTR(x);
 
-	if (IS_ATOM(x) || x_ptr->length != 13)
-		RTFatal("BACKEND requires a sequence of length 13");
+	if (IS_ATOM(x) || x_ptr->length != 16)
+		RTFatal("BACKEND requires a sequence of length 16");
+
 
 	fe.st = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
 	fe.sl = (struct sline *) get_pos_int(w, *(x_ptr->base+2));
@@ -2810,8 +2889,16 @@ object start_backend(object x)
 	syncolor          = get_pos_int(w, *(x_ptr->base+11));
 	
 	set_debugger( (char*) get_pos_int(w, *(x_ptr->base+12)) );
-	sprint_ptr        = get_pos_int(w, *(x_ptr->base+13));
+	;
+
+	if (
+		((map_new = get_pos_int(w, *(x_ptr->base+13))) == 0) ||
+		((map_put = get_pos_int(w, *(x_ptr->base+14))) == 0) ||
+		((map_get = get_pos_int(w, *(x_ptr->base+15))) == 0) ) {
+		RTInternal("BACKEND requires the routine ids args passed arg 13,14,15 be non-zero.");
+	}
 	
+	trace_lines = get_pos_int(w, *(x_ptr->base+16));
 	// This is checked when we try to write coverage to make sure
 	// we need to output an error message.
 	in_backend = 1;
@@ -2850,6 +2937,72 @@ object start_backend(object x)
 }
 #endif
 
+/* Get the string representation of an object.  Used when name_of
+ * is used on something which is not of an enumerated type.  */
+static object SPrint(object x)
+{
+	/* a small buffer for numbers */
+	static char sbuf[NUMSIZE];
+	/* result sequence, the passed in object and a temporary */ 
+	s1_ptr rs, xs, ts;
+	/* result object and a temporary object */
+	object ro, to;
+	/* a EUPHORIA string representation of ", ". */
+	static object cso = 0;
+	/* For caching the length of both xs and rs */ 
+	int len;
+	int i,j;
+	
+	sbuf[sizeof(sbuf)-1] = '\0';
+	if (IS_ATOM_INT(x)) {
+		len = snprintf(sbuf, sizeof(sbuf)-1, "%d", x );
+	} else if (IS_ATOM(x)) {
+		#if INTPTR_MAX == INT32_MAX
+			len = snprintf(sbuf, sizeof(sbuf)-1, "%.10g", DBL_PTR(x)->dbl);
+		#else
+			len = snprintf(sbuf, sizeof(sbuf)-1, "%.10Lg", DBL_PTR(x)->dbl);
+		#endif
+	} else {
+		/* must be a sequence */
+		if (!cso) {
+			ts = NewS1(2);
+			ts->base[1] = ',';
+			ts->base[2] = ' ';
+			cso = MAKE_SEQ(ts);
+			ts = NULL;
+		}
+		xs = SEQ_PTR(x);
+		len = xs->length;
+		rs = NewS1(51);
+		rs->length = 1;
+		rs->postfill = 50;
+		ro = MAKE_SEQ(rs);
+		rs->base[1] = '{';
+		if (len > 0) {
+			to = SPrint(xs->base[1]);
+			Concat(&ro, ro, to);
+			DeRef(to);
+			for ( i = 2; i <= len; ++i) {
+				to = SPrint(xs->base[i]);
+				Concat(&ro, ro, cso);
+				Concat(&ro, ro, to);
+				DeRef(to);
+			}
+			to = 0;
+		}
+		Append(&ro, ro, '}');
+		return ro;		
+	}
+	if (len >= sizeof(sbuf))
+		RTInternal("Insufficient length used in string buffer %s:%d.  Adjust NUMSIZE to at least %d\n", __FILE__, __LINE__, len);
+	rs = NewS1(len);
+	for (i = 0, j = 1; i <= len; ++j,++i)
+		rs->base[j] = MAKE_INT(sbuf[i]);
+	rs->base[len+1] = NOVALUE;
+	return MAKE_SEQ(rs);
+}
+
+
 object machine(object opcode, object x)
 /* Machine-specific function "machine". It is passed an opcode and
    a general Euphoria object as its parameters and it returns a
@@ -2860,10 +3013,6 @@ object machine(object opcode, object x)
 	char *src;
 	eudouble d;
 	int temp;
-#	ifndef ERUNTIME	
-		intptr_t (*fn_ptr)();
-		fn_ptr = rt00[sprint_ptr].addr;
-#	endif
 
 	while (TRUE) {
 		switch(opcode) {  /* tricky - could be atom or sequence */
@@ -3139,6 +3288,7 @@ object machine(object opcode, object x)
 				addr = (char *)EMalloc(SEQ_PTR(x)->length + 1);
 				MakeCString((char*)addr, x, SEQ_PTR(x)->length + 1);
 				screen_output(NULL, (char*)addr);
+				SetTColor(0);
 				return ATOM_1;
 				break;
 
@@ -3329,19 +3479,8 @@ object machine(object opcode, object x)
 				return 0;
 #endif
 	        case M_SPRINT:
-#			ifndef ERUNTIME
-		        	return (*fn_ptr)(x);
-#			else
-				sprint_sequence = NULL;
-				Print((IFILE)DOING_SPRINTF, x, 100, 80, 0, 0);
-				if (sprint_sequence == NULL) 
-					RTInternal("Creation of sprint_sequence failed.\n");
-				x = MAKE_SEQ(sprint_sequence);
-				Ref(x);				
-				return x;
-#			endif
-			
-		
+	        	// when using Print instead of SPrint routine below some problem always killed off translated programs using this.
+	        	return SPrint(x);
 
             case M_KEY_CODES:
                 return key_codes(x);

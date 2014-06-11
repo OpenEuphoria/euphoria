@@ -14,6 +14,7 @@ include std/text.e
 include std/io.e
 include std/dll.e
 
+include global.e
 include msgtext.e
 
 public constant
@@ -146,23 +147,27 @@ public procedure set_target_arch( sequence arch )
 	TX86_64 = 0
 	IARM    = 0
 	TARM    = 0
-	switch arch do
+	switch upper( arch ) do
 		case "X86", "IX86" then
 			IX86    = 1
 			TX86    = 1
+			TARGET_SIZEOF_POINTER = 4
 		
 		case "X86_64", "IX86_64" then
 			IX86_64 = 1
 			TX86_64 = 1
+			TARGET_SIZEOF_POINTER = 8
 		
 		case "ARM" then
 			IARM = 1
 			TARM = 1
+			TARGET_SIZEOF_POINTER = 4
 		
 		case else
 			ShowMsg( 2, 357, { arch, "X86, X86_64, ARM" } )
 			abort( 1 )
 	end switch
+	set_target_integer_size( TARGET_SIZEOF_POINTER )	
 end procedure
 
 public function GetPlatformDefines(integer for_translator = 0)
@@ -246,7 +251,7 @@ public function GetPlatformDefines(integer for_translator = 0)
 			local_defines &= {"LONG64"}
 		end if
 	elsif (IARM and not for_translator) or (TARM and for_translator) then
-		local_defines &= {"ARM", "BITS32", "LONG64"}
+		local_defines &= {"ARM", "BITS32", "LONG32"}
 	end if
 	
 	-- So the translator knows what to strip from defines if translating

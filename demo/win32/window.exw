@@ -6,255 +6,94 @@
 --
 
 include std/os.e
-include std/machine.e
 include std/dll.e
+include std/machine.e
+include std/math.e
+include std/error.e
 
-constant cbSize = 0,
-	 style  = 4,
-	 lpfnWndProc = 8,
-	 cbClsExtra = 12,
-	 cbWndExtra = 16,
-	 hInstance  = 20,
-	 hIcon      = 24,
-	 hCursor    = 28,
-	 hbrBackground = 32,
-	 lpszMenuName  = 36,
-	 lpszClassName = 40,
-	 hIconSm = 44,
-	 SIZE_OF_WNDCLASS = 48
+include winstruct.ew
 
-constant SIZE_OF_MESSAGE = 40
 
-constant CS_HREDRAW = 2,
-	 CS_VREDRAW = 1
 
-constant SW_SHOWNORMAL = 1
-
-constant WM_CREATE = #01,
-	 WM_PAINT  = #0F,
-	 WM_DESTROY= #02
-
-constant SND_FILENAME = #00020000,
-	 SND_ASYNC    = #00000001
-	 
-constant DT_SINGLELINE = #0020,
-	 DT_CENTER     = #0001,
-	 DT_VCENTER    = #0004
-	 
-function or_all(sequence s)
--- or together all elements of a sequence
-    atom result
-    
-    result = 0
-    for i = 1 to length(s) do
-	result = or_bits(result, s[i])
-    end for
-    return result
-end function
-
-constant WS_OVERLAPPED  = #00000000,
-	 WS_CAPTION     = #00C00000,
-	 WS_SYSMENU     = #00080000,
-	 WS_THICKFRAME  = #00040000,
-	 WS_MINIMIZEBOX = #00020000,
-	 WS_MAXIMIZEBOX = #00010000 
-
-constant IDC_ARROW = 32512,
-	 WHITE_BRUSH = 0,
-	 CW_USEDEFAULT = #80000000,
-	 WS_OVERLAPPEDWINDOW = or_all({WS_OVERLAPPED, WS_CAPTION, WS_SYSMENU,
-				       WS_THICKFRAME, WS_MINIMIZEBOX, 
-				       WS_MAXIMIZEBOX})
-
-	 
-integer LoadIcon, LoadCursor, GetStockObject, RegisterClassEx,
-	CreateWindow, ShowWindow, UpdateWindow, GetMessage,
-	TranslateMessage, DispatchMessage, PlaySound, BeginPaint,
-	GetClientRect, DrawText, EndPaint, PostQuitMessage, DefWindowProc
-
-procedure not_found(sequence name)
-    puts(1, "Couldn't find " & name & '\n')
-    abort(1)
-end procedure
-
-function link_c_func(atom dll, sequence name, sequence args, atom result)
--- dynamically link a C routine as a Euphoria function
-    integer handle
-
-    handle = define_c_func(dll, name, args, result)
-    if handle = -1 then
-	not_found(name)
-    else
-	return handle
-    end if
-end function
-
-function link_c_proc(atom dll, sequence name, sequence args)
--- dynamically link a C routine as a Euphoria function
-    integer handle
-
-    handle = define_c_proc(dll, name, args)
-    if handle = -1 then
-	not_found(name)
-    else
-	return handle
-    end if
-end function
-
-procedure link_dll_routines()
--- get handles to all dll routines that we need
-    atom user32, gdi32, winmm
-    
-    user32 = open_dll("user32.dll")
-    if user32 = NULL then
-	not_found("user32.dll")
-    end if
-    gdi32 = open_dll("gdi32.dll")
-    if gdi32 = NULL then
-	not_found("gdi32.dll")
-    end if
-    winmm = open_dll("winmm.dll")
-    if winmm = NULL then
-	not_found("winmm.dll")
-    end if
-    
-    LoadIcon = link_c_func(user32, "LoadIconA", {C_POINTER, C_INT}, C_INT)
-    LoadCursor = link_c_func(user32, "LoadCursorA", {C_POINTER, C_INT}, C_INT)
-    GetStockObject = link_c_func(gdi32, "GetStockObject", {C_INT}, C_INT)
-    RegisterClassEx = link_c_func(user32, "RegisterClassExA", {C_POINTER}, C_INT)
-    CreateWindow = link_c_func(user32, "CreateWindowExA", 
-     {C_INT, C_INT,C_INT,C_INT,C_INT,C_INT,C_INT,C_INT,C_INT,C_INT,C_INT,C_INT},
-      C_INT)
-    ShowWindow = link_c_proc(user32, "ShowWindow", {C_INT, C_INT})
-    UpdateWindow = link_c_proc(user32, "UpdateWindow", {C_INT})
-    GetMessage = link_c_func(user32, "GetMessageA", 
-			     {C_INT, C_INT, C_INT, C_INT}, C_INT)
-    TranslateMessage = link_c_proc(user32, "TranslateMessage", {C_INT})
-    DispatchMessage = link_c_proc(user32, "DispatchMessageA", {C_INT})
-    PlaySound = link_c_proc(winmm, "PlaySound", {C_INT, C_INT, C_INT})
-    BeginPaint = link_c_func(user32, "BeginPaint", {C_INT, C_POINTER}, C_INT)
-    GetClientRect = link_c_proc(user32, "GetClientRect", {C_INT, C_POINTER})
-    DrawText = link_c_proc(user32, "DrawTextA", 
-			   {C_INT, C_INT, C_INT, C_INT, C_INT})
-    EndPaint = link_c_proc(user32, "EndPaint", {C_INT, C_INT})
-    PostQuitMessage = link_c_proc(user32, "PostQuitMessage", {C_INT})
-    DefWindowProc = link_c_func(user32, "DefWindowProcA", 
-				{C_INT, C_INT, C_INT, C_INT}, C_INT)
-end procedure
-
-link_dll_routines()
-
-atom wav_file, Euphoria, ps, rect
-wav_file = allocate_string("\\Windows\\Media\\tada.wav")
-Euphoria = allocate_string("A Plain Vanilla Window using Euphoria!")
-ps = allocate(64)
-rect = allocate(16) 
+atom 
+	wav_file = allocate_string(getenv("windir")&`\Media\tada.wav`),
+	Euphoria = allocate_string("A Plain Vanilla Window using Euphoria!"),
+	my_title = allocate_string("Euphoria for Windows"),
+	ps = allocate(64),
+	rect = allocate(16) 
  
-global function WndProc(atom hwnd, atom iMsg, atom wParam, atom lParam)
 -- callback routine to handle Window class
-    atom hdc
-    integer temp
-    
-    if iMsg = WM_CREATE then
-	c_proc(PlaySound, {wav_file,
-			   NULL,
-			   or_bits(SND_FILENAME, SND_ASYNC)})
-	return 0
-    
-    elsif iMsg = WM_PAINT then
-	hdc = c_func(BeginPaint, {hwnd, ps})
-	c_proc(GetClientRect, {hwnd, rect})
-	c_proc(DrawText, {hdc, Euphoria, -1, rect, 
-			  or_all({DT_SINGLELINE, DT_CENTER, DT_VCENTER})})
-	c_proc(EndPaint, {hwnd, ps})
-	return 0
+function WndProc(atom hwnd, atom iMsg, atom wParam, atom lParam)
+	atom hdc
 	
-    elsif iMsg = WM_DESTROY then
-	c_proc(PostQuitMessage, {0})
-	return 0
+	if iMsg = WM_CREATE then
+		c_proc(PlaySound, {wav_file,
+				   NULL,
+				   or_bits(SND_FILENAME, SND_ASYNC)})
+		return 0
+
+	elsif iMsg = WM_PAINT then
+		hdc = c_func(BeginPaint, {hwnd, ps})
+		c_proc(GetClientRect, {hwnd, rect})
+		c_proc(DrawText, {hdc, Euphoria, -1, rect, 
+				  or_all({DT_SINGLELINE, DT_CENTER, DT_VCENTER})})
+		c_proc(EndPaint, {hwnd, ps})
+		return 0
+
+	elsif iMsg = WM_DESTROY then
+		c_proc(PostQuitMessage, {0})
+		return 0
 	
-    end if
-    
-    temp = c_func(DefWindowProc, {hwnd, iMsg, wParam, lParam})
-    return temp
+	end if
+	
+	return c_func(DefWindowProc, {hwnd, iMsg, wParam, lParam})
 end function
 
-atom my_title
-my_title = allocate_string("Euphoria for WIN32")
 
 procedure WinMain()
--- main routine 
-    atom szAppName
-    atom hwnd
-    atom msg
-    atom wndclass
-    atom WndProcAddress
-    atom class
-    integer id
-    atom icon_handle
+	-- main routine 
+	atom hwnd
+	atom icon_handle
 
-    wndclass = allocate(SIZE_OF_WNDCLASS)
-    msg = allocate(SIZE_OF_MESSAGE)
-    szAppName = allocate_string("HelloWin")
+	atom wndclass = allocate(SIZE_OF_WNDCLASS,1)
+	atom msg = allocate(SIZE_OF_MESSAGE,1)
+	atom szAppName = allocate_string("HelloWin",1)
 
-    id = routine_id("WndProc")
-    if id = -1 then
-	puts(1, "routine_id failed!\n")
-	abort(1)
-    end if
-    WndProcAddress = call_back(id) -- get 32-bit address for callback
-    
-    poke4(wndclass + cbSize, SIZE_OF_WNDCLASS)
-    poke4(wndclass + style, or_bits(CS_HREDRAW, CS_VREDRAW))
-    poke4(wndclass + lpfnWndProc, WndProcAddress)
-    poke4(wndclass + cbClsExtra, 0)
-    poke4(wndclass + cbWndExtra, 0)
-    poke4(wndclass + hInstance, 0) --hInstance
+	atom id = routine_id("WndProc")
+	if id = -1 then
+		crash("routine_id failed!")
+	end if
+	atom WndProcAddress = call_back(id) -- get address for callback
+	
 
-    -- set icon in top-left of window
-    icon_handle = c_func(LoadIcon, {instance(), allocate_string("eui")})
-    poke4(wndclass + hIcon, icon_handle)
-    poke4(wndclass + hIconSm, icon_handle)
-    
-    -- Wolfgang Fritz observes that you can set an icon
-    -- dynamically using:
-    -- junk = sendMessage(YourWindow, 128, 1, icon_handle) 
-    -- where 128 is WM_SETICON   
-    
-    poke4(wndclass + hCursor, c_func(LoadCursor, {NULL, IDC_ARROW}))
-    poke4(wndclass + hbrBackground, c_func(GetStockObject, {WHITE_BRUSH}))
-    poke4(wndclass + lpszMenuName, NULL)
-    poke4(wndclass + lpszClassName, szAppName)
+	atom class = register_class( wndclass, WndProcAddress, szAppName )
+	if class = 0 then
+		crash("Couldn't register class")
+	end if
+	hwnd = c_func(CreateWindow, {
+		0,                       -- extended style
+		szAppName,               -- window class name
+		my_title,                -- window caption
+		WS_OVERLAPPEDWINDOW,     -- window style
+		CW_USEDEFAULT,           -- initial x position
+		CW_USEDEFAULT,           -- initial y position
+		CW_USEDEFAULT,           -- initial x size
+		CW_USEDEFAULT,           -- initial y size
+		NULL,                    -- parent window handle
+		NULL,                    -- window menu handle
+		0 ,                 --hInstance // program instance handle
+		NULL})              -- creation parameters
+	if hwnd = 0 then
+		crash("Couldn't CreateWindow")
+	end if
+	c_proc(ShowWindow, {hwnd, SW_SHOWNORMAL})
+	c_proc(UpdateWindow, {hwnd})
 
-    class = c_func(RegisterClassEx, {wndclass})
-    if class = 0 then
-	puts(1, "Couldn't register class\n")
-	abort(1)
-    end if
-    hwnd = c_func(CreateWindow, {
-		    0,                       -- extended style
-		    szAppName,               -- window class name
-		    my_title,                -- window caption
-		    WS_OVERLAPPEDWINDOW,     -- window style
-		    CW_USEDEFAULT,           -- initial x position
-		    CW_USEDEFAULT,           -- initial y position
-		    CW_USEDEFAULT,           -- initial x size
-		    CW_USEDEFAULT,           -- initial y size
-		    NULL,                    -- parent window handle
-		    NULL,                    -- window menu handle
-		    0 ,                 --hInstance // program instance handle
-		    NULL})              -- creation parameters
-    if hwnd = 0 then
-	puts(1, "Couldn't CreateWindow\n")
-	abort(1)
-    end if
-    c_proc(ShowWindow, {hwnd, SW_SHOWNORMAL})
-    c_proc(UpdateWindow, {hwnd})
-
-    while c_func(GetMessage, {msg, NULL, 0, 0}) do
-	c_proc(TranslateMessage, {msg})
-	c_proc(DispatchMessage, {msg})
-    end while
+	-- message loop
+	while c_func(GetMessage, {msg, NULL, 0, 0}) do
+		c_proc(TranslateMessage, {msg})
+		c_proc(DispatchMessage, {msg})
+	end while
 end procedure
 
 WinMain()

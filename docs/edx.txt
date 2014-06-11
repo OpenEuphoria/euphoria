@@ -1,43 +1,44 @@
-== Ed - Euphoria Editor
+== Edx Demonstration Code Editor
 :<<LEVELTOC level=2 depth=4>>
 
 === Introduction
 
-The Euphoria download package includes a handy, text-mode editor, **##ed##**, 
-that's written completely in Euphoria. Many people find ##ed## convenient for 
-editing Euphoria programs and other files, but there is no requirement that you 
-use it.
+The Euphoria includes a handy, text-mode editor, **##edx##**  
+that is written completely in Euphoria. 
+
+While ##edx## is intended as a demonstration program, many people find ##edx## convenient for 
+editing and examinng small programs.
 
 === Summary
 
 Usage:
 
-# ##ed filename##
-# ##ed##
+# ##edx filename##
+# ##edx##
 
-After any error, just type ##ed##, and
-you'll be placed in the editor, at the line and column where the error was
+After any error, just type ##edx## and
+you will be placed in the editor at the line and column where the error was
 detected. The error message will be at the top of your screen.
 
-Euphoria-related files are displayed in color. Other text files are in mono.
-You'll know that you have misspelled something when the color does not change
+Euphoria related files are displayed in color. Other text files are in mono.
+You will know that you have misspelled something when the color does not change
 as you expect. Keywords are blue. Names of routines that are built in to the
 interpreter appear in magenta. Strings are green, comments are red, most other
 text is black. Balanced brackets (on the same line) have the same color. You
-can change these colors as well as several other parameters of **ed**. See
-"user-modifiable parameters" near the top of ##ed.ex##.
+can change these colors as well as several other parameters of **edx**. See
+//user-modifiable parameters// near the top of ##edx.ex##.
 
 The arrow keys move the cursor left, right, up or down. Most other characters
 are immediately inserted into the file.
 
-In Windows, you can "associate" various types of files with ##ed.bat##. You
-will then be put into **ed** when you //double-click// on these types of files
-- e.g. ##.e, .pro, .doc## etc.  Main Euphoria files ending in ##.ex##, ##.exd##
+In Windows, you can //associate// various types of files with ##edx.bat##. You
+will then be put into **edx** when you //double-click// on these types of files
+~-- such as. ##.e, .pro, .doc## etc.  Main Euphoria files ending in ##.ex##, ##.exd##
 or ##.exw## might better be associated with ##eui.exe##, ##euid.exe##, or
 ##euiw.exe##, respectively.
 
-**ed** is a multi-file/multi-window text-based editor. //Esc c// will split your
-screen so you can view and edit up to 10 files simultaneously, with cutting and
+**edx** is a multi-file and multi-window text-based editor. //Esc c// will split your
+screen so you can view and edit up to ten files simultaneously, with cutting and
 pasting between them. You can also use multiple edit windows to view and edit
 different parts of a single file.
 
@@ -46,8 +47,8 @@ different parts of a single file.
 Some PC keys do not work in a Linux or FreeBSD or Windows text console, or in 
 Telnet, and
 some keys do not work in an xterm under X windows. Alternate keys have been
-provided. In some cases you might have to edit ed.ex to map
-the desired key to the desired function.  e.g. you'll have to use
+provided. In some cases you might have to edit ##edx.ex## to map
+the desired key to the desired function.  For example you may have to use
 //C-t// and //C-b// instead of //C-Home// and //C-End//.
 
 | Delete    | Delete the current character above the cursor |
@@ -55,14 +56,14 @@ the desired key to the desired function.  e.g. you'll have to use
 | C-Delete  | Delete the current line (not available on all platforms) |
 | C-d       | Delete the current line (same as C-Delete) |
 | Insert    | re-insert the preceding series of Deletes before the current line/character |
-| C-Left    | Move to the start of the previous word. On Unix, use C-l |
-| C-Right   | Move to the start of the next word. On Unix, use C-r |
+| C-Left    | Move to the start of the previous word. On //Unix// use C-l |
+| C-Right   | Move to the start of the next word. On //Unix// use C-r |
 | Home      | Move to the beginning of the current line |
 | End       | Move to the end of the current line |
 | C-Home    | Move to the beginning of the file (euid.exe only, others use C-t |
 | C-End     | Move to the end of the file (euid.exe only, others use C-b |
-| PgUp      | Move up one screen. On Unix use C-u |
-| PgDn      | Move down one screen. On Unix use C-p |
+| PgUp      | Move up one screen. On //Unix// use C-u |
+| PgDn      | Move down one screen. On //Unix// use C-p |
 | F1..F10   | Select a new window. The windows are numbered from top to bottom with the top window on the screen being //F1// |
 | F12       | User definable key (see ##CUSTOM_KEYSTROKES## near top of ##ed.ex##. Default action is to insert ##--## for a Euphoria comment |
 
@@ -98,7 +99,7 @@ Press and release the //Esc// key, then press one of the following keys:
 | n | Start editing a new file in the current window. Deleted lines/chars and
       search strings are available for use in the new file. You must type in
       the path to the new file. Alternatively, you can drag a file name from a
-      Windows file manager window into the console window for ##ed##. This
+      Windows file manager window into the console window for ##edx##. This
       will type the full path for you. |
 | f | Find the next occurrence of a string in the current window. When you type
       in a new string there is an option to "match case" or not. Press //y//
@@ -111,11 +112,11 @@ Press and release the //Esc// key, then press one of the following keys:
       way to skip over a possible replacement.// |
 | l | Change the number of lines displayed on the screen. Only certain values
       are allowed, depending on your video card. Many cards will allow 25, 28,
-      43 and 50 lines. In a Linux/FreeBSD text console you're stuck with the
-      number of lines available (usually 25). In a Linux/FreeBSD xterm window,
-      ##ed## will use the number of lines initially available when ed is
+      43 and 50 lines. In a //Unix// text console you're stuck with the
+      number of lines available (usually 25). In a //Unix// terminal xterm window,
+      ##edx## will use the number of lines initially available when ##edx## is
       started up. Changing the size of the window will have no effect after
-      ed is started. |
+      ##edx## is started. |
 | m | Show the modifications that you've made so far. The current edit buffer
       is saved as ##editbuff.tmp##, and is compared with the file on disk
       using the Windows ##fc## command, or the Linux/FreeBSD ##diff## command.
@@ -166,56 +167,56 @@ you can
 press an //F-key// to select a new edit window. You can then insert your 
 kill-buffer.
 
-=== Use of Tabs
+=== Using Tabs
 
 The standard //tab// width is 8 spaces. The editor assumes tab=8 for most
 files. However, it is more convenient when editing a program for a tab to equal
 the amount of space that you like to indent.  Therefore you will find that tabs
-are set to 4 when you edit Euphoria files (or .c, or .h or .bas files). The
+are set to four when you edit Euphoria files (or .c, or .h or .bas files). The
 editor converts from tab=8 to tab=4 when reading your //program// file, and
 converts back to tab=8 when you save the file. Thus your file remains
-compatible with the tab=8 world. **If you would
-like to choose a different number of spaces to indent**, change the line at the
-top of ##ed.ex## that says "##constant PROG_INDENT = 4##".
+compatible with the tab=8 world.
+
+If you would like to choose a different number of spaces to indent, change the line at the
+top of ##edx.ex## that says "##constant PROG_INDENT = 4##".
 
 === Long Lines
 
 Lines that extend beyond the right edge of the screen are marked with an
  //inverse video// character in the 80th column. This warns you that
- there is more text "out there" that you can't see. You can move the cursor
+ there is more text "out there" that you can not see. You can move the cursor
 beyond the 80th column. The screen will scroll left or right so the cursor
 position is always visible.
 
 === Maximum File Size
 
-Like any Euphoria program, ##ed## can access all the memory on your machine.
+Like any Euphoria program, ##edx## can access all the memory on your machine.
 It can edit huge files, and unless disk swapping occurs, most operations will
 be very fast.
 
 === Non-text Files
 
-##ed## is designed for editing pure text files, although you can use it to
-view other files. As ##ed## reads in a file, it replaces certain non-printable
-characters (less than ASCII 14) with ASCII 254 - small square. //If you try to
-save a non-text file you will be warned about this.// Since ##ed## opens all
+##edx## is designed for editing pure text files, although you can use it to
+view other files. As ##edx## reads in a file, it replaces certain non-printable
+characters (less than ASCII 14) with ASCII 254 ~-- a small square. //If you try to
+save a non-text file you will be warned about this.// Since ##edx## opens all
 files as "text" files, a //control-z// character (26) embedded in a file will
-appear to ed to be the //end of the file//.
+appear to ##edx## to be the //end of the file//.
 
 === Line Terminator
 
-The end-of-line terminator on Linux/FreeBSD/OSX/OPENBSD/NETBSD
-is simply ##\n##. On Windows, text files have lines ending with ##\r\n##.
-If you copy a Windows file to Linux/FreeBSD and try to modify it, **ed** will 
+The end-of-line terminator on //Unix//is simply ##\n##. On //Windows// text files have lines ending with ##\r\n##.
+If you copy a //Windows// file to //Unix//  and try to modify it, **edx** will 
 give you a
 choice of either keeping the ##\r\n## terminators, or saving the file with
 ##\n## terminators.
 
-=== Source Code
+=== Source-Code
 
-The complete source code to this editor is in ##bin\ed.ex## and 
-##bin\syncolor.e##.
-You are welcome to make improvements. There is a section at the top of ##ed.ex##
-containing "user-modifiable" configuration parameters that you can adjust. The
+The complete source code to this editor is in ##bin\edx.ex## and 
+##bin\syncolor.e## .
+You are welcome to make improvements. There is a section at the top of ##edx.ex##
+containing //user-modifiable// configuration parameters that you can adjust. The
 colors and the cursor size may need adjusting for some operating environments.
 
 

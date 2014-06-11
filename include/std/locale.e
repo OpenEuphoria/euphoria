@@ -38,17 +38,17 @@ object def_lang = 0
 object lang_path = 0
 
 --****
--- === Message translation functions
+-- === Message Translation Functions
 --
 
 --**
--- Set the language path.
+-- sets the language path.
 --
 -- Parameters:
 -- 		# ##pp## : an object, either an actual path or an atom.
 --
 -- Comments:
---	When the language path is not set, and it is unset by default, [[:set]]() does not load any language file.
+--	When the language path is not set, and it is unset by default, [[:set]] does not load any language file.
 --
 -- See Also:
 --		[[:set]]
@@ -58,7 +58,7 @@ public procedure set_lang_path(object pp)
 end procedure
 
 --**
--- Get the language path.
+-- gets the language path.
 --
 -- Returns:
 -- 		An **object**, the current language path.
@@ -71,14 +71,14 @@ public function get_lang_path()
 end function
 
 --**
--- Load a language file.
+-- loads a language file.
 --
 -- Parameters:
 -- 		# ##filename## : a sequence, the name of the file to load. If no file
---                      extension is supplied, then ".lng" is used.
+--                      extension is supplied, then ##".lng"## is used.
 --
 -- Returns:
---	A language **map**, if successful. This is to be used when calling [[:translate]]().
+--	A language **map**, if successful. This is to be used when calling [[:translate]].
 --
 -- If the load fails it returns a zero.
 --
@@ -87,9 +87,9 @@ end function
 -- or translations. Note that leading whitespace is ignored on all lines except 
 -- continuation lines.
 --
--- * **Comments** are lines that begin with a ~# character and extend to the end of the line.
--- * **Empty Lines** are ignored.
--- * **Translations** have two forms ...
+-- * //Comments// are lines that begin with a ##~### character and extend to the end of the line.
+-- * //Empty Lines// are ignored.
+-- * //Translations// have two forms.
 -- 
 -- {{{
 -- keyword translation_text
@@ -98,13 +98,13 @@ end function
 -- {{{
 -- keyphrase = translation_text
 -- }}}
--- In which the 'keyphrase' is anything up to the first '=' symbol.
+-- In which the 'keyphrase' is anything up to the first ##'='## symbol.
 --
 -- It is possible to have the translation text span multiple lines. You do this by 
--- having '&' as the last character of the line. These are placed by newline characters
+-- having ##'&'## as the last character of the line. These are placed by newline characters
 -- when loading.
 --
--- Example:
+-- Example 1:
 --{{{
 --# Example translation file
 --#
@@ -206,12 +206,12 @@ public function lang_load(sequence filename)
 end function
 
 --**
--- Sets the default language (translation) map
+-- sets the default language (translation) map.
 --
 -- Parameters:
--- # ##langmap## : A value returned by [[:lang_load]](), or zero to remove any default map.
+-- # ##langmap## : A value returned by [[:lang_load]], or zero to remove any default map.
 -- 
--- Example:
+-- Example 1:
 -- <eucode>
 --   set_def_lang( lang_load("appmsgs") )
 -- </eucode>
@@ -225,7 +225,7 @@ public procedure set_def_lang( object langmap )
 end procedure
 
 --**
--- Gets the default language (translation) map
+-- gets the default language (translation) map.
 --
 -- Parameters: 
 -- none.
@@ -233,7 +233,7 @@ end procedure
 -- Returns:
 -- An **object**, a language map, or zero if there is no default language map yet.
 -- 
--- Example:
+-- Example 1:
 -- <eucode>
 --   object langmap = get_def_lang()
 -- </eucode>
@@ -243,14 +243,14 @@ public function get_def_lang( )
 end function
 
 --**
--- Translates a word, using the current language file.
+-- translates a word, using the current language file.
 --
 -- Parameters:
 -- 		# ##word## : a sequence, the word to translate.
---      # ##langmap## : Either a value returned by [[:lang_load]]() or zero to use the default language map
+--      # ##langmap## : Either a value returned by [[:lang_load]] or zero to use the default language map
 -- 		# ##defval## : a object. The value to return if the word cannot be translated.
 --                              Default is "". If ##defval## is ##PINF## then the ##word## is returned
---                              if it can't be translated.
+--                              if it can not be translated.
 --      # ##mode## : an integer. If zero (the default) it uses ##word## as the keyword and returns
 --                              the translation text. If not zero it uses ##word##
 --                              as the translation and returns the keyword.
@@ -305,28 +305,28 @@ public function translate(sequence word, object langmap = 0, object defval="", i
 end function
 
 --**
--- Returns a formatted string with automatic translation performed on the parameters.
+-- returns a formatted string with automatic translation performed on the parameters.
 --
 -- Parameters:
--- # ##fmt## : A sequence. Contains the formatting string. see [[:printf]]() for details.
+-- # ##fmt## : A sequence. Contains the formatting string. See [[:printf]] for details.
 -- # ##data## : A sequence. Contains the data that goes into the formatted result. see [[:printf]] for details.
 -- # ##langmap## : An object. Either 0 (the default) to use the default language maps, or
---                the result returned from [[:lang_load]]() to specify a particular
+--                the result returned from [[:lang_load]] to specify a particular
 --                language map.
 --
 -- Returns:
 -- A **sequence**, the formatted result.
 --
 -- Comments:
--- This works very much like the [[:sprintf]]() function. The difference is that the ##fmt## sequence
+-- This works very much like the [[:sprintf]] function. The difference is that the ##fmt## sequence
 -- and sequences contained in the ##data## parameter are [[:translate | translated ]] before 
 -- passing them to [[:sprintf]]. If an item has no translation, it remains unchanged.
 --
 -- Further more, after the translation pass, if the result text begins with {{{"__"}}},
 --  the {{{"__"}}} is removed. 
--- This method can be used when you do not want an item to be translated.
+-- This function can be used when you do not want an item to be translated.
 --
--- Examples:
+-- Example 1:
 -- <eucode>
 -- -- Assuming a language has been loaded and
 -- --   "greeting" translates as '%s %s, %s'
@@ -370,8 +370,8 @@ ifdef WINDOWS then
 		lib2 = open_dll("KERNEL32.DLL"),
 		f_strfmon = define_c_func(lib2, "GetCurrencyFormatA", {I, I, P, P, P, I}, I),
 		f_strfnum = define_c_func(lib2, "GetNumberFormatA", {I, I, P, P, P, I}, I),
-		f_setlocale = define_c_func(lib, "setlocale", {I, P}, P),
-		f_strftime = define_c_func(lib, "strftime", {P, I, P, P}, I),
+		f_setlocale = define_c_func(lib, "+setlocale", {I, P}, P),
+		f_strftime = define_c_func(lib, "+strftime", {P, I, P, P}, I),
 		LC_ALL         = 0,
 	--	LC_COLLATE     = 1,
 	--	LC_CTYPE       = 2,
@@ -395,10 +395,9 @@ ifdef WINDOWS then
 elsifdef LINUX then
 	constant
 		lib = dll:open_dll(""),
-		f_strfmon = dll:define_c_func(lib, "strfmon", {P, L, P, dll:C_DOUBLE}, L),
-		f_strfnum = -1,
 		f_setlocale = dll:define_c_func(lib, "setlocale", {I, P}, P),
 		f_strftime = dll:define_c_func(lib, "strftime", {P, L, P, P}, L),
+		f_strfnum = -1,
 		LC_ALL      = 6,
 	--	LC_CTYPE    = 0,
 		LC_NUMERIC  = 1,
@@ -406,6 +405,34 @@ elsifdef LINUX then
 	--	LC_COLLATE  = 3,
 		LC_MONETARY = 4,
 	--	LC_MESSAGES = 5,
+		$
+	ifdef ARM then
+		include std/convert.e
+		-- ugly hack..this is a variadic function, and we pass a double,
+		-- which doesn't work with the ARM C calling implementation
+		constant
+			f_strfmon = dll:define_c_func(lib, "strfmon", {P, L, P, L, C_ULONG, C_ULONG}, L),
+			$
+	elsedef
+		constant
+			f_strfmon = dll:define_c_func(lib, "strfmon", {P, L, P, dll:C_DOUBLE}, L),
+			$
+	end ifdef
+	
+elsifdef OSX then
+	constant
+		lib = dll:open_dll("libc.dylib"),
+		f_strfmon = dll:define_c_func(lib, "strfmon", {P, I, P, dll:C_DOUBLE}, I),
+		f_strfnum = -1,
+		f_setlocale = dll:define_c_func(lib, "setlocale", {I, P}, P),
+		f_strftime = dll:define_c_func(lib, "strftime", {P, I, P, P}, I),
+		LC_ALL      = 0,
+	--	LC_COLLATE  = 1,
+	-- 	LC_CTYPE    = 2,
+		LC_MONETARY = 3,
+		LC_NUMERIC  = 4,
+	--	LC_TIME     = 5,
+	--	LC_MESSAGES = 6,
 		$
 
 elsifdef BSD then
@@ -424,22 +451,6 @@ elsifdef BSD then
 	--	LC_MESSAGES = 6,
 		$
 
-elsifdef OSX then
-	constant
-		lib = dll:open_dll("libc.dylib"),
-		f_strfmon = dll:define_c_func(lib, "strfmon", {P, I, P, dll:C_DOUBLE}, I),
-		f_strfnum = -1,
-		f_setlocale = dll:define_c_func(lib, "setlocale", {I, P}, P),
-		f_strftime = dll:define_c_func(lib, "strftime", {P, I, P, P}, I),
-		LC_ALL      = 0,
-	--	LC_COLLATE  = 1,
-	-- 	LC_CTYPE    = 2,
-		LC_MONETARY = 3,
-		LC_NUMERIC  = 4,
-	--	LC_TIME     = 5,
-	--	LC_MESSAGES = 6,
-		$
-	
 elsedef
 	constant
 		lib = -1,
@@ -459,11 +470,12 @@ elsedef
 
 end ifdef
 
+
 --****
--- === Time/Number Translation
+-- === Time and Number Translation
 
 --**
--- Set the computer locale, and possibly load appropriate translation file.
+-- sets the computer locale, and possibly loads an appropriate translation file.
 --
 -- Parameters:
 --		# ##new_locale## : a sequence representing a new locale.
@@ -472,16 +484,16 @@ end ifdef
 --		An **integer**, either 0 on failure or 1 on success.
 --
 -- Comments:
--- Locale strings have the following format: xx_YY or xx_YY.xyz .
--- The xx part refers to a culture, or main language/script. For instance, "en" refers to 
--- English, "de" refers to German, and so on. For some language, a script may be specified, 
--- like in "mn_Cyrl_MN" (mongolian in cyrillic transcription).
+-- Locale strings have the following format: ##xx_YY## or ##xx_YY.xyz## .
+-- The ##xx## part refers to a culture, or main language or script. For instance, ##"en"## refers to 
+-- English, ##"de"## refers to German, and so on. For some languages, a script may be specified, 
+-- like ##"mn_Cyrl_MN"## (Mongolian in cyrillic transcription).
 --
--- The YY part refers to a subculture, or variant, of the main language. For instance, "fr_FR" 
--- refers to metropolitan France, while "fr_BE" refers to the variant spoken in Wallonie, the 
+-- The ##YY## part refers to a subculture, or variant, of the main language. For instance, ##"fr_FR"## 
+-- refers to metropolitan France, while ##"fr_BE"## refers to the variant spoken in Wallonie, the 
 -- French speaking region of Belgium.
 --
--- The optional .xyz part specifies an encoding, like .utf8 or .1252 . This is required in some cases.
+-- The optional ##.xyz## part specifies an encoding, like ##.utf8## or ##.1252## . This is required in some cases.
 
 public function set(sequence new_locale)
 	atom lAddr_localename
@@ -510,7 +522,7 @@ public function set(sequence new_locale)
 end function
 
 --**
--- Get current locale string
+-- gets the current locale string.
 --
 -- Returns:
 --		A **sequence**, a locale string.
@@ -539,7 +551,7 @@ public function get()
 end function
 
 --**
--- Converts an amount of currency into a string representing that amount.
+-- converts an amount of currency into a string representing that amount.
 --
 -- Parameters:
 --   # ##amount## : an atom, the value to write out.
@@ -565,7 +577,13 @@ public function money(object amount)
 		ifdef UNIX then
 			pResult = machine:allocate(4 * 160, 1)
 			pTmp = machine:allocate_string("%n", 1)
-			c_func(f_strfmon, {pResult, 4 * 160, pTmp, amount})
+			ifdef ARM then
+				sequence f = atom_to_float64( amount )
+				c_func(f_strfmon, {pResult, 4 * 160, pTmp, 0,bytes_to_int( f[1..4] ),  bytes_to_int( f[5..8] ) })
+			elsedef
+				c_func(f_strfmon, {pResult, 4 * 160, pTmp, amount})
+			end ifdef
+			
 		elsifdef WINDOWS then
 			pResult = machine:allocate(4 * 160, 1)
 			pTmp = machine:allocate_string(sprintf("%.8f", {amount}), 1)
@@ -581,7 +599,7 @@ public function money(object amount)
 end function
 
 --**
--- Converts a number into a string representing that number.
+-- converts a number into a string representing that number.
 --
 -- Parameters:
 --   # ##num## : an atom, the value to write out.
@@ -610,7 +628,12 @@ public function number(object num)
 			else
 				pTmp = machine:allocate_string("%!n")
 			end if
-			c_func(f_strfmon, {pResult, 4 * 160, pTmp, num})
+			ifdef ARM then
+				sequence f = atom_to_float64( num )
+				c_func(f_strfmon, {pResult, 4 * 160, pTmp, 0,  bytes_to_int( f[1..4] ), bytes_to_int( f[5..8] ) })
+			elsedef
+				c_func(f_strfmon, {pResult, 4 * 160, pTmp, num})
+			end ifdef
 		else
 			return text:format("[,,]", num)
 		end if
@@ -698,7 +721,7 @@ function mk_tm_struct(datetime:datetime dtm)
 end function
 
 --**
--- Formats a date according to current locale.
+-- formats a date according to current locale.
 --
 -- Parameters:
 --   # ##fmt## : A format string, as described in datetime:[[:format]]
@@ -715,7 +738,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---   datetime:[[:format]]
+--   [[:datetime:format]]
 --
 
 public function datetime(sequence fmt, datetime:datetime dtm)
@@ -741,30 +764,30 @@ public function datetime(sequence fmt, datetime:datetime dtm)
 end function
 
 --**
--- Get the text associated with the message number in the requested locale.
+-- gets the text associated with the message number in the requested locale.
 --
 -- Parameters:
 --   # ##MsgNum## : An integer. The message number whose text you are trying to get.
---   # ##LocalQuals## : A sequence. Zero or more locale codes. Default is {}.
+--   # ##LocalQuals## : A sequence. Zero or more locale codes. Default is ##{}##.
 --   # ##DBBase##: A sequence. The base name for the database files containing the
---                 locale text strings. The default is "teksto".
+--                 locale text strings. The default is ##"teksto"##.
 --
 -- Returns:
 -- A string **sequence**, the text associated with the message number and locale.\\
 -- The **integer** zero, if associated text can not be found for any reason.
 --
 -- Comments:
--- * This first scans the database(s) linked to the locale codes supplied.
--- * The database name for each locale takes the format of "<DBBase>_<Locale>.edb"
--- so if the default DBBase is used, and the locales supplied are {"enus", "enau"}
--- the databases scanned are "teksto_enus.edb" and "teksto_enau.edb".
--- The database table name searched is "1" with the key being the message number,
+-- * This first scans the database or databases linked to the locale codes supplied.
+-- * The database name for each locale takes the format of ##"<DBBase>_<Locale>.edb"##
+-- so if the default ##DBBase## is used, and the locales supplied are ##{"enus", "enau"}##
+-- the databases scanned are ##"teksto_enus.edb"## and ##"teksto_enau.edb"##.
+-- The database table name searched is ##"1"## with the key being the message number,
 -- and the text is the record data.
--- * If the message is not found in these databases (or the databases don't exist)
--- a database called "<DBBase>.edb" is searched. Again the table name is "1" but
--- it first looks for keys with the format {<locale>,msgnum} and failing that it
--- looks for keys in the format {"", msgnum}, and if that fails it looks for a
--- key of just the msgnum.
+-- * If the message is not found in these databases (or the databases do not exist)
+-- a database called ##"<DBBase>.edb"## is searched. Again the table name is ##"1"## but
+-- it first looks for keys with the format ##{<locale>,msgnum}## and failing that it
+-- looks for keys in the format ##{"", msgnum}##, and if that fails it looks for a
+-- key of just the ##msgnum##.
 --
 
 public function get_text(integer MsgNum, sequence LocalQuals = {}, sequence DBBase = "teksto")

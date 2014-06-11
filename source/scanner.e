@@ -13,7 +13,11 @@ include std/filesys.e
 include std/get.e
 include std/hash.e
 include std/machine.e
-include std/scinot.e
+ifdef EU_4_0 then
+	include scinot.e
+elsedef
+	include std/scinot.e
+end ifdef
 include std/search.e
 include std/sequence.e
 include std/text.e
@@ -32,7 +36,7 @@ include coverage.e
 include block.e
 
 ifdef EU4_0 then
-	with define E32
+	with define BITS32
 end ifdef
 
 constant INCLUDE_LIMIT = 30   -- maximum depth of nested includes
@@ -383,6 +387,10 @@ export procedure read_line()
 		ThisLine = -1
 	else
 		ThisLine = gets(src_file)
+		if sequence(ThisLine) and ends( {13,10}, ThisLine ) then
+			ThisLine = remove(ThisLine, length(ThisLine))
+			ThisLine[$] = 10
+		end if
 	end if
 	if atom(ThisLine) then
 		ThisLine = {END_OF_FILE_CHAR}
@@ -979,14 +987,14 @@ export function IncludePop()
 	return TRUE
 end function
 
-ifdef E32 or EU4_0 then
+ifdef BITS32 or EU4_0 then
 	constant
 		MAXCHK2  = 0x1FFFFFFF,
 		MAXCHK8  = 0x07FFFFFF,
 		MAXCHK10 = 0x06666665,
 		MAXCHK16 = 0x03FFFFFF,
 		$
-elsifdef E64 then
+elsifdef BITS64 then
 	constant
 		MAXCHK2  = 0x1FFFFFFF_FFFFFFFD,
 		MAXCHK8  = 0x07FFFFFF_FFFFFFF7,
@@ -1001,10 +1009,13 @@ constant common_int_text = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "1
 constant common_ints     = { 0,   1,   2,   3,   4,   5,   6,   7,   8,   9,   10,   11,   12,   13,   20,   50,   100,   1000 }
 function MakeInt(sequence text, integer nBase = 10)
 -- make a non-negative integer out of a string of digits
-	integer num
+	ifdef BITS32 then
+		atom num, maxchk
+	elsedef
+		integer num, maxchk
+	end ifdef
 	atom fnum
 	integer digit
-	integer maxchk
 	
 	-- Quick scan for common integers
 	switch nBase do
@@ -1171,9 +1182,9 @@ function my_sscanf(sequence yytext)
 
 	-- TODO need to find a way to error check this.
 	if find( 'e', yytext ) or find( 'E', yytext ) then
-		ifdef E32 then
+		ifdef BITS32 then
 			return scientific_to_atom( yytext, DOUBLE )
-		elsifdef E64 then
+		elsifdef BITS64 then
 			return scientific_to_atom( yytext, EXTENDED )
 		elsedef
 			InternalErr( 351, "Scanning scientific notation in my_sscanf" )
@@ -1465,7 +1476,8 @@ end function
 
 export function Scanner()
 -- The scanner main routine: returns a lexical token
-	integer ch, i, sp, prev_Nne
+	integer ch, sp, prev_Nne
+	atom i
 	integer pch
 	integer cline
 	sequence yytext, namespaces  -- temporary buffer for a token
@@ -1775,7 +1787,7 @@ export function Scanner()
 			d = my_sscanf(yytext)
 			if sequence(d) then
 				CompileErr(121)
-			elsif is_int and d <= MAXINT_DBL then
+			elsif is_int and d <= TMAXINT_DBL then
 				return {ATOM, NewIntSym(d)}  -- 1 to 1.07 billion
 			else
 				return {ATOM, NewDoubleSym(d)}
@@ -1848,7 +1860,7 @@ export function Scanner()
 		elsif class = NUMBER_SIGN then
 			i = 0
 			is_int = -1
-			while i < MAXINT/32 do
+			while i < TMAXINT/32 do
 				ch = getch()
 				if char_class[ch] = DIGIT then
 					if ch != '_' then
@@ -1881,8 +1893,8 @@ export function Scanner()
 					CompileErr(97)
 				end if
 			else
-				if i >= MAXINT/32 then
-					d = i
+				d = i
+				if i >= TMAXINT/32 then
 					is_int = FALSE
 					while TRUE do
 						ch = getch()  -- eventually END_OF_FILE_CHAR or new-line
@@ -1906,7 +1918,7 @@ export function Scanner()
 				if is_int and is_integer(i) then
 					return {ATOM, NewIntSym(i)}
 				else
-					if d <= MAXINT_DBL then            -- d is always >= 0
+					if d <= TMAXINT_DBL then            -- d is always >= 0
 						return {ATOM, NewIntSym(d)}
 					else
 						return {ATOM, NewDoubleSym(d)}

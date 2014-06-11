@@ -6,12 +6,14 @@
 
 namespace random
 
+include std/types.e
+
 --****
 -- Signature:
 -- <built-in> function rand(object maximum)
 --
 -- Description:
---   Return a random integral value.
+--   returns a random integral value.
 --
 -- Parameters:
 -- 		# ##maximum## : an atom, a cap on the value to return.
@@ -21,10 +23,10 @@ namespace random
 --
 -- Comments:
 --	* The minimum value of ##maximum## is 1.
---  * The maximum value that can possibly be returned is #FFFFFFFF (4_294_967_295)
+--  * The maximum value that can possibly be returned is ###FFFFFFFF## (##4_294_967_295##)
 --  * This function may be applied to an atom or to all elements of a sequence.
 --	* In order to get reproducible results from this function, you should call 
---   [[:set_rand]]() with a reproducible value prior.
+--   [[:set_rand]] with a reproducible value prior.
 --
 -- Example 1:
 --   <eucode>
@@ -35,9 +37,8 @@ namespace random
 -- See Also:
 -- 		[[:set_rand]], [[:ceil]]
 
-
 --**
--- Return a random integer from a specified inclusive integer range.
+-- returns a random integer from a specified inclusive integer range.
 --
 -- Parameters:
 --		# ##lo## : an atom, the lower bound of the range
@@ -49,7 +50,7 @@ namespace random
 -- Comments:
 --   This function may be applied to an atom or to all elements of a sequence.
 --	 In order to get reproducible results from this function, you should 
---   call ##set_rand##() with a reproducible value prior.
+--   call ##set_rand## with a reproducible value prior.
 --
 -- Example 1:
 -- <eucode>
@@ -67,8 +68,8 @@ public function rand_range(atom lo, atom hi)
 		hi = lo
 		lo = temp
 	end if
-	
-	if not integer(lo) or not integer(hi) then
+
+	if not t_integer32( lo ) or not t_integer32( hi ) then
    		hi = rnd() * (hi - lo)
    	else
 		lo -= 1
@@ -82,7 +83,7 @@ constant M_SET_RAND = 35,
          M_GET_RAND = 98
 
 --**
--- Return a random floating point number in the range 0 to 1.
+-- returns a random floating point number in the range 0 to 1.
 --
 -- Parameters:
 --		None.
@@ -92,7 +93,7 @@ constant M_SET_RAND = 35,
 --
 -- Comments:
 --	 In order to get reproducible results from this function, you should
--- call ##set_rand##() with a reproducible value prior to calling this.
+-- call ##set_rand## with a reproducible value prior to calling this.
 --
 -- Example 1:
 -- <eucode>
@@ -122,7 +123,7 @@ public function rnd()
 end function
 
 --**
--- Return a random floating point number in the range 0 to less than 1.
+-- returns a random floating point number in the range 0 to less than 1.
 --
 -- Parameters:
 --		None.
@@ -132,7 +133,7 @@ end function
 --
 -- Comments:
 --	 In order to get reproducible results from this function, you should
--- call ##set_rand##() with a reproducible value prior to calling this.
+-- call ##set_rand## with a reproducible value prior to calling this.
 --
 -- Example 1:
 -- <eucode>
@@ -155,7 +156,7 @@ public function rnd_1()
 end function
 
 --**
--- Reset the random number generator.
+-- resets the random number generator.
 --
 -- Parameters:
 -- 		# ##seed## : an object. The generator uses this initialize itself for the next
@@ -164,22 +165,22 @@ end function
 --                    other sort of sequence.
 --
 -- Comments:
--- * Starting from a ##seed##, the values returned by ##rand##() are
+-- * Starting from a ##seed##, the values returned by ##rand## are
 -- reproducible. This is useful for demos and stress tests based on random
--- data. Normally the numbers returned by the ##rand##() function are totally
+-- data. Normally the numbers returned by the ##rand## function are totally
 -- unpredictable, and will be different each time you run your program.
 -- Sometimes however you may wish to repeat the same series of numbers,
 -- perhaps because you are trying to debug your program, or maybe you want
--- the ability to generate the same output (e.g. a random picture) for your
+-- the ability to generate the same output (for example random picture) for your
 -- user upon request.  
 -- * Internally there are actually two seed values. 
--- ** When ##set_rand()## is called with a single integer or atom, the two 
+-- ** When ##set_rand## is called with a single integer or atom, the two 
 --   internal seeds are derived from the parameter. 
--- ** When ##set_rand()## is called with a sequence of exactly two integers/atoms
+-- ** When ##set_rand## is called with a sequence of exactly two integers or atoms
 --    the internal seeds are set to the parameter values.
--- ** When ##set_rand()## is called with an empty sequence, the internal seeds are
+-- ** When ##set_rand## is called with an empty sequence, the internal seeds are
 --   set to random values and are unpredictable. This is how to reset the generator.
--- ** When ##set_rand()## is called with any other sequence, the internal seeds are
+-- ** When ##set_rand## is called with any other sequence, the internal seeds are
 -- set based on the length of the sequence and the hashed value of the sequence.
 -- * Aside from an empty ##seed## parameter, this sets the generator to a known state
 -- and the random numbers generated after come in a predicable order, though they still
@@ -215,7 +216,7 @@ public procedure set_rand(object seed)
 end procedure
 
 --**
--- Retrieves the current values of the random generator's seeds.
+-- retrieves the current values of the random generator's seeds.
 --
 -- Returns:
 --    a sequence. A 2-element sequence containing the values of the two internal seeds.
@@ -242,7 +243,7 @@ public function get_rand()
 end function
 
 --**
--- Simulates the probability of a desired outcome.
+-- simulates the probability of a desired outcome.
 --
 -- Parameters:
 -- # ##my_limit## : an atom. The desired chance of something happening.
@@ -279,7 +280,7 @@ end function
 
 
 --**
--- Simulates the probability of a dice throw.
+-- simulates the probability of a dice throw.
 --
 -- Parameters:
 -- # ##desired## : an object. One or more desired outcomes.
@@ -290,7 +291,7 @@ end function
 --    the face number that was rolled.
 --
 -- Comments:
--- The minimum number of sides is 2 and there is no maximum.
+-- The minimum number of sides is two and there is no maximum.
 --
 -- Example 1:
 -- <eucode>
@@ -323,11 +324,7 @@ public function roll(object desired, integer sides = 6)
 end function
 
 --**
--- Selects a set of random samples from a population set. This can be done with either
--- the "with-replacement" or "without-replacement" methods. When using the "with-replacement"
--- method, after each sample is taken it is returned to the population set so that it
--- could possible be taken again. The "without-replacement" method does not return the sample so
--- these items can only ever be chosen once.
+-- selects a set of random samples from a population set.
 --
 -- Parameters:
 -- # ##population## : a sequence. The set of items from which to take a sample.
@@ -345,7 +342,13 @@ end function
 --  (in the original order).
 --
 -- Comments:
--- * If ##sample_size## is less than 1, an empty set is returned.
+-- Selects a set of random samples from a population set. This can be done with either
+-- the "with-replacement" or "without-replacement" methods. When using the "with-replacement"
+-- method, after each sample is taken it is returned to the population set so that it
+-- could possible be taken again. The "without-replacement" method does not return the sample so
+-- these items can only ever be chosen once.
+--
+-- * If ##sample_size## is less than ##1## , an empty set is returned.
 -- * When using "without-replacement" method, if ##sample_size## is greater than
 --   or equal to the population count, the entire population set is returned,
 --   but in a random order.
@@ -353,8 +356,10 @@ end function
 --   integer, thus it is possible to return more samples than there are items in
 --   the population set as items can be chosen more than once.
 --
--- Example 1 (without replacement):
+-- Example 1:
 -- <eucode>
+-- -- without replacement
+--
 -- set_rand("example")
 -- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", 1)})  
 --      --> "t"
@@ -368,8 +373,10 @@ end function
 --     --> "omntrqsbjguaikzywvxflpedc"
 -- </eucode>
 --
--- Example 2 (with replacement):
+-- Example 2:
 -- <eucode>
+-- -- with replacement
+--
 -- set_rand("example")
 -- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", 1, -1)})  
 --      --> "t"

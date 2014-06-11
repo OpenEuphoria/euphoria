@@ -44,16 +44,16 @@ constant URLs = { -- feel free to add or delete your own. They need not be news.
 	"http://www.juancole.com/",
 	"http://www.abc.net.au/",
 	"http://abcnews.go.com/",
-	"http://english.aljazeera.net/HomePage",
-	"http://news.bbc.co.uk/",
+	"http://www.aljazeera.com/",
+	"http://www.bbc.co.uk/news/",
 	"http://www.cbsnews.com/",
-	"http://cnn.com/",
-	"http://www.democracynow.org/index.pl",
+	"http://www.cnn.com/",
+	"http://www.democracynow.org/",
 	"http://www.foxnews.com/",
-	"http://www.guardian.co.uk/",
-	"http://www.msnbc.msn.com/",
+	"http://www.guardiannews.com/",
+	"http://www.nbcnews.com/",
 	"http://www.reuters.com/",
-	"http://www.whatreallyhappened.com/",
+	"http://whatreallyhappened.com/",
 	"http://news.yahoo.com/"
 }
 

@@ -47,6 +47,31 @@ include std/text.e
 constant TRUE = 1,
 		 FALSE = 0
 
+ 
+    -- patch to fix Linux screen positioning
+procedure get_real_text_starting_position() 
+                sequence sss = "" 
+                integer ccc 
+                puts(1, 27&"[6n") 
+                while 1 do 
+                        ccc = get_key() 
+                        if ccc = 'R' then 
+                                exit 
+                        end if 
+                        if ccc != -1 then 
+                                sss &= ccc 
+                        end if 
+                end while 
+                sss = sss[3..$] 
+                sequence aa, bb 
+                aa = value(sss[1..find(';', sss)-1]) 
+                bb = value(sss[find(';', sss)+1..$]) 
+                position(aa[2], bb[2]) 
+end procedure 
+ifdef LINUX then 
+	get_real_text_starting_position() 
+end ifdef 
+
 -- special input characters
 constant CONTROL_B = 2,
 		 CONTROL_C = 3,
@@ -251,6 +276,8 @@ sequence buffer -- In-memory buffer where the file is manipulated.
 -- This is a sequence where each element is a sequence
 -- containing one line of text. Each line of text ends with '\n'
 
+sequence buffer_multi -- remember if the line ended with an open multiline token
+
 positive_int screen_length  -- number of lines on physical screen
 positive_int screen_width
 
@@ -318,6 +345,7 @@ boolean stop         -- indicates when to stop processing current buffer
 
 sequence kill_buffer -- kill buffer of deleted lines or characters
 kill_buffer = {}
+
 
 boolean adding_to_kill  -- TRUE if still accumulating deleted lines/chars
 
@@ -479,6 +507,32 @@ procedure set_absolute_position(natural window_line, positive_int column)
 	position(window_base + window_line, column)
 end procedure
 
+function get_multiline( integer bline )
+	if bline > 0 and bline < length( buffer_multi ) then
+		integer multi = buffer_multi[bline]
+		if not multiline_token( multi ) then
+			-- have to back up...
+			integer prev = bline - 1
+			while prev and not multiline_token( buffer_multi[prev] ) do
+				prev -= 1
+			end while
+			for re_line = prev + 1 to bline do
+				SyntaxColor( buffer[re_line], , get_multiline( re_line - 1 ) )
+				buffer_multi[re_line] = last_multiline_token()
+			end for
+			multi = buffer_multi[bline]
+		end if
+		return multi
+	end if
+	return 0
+end function
+
+procedure set_multiline( integer bline, multiline_token multi )
+	if bline > 0 and bline < length( buffer_multi ) then
+		buffer_multi[bline] = multi
+	end if
+end procedure
+
 procedure DisplayLine(buffer_line bline, window_line sline, boolean all_clear)
 -- display a buffer line on a given line on the screen
 -- if all_clear is TRUE then the screen area has already been cleared before getting here.
@@ -490,7 +544,8 @@ procedure DisplayLine(buffer_line bline, window_line sline, boolean all_clear)
 	set_absolute_position(sline, 1)
 	if multi_color then
 		-- color display
-		color_line = SyntaxColor(this_line)
+		color_line = SyntaxColor(this_line, ,get_multiline( bline - 1 ))
+		set_multiline( bline, last_multiline_token() )
 		last_pos = 0
 		
 		for i = 1 to length(color_line) do
@@ -623,6 +678,7 @@ function add_line(file_number file_no)
 	
 	line = convert_tabs(STANDARD_TAB_WIDTH, edit_tab_width, clean(line))
 	buffer = append(buffer, line)
+	buffer_multi &= -1
 	return TRUE
 end function
 
@@ -631,6 +687,7 @@ procedure new_buffer()
 	buffer_list &= 0 -- place holder for new buffer
 	buffer_number = length(buffer_list) 
 	buffer = {}
+	buffer_multi = {}
 end procedure
 
 procedure read_file(file_number file_no)
@@ -922,6 +979,12 @@ constant W_BUFFER_NUMBER = 1,
 		 W_WINDOW_LENGTH = 4,
 		 W_B_LINE = 11
 
+enum
+	B_BUFFER,
+	B_MODIFIED,
+	B_VERSION,
+	B_MULTILINE,
+	$
 procedure save_state()
 -- save current state variables for a window
 	window_list[window_number] = {buffer_number, buffer_version, window_base, 
@@ -929,7 +992,7 @@ procedure save_state()
 								  dot_e, control_chars, cr_removed, file_name, 
 								  b_line, b_col, s_line, s_col, s_shift, 
 								  edit_tab_width}
-	buffer_list[buffer_number] = {buffer, modified, buffer_version}
+	buffer_list[buffer_number] = {buffer, modified, buffer_version, buffer_multi}
 end procedure
 
 procedure restore_state(window_id w)
@@ -942,9 +1005,10 @@ procedure restore_state(window_id w)
 	window_number = w
 	buffer_number =  state[W_BUFFER_NUMBER]
 	buffer_info = buffer_list[buffer_number]
-	buffer = buffer_info[1]
-	modified = buffer_info[2]
-	buffer_version = buffer_info[3]
+	buffer         = buffer_info[B_BUFFER]
+	modified       = buffer_info[B_MODIFIED]
+	buffer_version = buffer_info[B_VERSION]
+	buffer_multi   = buffer_info[B_MULTILINE]
 	buffer_list[buffer_number] = 0 -- save space
 	
 	-- restore other variables
@@ -1050,7 +1114,7 @@ function delete_window()
 -- delete the current window    
 	boolean buff_in_use
 	
-	buffer_list[buffer_number] = {buffer, modified, buffer_version}
+	buffer_list[buffer_number] = {buffer, modified, buffer_version, buffer_multi}
 	window_list = window_list[1..window_number-1] & 
 				  window_list[window_number+1..length(window_list)]
 	buff_in_use = FALSE
@@ -1922,19 +1986,12 @@ procedure insert(char key)
 	sequence tail
 
 	set_modified()
-	tail = buffer[b_line][b_col..length(buffer[b_line])]
+	tail = buffer[b_line][b_col..$]
 	if key = CR or key = '\n' then
 		-- truncate this line and create a new line using tail
-		buffer[b_line] = buffer[b_line][1..b_col-1] & '\n'
-		
-		-- make room for new line:
-		buffer = append(buffer, 0)
-		for i = length(buffer)-1 to b_line+1 by -1 do
-			buffer[i+1] = buffer[i]
-		end for
-		
-		-- store new line
-		buffer[b_line+1] = tail
+		buffer[b_line] = head( buffer[b_line], b_col-1) & '\n'
+		buffer = eu:insert( buffer, tail, b_line + 1 )
+		buffer_multi = eu:insert( buffer_multi, -1, b_line + 1 )
 		
 		if s_line = window_length then
 			arrow_down()
@@ -1975,12 +2032,12 @@ procedure insert_string(sequence text)
 		if text[i] = CR or text[i] = '\n' then
 			insert(text[i])
 		else
-			buffer[b_line] = buffer[b_line][1..b_col-1] & text[i] &
-							 buffer[b_line][b_col..length(buffer[b_line])]
+			buffer[b_line] = splice( buffer[b_line], text[i], b_col )
 			b_col += 1
 			if i = length(text) then
 				DisplayLine(b_line, s_line, FALSE)
 			end if
+			
 		end if
 	end for
 	goto_line(save_line, save_col)
@@ -2039,8 +2096,7 @@ procedure try_auto_complete(char key)
 	end if
 	if key = CR then
 		if b_col >= first_non_blank then
-			buffer[b_line] = buffer[b_line][1..b_col-1] & leading_white &
-							 buffer[b_line][b_col..length(buffer[b_line])]
+			buffer[b_line] = eu:splice( buffer[b_line], leading_white, b_col )
 			insert(CR)
 			skip_white()
 		else
@@ -2062,9 +2118,8 @@ procedure insert_kill_buffer()
 		insert_string(kill_buffer)
 	else
 		-- inserting a sequence of lines
-		buffer = buffer[1..b_line - 1] &
-				 kill_buffer &
-				 buffer[b_line..length(buffer)]
+		buffer       = splice( buffer, kill_buffer, b_line )
+		buffer_multi = splice( buffer_multi, repeat( -1, length( kill_buffer ) ), b_line )
 		DisplayWindow(b_line, s_line)
 		b_col = 1
 		s_col = 1
@@ -2081,7 +2136,7 @@ procedure delete_line(buffer_line dead_line)
 	for i = dead_line to length(buffer)-1 do
 		buffer[i] = buffer[i+1]
 	end for
-	buffer = buffer[1..length(buffer)-1]
+	buffer = head( buffer, length(buffer)-1)
 	
 	x = dead_line - b_line + s_line
 	if window_line(x) then

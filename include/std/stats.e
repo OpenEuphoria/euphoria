@@ -12,17 +12,17 @@ include std/sort.e
 
 
 --**
--- Determines the k-th smallest value from the supplied set of numbers. 
+-- determines the k-th smallest value from the supplied set of numbers. 
 --
 -- Parameters:
 -- # ##data_set## : The list of values from which the smallest value is chosen.
 -- # ##ordinal_idx## : The relative index of the desired smallest value.
 --
 -- Returns:
--- A **sequence**, {The k-th smallest value, its index in the set}
+-- A **sequence**, ##{The k-th smallest value, its index in the set}##.
 --
 -- Comments: 
--- ##small##() is used to return a value based on its size relative to
+-- ##small## is used to return a value based on its size relative to
 -- all the other elements in the sequence. When ##index## is 1, the smallest index is returned. Use ##index = length(data_set)## to return the highest. 
 --
 -- If ##ordinal_idx## is less than one, or greater then length of ##data_set##,
@@ -60,7 +60,7 @@ public function small(sequence data_set, integer ordinal_idx)
 end function
 
 --**
--- Returns the largest of the data points that are atoms.
+-- returns the largest of the data points that are atoms.
 --
 -- Parameters:
 --   # ##data_set## : a list of 1 or more numbers among which you want the largest.
@@ -79,7 +79,7 @@ end function
 --   largest( {"just","text"} ) -- Ans: {}
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:range]]
 --
 public function largest(object data_set)
@@ -109,7 +109,7 @@ public function largest(object data_set)
 end function
 
 --**
--- Returns the smallest of the data points. 
+-- returns the smallest of the data points. 
 --
 -- Parameters:
 --   # ##data_set## : A list of 1 or more numbers for which you want the smallest.
@@ -117,7 +117,7 @@ end function
 --             elements are ignored.
 --
 -- Returns:
---   An **object**, either of:
+--   An **object**, either of~:
 -- * an atom (the smallest value) if there is at least one atom item in the set\\
 -- * ##{} ##if there //is// no largest value.
 --
@@ -130,7 +130,7 @@ end function
 --   ? smallest( {"just","text"} ) -- Ans: {}
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:range]]
 public function smallest(object data_set)
 	atom result_, temp_
@@ -159,13 +159,13 @@ public function smallest(object data_set)
 end function
 
 --**
--- Determines a number of //range// statistics for the data set. 
+-- determines a number of //range// statistics for the data set. 
 --
 -- Parameters:
 --   # ##data_set## : a list of 1 or more numbers for which you want the range data.
 --
 -- Returns:
---  A **sequence**, empty if no atoms were found, else like {Lowest, Highest, Range, Mid-range}
+--  A **sequence**, empty if no atoms were found, else like ##{Lowest, Highest, Range, Mid-range}## ,
 --
 -- Comments:
 -- Any sequence element in ##data_set## is ignored.
@@ -175,7 +175,7 @@ end function
 --   ? range( {7,2,8,5,6,6,4,8,6,16,3,3,4,1,8,"text"} ) -- Ans: {1, 16, 15, 8.5}
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:smallest]] [[:largest]]
 --
 public function range(object data_set)
@@ -228,11 +228,11 @@ public enum
 	ST_ALLNUM,
 	
    --** 
-   -- Any sub-sequences (eg. strings) in the supplied data are ignored.
+   -- Any sub-sequences (such as strings) in the supplied data are ignored.
 	ST_IGNSTR,
 	
    --** 
-   -- Any sub-sequences (eg. strings) in the supplied data are assumed to
+   -- Any sub-sequences (such as strings) in the supplied data are assumed to
    -- have the value zero.
 	ST_ZEROSTR,
 	
@@ -252,15 +252,15 @@ function massage(sequence data_set, object subseq_opt)
 end function
 
 --**
--- Returns the standard deviation based of the population. 
+-- returns the standard deviation based on the population. 
 --
 -- Parameters:
 -- # ##data_set## : a list of 1 or more numbers for which you want the estimated standard deviation.
--- # ##subseq_opt## : an object. When this is ST_ALLNUM (the default) it 
+-- # ##subseq_opt## : an object. When this is ##ST_ALLNUM## (the default) it 
 --  means that ##data_set## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences. See comments for details.
--- # ##population_type## : an integer. ST_SAMPLE (the default) assumes that ##data_set## is a random
--- sample of the total population. ST_FULLPOP means that ##data_set## is the
+-- # ##population_type## : an integer. ##ST_SAMPLE## (the default) assumes that ##data_set## is a random
+-- sample of the total population. ##ST_FULLPOP## means that ##data_set## is the
 -- entire population.
 --
 -- Returns:
@@ -268,7 +268,7 @@ end function
 --    An empty **sequence** means that there is no meaningful data to calculate from.
 --
 -- Comments:
--- ##stdev##() is a measure of how values are different from the average. 
+-- ##stdev## is a measure of how values are different from the average. 
 --
 -- The numbers in ##data_set## can either be the entire population of values or
 -- just a random subset. You indicate which in the ##population_type## parameter. By default
@@ -280,12 +280,13 @@ end function
 -- an number. If that is not the case then the function will crash. So it is
 -- important that if it can possibly contain sub-sequences that you tell this
 -- function what to do with them. Your choices are to ignore them or assume they
--- have the value zero. To ignore them, use ST_IGNSTR as the ##subseq_opt## parameter
--- value otherwise use ST_ZEROSTR. However, if you know that ##data_set## only
--- contains numbers use the default ##subseq_opt## value, ST_ALLNUM. 
+-- have the value zero. To ignore them, use ##ST_IGNSTR## as the ##subseq_opt## parameter
+-- value otherwise use ##ST_ZEROSTR##. However, if you know that ##data_set## only
+-- contains numbers use the default ##subseq_opt## value, ##ST_ALLNUM##. 
+--
 -- **Note** It is faster if the data only contains numbers.
 --
--- The equation for standard deviation is:
+-- The equation for standard deviation is~:
 -- {{{
 -- stdev(X) ==> SQRT(SUM(SQ(X{1..N} - MEAN)) / (N))
 -- }}}
@@ -300,7 +301,7 @@ end function
 -- ? stdev( {4,5,6,7,5,4,3,"text"}, 0, ST_FULLPOP )         -- Ans: 1.984313483
 -- </eucode>
 --
--- See also:
+-- See Also:
 --   [[:average]], [[:avedev]]
 --
 
@@ -339,15 +340,15 @@ public function stdev(sequence data_set, object subseq_opt = ST_ALLNUM, integer 
 end function
 
 --**
--- Returns the average of the absolute deviations of data points from their mean.
+-- returns the average of the absolute deviations of data points from their mean.
 --
 -- Parameters:
 -- # ##data_set## : a list of 1 or more numbers for which you want the mean of the absolute deviations.
--- # ##subseq_opt## : an object. When this is ST_ALLNUM (the default) it 
+-- # ##subseq_opt## : an object. When this is ##ST_ALLNUM## (the default) it 
 --  means that ##data_set## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences. See comments for details.
--- # ##population_type## : an integer. ST_SAMPLE (the default) assumes that ##data_set## is a random
--- sample of the total population. ST_FULLPOP means that ##data_set## is the
+-- # ##population_type## : an integer. ##ST_SAMPLE## (the default) assumes that ##data_set## is a random
+-- sample of the total population. ##ST_FULLPOP## means that ##data_set## is the
 -- entire population.
 --
 -- Returns:
@@ -355,7 +356,7 @@ end function
 --    An empty **sequence**, means that there is no meaningful data to calculate from.
 --
 -- Comments:
--- ##avedev##() is a measure of the variability in a data set. Its statistical
+-- ##avedev## is a measure of the variability in a data set. Its statistical
 -- properties are less well behaved than those of the standard deviation, which is
 -- why it is used less. 
 --
@@ -369,9 +370,10 @@ end function
 -- an number. If that is not the case then the function will crash. So it is
 -- important that if it can possibly contain sub-sequences that you tell this
 -- function what to do with them. Your choices are to ignore them or assume they
--- have the value zero. To ignore them, use ST_IGNSTR as the ##subseq_opt## parameter
--- value otherwise use ST_ZEROSTR. However, if you know that ##data_set## only
--- contains numbers use the default ##subseq_opt## value, ST_ALLNUM. 
+-- have the value zero. To ignore them, use ##ST_IGNSTR## as the ##subseq_opt## parameter
+-- value otherwise use ##ST_ZEROSTR##. However, if you know that ##data_set## only
+-- contains numbers use the default ##subseq_opt## value, ##ST_ALLNUM##.
+-- 
 -- **Note** It is faster if the data only contains numbers.
 --
 -- The equation for absolute average deviation is~:
@@ -395,7 +397,7 @@ end function
 --    --> Ans: 2.0859375
 -- </eucode>
 --
--- See also:
+-- See Also:
 --   [[:average]], [[:stdev]]
 --
 
@@ -437,11 +439,11 @@ public function avedev(sequence data_set, object subseq_opt = ST_ALLNUM, integer
 end function
 
 --**
--- Returns the sum of all the atoms in an object.
+-- returns the sum of all the atoms in an object.
 --
 -- Parameters:
 -- # ##data_set## : Either an atom or a list of numbers to sum.
--- # ##subseq_opt## : an object. When this is ST_ALLNUM (the default) it 
+-- # ##subseq_opt## : an object. When this is ##ST_ALLNUM## (the default) it 
 --  means that ##data_set## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences. See comments for details.
 --
@@ -449,16 +451,17 @@ end function
 --   An **atom**,  the sum of the set.
 --
 -- Comments: 
---   ##sum##() is used as a measure of the magnitude of a sequence of positive values.
+--   ##sum## is used as a measure of the magnitude of a sequence of positive values.
 --
 -- If the data can contain sub-sequences, such as strings, you need to let the
 -- the function know about this otherwise it assumes every value in ##data_set## is
 -- an number. If that is not the case then the function will crash. So it is
 -- important that if it can possibly contain sub-sequences that you tell this
 -- function what to do with them. Your choices are to ignore them or assume they
--- have the value zero. To ignore them, use ST_IGNSTR as the ##subseq_opt## parameter
--- value otherwise use ST_ZEROSTR. However, if you know that ##data_set## only
--- contains numbers use the default ##subseq_opt## value, ST_ALLNUM. 
+-- have the value zero. To ignore them, use ##ST_IGNSTR## as the ##subseq_opt## parameter
+-- value otherwise use ##ST_ZEROSTR##. However, if you know that ##data_set## only
+-- contains numbers use the default ##subseq_opt## value, ##ST_ALLNUM##.
+-- 
 -- **Note** It is faster if the data only contains numbers.
 --
 -- The equation is~:
@@ -472,7 +475,7 @@ end function
 --   ? sum( {7,2,8.5,6,6,-4.8,6,6,3.341,-8,"text"}, 0 ) -- Ans: 32.041
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:average]]
 
 public function sum(object data_set, object subseq_opt = ST_ALLNUM)
@@ -491,11 +494,11 @@ public function sum(object data_set, object subseq_opt = ST_ALLNUM)
 end function
 
 --**
--- Returns the count of all the atoms in an object.
+-- returns the count of all the atoms in an object.
 --
 -- Parameters:
 --   # ##data_set## : either an atom or a list.
--- # ##subseq_opt## : an object. When this is ST_ALLNUM (the default) it 
+-- # ##subseq_opt## : an object. When this is ##ST_ALLNUM## (the default) it 
 --  means that ##data_set## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences. See comments for details.
 --
@@ -507,9 +510,10 @@ end function
 -- an number. If that is not the case then the function will crash. So it is
 -- important that if it can possibly contain sub-sequences that you tell this
 -- function what to do with them. Your choices are to ignore them or assume they
--- have the value zero. To ignore them, use ST_IGNSTR as the ##subseq_opt## parameter
--- value otherwise use ST_ZEROSTR. However, if you know that ##data_set## only
--- contains numbers use the default ##subseq_opt## value, ST_ALLNUM. 
+-- have the value zero. To ignore them, use ##ST_IGNSTR## as the ##subseq_opt## parameter
+-- value otherwise use ##ST_ZEROSTR##. However, if you know that ##data_set## only
+-- contains numbers use the default ##subseq_opt## value, ##ST_ALLNUM##.
+-- 
 -- **Note** It is faster if the data only contains numbers.
 --
 -- Returns:
@@ -523,7 +527,7 @@ end function
 --   ? count( 5 ) -- Ans: 1
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:average]], [[:sum]]
 
 public function count(object data_set, object subseq_opt = ST_ALLNUM)
@@ -537,11 +541,11 @@ end function
 
 
 --**
--- Returns the average (mean) of the data points.
+-- returns the average (mean) of the data points.
 --
 -- Parameters:
 --   # ##data_set## : A list of 1 or more numbers for which you want the mean.
--- # ##subseq_opt## : an object. When this is ST_ALLNUM (the default) it 
+-- # ##subseq_opt## : an object. When this is ##ST_ALLNUM## (the default) it 
 --  means that ##data_set## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences. See comments for details.
 --
@@ -553,9 +557,9 @@ end function
 --
 -- Comments: 
 --
---   ##average##() is the theoretical probable value of a randomly selected item from the set.
+--   ##average## is the theoretical probable value of a randomly selected item from the set.
 --
--- The equation for average  is:
+-- The equation for average is~:
 --
 -- {{{
 -- average(X) ==> SUM( X{1..N} ) / N
@@ -566,9 +570,10 @@ end function
 -- an number. If that is not the case then the function will crash. So it is
 -- important that if it can possibly contain sub-sequences that you tell this
 -- function what to do with them. Your choices are to ignore them or assume they
--- have the value zero. To ignore them, use ST_IGNSTR as the ##subseq_opt## parameter
--- value otherwise use ST_ZEROSTR. However, if you know that ##data_set## only
--- contains numbers use the default ##subseq_opt## value, ST_ALLNUM. 
+-- have the value zero. To ignore them, use ##ST_IGNSTR## as the ##subseq_opt## parameter
+-- value otherwise use ##ST_ZEROSTR##. However, if you know that ##data_set## only
+-- contains numbers use the default ##subseq_opt## value, ##ST_ALLNUM##. 
+--
 -- **Note** It is faster if the data only contains numbers.
 --
 -- Example 1:
@@ -576,7 +581,7 @@ end function
 --   ? average( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"}, ST_IGNSTR ) -- Ans: 5.13333333
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:geomean]], [[:harmean]], [[:movavg]], [[:emovavg]]
 --
 public function average(object data_set, object subseq_opt = ST_ALLNUM)
@@ -594,11 +599,11 @@ public function average(object data_set, object subseq_opt = ST_ALLNUM)
 end function
 
 --**
--- Returns the geometric mean of the atoms in a sequence.
+-- returns the geometric mean of the atoms in a sequence.
 --
 -- Parameters:
 -- # ##data_set## : the values to take the geometric mean of.
--- # ##subseq_opt## : an object. When this is ST_ALLNUM (the default) it 
+-- # ##subseq_opt## : an object. When this is ##ST_ALLNUM## (the default) it 
 --  means that ##data_set## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences. See comments for details.
 --
@@ -609,7 +614,7 @@ end function
 --
 -- Comments:
 --
--- The geometric mean of ##N## atoms is the N-th root of their product. Signs are ignored.
+-- The geometric mean of ##N## atoms is the n-th root of their product. Signs are ignored.
 --
 -- This is useful to compute average growth rates.
 --
@@ -618,9 +623,10 @@ end function
 -- an number. If that is not the case then the function will crash. So it is
 -- important that if it can possibly contain sub-sequences that you tell this
 -- function what to do with them. Your choices are to ignore them or assume they
--- have the value zero. To ignore them, use ST_IGNSTR as the ##subseq_opt## parameter
--- value otherwise use ST_ZEROSTR. However, if you know that ##data_set## only
--- contains numbers use the default ##subseq_opt## value, ST_ALLNUM. 
+-- have the value zero. To ignore them, use ##ST_IGNSTR## as the ##subseq_opt## parameter
+-- value otherwise use ##ST_ZEROSTR##. However, if you know that ##data_set## only
+-- contains numbers use the default ##subseq_opt## value, ##ST_ALLNUM##.
+-- 
 -- **Note** It is faster if the data only contains numbers.
 --
 -- Example 1:
@@ -670,11 +676,11 @@ public function geomean(object data_set, object subseq_opt = ST_ALLNUM)
 end function
 
 --**
--- Returns the harmonic mean of the atoms in a sequence.
+-- returns the harmonic mean of the atoms in a sequence.
 --
 -- Parameters:
 -- # ##data_set## : the values to take the harmonic mean of.
--- # ##subseq_opt## : an object. When this is ST_ALLNUM (the default) it 
+-- # ##subseq_opt## : an object. When this is ##ST_ALLNUM## (the default) it 
 --  means that ##data_set## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences. See comments for details.
 --
@@ -692,9 +698,10 @@ end function
 -- an number. If that is not the case then the function will crash. So it is
 -- important that if it can possibly contain sub-sequences that you tell this
 -- function what to do with them. Your choices are to ignore them or assume they
--- have the value zero. To ignore them, use ST_IGNSTR as the ##subseq_opt## parameter
--- value otherwise use ST_ZEROSTR. However, if you know that ##data_set## only
--- contains numbers use the default ##subseq_opt## value, ST_ALLNUM. 
+-- have the value zero. To ignore them, use ##ST_IGNSTR## as the ##subseq_opt## parameter
+-- value otherwise use ##ST_ZEROSTR##. However, if you know that ##data_set## only
+-- contains numbers use the default ##subseq_opt## value, ##ST_ALLNUM##.
+-- 
 -- **Note** It is faster if the data only contains numbers.
 --
 -- Example 1:
@@ -737,7 +744,7 @@ public function harmean(sequence data_set, object subseq_opt = ST_ALLNUM)
 end function
  
 --**
--- Returns the average (mean) of the data points for overlaping periods. This
+-- returns the average (mean) of the data points for overlaping periods. This
 -- can be either a simple or weighted moving average.
 --
 -- Parameters:
@@ -757,11 +764,11 @@ end function
 --   A moving average is used to smooth out a set of data points over a period.\\
 --   For example, given a period of 5:
 -- # the first returned element is the average
---   of the first five data points [1..5], 
+--   of the first five data points ##[1..5]##, 
 -- # the second returned element is
---   the average of the second five data points [2..6], \\and so on \\until
+--   the average of the second five data points ##[2..6]##, \\and so on \\until
 --   the last returned value is the average of the last 5 data points
---   [$-4 .. $].
+--   ##[$-4 .. $]##.
 --
 -- When ##period_delta## is an atom, it is rounded down to the width of the average. When it is a 
 -- sequence, the width is its length. If there are not enough data points, zeroes are inserted.
@@ -778,7 +785,7 @@ end function
 --    -- Ans: {3.25, 6.5, 5.75, 5.75}
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:average]]
 --
 public function movavg(object data_set, object period_delta)
@@ -832,7 +839,7 @@ public function movavg(object data_set, object period_delta)
 end function
 
 --**
--- Returns the exponential moving average of a set of data points.
+-- returns the exponential moving average of a set of data points.
 --
 -- Parameters:
 --   # ##data_set## : a list of 1 or more numbers for which you want a moving average.
@@ -846,14 +853,14 @@ end function
 --
 --   A moving average is used to smooth out a set of data points over a period.
 --
--- The formula used is:\\
+-- The formula used is~:\\
 -- : ##Y,,i,, = Y,,i-1,, + F * (X,,i,, - Y,,i-1,,)##
 --
 -- Note that only atom elements are included and any sub-sequences elements are ignored.
 --
 -- The smoothing factor controls how data is smoothed. 0 smooths everything to 0, and 1 means no smoothing at all.
 --
--- Any value for ##smoothing_factor## outside the 0.0..1.0 range causes ##smoothing_factor## 
+-- Any value for ##smoothing_factor## outside the ##0.0..1.0## range causes ##smoothing_factor## 
 -- to be set to the periodic factor ##(2/(N+1))##.
 --
 -- Example 1:
@@ -866,7 +873,7 @@ end function
 --    -- Ans: {6.066666667,4.711111111,5.807407407,5.538271605,5.69218107}
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:average]]
 
 public function emovavg(object data_set, atom smoothing_factor)
@@ -893,11 +900,11 @@ public function emovavg(object data_set, atom smoothing_factor)
 end function
 
 --**
--- Returns the mid point of the data points.
+-- returns the mid point of the data points.
 --
 -- Parameters:
 -- # ##data_set## : a list of 1 or more numbers for which you want the mean.
--- # ##subseq_opt## : an object. When this is ST_ALLNUM (the default) it 
+-- # ##subseq_opt## : an object. When this is ##ST_ALLNUM## (the default) it 
 --  means that ##data_set## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences. See comments for details.
 --
@@ -906,12 +913,12 @@ end function
 --
 -- Comments:
 --
---   ##median##() is the item for which half the items are below it and half
+--   ##median## is the item for which half the items are below it and half
 --   are above it.
 --
 -- All elements are included; any sequence elements are assumed to have the value zero.
 --
--- The equation for average  is:
+-- The equation for average  is~:
 --
 -- {{{
 -- median(X) ==> sort(X)[N/2]
@@ -922,9 +929,10 @@ end function
 -- an number. If that is not the case then the function will crash. So it is
 -- important that if it can possibly contain sub-sequences that you tell this
 -- function what to do with them. Your choices are to ignore them or assume they
--- have the value zero. To ignore them, use ST_IGNSTR as the ##subseq_opt## parameter
--- value otherwise use ST_ZEROSTR. However, if you know that ##data_set## only
--- contains numbers use the default ##subseq_opt## value, ST_ALLNUM. 
+-- have the value zero. To ignore them, use ##ST_IGNSTR## as the ##subseq_opt## parameter
+-- value otherwise use ##ST_ZEROSTR##. However, if you know that ##data_set## only
+-- contains numbers use the default ##subseq_opt## value, ##ST_ALLNUM##.
+-- 
 -- **Note** It is faster if the data only contains numbers.
 --
 -- Example 1:
@@ -932,7 +940,7 @@ end function
 --   ? median( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,4} ) -- Ans: 5
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:average]], [[:geomean]], [[:harmean]], [[:movavg]], [[:emovavg]]
 --
 
@@ -957,11 +965,11 @@ public function median(object data_set, object subseq_opt = ST_ALLNUM)
 end function
 
 --**
--- Returns the frequency of each unique item in the data set.
+-- returns the frequency of each unique item in the data set.
 --
 -- Parameters:
 -- # ##data_set## : a list of 1 or more numbers for which you want the frequencies.
--- # ##subseq_opt## : an object. When this is ST_ALLNUM (the default) it 
+-- # ##subseq_opt## : an object. When this is ##ST_ALLNUM## (the default) it 
 --  means that ##data_set## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences. See comments for details.
 --
@@ -977,9 +985,10 @@ end function
 -- an number. If that is not the case then the function will crash. So it is
 -- important that if it can possibly contain sub-sequences that you tell this
 -- function what to do with them. Your choices are to ignore them or assume they
--- have the value zero. To ignore them, use ST_IGNSTR as the ##subseq_opt## parameter
--- value otherwise use ST_ZEROSTR. However, if you know that ##data_set## only
--- contains numbers use the default ##subseq_opt## value, ST_ALLNUM. 
+-- have the value zero. To ignore them, use ##ST_IGNSTR## as the ##subseq_opt## parameter
+-- value otherwise use ##ST_ZEROSTR##. However, if you know that ##data_set## only
+-- contains numbers use the default ##subseq_opt## value, ##ST_ALLNUM##.
+-- 
 -- **Note** It is faster if the data only contains numbers.
 --
 -- Example 1:
@@ -1039,11 +1048,11 @@ public function raw_frequency(object data_set, object subseq_opt = ST_ALLNUM)
 end function
 
 --**
--- Returns the most frequent point(s) of the data set.
+-- returns the most frequent point(s) of the data set.
 --
 -- Parameters:
 -- # ##data_set## : a list of 1 or more numbers for which you want the mode.
--- # ##subseq_opt## : an object. When this is ST_ALLNUM (the default) it 
+-- # ##subseq_opt## : an object. When this is ##ST_ALLNUM## (the default) it 
 --  means that ##data_set## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences. See comments for details.
 --
@@ -1052,7 +1061,7 @@ end function
 --
 -- Comments:
 --
--- It is possible for the ##mode##() to return more than one item when more than
+-- It is possible for the ##mode## to return more than one item when more than
 -- one item in the set has the same highest frequency count.
 --
 -- If the data can contain sub-sequences, such as strings, you need to let the
@@ -1060,9 +1069,10 @@ end function
 -- an number. If that is not the case then the function will crash. So it is
 -- important that if it can possibly contain sub-sequences that you tell this
 -- function what to do with them. Your choices are to ignore them or assume they
--- have the value zero. To ignore them, use ST_IGNSTR as the ##subseq_opt## parameter
--- value otherwise use ST_ZEROSTR. However, if you know that ##data_set## only
--- contains numbers use the default ##subseq_opt## value, ST_ALLNUM. 
+-- have the value zero. To ignore them, use ##ST_IGNSTR## as the ##subseq_opt## parameter
+-- value otherwise use ##ST_ZEROSTR##. However, if you know that ##data_set## only
+-- contains numbers use the default ##subseq_opt## value, ##ST_ALLNUM##.
+-- 
 -- **Note** It is faster if the data only contains numbers.
 --
 -- Example 1:
@@ -1071,7 +1081,7 @@ end function
 -- ? mode( {8,2,8,5,6,6,4,8,6,6,3,3,4,1,8,4} ) -- Ans: {8,6}
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:average]], [[:geomean]], [[:harmean]], [[:movavg]], [[:emovavg]]
 --
 
@@ -1101,7 +1111,7 @@ public function mode(sequence data_set, object subseq_opt = ST_ALLNUM)
 end function
 
 --**
--- Returns the distance between a supplied value and the mean, to some supplied
+-- returns the distance between a supplied value and the mean, to some supplied
 -- order of magnitude. This is used to get a measure of the //shape// of a 
 -- data set.
 --
@@ -1111,7 +1121,7 @@ end function
 -- the central moments.
 -- # ##order_mag##: An integer. This is the order of magnitude required. Usually
 -- a number from 1 to 4, but can be anything.
--- # ##subseq_opt## : an object. When this is ST_ALLNUM (the default) it 
+-- # ##subseq_opt## : an object. When this is ##ST_ALLNUM## (the default) it 
 --  means that ##data_set## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences. See comments for details.
 --
@@ -1121,7 +1131,7 @@ end function
 --
 -- Comments:
 --
--- For each of the items in ##datum##, its central moment is calculated as ...
+-- For each of the items in ##datum##, its central moment is calculated as~:
 -- {{{
 --     CM = power( ITEM - AVG, MAGNITUDE)
 -- }}}
@@ -1131,9 +1141,10 @@ end function
 -- an number. If that is not the case then the function will crash. So it is
 -- important that if it can possibly contain sub-sequences that you tell this
 -- function what to do with them. Your choices are to ignore them or assume they
--- have the value zero. To ignore them, use ST_IGNSTR as the ##subseq_opt## parameter
--- value otherwise use ST_ZEROSTR. However, if you know that ##data_set## only
--- contains numbers use the default ##subseq_opt## value, ST_ALLNUM. 
+-- have the value zero. To ignore them, use ##ST_IGNSTR## as the ##subseq_opt## parameter
+-- value otherwise use ##ST_ZEROSTR##. However, if you know that ##data_set## only
+-- contains numbers use the default ##subseq_opt## value, ##ST_ALLNUM##.
+-- 
 -- **Note** It is faster if the data only contains numbers.
 --
 -- Example 1:
@@ -1143,7 +1154,7 @@ end function
 -- ? central_moment("the cat is the hatter", 't',3) -->   12395.12536                          
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:average]]
 --
 public function central_moment(sequence data_set, object datum, integer order_mag = 1, object subseq_opt = ST_ALLNUM)
@@ -1163,13 +1174,13 @@ public function central_moment(sequence data_set, object datum, integer order_ma
 end function
  
 --**
--- Returns sum of the central moments of each item in a data set.
+-- returns sum of the central moments of each item in a data set.
 --
 -- Parameters:
 -- # ##data_set## : a list of 1 or more numbers whose mean is used.
 -- # ##order_mag##: An integer. This is the order of magnitude required. Usually
 -- a number from 1 to 4, but can be anything.
--- # ##subseq_opt## : an object. When this is ST_ALLNUM (the default) it 
+-- # ##subseq_opt## : an object. When this is ##ST_ALLNUM## (the default) it 
 --  means that ##data_set## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences. See comments for details.
 --
@@ -1183,9 +1194,10 @@ end function
 -- an number. If that is not the case then the function will crash. So it is
 -- important that if it can possibly contain sub-sequences that you tell this
 -- function what to do with them. Your choices are to ignore them or assume they
--- have the value zero. To ignore them, use ST_IGNSTR as the ##subseq_opt## parameter
--- value otherwise use ST_ZEROSTR. However, if you know that ##data_set## only
--- contains numbers use the default ##subseq_opt## value, ST_ALLNUM. 
+-- have the value zero. To ignore them, use ##ST_IGNSTR## as the ##subseq_opt## parameter
+-- value otherwise use ##ST_ZEROSTR##. However, if you know that ##data_set## only
+-- contains numbers use the default ##subseq_opt## value, ##ST_ALLNUM##.
+-- 
 -- **Note** It is faster if the data only contains numbers.
 --
 -- Example 1:
@@ -1196,7 +1208,7 @@ end function
 -- ? sum_central_moments("the cat is the hatter", 4) --> 56824083.71
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:central_moment]], [[:average]]
 --
 public function sum_central_moments(object data_set, integer order_mag = 1, object subseq_opt = ST_ALLNUM)
@@ -1204,14 +1216,14 @@ public function sum_central_moments(object data_set, integer order_mag = 1, obje
 end function
 
 --**
--- Returns a measure of the asymmetry of a data set. Usually the data_set is a
+-- returns a measure of the asymmetry of a data set. Usually the data_set is a
 -- probablity distribution but it can be anything. This value is used to assess
 -- how suitable the data set is in representing the required analysis. It can
 -- help detect if there are too many extreme values in the data set.
 --
 -- Parameters:
 -- # ##data_set## : a list of 1 or more numbers whose mean is used.
--- # ##subseq_opt## : an object. When this is ST_ALLNUM (the default) it 
+-- # ##subseq_opt## : an object. When this is ##ST_ALLNUM## (the default) it 
 --  means that ##data_set## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences. See comments for details.
 --
@@ -1236,9 +1248,10 @@ end function
 -- an number. If that is not the case then the function will crash. So it is
 -- important that if it can possibly contain sub-sequences that you tell this
 -- function what to do with them. Your choices are to ignore them or assume they
--- have the value zero. To ignore them, use ST_IGNSTR as the ##subseq_opt## parameter
--- value otherwise use ST_ZEROSTR. However, if you know that ##data_set## only
--- contains numbers use the default ##subseq_opt## value, ST_ALLNUM. 
+-- have the value zero. To ignore them, use ##ST_IGNSTR## as the ##subseq_opt## parameter
+-- value otherwise use ##ST_ZEROSTR##. However, if you know that ##data_set## only
+-- contains numbers use the default ##subseq_opt## value, ##ST_ALLNUM##.
+-- 
 -- **Note** It is faster if the data only contains numbers.
 --
 -- Example 1:
@@ -1247,7 +1260,7 @@ end function
 -- ? skewness("thecatisthehatter")     --> 0.1093730315
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:kurtosis]]
 --
 public function skewness(object data_set, object subseq_opt = ST_ALLNUM)
@@ -1266,19 +1279,19 @@ public function skewness(object data_set, object subseq_opt = ST_ALLNUM)
 end function
 
 --**
--- Returns a measure of the spread of values in a dataset when compared to a 
+-- returns a measure of the spread of values in a dataset when compared to a 
 -- //normal// probability curve. 
 --
 -- Parameters:
 -- # ##data_set## : a list of 1 or more numbers whose kurtosis is required.
--- # ##subseq_opt## : an object. When this is ST_ALLNUM (the default) it 
+-- # ##subseq_opt## : an object. When this is ##ST_ALLNUM## (the default) it 
 --  means that ##data_set## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences. See comments for details.
 --
 -- Returns:
 --   An **object**. If this is an atom it is the kurtosis measure of the data set.
---   Othewise it is a sequence containing an error integer. The return value {0}
---   indicates that an empty dataset was passed, {1} indicates that the standard
+--   Othewise it is a sequence containing an error integer. The return value ##{0}##
+--   indicates that an empty dataset was passed, ##{1}## indicates that the standard
 --   deviation is zero (all values are the same).
 --
 -- Comments:
@@ -1294,9 +1307,10 @@ end function
 -- an number. If that is not the case then the function will crash. So it is
 -- important that if it can possibly contain sub-sequences that you tell this
 -- function what to do with them. Your choices are to ignore them or assume they
--- have the value zero. To ignore them, use ST_IGNSTR as the ##subseq_opt## parameter
--- value otherwise use ST_ZEROSTR. However, if you know that ##data_set## only
--- contains numbers use the default ##subseq_opt## value, ST_ALLNUM. 
+-- have the value zero. To ignore them, use ##ST_IGNSTR## as the ##subseq_opt## parameter
+-- value otherwise use ##ST_ZEROSTR##. However, if you know that ##data_set## only
+-- contains numbers use the default ##subseq_opt## value, ##ST_ALLNUM##.
+-- 
 -- **Note** It is faster if the data only contains numbers.
 --
 -- Example 1:
@@ -1304,7 +1318,7 @@ end function
 -- ? kurtosis("thecatisthehatter")     --> -1.737889192
 --   </eucode>
 --
--- See also:
+-- See Also:
 --   [[:skewness]]
 --
 public function kurtosis(object data_set, object subseq_opt = ST_ALLNUM)

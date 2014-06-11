@@ -616,7 +616,7 @@ export procedure CName(symtab_index s)
 
 		if LeftSym = FALSE and GType(s) = TYPE_INTEGER and v != NOVALUE then
 			c_printf("%d", v)
-			if SIZEOF_POINTER = 8 then
+			if TARGET_SIZEOF_POINTER = 8 then
 				c_puts( "LL" )
 			end if
 		else
@@ -639,7 +639,7 @@ export procedure CName(symtab_index s)
 			-- integer: either literal, or
 			-- declared constant rvalue with integer value
 			c_printf("%d", v)
-			if SIZEOF_POINTER = 8 then
+			if TARGET_SIZEOF_POINTER = 8 then
 				c_puts( "LL" )
 			end if
 		else
@@ -655,7 +655,7 @@ export procedure CName(symtab_index s)
 		-- literal doubles, strings, temporary vars that we create
 		if LeftSym = FALSE and GType(s) = TYPE_INTEGER and v != NOVALUE then
 			c_printf("%d", v)
-			if SIZEOF_POINTER = 8 then
+			if TARGET_SIZEOF_POINTER = 8 then
 				c_puts( "LL" )
 			end if
 		else
@@ -747,6 +747,19 @@ export procedure c_stmt0(sequence stmt)
 	end if
 end procedure
 
+function needs_uninit( sequence eentry )
+	if eentry[S_SCOPE] >= SC_LOCAL
+	and (eentry[S_SCOPE] <= SC_GLOBAL or eentry[S_SCOPE] = SC_EXPORT or eentry[S_SCOPE] = SC_PUBLIC)
+	and eentry[S_USAGE] != U_UNUSED
+	and eentry[S_USAGE] != U_DELETED
+	and not find(eentry[S_TOKEN], RTN_TOKS)
+	then
+		return 1
+	else
+		return 0
+	end if
+end function
+
 --**
 -- emit C declaration for each local and global constant and var
 export procedure DeclareFileVars()
@@ -755,6 +768,7 @@ export procedure DeclareFileVars()
 
 	c_puts("// Declaring file vars\n")
 	s = SymTab[TopLevelSub][S_NEXT]
+	
 	while s do
 		eentry = SymTab[s]
 		if eentry[S_SCOPE] >= SC_LOCAL
@@ -786,6 +800,60 @@ export procedure DeclareFileVars()
 	end while
 	c_puts("\n")
 	c_hputs("\n")
+	if dll_option or debug_option then
+		integer cleanup_vars = 0
+		c_puts("// Declaring var array for cleanup\n")
+		s = SymTab[TopLevelSub][S_NEXT]
+		c_stmt0( "object_ptr _0var_cleanup[] = {\n" )
+		while s do
+			eentry = SymTab[s]
+			if needs_uninit( eentry ) then
+
+				c_stmt0( sprintf("&_%d", eentry[S_FILE_NO]))
+				c_puts(eentry[S_NAME] )
+				c_printf(", // %d\n", cleanup_vars )
+				cleanup_vars += 1
+
+			end if
+			s = SymTab[s][S_NEXT]
+		end while
+		c_stmt0( "0\n" )
+		c_stmt0( "};\n" )
+		s = SymTab[TopLevelSub][S_NEXT]
+		c_stmt0( "char *_0var_cleanup_name[] = {\n" )
+		cleanup_vars = 0
+		while s do
+			eentry = SymTab[s]
+			if needs_uninit( eentry ) then
+				c_stmt0( sprintf("\"_%d", eentry[S_FILE_NO]))
+				c_puts(eentry[S_NAME] )
+				c_printf("\", // %d\n", cleanup_vars )
+				cleanup_vars += 1
+
+			end if
+			s = SymTab[s][S_NEXT]
+		end while
+		c_stmt0( "0\n" )
+		c_stmt0( "};\n" )
+		c_stmt0( "void _0cleanup_vars(){\n" )
+			c_stmt0( "int i;\n" )
+			c_stmt0( "object x;\n" )
+			c_stmt0( sprintf( "for( i = 0; i < %d; ++i ){\n", cleanup_vars ) )
+				c_stmt0( "x = *_0var_cleanup[i];\n" )
+				c_stmt0( "if( x >= NOVALUE ) /* do nothing */;\n" )
+				c_stmt0( "else if ( IS_ATOM_DBL( x ) && DBL_PTR( x )->cleanup != 0) {\n")
+					c_stmt0( "cleanup_double( DBL_PTR( x ) );\n")
+				c_stmt0( "}\n" )
+					c_stmt0( "else if (IS_SEQUENCE( x ) && SEQ_PTR( x )->cleanup != 0 ) {\n")
+					c_stmt0( "cleanup_sequence( SEQ_PTR( x ) );\n")
+				c_stmt0( "}\n" )
+			c_stmt0( "}\n" )
+			c_stmt0( sprintf( "for( i = 0; i < %d; ++i ){\n", cleanup_vars ) )
+				c_stmt0( "DeRef( *_0var_cleanup[i] );\n" )
+				c_stmt0( "*_0var_cleanup[i] = NOVALUE;\n" )
+			c_stmt0( "}\n" )
+		c_stmt0( "}\n" )
+	end if
 end procedure
 
 integer deleted_routines = 0
@@ -1510,7 +1578,13 @@ export procedure GenerateUserRoutines()
 					else
 						ret_type = "object "
 					end if
-					if find( SymTab[s][S_SCOPE], {SC_GLOBAL, SC_EXPORT, SC_PUBLIC} ) and dll_option then
+					integer s_scope = sym_scope( s )
+					integer s_file  = SymTab[s][S_FILE_NO]
+					if dll_option and
+					(s_scope = SC_GLOBAL
+					or (s_file = 1 and (s_scope = SC_PUBLIC or s_scope = SC_EXPORT)
+					or (s_scope = SC_PUBLIC and and_bits( include_matrix[1][s_file], PUBLIC_INCLUDE ) ) ) )
+					then
 						-- mark it as a routine_id target, so it won't be deleted
 						SymTab[s][S_RI_TARGET] = TRUE
 						LeftSym = TRUE

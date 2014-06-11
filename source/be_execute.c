@@ -272,7 +272,7 @@ static int watch_count = 1;
 static void trace_command(object x)
 // perform trace(x)
 {
-	int i;
+	int i = 0;
 
 	if (IS_ATOM_INT(x)) {
 		i = x;
@@ -281,7 +281,7 @@ static void trace_command(object x)
 		i = (int)DBL_PTR(x)->dbl;
 	}
 	else
-		RTFatal("argument to trace() must be an atom");
+		RTFatal("argument to trace() must be an atom", i);
 
 #ifndef BACKEND
 		if (i == 0) {
@@ -496,7 +496,12 @@ static object do_peek4(object a, int b )
 		peek4_addr = (uint32_t *)a;
 	}
 	else if (IS_ATOM(a)) {
+#ifdef __arm__
+		double d = DBL_PTR(a)->dbl;
+		peek4_addr = (uint32_t*)(uintptr_t)d;
+#else
 		peek4_addr = (uint32_t *)(uintptr_t)(DBL_PTR(a)->dbl);
+#endif
 	}
 	else {
 		/* a sequence: {addr, nbytes} */
@@ -582,7 +587,13 @@ static void do_poke2(object a, object top)
 		temp_dbl = DBL_PTR(top)->dbl;
 		if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 			RTFatal(POKE_LIMIT(2));
-		*poke2_addr = (uint16_t) temp_dbl;
+#ifdef __arm__
+			a = trunc( temp_dbl );
+			*poke2_addr = (uint16_t) a;
+#else
+			*poke2_addr = (uint16_t) temp_dbl;
+#endif
+		
 	}
 	else {
 		/* second arg is sequence */
@@ -598,9 +609,15 @@ static void do_poke2(object a, object top)
 				if (top == NOVALUE)
 					break;
 				temp_dbl = DBL_PTR(top)->dbl;
+		
 				if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 					RTFatal( POKE_LIMIT(2) );
+#ifdef __arm__
+				a = trunc( DBL_PTR(top)->dbl );
+				*poke2_addr = (uint16_t) a;
+#else
 				*poke2_addr = (uint16_t) temp_dbl;
+#endif
 				++poke2_addr;
 			}
 			else {
@@ -616,6 +633,9 @@ static void do_poke8(object a, object top)
 	eudouble temp_dbl;
 	s1_ptr s1;
 	object_ptr obj_ptr;
+#ifdef __arm__
+	uint64_t tmp64;
+#endif
 
 	/* determine the address to be poked */
 	if (IS_ATOM_INT(a)) {
@@ -635,7 +655,12 @@ static void do_poke8(object a, object top)
 		temp_dbl = DBL_PTR(top)->dbl;
 		if (temp_dbl < MIN_LONGLONG_DBL || temp_dbl > MAX_LONGLONG_DBL)
 			RTFatal("poke8 is limited to 64-bit numbers");
+#ifdef __arm__
+		tmp64 = trunc( temp_dbl );
+		*poke8_addr = tmp64;
+#else
 		*poke8_addr = (uint64_t) temp_dbl;
+#endif
 	}
 	else {
 		/* second arg is sequence */
@@ -653,7 +678,12 @@ static void do_poke8(object a, object top)
 				temp_dbl = DBL_PTR(top)->dbl;
 				if (temp_dbl < MIN_LONGLONG_DBL || temp_dbl > MAX_LONGLONG_DBL)
 					RTFatal("poke8 is limited to 64-bit numbers");
+#ifdef __arm__
+				tmp64 = trunc( temp_dbl );
+				*poke8_addr = (uint64_t) tmp64;
+#else
 				*poke8_addr = (uint64_t) temp_dbl;
+#endif
 				++poke8_addr;
 			}
 			else {
@@ -670,13 +700,21 @@ static void do_poke4(object a, object top)
 	eudouble temp_dbl;
 	s1_ptr s1;
 	object_ptr obj_ptr;
+#ifdef __arm__
+	int32_t tmp_int;
+#endif
 
 	/* determine the address to be poked */
 	if (IS_ATOM_INT(a)) {
 		poke4_addr = (uint32_t *)INT_VAL(a);
 	}
 	else if (IS_ATOM(a)) {
+#ifdef __arm__
+		temp_dbl = DBL_PTR(a)->dbl;
+		poke4_addr = (uint32_t *)(uintptr_t)temp_dbl;
+#else
 		poke4_addr = (uint32_t *)(uintptr_t)(DBL_PTR(a)->dbl);
+#endif
 	}
 	else {
 		RTFatal("first argument to poke4 must be an atom");
@@ -689,7 +727,17 @@ static void do_poke4(object a, object top)
 		temp_dbl = DBL_PTR(top)->dbl;
 		if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 			RTFatal(POKE_LIMIT(4));
+#ifdef __arm__
+		if( temp_dbl < 0.0 ){
+			tmp_int = (int32_t) temp_dbl;
+		}
+		else{
+			tmp_int = (int32_t)(uint32_t) temp_dbl;
+		}
+		*poke4_addr = (uint32_t) tmp_int;
+#else
 		*poke4_addr = (uint32_t) temp_dbl;
+#endif
 	}
 	else {
 		/* second arg is sequence */
@@ -707,7 +755,17 @@ static void do_poke4(object a, object top)
 				temp_dbl = DBL_PTR(top)->dbl;
 				if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 					RTFatal(POKE_LIMIT(4));
+#ifdef __arm__
+				if( temp_dbl < 0.0 ){
+					tmp_int = (int32_t) temp_dbl;
+				}
+				else{
+					tmp_int = (int32_t)(uint32_t) temp_dbl;
+				}
+				*poke4_addr = (uint32_t) tmp_int;
+#else
 				*poke4_addr = (uint32_t) temp_dbl;
+#endif
 				++poke4_addr;
 			}
 			else {
@@ -1403,6 +1461,39 @@ void symtab_set_pointers()
 	}
 }
 
+
+// routine ids to euphoria std/map routines:
+int map_new;
+int map_put;
+int map_get;
+
+/**
+ * Call's the front end's map:new() function
+ */
+object call_map_new(){
+	return internal_general_call_back( map_new, 690, 0, 0, 0, 0, 0, 0, 0, 0 );
+}
+
+/**
+ * Calls the front end's map:put procedure
+ */
+void call_map_put( object map, object key, object value, object operation ){
+	RefDS( map );
+	Ref( key );
+	Ref( value );
+	internal_general_call_back( map_put, map, key, value, operation, 23 /* default threshold */, 0, 0, 0, 0 );
+}
+
+/**
+ * Calls the front end's map:get function
+ */
+object call_map_get( object map, object key, object default_value ){
+	RefDS( map );
+	Ref( key );
+	Ref( default_value );
+	return internal_general_call_back( map_get, map, key, default_value, 0, 0, 0, 0, 0, 0 );
+}
+
 void analyze_switch()
 // changes a SWITCH_RT to a real switch statement
 {
@@ -1429,6 +1520,19 @@ void analyze_switch()
 	s1_ptr lookup;
 	int i;
 	object top;
+	object unique_jumps;
+	s1_ptr unique_values;
+	object unique_values_obj;
+	object empty_sequence;
+	object check_map;
+
+	unique_jumps = call_map_new();
+	unique_values = NewS1( values->length );
+	unique_values->postfill = unique_values->length;
+	unique_values->length = 0;
+	unique_values->base[1] = NOVALUE;
+	unique_values_obj = MAKE_SEQ( unique_values );
+	empty_sequence = MAKE_SEQ( NewS1(0) );
 	for( i = 1; i <= values->length; ++i ){
 		negative = 0;
 		sym = values->base[i];
@@ -1439,7 +1543,7 @@ void analyze_switch()
 		top = fe.st[sym].obj;
 
 		if( top == NOVALUE ){
-			NoValue( (symtab_ptr)sym );
+			NoValue( &fe.st[sym] );
 		}
 
 		// int check
@@ -1478,7 +1582,66 @@ void analyze_switch()
 
 			new_values->base[i] = fe.st[sym].obj;
 		}
+		Ref( new_values->base[i] );
+		
+		// Use a std;map just like in the front end to check for duplicate case values:
+		check_map = call_map_get( unique_jumps, jump->base[i], empty_sequence );
+		if( find_from( new_values->base[i], check_map, 1 ) ){
+			// duplicate value in the same case..ok
+		}
+		else if( find_from( new_values->base[i], unique_values_obj, 1 ) ){
+			// error!
+			// TODO: report correct line, value
+			// Currently points to top of the switch, and reports
+			// the offending symbol or symbols, but not a value, as
+			// there is currently no way to pretty sprint into a buffer
+			symtab_ptr first, second;
+			object second_val;
+			first = 0;
+			second_val = new_values->base[i];
+			second = fe.st + sym;
+			while( --i ){
+				int c = 0;
+				if( new_values->base[i] == second_val ){
+					c = 1;
+				}
+				else if( !IS_ATOM_INT( new_values->base[i] ) || IS_ATOM_INT( second_val ) ){
+					c = (0 == compare( new_values->base[i], second_val ) );
+				}
+				if( c ){
+					sym = values->base[i];
+					if( sym < 0 ){
+						sym = -sym;
+					}
+					first = fe.st + sym;
+					break;
+				}
+			}
+			if( first->name && second->name ){
+				RTFatal("duplicate values in a switch: %s and %s", first->name, second->name );
+			}
+			else if( first->name ){
+				RTFatal("duplicate values in a switch: %s and a literal value", first->name );
+			}
+			else if( second->name ){
+				RTFatal("duplicate values in a switch: %s and a literal value", second->name );
+			}
+			else{
+				// this shouldn't happen
+				RTFatal("duplicate values in a switch" );
+			}
+		}
+		else{
+			// new value...
+			call_map_put( unique_jumps, jump->base[i], new_values->base[i], 6 /* map:APPEND */ );
+			Append( &unique_values_obj, unique_values_obj, new_values->base[i] );
+			unique_values = SEQ_PTR( unique_values_obj );
+		}
+		DeRefDS( check_map );
 	}
+	DeRefDS( unique_jumps );
+	DeRefDS( empty_sequence );
+	DeRefDS( unique_values_obj );
 
 	DeRefDS( MAKE_SEQ( values ) );
 	if( all_ints &&  max - min < 1024){
@@ -1690,12 +1853,12 @@ void do_exec(intptr_t *start_pc)
 
 	/* address registers: (3 max) */
 	register intptr_t *pc;               /* program counter, kept in a register */
-	register object_ptr obj_ptr;    /* general pointer to an object */
+	register object_ptr obj_ptr = 0;    /* general pointer to an object */
 
 	/* data registers: (5 max) */
 	register object a;            /* another object */
 	volatile object v;            /* get compiler to do the right thing! */
-	register object top;          /* an object - hopefully kept in a register */
+	register object top = 0;          /* an object - hopefully kept in a register */
 	/*register*/ intptr_t i;           /* loop counter */
 
 	eudouble temp_dbl;
@@ -2060,7 +2223,8 @@ void do_exec(intptr_t *start_pc)
 					BREAK;
 				}
 
-			case L_ENDFOR_INT_UP1:
+			/* for pc[3] = ? to pc[2] do (label pc[1]) */	
+			case L_ENDFOR_INT_UP1:  
 			deprintf("case L_ENDFOR_INT_UP1:");
 				obj_ptr = (object_ptr)pc[3]; /* loop var */
 				top = *obj_ptr + 1;
@@ -2074,7 +2238,8 @@ void do_exec(intptr_t *start_pc)
 				}
 				BREAK;
 
-			case L_ENDFOR_INT_UP:
+			/* for pc[3] = ? to pc[2] do by pc[4] (label pc[1]) */
+			case L_ENDFOR_INT_UP: 
 			deprintf("case L_ENDFOR_INT_UP:");
 				obj_ptr = (object_ptr)pc[3]; /* loop var */
 				top = *obj_ptr + *(object_ptr)pc[4]; /* increment */
@@ -2933,7 +3098,7 @@ void do_exec(intptr_t *start_pc)
 #if INT64_MAX == INTPTR_MAX
 					{
 						int128_t product = (int128_t)c * (int128_t)b;
-						if( product == (int128_t)( a = (intptr_t)product ) ){
+						if( product == (int128_t)( a = (intptr_t)product ) && IS_ATOM_INT( product ) ){
 							top = MAKE_INT( a );
 						}
 						else{
@@ -3993,7 +4158,7 @@ void do_exec(intptr_t *start_pc)
 					DBL_PTR(a)->cleanup = (cleanup_ptr) obj_ptr;
 				}
 				else{ // sequence
-					if( (!UNIQUE(SEQ_PTR(a)) && !DBL_PTR(a)->cleanup) ||
+					if( (!UNIQUE(SEQ_PTR(a)) && !SEQ_PTR(a)->cleanup) ||
 					(((symtab_ptr)pc[1])->mode == M_CONSTANT && ((symtab_ptr)pc[1])->name == 0) ){
 						a = MAKE_SEQ( SequenceCopy( SEQ_PTR(a) ) );
 						b = 0;
@@ -4116,7 +4281,6 @@ void do_exec(intptr_t *start_pc)
 				if (nvars < 2 ) {
 					if (end_pos >= seqlen) {   // return ""
 						*obj_ptr = MAKE_SEQ(NewS1(0));
-						Ref(*obj_ptr);
 						DeRef(top);
 					}
 				   	else
@@ -4514,7 +4678,12 @@ void do_exec(intptr_t *start_pc)
 					poke_addr = (char *)INT_VAL(a);
 				}
 				else if (IS_ATOM(a)) {
-					poke_addr = (char *)(uintptr_t)(DBL_PTR(a)->dbl);
+#ifdef __arm__
+					double d = DBL_PTR(a)->dbl;
+					poke_addr = (char*) (uintptr_t) d;
+#else
+					poke_addr = (char*) (uintptr_t) DBL_PTR(a)->dbl;
+#endif
 				}
 				else { /* sequence */
 						RTFatal(
@@ -4652,11 +4821,17 @@ void do_exec(intptr_t *start_pc)
 				b = top;
 
 				if (IS_ATOM_INT(b)) {
+					
 					*poke_addr = (uint8_t) b;
 				}
 				else if (IS_ATOM(b)) {
 					/* no check for overflow here.. hmm*/
+#ifdef __arm__
+					b = trunc( DBL_PTR(b)->dbl );
+					*poke_addr = (uint8_t) b;
+#else
 					*poke_addr = (uint8_t) DBL_PTR(b)->dbl;
+#endif
 				}
 				else {
 					/* second arg is sequence */
@@ -4670,7 +4845,12 @@ void do_exec(intptr_t *start_pc)
 						else if (IS_ATOM(b)) {
 							if (b == NOVALUE)
 								break;
+#ifdef __arm__
+							b = trunc( DBL_PTR(b)->dbl );
+							*poke_addr = (uint8_t) b;
+#else
 							*poke_addr = (uint8_t) DBL_PTR(b)->dbl;
+#endif
 						}
 						else {
 							RTFatal(
@@ -4712,7 +4892,12 @@ void do_exec(intptr_t *start_pc)
 					sub_addr = (void(*)())INT_VAL(a);
 				}
 				else if (IS_ATOM(a)) {
+#ifdef __arm__
+					tuint = (uintptr_t)(DBL_PTR(a)->dbl);
+					sub_addr = (void(*)())tuint;
+#else
 					sub_addr = (void(*)())(uintptr_t)(DBL_PTR(a)->dbl);
+#endif
 				}
 				else {
 					RTFatal("argument to call() must be an atom");

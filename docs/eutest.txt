@@ -1,4 +1,4 @@
-== EuTEST - Unit Testing
+== eutest Unit Testing
 
 <<LEVELTOC level=2 depth=4>>
 
@@ -9,13 +9,13 @@ interpreter and translator works properly by use of //unit tests//.  The
 unit tests are Euphoria //include// files that ##include unittest.e##
 at the top, several test-routines for comparison between expected value
 and true value and at the end of the program a call to
-##test_report()##.  There are error control files for when we expect
+##test_report##.  There are error control files for when we expect
 the interpreter to fail but we want it to fail with a particular error
 message. You may use this section as an outline for testing your own code.
 
-=== The eutest Program
+=== eutest Tool
 
-==== Synopsis for running the tests
+==== Synopsis, Running Tests 
 
 {{{
 eutest [-D NO_INET ] [-D NO_INET_TESTS ]
@@ -24,13 +24,13 @@ eutest [-D NO_INET ] [-D NO_INET_TESTS ]
     [optional list of unit test files]
 }}}
 
-==== Synopsis for creating report from the log
+==== Synopsis, Report From Log
 
 {{{
 eutest -process-log [-html]
 }}}
 
-==== General behavior
+==== General Behavior
 
 If you want to test translation of your tests as well as interpreted tests, you
 can specify it with ##-ec##.
@@ -40,14 +40,14 @@ will scan the directory for unit test files using the pattern
 ##t_*.e##.  If you specify a pattern it will interpret the pattern, as
 some shells do not do this for programs.
 
-==== Options detail
+==== Options Detail
 
 * -D REC: Is for creating control files, use only when on tests that
 work already on an interpreter that correctly works or correctly *fails*
  with them.  This option must come before the ##eutest.ex## program
 itself in the command line and is the option with that requirement.
 * -log: Is for creating a log file for later processing
-* -verbose: Is for eutest.ex to give you detail of what it is doing
+* -verbose: Is for ##eutest.ex## to give you detail of what it is doing
 * -i: is for specify the include path which will be passed to both the
   interpreter and the translator when interpreting and translating the
   test.
@@ -55,7 +55,7 @@ itself in the command line and is the option with that requirement.
   djg, or gcc.  Each of these represent the kind of compiler we will
   request the translator to use.
 * -process-log: Is for processing a log created by a previous
-invocation of eutest.ex output is sent to standard output as a report
+invocation of ##eutest.ex## output is sent to standard output as a report
 of how the tests went.  By default this is in ASCII format.  Use -html
 to make it HTML format.
 * -html: Is for making the report creation to be in HTML format
@@ -76,7 +76,7 @@ file's contents found in the said directory.  Such a failure is marked as
 a successful test run.  However, if there is no such 
 directory or file the counter test will be marked as a failed test run.
 
-==== A trivial example
+==== Trivial Example
 
 The following is a minimal unit test file~:
 {{{
@@ -110,8 +110,8 @@ The //OSNAME// is the name of the operating system.  Which is either
 UNIX or Win32.
 
 Now, if ##t_foo.d/Win32/control.err## exists, then the testing program
-eutest.ex expects t_foo.e to fail when run with the WINDOWS interpreter.
-However, this is not necessarily true for other platforms.  In WINDOWS,
+eutest.ex expects t_foo.e to fail when run with the //Windows// interpreter.
+However, this is not necessarily true for other platforms.  In //Windows//
 eutest runs it, watches it fail, then compares the ex.err file to
 ##t_foo.d/Win32/control.err##.  If they ex.err is different from
 control.err an error message is written to the log.  Now on, say NetBSD,
@@ -119,9 +119,9 @@ t_file.e is tested with the expectation it will return 0 and the tests
 will all pass unless ##t_foo.d/UNIX/control.err## or ##t_foo.d/control.err## 
 also exist.
 Thus you can have different expectations for differing platforms.
-Some feature that is not possible to implement under WINDOWS can be put into a 
+Some feature that is not possible to implement under //Windows// can be put into a 
 unit test and the
-resulting ##ex.err## file can be put into a control file for WINDOWS.
+resulting ##ex.err## file can be put into a control file for //Windows//.
 This means we do not need to have all of these errors that we expect to get
 drawing our attention away from errors that need our attention.
 On the other hand, if an unexpected error message not like 
@@ -144,7 +144,7 @@ post-processor that generates html reports to make
 analysis of your coverage easy.
 
 The coverage capabilities can be used manually, with arguments supplied on the 
-command line, or passed to eutest.  Indeed, eutest simply passes these along to 
+command line, or passed to ##eutest##.  Indeed, ##eutest## simply passes these along to 
 the interpreter.  The Euphoria suite of unit tests can be run via the makefiles, 
 and there is a special target to run a coverage analysis of the standard 
 library:
@@ -157,7 +157,7 @@ Unix:
 $ make coverage
 }}}
 
-Then, in your build directory, eutest will run the tests to create the coverage 
+Then, in your build directory, ##eutest## will run the tests to create the coverage 
 database ##unit-test.edb##, and will post-process the results, placing the HTML 
 reports into a unit-test subdirectory from your build directory.
 
@@ -169,7 +169,7 @@ obviously Euphoria are
 included ( ##.e, .ew, .eu, .ex, .exw, .exu##).
 
 * ##-coverage-db <file>## This one allows you to specify a specific location and
-name for the database where coverage information is stored.  It's an EDS 
+name for the database where coverage information is stored.  It is an EDS 
 database. By default, the DB is ##eui-cvg.edb##.
 
 * ##-coverage-erase##  Tells the interpreter to start over.  By default, 
@@ -179,8 +179,8 @@ a suite of unit test files.
 * ##-coverage-exclude <pattern>##  Specifies a regular expression that is used to
 exclude files from coverage analysis.
 
-* ##-coverage-pp <post-processor>##  Supported by eutest only (i.e., not the 
-interpreter itself). Tells eutest how to post process the coverage data.  
+* ##-coverage-pp <post-processor>##  Supported by ##eutest## only (i.e., not the 
+interpreter itself). Tells ##eutest## how to post process the coverage data.  
 ##<post-processor>## must be the path to a the post processing application.  
 After running the suite of tests, ##eutest## will execute this program with the 
 path to the coverage db as an argument.
@@ -191,7 +191,7 @@ path to the coverage db as an argument.
 Once you have run tests to generate a coverage database, the data is not easily 
 viewed. Euphoria comes with a post-processor called ##eucoverage.ex##, which is 
 installed in the bin directory. On a //Unix// packaged install, you should be 
-able to simply use eucoverage, which is configured to run ##eucoverage.ex##.
+able to simply use ##eucoverage##, which is configured to run ##eucoverage.ex##.
 
 The post-processor generates an index page, with coverage stats for each file, 
 and individual html files, linked from the index page, for each file analyzed 

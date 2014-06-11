@@ -20,6 +20,9 @@
 include std/unittest.e
 include std/get.e
 include std/convert.e
+include std/io.e
+include std/filesys.e
+include std/pipeio.e
 
 sequence buf
 
@@ -32,7 +35,7 @@ type enum weekday
 	$
 end type
 test_equal("assigned values out of order integer (incomplete interval) enumerated type", {2,1,3,9,5}, {MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY})
-test_equal("type values out of order integer (incomplete interval) enumerated type", {1,2,3,4,5}, {weekday(MONDAY), weekday(TUESDAY), weekday(WEDNESDAY), weekday(THURSDAY), weekday(FRIDAY)})
+test_equal("type values out of order integer (incomplete interval) enumerated type", repeat(1,5), {weekday(MONDAY), weekday(TUESDAY), weekday(WEDNESDAY), weekday(THURSDAY), weekday(FRIDAY)})
 test_false("non-weekday in the numeric hull is false #1", weekday(4))
 test_false("non-weekday in the numeric hull is false #2", weekday(8))
 buf = value("9")
@@ -49,7 +52,7 @@ enum type inner_planet
 	MARS
 end type
 test_equal("assigned values in order stepping by one (complete interval) enumerated type", {1,2,3,4}, {MERCURY, VENUS, EARTH, MARS})
-test_equal("type values of in order integer (complete interval) enumerated type", {1,2,3,4}, {inner_planet(MERCURY), inner_planet(VENUS), inner_planet(EARTH), inner_planet(MARS)})
+test_equal("type values of in order integer (complete interval) enumerated type", repeat(1,4), {inner_planet(MERCURY), inner_planet(VENUS), inner_planet(EARTH), inner_planet(MARS)})
 
 -- continuous but non-monotonic enumerated type
 -- internally, the parser will implement name of by using a sequence of pairs indexed by 
@@ -63,7 +66,7 @@ enum type outer_planet
 	JUPITER=5
 end type
 test_equal("assigned values in continuous out of order integer interval (complete interval) enumerated type", {6,7,8,5}, {SATURN,URANUS,NEPTUNE,JUPITER})
-test_equal("type values out of order integer (complete interval) enumerated type", {1,2,3,4}, {outer_planet(SATURN),outer_planet(URANUS),outer_planet(NEPTUNE),outer_planet(JUPITER)})
+test_equal("type values out of order integer (complete interval) enumerated type", repeat(1,4), {outer_planet(SATURN),outer_planet(URANUS),outer_planet(NEPTUNE),outer_planet(JUPITER)})
 
 -- non-integer enumerated type
 -- Internally, the parser will implement this by using a pair of same length sequences.
@@ -78,7 +81,7 @@ type enum metric_prefix by * 1000
 	giga
 end type
 test_equal("assigned values non-integer enumerated type", {0.000_000_001, 0.000_001, 0.001, 1_000, 1_000_000, 1_000_000_000 }, {nano, micro, milli, kilo, mega, giga})
-test_equal("type values non-integer enumerated type", {1,2,3,4,5,6}, {metric_prefix(nano),
+test_equal("type values non-integer enumerated type", repeat(1,6), {metric_prefix(nano),
 	metric_prefix(micro),
 	metric_prefix(milli),
 	metric_prefix(kilo),
@@ -155,5 +158,45 @@ test_equal( "X86 name_of", "X86", name_of( X86 ) )
 test_equal( "X86_64 name_of", "X86_64", name_of( X86_64 ) )
 test_equal( "ARM name_of", "ARM", name_of( ARM ) )
 
+-- Make sure the Alternative Literals are used in the Crash File (ex.err)
+sequence cmd            = command_line()
+sequence program_name   = cmd[1]
+-- The special "device" that always accepts input
+ifdef WINDOWS then
+	constant NUL = "NUL"
+elsedef
+	constant NUL = "/dev/null"
+end ifdef
+ifdef EUI then
+	delete_file("ex.err")
+	while file_exists("ex.err") do
+	end while
+	system(sprintf("%s -batch crashing_program.ex > %s", {program_name, NUL}), 0)
+	while not file_exists("ex.err") do
+	end while
+	object file_contents = read_file("ex.err")
+	test_true("ex.err has alternative literals", match("p = (URANUS)7", file_contents))
+	delete_file("ex.err")
+	while file_exists("ex.err") do
+	end while
+	
+	delete_file("warnings.txt")
+	while file_exists("warnings.txt") do
+	end while
+	system(sprintf("%s -batch manual/t_enumwarn.e 2>&1 > warnings.txt", cmd[1..1]),0)
+	while file_exists("warnings.txt") = 0 do
+	end while
+	file_contents = read_file("warnings.txt")
+	test_equal("unforwarded enum type warnings", read_file("manual/no_fwd_enumwarn.txt"), file_contents)
+	
+	delete_file("warnings.txt")
+	while file_exists("warnings.txt") do
+	end while
+	system(sprintf("%s -batch manual/t_enumwarn_fwd.e 2>&1 > warnings.txt", cmd[1..1]),0)
+	while file_exists("warnings.txt") = 0 do
+	end while
+	file_contents = read_file("warnings.txt")
+	test_equal("forward referenced enum type warnings", read_file("manual/fwd_enumwarn.txt"), file_contents)
+end ifdef
 
 test_report()

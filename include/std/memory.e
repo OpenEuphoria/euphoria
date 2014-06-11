@@ -11,8 +11,13 @@ namespace memory
 -- @nodoc@
 public include std/memconst.e
 
--- biggest address on a 32-bit machine
-constant MAX_ADDR = power(2, 32)-1
+ifdef BITS64 then
+    -- biggest address on a 64-bit machine 
+    constant MAX_ADDR = power(2, 48)-1 
+elsedef 
+    -- biggest address on a 32-bit machine 
+    constant MAX_ADDR = power(2, 32)-1 
+end ifdef
 
 ifdef DATA_EXECUTE or not WINDOWS  then
 	include std/machine.e

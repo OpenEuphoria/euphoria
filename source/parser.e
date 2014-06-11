@@ -15,12 +15,14 @@ include std/error.e
 
 include euphoria/info.e
 
-include std/sequence.e
-include std/text.e
-include std/search.e
 include std/convert.e
 include std/filesys.e
+include std/map.e
+include std/search.e
+include std/sequence.e
 include std/sort.e
+include std/text.e
+
 
 include literal_set.e as literal_set
 include global.e
@@ -75,6 +77,7 @@ sequence goto_addr
 sequence goto_stack
 sequence goto_ref
 sequence label_block
+map goto_init
 
 -- flow control management
 sequence break_list        -- back-patch list for end if label
@@ -84,6 +87,8 @@ sequence exit_delay        -- delay list for end for/while/until
 sequence continue_list     -- stack of exits to back-patch
 sequence continue_delay    -- stack of exits to back-patch
 sequence entry_addr, continue_addr, retry_addr -- lists of Code indexes for the entry, continue and retry keywords
+
+sequence entry_stack       -- stack for keeping track of uninitialized vars in case of entry
 
 -- block headers
 sequence loop_labels       -- sequence of loop labels, 0 for unlabelled loops
@@ -153,7 +158,7 @@ procedure CheckForUndefinedGotoLabels()
 end procedure
 
 procedure PushGoto()
-	goto_stack = append(goto_stack, {goto_addr, goto_list, goto_labels, goto_delay, goto_line, goto_ref, label_block })
+	goto_stack = append(goto_stack, {goto_addr, goto_list, goto_labels, goto_delay, goto_line, goto_ref, label_block, goto_init })
 	goto_addr = {}
 	goto_list = {}
 	goto_labels = {}
@@ -161,18 +166,22 @@ procedure PushGoto()
 	goto_line = {}
 	goto_ref = {}
 	label_block = {}
+	goto_init = map:new()
 end procedure
 
 procedure PopGoto()
 	CheckForUndefinedGotoLabels()
-	goto_addr = goto_stack[$][1]
-	goto_list = goto_stack[$][2]
+	goto_addr   = goto_stack[$][1]
+	goto_list   = goto_stack[$][2]
 	goto_labels = goto_stack[$][3]
-	goto_delay = goto_stack[$][4]
-	goto_line = goto_stack[$][5]
-	goto_ref = goto_stack[$][6]
+	goto_delay  = goto_stack[$][4]
+	goto_line   = goto_stack[$][5]
+	goto_ref    = goto_stack[$][6]
 	label_block = goto_stack[$][7]
-	goto_stack = goto_stack[1..$-1]
+	goto_init   = goto_stack[$][8]
+	
+	goto_stack = remove( goto_stack, length( goto_stack ) )
+	
 end procedure
 
 procedure EnterTopLevel( integer end_line_table = 1 )
@@ -189,6 +198,8 @@ procedure EnterTopLevel( integer end_line_table = 1 )
 	end if
 	LineTable = SymTab[TopLevelSub][S_LINETAB]
 	Code = SymTab[TopLevelSub][S_CODE]
+	SymTab[TopLevelSub][S_LINETAB] = 0
+	SymTab[TopLevelSub][S_CODE] = 0
 	previous_op = -1
 	CurrentSub = TopLevelSub
 	clear_last()
@@ -252,6 +263,8 @@ export procedure InitParser()
 	m_sprint_tok = {VARIABLE,NewIntSym(M_SPRINT)}
 	SymTab[m_sprint_tok[2]][S_OBJ] = M_SPRINT
 	machine_func_tok = {BUILTIN,keyfind("eu:machine_func",-1)}
+	entry_stack = {}
+	goto_init = map:new()	
 end procedure
 
 sequence switch_stack = {}
@@ -262,7 +275,15 @@ enum
 	SWITCH_ELSE,
 	SWITCH_PC,
 	SWITCH_FALLTHRU,
-	SWITCH_VALUE
+	SWITCH_VALUE,
+	SWITCH_CASE_MAP,
+	SWITCH_CASE_VALUES,
+	SWITCH_JUMP_OFFSET,
+	SWITCH_THISLINE,
+	SWITCH_BP,
+	SWITCH_LINE_NUMBER,
+	SWITCH_CURRENT_FILE_NO,
+	$
 
 procedure NotReached(integer tok, sequence keyword)
 -- Issue warning about code that can't be executed
@@ -571,9 +592,9 @@ enum -- struct parseargs_states record
 	PS_ON_ARG
 
 sequence private_list = {}
-integer lock_scanner = 0
+export integer lock_scanner = 0
 integer on_arg = 0
-sequence nested_calls = {}
+export sequence nested_calls = {}
 
 procedure restore_parseargs_states()
 	sequence s
@@ -593,7 +614,7 @@ end procedure
 function read_recorded_token(integer n)
 	token t
 	integer p, prev_Nne
-	if atom(Ns_recorded[n]) then
+	if atom(Ns_recorded[n]) label "top if" then
 		if use_private_list then
 			p = find( Recorded[n], private_list)
 			if p > 0 then -- the value of this parameter is known, use it
@@ -614,8 +635,15 @@ function read_recorded_token(integer n)
 
 			end if
 		end if
+
 		prev_Nne = No_new_entry
 		No_new_entry = 1
+		
+		if Recorded_sym[n] > 0 and  sym_scope( Recorded_sym[n] ) != SC_UNDEFINED then
+			t = { sym_token( Recorded_sym[n] ), Recorded_sym[n] }
+			break "top if"
+		end if
+		
 		t = keyfind(Recorded[n],-1)
 		if t[T_ID] = IGNORED then
 	        p = Recorded_sym[n]
@@ -1174,7 +1202,7 @@ procedure Object_call( token tok )
 					putback(tok2)
 					tok_match(RIGHT_SQUARE)
 					subs_depth -= 1
-					current_sequence = current_sequence[1..$-1]
+					current_sequence = remove( current_sequence, length( current_sequence ) )
 					emit_op(RHS_SUBS)
 					-- current_sequence will be updated
 				end if
@@ -1182,7 +1210,7 @@ procedure Object_call( token tok )
 				lhs_subs_level = save_lhs_subs_level
 				tok2 = next_token()
 			end while
-			current_sequence = current_sequence[1..$-1]
+			current_sequence = remove( current_sequence, length( current_sequence ) )
 			putback(tok2)
 			--short_circuit += 1
 
@@ -1307,7 +1335,9 @@ end function
 -- parse a name_of call...
 function Name_of_call( token tok )
 	object argument_tok = next_token(), round_tok
-	
+	if integer(SymTab[argument_tok[T_SYM]]) or length(SymTab[argument_tok[T_SYM]]) < S_SCOPE then
+		goto "handle error"
+	end if
 	if SymTab[argument_tok[T_SYM]][S_SCOPE] != SC_UNDEFINED
 		and find(argument_tok[T_ID],{
 		VARIABLE, QUALIFIED_VARIABLE})=0  then
@@ -1516,14 +1546,14 @@ procedure Factor()
 					putback(tok)
 					tok_match(RIGHT_SQUARE)
 					subs_depth -= 1
-					current_sequence = head( current_sequence, length( current_sequence ) - 1 )
+					current_sequence = remove( current_sequence, length( current_sequence ) )
 					emit_op(RHS_SUBS) -- current_sequence will be updated
 				end if
 				factors = save_factors
 				lhs_subs_level = save_lhs_subs_level
 				tok = next_token()
 			end while
-			current_sequence = head( current_sequence, length( current_sequence ) - 1 )
+			current_sequence = remove( current_sequence, length( current_sequence ) )
 			putback(tok)
 			short_circuit += 1
 
@@ -1594,7 +1624,7 @@ function Term()
 
 	UFactor()
 	tok = next_token()
-	while tok[T_ID] = MULTIPLY or tok[T_ID] = DIVIDE do
+	while tok[T_ID] = reserved:MULTIPLY or tok[T_ID] = reserved:DIVIDE do
 		UFactor()
 		emit_op(tok[T_ID])
 		tok = next_token()
@@ -1623,13 +1653,13 @@ function cexpr()
 
 	tok = aexpr()
 	concat_count = 0
-	while tok[T_ID] = CONCAT do
+	while tok[T_ID] = reserved:CONCAT do
 		tok = aexpr()
 		concat_count += 1
 	end while
 
 	if concat_count = 1 then
-		emit_op(CONCAT)
+		emit_op( reserved:CONCAT )
 
 	elsif concat_count > 1 then
 		op_info1 = concat_count+1
@@ -1826,9 +1856,11 @@ include std/machine.e
 -- run the literal_match test.
 public function forward_type_mismatch_warning(symtab_pointer left_sym, symtab_pointer right_sym, integer routine_sym = 0, integer parameter_index = 0)
 	sequence forward_refs = routine_sym & parameter_index & left_sym & right_sym & 0 & 0
+	symtab_pointer right_sym_type = 0
+	symtab_pointer left_sym_type = 0
 	if routine_sym >= 0 and left_sym and right_sym and symtab_index(left_sym) and symtab_index(right_sym) and length(SymTab[left_sym]) >= S_VTYPE and length(SymTab[right_sym]) >= S_VTYPE then
-		symtab_pointer right_sym_type = sym_type(right_sym)
-		symtab_pointer left_sym_type = sym_type(left_sym)
+		right_sym_type = sym_type(right_sym)
+		left_sym_type = sym_type(left_sym)
 		forward_refs = forward_refs[1..4] & left_sym_type & right_sym_type
 		if right_sym_type and left_sym_type and symtab_index(right_sym_type) and symtab_index(left_sym_type) 
 			and	find(sym_mode(left_sym),  {M_CONSTANT, M_NORMAL}) != 0 
@@ -1837,19 +1869,19 @@ public function forward_type_mismatch_warning(symtab_pointer left_sym, symtab_po
 		end if
 	end if
 	
-	atom match_data_pointer = allocate( 6 * 4, 1 )
-	poke4(match_data_pointer, forward_refs)
+	atom match_data_pointer = new_match_pair_data()
+	set_match_pair_data_routine(match_data_pointer, routine_sym) 
+	set_match_pair_data_index(match_data_pointer, parameter_index) 
+	set_match_pair_data_left_value(match_data_pointer, left_sym) 
+	set_match_pair_data_right_value(match_data_pointer, right_sym) 
+	set_match_pair_data_left_type(match_data_pointer, left_sym_type) 
+	set_match_pair_data_right_type(match_data_pointer, right_sym_type) 
 	
 	object match_data
 	integer fi = length(forward_refs)
 	while fi > 0 do
 		if forward_refs[fi] < 0 then
-			match_data = get_property( -forward_refs[fi], test_literal_match_pair_key )
-			if atom(match_data) then
-				match_data = {}
-			end if
-			match_data = append(match_data, match_data_pointer)
-			set_property( -forward_refs[fi], test_literal_match_pair_key, match_data )
+			include_match_pair(-forward_refs[fi], match_data_pointer)
 		end if
 		fi -= 1
 	end while
@@ -1924,7 +1956,7 @@ procedure Assignment(token left_var)
 		subs_depth += 1
 		if lhs_ptr then
 			-- multiple lhs subscripts, evaluate first n-1 of them with this
-			current_sequence = head( current_sequence, length( current_sequence ) - 1 )
+			current_sequence = remove( current_sequence, length( current_sequence ) )
 			if subs = 1 then
 				-- first subscript of 2 or more
 				subs1_patch = length(Code)+1
@@ -2073,7 +2105,7 @@ procedure Assignment(token left_var)
 		end if
 	end if
 
-	current_sequence = head( current_sequence, length( current_sequence ) - 1 )
+	current_sequence = remove( current_sequence, length( current_sequence ) )
 
 	if not TRANSLATE then
 		if OpTrace then
@@ -2294,6 +2326,8 @@ procedure GLabel_statement()
 		n = find(labbel, goto_delay)
 	end while
 
+	force_uninitialize( map:get( goto_init, labbel, {} ) )
+	
 	if TRANSLATE then
 		emit_op(GLABEL)
 		emit_addr(laddr)
@@ -2316,6 +2350,7 @@ procedure Goto_statement()
 			goto_list &= length(Code)+2 --not 1???
 			goto_line &= {{line_number,ThisLine}}
 			goto_ref &= new_forward_reference( GOTO, top_block() )
+			map:put( goto_init, SymTab[tok[T_SYM]][S_OBJ], get_private_uninitialized() )
 			add_data( goto_ref[$], sym_obj( tok[T_SYM] ) )
 			set_line( goto_ref[$], line_number, ThisLine, bp )
 		else
@@ -2690,7 +2725,23 @@ end procedure
 
 procedure push_switch()
 	if_stack &= SWITCH
-	switch_stack = append( switch_stack, { {}, {}, 0, 0, 0, 0 })
+	switch_stack = append( switch_stack,
+			{
+				{},          -- SWITCH_CASES
+				{},          -- SWITCH_JUMP_TABLE
+				0,           -- SWITCH_ELSE
+				0,           -- SWITCH_PC
+				0,           -- SWITCH_FALLTHRU
+				0,           -- SWITCH_VALUE
+				map:new(),   -- SWITCH_CASE_MAP
+				{},          -- SWITCH_CASE_VALUES
+				0,           -- SWITCH_JUMP_OFFSET
+				{},          -- SWITCH_THISLINE
+				{},          -- SWTICH_BP
+				{},          -- SWITCH_LINE_NUMBER
+				{},          -- SWITCH_CURRENT_FILE_NO
+				$
+			})
 end procedure
 
 procedure pop_switch( integer break_base )
@@ -2713,8 +2764,12 @@ procedure add_case( object sym, integer sign )
 	end if
 
 	if find(sym, switch_stack[$][SWITCH_CASES] ) = 0 then
-		switch_stack[$][SWITCH_CASES]       = append( switch_stack[$][SWITCH_CASES], sym )
-		switch_stack[$][SWITCH_JUMP_TABLE] &= length(Code) + 1
+		switch_stack[$][SWITCH_CASES]            = append( switch_stack[$][SWITCH_CASES], sym )
+		switch_stack[$][SWITCH_JUMP_TABLE]      &= length(Code) + 1
+		switch_stack[$][SWITCH_THISLINE]        &= {ThisLine}
+		switch_stack[$][SWITCH_BP]              &= bp
+		switch_stack[$][SWITCH_LINE_NUMBER]     &= line_number
+		switch_stack[$][SWITCH_CURRENT_FILE_NO] &= current_file_no
 
 		if TRANSLATE then
 			emit_addr( CASE )
@@ -2904,6 +2959,11 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 	integer has_sequence   = 0
 	integer has_unassigned = 0
 	integer has_fwdref     = 0
+	sequence unique_values = {}
+	map unique_jumps = map:new()
+	
+	sequence jump = switch_stack[$][SWITCH_JUMP_TABLE]
+	integer jump_offset = 0
 	for i = 1 to length( values ) do
 		if sequence( values[i] ) then
 			has_fwdref = 1
@@ -2911,6 +2971,7 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 		end if
 		integer sym = values[i]
 		integer sign
+		
 		if sym < 0 then
 			sign = -1
 			sym = -sym
@@ -2918,23 +2979,56 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 			sign = 1
 		end if
 		if not equal(SymTab[sym][S_OBJ], NOVALUE) then
-			values[i] = sign * SymTab[sym][S_OBJ]
-			if not is_integer( values[i] ) then
-				all_ints = 0
-				if atom( values[i] ) then
-					has_atom = 1
+			object value_i = sign * SymTab[sym][S_OBJ]
+			values[i] = value_i
+			if TRANSLATE then
+				if Code[jump[i]-2] = CASE then
+					jump_offset -=2
 				else
-					has_sequence = 1
+					jump_offset = 0
 				end if
+			end if
+			
+			if find( value_i, map:get( unique_jumps, jump[i] + jump_offset, {}) ) then
+				-- do nothing...duplicate value for the same jump target...warning?
+				
+			elsif find( value_i, unique_values ) then
+				-- error!
+				-- TODO: need to identify line, plus duplicate sym
+				object v = ""
+				if length( SymTab[sym] ) > S_NAME and sequence( sym_name( sym ) ) then
+					v = sym_name( sym ) & " = " 
+				end if
+				
+				v &= sprint( value_i )
+				ThisLine        = switch_stack[$][SWITCH_THISLINE][i]
+				bp              = switch_stack[$][SWITCH_BP][i]
+				line_number     = switch_stack[$][SWITCH_LINE_NUMBER][i]
+				current_file_no = switch_stack[$][SWITCH_CURRENT_FILE_NO][i]
+				
+				CompileErr("duplicate case value used in switch: [1]", {v})
 			else
-				has_integer = 1
+				
+				unique_values   &= value_i
+				map:put( unique_jumps, jump[i] + jump_offset, value_i, map:APPEND )
+				
+				if not is_integer( value_i ) then
+					all_ints = 0
+					if atom( value_i ) then
+						has_atom = 1
+					else
+						has_sequence = 1
+					end if
+				else
+					has_integer = 1
 
-				if values[i] < min then
-					min = values[i]
-				end if
+					if value_i < min then
+						min = value_i
+					end if
 
-				if values[i] > max then
-					max = values[i]
+					if value_i > max then
+						max = value_i
+					end if
 				end if
 			end if
 		else
@@ -2972,7 +3066,7 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 		atom delta = max - min
 		if not TRANSLATE and  delta < 1024 and delta >= 0 then
 			opcode = SWITCH_SPI
-			sequence jump = switch_stack[$][SWITCH_JUMP_TABLE]
+-- 			sequence jump = switch_stack[$][SWITCH_JUMP_TABLE]
 			sequence switch_table = repeat( else_target, delta + 1 )
 			integer offset = min - 1
 			for i = 1 to length( values ) do
@@ -3059,12 +3153,31 @@ procedure Switch_statement()
 	pop_switch( break_base )
 end procedure
 
+function get_private_uninitialized()
+	sequence uninitialized = {}
+	if CurrentSub != TopLevelSub then
+		symtab_pointer s = SymTab[CurrentSub][S_NEXT]
+		sequence pu = { SC_PRIVATE, SC_UNDEFINED }
+		while s and find( SymTab[s][S_SCOPE], pu ) do
+			if SymTab[s][S_SCOPE] = SC_PRIVATE and SymTab[s][S_INITLEVEL] = -1 then
+				uninitialized &= s
+			end if
+			s = SymTab[s][S_NEXT]
+		end while
+	end if
+	return uninitialized
+end function
+
 procedure While_statement()
 -- Parse a while loop
 	integer bp1
 	integer bp2
 	integer exit_base, next_base
 
+	sequence uninitialized = get_private_uninitialized()
+	
+	entry_stack = append( entry_stack, uninitialized )
+	
 	Start_block( WHILE )
 
 	exit_base = length(exit_list)
@@ -3132,6 +3245,7 @@ procedure While_statement()
 		backpatch(bp2, length(Code)+1)
 	end if
 	exit_loop(exit_base)
+	entry_stack = remove( entry_stack, length( entry_stack ) )
 	push_temps( temps )
 end procedure
 
@@ -3142,6 +3256,9 @@ procedure Loop_statement()
 	token t
 
 	Start_block( LOOP )
+
+	sequence uninitialized = get_private_uninitialized()
+	entry_stack = append( entry_stack, uninitialized )
 
 	exit_base = length(exit_list)
 	next_base = length(continue_list)
@@ -3674,11 +3791,11 @@ function Global_declaration(integer type_ptr, integer scope)
 			integer negate = 0
 			ptok = next_token()
 			switch ptok[T_ID] do
-				case MULTIPLY then
+				case reserved:MULTIPLY then
 					deltafunc = '*'
 					ptok = next_token()
 
-				case DIVIDE then
+				case reserved:DIVIDE then
 					deltafunc = '/'
 					ptok = next_token()
 
@@ -4108,6 +4225,18 @@ procedure Entry_statement()
 	if TRANSLATE then
 	    emit_op(NOP1)
 	end if
+	
+	force_uninitialize( entry_stack[$] )
+
+end procedure
+
+--*
+-- Make sure these symbols are marked uninitialized.  An entry or goto
+-- may require extra init checks after a variable may have been initialized.
+procedure force_uninitialize( sequence uninitialized )
+	for i = 1 to length( uninitialized ) do
+		SymTab[uninitialized[i]][S_INITLEVEL] = -1
+	end for
 end procedure
 
 procedure Statement_list()
@@ -4422,8 +4551,10 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 	SymTab[p][S_RESIDENT_TASK] = 0
 	SymTab[p][S_SAVED_PRIVATES] = {}
 	SymTab[p][S_DEPRECATED] = deprecated
-	
+		
+	symtab_index tmp1
 	if type_enum then
+		tmp1 = NewTempSym()
 		SymTab[p][S_FIRSTLINE] = type_enum_gline
 		real_gline = gline_number
 		gline_number = type_enum_gline
@@ -4591,8 +4722,95 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 	if type_enum then
 		integer elist_base
 		tok_match(RETURN)
-		-- Create the body ourselves
+		putback(zero)
+		if not TRANSLATE then
+			if OpTrace then
+				emit_op(ERASE_PRIVATE_NAMES)
+				emit_addr(CurrentSub)
+			end if
+		end if
+		Expr()
+		FuncReturn = TRUE
+		emit_op(RETURNF)
+		flush_temps()
+		InitDelete()
+		flush_temps()
+		tok_match(END)
+	else
+		-- Parse a list of statements
+		Statement_list()
+		-- parse routine end.
+		tok_match(END)
+	end if
+
+	-- parse routine end.
+	tok_match(prog_type, END)
+
+	if prog_type != PROCEDURE then
+		if not FuncReturn then
+			if prog_type = FUNCTION then
+				CompileErr(120)
+			else
+				CompileErr(149)
+			end if
+		end if
+		emit_op(BADRETURNF) -- function/type shouldn't reach here
+
+	else
+		StartSourceLine(TRUE)
+		if not TRANSLATE then
+			if OpTrace then
+				emit_op(ERASE_PRIVATE_NAMES)
+				emit_addr(p)
+			end if
+		end if
+		emit_op(RETURNP)
+		if TRANSLATE then
+			emit_op(BADRETURNF) -- just to mark end of procedure
+		end if
+	end if
+	Drop_block( pt )
+
+	if Strict_Override > 0 then
+		Strict_Override -= 1	-- Reset at the end of each routine.
+	end if
+
+	SymTab[p][S_STACK_SPACE] += temps_allocated + param_num
+	if temps_allocated + param_num > max_stack_per_call then
+		max_stack_per_call = temps_allocated + param_num
+	end if
+	param_num = -1
+	
+	StraightenBranches()
+	check_inline( p )
+	param_num = -1
+	EnterTopLevel()
+
+	if type_enum then
+		symtab_pointer first_arg = SymTab[p][S_NEXT]
+		-- Patch the code in SymTab[p] so that it doesn't just return 0.
+		-- We cannot return a temporary it must be copied to the first argument
+		-- parameter instead.
 		switch literal_set:get_access_method(ls)  do
+			case SEQUENCE_PAIR then
+				-- find(x,ls_data[1])
+				-- {RETURNF, 160, 166, zero, BADRETURNF}
+				--? SymTab[p][S_CODE]
+				SymTab[p][S_CODE] = {
+				-- literal_set[1] => tmp1
+				RHS_SUBS, literal_set:emit_literals_data_structure(ls), one[T_SYM]} & tmp1 &
+				-- find_from(i1, tmp1, 1) => tmp1
+				FIND_FROM & i1_sym[T_SYM] & tmp1 & one[T_SYM] & i1_sym[T_SYM] &
+				-- -- tmp1 != 0 => tmp1
+				NOTEQ & i1_sym[T_SYM] & zero[T_SYM] & i1_sym[T_SYM] &
+				-- return the argument back again.
+				SymTab[p][S_CODE][1..$-2] & i1_sym[T_SYM] & BADRETURNF
+				--? SymTab[p][S_CODE]
+			case INDEX_MAP then
+				fallthru
+			case else
+				crash("Not yet implemented")
+			/*
 			case INDEX_MAP then
 				-- 0
 				putback(zero)
@@ -4649,85 +4867,9 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 				
 				-- 0
 				putback(zero)
-				
-
-			case SEQUENCE_PAIR then
-				-- find(x,ls_data[1])
-				putback({RIGHT_ROUND,0})
-					putback({RIGHT_SQUARE,0})
-					putback(one)
-					putback({LEFT_SQUARE,0})
-				putback({VARIABLE,literal_set:emit_literals_data_structure(ls)})
-				putback({COMMA,0})
-				putback(i1_sym)
-				putback({LEFT_ROUND,0})
-				putback(keyfind("find",-1))
+				*/
 		end switch
-		if not TRANSLATE then
-			if OpTrace then
-				emit_op(ERASE_PRIVATE_NAMES)
-				emit_addr(CurrentSub)
-			end if
-		end if
-		Expr()
-		FuncReturn = TRUE
-		emit_op(RETURNF)
-		flush_temps()
-		InitDelete()
-		flush_temps()
-		if literal_set:get_access_method(ls) = INDEX_MAP then
-			tok_match(END)
-		end if
-	else
-		-- Parse a list of statements
-		Statement_list()
-		-- parse routine end.
-		tok_match(END)
 	end if
-
-	-- parse routine end.
-	tok_match(prog_type, END)
-
-	if prog_type != PROCEDURE then
-		if not FuncReturn then
-			if prog_type = FUNCTION then
-				CompileErr(120)
-			else
-				CompileErr(149)
-			end if
-		end if
-		emit_op(BADRETURNF) -- function/type shouldn't reach here
-
-	else
-		StartSourceLine(TRUE)
-		if not TRANSLATE then
-			if OpTrace then
-				emit_op(ERASE_PRIVATE_NAMES)
-				emit_addr(p)
-			end if
-		end if
-		emit_op(RETURNP)
-		if TRANSLATE then
-			emit_op(BADRETURNF) -- just to mark end of procedure
-		end if
-	end if
-	Drop_block( pt )
-
-	if Strict_Override > 0 then
-		Strict_Override -= 1	-- Reset at the end of each routine.
-	end if
-
-	SymTab[p][S_STACK_SPACE] += temps_allocated + param_num
-	if temps_allocated + param_num > max_stack_per_call then
-		max_stack_per_call = temps_allocated + param_num
-	end if
-	param_num = -1
-	
-	StraightenBranches()
-	check_inline( p )
-	param_num = -1
-	EnterTopLevel()
-
 	-- need to patch up the SYM_NEXT chain in case of enum type
 	if length( enum_syms ) then
 		SymTab[p][S_NEXT] = SymTab[enum_syms[$]][S_NEXT]
@@ -5344,6 +5486,10 @@ export procedure parser()
 	mark_final_targets()
 	resolve_unincluded_globals( 1 )
 	Resolve_forward_references( 1 )
+	SymTab[TopLevelSub][S_CODE] = Code
+	SymTab[TopLevelSub][S_LINETAB] = LineTable
+	Code = {}
+	LineTable = {}
 	inline_deferred_calls()
 	if not repl then
 	End_block( PROC )

@@ -48,7 +48,7 @@ struct translated_task{
 
 // Task Control Block - sync with euphoria\include\euphoria.h
 struct tcb {
-	int rid;         // routine id
+	object rid;         // routine id
 	double tid;      // external task id
 	int type;        // type of task: T_REAL_TIME or T_TIME_SHARED
 	int status;      // status: ST_ACTIVE, ST_SUSPENDED, ST_DEAD

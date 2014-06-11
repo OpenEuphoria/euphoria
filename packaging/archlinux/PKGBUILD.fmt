@@ -1,12 +1,12 @@
 # Contributor: Jeremy Cowgar <jeremy@cowgar.com>
 pkgname=euphoria
-pkgver=4.0.0
+pkgver=VERSION
 pkgrel=1
 pkgdesc="Fast interpreted or compiled general purpose programming language"
 url="http://openeuphoria.org"
 license=('custom:"OpenEuphoria License"')
-source=(http://downloads.sourceforge.net/rapideuphoria/Euphoria/$pkgver/Linux/$pkgname-$pkgver-src.tar.gz)
-md5sums=('321d1e14a86e4ac4662c9d4f073fd9ea')
+source=(http://openeuphoria.org/dist/Linux/$pkgname-$pkgver.tar.gz)
+md5sums=('SUM')
 arch=('i686' 'x86_64')
 
 if [ "$CARCH" = "x86_64" ]; then
@@ -26,11 +26,12 @@ package() {
   cd "$srcdir/$pkgname-$pkgver-src/source"
 
   # Base and Tool install
-  make DESTDIR="$pkgdir" install install-tools
+  make DESTDIR="$pkgdir" install install-tools install-docs
 
   # Install our license file per ArchLinux spec
   mkdir -p "$pkgdir/usr/share/licenses/$pkgname"
-  install -m 644 "$srcdir/$pkgname-$pkgver-src/License.txt" "$pkgdir/usr/share/licenses/$pkgname"
+  install -m 644 "$srcdir/$pkgname-$pkgver/License.txt" "$pkgdir/usr/share/licenses/$pkgname"
+  install -m 644 "$srcdir/$pkgname-$pkgver/source/build/euphoria.pdf /usr/
 
   # Create a default eu.cfg file
   mkdir -p "$pkgdir/etc/euphoria"

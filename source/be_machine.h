@@ -12,6 +12,16 @@ extern int in_backend;
 #endif
 
 #ifdef EWINDOWS
+#define DLL_PTR_TYPE HINSTANCE
+#else
+#define DLL_PTR_TYPE void*
+#endif
+
+extern DLL_PTR_TYPE *open_dll_list;
+extern int open_dll_size;
+extern int open_dll_count;
+
+#ifdef EWINDOWS
 extern HINSTANCE *open_dll_list;
 extern int open_dll_size;
 extern int open_dll_count;
@@ -64,6 +74,7 @@ void echo_wait();
 object memory_copy(object d, object s, object n);
 object memory_set(object d, object v, object n);
 uintptr_t get_pos_int(char *where, object x);
+object ATOM_TO_ATOM_INT( object X );
 object get_int(object x);
 
 void NewConfig(int raise_console);
@@ -77,7 +88,7 @@ object Wrap(object x);
 
 IFILE long_iopen(char *name, char *mode);
 
-uintptr_t internal_general_call_back(
+object internal_general_call_back(
 		  intptr_t cb_routine,
 						   uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 						   uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,

@@ -18,7 +18,7 @@ include std/dll.e
 -- representation of a number.  The general pattern is an optional negative sign (-), a number, 
 -- usually with a decimal point, followed by an upper case or lower case 'e', then optionally 
 -- a plus (+) or a minus (-) sign, and an integer.  There should be no spaces or other characters.  
--- The following are valid numbers:
+-- The following are valid numbers~:
 -- {{{
 -- 1e0
 -- 3.1415e-2
@@ -30,13 +30,13 @@ include std/dll.e
 -- (or 20) digits.  The 17th (or 20th) supplied digit may have an effect upon the value of the 
 -- atom due to rounding errors in the calculations.  
 -- 
--- This doesn't mean that if the 17th (or 20th) digit is 5 or higher, you should include it.  The 
+-- This does not mean that if the 17th (or 20th) digit is 5 or higher, you should include it.  The 
 -- calculations are much more complicated, because a decimal fraction has to be converted to a 
--- binary fraction, and there's not really a one-to-one correspondence between the decimal 
+-- binary fraction, and there is not really a one-to-one correspondence between the decimal 
 -- digits and the bits in the resulting atom.  The 18th or higher digit, however, will never 
 -- have an effect on the resulting atom.
 -- 
--- The biggest and smallest (magnitude) atoms possible are: 
+-- The biggest and smallest (magnitude) atoms possible are~: 
 -- {{{
 -- 32-bit:
 --    1.7976931348623157e+308
@@ -48,10 +48,16 @@ include std/dll.e
 -- === Floating Point Types
 
 public enum type floating_point
---** NATIVE: Use whatever is the appropriate format based upon the version of
+--**
+-- NATIVE
+-- Description:
+-- Use whatever is the appropriate format based upon the version of
 -- euphoria being used (DOUBLE for 32-bit, EXTENDED for 64-bit)
 	NATIVE,
---** DOUBLE: IEEE 754 double (64-bit) floating point format. 
+--**
+-- DOUBLE:
+-- Description
+-- IEEE 754 double (64-bit) floating point format.
 -- The native 32-bit euphoria floating point representation.
 	DOUBLE,
 --** EXTENDED: 80-bit floating point format.
@@ -159,7 +165,7 @@ public function bits_to_bytes( sequence bits )
 end function
 
 --**
--- Description
+-- Description:
 -- Converts a sequence of bytes (all elements integers between 0 and 255) and
 -- converts it into a sequence of bits.
 --
@@ -289,7 +295,6 @@ constant
 -- bytes in the raw format of an IEEE 754 double or extended
 -- precision floating point number.  This value can be passed to the euphoria
 -- library function, ##[[:float64_to_atom]]## or ##[[:float80_to_atom]]##, respectively.
--- Note: does not check if the string exceeds IEEE 754 double precision limits.
 --
 -- Parameters:
 --	# ##s## : string representation of a number, e.g., "1.23E4"
@@ -299,6 +304,10 @@ constant
 --
 -- Returns:
 -- Sequence of bytes that represents the physical form of the converted floating point number.
+--
+-- Note: 
+-- Does not check if the string exceeds IEEE 754 double precision limits.
+--
 public  function scientific_to_float( sequence s, floating_point fp = NATIVE )
 	integer dp, e, exp
 	sequence int_bits, frac_bits, mbits, ebits, sbits
@@ -474,10 +483,10 @@ end function
 -- an atom.
 --
 -- Parameters:
---	# ##s## : string representation of a number, e.g., "1.23E4"
---	# ##fp## : the required precision for the ultimate representation
---	## ##DOUBLE## Use IEEE 754, the euphoria representation used in 32-bit euphoria
---	## ##EXTENDED## Use Extended Floating Point, the euphoria representation in 64-bit euphoria
+--	# ##s## : string representation of a number (such as "1.23E4" ).
+--	# ##fp## : the required precision for the ultimate representation.
+--	## ##DOUBLE## Use IEEE 754, the euphoria representation used in 32-bit Euphoria.
+--	## ##EXTENDED## Use Extended Floating Point, the euphoria representation in 64-bit Euphoria.
 -- 
 -- Returns:
 -- Euphoria atom floating point number.

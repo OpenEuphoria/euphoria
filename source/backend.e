@@ -13,7 +13,7 @@ end ifdef
 include std/dll.e
 include std/machine.e
 include std/text.e
-
+include std/map.e
 include global.e
 include common.e
 include mode.e as mode
@@ -188,6 +188,7 @@ procedure BackEnd(integer il_file)
 	
 	-- convert symbol names to C strings in memory
 	nm = alloc_symbol_names( st, lit, string_size )
+	poke_pointer( st + ST_NAME, nm )
 	
 	if not has_coverage() then
 		SymTab = {}  -- free up some space
@@ -228,6 +229,7 @@ procedure BackEnd(integer il_file)
 		end if
 		
 		short = length(eentry) < 4
+		sequence started_file = repeat( 0, length( known_files ) )
 		for j = 1 to repcount do
 			poke2(addr + SL_LINE, eentry[LINE-short])  -- hits 4,5,6,7 
 											  -- 7 should be 0 unless 16 million
@@ -238,6 +240,12 @@ procedure BackEnd(integer il_file)
 						+ remainder(eentry[SRC], SOURCE_CHUNK)) -- store actual address
 				end if
 				poke(addr + SL_OPTIONS, eentry[OPTIONS]) -- else leave it 0
+			end if
+			if started_file[eentry[LOCAL_FILE_NO-short]] then
+				poke4( addr + SL_MULTILINE, -1 )
+			else
+				poke4( addr + SL_MULTILINE, 0 )
+				started_file[eentry[LOCAL_FILE_NO-short]] = 1
 			end if
 			addr += SL_SIZE
 			eentry[LINE-short] += 1
@@ -292,23 +300,40 @@ procedure BackEnd(integer il_file)
 	end if
 
 	-- M_BACKEND:
-	machine_proc(65, 
-		{
-			st, 
-			sl, 
-			ms, 
-			lit, 
-			include_info, 
-			get_switches(), 
-			Argv,
-			routine_id( "cover_line" ),
-			routine_id( "cover_routine" ),
-			routine_id( "write_coverage_db" ),
-			routine_id( "DisplayColorLine" ),
-			external_debugger_ptr,
-			routine_id( "sprint" ),
-			$
-		})
+	ifdef EU4_0 and EUI then
+		machine_proc(65, 
+			{
+				st, 
+				sl, 
+				ms, 
+				lit, 
+				include_info, 
+				get_switches(), 
+				Argv,
+				$
+			})
+	elsedef
+		machine_proc(65, 
+			{
+				st, 
+				sl, 
+				ms, 
+				lit, 
+				include_info, 
+				get_switches(), 
+				Argv,
+				routine_id( "cover_line" ),
+				routine_id( "cover_routine" ),
+				routine_id( "write_coverage_db" ),
+				routine_id( "DisplayColorLine" ),
+				external_debugger_ptr,	
+				routine_id( "map:new" ),
+				routine_id( "map:put" ),
+				routine_id( "map:get" ),
+				trace_lines,
+				$
+			})
+	end ifdef
 end procedure
 mode:set_backend( routine_id("BackEnd") )
 
