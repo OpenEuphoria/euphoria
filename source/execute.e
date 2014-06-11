@@ -2455,7 +2455,8 @@ procedure opLESS()
 	a = Code[pc+1]
 	b = Code[pc+2]
 	target = Code[pc+3]
-	val[target] = compare(val[a], val[b]) < 0
+	--val[target] = compare(val[a], val[b]) < 0
+	val[target] = xq_less(val[a], val[b])
 	pc += 4
 end procedure
 
@@ -2463,7 +2464,8 @@ procedure opGREATER()
 	a = Code[pc+1]
 	b = Code[pc+2]
 	target = Code[pc+3]
-	val[target] = compare(val[a], val[b]) > 0
+	--val[target] = compare(val[a], val[b]) > 0
+	val[target] = xq_more(val[a], val[b])
 	pc += 4
 end procedure
 
@@ -2471,7 +2473,8 @@ procedure opEQUALS()
 	a = Code[pc+1]
 	b = Code[pc+2]
 	target = Code[pc+3]
-	val[target] = compare(val[a], val[b]) = 0
+	--val[target] = compare(val[a], val[b]) = 0
+	val[target] = xq_equ(val[a], val[b])
 	pc += 4
 end procedure
 
@@ -2479,7 +2482,8 @@ procedure opNOTEQ()
 	a = Code[pc+1]
 	b = Code[pc+2]
 	target = Code[pc+3]
-	val[target] = compare(val[a], val[b]) != 0
+	--val[target] = compare(val[a], val[b]) != 0
+	val[target] = xq_neq(val[a], val[b])
 	pc += 4
 end procedure
 
@@ -2487,7 +2491,8 @@ procedure opLESSEQ()
 	a = Code[pc+1]
 	b = Code[pc+2]
 	target = Code[pc+3]
-	val[target] = compare(val[a], val[b]) <= 0
+	--val[target] = compare(val[a], val[b]) <= 0
+	val[target] = xq_leq(val[a], val[b])
 	pc += 4
 end procedure
 
@@ -2495,7 +2500,8 @@ procedure opGREATEREQ()
 	a = Code[pc+1]
 	b = Code[pc+2]
 	target = Code[pc+3]
-	val[target] = compare(val[a], val[b]) >= 0
+	--val[target] = compare(val[a], val[b]) >= 0
+	val[target] = xq_geq(val[a], val[b])
 	pc += 4
 end procedure
 
