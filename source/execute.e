@@ -36,6 +36,8 @@ include mode.e as mode
 include intinit.e
 include coverage.e
 
+include std/seqops.e
+
 include std/machine.e as dep
 include std/dll.e -- for sizeof in 4.0
 without inline
@@ -2338,7 +2340,7 @@ procedure opMULTIPLY()
 	a = Code[pc+1]
 	b = Code[pc+2]
 	target = Code[pc+3]
-	val[target] = val[a] * val[b]
+	val[target] = xq_mul(val[a], val[b])
 	pc += 4
 end procedure
 
@@ -2347,7 +2349,7 @@ procedure opPLUS()
 	a = Code[pc+1]
 	b = Code[pc+2]
 	target = Code[pc+3]
-	val[target] = val[a] + val[b]
+	val[target] = xq_add(val[a], val[b])
 	pc += 4
 end procedure
 
@@ -2356,7 +2358,7 @@ procedure opMINUS()
 	a = Code[pc+1]
 	b = Code[pc+2]
 	target = Code[pc+3]
-	val[target] = val[a] - val[b]
+	val[target] = xq_sub(val[a], val[b])
 	pc += 4
 end procedure
 
@@ -2364,7 +2366,7 @@ procedure opOR()
 	a = Code[pc+1]
 	b = Code[pc+2]
 	target = Code[pc+3]
-	val[target] = val[a] or val[b]
+	val[target] = xq_or(val[a], val[b])
 	pc += 4
 end procedure
 
@@ -2372,7 +2374,7 @@ procedure opXOR()
 	a = Code[pc+1]
 	b = Code[pc+2]
 	target = Code[pc+3]
-	val[target] = val[a] xor val[b]
+	val[target] = xq_xor(val[a], val[b])
 	pc += 4
 end procedure
 
@@ -2380,7 +2382,7 @@ procedure opAND()
 	a = Code[pc+1]
 	b = Code[pc+2]
 	target = Code[pc+3]
-	val[target] = val[a] and val[b]
+	val[target] = xq_and(val[a], val[b])
 	pc += 4
 end procedure
 
@@ -2391,7 +2393,7 @@ procedure opDIVIDE()
 	if equal(val[b], 0) then
 		RTFatal("attempt to divide by 0")
 	end if
-	val[target] = val[a] / val[b]
+	val[target] = xq_div(val[a], val[b])
 	pc += 4
 end procedure
 
@@ -2402,7 +2404,7 @@ procedure opREMAINDER()
 	if equal(val[b], 0) then
 		RTFatal("Can't get remainder of a number divided by 0")
 	end if
-	val[target] = remainder(val[a], val[b])
+	val[target] = xq_mod(val[a], val[b])
 	pc += 4
 end procedure
 
@@ -2413,7 +2415,7 @@ procedure opFLOOR_DIV()
 	if equal(val[b], 0) then
 		RTFatal("attempt to divide by 0")
 	end if
-	val[target] = floor(val[a] / val[b])
+	val[target] = floor(xq_div(val[a], val[b]))
 	pc += 4
 end procedure
 
@@ -2421,7 +2423,7 @@ procedure opAND_BITS()
 	a = Code[pc+1]
 	b = Code[pc+2]
 	target = Code[pc+3]
-	val[target] = and_bits(val[a], val[b])
+	val[target] = xq_and_bits(val[a], val[b])
 	pc += 4
 end procedure
 
@@ -2429,7 +2431,7 @@ procedure opOR_BITS()
 	a = Code[pc+1]
 	b = Code[pc+2]
 	target = Code[pc+3]
-	val[target] = or_bits(val[a], val[b])
+	val[target] = xq_or_bits(val[a], val[b])
 	pc += 4
 end procedure
 
@@ -2437,7 +2439,7 @@ procedure opXOR_BITS()
 	a = Code[pc+1]
 	b = Code[pc+2]
 	target = Code[pc+3]
-	val[target] = xor_bits(val[a], val[b])
+	val[target] = xq_xor_bits(val[a], val[b])
 	pc += 4
 end procedure
 
@@ -2445,7 +2447,7 @@ procedure opPOWER()
 	a = Code[pc+1]
 	b = Code[pc+2]
 	target = Code[pc+3]
-	val[target] = power(val[a], val[b])
+	val[target] = xq_pow(val[a], val[b])
 	pc += 4
 end procedure
 

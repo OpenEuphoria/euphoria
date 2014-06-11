@@ -2361,12 +2361,12 @@ object binary_op(int fn, object a, object b)
 /* Recursively calculates fn of a and b. */
 /* Caller must handle INT:INT case */
 {
-	int length;
-	object_ptr ap, bp, cp;
+	int length, maxlen;
+	object_ptr ap, bp, cp, zp;
 	struct d temp_d;
 	s1_ptr c;
 	object (*int_fn)();
-	object x;
+	object x, z;
 
 	/* handle all ATOM:ATOM cases except INT:INT - not allowed
 	   n.b. IS_ATOM_DBL actually only distinguishes ATOMS from SEQUENCES */
@@ -2447,19 +2447,27 @@ object binary_op(int fn, object a, object b)
 		a = (object)SEQ_PTR(a);
 		b = (object)SEQ_PTR(b);
 		length = ((s1_ptr)a)->length;
+		maxlen = ((s1_ptr)a)->length;
 		//if (length != ((s1_ptr)b)->length) {
 		if (length > ((s1_ptr)b)->length) {
 			length = ((s1_ptr)b)->length;
+			z = a;
 			//RTFatal("sequence lengths are not the same (%ld != %ld)",
 					//length, ((s1_ptr)b)->length);
+		} else {
+			maxlen = ((s1_ptr)b)->length;
+			z = b;
 		}
-		c = NewS1(length);
+		c = NewS1(maxlen);
 		cp = c->base;
 		ap = ((s1_ptr)a)->base;
 		bp = ((s1_ptr)b)->base+1;
+		zp = ((s1_ptr)z)->base;
 		//while (TRUE) {
 		while (length) {
 			length--;
+			maxlen--;
+			++zp;
 			x = *(++ap);
 			if (IS_ATOM_INT(x) && IS_ATOM_INT(*bp)) {
 				*(++cp) = (*int_fn)(INT_VAL(x), INT_VAL(*bp++));
@@ -2468,6 +2476,21 @@ object binary_op(int fn, object a, object b)
 				if (x == NOVALUE)
 					break;
 				*(++cp) = binary_op(fn, x, *bp++);
+			}
+		}
+		// this is a bit of a hack, using (x minus 0) as a nop
+		fn = 10; // minus
+	int_fn = optable[fn].intfn;
+		while (maxlen) {
+			maxlen--;
+			x = *(++zp);
+			if (IS_ATOM_INT(x)) {
+				*(++cp) = (*int_fn)(INT_VAL(x), 0);
+			}
+			else {
+				if (x == NOVALUE)
+					break;
+				*(++cp) = binary_op(fn, x, 0);
 			}
 		}
 	}
