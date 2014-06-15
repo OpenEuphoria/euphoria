@@ -2965,7 +2965,11 @@ procedure opAPPEND()
 	a = Code[pc+1]
 	b = Code[pc+2]
 	target = Code[pc+3]
+	if atom(val[a]) then
+	val[target] = append({val[a]}, val[b])
+	else
 	val[target] = append(val[a], val[b])
+	end if
 	pc += 4
 end procedure
 
@@ -2973,7 +2977,11 @@ procedure opPREPEND()
 	a = Code[pc+1]
 	b = Code[pc+2]
 	target = Code[pc+3]
+	if atom(val[a]) then
+	val[target] = prepend({val[a]}, val[b])
+	else
 	val[target] = prepend(val[a], val[b])
+	end if
 	pc += 4
 end procedure
 

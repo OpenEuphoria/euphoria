@@ -4596,10 +4596,10 @@ void do_exec(intptr_t *start_pc)
 			deprintf("case L_APPEND:");
 				b = *(object_ptr)pc[1];
 				top = *(object_ptr)pc[2];
-				if (!IS_SEQUENCE(b)) {
+				/*if (!IS_SEQUENCE(b)) {
 					tpc = pc;
 					RTFatal("first argument of append must be a sequence");
-				}
+				}*/
 	  app_copy:
 				tpc = pc;
 				Ref(top);
@@ -4611,10 +4611,10 @@ void do_exec(intptr_t *start_pc)
 			deprintf("case L_PREPEND:");
 				b = *(object_ptr)pc[1];
 				top = *(object_ptr)pc[2];
-				if (!IS_SEQUENCE(b)) {
+				/*if (!IS_SEQUENCE(b)) {
 					tpc = pc;
 					RTFatal("first argument of prepend must be a sequence");
-				}
+				}*/
 	 prep_copy:
 				tpc = pc;
 				Ref(top);

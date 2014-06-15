@@ -674,9 +674,18 @@ void Prepend(object_ptr target, object s1, object a)
 	int len, new_len;
 	object temp;
 
+	if (IS_ATOM_INT(s1) || IS_ATOM(s1))
+	{
+		s1p = NOVALUE;
+		t = NOVALUE;
+		len = 1;
+	}
+	else
+	{
 	t = (s1_ptr)*target;
 	s1p = SEQ_PTR(s1);
 	len = s1p->length;
+	}
 	if ((s1_ptr)s1 == t && s1p->ref == 1) {
 		/* we can to prepend in-place */
 		/* Check for room at beginning */
@@ -697,6 +706,17 @@ void Prepend(object_ptr target, object s1, object a)
 	new_seq->base += new_len - new_seq->length; /* make room at beginning */
 	p = new_seq->base+1;
 	*p = a;
+	if (s1p == NOVALUE)
+	{
+		temp = s1;
+		*(++p) = temp;
+		if (!IS_ATOM_INT(temp))
+			RefDS(temp);
+		temp = NOVALUE;
+		*(++p) = temp;
+	}
+	else
+	{
 	q = s1p->base;
 	while (TRUE) {  // NOVALUE will be copied
 		temp = *(++q);
@@ -706,6 +726,7 @@ void Prepend(object_ptr target, object s1, object a)
 				break;
 			RefDS(temp);
 		}
+	}
 	}
 	ASSIGN_SEQ(target, new_seq);
 }
@@ -721,9 +742,18 @@ void Append(object_ptr target, object s1, object a)
 	object_ptr base, last;
 	object temp;
 
+	if (IS_ATOM_INT(s1) || IS_ATOM(s1))
+	{
+		t = NOVALUE;
+		s1p = NOVALUE;
+		len = 1;
+	}
+	else
+	{
 	t = (s1_ptr)*target;
 	s1p = SEQ_PTR(s1);
 	len = s1p->length;
+	}
 
 	if ((s1_ptr)s1 == t && s1p->ref == 1) {
 		/* we can append in-place */
@@ -760,6 +790,17 @@ void Append(object_ptr target, object s1, object a)
 	new_seq->length = len + 1;
 	new_seq->postfill = new_len - new_seq->length;
 	p = new_seq->base;
+	if (s1p == NOVALUE)
+	{
+		temp = s1;
+		*(++p) = temp;
+		if (!IS_ATOM_INT(temp))
+			RefDS(temp);
+		temp = NOVALUE;
+		*(++p) = temp;
+	}
+	else
+	{
 	q = s1p->base;
 	while (TRUE) {  // NOVALUE will be copied
 		temp = *(++q);
@@ -769,6 +810,7 @@ void Append(object_ptr target, object s1, object a)
 				break;
 			RefDS(temp);
 		}
+	}
 	}
 	*p++ = a;
 	*p = NOVALUE; // end marker
