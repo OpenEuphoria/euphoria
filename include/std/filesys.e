@@ -2373,7 +2373,7 @@ end ifdef
 -- See Also:
 --   [[:rename_file]], [[:copy_file]]
 public function move_file(sequence src, sequence dest, integer overwrite=0)
-	atom psrc = 0, pdest = 0, ret
+	atom psrc = 0, pdest = 0
 	sequence tempfile = ""
 	if not file_exists(src) then
 		return 0
@@ -2388,7 +2388,7 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 	ifdef UNIX then
 		sequence src_result, dest_result
 		src_result = stat( src )
-		ret = src_result[STAT_RETURN]
+		atom ret = src_result[STAT_RETURN]
 		if ret then
 			return 0
 		end if
@@ -2409,11 +2409,11 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 		if not ret and dest_result[STAT_DEV] != src_result[STAT_DEV] then
 			-- on different filesystems, can not use rename
 			-- fall back on copy&delete
-			ret = copy_file(src, dest, overwrite)
-			if ret then
-				ret = delete_file(src)
-			end if
- 			return (not ret)
+			if copy_file(src, dest, overwrite) then
+				return delete_file(src)
+			else			    
+ 			    return 0
+ 			end if
 		end if
 		
 	end ifdef
@@ -2428,7 +2428,7 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 		move_file(dest, tempfile)
 	end if
 	
-	ret = c_func(xMoveFile, {psrc, pdest})
+	atom ret = c_func(xMoveFile, {psrc, pdest})
 	
 	ifdef UNIX then
 		ret = not ret
