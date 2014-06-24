@@ -2409,11 +2409,11 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 		if not ret and dest_result[STAT_DEV] != src_result[STAT_DEV] then
 			-- on different filesystems, can not use rename
 			-- fall back on copy&delete
-			ret = copy_file(src, dest, overwrite)
-			if ret then
-				ret = delete_file(src)
-			end if
- 			return (not ret)
+			if copy_file(src, dest, overwrite) then
+				return delete_file(src)
+			else			    
+ 			    return 0
+ 			end if
 		end if
 		
 	end ifdef
