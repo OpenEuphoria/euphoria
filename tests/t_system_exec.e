@@ -33,7 +33,9 @@ abort(1)
     if not file_exists(interpreter_copy) then
         assert("Copy interpreter", copy_file(interpreter, test_dir))
     end if
-    
+    ifdef UNIX then
+	system("chmod 755 \"" & interpreter_copy & "\"", 2)
+    end ifdef 
     sequence full_test_prg = join_path({test_dir, test_prg})
     full_test_prg = full_test_prg[2..$]
     

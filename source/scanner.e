@@ -987,7 +987,7 @@ export function IncludePop()
 	return TRUE
 end function
 
-ifdef BITS32 or EU4_0 then
+ifdef BITS32 then
 	constant
 		MAXCHK2  = 0x1FFFFFFF,
 		MAXCHK8  = 0x07FFFFFF,

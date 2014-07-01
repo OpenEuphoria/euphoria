@@ -11,7 +11,11 @@
 #include "symtab.h"
 
 #ifndef MAX_SEQ_LEN
+#if INTPTR_MAX == INT32_MAX
 #	define MAX_SEQ_LEN ((((unsigned long)0xFFFFFFFF - sizeof(struct s1)) / sizeof(object)) - 1)
+#else
+#	define MAX_SEQ_LEN ((((unsigned long)0xFFFFFFFFFFFFFFFFLL - sizeof(struct s1)) / sizeof(object)) - 1)
+#endif
 #endif		                /* maximum sequence length set such that it doesn't overflow */
 #define RESOLUTION 8            /* minimum size & increment before mapping */
 #define LOG_RESOLUTION 3        /* log2 of RESOLUTION */

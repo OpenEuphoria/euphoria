@@ -64,19 +64,19 @@ fi
 
 
 MFLAG=-m32
-EFLAG=E32
+
 if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
 	ARCH=ix86
 	MFLAG=-m32
-	EFLAG=E32
+	
 elif echo "$UNAME_MACHINE" | egrep "x86_64|amd64" > /dev/null; then
 	ARCH=ix86_64
 	MFLAG=-m64
-	EFLAG=E64
+	
 elif echo "$UNAME_MACHINE" | grep -i ARM > /dev/null; then
 	ARCH=ARM
 	MFLAG=
-	EFLAG=E32
+	
 fi
 
 if test $UNAME_SYSTEM = "Linux"; then
@@ -106,12 +106,12 @@ elif test $UNAME_SYSTEM = "Darwin"; then
 	if test $VAL -gt 8; then
 		ARCH=ix86_64
 		MFLAG=-m64
-		EFLAG=E64
+		
 	# PPC will have to be supported manually; Euphoria doesn't currently support PPC.
 	else 
 		ARCH=x86
 		MFLAG=-m32
-		EFLAG=E32
+		
 	fi
 else
 	EHOST=EBSD
@@ -333,17 +333,17 @@ while [ "$1" != "" ]; do
 			x86[_\-\.]64)
 				ARCH=ix86_64
 				MFLAG=-m64
-				EFLAG=E64
+				
 			;;
 			x86|ix86)
 				ARCH=ix86
 				MFLAG=-m32
-				EFLAG=E32
+				
 			;;
 			ARM)
 				ARCH=ARM
 				MFLAG=
-				EFLAG=E32
+				
 			;;
 			*)
 				echo "Unknown Architecture '$VAL'"
@@ -519,7 +519,6 @@ echo "TRANSLATE=$EC" >> "$PREFIX"${CONFIG_FILE}
 [ -n "$TARGET" ] && echo "ETARGET=$TARGET" >> "$PREFIX"${CONFIG_FILE}
 [ -n "$ARCH" ] && echo "ARCH=$ARCH" >> "$PREFIX"${CONFIG_FILE}
 [ -n "$MFLAG" ] && echo "MSIZE=$MFLAG" >> "$PREFIX"${CONFIG_FILE}
-[ -n "$EFLAG" ] && echo "EFLAG=-d $EFLAG" >> "$PREFIX"${CONFIG_FILE}
 [ -n "$CC" ] && echo "CC_SUFFIX=$CC" >> "$PREFIX"${CONFIG_FILE}
 [ -n "$CC_PREFIX" ] && echo "CC_PREFIX=$CC_PREFIX" >> "$PREFIX"${CONFIG_FILE}
 [ -n "$RC" ] && echo "RC_SUFFIX=$RC" >> "$PREFIX"${CONFIG_FILE}
@@ -574,7 +573,6 @@ echo include $SOURCEDIR/Makefile.gnu > Makefile
 
 echo Writing eu.cfg to $BUILDDIR/eu.cfg...
 echo "[all]" > $BUILDDIR/eu.cfg
-echo -d $EFLAG >> $BUILDDIR/eu.cfg
 echo -eudir $CYPTRUNKDIR >> $BUILDDIR/eu.cfg
 echo -i $CYPTRUNKDIR/include >> $BUILDDIR/eu.cfg
 
