@@ -716,9 +716,9 @@ void Append(object_ptr target, object s1, object a)
 {
 	object_ptr p, q;
 	s1_ptr t;
-	s1_ptr s1p, new_s1p, new_seq;
+	s1_ptr s1p, new_seq;
 	long len, new_len;
-	object_ptr base, last;
+	object_ptr last;
 	object temp;
 
 	t = (s1_ptr)*target;
@@ -730,9 +730,7 @@ void Append(object_ptr target, object s1, object a)
 		if (s1p->postfill == 0) {
 			/* make some more postfill space */
 			new_len = EXTRA_EXPAND(len);
-			base = s1p->base;
-			new_s1p = ReNewS1(s1p, new_len+1);
-			s1p = new_s1p;
+			s1p = ReNewS1(s1p, new_len+1);
 			*target = MAKE_SEQ(s1p);
 		}
 		s1p->postfill--;
