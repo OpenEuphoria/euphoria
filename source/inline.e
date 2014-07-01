@@ -823,7 +823,7 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 						
 					else
 						-- TODO: make this more descriptive!
-						CompileErr(146)
+						CompileErr(TYPE_CHECK_ERROR_WHEN_INLINING_LITERAL)
 					end if
 					
 				elsif not is_temp( sym ) then

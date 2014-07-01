@@ -34,23 +34,23 @@ export sequence src_name = ""
 export sequence switches = {}
 
 constant COMMON_OPTIONS = {
-	{ "eudir",     0, GetMsgText(328,0), { HAS_PARAMETER, "dir" } },
-	{ "c",         0, GetMsgText(280,0), { MULTIPLE, HAS_PARAMETER, "filename" } },
-	{ "i",         0, GetMsgText(283,0), { MULTIPLE, HAS_PARAMETER, "dir" } },
-	{ "d",         0, GetMsgText(282,0), { MULTIPLE, HAS_PARAMETER, "word" } },
-	{ "l",         0, GetMsgText(284,0), { MULTIPLE, HAS_PARAMETER, "local" } },
-	{ "ldb",       0, GetMsgText(285,0), { HAS_PARAMETER, "localdb" } },
-	{ "p",         0, GetMsgText(286,0), { MULTIPLE, HAS_PARAMETER, "file_ext:command" } },
-	{ "pf",        0, GetMsgText(287,0), { } },
-	{ "w",         0, GetMsgText(291,0), { MULTIPLE, HAS_PARAMETER, "name" } },
-	{ "wf",        0, GetMsgText(292,0), { HAS_PARAMETER, "filename" } },
-	{ "x",         0, GetMsgText(293,0), { MULTIPLE, HAS_PARAMETER, "name" } },
-	{ "batch",     0, GetMsgText(279,0), { } },
-	{ "strict",    0, GetMsgText(288,0), { } },
-	{ "test",      0, GetMsgText(289,0), { } },
+	{ "eudir",     0, GetMsgText(OVERRIDES_THE_VALUE_OF_EUDIR,0), { HAS_PARAMETER, "dir" } },
+	{ "c",         0, GetMsgText(SPECIFY_A_CONFIGURATION_FILE,0), { MULTIPLE, HAS_PARAMETER, "filename" } },
+	{ "i",         0, GetMsgText(ADD_A_DIRECTORY_TO_BE_SEARCHED_FOR_INCLUDE_FILES,0), { MULTIPLE, HAS_PARAMETER, "dir" } },
+	{ "d",         0, GetMsgText(DEFINE_A_PREPROCESSOR_WORD,0), { MULTIPLE, HAS_PARAMETER, "word" } },
+	{ "l",         0, GetMsgText(DEFINES_A_LOCALIZATION_QUALIFIER,0), { MULTIPLE, HAS_PARAMETER, "local" } },
+	{ "ldb",       0, GetMsgText(DEFINES_THE_BASE_NAME_FOR_LOCALIZATION_DATABASES,0), { HAS_PARAMETER, "localdb" } },
+	{ "p",         0, GetMsgText(SETUP_A_PREPROCESSOR,0), { MULTIPLE, HAS_PARAMETER, "file_ext:command" } },
+	{ "pf",        0, GetMsgText(FORCE_PREPROCESSING_REGARDLESS_OF_CACHE_STATE,0), { } },
+	{ "w",         0, GetMsgText(DEFINES_WARNING_LEVEL,0), { MULTIPLE, HAS_PARAMETER, "name" } },
+	{ "wf",        0, GetMsgText(WRITE_ALL_WARNINGS_TO_THE_GIVEN_FILE_INSTEAD_OF_STDOUT,0), { HAS_PARAMETER, "filename" } },
+	{ "x",         0, GetMsgText(DEFINES_WARNING_LEVEL_BY_EXCLUSION,0), { MULTIPLE, HAS_PARAMETER, "name" } },
+	{ "batch",     0, GetMsgText(TURN_ON_BATCH_PROCESSING_DO_NOT_PRESS_ENTER_ON_ERROR,0), { } },
+	{ "strict",    0, GetMsgText(ENABLE_ALL_WARNINGS,0), { } },
+	{ "test",      0, GetMsgText(TEST_SYNTAX_ONLY_DO_NOT_EXECUTE,0), { } },
 	{ "trace-lines",0, GetMsgText(TRACE_LINES_CMD, 0), { HAS_PARAMETER, "lines" } },
-	{ "copyright", 0, GetMsgText(281,0), { } },
-	{ "v", "version", GetMsgText(290,0), { } },
+	{ "copyright", 0, GetMsgText(DISPLAY_ALL_COPYRIGHT_NOTICES,0), { } },
+	{ "v", "version", GetMsgText(DISPLAY_THE_VERSION_NUMBER,0), { } },
  	$
 }
 
@@ -107,19 +107,19 @@ export procedure show_banner()
 	sequence prod_name, memory_type
 
 	if INTERPRET and not BIND then
-		prod_name = GetMsgText(270,0)
+		prod_name = GetMsgText(EUPHORIA_INTERPRETER,0)
 
 	elsif TRANSLATE then
-		prod_name = GetMsgText(271,0)
+		prod_name = GetMsgText(EUPHORIA_TO_C_TRANSLATOR,0)
 
 	elsif BIND then
-		prod_name = GetMsgText(272,0)
+		prod_name = GetMsgText(EUPHORIA_BINDER,0)
 	end if
 
 	ifdef EU_MANAGED_MEM then
-		memory_type = GetMsgText(273,0)
+		memory_type = GetMsgText(USING_MANAGED_MEMORY,0)
 	elsedef
-		memory_type = GetMsgText(274,0)
+		memory_type = GetMsgText(USING_SYSTEM_MEMORY,0)
 	end ifdef
 
 	sequence misc_info = {
@@ -137,7 +137,7 @@ export procedure show_banner()
 
 	object EuConsole = getenv("EUCONS")
 	if equal(EuConsole, "1") then
-		misc_info[4] = GetMsgText(275,0)
+		misc_info[4] = GetMsgText(EUCONSOLE,0)
 	else
 		misc_info = remove(misc_info, 4)
 	end if
@@ -522,7 +522,7 @@ export procedure handle_common_options(m:map opts)
 			case "v", "version" then
 				show_banner()
 				if not batch_job and not test_only then
-					console:maybe_any_key(GetMsgText(278,0), 2)
+					console:maybe_any_key(GetMsgText(MSG_PRESS_ANY_KEY_AND_WINDOW_WILL_CLOSE,0), 2)
 				end if
 
 				abort(0)
@@ -530,7 +530,7 @@ export procedure handle_common_options(m:map opts)
 			case "copyright" then
 				show_copyrights()
 				if not batch_job and not test_only then
-					console:maybe_any_key(GetMsgText(278,0), 2)
+					console:maybe_any_key(GetMsgText(MSG_PRESS_ANY_KEY_AND_WINDOW_WILL_CLOSE,0), 2)
 				end if
 				abort(0)
 			

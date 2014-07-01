@@ -569,7 +569,7 @@ function setup_build()
 			-- resource file, executable file
 			rc_comp = compiler_prefix &"wrc -DSRCDIR=\"" & adjust_for_build_file(current_dir()) & "\" -q -fo=[2] -ad [1] [3]"
 		case else
-			CompileErr(43)
+			CompileErr(COMPILER_IS_UNKNOWN)
 	end switch
 
 	if length(cflags) then
@@ -819,14 +819,14 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 		switch compiler_type do
 			case COMPILER_GCC then
 				if not silent then
-					ShowMsg(1, 176, {"GCC"})
+					ShowMsg(1, COMPILING_WITH_1, {"GCC"})
 				end if
 
 			case COMPILER_WATCOM then
 				write_objlink_file()
 
 				if not silent then
-					ShowMsg(1, 176, {"Watcom"})
+					ShowMsg(1, COMPILING_WITH_1, {"Watcom"})
 				end if
 		end switch
 	end if
@@ -851,21 +851,21 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 						-- disabled until ticket:59 can be fixed
 						-- results in longer build times, but output is correct
 						if 0 and outdated_files[i] = 0 and force_build = 0 then
-							ShowMsg(1, 325, { pdone, generated_files[i] })
+							ShowMsg(1, SKIPPING__130_2_UPTODATE, { pdone, generated_files[i] })
 							continue
 						else
-							ShowMsg(1, 163, { pdone, generated_files[i] })
+							ShowMsg(1, COMPILING_130_2, { pdone, generated_files[i] })
 						end if
 					else
-						ShowMsg(1, 163, { pdone, cmd })
+						ShowMsg(1, COMPILING_130_2, { pdone, cmd })
 					end if
 
 				end if
 
 				status = system_exec(cmd, 0)
 				if status != 0 then
-					ShowMsg(2, 164, { generated_files[i] })
-					ShowMsg(2, 165, { status, cmd })
+					ShowMsg(2, COULDNT_COMPILE_FILE_1, { generated_files[i] })
+					ShowMsg(2, STATUS_1_COMMAND_2, { status, cmd })
 					goto "build_direct_cleanup"
 				end if
 			elsif match(".o", generated_files[i]) then
@@ -891,8 +891,8 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 		cmd = text:format(settings[SETUP_RC_COMPILER], { rc_file[D_ALTNAME], res_file[D_ALTNAME] })
 		status = system_exec(cmd, 0)
 		if status != 0 then
-			ShowMsg(2, 350, { rc_file[D_NAME] })
-			ShowMsg(2, 169, { status, cmd })
+			ShowMsg(2, UNABLE_TO_COMPILE_RESOURCE_FILE_1, { rc_file[D_NAME] })
+			ShowMsg(2, STATUS_1_COMMAND_2_A, { status, cmd })
 			
 			goto "build_direct_cleanup"
 		end if
@@ -913,23 +913,23 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 			})
 			
 		case else
-			ShowMsg(2, 167, { compiler_type })
+			ShowMsg(2, UNKNOWN_COMPILER_TYPE_1, { compiler_type })
 			
 			goto "build_direct_cleanup"
 	end switch
 
 	if not silent then
 		if not verbose then
-			ShowMsg(1, 166, { abbreviate_path(exe_name[D_NAME]) })
+			ShowMsg(1, LINKING_100_1, { abbreviate_path(exe_name[D_NAME]) })
 		else
-			ShowMsg(1, 166, { cmd })
+			ShowMsg(1, LINKING_100_1, { cmd })
 		end if
 	end if
 
 	status = system_exec(cmd, 0)
 	if status != 0 then
-		ShowMsg(2, 168, { exe_name[D_NAME] })
-		ShowMsg(2, 169, { status, cmd })
+		ShowMsg(2, UNABLE_TO_LINK_1, { exe_name[D_NAME] })
+		ShowMsg(2, STATUS_1_COMMAND_2_A, { status, cmd })
 		
 		goto "build_direct_cleanup"
 	end if
@@ -939,8 +939,8 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 		cmd = text:format(settings[SETUP_RC_COMPILER], { rc_file[D_ALTNAME], res_file[D_ALTNAME], exe_name[D_ALTNAME] })
 		status = system_exec(cmd, 0)
 		if status != 0 then
-			ShowMsg(2, 187, { rc_file[D_NAME], exe_name[D_NAME] })
-			ShowMsg(2, 169, { status, cmd })
+			ShowMsg(2, UNABLE_TO_LINK_RESOURCE_FILE_1_INTO_EXECUTABLE_2, { rc_file[D_NAME], exe_name[D_NAME] })
+			ShowMsg(2, STATUS_1_COMMAND_2_A, { status, cmd })
 			
 			goto "build_direct_cleanup"
 		end if
@@ -950,7 +950,7 @@ label "build_direct_cleanup"
 	if keep = 0 then
 		for i = 1 to length(generated_files) do
 			if verbose then
-				ShowMsg(1, 347, { generated_files[i] })
+				ShowMsg(1, DELETING_1, { generated_files[i] })
 			end if
 			delete_file(generated_files[i])
 		end for
@@ -964,7 +964,7 @@ label "build_direct_cleanup"
 
 			-- remove the trailing slash
 			if not remove_directory(output_dir) then
-				ShowMsg(2, 194, { abbreviate_path(output_dir) })
+				ShowMsg(2, COULD_NOT_REMOVE_DIRECTORY_1, { abbreviate_path(output_dir) })
 			end if
 		end if
 	end if
@@ -990,12 +990,12 @@ export procedure write_buildfile()
 					make_command = "make -f "
 				end if
 
-				ShowMsg(1, 170, { cfile_count + 2 })
+				ShowMsg(1, MSG_1C_FILES_WERE_CREATED, { cfile_count + 2 })
 					
 				if sequence(output_dir) and length(output_dir) > 0 then
-					ShowMsg(1, 174, { output_dir, make_command, file0 })
+					ShowMsg(1, TO_BUILD_YOUR_PROJECT_CHANGE_DIRECTORY_TO_1_AND_TYPE_23MAK, { output_dir, make_command, file0 })
 				else
-					ShowMsg(1, 172, { make_command, file0 })
+					ShowMsg(1, TO_BUILD_YOUR_PROJECT_TYPE_12MAK, { make_command, file0 })
 				end if
 			end if
 
@@ -1003,8 +1003,8 @@ export procedure write_buildfile()
 			write_makefile_partial()
 
 			if not silent then
-				ShowMsg(1, 170, { cfile_count + 2 })
-				ShowMsg(1, 173, { file0 })
+				ShowMsg(1, MSG_1C_FILES_WERE_CREATED, { cfile_count + 2 })
+				ShowMsg(1, TO_BUILD_YOUR_PROJECT_INCLUDE_1MAK_INTO_A_LARGER_MAKEFILE_PROJECT, { file0 })
 			end if
 
 		case BUILD_DIRECT then
@@ -1012,17 +1012,17 @@ export procedure write_buildfile()
 
 			if not silent then
 				sequence settings = setup_build()
-				--ShowMsg(1, 175, { exe_name[D_NAME] })
+				--ShowMsg(1, TO_RUN_YOUR_PROJECT_TYPE_1, { exe_name[D_NAME] })
 			end if
 
 		case BUILD_NONE then
 			if not silent then
-				ShowMsg(1, 170, { cfile_count + 2 })
+				ShowMsg(1, MSG_1C_FILES_WERE_CREATED, { cfile_count + 2 })
 			end if
 
 			-- Do not write any build file
 
 		case else
-			CompileErr(151)
+			CompileErr(UNKNOWN_BUILD_FILE_TYPE)
 	end switch
 end procedure

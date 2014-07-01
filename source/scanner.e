@@ -206,7 +206,7 @@ function pack_source(object src)
 		-- we ran out of space, allocate another chunk
 		current_source = allocate(SOURCE_CHUNK + LINE_BUFLEN)
 		if current_source = 0 then
-			CompileErr(123)
+			CompileErr(OUT_OF_MEMORY__TURN_OFF_TRACE_AND_PROFILE)
 		end if
 		all_source = append(all_source, current_source)
 		-- skip first byte, offset 0 means "no source"
@@ -406,7 +406,7 @@ export procedure read_line()
 -- 	end if
 -- 	n = find(0, ThisLine)
 -- 	if n != 0 then
--- 		CompileErr(103, {line_number, n})
+-- 		CompileErr(ILLEGAL_CHARACTER_ASCII_0_AT_LINECOL_12, {line_number, n})
 -- 	end if
 	AppendSourceLine()
 end procedure
@@ -449,7 +449,7 @@ function find_file(sequence fname)
 	if absolute_path(fname) then
 		-- open fname exactly as it is
 		if not file_exists(fname) then
-			CompileErr(51, {new_include_name})
+			CompileErr(CANT_OPEN_1, {new_include_name})
 		end if
 
 		return fname
@@ -560,7 +560,7 @@ function find_file(sequence fname)
 		errbuff &= sprintf("\t%s\n", {full_path[i]})
 	end for
 
-	CompileErr(52, {new_include_name, errbuff})
+	CompileErr(CANT_FIND_1_IN_ANY_OF_2, {new_include_name, errbuff})
 end function
 
 -- open an include file (new_include_name) according to the include path rules
@@ -620,7 +620,7 @@ procedure default_namespace( )
 		-- add the default namespace
 		tok = call_func( scanner_rid, {} )
 		if tok[T_ID] != VARIABLE then
-			CompileErr(114)
+			CompileErr(MISSING_DEFAULT_NAMESPACE_QUALIFIER)
 		end if
 
 		sym = tok[T_SYM]
@@ -834,7 +834,7 @@ procedure IncludePush()
 	end if
 	
 	if length(IncludeStk) >= INCLUDE_LIMIT then
-		CompileErr(104)
+		CompileErr(INCLUDES_ARE_NESTED_TOO_DEEPLY)
 	end if
 
 	IncludeStk = append(IncludeStk,
@@ -893,7 +893,7 @@ end ifdef
 	src_file = new_file_handle
 	file_start_sym = last_sym
 	if current_file_no >= MAX_FILE then
-		CompileErr(126)
+		CompileErr(PROGRAM_INCLUDES_TOO_MANY_FILES)
 	end if
 	known_files = append(known_files, new_include_name)
 	known_files_hash &= new_hash
@@ -1044,7 +1044,7 @@ function MakeInt(sequence text, integer nBase = 10)
 	for i = 1 to length(text) do
 		digit = (text[i] - '0')
 		if digit >= nBase or digit < 0 then
-			CompileErr(62, {text[i],i})
+			CompileErr(DIGIT_1_AT_POSITION_2_IS_OUTSIDE_OF_NUMBER_BASE, {text[i],i})
 		end if
 		if fnum = 0 then
 			if num <= maxchk then
@@ -1095,7 +1095,7 @@ function GetBinaryChar( integer delim )
 	while 1 do
 		d = find(getch(), vchars)
 		if d = 0 then
-			CompileErr( 343 )
+			CompileErr( EXPECTING_ONLY_0_1_OR_SPACE_TO_FOLLOW_THE_B)
 		end if
 		if d = 5 then
 			ungetch()
@@ -1111,7 +1111,7 @@ function GetBinaryChar( integer delim )
 	end while
 	
 	if cnt = 0 then
-		CompileErr(343)
+		CompileErr(EXPECTING_ONLY_0_1_OR_SPACE_TO_FOLLOW_THE_B)
 	end if
 	return val
 end function
@@ -1160,7 +1160,7 @@ function EscapeChar(integer delim)
 			c = GetBinaryChar(delim)
 			
 		case else
-			CompileErr(155)
+			CompileErr(UNKNOWN_ESCAPE_CHARACTER)
 	end switch
 	
 	return c
@@ -1177,7 +1177,7 @@ function my_sscanf(sequence yytext)
 
 	-- No upper bound or other error checking yet.
 	if length(yytext) < 2 then
-		CompileErr(121)
+		CompileErr(NUMBER_NOT_FORMED_CORRECTLY)
 	end if
 
 	-- TODO need to find a way to error check this.
@@ -1222,7 +1222,7 @@ function my_sscanf(sequence yytext)
 	end if
 
 	if ndigits = 0 then
-		CompileErr(121)  -- no digits
+		CompileErr(NUMBER_NOT_FORMED_CORRECTLY)  -- no digits
 	end if
 
 	--The following code is already handled by the call to
@@ -1305,7 +1305,7 @@ function ExtendedString(integer ech)
 
 	while 1 do
 		if ch = END_OF_FILE_CHAR then
-			CompileErr(129, cline)
+			CompileErr(RAW_STRING_LITERAL_FROM_LINE_1_NOT_TERMINATED, cline)
 		end if
 
 		if ch = ech then
@@ -1367,7 +1367,7 @@ function GetHexString(integer maxnibbles = 2)
 	ch = getch()
 	while 1 do
 		if ch = END_OF_FILE_CHAR then
-			CompileErr(129, cline)
+			CompileErr(RAW_STRING_LITERAL_FROM_LINE_1_NOT_TERMINATED, cline)
 		end if
 				
 		if ch = '"' then
@@ -1376,7 +1376,7 @@ function GetHexString(integer maxnibbles = 2)
 
 		digit = find(ch, "0123456789ABCDEFabcdef_ \t\n\r")
 		if digit = 0 then
-			CompileErr(329)
+			CompileErr(INVALID_CHARACTER_IN_HEX_STRING)
 		end if
 		if digit <= 23 then
 			if digit != 23 then
@@ -1432,7 +1432,7 @@ function GetBitString()
 	ch = getch()
 	while 1 do
 		if ch = END_OF_FILE_CHAR then
-			CompileErr(129, cline)
+			CompileErr(RAW_STRING_LITERAL_FROM_LINE_1_NOT_TERMINATED, cline)
 		end if
 				
 		if ch = '"' then
@@ -1441,7 +1441,7 @@ function GetBitString()
 
 		digit = find(ch, "01_ \t\n\r")
 		if digit = 0 then
-			CompileErr(329)
+			CompileErr(INVALID_CHARACTER_IN_HEX_STRING)
 		end if
 		if digit <= 3 then
 			if digit != 3 then
@@ -1567,7 +1567,7 @@ export function Scanner()
 					end if
 
 					if length(yytext) = 0 then
-						CompileErr(32)
+						CompileErr(AN_IDENTIFIER_IS_EXPECTED_HERE)
 					end if
 
 					-- must look in chosen file.
@@ -1649,7 +1649,7 @@ export function Scanner()
 			return {class, 0}  -- brackets, punctuation, eof, illegal char etc.
 
 		elsif class = ILLEGAL_CHAR then
-			CompileErr(101)
+			CompileErr(ILLEGAL_CHARACTER_IN_SOURCE)
 
 		elsif class = NEWLINE then
 			if start_include then
@@ -1688,7 +1688,7 @@ export function Scanner()
 					if basetype = 0 then
 						if char_class[ch] = LETTER then
 							if ch != 'e' and ch != 'E' then
-								CompileErr(105, ch)
+								CompileErr(INVALID_NUMBER_BASE_SPECIFIER_1, ch)
 							-- else a rare form of scientific notation "0E..."
 							end if
 						end if
@@ -1723,7 +1723,7 @@ export function Scanner()
 				else
 					is_int = FALSE
 					if yytext[1] = '.' then
-						CompileErr(124)
+						CompileErr(ONLY_ONE_DECIMAL_POINT_ALLOWED)
 					else
 						yytext &= '.'
 					end if
@@ -1735,7 +1735,7 @@ export function Scanner()
 							ch = getch()
 						end while
 					else
-						CompileErr(94)
+						CompileErr(FRACTIONAL_PART_OF_NUMBER_IS_MISSING)
 					end if
 				end if
 			end if
@@ -1747,7 +1747,7 @@ export function Scanner()
 				if ch = '-' or ch = '+' or char_class[ch] = DIGIT then
 					yytext &= ch
 				else
-					CompileErr(86)
+					CompileErr(EXPONENT_NOT_FORMED_CORRECTLY)
 				end if
 				ch = getch()
 				while char_class[ch] = DIGIT do
@@ -1755,7 +1755,7 @@ export function Scanner()
 					ch = getch()
 				end while
 			elsif char_class[ch] = LETTER then
-				CompileErr(127, {{ch}})
+				CompileErr(PUNCTUATION_MISSING_IN_BETWEEN_NUMBER_AND_1, {{ch}})
 			end if
 
 			ungetch()
@@ -1780,13 +1780,13 @@ export function Scanner()
 			end if
 
 			if basetype != -1 then
-				CompileErr(125, nbasecode[basetype])
+				CompileErr(ONLY_INTEGER_LITERALS_CAN_USE_THE_01_FORMAT, nbasecode[basetype])
 			end if
 
 			-- f.p. or large int
 			d = my_sscanf(yytext)
 			if sequence(d) then
-				CompileErr(121)
+				CompileErr(NUMBER_NOT_FORMED_CORRECTLY)
 			elsif is_int and d <= TMAXINT_DBL then
 				return {ATOM, NewIntSym(d)}  -- 1 to 1.07 billion
 			else
@@ -1828,14 +1828,14 @@ export function Scanner()
 				elsif ch = '\\' then
 					yytext &= EscapeChar('"')
 				elsif ch = '\t' then
-					CompileErr(145)
+					CompileErr(MSG_TAB_CHARACTER_FOUND_IN_STRING__USE_T_INSTEAD)
 				else
 					yytext &= ch
 				end if
 				ch = getch()
 			end while
 			if ch = '\n' or ch = '\r' then
-				CompileErr(67)
+				CompileErr(END_OF_LINE_REACHED_WITH_NO_CLOSING)
 			end if
 			return {STRING, NewStringSym(yytext)}
 
@@ -1881,7 +1881,7 @@ export function Scanner()
 			if is_int = -1 then
 				if ch = '!' then
 					if line_number > 1 then
-						CompileErr(161)
+						CompileErr(MSG__MAY_ONLY_BE_ON_THE_FIRST_LINE_OF_A_PROGRAM)
 					end if
 					-- treat as a comment (Linux command interpreter line)
 					shebang = ThisLine
@@ -1890,7 +1890,7 @@ export function Scanner()
 					end if
 					read_line()
 				else
-					CompileErr(97)
+					CompileErr(HEX_NUMBER_NOT_FORMED_CORRECTLY)
 				end if
 			else
 				d = i
@@ -1972,7 +1972,7 @@ export function Scanner()
 				end while
 
 				if cnest > 0 then
-					CompileErr(42, cline)
+					CompileErr(BLOCK_COMMENT_FROM_LINE_1_NOT_TERMINATED, cline)
 				end if
 			else
 				ungetch()
@@ -1983,14 +1983,14 @@ export function Scanner()
 			if ach = '\\' then
 				ach = EscapeChar('\'')
 			elsif ach = '\t' then
-				CompileErr(145)
+				CompileErr(MSG_TAB_CHARACTER_FOUND_IN_STRING__USE_T_INSTEAD)
 			elsif ach = '\'' then
-				CompileErr(137)
+				CompileErr(SINGLEQUOTE_CHARACTER_IS_EMPTY)
 			elsif ach = '\n' then
-				CompileErr(68, {"character", "end of line"})
+				CompileErr(EXPECTED_1_NOT_2, {"character", "end of line"})
 			end if
 			if getch() != '\'' then
-				CompileErr(56)
+				CompileErr(CHARACTER_CONSTANT_IS_MISSING_A_CLOSING)
 			end if
 			if is_integer(ach) then
 				return {ATOM, NewIntSym(ach)}
@@ -2166,7 +2166,7 @@ export procedure IncludeScan( integer is_public )
 			ch = getch()
 		end while
 		if ch != '"' then
-			CompileErr(115)
+			CompileErr(MISSING_CLOSING_QUOTE_ON_FILE_NAME)
 		end if
 	else
 		-- unquoted filename
@@ -2178,7 +2178,7 @@ export procedure IncludeScan( integer is_public )
 	end if
 
 	if length(gtext) = 0 then
-		CompileErr(95)
+		CompileErr(FILE_NAME_IS_MISSING)
 	end if
 
 	-- record the new filename
@@ -2221,17 +2221,17 @@ export procedure IncludeScan( integer is_public )
 					ungetch()
 					s = keyfind(gtext, -1, , 1)
 					if not find(s[T_ID], ID_TOKS) then
-						CompileErr(36)
+						CompileErr(A_NEW_NAMESPACE_IDENTIFIER_IS_EXPECTED_HERE)
 					end if
 					new_include_space = NameSpace_declaration(s[T_SYM])
 				else
-					CompileErr(113)
+					CompileErr(MISSING_NAMESPACE_QUALIFIER)
 				end if
 			else
-				CompileErr(100)
+				CompileErr(EXPECTING_AS_OR_ENDOF_LINE_UNEXPECTED_TEXT_ON_INCLUDE_DIRECTIVE)
 			end if
 		else
-			CompileErr(100)
+			CompileErr(EXPECTING_AS_OR_ENDOF_LINE_UNEXPECTED_TEXT_ON_INCLUDE_DIRECTIVE)
 		end if
 		
 	elsif find(ch, {'\n', '\r', END_OF_FILE_CHAR}) then
@@ -2240,7 +2240,7 @@ export procedure IncludeScan( integer is_public )
 	elsif ch = '-' then
 		ch = getch()
 		if ch != '-' then
-			CompileErr(100)
+			CompileErr(EXPECTING_AS_OR_ENDOF_LINE_UNEXPECTED_TEXT_ON_INCLUDE_DIRECTIVE)
 		end if
 		ungetch()
 		ungetch()
@@ -2248,13 +2248,13 @@ export procedure IncludeScan( integer is_public )
 	elsif ch = '/' then
 		ch = getch()
 		if ch != '*' then
-			CompileErr(100)
+			CompileErr(EXPECTING_AS_OR_ENDOF_LINE_UNEXPECTED_TEXT_ON_INCLUDE_DIRECTIVE)
 		end if
 		ungetch()
 		ungetch()
 		
 	else
-		CompileErr(100)
+		CompileErr(EXPECTING_AS_OR_ENDOF_LINE_UNEXPECTED_TEXT_ON_INCLUDE_DIRECTIVE)
 	end if
 
 	start_include = TRUE -- let scanner know

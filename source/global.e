@@ -15,6 +15,7 @@ end ifdef
 
 public include std/types.e 
 public include common.e
+public include msgtext.e
 include mode.e as mode
 include reswords.e
 

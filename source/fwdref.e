@@ -473,7 +473,7 @@ procedure patch_forward_goto( token tok, integer ref )
 	
 	if length( fr[FR_DATA] ) = 2 then
 		prep_forward_error( ref )
-		CompileErr( 156, { fr[FR_DATA][2] })
+		CompileErr( UNKNOWN_LABEL_1, { fr[FR_DATA][2] })
 	end if
 	
 	Goto_block(  fr[FR_DATA][1], fr[FR_DATA][3], fr[FR_PC] )
@@ -673,7 +673,7 @@ procedure patch_forward_call( token tok, integer ref )
 		end if
 		current_file_no = fr[FR_FILE]
 		line_number = fr[FR_LINE]
-		CompileErr( 158,
+		CompileErr( WRONG_NUMBER_OF_ARGUMENTS_SUPPLIED_FOR_FORWARD_REFERENCET1_2_3_4__EXPECTED_5_BUT_FOUND_6,
 			{ known_files[current_file_no], line_number, routine_type, name, args, supplied_args + extra_default_args }  )
 	end if
 	
@@ -792,7 +792,7 @@ procedure patch_forward_variable( token tok, integer ref )
 	
 	if fr[FR_OP] = ASSIGN and SymTab[sym][S_MODE] = M_CONSTANT then
 		prep_forward_error( ref )
-		CompileErr( 110 )
+		CompileErr( MAY_NOT_CHANGE_THE_VALUE_OF_A_CONSTANT)
 	end if
 	
 	if fr[FR_OP] = ASSIGN then
@@ -1080,7 +1080,7 @@ end procedure
 
 procedure forward_error( token tok, integer ref )
 	prep_forward_error( ref )
-	CompileErr(68, { expected_name( forward_references[ref][FR_TYPE] ),
+	CompileErr(EXPECTED_1_NOT_2, { expected_name( forward_references[ref][FR_TYPE] ),
 			expected_name( tok[T_ID] ) } ) 
 end procedure
 
@@ -1437,7 +1437,7 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 			line_number = ref[FR_LINE]
 		end for
 		if length(msg) > 0 then
-			CompileErr( 74, {msg} )
+			CompileErr( ERRORS_RESOLVING_THE_FOLLOWING_REFERENCES1, {msg} )
 		end if
 	elsif report_errors and not repl then
 		-- free up some space

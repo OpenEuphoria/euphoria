@@ -153,9 +153,9 @@ procedure main()
 
 	if src_file = -1 then
 		-- too early for normal error processing
-		screen_output(STDERR, GetMsgText(51, 0, {known_files[$]}))
+		screen_output(STDERR, GetMsgText(CANT_OPEN_1, 0, {known_files[$]}))
 		if not batch_job and not test_only then
-			maybe_any_key(GetMsgText(277,0), STDERR)
+			maybe_any_key(GetMsgText(PAUSED_PRESS_ANY_KEY,0), STDERR)
 		end if
 		Cleanup(1)
 
