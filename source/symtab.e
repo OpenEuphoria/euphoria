@@ -230,7 +230,7 @@ export procedure DefinedYet(symtab_index sym)
 	if not find(SymTab[sym][S_SCOPE],
 				{SC_UNDEFINED, SC_MULTIPLY_DEFINED, SC_PREDEF}) then
 		if SymTab[sym][S_FILE_NO] = current_file_no then
-			CompileErr(31, {SymTab[sym][S_NAME]})
+			CompileErr(ATTEMPT_TO_REDEFINE_1, {SymTab[sym][S_NAME]})
 		end if
 	end if
 end procedure
@@ -840,7 +840,7 @@ ifdef STDDEBUG then
 							export_warnings = prepend( export_warnings,
 								{ scanning_file, SymTab[tok[T_SYM]][S_FILE_NO] })
 							
-							symbol_resolution_warning = GetMsgText(232, 0, 
+							symbol_resolution_warning = GetMsgText(FILE_1_USES_PUBLIC_SYMBOLS_FROM_2_BUT_DOES_NOT_INCLUDE_THAT_FILE, 0, 
 										{name_ext(known_files[scanning_file]),
 										 name_ext(known_files[SymTab[tok[T_SYM]][S_FILE_NO]])})
 
@@ -1037,7 +1037,7 @@ ifdef STDDEBUG then
 					return gtok
 				end if
 end ifdef
-				symbol_resolution_warning = GetMsgText(233,0,
+				symbol_resolution_warning = GetMsgText(MSG_12__IDENTIFIER_3_IN_4_IS_NOT_INCLUDED,0,
 									{name_ext(known_files[scanning_file]), 
 									 line_number,
 									 word,
