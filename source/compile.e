@@ -39,6 +39,7 @@ include symtab.e
 include shift.e
 include fwdref.e
 include literal_set.e as ls
+include msgtext.e
 
 integer np, pc
 

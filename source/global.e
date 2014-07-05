@@ -18,6 +18,7 @@ public include common.e
 public include msgtext.e
 include mode.e as mode
 include reswords.e
+public include msgtext.e
 
 export constant
 	INTERPRET = mode:get_interpret(),

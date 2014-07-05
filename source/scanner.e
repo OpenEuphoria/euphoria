@@ -21,7 +21,7 @@ end ifdef
 include std/search.e
 include std/sequence.e
 include std/text.e
-
+include msgtext.e
 include global.e
 include common.e
 include platform.e
