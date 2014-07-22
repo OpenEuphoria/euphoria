@@ -64,5 +64,5 @@ if [ ! -e inst ] ; then
 fi
 echo "become root, "
 echo "cd to inst and type "
-echo "'chown root.root -R *;makepkg ../euphoria-4.0.5-i486-4.tgz'"
+makepkg -c y euphoria-4.1.0al-i486-1.tgz inst
 
