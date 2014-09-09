@@ -407,7 +407,7 @@ end procedure
 --     subscripted or sliced that shows that it's a sequence in that instance,
 --     and its element type can be used.
 --   # ##has_delete##: is 1 if the object might have a delete routine attached,
--- 	   or 0 if not if has_delete then ? 1/0 end if
+-- 	   or 0 if not.
 constant dummy_bb = {0, TYPE_NULL, TYPE_OBJECT, NOVALUE, {MININT, MAXINT}, 0}
 export procedure SetBBType(symtab_index s, integer t, sequence val, integer etype, integer has_delete )
 	integer found, i, tn, int
