@@ -20,6 +20,7 @@ include std/pipeio.e as pipeio
 include std/error.e
 include std/sequence.e as stdseq
 include std/io.e
+include std/console.e
 
 constant TRUE = 1, FALSE = 0
 
@@ -42,11 +43,9 @@ ifdef WINDOWS then
 end ifdef
 
 ifdef LINUX then
-
-enum 
-  LH_PIPES,
-  LH_DATA
-
+    enum 
+      LH_PIPES,
+      LH_DATA
 end ifdef
 
 atom string_pointer
@@ -80,17 +79,28 @@ procedure CSetup()
         FreeLibrary = define_c_func(kernel32, "FreeLibrary", {C_POINTER}, C_INT)
         if FreeLibrary = -1 then
             puts(io:STDERR, "Can't find FreeLibrary\n")
+            console:any_key("Press any key to exit..", io:STDOUT)
             abort(1)
         end if
         GetProcAddress = define_c_func(kernel32, "GetProcAddress", 
                          {C_POINTER, C_POINTER}, C_INT)
         if GetProcAddress = -1 then
             puts(io:STDERR, "Can't find GetProcAddress\n")
+            console:any_key("Press any key to exit..", io:STDOUT)
             abort(1)
         end if
     elsifdef LINUX then
+        -- Linux version is not done with loading dlls because often when loading many
+        -- dlls on Linux a segmentation fault occurs.  Perhaps some libraries conflict 
+        -- with each other.  There is no way to use the dlsym, dlopen and dlclose
+        -- interface such that the dll's init routine isn't called.  Since we are not
+        -- even calling anything from the dlls it is enough to interogate nm for what
+        -- routines are dynamically exported.
+        -- See: Ticket #869
         if not file_exists("/usr/bin/nm") then
             puts(io:STDERR, "This program requires nm (from the binutils package).\n")
+            console:any_key("Press any key to exit..", io:STDOUT)
+            abort(1)
         end if
     end ifdef
 end procedure
@@ -245,9 +255,7 @@ end for
 if length(cmd) >= 3 then
     orig_string = cmd[$]
 else
-    puts(io:STDOUT, "C function name:")
-    orig_string = delete_trailing_white(gets(io:STDIN))
-    puts(io:STDOUT, '\n')
+    orig_string = delete_trailing_white( console:prompt_string("C function name:") )
 end if
 
 routine_name = orig_string
@@ -257,8 +265,7 @@ procedure locate(sequence name)
     puts(io:STDOUT, "Looking for " & routine_name & "\n ")
     for i = 1 to length(dll_list) do
 	if scan(dll_list[i]) then
-	    if getc(0) then
-	    end if
+            console:any_key("Press any key to exit..", io:STDOUT)
 	    abort(1)
 	end if
     end for
@@ -272,8 +279,5 @@ end if
 locate(orig_string)
 
 puts(io:STDOUT, "\nCouldn't find " & orig_string & '\n')
-puts(io:STDOUT, "Press Enter\n")
-
-if getc(0) then
-end if
+console:any_key("Press any key to exit..", io:STDOUT)
 
