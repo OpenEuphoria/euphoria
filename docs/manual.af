@@ -29,7 +29,7 @@
 #
 
 # Output file generation options
-:@@(title Euphoria v4.1)@
+:@@(title Euphoria v4.1AL)@
 
 ifdef HTML
 :%%maxnumlevel = 4
@@ -48,7 +48,7 @@ end ifdef
 
 ########
 :%%output=eu_intro
-:= Euphoria Programming Language v4.1
+:= Euphoria Programming Language v4.1AL
 :@[toc|]
 :<<LEVELTOC level=1 depth=4>>
 
