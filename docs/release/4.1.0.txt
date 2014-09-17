@@ -1,6 +1,6 @@
 == Version 4.1.0 Date TBD
 
-== Bug Fixes
+=== Bug Fixes
 
 * [[ticket:665]] Fixed to load socket routines from its DLL only when needed.
 * [[ticket:744]] Detect duplicate ##case## values in a ##[[:switch statement]]## and throw
@@ -23,7 +23,7 @@
 * [[ticket:886]] system_exec with quotes on Windows failed due to quotes being removed
 * [[ticket:887]] EDS: crash if create_table and clear_table init_records parameter was less than MAX_INDEX
 
-== Enhancements
+=== Enhancements
 
 * Euphoria can be built natively as a 64-bit programming language.
 * Added 8-byte memory access: [[:poke8]], [[:peek8s]], [[:peek8u]]
