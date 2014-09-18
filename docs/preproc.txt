@@ -73,10 +73,10 @@ write_file(outFileName, content)
 So, that is our pre-processor. Now, how do we make use of it? First let's
 create a
 simple test program that we can watch it work with. Name this file
-##thedate.ex##.
+##thedate.eui##.
 
 <eucode>
--- thedate.ex
+-- thedate.eui
 
 puts(1, "The date this was run is @DATE@\n")
 </eucode>
@@ -90,7 +90,7 @@ NOTE: Through this document I am going to assume that you are working in
 If not, you can make the appropriate changes to the shell type examples.
 
 {{{
-C:\MyProjects\datesub> eui thedate.ex
+C:\MyProjects\datesub> eui thedate.eui
 The date this was run is @DATE@
 }}}
 
@@ -99,7 +99,7 @@ that we just
 created and then see what happens.
 
 {{{
-C:\MyProjects\datesub> eui -p eui:datesub.ex thedate.ex
+C:\MyProjects\datesub> eui -p eui:datesub.ex thedate.eui
 The date this was run is 2009-08-05 19:36:22
 }}}
 
@@ -195,7 +195,7 @@ something like this into it.
 
 {{{
 -p le,lex:literate.ex
--p e,ex:datesub.ex
+-p ei,eui:datesub.ex
 ... etc ...
 }}}
 
@@ -283,7 +283,7 @@ If all went correctly, you now have a datesub.dll file. I'm sure you can
 guess on how it should be used, but for the sake of being complete,
 
 {{{
-C:\MyProjects\datesub> eui -p e,ex:datesub.dll thedate.ex
+C:\MyProjects\datesub> eui -p eui:datesub.dll thedate.eui
 }}}
 
 On such a simple file and such a simple pre-processor, you probably are

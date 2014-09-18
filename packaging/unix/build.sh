@@ -14,6 +14,9 @@ OPT=$2
 REL_NAME=euphoria-${VERSION}${OPT}
 ROOTDIR=../../..
 
+# exit on error
+set -e
+
 echo Cleaning previous working directory
 rm -rf ${REL_NAME}
 
@@ -28,7 +31,7 @@ cd ..
 rm -rf docs
 rm -rf packaging
 
-BINS=`ls ${ROOTDIR}/bin/eu{b,bind,c,i,shroud} ${ROOTDIR}/bin/eu{coverage,dis,dist,doc,loc,test} ${ROOTDIR}/bin/creole`
+BINS=`ls ${ROOTDIR}/source/build/eu{b,bind,c,i,shroud} ${ROOTDIR}/source/build/eu{coverage,dis,dist,test,loc} ${ROOTDIR}/../creole/build/creole ${ROOTDIR}/../eudoc/build/eudoc`
 for f in ${BINS}; do
 	echo Stripping/copying ${f}
 	strip ${f}
@@ -36,12 +39,12 @@ for f in ${BINS}; do
 done
 
 echo Copying other misc files to bin/
-cp ${ROOTDIR}/bin/ecp.dat ${ROOTDIR}/bin/eu{.a,dbg.a} bin
+cp ${ROOTDIR}/bin/ecp.dat ${ROOTDIR}/source/build/eu{.a,dbg.a} bin
 
 echo Copying docs to our distribution directory
 
 mkdir docs
-cp ${ROOTDIR}/build/*.pdf docs
+cp -r ${ROOTDIR}/source/build/*.pdf ${ROOTDIR}/source/build/html docs
 
 cd ..
 
