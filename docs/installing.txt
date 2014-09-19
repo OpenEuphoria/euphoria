@@ -10,7 +10,7 @@ operating system.
 All versions other than Windows 95 work without problems.  To use Windows 95, it must have Internet Explorer version 4 or higher
 installed (included in service pack 2.5).  To use the new socket functions you will also Windows 2000 or later.  To use all of the new standard library functions you will need at least Windows XP or later.
 
-EUPHORIA is frequently tested on versions Windows XP, Vista, 7.
+Euphoria is frequently tested on Windows versions: XP, Vista, 7.
 
 To install Euphoria on //Windows//, visit the following URL:
 
@@ -31,7 +31,7 @@ prompts to get Euphoria installed.
 The installer copies the required files; adds the binary subdirectory to 
 your path, if you leave 'update environment' checked; and if you leave 
 'Associate file extensions' checked, it associates icons and various actions to
-EUPHORIA file extensions.  Please do not open 'Euphoria Console Files' from Explorer;
+Euphoria file extensions.  Please do not open 'Euphoria Console Files' from Explorer;
 they are meant to be run from the command line.
 
 The installer does not set the environment variable **EUDIR** to the Euphoria 
@@ -133,11 +133,11 @@ HKEY_CLASSES_ROOT\.ew\(Default) => 'EUInc'
 You can also set an editor for your EUPHORIA programs this way:
 {{{
 HKEY_CLASSES_ROOT\EUWinApp\shell\edit\command"\(Default) 
-   => 'C:\EUPHORIA\BIN\euiw.exe C:\EUPHORIA\BIN\ed.ex "%1"'
+   => 'C:\EUPHORIA\BIN\euiw.exe C:\EUPHORIA\BIN\edx.ex "%1"'
 HKEY_CLASSES_ROOT\EUConsoleApp\shell\edit\command"\(Default) 
-   => 'C:\EUPHORIA\BIN\euiw.exe C:\EUPHORIA\BIN\ed.ex "%1"'
+   => 'C:\EUPHORIA\BIN\euiw.exe C:\EUPHORIA\BIN\edx.ex "%1"'
 HKEY_CLASSES_ROOT\EUInc\shell\edit\command"\(Default) 
-   => 'C:\EUPHORIA\BIN\euiw.exe C:\EUPHORIA\BIN\ed.ex "%1"'
+   => 'C:\EUPHORIA\BIN\euiw.exe C:\EUPHORIA\BIN\edx.ex "%1"'
 }}}
 
 You can setup to allow the supplied editor program open to the line where the last failure occured in ex.err files:
@@ -147,7 +147,7 @@ HKEY_CLASSES_ROOT\EUError\(Default) => 'Error File'
 HKEY_CLASSES_ROOT\EUError\shell\debug 
     => 'Debug what created this error file'
 HKEY_CLASSES_ROOT\EUError\shell\debug\command\(Default) 
-    => 'C:\EUPHORIA\BIN\eui.exe C:\EUPHORIA\BIN\ed.ex'
+    => 'C:\EUPHORIA\BIN\eui.exe C:\EUPHORIA\BIN\edx.ex'
 HKEY_CLASSES_ROOT\EUError\DefaultIcon\(Default) 
     => 'C:\Windows\system32\shell32.dll,78'
 }}}
@@ -217,7 +217,7 @@ The default for the //Windows// installation, and optional for a
 |     Binder      (eubind, with eub)
 |     Translator  (euc.exe, if on Windows)
 |                 (euc, if on Unix)
-|     Utilities   (bugreport.ex, bench.ex, ed.ex, ...)
+|     Utilities   (bugreport.ex, bench.ex, edx.ex, ...)
 |
 |__ include 
 |   |             (original include files)

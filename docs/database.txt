@@ -10,9 +10,9 @@ flexible, Euphoria-oriented database for storing data that works better for
 cases where you need more than a text file and don't quite need or want the
 power and complexity of larger database packages.
  
-=== Structure of an EDS database
+=== EDS Database Structure
 
-In EDS, a **database** is a single file with a ##.edb## file extension.  An EDS
+In EDS, a **database** is "a single file with a ##.edb## file extension."  An EDS
 database contains zero or more **tables**. Each table has a **name**, and 
 contains zero or more **records**.  Each record consists of a **key** part, and 
 a **data** part. The key can be //any// Euphoria object~--an atom, a sequence, a
@@ -54,8 +54,8 @@ database: "mydata.edb"
         record #3:  key: 134530    data: {"screw driver", 5.50, 1500}
 }}}
 
-It's up to you to interpret the meaning of the key and data. **In keeping with
-the spirit of Euphoria, you have total flexibility.** Unlike most other
+It's up to you to interpret the meaning of the key and data. //In keeping with
+the spirit of Euphoria, you have total flexibility.// Unlike most other
 database systems, an EDS record is //not// required to have either a fixed 
 number of fields, or fields with a preset maximum length.
  
@@ -64,27 +64,27 @@ those cases you should simply create a meaningless, but unique, integer to be
 the key. Remember that you can always access the data by record number. It's
 easy to loop through the records looking for a particular field value.
 
-=== How to access the data
+=== Accessing Data
 
 To reduce the number of parameters that you have to pass, there is a notion of
 the **current database**, and **current table**. 
 
-==== The current database.
+==== Current Database.
 
 Any data operation or table operation assumes there is a current database being 
 defined. You set the current database by opening, creating or selecting a 
 database. Deleting the current database leaves the current database undefined.
 
-==== The current table.
+==== Current Table.
 
 All data operations assume there is a current table being defined. You must 
 create, select or rename a table in order to make it current. Deleting the 
 current table leaves the current table undefined.
 
-==== Accessing data
+==== Accessing Data
 
- Most routines use these
-**current** values automatically.  You normally start by opening (or creating)
+Most routines use these
+//current// values automatically.  You normally start by opening (or creating)
 a database file, then selecting the table that you want to work with.
  
 You can map a key to a record number using [[:db_find_key]]. It uses an
@@ -93,7 +93,7 @@ record number as a parameter. You can very quickly access any record, given
 it's number. You can access all the records by starting at record number one and
 looping through to the record number returned by [[:db_table_size]].
  
-=== How does storage get recycled?
+=== Storage Recycling
 
 When you delete something, such as a record, the space for that item gets put
 on a free list, for future use. Adjacent free areas are combined into larger
@@ -103,7 +103,7 @@ that a file will shrink in size, but you can use a
 [[:db_compress]] to completely rewrite a
 database, removing the unused spaces.
 
-=== Security / Multi-user Access
+=== Security and Multi-user Access
 
 This release provides a simple way to lock an entire database to prevent unsafe
 access by other processes.
@@ -116,7 +116,7 @@ various C file functions used by Euphoria.  Given enough user demand, EDS
 databases could be expanded well beyond 2 Gb in the future.
  
 The current algorithm allocates four bytes of memory per record in the current
-table. So you'll need at least 4 Mb RAM per million records on disk.
+table. So you will need at least 4 Mb RAM per million records on disk.
  
 The binary search for keys should work reasonably well for large tables. 
  
@@ -135,7 +135,7 @@ found at [[:Euphoria Database (EDS)]].
 Do not store valuable data without a backup.  RDS will not be responsible for
 any damage or data loss.
 
-=== Warning: Use the right file mode
+=== Warning: Use Binary File Mode
 
 ##.edb## files are binary files, not text files.  You **must** use ##BINARY## 
 mode when

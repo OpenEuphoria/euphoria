@@ -1609,10 +1609,10 @@ public function db_create_table(sequence name, integer init_records = DEF_INIT_R
 		return DB_EXISTS_ALREADY
 	end if
 
-	if init_records < 1 then
-		init_records = 1
+	if init_records < MAX_INDEX then
+		init_records = MAX_INDEX
 	end if
-	init_index = math:min({init_records, MAX_INDEX})
+	init_index = MAX_INDEX
 	
 	-- increment number of tables
 	io:seek(current_db, TABLE_HEADERS)
@@ -1790,10 +1790,10 @@ public procedure db_clear_table(sequence name, integer init_records = DEF_INIT_R
 		return
 	end if
 
-	if init_records < 1 then
-		init_records = 1
+	if init_records < MAX_INDEX then
+		init_records = MAX_INDEX
 	end if
-	init_index = math:min({init_records, MAX_INDEX})
+	init_index = MAX_INDEX
 
 	io:seek(current_db, table + 4)
 	nrecs = get4()

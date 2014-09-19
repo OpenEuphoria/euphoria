@@ -372,6 +372,29 @@ procedure test_dump()
 end procedure
 test_dump()
 
-
+procedure test_create_clear_table_init_records()
+       sequence the_db = "create_table_init_records.edb"
+       sequence test_table
+       db_fatal_id = routine_id( "db_fatal_error" )
+       db_close()
+       if file_exists( the_db ) then
+               delete_file( the_db )
+       end if
+       test_equal( "create " & the_db, DB_OK, db_create( the_db ) )
+       for i = 0 to 50 do
+               test_table = sprintf( "table%d", i )
+               test_equal( "create " & the_db & " " & test_table, DB_OK, db_create_table( test_table, i ) )
+               for h = 0 to 10 do
+                       db_insert( sprintf( "dummy%d", h ), {h, "data"} )
+               end for
+               db_clear_table( test_table, i )
+               for h = 0 to 10 do
+                       db_insert( sprintf( "dummy%d", h ), {h, "data"} )
+               end for
+       end for
+       db_close()
+       delete_file( the_db )
+end procedure
+test_create_clear_table_init_records()
 
 test_report()

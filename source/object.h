@@ -25,13 +25,13 @@ struct s1 {                        /* a sequence header block */
 	int length;                   /* number of elements */
 	int ref;                      /* reference count */
 	cleanup_ptr cleanup;           /* custom clean up when sequence is deallocated */
+	int postfill;                 /* number of post-fill objects */
 #else
 	cleanup_ptr cleanup;           /* custom clean up when sequence is deallocated */
-	int ref;                      /* reference count */
-	int length;                   /* number of elements */
-	
+	intptr_t ref;                      /* reference count */
+	intptr_t length;                   /* number of elements */
+	intptr_t postfill;                 /* number of post-fill objects */
 #endif
-	int postfill;                 /* number of post-fill objects */
 	
 }; /* total 20 bytes */
 
@@ -43,7 +43,11 @@ typedef long double eudouble;
 
 struct d {                         /* a double precision number */
 	eudouble dbl;                    /* double precision value */
+#if INTPTR_MAX == INT32_MAX
 	int ref;                      /* reference count */
+#else
+	intptr_t ref;                      /* reference count */
+#endif
 	cleanup_ptr cleanup;           /* custom clean up when sequence is deallocated */
 }; /* total 16 bytes */
 

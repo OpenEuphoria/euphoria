@@ -1295,7 +1295,7 @@ object Repeat(object item, object repcount)
 	if (count < 0)
 		RTFatal("repetition count must not be less than 0");
 	if (count > MAXINT_DBL)
-		RTFatal("repetition count must not be more than 1073741823");
+		RTFatal("repetition count must not be more than %ld", MAXINT_DBL);
 
 
 	s1 = NewS1(count);
@@ -4923,7 +4923,7 @@ char *get_module_name(){
 }
 #endif
 
-char **make_arg_cv(char *cmdline, int *argc)
+char **make_arg_cv(char *cmdline, int *argc, int skip_leading_dquote)
 /* Convert command line string to argc, argv.
    If *argc is 1, then get program name from GetModuleFileName().
    When double-clicked under Windows, cmdline will
@@ -4962,8 +4962,11 @@ char **make_arg_cv(char *cmdline, int *argc)
 		if (cmdline[i] == '\0')
 			break;
 		if (cmdline[i] == '\"') {
-			i++; // skip leading double-quote
+            if (skip_leading_dquote)
+                i++;
 			argv[w++] = &cmdline[i]; // start of new quoted word
+            if (!skip_leading_dquote)
+                i++;
 			while (cmdline[i] != '\"' &&
 				   cmdline[i] != '\0') {
 
@@ -4973,10 +4976,10 @@ char **make_arg_cv(char *cmdline, int *argc)
 					/* copy the rest of the string over the backslash */
 					for (j = ++i;(cmdline[j-1] = cmdline[j]); ++j) /* do nothing */;
 				}
-
 				i++;
 			}
-
+            if (!skip_leading_dquote && cmdline[i] == '\"')
+                i++;
 		}
 		else {
 			argv[w++] = &cmdline[i]; // start of new unquoted word
@@ -5050,6 +5053,7 @@ object system_exec_call(object command, object wait)
 {
 #ifndef EUNIX
 	char **argv;
+    char *argvNDQ; // Without double-quote
 #endif
 	char *string_ptr;
 	int len, w, exit_code;
@@ -5087,12 +5091,20 @@ object system_exec_call(object command, object wait)
 		exit_code = system(string_ptr);
 		exit_code = WEXITSTATUS( exit_code );
 #else
-	argv = make_arg_cv(string_ptr, &exit_code);
-	exit_code = spawnvp(P_WAIT, argv[0], (char * const *)argv);
-
+	argv = make_arg_cv(string_ptr, &exit_code, 0);
+	
+    argvNDQ = (char *)EMalloc(strlen(argv[0])+1);
+    if (argv[0][0] == '\"') { // Assume argument is surrounded by double-quote and remove them
+        copy_string(argvNDQ, argv[0]+1, strlen(argv[0])-1);
+    } else {
+        copy_string(argvNDQ, argv[0], strlen(argv[0])+1);
+    }
+    
+    exit_code = _spawnvp(P_WAIT, argvNDQ, (char const * const *)argv);
+    
 	#if INTPTR_MAX == INT32_MAX
 	// This causes a crash on Win64
-	EFree(argv[0]);		// free the 'process' name
+    EFree(argvNDQ);			// free the 'process' name
 	#endif
 	EFree((char *)argv); // free the list of arg addresses, but not the args themself.
 

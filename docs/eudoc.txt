@@ -1,5 +1,5 @@
 
-== EuDOC - Source Documentation Tool
+== EuDOC Source Documentation Tool
 :<<LEVELTOC level=2 depth=4>>
 
 Writing and managing documentation for your programs is made 
@@ -25,14 +25,14 @@ convert HTML to PDF. ##creole## will also output LaTeX files directly
 that can be used to create professional PDF files for online viewing or
 publishing.
 
-=== Documentation tags
+=== Documentation Tags
 
 Documentation is embedded in source-code using the Euphoria line 
 //(// **--** //)// comments. Two special tags, {{{--**** }}} and 
 {{{ --** }}} distinguish documentation from comments that will not be 
 extracted.
 
-=== Generic documentation
+=== Generic Documentation
 
 "Generic" documentation starts with the //(// {{{ --**** }}} //)// tag, 
 continues with lines starting with {{{ -- }}} in the first column, and 
@@ -57,7 +57,7 @@ write your documentation here...
 }}} 
  
  
-=== Source documentation 
+=== Source Documentation 
  
 "Source" documentation starts with the //(// {{{--**}}} //)// tag. 
 Locate them before a routine or identifier that you wish to be described
@@ -106,14 +106,14 @@ If you examine the source-code included with Euphoria you will realize
 how these steps were used to create the documentation you are reading 
 now. 
 
-=== Assembly file
+=== Assembly File
 
 Large projects are managed using an **assembly file**, which is a list 
 of files (source-code, and external) that will be incorporated into one 
 output file. Look at ##euphoria/docs/manual.af## for the file used to 
 produce this documentation.
 
-=== Creole markup
+=== Creole Markup
 
 Creole is a text markup language used in wikis, such as the 
 [[http://openeuphoria.org/wiki/view/home.wc|Euphoria Wiki]], 
@@ -168,7 +168,7 @@ end for
 
 * More details can be found at the Euphoria Wiki under [[wiki:CreoleHelp|CreoleHelp]].
 
-=== Documentation software
+=== Documentation Software
 
 The programs required for creating documentation are hosted on our
 Mercurial SCM server at [[http://scm.openeuphoria.org]].

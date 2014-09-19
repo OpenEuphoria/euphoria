@@ -1,4 +1,4 @@
-== EuDis - Disassembling Euphoria code
+== EuDis, Disassembling Euphoria Code
 
 <<LEVELTOC level=2 depth=3>>
 

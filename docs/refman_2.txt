@@ -369,7 +369,7 @@ Special characters may be entered using a back-slash:
 | \u/hhhh/ | A 4-hex-digit value, e.g. "\u2A7C" ==> {10876} |
 | \U/hhhhhhhh/ | An 8-hex-digit value, e.g. "\U8123FEDC" ==> {2166619868} |
 
-For example, ##"Hello, World!\n"##, or ##'~\~\'##. The Euphoria editor displays character
+For example, ##"Hello, World!\n"##, or ##'~\~\'##. The demonstration editor ##edx## displays character
 strings in green.
 
 Note that you can use the underscore character ##'_'## inside the 
@@ -409,7 +409,7 @@ quick-sort -- must only consist of letters, digits or underscore.
 @[source_comments|]
 === Comments
 Comments are ignored by Euphoria and have no effect on execution speed.
-The editor displays comments in red.
+For example the ##edx## editor displays comments in red.
 
 There are three forms of comment text:
 
@@ -1183,7 +1183,8 @@ exit            procedure
 
 
 
-The Euphoria editor displays these words in blue
+
+For example, the ##edx## editor displays these words in blue.
 
 The following are Euphoria built-in routines. It is best if you do
 not use these for your own identifiers:
@@ -1807,7 +1808,7 @@ The //scope// of an identifier is the portion of the program where its
 declaration is in effect, i.e. where that identifier is //visible//.
 
 Euphoria has many pre-defined procedures, functions and types.  These are
-defined automatically at the start of any program.  The Euphoria editor shows
+defined automatically at the start of any program.  For exmaple, the ##edx## editor shows
 them in magenta. These pre-defined names are not reserved. You can override
 them with your own variables or routines.
 
