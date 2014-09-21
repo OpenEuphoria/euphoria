@@ -49,7 +49,7 @@ sequence base_demos = {
 sequence additional_demos = {}
 ifdef WINDOWS then
 	additional_demos = {
-		"win32/dsearch.exw",
+		"dsearch.ex",
 		"win32/taskwire.exw",
 		"win32/window.exw",
 		"win32/winwire.exw",
@@ -62,6 +62,9 @@ elsifdef UNIX then
 		"unix/qsort.ex",
 		$
 	}
+	ifdef LINUX then
+		additional_demos &= { "dsearch.ex" }
+	end ifdef        
 end ifdef
 
 constant demos = base_demos & additional_demos
