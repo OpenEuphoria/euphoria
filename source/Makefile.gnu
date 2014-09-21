@@ -407,7 +407,11 @@ EU_STD_INC = \
 DOCDIR = $(TRUNKDIR)/docs
 EU_DOC_SOURCE = \
 	$(EU_STD_INC) \
+	$(wildcard $(TRUNKDIR)/include/*.*) \
 	$(DOCDIR)/manual.af \
+	$(TRUNKDIR)/License.txt \
+	$(wildcard $(TRUNKDIR)/demo/*.*) \
+	$(wildcard $(TRUNKDIR)/demo/*/*.*) \
 	$(wildcard $(DOCDIR)/*.txt) \
 	$(wildcard $(INCDIR)/euphoria/debug/*.e) \
 	$(wildcard $(DOCDIR)/release/*.txt)
@@ -744,7 +748,7 @@ $(BUILDDIR)/html/js/prototype.js: $(DOCDIR)/prototype.js  $(BUILDDIR)/html/js
 	copy $(DOCDIR)/prototype.js $^@
 
 htmldoc : $(BUILDDIR)/html/index.html
-	echo $(EU_STD_INC)
+	/bin/true
 #
 # PDF manual
 #
