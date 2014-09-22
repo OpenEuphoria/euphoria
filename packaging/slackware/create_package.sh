@@ -27,16 +27,6 @@ fi
 # Carefully clean most of the files
 # hg sta -umai | grep -v inst | grep -v linux-build | grep -v slackware | awk '{ print $2; }' | xargs rm -v
 
-cd packaging/slackware
-if [ -e clean_branch ]; then
-    hg summary | grep parent  | awk '{ print $2; } ' | awk --field-separator=: '{ print $2;} '  | xargs hg update  -r || \
-	rm -rf clean_branch
-else
-    hg summary | grep parent  | awk '{ print $2; } ' | awk --field-separator=: '{ print $2;} '  | xargs hg clone ../.. clean_branch -u
-fi
-
-cd ../..
-
 if [ ! -e linux-build ]; then
 	if [ -e linux-build.tar.gz ]; then
 #		translating the sources alone creates exe files on Windows, make sure we don't keep them here.
@@ -70,7 +60,7 @@ cp -v ../../../eudoc/build/eudoc inst/usr/bin || ( echo "Must have a eudoc direc
 cp -v ../../../creole/build/creole inst/usr/bin || ( echo "Must have a creole directory below the source distro with compiled creole." && /bin/false )
 ( make DESTDIR=`pwd`/inst PREFIX=/usr  -C ../../source install install-docs install-tools )
 cd inst
-cp -v ../clean_branch/demo/win32/* usr/share/euphoria/demo/win32
+cp -v ../../../demo/win32/* usr/share/euphoria/demo/win32
 mkdir -p usr/share/euphoria/lib
 mv ./usr/lib/* ./usr/share/euphoria/lib
 mv ./usr/share/euphoria ./usr/share/euphoria-${VERSION}
@@ -92,10 +82,6 @@ done )
 echo "[all]\n-i /usr/share/euphoria-${VERSION}/include" > ./usr/share/euphoria-${VERSION}/bin/eu.cfg
 cd ..
 cp slack-desc inst/install
-if [ ! -e inst ] ; then
-	echo "problem! inst not found. "
-	exit
-fi
 cd inst
 find . \
  \( -xtype l -prune \) -o \

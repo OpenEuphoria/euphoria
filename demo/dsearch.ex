@@ -1,5 +1,5 @@
 --****
--- === win32/dsearch.exw
+-- === dsearch.ex
 -- 
 -- search for a .DLL that contains a given routine
 -- ==== Usage

@@ -71,3 +71,4 @@
   improves performance on large files with Windows style newlines
 * [[ticket:883]] Improved error messages on subscript / slice errors
 * ed.ex renamed edx.ex
+* [[ticket:901]] Made dsearch.exw a portable demo for both Windows and Linux
