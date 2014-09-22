@@ -5418,39 +5418,39 @@ uintptr_t general_call_back(
 
 	if (num_args >= 1) {
 	  DeRef(call_back_arg1->obj);
-	  call_back_arg1->obj = make_atom32((uintptr_t)arg1);
+	  call_back_arg1->obj = make_atom((uintptr_t)arg1);
 	  code[2] = (object *)call_back_arg1;
 	  if (num_args >= 2) {
 		DeRef(call_back_arg2->obj);
-		call_back_arg2->obj = make_atom32((uintptr_t)arg2);
+		call_back_arg2->obj = make_atom((uintptr_t)arg2);
 		code[3] = (object *)call_back_arg2;
 		if (num_args >= 3) {
 		  DeRef(call_back_arg3->obj);
-		  call_back_arg3->obj = make_atom32((uintptr_t)arg3);
+		  call_back_arg3->obj = make_atom((uintptr_t)arg3);
 		  code[4] = (object *)call_back_arg3;
 		  if (num_args >= 4) {
 			DeRef(call_back_arg4->obj);
-			call_back_arg4->obj = make_atom32((uintptr_t)arg4);
+			call_back_arg4->obj = make_atom((uintptr_t)arg4);
 			code[5] = (object *)call_back_arg4;
 			if (num_args >= 5) {
 			  DeRef(call_back_arg5->obj);
-			  call_back_arg5->obj = make_atom32((uintptr_t)arg5);
+			  call_back_arg5->obj = make_atom((uintptr_t)arg5);
 			  code[6] = (object *)call_back_arg5;
 			  if (num_args >= 6) {
 				DeRef(call_back_arg6->obj);
-				call_back_arg6->obj = make_atom32((uintptr_t)arg6);
+				call_back_arg6->obj = make_atom((uintptr_t)arg6);
 				code[7] = (object *)call_back_arg6;
 				if (num_args >= 7) {
 				  DeRef(call_back_arg7->obj);
-				  call_back_arg7->obj = make_atom32((uintptr_t)arg7);
+				  call_back_arg7->obj = make_atom((uintptr_t)arg7);
 				  code[8] = (object *)call_back_arg7;
 				  if (num_args >= 8) {
 					DeRef(call_back_arg8->obj);
-					call_back_arg8->obj = make_atom32((uintptr_t)arg8);
+					call_back_arg8->obj = make_atom((uintptr_t)arg8);
 					code[9] = (object *)call_back_arg8;
 					if (num_args >= 9) {
 					  DeRef(call_back_arg9->obj);
-					  call_back_arg9->obj = make_atom32((uintptr_t)arg9);
+					  call_back_arg9->obj = make_atom((uintptr_t)arg9);
 					  code[10] = (object *)call_back_arg9;
 					}
 				  }
