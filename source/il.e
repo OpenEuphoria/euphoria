@@ -36,19 +36,19 @@ include intinit.e
 
 
 constant OPTIONS = {
-	{ "batch",       0, GetMsgText(279,0), { } },
-	{ "c",           0, GetMsgText(280, 0), { MULTIPLE, HAS_PARAMETER, "filename" } },
-	{ "con",         0, GetMsgText(308, 0), { } },
-	{ "copyright",   0, GetMsgText(312, 0), { } },
-	{ "d",           0, GetMsgText(282,0), { MULTIPLE, HAS_PARAMETER, "word" } },
-	{ "eub",         0, GetMsgText(345,0), { HAS_PARAMETER, "backend runner" } },
-	{ "eudir",     0, GetMsgText(328,0), { HAS_PARAMETER, "dir" } },
-	{ "full_debug",  0, GetMsgText(309, 0), { } },
-	{ "i",           0, GetMsgText(311, 0), { MULTIPLE, HAS_PARAMETER, "file" }  },
-	{ "icon",        0, GetMsgText(307, 0), { HAS_PARAMETER, "file" }  },
-	{ "list",        0, GetMsgText(305, 0), { } },
-	{ "out",         0, GetMsgText(310, 0), { HAS_PARAMETER, "file" }  },
-	{ "quiet",       0, GetMsgText(304, 0), { } },
+	{ "batch",       0, GetMsgText(TURN_ON_BATCH_PROCESSING_DO_NOT_PRESS_ENTER_ON_ERROR,0), { } },
+	{ "c",           0, GetMsgText(SPECIFY_A_CONFIGURATION_FILE, 0), { MULTIPLE, HAS_PARAMETER, "filename" } },
+	{ "con",         0, GetMsgText(WINDOWS_ONLY_USES_THE_CURRENT_CONSOLE_RATHER_THAN_CREATING_A_NEW_CONSOLE_IGNORED_WHEN_SHROUDING, 0), { } },
+	{ "copyright",   0, GetMsgText(DISPLAY_COPYRIGHT_INFORMATION, 0), { } },
+	{ "d",           0, GetMsgText(DEFINE_A_PREPROCESSOR_WORD,0), { MULTIPLE, HAS_PARAMETER, "word" } },
+	{ "eub",         0, GetMsgText(PATH_TO_BACKEND_RUNNER_TO_USE_FOR_BINDING_IGNORED_WHEN_SHROUDING,0), { HAS_PARAMETER, "backend runner" } },
+	{ "eudir",     0, GetMsgText(OVERRIDES_THE_VALUE_OF_EUDIR,0), { HAS_PARAMETER, "dir" } },
+	{ "full_debug",  0, GetMsgText(INCLUDES_SYMBOL_NAMES_IN_IL_DATA, 0), { } },
+	{ "i",           0, GetMsgText(AN_INCLUDE_DIRECTORY_TO_USE, 0), { MULTIPLE, HAS_PARAMETER, "file" }  },
+	{ "icon",        0, GetMsgText(USER_SUPPLIED_ICON_FILE_USED_IGNORED_WHEN_SHROUDING, 0), { HAS_PARAMETER, "file" }  },
+	{ "list",        0, GetMsgText(LIST_UNUSED_DELETED_SYMBOLS_IN_DELETEDTXT, 0), { } },
+	{ "out",         0, GetMsgText(THE_NAME_OF_THE_EXECUTABLE_TO_CREATE_THE_DEFAULT_IS_THE_SAME_BASENAME_OF_THE_INPUT_FILE, 0), { HAS_PARAMETER, "file" }  },
+	{ "quiet",       0, GetMsgText(DOES_NOT_DISPLAY_BINDING_INFORMATION, 0), { } },
 	$
 }
 
@@ -74,7 +74,7 @@ procedure fatal(sequence msg)
 -- fatal error during bind
 	puts(2, msg & '\n')
 	if not batch_job and not test_only then
-		ShowMsg(2, 208)
+		ShowMsg(2, PRESS_ENTER)
 		getc(0)
 	end if
 
@@ -92,9 +92,9 @@ procedure OutputSymTab(file f)
 	if list then
 		fd = open("deleted.txt", "w")
 		if fd = -1 then
-			fatal(GetMsgText(243,0))
+			fatal(GetMsgText(COULDNT_OPEN_DELETEDTXT,0))
 		end if
-		puts(fd, GetMsgText(244, 0))
+		puts(fd, GetMsgText(DELETED_SYMBOLS, 0))
 	end if
 
 	still_changing = TRUE
@@ -163,7 +163,7 @@ procedure OutputSymTab(file f)
 	if list then
 		close(fd)
 		if not quiet then
-			ShowMsg(1, 245)
+			ShowMsg(1, THE_LIST_OF_DELETED_SYMBOLS_IS_IN_DELETEDTXT)
 		end if
 
 	end if
@@ -377,14 +377,14 @@ export procedure handle_options_for_bind( m:map opts )
 				set_eudir( val )
 			
 			case else
-				fatal(GetMsgText(314, , {option}))
+				fatal(GetMsgText(INVALID_OPTION_1, , {option}))
 		end switch
 
 		op += 1
 	end while
 
 	if file_supplied = 0 then
-		fatal(GetMsgText(313))
+		fatal(GetMsgText(NO_FILE_TO_BIND_WAS_SUPPLIED))
 	end if
 	
 	ifdef WINDOWS then
@@ -428,7 +428,7 @@ procedure store_checksum(sequence backend_name)
 	bound_file = open(backend_name, "ub") -- update mode
 
 	if seek(bound_file, check_place+8) then
-		fatal(GetMsgText(315))
+		fatal(GetMsgText(INTERNAL_ERROR_BINDING_SEEK_TO_START_OF_IL_FAILED))
 	end if
 
 	checksum = 11352 -- magic starting point
@@ -451,7 +451,7 @@ procedure store_checksum(sequence backend_name)
 	end while
 
 	if seek(bound_file, check_place) then
-		fatal(GetMsgText(316))
+		fatal(GetMsgText(INTERNAL_ERROR_BINDING_SEEK_TO_CHECKSUM_AREA_FAILED))
 	end if
 
 	puts(bound_file, base200(size))
@@ -493,7 +493,7 @@ procedure OutputIL()
 
 	out = open(out_name, "wb")
 	if out = -1 then
-		fatal(GetMsgText(301, , {out_name}))
+		fatal(GetMsgText(COULDNT_OPEN_1, , {out_name}))
 	end if
 
 	if not shroud_only then
@@ -553,7 +553,7 @@ procedure OutputIL()
 			be = open(backend_name, "rb")
 		end if
 		if be = -1 then
-			fatal(GetMsgText(301, , {backend_name}))
+			fatal(GetMsgText(COULDNT_OPEN_1, , {backend_name}))
 		end if
 
 		-- copy eub to output file
@@ -593,7 +593,7 @@ procedure OutputIL()
 						end if
 						ic = open(icon, "rb")
 						if ic = -1 then
-							fatal(GetMsgText(301,, {icon}))
+							fatal(GetMsgText(COULDNT_OPEN_1,, {icon}))
 						end if
 						-- skip icon file header
 						for i = 1 to 22 do
@@ -610,7 +610,7 @@ procedure OutputIL()
 
 							c = getc(be) -- skip over our icon
 							if c = -1 then
-								fatal(GetMsgText(318))
+								fatal(GetMsgText(YOUR_CUSTOM_ICON_FILE_IS_TOO_LARGE))
 							end if
 						end while
 						close(ic)
@@ -644,7 +644,7 @@ procedure OutputIL()
 	store_checksum(out_name)
 
 	if not quiet then
-		ShowMsg(1, 248, {del_routines, del_vars})
+		ShowMsg(1, DELETED_1_UNUSED_ROUTINES_AND_2_UNUSED_VARIABLES, {del_routines, del_vars})
 		ifdef UNIX then
 			system("chmod +x " & out_name, 2)
 		end ifdef
@@ -658,13 +658,13 @@ procedure OutputIL()
 					filename &= "w.exe"
 				end if
 			end ifdef
-			ShowMsg(1, 246, {filename, out_name})
+			ShowMsg(1, YOU_MAY_NOW_USE_1_TO_RUN_2, {filename, out_name})
 		else
 			ifdef UNIX then
 				out_name = "./" & out_name
 			end ifdef
 
-			ShowMsg(1, 247, {out_name})
+			ShowMsg(1, YOU_MAY_NOW_RUN_1, {out_name})
 		end if
 	end if
 end procedure

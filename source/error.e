@@ -85,7 +85,7 @@ export procedure Warning(object msg, integer mask, sequence args = {})
 			msg = GetMsgText(msg, 1, args)
 		end if
 		
-		text = GetMsgText(204, 0, {w_name, msg})
+		text = GetMsgText(WARNING_1T2, 0, {w_name, msg})
 		if find(text, warning_list) then
 			return -- duplicate
 		end if
@@ -131,9 +131,9 @@ export function ShowWarnings()
 	if not integer(TempWarningName) then
 		twf = open(TempWarningName,"w")
 		if twf = -1 then
-			ShowMsg(errfile, 205, {TempWarningName})
+			ShowMsg(errfile, UNABLE_TO_CREATE_WARNING_FILE_1, {TempWarningName})
 			if errfile != STDERR then
-				ShowMsg(STDERR, 205, {TempWarningName})
+				ShowMsg(STDERR, UNABLE_TO_CREATE_WARNING_FILE_1, {TempWarningName})
 			end if
 		else
 			for i = 1 to length(warning_list) do
@@ -149,7 +149,7 @@ export function ShowWarnings()
 			puts(errfile, warning_list[i])
 			if errfile = STDERR then
 				if remainder(i, 20) = 0 and batch_job = 0 and test_only = 0 then
-					ShowMsg(errfile, 206)
+					ShowMsg(errfile, PRESS_ENTER_TO_CONTINUE_Q_TO_QUIT)
 					c = getc(0)
 					if c = 'q' then
 						exit
@@ -169,7 +169,7 @@ export procedure ShowDefines(integer errfile)
 		errfile = STDERR
 	end if
 
-	puts(errfile, format("\n--- [1] ---\n", {GetMsgText(207,0)}))
+	puts(errfile, format("\n--- [1] ---\n", {GetMsgText(DEFINED_WORDS,0)}))
 
 	for i = 1 to length(OpDefines) do
 		if find(OpDefines[i], {"_PLAT_START", "_PLAT_STOP"}) = 0 then
@@ -207,7 +207,7 @@ export procedure Cleanup(integer status)
 	w = ShowWarnings()
 	if not TRANSLATE and (BIND or show_error) and (w or Errors) then
 		if not batch_job and not test_only then
-			screen_output(STDERR, GetMsgText(208,0))
+			screen_output(STDERR, GetMsgText(PRESS_ENTER,0))
 			getc(0) -- wait
 		end if
 	end if
@@ -226,7 +226,7 @@ export procedure OpenErrFile()
 
 	if TempErrFile = -1 then
 		if length(TempErrName) > 0 then
-			screen_output(STDERR, GetMsgText(209, 0, {TempErrName}))
+			screen_output(STDERR, GetMsgText(CANT_CREATE_ERROR_MESSAGE_FILE_1, 0, {TempErrName}))
 		end if
 		abort(1) -- with no clean up
 	end if
@@ -240,7 +240,7 @@ procedure ShowErr(integer f)
 	end if
 
 	if ThisLine[1] = END_OF_FILE_CHAR then
-		screen_output(f, GetMsgText(210,0))
+		screen_output(f, GetMsgText(MSG_ENDOFFILE,0))
 	else
 		screen_output(f, ThisLine)
 	end if
@@ -308,7 +308,7 @@ end procedure
 --**
 -- report feature not supported
 procedure not_supported_compile(sequence feature)
-	CompileErr(5, {feature, version_name})
+	CompileErr(MSG_1_IS_NOT_SUPPORTED_IN_EUPHORIA_FOR_2, {feature, version_name})
 end procedure
 
 --**
@@ -328,17 +328,17 @@ export procedure InternalErr(object  msgno, object args = {})
 	end if
 	
 	if TRANSLATE then
-		screen_output(STDERR, GetMsgText(211, 1, {msg}))
+		screen_output(STDERR, GetMsgText(INTERNAL_ERRORT1, 1, {msg}))
 	else
-		screen_output(STDERR, GetMsgText(212, 1, {known_files[current_file_no], line_number, msg}))
+		screen_output(STDERR, GetMsgText(INTERNAL_ERROR_AT_12T3, 1, {known_files[current_file_no], line_number, msg}))
 	end if
 
 	if not batch_job and not test_only then
-		screen_output(STDERR, GetMsgText(208, 0))
+		screen_output(STDERR, GetMsgText(PRESS_ENTER, 0))
 		getc(0)
 	end if
 
     -- M_CRASH = 67
-	machine_proc(67, GetMsgText(213))
+	machine_proc(67, GetMsgText(FAILED_DUE_TO_INTERNAL_ERROR))
 end procedure
 

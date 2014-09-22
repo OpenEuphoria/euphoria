@@ -66,7 +66,7 @@ export procedure init_coverage()
 	
 	if coverage_erase and file_exists( coverage_db_name ) then
 		if not delete_file( coverage_db_name ) then
-			CompileErr( 335, { coverage_db_name } )
+			CompileErr( COULD_NOT_ERASE_COVERAGE_DATABASE_1, { coverage_db_name } )
 		end if
 	end if
 	
@@ -80,11 +80,11 @@ procedure write_map( map coverage, sequence table_name )
 	if db_select( coverage_db_name, DB_LOCK_EXCLUSIVE) = DB_OK then
 		if db_select_table( table_name ) != DB_OK then
 			if db_create_table( table_name ) != DB_OK then
-				CompileErr( 336, {table_name} )
+				CompileErr( COULD_NOT_CREATE_COVERAGE_TABLE_1, {table_name} )
 			end if
 		end if
 	else
-		CompileErr( 336, {table_name} )
+		CompileErr( COULD_NOT_CREATE_COVERAGE_TABLE_1, {table_name} )
 	end if
 	
 	sequence keys = map:keys( coverage )
@@ -233,7 +233,7 @@ export procedure coverage_exclude( sequence patterns )
 				end if
 			end while
 		else
-			printf( 2,"%s\n", { GetMsgText( 339, 1, {patterns[i]}) } )
+			printf( 2,"%s\n", { GetMsgText( ERROR_CREATING_REGEX_FOR_COVERAGE_EXCLUSION_PATTERN_1, 1, {patterns[i]}) } )
 		end if
 	end for
 	

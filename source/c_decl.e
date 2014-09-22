@@ -1222,7 +1222,7 @@ export procedure new_c_file(sequence name)
 
 	c_code = open(output_dir & name & ".c", "w")
 	if c_code = -1 then
-		CompileErr(57)
+		CompileErr(COULDNT_OPEN_C_FILE_FOR_OUTPUT)
 	end if
 
 	cfile_count += 1
@@ -1264,7 +1264,7 @@ function unique_c_name(sequence name)
 		if equal(generated_files[i], compare_name) then
 			-- name conflict
 			if next_fc > length(file_chars) then
-				CompileErr(140)
+				CompileErr(SORRY_TOO_MANY_C_FILES_WITH_THE_SAME_BASE_NAME)
 			end if
 
 			name[1] = file_chars[next_fc]
@@ -1440,7 +1440,7 @@ export function truncate_to_83( sequence lfn )
 	elsif dl > 9 and dl + 3 <= length(lfn) then
 		return lfn[1..8] & lfn[dl..$]
 	else
-		CompileErr( 48, {lfn})
+		CompileErr( CANNOT_USE_THE_FILENAME_1_UNDER_DOSUSE_THE_WINDOWS_VERSION_WITH_PLAT_DOS_INSTEAD, {lfn})
 	end if
 end function
 
@@ -1471,13 +1471,13 @@ export procedure GenerateUserRoutines()
 
 	if not silent then
 		if Pass = 1 then
-			ShowMsg(1, 239,,0)
+			ShowMsg(1, TRANSLATING_CODE_PASS,,0)
 		end if
 
 		if LAST_PASS = TRUE then
-			ShowMsg(1, 240)
+			ShowMsg(1, MSG__GENERATING)
 		else
-			ShowMsg(1, 241, Pass, 0)
+			ShowMsg(1, MSG_1, Pass, 0)
 		end if
 	end if
 	
@@ -1502,7 +1502,7 @@ export procedure GenerateUserRoutines()
 			end while
 
 			if find(lower(c_file), {"main-", "init-"})  then
-				CompileErr(12, {base_name})
+				CompileErr(MSG_1_CONFLICTS_WITH_A_FILE_NAME_USED_INTERNALLY_BY_THE_TRANSLATOR, {base_name})
 			end if
 
 			long_c_file = c_file

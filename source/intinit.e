@@ -23,11 +23,11 @@ include msgtext.e
 include coverage.e
 
 sequence interpreter_opt_def = {
-	{ "coverage",         0, GetMsgText(332,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "dir|file" } },
-	{ "coverage-db",      0, GetMsgText(333,0), { NO_CASE, ONCE, HAS_PARAMETER, "file" } },
-	{ "coverage-erase",   0, GetMsgText(334,0), { NO_CASE, ONCE } },
-	{ "coverage-exclude", 0, GetMsgText(338,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "pattern"} },
-	{ 0, "debugger", GetMsgText( 357, 0), {NO_CASE, ONCE, HAS_PARAMETER, "debugger"} },
+	{ "coverage",         0, GetMsgText(INDICATE_FILES_OR_DIRECTORIES_FOR_WHICH_TO_GATHER_COVERAGE_STATISTICS,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "dir|file" } },
+	{ "coverage-db",      0, GetMsgText(SPECIFY_THE_FILENAME_FOR_THE_COVERAGE_DATABASE,0), { NO_CASE, ONCE, HAS_PARAMETER, "file" } },
+	{ "coverage-erase",   0, GetMsgText(ERASE_AN_EXISTING_COVERAGE_DATABASE_AND_START_A_NEW_COVERAGE_ANALYSIS,0), { NO_CASE, ONCE } },
+	{ "coverage-exclude", 0, GetMsgText(EXCLUDE_FROM_COVERAGE,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "pattern"} },
+	{ 0, "debugger", GetMsgText( EXTERNAL_DEBUGGER, 0), {NO_CASE, ONCE, HAS_PARAMETER, "debugger"} },
 	$
 }
 
@@ -40,7 +40,7 @@ pretty_opt[DISPLAY_ASCII] = 2
 export object external_debugger = 0
 
 export procedure intoptions()
-	sequence pause_msg = GetMsgText(278, 0)
+	sequence pause_msg = GetMsgText(MSG_PRESS_ANY_KEY_AND_WINDOW_WILL_CLOSE, 0)
 	
 	Argv = expand_config_options(Argv)
 	Argc = length(Argv)
@@ -82,7 +82,7 @@ export procedure intoptions()
 	
 	if length(m:get(opts, cmdline:EXTRAS)) = 0 and not repl then
 		show_banner()
-		ShowMsg(2, 249)
+		ShowMsg(2, ERROR_MUST_SPECIFY_THE_FILE_TO_BE_INTERPRETED_ON_THE_COMMAND_LINE)
 
 		if not batch_job and not test_only then
 			maybe_any_key(pause_msg)

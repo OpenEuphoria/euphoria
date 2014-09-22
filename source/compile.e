@@ -39,7 +39,7 @@ include scanner.e
 include symtab.e
 include shift.e
 include fwdref.e
-
+include msgtext.e
 
 export integer np, pc
 
@@ -814,7 +814,7 @@ export procedure CDeRefStr(sequence s)
 	end if
 
 	if not equal(s, deref_str) then
-		CompileErr(106)
+		CompileErr(INTERNAL_DEREF_PROBLEM)
 	end if
 
 	if deref_type != TYPE_INTEGER then
@@ -6459,7 +6459,7 @@ tasks_created = FALSE
 
 procedure dll_tasking()
 	if dll_option then
-		CompileErr(112)
+		CompileErr(MULTITASKING_OPERATIONS_ARE_NOT_SUPPORTED_IN_A_DLL_OR_SO)
 	end if
 end procedure
 
@@ -7409,7 +7409,7 @@ procedure BackEnd(atom ignore)
 
 	c_code = open(output_dir & "main-.c", "w")
 	if c_code = -1 then
-		CompileErr(54)
+		CompileErr(CANT_OPEN_MAINC_FOR_OUTPUT)
 	end if
 
 	version()
@@ -7665,7 +7665,7 @@ procedure BackEnd(atom ignore)
 
 	c_code = open(output_dir & "init-.c", "a")
 	if c_code = -1 then
-		CompileErr(53)
+		CompileErr(CANT_OPEN_INITC_FOR_APPEND)
 	end if
 
 -- declare all *used* constants, and local and global variables as ints

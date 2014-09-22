@@ -347,6 +347,22 @@ test_equal("4-byte, 8-byte float sum #3",
 	c_func( c_sum_C_FLOAT_C_DOUBLE, { 0x23_312_000_123, 0 } )
 	 )
 
-	 
+atom signed_buffer = allocate( sizeof( C_POINTER ) )
+
+function f( atom i ) 
+	poke_pointer( signed_buffer, i )
+	ifdef BITS64 then
+		i = peek8s( signed_buffer )
+	elsedef
+		i = peek4s( signed_buffer )
+	end ifdef
+    return i
+end function 
+ 
+constant r_f  = routine_id( "f") 
+constant cb_f = call_back( r_f ) 
+constant c_f = define_c_func( {}, cb_f, {C_POINTER}, E_INTEGER ) 
+test_equal( "callback properly handles -1", -1, c_func( c_f, {-1} ) )
+
 test_report()
 

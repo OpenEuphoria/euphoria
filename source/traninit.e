@@ -71,35 +71,35 @@ end function
 set_extract_options( routine_id("extract_options") )
 
 sequence trans_opt_def = {
-	{ "debug",            0, GetMsgText(189,0), { } },
-	{ "plat",             0, GetMsgText(185,0), { HAS_PARAMETER, "platform" } },
-	{ "con",              0, GetMsgText(182,0), { } },
-	{ "dll",              0, GetMsgText(183,0), { } },
-	{ "so",               0, GetMsgText(184,0), { } },
-	{ "o",                0, GetMsgText(198,0), { HAS_PARAMETER, "filename" } },
-	{ "build-dir",        0, GetMsgText(197,0), { HAS_PARAMETER, "dir" } },
-	{ "rc-file",          0, GetMsgText(171,0), { HAS_PARAMETER, "filename" } },
-	{ "wat",              0, GetMsgText(178,0), { } },
-	{ "gcc",              0, GetMsgText(180,0), { } },
-	{ "com",              0, GetMsgText(181,0), { HAS_PARAMETER, "dir" } },
-	{ "cflags", 	      0, GetMsgText(323,0), { HAS_PARAMETER, "flags" } },
-	{ "lflags", 	      0, GetMsgText(324,0), { HAS_PARAMETER, "flags" } },
-	{ "lib",              0, GetMsgText(186,0), { HAS_PARAMETER, "filename" } },
-	{ "lib-pic",          0, GetMsgText(353,0), { HAS_PARAMETER, "filename" } },
-	{ "stack",            0, GetMsgText(188,0), { HAS_PARAMETER, "size" } },
-	{ "maxsize",          0, GetMsgText(190,0), { HAS_PARAMETER, "size" } },
-	{ "keep",             0, GetMsgText(191,0), { } },
-	{ "nobuild",          0, GetMsgText(196,0), { } },
-	{ "force-build",      0, GetMsgText(326,0), { } },
-	{ "makefile",         0, GetMsgText(193,0), { } },
-	{ "makefile-partial", 0, GetMsgText(192,0), { } },
-	{ "silent",           0, GetMsgText(177,0), { } },
-	{ "verbose",	      0, GetMsgText(319,0), { } },
-	{ "no-cygwin",        0, GetMsgText(355,0), { } },
-	{ "arch",             0, GetMsgText(356),   { HAS_PARAMETER, "architecture" } },
+	{ "debug",            0, GetMsgText(ENABLE_DEBUG_MODE_FOR_GENERATED_CODE,0), { } },
+	{ "plat",             0, GetMsgText(SET_THE_PLATFORM_FOR_THE_TRANSLATED_CODE,0), { HAS_PARAMETER, "platform" } },
+	{ "con",              0, GetMsgText(CREATE_A_CONSOLE_APPLICATION,0), { } },
+	{ "dll",              0, GetMsgText(CREATE_A_SHARED_LIBRARY,0), { } },
+	{ "so",               0, GetMsgText(CREATE_A_SHARED_LIBRARY_A,0), { } },
+	{ "o",                0, GetMsgText(SET_THE_OUTPUT_FILENAME,0), { HAS_PARAMETER, "filename" } },
+	{ "build-dir",        0, GetMsgText(GENERATECOMPILE_ALL_FILES_IN_DIR,0), { HAS_PARAMETER, "dir" } },
+	{ "rc-file",          0, GetMsgText(LINK_RESOURCE_FILE_INTO_RESULTING_EXECUTABLE,0), { HAS_PARAMETER, "filename" } },
+	{ "wat",              0, GetMsgText(SET_THE_COMPILER_TO_WATCOM,0), { } },
+	{ "gcc",              0, GetMsgText(SET_THE_COMPILER_TO_GCC,0), { } },
+	{ "com",              0, GetMsgText(SET_THE_COMPILER_DIRECTORY,0), { HAS_PARAMETER, "dir" } },
+	{ "cflags", 	      0, GetMsgText(FLAGS_TO_PASS_TO_COMPILER_OVERRIDES_INTERNAL_COMPILER_FLAGS,0), { HAS_PARAMETER, "flags" } },
+	{ "lflags", 	      0, GetMsgText(FLAGS_TO_PASS_TO_LINKER_OVERRIDES_INTERNAL_LINKER_FLAGS,0), { HAS_PARAMETER, "flags" } },
+	{ "lib",              0, GetMsgText(USE_A_NONSTANDARD_LIBRARY,0), { HAS_PARAMETER, "filename" } },
+	{ "lib-pic",          0, GetMsgText(MISSING_CMD_PARAMETER,0), { HAS_PARAMETER, "filename" } },
+	{ "stack",            0, GetMsgText(SET_THE_STACK_SIZE_WATCOM,0), { HAS_PARAMETER, "size" } },
+	{ "maxsize",          0, GetMsgText(SET_THE_NUMBER_OF_C_STATEMENTS_PER_GENERATED_FILE_BEFORE_SPLITTING,0), { HAS_PARAMETER, "size" } },
+	{ "keep",             0, GetMsgText(KEEP_THE_GENERATED_FILES,0), { } },
+	{ "nobuild",          0, GetMsgText(DO_NOT_BUILD_THE_PROJECT_NOR_WRITE_A_BUILD_FILE,0), { } },
+	{ "force-build",      0, GetMsgText(FORCE_BUILDING_EVEN_IF_FILE_IS_UPTODATE,0), { } },
+	{ "makefile",         0, GetMsgText(GENERATE_A_FULL_MAKEFILE,0), { } },
+	{ "makefile-partial", 0, GetMsgText(GENERATE_A_PARTIAL_PROJECT_MAKEFILE,0), { } },
+	{ "silent",           0, GetMsgText(DO_NOT_DISPLAY_STATUS_MESSAGES,0), { } },
+	{ "verbose",	      0, GetMsgText(VERBOSE_OUTPUT,0), { } },
+	{ "no-cygwin",        0, GetMsgText(USE_THE_MNOCYGWIN_FLAG_WITH_MINGW,0), { } },
+	{ "arch",             0, GetMsgText(SPECIFY_THE_TARGET_ARCHITECTURE_X86_X86_64_ARM),   { HAS_PARAMETER, "architecture" } },
 	{ "cc-prefix",        0, GetMsgText( MSG_CC_PREFIX ), { HAS_PARAMETER, "prefix" } },
-	{ "extra-cflags",     0, GetMsgText(276,0), { HAS_PARAMETER, "extra_cflags"} },
-	{ "extra-lflags",     0, GetMsgText(317,0), { HAS_PARAMETER, "extra_lflags"} },
+	{ "extra-cflags",     0, GetMsgText(SPECIFY_ADDITIONAL_COMPILER_FLAGS_TO_TRANSLATOR,0), { HAS_PARAMETER, "extra_cflags"} },
+	{ "extra-lflags",     0, GetMsgText(SPECIFY_ADDITIONAL_LINKER_FLAGS_FOR_TRANSLATOR,0), { HAS_PARAMETER, "extra_lflags"} },
 	$
 }
 
@@ -137,7 +137,7 @@ export procedure transoptions()
 				rc_file[D_NAME] = canonical_path(val)
 				rc_file[D_ALTNAME] = adjust_for_command_line_passing((rc_file[D_NAME]))
 				if not file_exists(rc_file[D_NAME]) then
-					ShowMsg(2, 349, { val })
+					ShowMsg(2, RESOURCE_FILE_DOES_NOT_EXIST__1, { val })
 					abort(1)
 				end if
 
@@ -194,7 +194,7 @@ export procedure transoptions()
 						set_host_platform( UNETBSD )
 
 					case else
-						ShowMsg(2, 201, { val, "WINDOWS, LINUX, FREEBSD, OSX, OPENBSD, NETBSD" })
+						ShowMsg(2, UNKNOWN_PLATFORM_1__SUPPORTED_PLATFORMS_ARE_2, { val, "WINDOWS, LINUX, FREEBSD, OSX, OPENBSD, NETBSD" })
 						abort(1)
 				end switch
 
@@ -221,7 +221,7 @@ export procedure transoptions()
 				if tmp[1] = GET_SUCCESS then
 					max_cfile_size = tmp[2]
 				else
-					ShowMsg(2, 202)
+					ShowMsg(2, INVALID_MAXIMUM_FILE_SIZE)
 					abort(1)
 				end if
 
@@ -290,7 +290,7 @@ export procedure transoptions()
 	if length(map:get(opts, OPT_EXTRAS)) = 0 then
 		-- No source supplied on command line
 		show_banner()
-		ShowMsg(2, 203)
+		ShowMsg(2, ERROR_MUST_SPECIFY_THE_FILE_TO_BE_TRANSLATED_ON_THE_COMMAND_LINE)
 		-- translator_help()
 
 		abort(1)
@@ -336,7 +336,7 @@ procedure OpenCFiles()
 
 	c_code = open(output_dir & "init-.c", "w")
 	if c_code = -1 then
-		CompileErr(55)
+		CompileErr(CANT_OPEN_INITC_FOR_OUTPUT)
 	end if
 
 	add_file("init-.c")
@@ -350,7 +350,7 @@ procedure OpenCFiles()
 	c_puts("#include \"struct.h\"\n\n")
 	c_h = open(output_dir & "main-.h", "w")
 	if c_h = -1 then
-		CompileErr(47)
+		CompileErr(CANT_OPEN_MAINH_FILE_FOR_OUTPUT)
 	end if
 	c_hputs("#include \"include/euphoria.h\"\n")
 
@@ -390,7 +390,7 @@ procedure InitBackEnd(integer c)
 				if build_system_type = BUILD_DIRECT then
 					-- We know the building process will fail when the translator starts
 					-- calling the compiler.  So, the process fails here.
-					CompileErr(159)
+					CompileErr(WATCOM_ENVIRONMENT_VARIABLE_IS_NOT_SET)
 				else
 					-- In this case, the user has to call something to compile after the
 					-- translation.  The user may set up the environment after the translation or
@@ -403,7 +403,7 @@ procedure InitBackEnd(integer c)
 				Warning( 215, translator_warning_flag )
 			elsif not file_exists(wat_path & SLASH & "binnt" & SLASH & "wcc386.exe") then
 				if build_system_type = BUILD_DIRECT then
-					CompileErr( 352, {wat_path})
+					CompileErr( THERE_IS_NO_WATCOM_INSTALATION_UNDER_SPECIFIED_WATOM_PATH_1, {wat_path})
 				else
 					Warning( 352, translator_warning_flag, {wat_path})
 				end if
@@ -414,7 +414,7 @@ procedure InitBackEnd(integer c)
 			end if
 
 		case else
-			CompileErr(150)
+			CompileErr(UNKNOWN_COMPILER)
 
 	end switch
 end procedure
@@ -436,7 +436,7 @@ function check_library( sequence lib )
 	end if
 	
 	if not file_exists( lib ) then
-		ShowMsg(2, 348, { lib })
+		ShowMsg(2, USER_SUPPLIED_LIBRARY_DOES_NOT_EXIST__1, { lib })
 		if force_build or build_system_type = BUILD_DIRECT then
 			abort(1)
 		end if

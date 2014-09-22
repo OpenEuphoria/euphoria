@@ -164,7 +164,7 @@ public procedure set_target_arch( sequence arch )
 			TARGET_SIZEOF_POINTER = 4
 		
 		case else
-			ShowMsg( 2, 357, { arch, "X86, X86_64, ARM" } )
+			ShowMsg( 2, UNKNOWN_ARCHITECTURE_1__SUPPORTED_ARCHITECTURES_ARE_2, { arch, "X86, X86_64, ARM" } )
 			abort( 1 )
 	end switch
 	set_target_integer_size( TARGET_SIZEOF_POINTER )	

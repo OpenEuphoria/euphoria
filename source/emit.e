@@ -1097,7 +1097,7 @@ export procedure emit_op(integer op)
 					-- type check error!
 					ThisLine = ExprLine
 					bp = expr_bp
-					CompileErr( 346 )
+					CompileErr( TYPE_CHECK_ERROR__ASSIGNING_A_SEQUENCE_TO_AN_ATOM)
 					
 				elsif SymTab[c][S_OBJ] = NOVALUE then
 					emit_opcode(op)

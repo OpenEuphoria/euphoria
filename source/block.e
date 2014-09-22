@@ -66,7 +66,7 @@ procedure check_block( integer got )
 		got = PROC
 	end if
 	if got != expected then
-		CompileErr( 79, {block_type_name( expected ), block_type_name( got)} )
+		CompileErr( EXPECTED_END_OF_1_BLOCK_NOT_2, {block_type_name( expected ), block_type_name( got)} )
 	end if
 end procedure
 
@@ -217,7 +217,7 @@ end function
 export function top_block( integer offset = 0 )
 -- Returns the sym to the block at $-offset
 	if offset >= length(block_stack) then
-		CompileErr(107, {offset,length(block_stack)})
+		CompileErr(LEAVING_TOO_MANY_BLOCKS_1__2, {offset,length(block_stack)})
 	else
 		return block_stack[$-offset][BLOCK_SYM]
 	end if
