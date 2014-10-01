@@ -228,8 +228,10 @@ test_equal("trig_range 1c ", {1.104, {1.104}}, round(arccos({.45, {.45}}), 1e4) 
 test_equal("abs_below_1 1c ", {.4847, {.4847}}, round(arctanh({.45, {.45}}), 1e4)  )
 test_equal("not_below_1 1c ", {0.9163, {.9163}}, round(arccosh({1.45, {1.45}}), 1e4)  )
 
-
-
+test_equal("sin(1)", 0.841, round( sin(1), 1e3 ))
+test_equal("cos(1)", 0.540, round( cos(1), 1e3 ))
+test_equal("tan(1)", 1.557, round( tan(1), 1e3 ))
+test_equal("arctan(1)", 0.785, round( arctan(1), 1e3 ))
 
 test_true("Hex Literal #1", #abcdef = #ABCDEF)
 test_true("Hex Literal #2", #012345 = #012345)

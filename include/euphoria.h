@@ -309,6 +309,15 @@ void shift_args(int, char**);
 object NewString(char *);
 object e_log(object a);
 object De_log(d_ptr a);
+object e_sin(object a);
+object De_sin(object a);
+object e_cos(object a);
+object De_cos(object a);
+object e_tan(object a);
+object De_tan(object a);
+object e_arctan(object);
+object De_arctan(object a);
+
 int32_t good_rand();
 #ifdef __GNUC__
 #if !defined(EMINGW) && !defined(__MINGW32__) && !defined(__CYGWIN32__)
@@ -321,7 +330,6 @@ void eu_startup(struct routine_list *rl, struct ns_list *nl, char **ip,
 void exit(int);
 int CRoutineId(int, int, object);
 object e_sqrt(object);
-object e_arctan(object);
 void AssignSlice(object, object, object);
 void StdPrint(object, object, int);
 void ClearScreen();
@@ -361,6 +369,7 @@ object calc_hash(object a, object b);
 object Dor_bits(d_ptr a, d_ptr b);
 object Dxor_bits(d_ptr a, d_ptr b);
 object not_bits(object a);
+object Dxor(object a, object b);
 object Date();
 cleanup_ptr ChainDeleteRoutine( cleanup_ptr old, cleanup_ptr prev );
 cleanup_ptr DeleteRoutine( object e_index );
