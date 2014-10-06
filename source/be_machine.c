@@ -60,11 +60,9 @@
 
 // This is a workaround for ARM not recognizing INFINITY, which is included math.h
 // but is not recognized. This seems to be a bug/issue with Scratchbox and Maemo SDK
-#ifdef EARM
 #ifndef INFINITY
 #define INFINITY (1.0/0.0)
 #endif 
-#endif
 
 
 #include <sys/mman.h>
