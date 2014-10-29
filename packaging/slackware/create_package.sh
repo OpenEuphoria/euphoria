@@ -43,32 +43,32 @@ fi
 # hg sta -uai | grep -v inst | grep -v linux-build | grep -v slackware | awk '{ print $2; }' | xargs rm -fv || /bin/true
 FILES=`hg sta -muai`
 
-( cd source ; sh configure --release 1 --build ../linux-build; make source )    
-    	    	 
+if [ ! -x linux-build/eudis ]; then
+    ( cd source ; sh configure --release 1 --build ../linux-build; make source )
+else
+    ( cd source ; make source )
+fi
+
 make -C source htmldoc pdfdoc
 if [ ! -e linux-build/eub ]; then
     tar cf linux-source-${ARCH}.tar.xz linux-build
 fi
 
-make -C source all
+make -C source library all
 tar cf linux-build-${ARCH}.tar.xz linux-build
-# building produces but one file in the otherwise pristine sub-trees of include, bin, demo, bin, etc...
-# in some versions it doesn't exist.
 rm -f source/eu.cfg
-cd ..
-# by here there should be C source code in ./linux-build and
-# only C source code in linux-build.tar.gz
+
 
 set -e
 
-( cd source; make library all )
 cd packaging/slackware
 mkdir -p inst/usr/bin
-mkdir -p inst/etc/euphoria inst/install inst/usr/doc
+mkdir -p inst/install inst/usr/doc
 cp -v ../../../eudoc/build/eudoc inst/usr/bin || ( echo "Must have a eudoc directory below the source distro with compiled eudoc." && /bin/false )
 cp -v ../../../creole/build/creole inst/usr/bin || ( echo "Must have a creole directory below the source distro with compiled creole." && /bin/false )
 ( make DESTDIR=`pwd`/inst PREFIX=/usr  -C ../../source install install-docs install-tools )
 cd inst
+INST=`pwd`
 cp -v ../../../demo/win32/* usr/share/euphoria/demo/win32
 mkdir -p usr/share/euphoria/lib
 mv ./usr/lib/* ./usr/share/euphoria/lib
@@ -80,14 +80,17 @@ mv ./usr/bin/* ./usr/share/euphoria-${VERSION}/bin/
  for f in *; \
       do       
       	  strip $f 2> /dev/null || /bin/true	  
-      ln -sf /usr/share/euphoria/bin/$f ../../../bin/$f;
-      ln -sf /usr/share/euphoria-${VERSION}/bin/$f ../../../bin/$f-${VERSION};
+      ln -sf /usr/share/euphoria/bin/$f $INST/usr/bin/$f;
+      ln -sf /usr/share/euphoria-${VERSION}/bin/$f $INST/usr/bin/$f-${VERSION};
 done ;
 )
 ( cd usr/share/euphoria-${VERSION}/lib;for f in *; \
-      do ln -s /usr/share/euphoria/lib/$f ../../../lib/$f;
-      ln -sf /usr/share/euphoria-${VERSION}/lib/$f ../../../lib/$f-${VERSION};
-done )
+      do ln -s /usr/share/euphoria/lib/$f ../../../lib/$f;      
+done
+for f in eu eudbg euso eusodbg; do 
+    ln -sf /usr/share/euphoria-${VERSION}/lib/$f.a $INST/usr/lib/$f-${VERSION}.a;
+done
+)
 echo "[all]\n-i /usr/share/euphoria-${VERSION}/include" > ./usr/share/euphoria-${VERSION}/bin/eu.cfg
 cd ..
 cp slack-desc inst/install
@@ -110,8 +113,9 @@ else
     echo "   /sbin/makepkg -c y -l y ../euphoria-${VERSION}-${ARCH}-${PVER}.tgz"
 fi
 
-if [ "x"$FILES != "x" ]; then
+if [ "x$FILES" != "x" ]; then
     	echo "Warning: There were these files left laying around."
+    	echo "$FILES" | grep -v linux-build
 	/bin/false
 fi
 
