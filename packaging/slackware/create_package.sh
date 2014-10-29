@@ -15,6 +15,7 @@ ARCH=i486
 PVER=1
 set -e
 
+# Fail now from problems that would otherwise need to fail later in the script
 if [ ! -e include/euphoria.h ]; then
 	# Not in base directory, maybe we are deep inside of it?
 	cd ../..
@@ -23,37 +24,45 @@ if [ ! -e packaging/slackware ]; then
 	echo "Please run from base directory"
 	exit;
 fi
+if [ ! -e ../eudoc/build/eudoc ]; then
+	echo "Must have a eudoc directory below the source distro with compiled eudoc."
+	exit
+fi
+if [ ! -e ../creole/build/creole ]; then
+	echo "Must have a creole directory below the source distro with compiled creole."
+	exit
+fi
+rm -fr packaging/slackware/inst
+if [ -e packaging/slackware/inst ] ; then
+	echo "please remove packaging/slackware/inst as root and run again. "
+    exit
+fi
+
 
 # Carefully clean most of the files
-# hg sta -umai | grep -v inst | grep -v linux-build | grep -v slackware | awk '{ print $2; }' | xargs rm -v
+# hg sta -uai | grep -v inst | grep -v linux-build | grep -v slackware | awk '{ print $2; }' | xargs rm -fv || /bin/true
+FILES=`hg sta -muai`
 
-if [ ! -e linux-build ]; then
-	if [ -e linux-build.tar.gz ]; then
-#		translating the sources alone creates exe files on Windows, make sure we don't keep them here.
-		tar -xzf linux-build.tar.gz &&
-		rm -f linux-build/*.exe
-		cd source
-		sh configure --build ../linux-build --without-euphoria
-	else
-		cd source
-		sh configure --build ../linux-build
-	fi
-	make all htmldoc pdfdoc
-	# building produces but one file in the otherwise pristine sub-trees of include, bin, demo, bin, etc...
-	# in some versions it doesn't exist.
-	rm -f source/eu.cfg
-	cd ..
-else
-        # for make install
-	( cd source; sh configure --build ../linux-build )    
+( cd source ; sh configure --release 1 --build ../linux-build; make source )    
+    	    	 
+make -C source htmldoc pdfdoc
+if [ ! -e linux-build/eub ]; then
+    tar cf linux-source-${ARCH}.tar.xz linux-build
 fi
 
+make -C source all
+tar cf linux-build-${ARCH}.tar.xz linux-build
+# building produces but one file in the otherwise pristine sub-trees of include, bin, demo, bin, etc...
+# in some versions it doesn't exist.
+rm -f source/eu.cfg
+cd ..
+# by here there should be C source code in ./linux-build and
+# only C source code in linux-build.tar.gz
+
+set -e
+
+( cd source; make library all )
 cd packaging/slackware
-rm -fr inst
-if [ -e inst ] ; then
-	echo "please remove inst as root and run again. "
-        exit
-fi
 mkdir -p inst/usr/bin
 mkdir -p inst/etc/euphoria inst/install inst/usr/doc
 cp -v ../../../eudoc/build/eudoc inst/usr/bin || ( echo "Must have a eudoc directory below the source distro with compiled eudoc." && /bin/false )
@@ -95,4 +104,15 @@ if [ `id -u` = '0' ]; then
 else
     echo "You'll need to do this again, as root. So files will be owned as root."
     echo "Inspect inst to see where files will go."
+    echo "OR become root now and type:"
+    echo "   cd packaging/slackware/inst"
+    echo "   chown root.root -R ."
+    echo "   /sbin/makepkg -c y -l y ../euphoria-${VERSION}-${ARCH}-${PVER}.tgz"
 fi
+
+if [ "x"$FILES != "x" ]; then
+    	echo "Warning: There were these files left laying around."
+	/bin/false
+fi
+
+
