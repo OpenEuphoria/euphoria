@@ -21,7 +21,7 @@
 #  define REL_TYPE "development"
 #else
 #  if EREL_TYPE == 1
-#    define REL_TYPE ""
+#    define REL_TYPE "al"
 #  else
 #    define XSTR( S ) STR( S )
 #    define STR( S ) #S
