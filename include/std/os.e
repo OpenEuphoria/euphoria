@@ -165,18 +165,30 @@ public function uname()
 				elsif mine = 90 then
 					sbuf = append(sbuf, "WinME")
 				else
-					sbuf = append(sbuf, "Unknown")
+					sbuf = append(sbuf, sprintf("Windows %d.%d", {maj,mine}))
 				end if
 			elsif plat = 2 then
 				sbuf = append(sbuf, "WinNT")
-				if maj = 6 and mine = 1 then
-					sbuf = append(sbuf, "Windows7")
-				elsif maj = 6 and mine = 0 then
-					sbuf = append(sbuf, "Vista")
-				elsif maj = 5 and mine = 1 or 2 then
-					sbuf = append(sbuf, "WinXP")
-				elsif maj = 5 and mine = 0 then
-					sbuf = append(sbuf, "Win2K")
+				if maj = 6 then
+					if mine = 0 then
+						sbuf = append(sbuf, "Vista") -- or Win2008
+					elsif mine = 1 then
+						sbuf = append(sbuf, "Windows7") -- or Win2008 R2
+					elsif mine = 2 then
+						sbuf = append(sbuf, "Windows8") -- or Win2012
+					else
+						sbuf = append(sbuf, sprintf("Windows %d.%d", {maj,mine}))
+					end if
+				elsif maj = 5 then
+					if mine = 0 then
+						sbuf = append(sbuf, "Win2K")
+					elsif mine = 1 then
+						sbuf = append(sbuf, "WinXP")
+					elsif mine = 2 then
+						sbuf = append(sbuf, "Win2003") -- according to http://msdn.microsoft.com/en-us/library/windows/desktop/ms724834%28v=vs.85%29.aspx
+					else
+						sbuf = append(sbuf, sprintf("Windows %d.%d", {maj,mine}))
+					end if
 				elsif maj = 4 and mine = 0 then
 					sbuf = append(sbuf, "WinNT 4.0")
 				elsif maj = 3 and mine = 51 then

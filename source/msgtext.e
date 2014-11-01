@@ -14,6 +14,8 @@ include common.e
 
 export enum
 	MISSING_CMD_PARAMETER = 353,
+	BUILDDIR_IS_FILE,
+	BUILDDIR_IS_UNDEFINED,
 	$
 
 -- don't change this please, but please look for -deleted- items before adding new options
@@ -326,8 +328,8 @@ constant StdErrMsgs = {
 	{304, "Does not display binding information"},
 	{305, "List unused (deleted) symbols in 'deleted.txt'"},
 	{306, "Prepares a file for use on Windows"},
-	{307, "User supplied icon file used."},
-	{308, "Windows Only: Uses the current console rather than creating a new console"},
+	{307, "User supplied icon file used. (ignored when shrouding)"},
+	{308, "Windows Only: Uses the current console rather than creating a new console (ignored when shrouding)"},
 	{309, "Includes symbol names in IL data"},
 	{310, "The name of the executable to create. The default is the same basename of the input file."},
 	{311, "An 'include' directory to use."},
@@ -364,7 +366,7 @@ constant StdErrMsgs = {
 	{342, "Expecting exactly eight hexadecimal digits to follow the '\\U'"},
 	{343, "Expecting only '0', '1' or space to follow the '\\b'"},
 	{344, "A numeric literal was expected"},
-	{345, "Path to backend runner to use for binding" },
+	{345, "Path to backend runner to use for binding (ignored when shrouding)" },
 	{346, "Type check error:  assigning a sequence to an atom" },
 	{347, "deleting [1]..." },
 	{348, "User supplied library does not exist:\n    [1]"},
@@ -373,6 +375,8 @@ constant StdErrMsgs = {
 	{351, "Create MinGW binaries in a Cygwin environment"},
 	{352, "There is no watcom instalation under specified Watom Path [1]"},
 	{MISSING_CMD_PARAMETER, "Command line argument [1] requires a parameter"},
+	{BUILDDIR_IS_FILE, "Error: Specified build directory is a file"},
+	{BUILDDIR_IS_UNDEFINED, "Error: Specified build directory is undefined (wildcards are not allowed)"},
 	$
 }
 

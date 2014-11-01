@@ -19,6 +19,7 @@
 * [[ticket:795]] Corrected std/serialize.e to call define_c_proc correctly
 * [[ticket:795]] Corrected std/net/http.e to call do a case insensitive search for 'content-length'
 * [[ticket:796]] when binding and translating use different EXE names
+* Fixed memory leak in translator when calls to ##head()## result in an empty sequence
 
 === Enhancements
 

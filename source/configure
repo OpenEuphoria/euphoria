@@ -231,7 +231,7 @@ while [ "$1" != "" ]; do
 		echo "   --eubin value       Use this option to specify the location of the"
 		echo "   --cc value          set this to the name of your GNU C compiler file name if its "
 		echo "                       name is not 'gcc'"
-		echo "   --roodir value      the root dir to use for checking the svn revision"
+		echo "   --rootdir value      the root dir to use for checking the svn revision"
 		echo "                       default is the parent directory"
 		echo "   --use-binary-translator"
 		echo "                       Use the already built translator rather"
@@ -260,7 +260,7 @@ if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
 	echo ARCH=ix86 >> "$PREFIX"${CONFIG_FILE}
 elif echo "$UNAME_MACHINE" | grep "x86_64" > /dev/null; then
 	echo ARCH=ix86 >> "$PREFIX"${CONFIG_FILE}
-elif echo "$UNAME_MACHINE" | grep ARM > /dev/null; then
+elif echo "$UNAME_MACHINE" | grep -i ARM > /dev/null; then
 	echo ARCH=ARM >> "$PREFIX"${CONFIG_FILE}
 fi
 
@@ -330,18 +330,15 @@ elif test $UNAME_SYSTEM = "FreeBSD"; then
 	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
 	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
 	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
-	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}else
+	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
+elif test $UNAME_SYSTEM = "Darwin"; then
 	echo EBSD=1 >> "$PREFIX"${CONFIG_FILE}
-else
-	if test $UNAME_SYSTEM = "Darwin"; then
-		echo EOSX=1 >> "$PREFIX"${CONFIG_FILE}
-	else
-		echo EOSX= >> "$PREFIX"${CONFIG_FILE}
-	fi
+	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EFREEBSD= >> "$PREFIX"${CONFIG_FILE}
 	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EOSX=1 >> "$PREFIX"${CONFIG_FILE}
 	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
 	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
-	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
 fi
 
 if [ "x$EDEBUG" = "x1" ]; then

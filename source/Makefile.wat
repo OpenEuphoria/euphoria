@@ -361,6 +361,10 @@ distclean : .SYMBOLIC clean
 
 clean : .SYMBOLIC mostlyclean docsclean
 	-@for %i in ($(BUILD_DIRS) $(INCLUDE_DIR)) do -$(RMDIR) %i
+	-$(RM) $(BUILDDIR)\pdf\*.*
+	-$(RMDIR) $(BUILDDIR)\pdf
+	-$(RM) $(BUILDDIR)\test818.obj
+	-$(RM) $(BUILDDIR)\euphoria.*
 	-$(RM) $(BUILDDIR)\*.lib
 	-$(RM) $(BUILDDIR)\*.exe
 	-$(RM) $(BUILDDIR)\ver.cache

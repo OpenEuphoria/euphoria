@@ -485,10 +485,16 @@ public integer my_dir = DEFAULT_DIR_SOURCE
 -- 	# ##path_name## : a sequence, the name of the directory to walk through
 -- 	# ##your_function## : the routine id of a function that will receive each path
 --                       returned from the result of ##dir_source##, one at a time.
+--                       Optionally, to include extra data for your function, ##your_function##
+--                       can be a 2 element sequence, with the routine_id as the first element and other data
+--                       as the second element.
 -- 	# ##scan_subdirs## : an optional integer, 1 to also walk though subfolders, 0 (the default) to skip them all.
 --  # ##dir_source## : an optional integer. A routine_id of a user-defined routine that 
 --                    returns the list of paths to pass to ##your_function##. If omitted,
---                    the [[:dir]]() function is used.   
+--                    the [[:dir]]() function is used. If your routine requires an extra parameter,
+--                    ##dir_source## may be a 2 element sequence where the first element is the
+--                    routine id and the second is the extra data to be passed as the second parameter
+--                    to your function.
 --
 -- Returns:
 -- An **object**,
@@ -559,7 +565,7 @@ public function walk_dir(sequence path_name, object your_function, integer scan_
 	object orig_func
 	sequence user_data = {path_name, 0}
 	object source_orig_func
-	object source_user_data
+	object source_user_data = ""
 	
 	orig_func = your_function
 	if sequence(your_function) then
@@ -1674,9 +1680,14 @@ public function canonical_path(sequence path_in, integer directory_given = 0, ca
 		if lPath[$] != SLASH then
 			sl = sl & {length(lPath)+1}
 		end if
-		
+
 		for i = length(sl)-1 to 1 by -1 label "partloop" do
-			sequence part = lPath[1..sl[i]-1]
+			ifdef WINDOWS then
+				sequence part = lDrive & lPath[1..sl[i]-1]
+			elsedef
+				sequence part = lPath[1..sl[i]-1]
+			end ifdef
+			
 			object list = dir( part & SLASH )
 			sequence supplied_name = lPath[sl[i]+1..sl[i+1]-1]
 			
@@ -1960,10 +1971,10 @@ public enum
 -- 
 -- Returns:
 --   An **integer**,
---     * -1 if file could be multiply defined
---     *  0 if filename does not exist
---     *  1 if filename is a file
---     *  2 if filename is a directory
+--     * FILETYPE_UNDEFINED (-1) if file could be multiply defined (i.e., contains any wildcards - '*' or '?')
+--     * FILETYPE_NOT_FOUND (0) if filename does not exist
+--     * FILETYPE_FILE (1) if filename is a file
+--     * FILETYPE_DIRECTORY (2) if filename is a directory
 --
 -- See Also:
 -- [[:dir]], [[:FILETYPE_DIRECTORY]], [[:FILETYPE_FILE]], [[:FILETYPE_NOT_FOUND]],
