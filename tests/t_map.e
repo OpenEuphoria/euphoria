@@ -186,23 +186,23 @@ test_equal("map load embed", "--", map:get(m1, "embed",-1))
 map:put(m1, 12.34, "Non alpha key - float")
 map:put(m1, {{"text"}}, "Non alpha key - sequence")
 map:put(m1, "This has a \\backslash", "Test back\\- slash handling")
-
+map:put(m1, "#!,$", "cartoon swear") -- "Continuation character in string"
 test_equal("map save fail", -1, save_map(m1, "<//badname.txt"))
 
-test_equal("map save #1", 12, save_map(m1, "save_map.txt", SM_TEXT))
+test_equal("map save #1", 13, save_map(m1, "save_map.txt", SM_TEXT))
 m2 = load_map("save_map.txt")
-test_equal("map save #2", 1, map:compare(m1,m2))
+test_equal("map save #2 compare maps", 1, map:compare(m1,m2))
 test_equal("map save #2 compare keys", 1, map:compare( m1, m2, 'k' ) )
 test_equal("map save #2 compare values", 1, map:compare( m1, m2, 'v' ) )
 
-test_equal("map save #3", 12, save_map(m1, "save_map.raw", SM_RAW))
+test_equal("map save #3", 13, save_map(m1, "save_map.raw", SM_RAW))
 m2 = load_map("save_map.raw")
 test_equal("map save #4", 1, map:compare(m1,m2))
 
 
 integer fhs
 fhs = open("save_map.raw2", "wb")
-test_equal("map save #5", 12, save_map(m1, fhs, SM_RAW))
+test_equal("map save #5", 13, save_map(m1, fhs, SM_RAW))
 close(fhs)
 
 fhs = open("save_map.raw2", "rb")
@@ -595,13 +595,18 @@ delete_file("save_map.raw2")
 delete_file("save_map.raw3")
 delete_file("xyz.cfg")
 
+
 map init_routines = map:new()
+
 
 sequence names = {}
 procedure register( sequence name, integer foo=0 )
 	map:put( init_routines, name, foo )
 	names = append( names, name )
 end procedure
+
+
+
 
 procedure validate_map( sequence name, integer has )
 	sequence keys = map:keys( init_routines, 1 )
@@ -620,6 +625,8 @@ procedure validate_map( sequence name, integer has )
 	end if
 	test_equal( sprintf( "validate_map %s %d", {name, has}), "", text )
 end procedure
+
+
 
 procedure remove_name( sequence name )
 	validate_map( name, 1 )
