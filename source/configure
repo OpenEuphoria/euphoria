@@ -4,15 +4,6 @@ CONFIG_FILE=config.gnu
 PLAT="default platform"
 ARCH="default arch"
 
-SOURCEDIR="`dirname \"$0\"`"              # relative
-SOURCEDIR="`( cd \"$SOURCEDIR\" && pwd )`"  # absolutized and normalized
-if [ -z "SOURCEDIR" ] ; then
-  # error; for some reason, the path is not accessible
-  # to the script (e.g. permissions re-evaled after suid)
-  exit 1  # fail
-fi
-
-TRUNKDIR="`(cd \"$SOURCEDIR\" && cd .. && pwd)`"
 UNAME_SYSTEM=`(uname -s) 2>/dev/null`  || UNAME_SYSTEM=unknown
 UNAME_MACHINE=`(uname -m) 2>/dev/null` || UNAME_MACHINE=unknown
 UNAME_REL=`(uname -r) 2>/dev/null` || UNAME_REL=unknown
@@ -55,6 +46,14 @@ else
 	PREFIX=./
 fi
 
+SOURCEDIR="`dirname \"$0\"`"              # relative
+SOURCEDIR="`( cd \"$SOURCEDIR\" && pwd $PWDARG )`"  # absolutized and normalized
+if [ -z "SOURCEDIR" ] ; then
+  # error; for some reason, the path is not accessible
+  # to the script (e.g. permissions re-evaled after suid)
+  exit 1  # fail
+fi
+TRUNKDIR="`(cd \"$SOURCEDIR\" && cd .. && pwd $PWDARG)`"
 
 # gcc doesn't seem to like -m32 on 32-bit machines when there are 
 # no 64-bit machines 
@@ -120,10 +119,10 @@ fi
 
 
 # default use source
-if [ "$SOURCEDIR" = `pwd` ] ; then
-	 BUILDDIR=`pwd`/build
+if [ "$SOURCEDIR" = `pwd $PWDARG` ] ; then
+	 BUILDDIR=`pwd $PWDARG`/build
 else
-	 BUILDDIR=`pwd`
+	 BUILDDIR=`pwd $PWDARG`
 fi
 
 if [ -x "$BUILDDIR"/euc ]; then
