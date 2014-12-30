@@ -1727,7 +1727,7 @@ export procedure GenerateUserRoutines()
 					call_proc(Execute_id, {s})
 
 					c_puts("    ;\n}\n")
-					if TUNIX and dll_option and is_exported( s ) then
+					if dll_option and is_exported( s ) then
 						-- create an alias for exporting routines
 						LeftSym = TRUE
 						if TOSX then
@@ -1758,7 +1758,14 @@ export procedure GenerateUserRoutines()
 								sp = SymTab[sp][S_NEXT]
 							end for
 
-							c_puts( ");\n}\n" )	
+							c_puts( ");\n}\n" )
+						elsif TWINDOWS then
+							-- Since we export stuff as stdcall, we have to add the standard 
+							-- @#bytes decoration to the alias. Since @ is used in c_stmt,
+							-- we have to do some direct output here to make it work:
+							c_stmt0( ret_type & SymTab[s][S_NAME] & "() __attribute__ ((alias (\"" )
+							CName( s )
+							c_puts( sprintf( "@%d\")));\n", SymTab[s][S_NUM_ARGS] * TARGET_SIZEOF_POINTER ) )
 						else
 							c_stmt( ret_type & SymTab[s][S_NAME] & "() __attribute__ ((alias (\"@\")));\n", s )
 						end if

@@ -900,7 +900,7 @@ endif
 	install $(TRUNKDIR)/demo/preproc/* $(DESTDIR)$(PREFIX)/share/euphoria/demo/preproc
 	install $(TRUNKDIR)/tutorial/* $(DESTDIR)$(PREFIX)/share/euphoria/tutorial
 	install  \
-	           $(TRUNKDIR)/bin/ed.ex \
+	           $(TRUNKDIR)/bin/edx.ex \
 	           $(TRUNKDIR)/bin/bugreport.ex \
 	           $(TRUNKDIR)/bin/buildcpdb.ex \
 	           $(TRUNKDIR)/bin/ecp.dat \
