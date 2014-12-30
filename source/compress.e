@@ -172,7 +172,7 @@ export procedure fcompress(integer f, object x)
 					puts(f, I4B & int_to_bytes(x))
 					
 				else
-					ifdef not EU4_0 then
+					ifdef not EU4 then
 						puts(f, I8B & int_to_bytes(x, 8))
 					elsedef
 						-- Euphoria 4.0 int_to_bytes doesn't take a size argument
