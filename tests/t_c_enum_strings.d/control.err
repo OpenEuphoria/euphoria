@@ -1,17 +1,4 @@
 t_c_enum_strings.e:4
-<0030>:: An enum constant must be an integer
-	MONDAY = "Monday",
-	                ^
+type_check failure, MONDAY is {77'M',111'o',110'n',100'd',97'a',121'y'} 
 
 
---- Defined Words ---
-EU4
-EU400
-EU40000
-WINDOWS
-WIN32
-WIN32_CONSOLE
-UNITTEST
-CRASH
-EUI
--------------------
