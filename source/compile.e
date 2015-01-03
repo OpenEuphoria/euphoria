@@ -3647,7 +3647,14 @@ end procedure
 
 procedure opFLOOR()
 	CUnaryOp(pc, "e_floor", "FLOOR")
-	SetBBType(Code[pc+2], TYPE_ATOM, novalue, TYPE_OBJECT, HasDelete( Code[pc+1] ) )
+	if TypeIsIn(Code[pc+1], TYPES_SO) then
+		target_type = GType(Code[pc+1])
+	elsif GType(Code[pc+1]) = TYPE_INTEGER then
+		target_type = TYPE_INTEGER
+	else
+		target_type = TYPE_ATOM
+	end if
+	SetBBType(Code[pc+2], target_type, novalue, TYPE_OBJECT, HasDelete( Code[pc+1] ) )
 	pc += 3
 end procedure
 
@@ -5023,7 +5030,7 @@ procedure opSPLICE()
 		c_stmt("@ = MAKE_SEQ( assign_space );\n",{target_pc})
 	c_stmt0("}\n")
 	c_stmt0( "else {\n" )
-		c_stmt( "if( @ != @ && SEQ_PTR( @ )->ref != 1 ){\n", {target_pc, source_pc, source_pc})
+		c_stmt( "if( @ == @ && SEQ_PTR( @ )->ref == 1 ){\n", {target_pc, source_pc, source_pc})
 			c_stmt("@ = Insert( @, @, insert_pos);\n", {target_pc, source_pc, splice_pc})
 		c_stmt0("}\n")
 		c_stmt0("else {\n")
@@ -5064,7 +5071,13 @@ procedure opINSERT()
 		c_stmt0("}\n")
 		c_stmt0("else {\n" )
 		c_stmt("RefDS( @ );\n", { Code[pc+2] } )
-		c_stmt("RefDS( @ );\n", { Code[pc+1] } )
+		if Code[pc+1] = Code[pc+4] then
+			c_stmt("if( SEQ_PTR( @ )->ref > 1 ){\n", {Code[pc+1]} )
+		end if
+		c_stmt("RefDS( @ );\n", Code[pc+1] )
+		if Code[pc+1] = Code[pc+4] then
+			c_stmt0("}\n" )
+		end if
 		c_stmt("@ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
 		c_stmt0("}\n")
 	elsif TypeIs( Code[pc+2], TYPE_INTEGER ) then
@@ -5072,7 +5085,13 @@ procedure opINSERT()
 		c_stmt("Append(&@,@,@);\n", { Code[pc+4], Code[pc+1], Code[pc+2] } )
 		c_stmt0( "}\n" )
 		c_stmt0( "else {\n" )
+		if Code[pc+1] = Code[pc+4] then
+			c_stmt("if( SEQ_PTR( @ )->ref > 1 ){\n", {Code[pc+1]} )
+		end if
 		c_stmt("RefDS( @ );\n", Code[pc+1] )
+		if Code[pc+1] = Code[pc+4] then
+			c_stmt0("}\n" )
+		end if
 		c_stmt("@ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
 		c_stmt0( "}\n" )
 	else
@@ -5082,7 +5101,13 @@ procedure opINSERT()
 		c_stmt0("}\n")
 		c_stmt0("else {\n" )
 		c_stmt("Ref( @ );\n", { Code[pc+2] } )
+		if Code[pc+1] = Code[pc+4] then
+			c_stmt("if( SEQ_PTR( @ )->ref > 1 ){\n", {Code[pc+1]} )
+		end if
 		c_stmt("RefDS( @ );\n", Code[pc+1] )
+		if Code[pc+1] = Code[pc+4] then
+			c_stmt0("}\n" )
+		end if
 		c_stmt("@ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
 		c_stmt0("}\n")
 	end if
@@ -5099,14 +5124,19 @@ procedure opHEAD()
 	--CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
 	c_stmt0("{\n")
 	c_stmt("int len = SEQ_PTR(@)->length;\n",{Code[pc+1]})
-	c_stmt("int size = (IS_ATOM_INT(@)) ? @ : (long)(DBL_PTR(@)->dbl);\n",repeat(Code[pc+2],3))
-	c_stmt("if (size <= 0) @ = MAKE_SEQ(NewS1(0));\n", {Code[pc+3]})
+	c_stmt("int size = (IS_ATOM_INT(@)) ? @ : (object)(DBL_PTR(@)->dbl);\n",repeat(Code[pc+2],3))
+	c_stmt0("if (size <= 0){\n")
+	c_stmt("DeRef( @ );\n", {Code[pc+3]} )
+	c_stmt("@ = MAKE_SEQ(NewS1(0));\n", {Code[pc+3]})
+	c_stmt0("}\n")
 	c_stmt0("else if (len <= size) {\n")
 	c_stmt("RefDS(@);\n", {Code[pc+1]})
 	c_stmt("DeRef(@);\n", {Code[pc+3]})
 	c_stmt("@ = @;\n",{Code[pc+3], Code[pc+1]})
 	c_stmt0("}\n")
-	c_stmt("else Head(SEQ_PTR(@),size+1,&@);\n",{Code[pc+1], Code[pc+3]})
+	c_stmt0("else{\n" )
+	c_stmt("Head(SEQ_PTR(@),size+1,&@);\n",{Code[pc+1], Code[pc+3]})
+	c_stmt0("}\n")
 	c_stmt0("}\n")
 	SetBBType(Code[pc+3], TYPE_SEQUENCE, novalue, SeqElem(Code[pc+1]),
 		HasDelete( Code[pc+1] ) )
@@ -5146,7 +5176,7 @@ procedure opREMOVE()
 	c_stmt0("if (stop > len){\n")
 		c_stmt0("stop = len;\n")
 	c_stmt0("}\n")
-	c_stmt0("if (start > len || start > stop || stop<0) {\n")
+	c_stmt0("if (start > len || start > stop || stop<1) {\n")
 	if Code[pc+1] != Code[pc+4] then
 		-- only do this if it's a different target...
 		c_stmt("RefDS(@);\n", {Code[pc+1]})

@@ -81,7 +81,11 @@
 #define CONTROL_Z 26
 #define CR 13
 #define LF 10
+#ifdef WINDOWS
 #define BS 8
+#else
+#define BS 127
+#endif
 
 #ifdef EWINDOWS
 static int winkbhit();
@@ -885,6 +889,10 @@ s1_ptr Copy_elements(int start,s1_ptr source, int replace )
 	}
 }
 
+/**
+  * Insert b into, the sequence, a at position pos.  If a has a ref > 1, Insert makes a copy of 
+  * a and inserts b into this copy and derefs a.  After that, this modified copy of a is returned. 
+  */
 object Insert(object a,object b,int pos)
 {
 	s1_ptr s1 = Add_internal_space(a,pos,1);
@@ -892,7 +900,10 @@ object Insert(object a,object b,int pos)
 	return MAKE_SEQ(s1);
 }
 
-
+/**
+  * Assigns to *target a sequence object which is comprised of the first reqlen-1 elements of s1.
+  * If s1->ref == 1 and *target == MAKESEQ(s1), the sequence will be processed in place.
+  */
 void Head(s1_ptr s1, int reqlen, object_ptr target)
 {
 	int i;
@@ -900,7 +911,7 @@ void Head(s1_ptr s1, int reqlen, object_ptr target)
 
 	if (s1->ref == 1 && *target == MAKE_SEQ(s1)) {
 		// Target is same as source and source only has one reference,
-		// so just use the existing allocation rather than creare a new sequence.
+		// so just use the existing allocation rather than create a new sequence.
 
 		// First, dereference all existing elements after the new end position.
 		for (op = (s1->base+reqlen), se = s1->base + s1->length + 1; op < se; op++)
@@ -3858,6 +3869,7 @@ object EGets(object file_no)
 	
 	if (oldc == EOF) {
 		// No input characters where actually read.
+		EFree( (char*)line );
 		return (object)ATOM_M1;
 	}
 
@@ -5788,13 +5800,28 @@ void key_gets(char *input_string, int buffsize)
 		if (c == CR || c == LF || c == numpad_enter)
 			break;
 
-		if (c == BS || c == left_arrow) {
+#ifndef WINDOWS
+		if( c == 27 ){
+			char d, e;
+			// escape code!
+			d = get_key(TRUE);
+			e = get_key(TRUE);
+			if( (d == 'O') &&  (e == 'D') ){
+				c = left_arrow;
+			}
+			else{
+				// just ignore it
+				continue;
+			}
+		}
+#endif
+
+		if (c == BS || c == left_arrow ) {
 			if (len > 0) {
 				// update buffer
 				ip--;
 				*ip = '\0';
 				len--;
-				
 				// update screen display
 				column--;
 				SetPosition(line, column);
@@ -6154,10 +6181,15 @@ void Replace( replace_ptr rb )
 				s1 = Copy_elements( start_pos, s2, 1 );
 			}
 			else {
-				if( target != copy_to ){
+				int replace_elements = target == copy_to;
+				if( !replace_elements ){
 					DeRef( target );
 				}
-				s1 = Copy_elements( start_pos, s2, (target == copy_to));
+				else if( !UNIQUE( SEQ_PTR( target ) ) ){
+					DeRef( target );
+					replace_elements = 0;
+				}
+				s1 = Copy_elements( start_pos, s2, replace_elements );
 			}
 			*rb->target = MAKE_SEQ( s1 );
 			if( c ){

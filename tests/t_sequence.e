@@ -112,6 +112,7 @@ test_equal("retain_all all match",{1,2,4,1,3,2,4,1,2,3} , retain_all( {1,2,3,4},
 test_equal("retain_all no objects",{} , retain_all( {}, {1,2,4,1,3,2,4,1,2,3} ))
 test_equal("retain_all 1c", {}, retain_all( {1,3,5}, {} ))
 
+
 test_equal("insert() integer sequence", {1,2,3}, insert({1,3}, 2, 2))
 test_equal("insert() string", {'J','o',"h",'n'}, insert("Jon", "h", 3))
 
@@ -190,6 +191,19 @@ test_equal( "replace 8,3", "johndoeaaa", replace("johndoe", "aaa", 8,3 ))
 test_equal( "replace 8,4", "johndoeaaa", replace("johndoe", "aaa", 8,4 ))
 test_equal( "replace 8,5", "johndoeaaa", replace("johndoe", "aaa", 8,5 ))
 test_equal( "replace 8,8", "johndoeaaa", replace("johndoe", "aaa", 8,8 ))
+
+-- Ticket:830 memory leak in replace()
+integer deleted_830 = 0
+procedure deleted_replaced_830( object o )
+	deleted_830 += 1
+end procedure
+constant DR_830 = routine_id("deleted_replaced_830")
+sequence bar_830, baz_830
+bar_830 = delete_routine( "a" & "b", DR_830 )
+baz_830 = bar_830
+baz_830 = replace( bar_830, "c", 2, 2 )
+bar_830 = ""
+test_true( "replace() memory leak from ticket:830", deleted_830 )
 
 sequence shuffleOrig = {1,2,3,3,4,5,5,5,6,"TEST"}, shuffled = shuffle(shuffleOrig)
 -- Ensure that the result is the same length
@@ -301,6 +315,7 @@ sequence s
 s={0,1,2,3,{"aaa",{{3},{1},{2}},"ccc"},4}
 test_equal("fetch",{2},fetch(s,{5,2,3}))
 test_equal("store",{0,1,2,3,{"aaa",{{3},{1},{98,98,98}},"ccc"},4},store(s,{5,2,3},"bbb"))
+test_equal("store single element",{1,100,3},store({1,2,3},{2},100))
 
 test_equal("repeat_pattern",{1,2,1,2,1,2,1,2},repeat_pattern({1,2},4))
 test_equal("repeat_pattern 1c", {}, repeat_pattern("it", 0))
@@ -577,6 +592,9 @@ in_place = remove( in_place, 2, 3 )
 test_equal( "remove in place 2,3", "367890", in_place )
 in_place = remove( in_place, 5, 6 )
 test_equal( "remove in place 5,6", "3678", in_place )
+
+in_place = {}
+test_equal( "remove( s, length( s) ) when s is empty", {}, remove( in_place, length( in_place ) ) )
 
 test_equal("columnize #1", {{1,3,5}, {2,4,6}}, columnize({{1, 2}, {3, 4}, {5, 6}}))
 test_equal("columnize #2", {{1,3,5}, {2,4,6}, {0,0,7}}, columnize({{1, 2}, {3, 4}, {5, 6, 7}}))
