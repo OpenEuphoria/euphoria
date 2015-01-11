@@ -892,14 +892,14 @@ static int recover_rhs_subscript(object subscript, s1_ptr s)
 	intptr_t subscripti;
 
 	if (IS_ATOM_INT(subscript)) {
-		RangeReading(subscript, s->length);
+		//RangeReading(subscript, s->length);
 	}
 	else if (IS_ATOM_DBL(subscript)) {
 		subscripti = (intptr_t)(DBL_PTR(subscript)->dbl);
 		if ((uintptr_t)(subscripti - 1) < (uintptr_t)s->length)
 			return subscripti;
-		else
-			RangeReading(subscript, s->length);
+		//else
+			//RangeReading(subscript, s->length);
 	}
 	else {
 		/* SEQUENCE */
@@ -2025,7 +2025,11 @@ void do_exec(intptr_t *start_pc)
 			case L_RHS_SUBS_CHECK:
 			deprintf("case L_RHS_SUBS_CHECK:");
 				if (!IS_SEQUENCE(*(object_ptr)pc[1])) {
-					goto subsfail;
+					//goto subsfail;
+				*(object_ptr)a = 0;
+				pc += 4;
+				thread();
+				BREAK;
 				}
 				/* FALL THROUGH */
 			case L_RHS_SUBS: /* rhs subscript of a sequence */
@@ -2036,7 +2040,14 @@ void do_exec(intptr_t *start_pc)
 					tpc = pc;
 					top = recover_rhs_subscript(top, (s1_ptr)obj_ptr);
 				}
+				if (top == 0)
+				{
+					// returns "null"
+				}
+				else
+				{
 				top = (object)*(top + ((s1_ptr)obj_ptr)->base);
+				}
 				a = pc[3];
 
 				Ref( top );
@@ -2058,7 +2069,14 @@ void do_exec(intptr_t *start_pc)
 					tpc = pc;
 					top = recover_rhs_subscript(top, (s1_ptr)obj_ptr);
 				}
+				if (top == 0)
+				{
+					// returns "null"
+				}
+				else
+				{
 				top = (object)*(top + ((s1_ptr)obj_ptr)->base);
+				}
 				a = pc[3];
 				pc += 4;
 				*(object_ptr)a = top;
@@ -2111,7 +2129,14 @@ void do_exec(intptr_t *start_pc)
 					tpc = pc;
 					top = recover_rhs_subscript(top, (s1_ptr)obj_ptr);
 				}
+				if (top == 0)
+				{
+					// returns "null"
+				}
+				else
+				{
 				top = (object)*(top + ((s1_ptr)obj_ptr)->base);
+				}
 				a = pc[3];
 				pc += 4;
 				if (IS_ATOM_INT(top)) {

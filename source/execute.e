@@ -1506,17 +1506,26 @@ procedure opRHS_SUBS()
 	x = val[a]
 	sub = val[b]
 	if atom(x) then
-		RTFatal("attempt to subscript an atom\n(reading from it)")
+		--RTFatal("attempt to subscript an atom\n(reading from it)")
+	val[target] = 0
+	pc += 4
+	return
 	end if
 	if sequence(sub) then
-		RTFatal("subscript must be an atom\n(reading an element of a sequence)")
+		--RTFatal("subscript must be an atom\n(reading an element of a sequence)")
+	val[target] = 0
+	pc += 4
+	return
 	end if
 	sub = floor(sub)
 	if sub < 1 or sub > length(x) then
-		RTFatal(
-		sprintf(
-		"subscript value %d is out of bounds, reading from a sequence of length %d",
-		{sub, length(x)}))
+		--RTFatal(
+		--sprintf(
+		--"subscript value %d is out of bounds, reading from a sequence of length %d",
+		--{sub, length(x)}))
+	val[target] = 0
+	pc += 4
+	return
 	end if
 	val[target] = x[sub]
 	pc += 4

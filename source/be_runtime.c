@@ -3418,7 +3418,7 @@ object e_match(s1_ptr a, s1_ptr b)
 }
 
 #ifndef ERUNTIME
-static void CheckSlice(object a, int startval, int endval, int length)
+static void CheckSlice(object a, int* startval, int* endval, int* length)
 /* check legality of a slice, return integer values of start, length */
 /* startval and endval are deref'd */
 {
@@ -3426,27 +3426,38 @@ static void CheckSlice(object a, int startval, int endval, int length)
 	s1_ptr s;
 
 	if (IS_ATOM(a))
-		RTFatal("attempt to slice an atom");
-
-	if (startval < 1) {
-		RTFatal("slice lower index is less than 1 (%d)", (int32_t) startval);
-	}
-	if (endval < 0) {
-		RTFatal("slice upper index is less than 0 (%d)", (int32_t) endval);
+	{
+		//RTFatal("attempt to slice an atom");
 	}
 
-	if (length < 0 ) {
-		RTFatal("slice length is less than 0 (%d)", (int32_t) length);
+	if (*startval < 1) {
+		//RTFatal("slice lower index is less than 1 (%d)", (int32_t) startval);
+		*startval = 1;
+		*length = *endval - *startval + 1;
+	}
+	if (*endval < 0) {
+		//RTFatal("slice upper index is less than 0 (%d)", (int32_t) endval);
+		*endval = 0;
+		*length = *endval - *startval + 1;
+	}
+
+	if (*length < 0 ) {
+		//RTFatal("slice length is less than 0 (%d)", (int32_t) length);
+		*length = 0;
 	}
 
 	s = SEQ_PTR(a);
 	n = s->length;
-	if ((startval > n + 1 || length > 0) && startval > n) {
-		RTFatal("slice starts past end of sequence (%ld > %ld)",
-				startval, n);
+	if ((*startval > n + 1 || *length > 0) && *startval > n) {
+		//RTFatal("slice starts past end of sequence (%ld > %ld)",
+				//startval, n);
+		*length = 0;
+		*endval = *startval - 1;
 	}
-	if (endval > n) {
-		RTFatal("slice ends past end of sequence (%ld > %ld)", endval, n);
+	if (*endval > n) {
+		//RTFatal("slice ends past end of sequence (%ld > %ld)", endval, n);
+		*endval = n;
+		*length = *endval - *startval + 1;
 	}
 }
 #endif
@@ -3468,7 +3479,8 @@ void RHS_Slice( object a, object start, object end)
 		startval = (int)(DBL_PTR(start)->dbl);
 	}
 	else
-		RTFatal("slice lower index is not an atom");
+		startval = 1;
+		//RTFatal("slice lower index is not an atom");
 
 	if (IS_ATOM_INT(end))
 		endval = INT_VAL(end);
@@ -3487,12 +3499,13 @@ void RHS_Slice( object a, object start, object end)
 			diagnostic will be wrong */
 	}
 	else
-		RTFatal("slice upper index is not an atom");
+		startval = 1;
+		//RTFatal("slice upper index is not an atom");
 	olda = SEQ_PTR(a);
 	length = endval - startval + 1;
 
 #ifndef ERUNTIME
-	CheckSlice( a, startval, endval, length);
+	CheckSlice( a, &startval, &endval, &length);
 #endif
 
 
@@ -3565,7 +3578,8 @@ void AssignSlice(object start, object end, object val)
 		startval = (int)(DBL_PTR(start)->dbl);
 	}
 	else
-		RTFatal("slice lower index is not an atom");
+		startval = 1;
+		//RTFatal("slice lower index is not an atom");
 
 	if (IS_ATOM_INT(end))
 		endval = INT_VAL(end);
@@ -3573,12 +3587,13 @@ void AssignSlice(object start, object end, object val)
 		endval = (int)(DBL_PTR(end)->dbl); /* see above comments on f.p. */
 	}
 	else
-		RTFatal("slice upper index is not an atom");
+		startval = 1;
+		//RTFatal("slice upper index is not an atom");
 
 	length = endval - startval + 1;
 
 #ifndef ERUNTIME
-	CheckSlice((object)*seq_ptr, startval, endval, length);
+	CheckSlice((object)*seq_ptr, &startval, &endval, &length);
 #endif
 
 	sp = SEQ_PTR(*seq_ptr);
