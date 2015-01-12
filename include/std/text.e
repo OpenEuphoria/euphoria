@@ -1887,12 +1887,11 @@ public function format(sequence format_pattern, object arg_list = {})
 										if pos > decs then
 											argtext = argtext[ 1 .. $ - pos + decs ]
 										elsif pos < decs then
-											argtext = argtext[ 1 .. $ - pflag ] & repeat('0', decs - pos)
-											--if pflag then
-												--argtext = argtext[ 1 .. $ - 1 ] & '.' & repeat('0', decs - pos) & ')'
-											--else
-												--argtext = argtext & '.' & repeat('0', decs - pos)
-											--end if
+											if pflag then
+												argtext = argtext[ 1 .. $ - 1 ] & repeat('0', decs - pos) & ')'
+											else
+												argtext = argtext & repeat('0', decs - pos)
+											end if
 										end if
 									end if
 								elsif decs > 0 then
