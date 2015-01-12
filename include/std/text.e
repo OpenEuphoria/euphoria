@@ -1928,6 +1928,7 @@ public function format(sequence format_pattern, object arg_list = {})
 
 	    					if binout or hexout then
 	    						dist = 4
+							psign = 0
 	    					else
 	    						dist = 3
 	    					end if
@@ -1945,7 +1946,7 @@ public function format(sequence format_pattern, object arg_list = {})
 	    					end if
 	    					while dpos > dist do
 	    						dpos -= dist
-	    						if dpos > 1 then
+	    						if dpos > 1 + (currargv < 0) * not msign + (currargv > 0) * psign then
 	    							argtext = argtext[1.. dpos - 1] & tsep & argtext[dpos .. $]
 	    						end if
 	    					end while
