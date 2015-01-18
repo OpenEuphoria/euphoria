@@ -96,7 +96,7 @@ else
 endif
 ifeq "$(EMINGW)" "1"
 	EXE_EXT=.exe
-	ifeq "$(EHOST)" "EWIN"
+	ifeq "$(EHOST)" "EWINDOWS"
 		HOST_EXE_EXT=.exe
 	endif
 	EPTHREAD=

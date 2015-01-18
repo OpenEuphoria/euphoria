@@ -1376,8 +1376,9 @@ procedure main()
 				
 			case "eui", "exe" then
 				executable = canonical_path(val)
+				verbose_printf(1, "Setting executable to \'%s\'\n", {executable})
 				if not file_exists(executable) then
-					printf(1, "Specified interpreter via -eui parameter was not found\n")
+					printf(1, "Specified interpreter via -eui or -exe parameter was not found\n")
 					if not no_check then
 						abort(1)
 					end if
