@@ -1438,7 +1438,7 @@ There is also a special form of ##enum##, an //enum type//. This is a simple way
 to write a user-defined type based on the set of values in a specific enum 
 group.
 The type created this way can be used anywhere a normal user-defined type can be
-use.
+used.
 
 For example,
 <eucode>
@@ -1453,48 +1453,30 @@ end function
 However there is one significant difference when it comes to enum types. For
 normal types, when calling the type function, it returns either ##0## or ##1##. 
 The enum type function returns ##0## if the argument is not a member of the 
-enum set, and it
-returns a positive integer when the argument is a member. The value returned is
-the ordinal number of
-the member in the enum's definition, regardless of what the member's value is.
-As an exception to this, if two enums share the same value, then they will
-share the same ordinal number. The ordinal numbers of enums surrounding these
-will continue to increment as if every enum had a unique ordinal number,
-causing some numbers to be skipped.
+enum set, and it returns a non-zero atom when the argument is a member. The value returned might be ##1## or it might not be ##1##.  Don't rely on the type returning one.  In EUPHORIA any atom that is not ##0## is true.  The non-zero value returned will defer between 4.0 and 4.1.
 
 For example,
 <eucode>
 enum type color RED=4, GREEN=7, BLACK=1, BLUE=3 , PINK=10 end type
 
-? color(RED)   --> 1
-? color(GREEN) --> 2
-? color(BLACK) --> 3
-? color(BLUE)  --> 4
-? color(PINK)  --> 5
+-- color(RED)   --> TRUE but might not be 1.
+if color(GREEN) then -- good.
+   -- do stuff
+end if
 
-constant color_names = {"rouge", "vert", "noir", "bleu", "rose"}
+-- color(BLUE)  --> also TRUE but might not be 1.
+if color(BLUE) = 1 then -- BAD, very BAD.
+	                -- BLUE is a color but this branch might not get executed.
+   -- do stuff
+end if
 
-puts(1, color_names[color(BLUE)]) --> bleu
+-- As a matter of style you may compare to 0.
+if color(BLACK) != 0 then -- good.  Any non-zero is true in EUPHORIA
+                          -- So, compare to 0 if you wish.
+   -- do stuff
+end if
 
 </eucode>
-
-But with the exception, 
-<eucode>
-enum type color RED, GREEN=7, BLACK=1, BLUE=3 , PINK=10 end type
-? color(RED) --> 1
-? color(GREEN) --> 2
-? color(BLACK) --> 1
-? color(BLUE) --> 4
-? color(PINK) --> 5
-</eucode>
-
-Note that none of the enums have an ordinal number with a value of 3. This is
-simply skipped.
-
-By default, unless an enum member is being specifically set to some value, its
-value
-will be one more than the previous member's value, with the first default value
-being ##1##. This default can be overridden. The syntax is:
 
 <eucode>
 enum by DELTA member1, member2, ... ,memberN
