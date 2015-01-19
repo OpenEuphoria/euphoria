@@ -1437,6 +1437,8 @@ public function format(sequence format_pattern, object arg_list = {})
 	object envsym
 	object envvar
 	integer ep
+	integer pflag
+	integer count
 	
 	if atom(arg_list) then
 		arg_list = {arg_list}
@@ -1682,12 +1684,17 @@ public function format(sequence format_pattern, object arg_list = {})
 							
 						elsif binout = 1 then
 							argtext = stdseq:reverse( convert:int_to_bits(arg_list[argn], 32)) + '0'
-							for ib = 1 to length(argtext) do
-								if argtext[ib] = '1' then
-									argtext = argtext[ib .. $]
-									exit
+							if zfill != 0 and width > 0 then
+								if width > length(argtext) then
+									argtext = repeat('0', width - length(argtext)) & argtext
 								end if
-							end for
+							else
+								count = 1
+								while count < length(argtext) and argtext[count] = '0' do
+									count += 1
+								end while
+								argtext = argtext[count .. $]
+							end if
 
 						elsif hexout = 0 then
 							argtext = sprintf("%d", arg_list[argn])
@@ -1866,21 +1873,33 @@ public function format(sequence format_pattern, object arg_list = {})
 					if atom(currargv) then
 						if find('e', argtext) = 0 then
 							-- Only applies to non-scientific notation.
+							pflag = 0
+							if msign and currargv < 0 then
+								pflag = 1
+							end if
 							if decs != -1 then
 								pos = find('.', argtext)
 								if pos then
 									if decs = 0 then
 										argtext = argtext [1 .. pos-1 ]
 									else
-										pos = length(argtext) - pos
+										pos = length(argtext) - pos - pflag
 										if pos > decs then
 											argtext = argtext[ 1 .. $ - pos + decs ]
 										elsif pos < decs then
-											argtext = argtext & repeat('0', decs - pos)
+											if pflag then
+												argtext = argtext[ 1 .. $ - 1 ] & repeat('0', decs - pos) & ')'
+											else
+												argtext = argtext & repeat('0', decs - pos)
+											end if
 										end if
 									end if
 								elsif decs > 0 then
-									argtext = argtext & '.' & repeat('0', decs)
+									if pflag then
+										argtext = argtext[1 .. $ - 1] & '.' & repeat('0', decs) & ')'
+									else
+										argtext = argtext & '.' & repeat('0', decs)
+									end if
 								end if
 							end if
 
@@ -1903,6 +1922,7 @@ public function format(sequence format_pattern, object arg_list = {})
 
 	    					if binout or hexout then
 	    						dist = 4
+							psign = 0
 	    					else
 	    						dist = 3
 	    					end if
@@ -1920,7 +1940,7 @@ public function format(sequence format_pattern, object arg_list = {})
 	    					end if
 	    					while dpos > dist do
 	    						dpos -= dist
-	    						if dpos > 1 then
+	    						if dpos > 1 + (currargv < 0) * not msign + (currargv > 0) * psign then
 	    							argtext = argtext[1.. dpos - 1] & tsep & argtext[dpos .. $]
 	    						end if
 	    					end while
