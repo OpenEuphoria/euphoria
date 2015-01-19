@@ -751,7 +751,11 @@ export procedure emit_op(integer op)
 						Code[inlined_targets[i]] = target
 					end for
 					clear_inline_targets()
-
+					-- Update op, in order to ensure that previous_op wont be ASSIGN
+					-- in the next call.  This signals that we no longer know what op is
+					-- at the end of Code.  In particular, SEQUENCE_CHECK assumes
+					-- that Code[$-1] is a symbol below when previous_op = ASSIGN.
+					op = -1
 				end if
 				assignable = FALSE
 				clear_last()
