@@ -1258,7 +1258,7 @@ static void LookBackForSubscriptSymbol( intptr_t *pc, int sublevel, int has_slic
 		snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, " - in %s #%d of '%s'", has_slice ? "slice/subscript" : "subscript", sublevel, sym->name);
 		sf_output( TPTempBuff );
 	}
-	else{
+	else if( sublevel > 1 ){
 		// find the previous subscript / slice
 		intptr_t *start_pc = pc;
 		--pc;
@@ -1270,6 +1270,10 @@ static void LookBackForSubscriptSymbol( intptr_t *pc, int sublevel, int has_slic
 			LookBackForSubscriptSymbol( pc, sublevel + 1, has_slice );
 		}
 	}
+	else{
+		snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, " - in %s of desequencing operation", has_slice ? "slice/subscript" : "subscript" );
+		sf_output( TPTempBuff );
+	}	
 }
 
 /**
