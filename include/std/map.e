@@ -1647,30 +1647,30 @@ public function load_map(object input_file_name)
 				end if
 			entry
 				line_in = gets(file_handle)
-			integer in_quote = 0, last_in = -1, cur_in = -1
-			if not equal(line_in, -1) then
-			for i = 1 to length(line_in) do
-				cur_in = line_in[i]
-				if cur_in = '"' then
-					in_quote = not in_quote
-				elsif in_quote then
-					if cur_in = '=' then
-						cur_in = -2 
-					elsif cur_in = '#' then
-						cur_in = -3 
-					elsif cur_in = '$' then
-						cur_in = -4
-					elsif cur_in = ',' then
-						cur_in = -5
-					elsif cur_in = '-' and last_in = '-' then
-						cur_in = -6
-						line_in[i-1] = -6
-					end if
-				end if
-				line_in[i] = cur_in
-				last_in = cur_in
-			end for
-			end if
+                integer in_quote = 0, last_in = -1, cur_in = -1
+                if not equal(line_in, -1) then
+                    for i = 1 to length(line_in) do
+                        cur_in = line_in[i]
+                        if cur_in = '"' then
+                            in_quote = not in_quote
+                        elsif in_quote then
+                            if cur_in = '=' then
+                                cur_in = -2 
+                            elsif cur_in = '#' then
+                                cur_in = -3 
+                            elsif cur_in = '$' then
+                                cur_in = -4
+                            elsif cur_in = ',' then
+                                cur_in = -5
+                            elsif cur_in = '-' and last_in = '-' then
+                                cur_in = -6
+                                line_in[i-1] = -6
+                            end if
+                        end if
+                        line_in[i] = cur_in
+                        last_in = cur_in
+                    end for
+                end if
 			end while
 		end while
 	else
