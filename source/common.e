@@ -155,3 +155,12 @@ end procedure
 public function is_eudir_from_cmdline()
 	return cmdline_eudir
 end function
+
+export enum
+	MISSING_CMD_PARAMETER = 353,
+	BUILDDIR_IS_FILE,
+	BUILDDIR_IS_UNDEFINED,
+	NUMBER_IS_TOO_SMALL,
+	NUMBER_IS_TOO_BIG,
+	$
+

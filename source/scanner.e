@@ -8,7 +8,6 @@ elsedef
 	without type_check
 end ifdef
 
-include std/error.e
 include std/filesys.e
 include std/get.e
 include std/machine.e
@@ -16,6 +15,7 @@ include std/search.e
 include std/sequence.e
 include std/text.e
 include std/hash.e
+include std/convert.e
 
 include global.e
 include common.e
@@ -28,6 +28,7 @@ include error.e
 include keylist.e
 include preproc.e
 include coverage.e
+include fenv.e as fenv
 
 constant INCLUDE_LIMIT = 30   -- maximum depth of nested includes
 constant MAX_FILE = 256       -- maximum number of source files
@@ -959,15 +960,20 @@ export function IncludePop()
 	return TRUE
 end function
 
+-- take no chances with the parsing engine to declare the maximum double here or we will inherit
+-- a limit from the way the translator parses the number!
+constant MAX_ATOM        = float64_to_atom( bits_to_bytes( repeat(1,52) & 0 & repeat(1,10) & 0 ) )
+constant almost_max_16   = (MAX_ATOM-15) / 16
 constant common_int_text = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "20", "50", "100", "1000"}
 constant common_ints     = { 0,   1,   2,   3,   4,   5,   6,   7,   8,   9,   10,   11,   12,   13,   20,   50,   100,   1000 }
 function MakeInt(sequence text, integer nBase = 10)
 -- make a non-negative integer out of a string of digits
+-- raises FE_OVERFLOW on overflow.
 	integer num
 	atom fnum
 	integer digit
 	integer maxchk
-
+	
 	-- Quick scan for common integers
 	switch nBase do
 		case 2 then
@@ -993,7 +999,13 @@ function MakeInt(sequence text, integer nBase = 10)
 	num = 0
 	fnum = 0
 	for i = 1 to length(text) do
-		digit = (text[i] - '0')
+		if text[i] > 'a' then
+			digit = text[i] - 'a' + 10
+		elsif text[i] > 'A' then
+			digit = text[i] - 'A' + 10
+		else
+			digit = text[i] - '0'
+		end if
 		if digit >= nBase or digit < 0 then
 			CompileErr(62, {text[i],i})
 		end if
@@ -1004,6 +1016,13 @@ function MakeInt(sequence text, integer nBase = 10)
 				fnum = num * nBase + digit
 			end if
 		else
+			if fnum >= almost_max_16 then
+				-- mathematically equivalent to: fnum * nBase + digit > MAX_DOUBLE
+				-- but possible to calculate with Euphoria atoms
+				if fnum > (MAX_ATOM - digit)/nBase then
+					fenv:raise(FE_OVERFLOW)					
+				end if
+			end if
 			fnum = fnum * nBase + digit
 		end if
 	end for
@@ -1125,15 +1144,18 @@ function my_sscanf(sequence yytext)
 	atom mantissa
 	integer c, i
 	atom dec
+	fenv:fexcept_t ex
+	integer real_overflow = 0
 
 	-- No upper bound or other error checking yet.
 	if length(yytext) < 2 then
 		CompileErr(121)
 	end if
 
-	-- TODO need to find a way to error check this.
+	fenv:clear(FE_ALL_EXCEPT)
 	if find( 'e', yytext ) or find( 'E', yytext ) then
-		return scientific_to_atom( yytext )
+		mantissa = scientific_to_atom( yytext )
+		goto "floating_point_check"
 	end if
 	mantissa = 0.0
 	ndigits = 0
@@ -1143,13 +1165,19 @@ function my_sscanf(sequence yytext)
 	yytext &= 0 -- end marker
 	c = yytext[1]
 	i = 2
+	
+	
 	while c >= '0' and c <= '9' do
 		ndigits += 1
 		mantissa = mantissa * 10.0 + (c - '0')
 		c = yytext[i]
 		i += 1
 	end while
-
+	
+	if fenv:test(FE_OVERFLOW) then
+		real_overflow = 1
+	end if
+	
 	if c = '.' then
 		-- get fraction
 		c = yytext[i]
@@ -1164,6 +1192,11 @@ function my_sscanf(sequence yytext)
 			i += 1
 		end while
 		mantissa += frac / dec
+	end if
+	
+	if fenv:test(fenv:FE_OVERFLOW) and not real_overflow then
+		fenv:clear(fenv:FE_OVERFLOW)
+		fenv:raise(fenv:FE_UNDERFLOW)
 	end if
 
 	if ndigits = 0 then
@@ -1213,6 +1246,15 @@ function my_sscanf(sequence yytext)
 			mantissa = mantissa * power(10.0, e_mag)
 		end if
 	end if */
+	label "floating_point_check"
+	-- we may have overflowed calculating the fraction part...
+	-- so, it is better we check whether it is underflowed  
+	-- before we check whether it has overflowed.
+	if fenv:test(fenv:FE_UNDERFLOW) then
+		CompileErr(NUMBER_IS_TOO_SMALL)
+	elsif fenv:test(fenv:FE_OVERFLOW) or real_overflow then -- ex = {FE_OVERFLOW}
+		CompileErr(NUMBER_IS_TOO_BIG)
+	end if
 	return mantissa
 end function
 
@@ -1714,7 +1756,11 @@ export function Scanner()
 				if basetype = -1 then
 					basetype = 3 -- decimal
 				end if
+				fenv:clear(FE_OVERFLOW)
 				d = MakeInt(yytext, nbase[basetype])
+				if fenv:test(FE_OVERFLOW) then
+					CompileErr(NUMBER_IS_TOO_BIG)
+				end if
 				if integer(d) then
 					return {ATOM, NewIntSym(d)}
 				else
@@ -1802,6 +1848,7 @@ export function Scanner()
 			end if
 
 		elsif class = NUMBER_SIGN then
+			fenv:clear(FE_OVERFLOW)		
 			i = 0
 			is_int = -1
 			while i < MAXINT/32 do
@@ -1858,6 +1905,10 @@ export function Scanner()
 					end while
 				end if
 
+				if fenv:test(FE_OVERFLOW) then
+					CompileErr(NUMBER_IS_TOO_BIG)
+				end if
+				fenv:clear(FE_OVERFLOW)
 				ungetch()
 				if is_int then
 					return {ATOM, NewIntSym(i)}

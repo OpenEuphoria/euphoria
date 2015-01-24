@@ -17,6 +17,7 @@ include reswords.e
 include msgtext.e
 include coverage.e
 include scanner.e
+include std/error.e
 
 integer Errors = 0 -- number of errors detected during compile
 
@@ -256,7 +257,7 @@ export procedure CompileErr(object msg, object args = {}, integer preproc = 0 )
 	if integer(msg) then
 		msg = GetMsgText(msg)
 	end if
-
+	
 	msg = format(msg, args)
 
 	Errors += 1

@@ -7,6 +7,9 @@ elsedef
 end ifdef
 
 include std/convert.e
+include fenv.e as fenv
+include std/math.e
+include std/error.e
 
 --/topic Introduction
 --/info
@@ -265,6 +268,14 @@ function trim_bits( sequence bits )
 		return bits
 end function
 
+type ebits_t(sequence s)
+	return length(s) = 11
+end type
+
+type sbits_t(sequence s)
+	return length(s) = 1
+end type
+
 --/topic Scientific Notation
 --/func scientific_to_float64( sequence s )
 --
@@ -272,11 +283,20 @@ end function
 --returns a sequence of bytes in the raw format of an IEEE 754 double 
 --precision floating point number.  This value can be passed to the euphoria
 --library function, float64_to_atom().
---Note: does not check if the string exceeds IEEE 754 double precision limits.
+--raises FE_OVERFLOW on overflow.
+--raises FE_UNDERFLOW on underflow.
 export function scientific_to_float64( sequence s )
-		integer dp, e, exp
-		sequence int_bits, frac_bits, mbits, ebits, sbits
+		integer dp, e, exp, almost_nothing, carried
+		sequence int_bits, frac_bits
+		sequence mbits
+		ebits_t ebits
+		sbits_t sbits
 		
+		-- if true, this number might evaluate to zero although the user wrote a non-zero matissa
+		almost_nothing = 0
+		-- if true, the mbits has overflowed and we need to adjust exp
+		carried = 0
+				
 		-- Determine if negative or positive
 		if s[1] = '-' then
 				sbits = {1}
@@ -288,8 +308,14 @@ export function scientific_to_float64( sequence s )
 				end if
 		end if
 		
+		-- In order to correctly judge the size we must get rid of the extra left hand side zeros
+		while length(s) and s[1] = '0' do
+			s = s[2..$]
+		end while
+		
+		
 		-- find the decimal point (if exists) and the exponent
-		dp = find('.', s)
+		dp = find('.', s)		
 		e = find( 'e', s )
 		if not e then
 				e = find('E', s )
@@ -321,30 +347,48 @@ export function scientific_to_float64( sequence s )
 		-- calculated differently.
 		s = s[1..e-1] - '0'
 		
+		while length(s) and s[1] = 0 do
+			s = s[2..$]
+			e -= 1
+			dp -= 1
+		end while
+		
 		-- If LHS only consists of zeros, then return zero.
 		if not find(0, s = 0) then
 			return atom_to_float64(0)
 		end if
 		
-		if exp >= 0 then
-				-- We have a large exponent, so it's all integral.  Pad it to account for 
-				-- the positive exponent.
-				int_bits = trim_bits( bytes_to_bits( convert_radix( repeat( 0, exp ) & reverse( s ), 10, #100 ) ) )
-				frac_bits = {}
+		if exp + length(s) - 1 > 308 then
+			-- make inf or -inf
+			exp = 1024
+			mbits = repeat(0, 52)
+		elsif exp + length(s) - 1 < -324 then -- -324 = floor((-1022-52)*log(2)/log(10))
+			-- make 0
+			fenv:raise(FE_UNDERFLOW)
+			exp = -1023
+			mbits = repeat(0, 52)
 		else
-				if -exp > length(s) then
-						-- all fractional
-						int_bits = {}
-						frac_bits = decimals_to_bits( repeat( 0, -exp-length(s) ) & s ) 
-				
-				else
-						-- some int, some frac
-						int_bits = trim_bits( bytes_to_bits( convert_radix( reverse( s[1..$+exp] ), 10, #100 ) ) )
-						frac_bits =  decimals_to_bits( s[$+exp+1..$] )
-				end if
-		end if
-		
-		if length(int_bits) >= 53 then
+			if exp >= 0 then
+					-- We have a large exponent, so it's all integral.  Pad it to account for 
+					-- the positive exponent.
+					int_bits = trim_bits( bytes_to_bits( convert_radix( repeat( 0, exp ) & reverse( s ), 10, #100 ) ) )
+					frac_bits = {}
+			else
+					almost_nothing = exp + e - dp = -324
+					if -exp > length(s) then
+							-- all fractional
+							int_bits = {}
+							frac_bits = decimals_to_bits( repeat( 0, -exp-length(s) ) & s )
+					
+					else
+							-- some int, some frac
+							int_bits = trim_bits( bytes_to_bits( convert_radix( reverse( s[1..$+exp] ), 10, #100 ) ) )
+							frac_bits =  decimals_to_bits( s[$+exp+1..$] )
+					end if
+			end if
+			
+			
+			if length(int_bits) >= 53 then
 				-- Can disregard the fractional component, because the integral 
 				-- component takes up all of the precision for which we have room.
 				mbits = int_bits[$-52..$-1]
@@ -352,57 +396,102 @@ export function scientific_to_float64( sequence s )
 						-- If the first bit that missed the precision is '1', then round up
 						mbits[1] += 1
 						mbits = carry( mbits, 2 )
+						if length(mbits) = 53 then
+							-- this only happens if mbits is now: { 0, 0, ..., 0, 0, 1 }
+							-- and is heavy one because it was    { 1, 1, ....,1, 1 }
+							--    1.000000000000 (implicit 1)
+							-- +  0.111111111111 (mbits before)
+							--    0.000000000001 (value to round off the number)
+							--    --------------
+							--   10.000000000000 (implicit 1)
+							--    0.000000000000 (new mbits)
+							-- mbits should be 52 zeroes and it so 
+							-- happens mbits[1..$-1] is just that.
+							mbits = mbits[1..$-1]
+							-- set carried flag so we increment exp later.
+							carried = 1
+						end if
 				end if
 				exp = length(int_bits)-1
-				
-		else
-				if length(int_bits) then
-						-- both fractional and integral
-						exp = length(int_bits)-1
-						
-				else
-						-- fractional only
-						exp = - find( 1, reverse( frac_bits ) )
-						if exp < -1023 then
-								-- -1023 is the smallest exponent possible, so we may have to lose
-								-- some precision.
-								exp = -1023
-						end if
-						
-						if exp then
-								-- Truncate it based on the exponent.
-								frac_bits = frac_bits[1..$+exp+1]
-						end if
-						
-				end if
-				
-				-- Now we combine the integral and fracional parts, and pad them
-				-- just to make the slice easier.
-				mbits = frac_bits & int_bits
-				mbits = repeat( 0, 53 ) & mbits
-				
-				if exp > -1023 then
-						-- normalized
-						if mbits[$-53] then
-								-- If the first bit that missed the precision is '1', then round up
-								mbits[$-52] += 1
-								mbits = carry( mbits, 2 )
-						end if
-						mbits = mbits[$-52..$-1]
-				else
-						-- denormalized
-						if mbits[$-52] then
-								-- If the first bit that missed the precision is '1', then round up
-								mbits[$-52] += 1
-								mbits = carry( mbits, 2 )
-						end if
-						mbits = mbits[$-51..$]
-				end if
-				
+			else
+					if length(int_bits) then
+							-- both fractional and integral
+							exp = length(int_bits)-1
+							
+					else
+							-- fractional only
+							exp = - find( 1, reverse( frac_bits ) )
+							if exp < -1023 then
+									-- -1023 is the smallest exponent possible, so we may have to lose
+									-- some precision.
+									exp = -1023
+							end if
+							
+							if exp then
+									-- Truncate it based on the exponent.
+									frac_bits = frac_bits[1..$+exp+1]
+							end if
+							
+					end if
+					
+					-- Now we combine the integral and fracional parts, and pad them
+					-- just to make the slice easier.
+					mbits = frac_bits & int_bits
+					mbits = repeat( 0, 53 ) & mbits
+					
+					if exp > -1023 then
+							-- normalized
+							if mbits[$-53] then
+									-- If the first bit that missed the precision is '1', then round up
+									mbits[$-52] += 1
+									integer mbits_len = length(mbits)
+									mbits = carry( mbits, 2 )
+									if length(mbits) = mbits_len + 1 then
+										carried = 1
+									end if
+							end if
+							mbits = mbits[$-52..$-1]
+					else
+							-- denormalized
+							if mbits[$-52] then
+									-- If the first bit that missed the precision is '1', then round up
+									mbits[$-52] += 1
+									integer mbits_len = length(mbits)
+									mbits = carry( mbits, 2 )
+									if length(mbits) = mbits_len + 1 then
+										carried = 1
+									end if
+							end if
+							mbits = mbits[$-51..$]
+					end if
+					
+			end if
+			
+			-- this handles denormalized.
+			exp += carried
+		end if
+		
+		if exp >= 1024 then
+			-- we have exceeded exp's legal values for real numbers
+			-- meaning that we cannot represent this number being parsed
+			-- set to inf or -inf and raise an overflow floating point exception.
+			-- This value is a special value for infinity.
+			exp   = 1024
+			mbits = repeat(0, 52)
+			fenv:raise(fenv:FE_OVERFLOW)
 		end if
 		
 		-- Add the IEEE 784 specified exponent bias and turn it into bits
 		ebits = int_to_bits( exp + 1023, 11 )
+		
+		if almost_nothing and not find(1, mbits & ebits) then
+			-- the user wrote a non-zero value but in the end it is evaluated as 0.
+			-- ebits is only all 0, in the subnormal or 0 cases
+			-- mbits is only all 0, in the case of 0.
+			-- but the case of 0 is handled about 120 lines above, so this 
+			-- non-zero number when parsed turns out to be too small for EUPHORIA.
+			fenv:raise(fenv:FE_UNDERFLOW)
+		end if
 		
 		-- Combine everything and convert to bytes (float64)
 		return bits_to_bytes( mbits & ebits & sbits )
