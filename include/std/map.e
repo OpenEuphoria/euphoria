@@ -1602,6 +1602,9 @@ public function load_map(object input_file_name)
 					end if
 									
 					data_value = text:trim(logical_line[delim_pos+1..$])
+					if data_value[1] = '\"' and data_value[$] = '\"' then
+					    data_value = data_value[2..$-1]
+					end if
 					data_value = search:match_replace("\\#2C", data_value, ",")
 					data_value = search:match_replace("\\#24", data_value, "$")
 					data_value = search:match_replace("\\#22", data_value, "\"")
@@ -1626,7 +1629,7 @@ public function load_map(object input_file_name)
 					logical_line = ""
 				end if
 				
-				has_comment = search:rmatch("--", line_in)
+				has_comment = match("--", line_in)
 				if has_comment != 0 then
 					line_in = text:trim(line_in[1..has_comment-1])
 				else
