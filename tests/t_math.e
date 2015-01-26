@@ -309,4 +309,11 @@ end function
 test_equal( "privates not initialized in BB when set to novalue", 2, ticket_730() )
 end ifdef
 
+test_equal( "Trig sine function works the same whether it is an integer or float 1:", sin(1.0000), sin(1) )
+test_equal( "Trig sine function works the same whether it is an integer or float 2:", sin(2.0000), sin(2) )
+test_equal( "Trig cosine function works the same whether it is an integer or float 1:", cos(1.0000), cos(1) )
+test_equal( "Trig cosine function works the same whether it is an integer or float 2:", cos(2.0000), cos(2) )
+test_equal( "Trig tan function works the same whether it is an integer or float 1:", tan(1.0000), tan(1) )
+test_equal( "Trig tan function works the same whether it is an integer or float d2:", tan(2.0000), tan(2) )
+
 test_report()
