@@ -34,8 +34,8 @@ ChangesEnvironment=yes
 InfoBeforeFile=before.txt
 InfoAfterFile=after.txt
 ; set the minimum environment required to 
-; Windows 95 Original Equipment Manufacterer Service Release 2.5 (see ticket 665)
-MinVersion=4.0.1212,
+; Windows NT or higher (Inno Setup has discontinued support for Windows 9x!) (see ticket 665)
+MinVersion=5.0
 
 [Types]
 Name: "full"; Description: "Full installation";
@@ -82,49 +82,34 @@ Source: "{app}\readme.htm"; DestDir: "{code:GetBackupPath}"; Flags: external ski
 Source: "{app}\license.txt"; DestDir: "{code:GetBackupPath}"; Flags: external skipifsourcedoesntexist;
 Source: "{app}\file_id.diz"; DestDir: "{code:GetBackupPath}"; Flags: external skipifsourcedoesntexist;
 
-; Temporary Programs used to update AUTOEXEC.BAT in Windows 95, 98 and ME,
-; create the docs, and euiw.exe (see [Run] section below)
-Source: "..\..\bin\euiw.exe"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-
-; We temporarily need these includes as well, but EUDIR will not have been set.
-Source: "cleanbranch\include\wildcard.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: "cleanbranch\include\get.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: "cleanbranch\include\misc.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: "cleanbranch\include\msgbox.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: "cleanbranch\include\machine.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: "cleanbranch\include\dll.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: "cleanbranch\include\euphoria\keywords.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: "cleanbranch\include\euphoria\syncolor.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: "cleanbranch\source\autoexec_update.exw"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-
 ; Files to Install
 ; Root
 Source: "cleanbranch\file_id.diz"; DestDir: {app}; Flags: ignoreversion;
 Source: "cleanbranch\license.txt"; DestDir: {app}; Flags: ignoreversion;
 
 ; Windows Binaries
-Source: "..\..\bin\eu.a"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eu.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eub.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eubind.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eubw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\euc.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eudbg.a"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eudbg.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eui.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main; AfterInstall: InstallEuCfg
-Source: "..\..\bin\euiw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eushroud.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\eu.a"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\eu.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\eub.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\eubind.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\eubw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\euc.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\eudbg.a"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\eudbg.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\eui.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main; AfterInstall: InstallEuCfg
+Source: "..\..\source\build\euiw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\source\build\eushroud.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "cleanbranch\source\eufile.ico"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "cleanbranch\source\euphoria.ico"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 
 ; Windows Tools
-Source: "..\..\bin\creole.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "..\..\bin\eucoverage.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "..\..\bin\eudis.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "..\..\bin\eudist.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "..\..\bin\eudoc.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "..\..\bin\euloc.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "..\..\bin\eutest.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "..\..\source\build\creole.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "..\..\source\build\eucoverage.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "..\..\source\build\eudis.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "..\..\source\build\eudist.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "..\..\source\build\eudoc.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "..\..\source\build\euloc.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "..\..\source\build\eutest.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 
 ; Generic Tools
 Source: "cleanbranch\bin\*.bat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
@@ -152,8 +137,6 @@ Source: "cleanbranch\tests\*.*"; DestDir: {app}\tests\; Flags: ignoreversion rec
 ; Tutorial
 Source: "cleanbranch\tutorial\*.*"; DestDir: {app}\tutorial\; Flags: ignoreversion recursesubdirs; Components: comp_tuts
 
-; Others
-Source: "cleanbranch\packaging\win32\setenv.bat"; DestDir: {app}; Flags: ignoreversion; Tasks: not update_env; AfterInstall: CreateEnvBatchFile()
 
 [INI]
 ; shortcut file to launch Rapid Euphoria website
@@ -183,21 +166,21 @@ Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "PATH"; ValueDa
 ;associate .exw files to be called by euiw.exe
 Root: HKCR; Subkey: ".exw"; ValueType: string; ValueName: ""; ValueData: "EUWinApp"; Flags: deletekey uninsdeletevalue createvalueifdoesntexist; Tasks: associate
 Root: HKCR; Subkey: "EUWinApp"; ValueType: string; ValueName: ""; ValueData: "Euphoria Windows App"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
-Root: HKCR; Subkey: "EUWinApp\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\eufile.ico"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
-Root: HKCR; Subkey: "EUWinApp\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\euiw.exe"" ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
-Root: HKCR; Subkey: "EUWinApp\shell\translate\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\euc.exe"" ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: "EUWinApp\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\source\build\eufile.ico"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: "EUWinApp\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\source\build\euiw.exe"" ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: "EUWinApp\shell\translate\command"; ValueType: string; ValueName: ""; ValueData: """{app}\source\build\euc.exe"" ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
 
 ;associate .ex files to be called by eui.exe
 Root: HKCR; Subkey: ".ex"; ValueType: string; ValueName: ""; ValueData: "EUConsoleApp"; Flags: deletekey uninsdeletevalue createvalueifdoesntexist; Tasks: associate
 Root: HKCR; Subkey: "EUConsoleApp"; ValueType: string; ValueName: ""; ValueData: "Euphoria Console App"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
-Root: HKCR; Subkey: "EUConsoleApp\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\eufile.ico"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
-Root: HKCR; Subkey: "EUConsoleApp\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\eui.exe"" ""%1"" %*"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
-Root: HKCR; Subkey: "EUConsoleApp\shell\translate\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\euc.exe"" -con ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: "EUConsoleApp\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\source\build\eufile.ico"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: "EUConsoleApp\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\source\build\eui.exe"" ""%1"" %*"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: "EUConsoleApp\shell\translate\command"; ValueType: string; ValueName: ""; ValueData: """{app}\source\build\euc.exe"" -con ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
 
 ;create an icon link for .e files
 Root: HKCR; Subkey: ".e"; ValueType: string; ValueName: ""; ValueData: "EUInc"; Flags: deletekey uninsdeletevalue createvalueifdoesntexist; Tasks: associate
 Root: HKCR; Subkey: "EUInc"; ValueType: string; ValueName: ""; ValueData: "Euphoria Include File"; Flags: deletekey uninsdeletekey createvalueifdoesntexist; Tasks: associate
-Root: HKCR; Subkey: "EUInc\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\eufile.ico"; Flags: deletekey uninsdeletekey createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: "EUInc\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\source\build\eufile.ico"; Flags: deletekey uninsdeletekey createvalueifdoesntexist; Tasks: associate
 
 ;create an icon link for .ew files
 Root: HKCR; Subkey: ".ew"; ValueType: string; ValueName: ""; ValueData: "EUInc"; Flags: deletekey uninsdeletevalue createvalueifdoesntexist; Tasks: associate
@@ -213,12 +196,6 @@ Filename: "{tmp}\euiw.exe"; Description: "Update AUTOEXEC.bat"; Parameters: """{
 var
 	backupDir : String;
 
-procedure CreateEnvBatchFile();
-begin
-	SaveStringToFile(ExpandConstant('{app}\setenv.bat'), #13#10 + 
-		ExpandConstant('SET EUDIR={app}') + #13#10 + 'SET PATH=%EUDIR%\bin;%PATH%' + #13#10, True);
-end;
-
 function GetBackupPath(Param: String) : String;
 begin
   if Length(backupDir) = 0 then
@@ -231,7 +208,7 @@ var
   euCfgFname : String;
   incLine : String;
 begin
-  euCfgFName := ExpandConstant('{app}\bin\eu.cfg');
+  euCfgFName := ExpandConstant('{app}\source\build\eu.cfg');
    incLine := ExpandConstant('-i {app}\include');
   Result := #13#10 + '[all]' + #13#10 + incLine + #13#10;
 end;
@@ -243,7 +220,7 @@ var
 
 begin
   incLine := ExpandConstant('-i {app}\include');
-  euCfgFname := ExpandConstant('{app}\bin\eu.cfg');
+  euCfgFname := ExpandConstant('{app}\source\build\eu.cfg');
 
   if FileExists(euCfgFname) = False then
     begin
@@ -273,7 +250,7 @@ var path : String;
 var eu_auto_exec_bat : String;
 // Undo what the installer changed at runtime.
 begin
-  euCfgFName := ExpandConstant('{app}\bin\eu.cfg');
+  euCfgFName := ExpandConstant('{app}\source\build\eu.cfg');
   euCfgContents_theoretical := generateEuCfgString();
   euCfgContents_tested := '';
   if not LoadStringFromFile( euCfgFName, euCfgContents_tested )
@@ -287,12 +264,6 @@ begin
            StringChangeEx(path, ExpandConstant('{app}\bin;'), '', True);
            StringChangeEx(path, ExpandConstant('{app}\bin'), '', True);
             RegWriteStringValue(HKEY_CURRENT_USER, 'Environment', 'PATH', path);
-      end;
-  if LoadStringFromFile('C:\AUTOEXEC.BAT', eu_auto_exec_bat) then
-      begin
-      	if StringChangeEx(eu_auto_exec_bat, ExpandConstant('{app}\bin'),
-      		'', True) <> 0 then
-          SaveStringToFile('C:\AUTOEXEC.BAT', eu_auto_exec_bat, False);
       end;
  Result := True;
 end;
