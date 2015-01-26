@@ -1,12 +1,12 @@
 include std/dll.e
+include std/utils.e
 
-constant libm = open_dll("libm.so")
-
-constant feclearexcept = define_c_func(libm, "feclearexcept", {C_INT}, C_INT)
-constant fegetexceptflag = define_c_func(libm, "fegetexceptflag", {C_POINTER, C_INT}, C_INT)
-constant feraiseexcept = define_c_func(libm, "feraiseexcept", {C_INT}, C_INT)
-constant fesetexceptflag = define_c_func(libm, "fesetexceptflag", {C_POINTER, C_INT}, C_INT)
-constant fetestexcept = define_c_func(libm, "fetestexcept", {C_INT}, C_INT)
+-- true if running wine
+constant wine = not equal(getenv("WINELOADERNOEXEC"),-1)
+constant libm = iff(wine, 0, open_dll({"libm.so", "mscrv120.dll"}))
+constant feclearexcept = iff(wine, -1, define_c_func(libm, "feclearexcept", {C_INT}, C_INT))
+constant feraiseexcept = iff(wine, -1, define_c_func(libm, "feraiseexcept", {C_INT}, C_INT))
+constant fetestexcept = iff(wine, -1, define_c_func(libm, "fetestexcept", {C_INT}, C_INT))
 
 public type fexcept_t(object s)
     if atom(s) then

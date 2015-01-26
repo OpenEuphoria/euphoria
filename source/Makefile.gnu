@@ -262,6 +262,7 @@ EU_CORE_FILES = \
 	coverage.e \
 	emit.e \
 	error.e \
+	fenv.e \
 	fwdref.e \
 	inline.e \
 	keylist.e \

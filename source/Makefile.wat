@@ -118,6 +118,7 @@ EU_CORE_FILES = &
 	coverage.e &
 	emit.e &
 	error.e &
+	fenv.e &
 	fwdref.e &
 	global.e &
 	inline.e &
