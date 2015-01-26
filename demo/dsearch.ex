@@ -129,7 +129,7 @@ end type
 
 function dl_open(sequence name)
     ifdef WINDOWS then
-        return eu:open_dll(name)
+        return open_dll(name)
     elsifdef LINUX then
         atom name_string_pointer = allocate_string(name, TRUE)
         object pipe = pipeio:exec(  "nm -D " & name,   pipeio:create()  )
