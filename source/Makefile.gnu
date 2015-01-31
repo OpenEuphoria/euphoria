@@ -362,12 +362,12 @@ EU_DOC_SOURCE = \
 	$(EU_STD_INC) \
 	$(DOCDIR)/manual.af \
 	$(wildcard $(TRUNKDIR)/include/*.*) \
-	$(wildcard $(DOCDIR)/demo/*.ex) \
-	$(wildcard $(DOCDIR)/demo/win32/*.ew) \
-	$(wildcard $(DOCDIR)/demo/bench/*.ex) \
-	$(wildcard $(DOCDIR)/demo/net/*.ex) \
-	$(wildcard $(DOCDIR)/demo/preproc/*.ex) \
-	$(wildcard $(DOCDIR)/demo/unix/*.ex) \
+	$(wildcard $(TRUNKDIR)/demo/*.ex) \
+	$(wildcard $(TRUNKDIR)/demo/win32/*.ew) \
+	$(wildcard $(TRUNKDIR)/demo/bench/*.ex) \
+	$(wildcard $(TRUNKDIR)/demo/net/*.ex) \
+	$(wildcard $(TRUNKDIR)/demo/preproc/*.ex) \
+	$(wildcard $(TRUNKDIR)/demo/unix/*.ex) \
 	$(wildcard $(DOCDIR)/*.txt) \
 	$(wildcard $(DOCDIR)/release/*.txt)
 
