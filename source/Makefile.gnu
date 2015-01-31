@@ -361,7 +361,8 @@ DOCDIR = $(TRUNKDIR)/docs
 EU_DOC_SOURCE = \
 	$(EU_STD_INC) \
 	$(DOCDIR)/manual.af \
-	$(wildcard $(DOCDIR)/demo/*.e) \
+	$(wildcard $(TRUNKDIR)/include/*.*) \
+	$(wildcard $(DOCDIR)/demo/*.ex) \
 	$(wildcard $(DOCDIR)/demo/win32/*.ew) \
 	$(wildcard $(DOCDIR)/demo/bench/*.ex) \
 	$(wildcard $(DOCDIR)/demo/net/*.ex) \
