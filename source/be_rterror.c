@@ -1271,7 +1271,15 @@ static void LookBackForSubscriptSymbol( intptr_t *pc, int sublevel, int has_slic
 		}
 	}
 	else{
-		snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, " - in %s of desequencing operation", has_slice ? "slice/subscript" : "subscript" );
+		if( *pc == rhs_subs ||  *pc == rhs_subs_check ){
+			symtab_ptr assign_to = *(pc+3);
+			if( assign_to->name ){
+				snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, " - in assignment to '%s'", assign_to->name );
+				sf_output( TPTempBuff );
+				return;
+			}
+		}
+		snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, " - in %s #%d", has_slice ? "slice/subscript" : "subscript", sublevel);
 		sf_output( TPTempBuff );
 	}	
 }
