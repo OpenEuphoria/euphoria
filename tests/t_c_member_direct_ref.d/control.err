@@ -1,0 +1,6 @@
+t_c_member_direct_ref.e:4
+<0618>:: memstruct member cannot reference itself directly. Did you mean 'pointer TEST_STRUCT next'?
+    TEST_STRUCT next 
+               ^
+
+

@@ -69,6 +69,27 @@ enum
 	MULTI_PARSE_SIGNED,
 	MULTI_PARSE_ID,
 	MULTI_PARSE_SYM
+	
+
+enum
+	MEMSTRUCT_THISLINE,
+	MEMSTRUCT_BP,
+	MEMSTRUCT_LINE_NUMBER,
+	MEMSTRUCT_CURRENT_FILE_NO,
+	$
+
+function get_line_info()
+	return { ThisLine, bp, line_number, current_file_no }
+end function
+
+procedure set_line_info( sequence line_info )
+	if length( line_info ) then
+		ThisLine        = line_info[MEMSTRUCT_THISLINE]
+		bp              = line_info[MEMSTRUCT_BP]
+		line_number     = line_info[MEMSTRUCT_LINE_NUMBER]
+		current_file_no = line_info[MEMSTRUCT_CURRENT_FILE_NO]
+	end if
+end procedure
 
 function multi_part_memtype( token tok, integer terminator = MS_AS )
 	integer tid = tok[T_ID]
@@ -309,6 +330,7 @@ export procedure MemStruct_declaration( integer scope )
 	SymTab[mem_struct][S_SCOPE] = scope
 	
 	mem_pack = 0
+	
 	tok = next_token()
 	if tok[T_ID] = WITH then
 		No_new_entry = 1
@@ -333,6 +355,8 @@ export procedure MemStruct_declaration( integer scope )
 	else
 		putback( tok )
 	end if
+	
+	sequence line_info = get_line_info()
 	
 	integer pointer = 0
 	integer signed  = -1
@@ -369,7 +393,7 @@ export procedure MemStruct_declaration( integer scope )
 				
 			case MEMSTRUCT, MEMUNION, QUALIFIED_MEMSTRUCT, QUALIFIED_MEMUNION then
 				-- embedding
-				MemStruct_member( tok, pointer )
+				MemStruct_member( tok, pointer, , line_info )
 				-- reset the flags
 				pointer = 0
 				long    = 0
@@ -381,7 +405,7 @@ export procedure MemStruct_declaration( integer scope )
 					
 					if pointer then
 						integer ref = new_forward_reference( TYPE, tok[T_SYM], MEMSTRUCT )
-						MemStruct_member( tok, pointer, 1 )
+						MemStruct_member( tok, pointer, 1, line_info )
 					else
 					
 						token nt = next_token()
@@ -392,7 +416,7 @@ export procedure MemStruct_declaration( integer scope )
 							break "token"
 						else
 							putback( nt )
-							MemStruct_member( tok, pointer, 1 )
+							MemStruct_member( tok, pointer, 1, line_info )
 						end if
 					end if
 					
@@ -808,7 +832,7 @@ function member_array( symtab_index sym )
 	return size
 end function
 
-procedure add_member( integer type_sym, token name_tok, object mem_type, integer size, integer pointer, integer signed = 0 )
+procedure add_member( integer type_sym, token name_tok, object mem_type, integer size, integer pointer, integer signed = 0, sequence line_info = {} )
 	
 	symtab_index sym = name_tok[T_SYM]
 	
@@ -825,6 +849,9 @@ procedure add_member( integer type_sym, token name_tok, object mem_type, integer
 	
 	if pointer then
 		size = sizeof( C_POINTER )
+	elsif SymTab[sym][S_MEM_STRUCT] = mem_struct then
+		set_line_info( line_info )
+		CompileErr( MEMBER_DIRECT_REFERENCE, { sym_name( mem_struct ), sym_name( sym ) } )
 	end if
 	
 	if signed = -1 then
@@ -898,7 +925,7 @@ procedure Object( integer eu_type, integer pointer, integer signed )
 	add_member( eu_type, name_tok, MS_OBJECT, sizeof( E_OBJECT ), pointer, signed )
 end procedure
 
-procedure MemStruct_member( token memstruct_tok, integer pointer, integer fwd = 0 )
+procedure MemStruct_member( token memstruct_tok, integer pointer, integer fwd = 0, sequence line_info )
 	token name_tok = read_name()
 	integer size = 0
 	
@@ -910,7 +937,7 @@ procedure MemStruct_member( token memstruct_tok, integer pointer, integer fwd = 
 	else
 		size = SymTab[memstruct_tok[T_SYM]][S_MEM_SIZE]
 	end if
-	add_member( 0, name_tok, memstruct_tok, size, pointer )
+	add_member( 0, name_tok, memstruct_tok, size, pointer, , line_info )
 	
 end procedure
 

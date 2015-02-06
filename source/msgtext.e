@@ -392,6 +392,7 @@ public type enum message_index
 	MISSING_MEMSTRUCT_MEMBER,
 	DEREFERENCING_NONPOINTER,
 	OFFSET_DEREFERENCED_POINTER,
+	MEMBER_DIRECT_REFERENCE,
     $
 end type
 
@@ -778,6 +779,7 @@ constant StdErrMsgs = {
 	{ OFFSET_DEREFERENCED_POINTER,"Cannot calculate the offset of a memstruct member after a dereferenced pointer ([1])"},
 	{ BUILDDIR_IS_FILE, "Error: Specified build directory is a file"},
 	{ BUILDDIR_IS_UNDEFINED, "Error: Specified build directory is undefined (wildcards are not allowed)"},
+	{ MEMBER_DIRECT_REFERENCE, "memstruct member cannot reference itself directly. Did you mean 'pointer [1] [2]'?" },
     $
 }
 
