@@ -1184,7 +1184,15 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 											{ref[FR_NAME], abbreviate_path(known_files[ref[FR_FILE]]), ref[FR_LINE]})
 									end if
 								elsif ref[FR_TYPE] = MS_MEMBER then
-								errloc = sprintf("\t\'%s\' (%s:%d) could not be resolved as a member of %s (%s).\n",
+									if ref[FR_OP] = MEMSTRUCT_DECL or ref[FR_OP] = MEMUNION_DECL then
+										errloc = sprintf("\t\tmemtype '%s\' has not been declared (%s:%d)\n",
+												 {
+													ref[FR_NAME],
+													abbreviate_path(known_files[ref[FR_FILE]]),
+													ref[FR_LINE]
+												})
+									else
+										errloc = sprintf("\t\'%s\' (%s:%d) could not be resolved as a member of %s (%s).\n",
 												 {
 													ref[FR_NAME],
 													abbreviate_path(known_files[ref[FR_FILE]]),
@@ -1192,6 +1200,8 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 													join( ref[FR_DATA], "." ),
 													opnames[ref[FR_OP]]
 												})
+									end if
+									
 								else
 									errloc = sprintf("\t\'%s\' (%s:%d) has not been declared.\n", 
 										{ref[FR_NAME], abbreviate_path(known_files[ref[FR_FILE]]), ref[FR_LINE]})

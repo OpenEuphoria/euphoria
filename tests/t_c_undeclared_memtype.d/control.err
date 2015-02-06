@@ -1,0 +1,7 @@
+t_c_undeclared_memtype.e:5
+<0074>:: Errors resolving the following references:
+		memtype 'bool' has not been declared (t_c_undeclared_memtype.e:5)
+
+    bool enabled 
+                 ^
+
