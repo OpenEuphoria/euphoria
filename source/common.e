@@ -9,6 +9,8 @@ elsedef
 	without type_check
 end ifdef
 
+with type_check
+
 include std/os.e
 include std/filesys.e
 include std/search.e
@@ -22,6 +24,7 @@ public constant
 	DIRECT_OR_PUBLIC_INCLUDE = DIRECT_INCLUDE + PUBLIC_INCLUDE,
 	ANY_INCLUDE = DIRECT_OR_PUBLIC_INCLUDE + INDIRECT_INCLUDE
 
+	
 public sequence SymTab = {}  -- the symbol table
 
 public sequence known_files = {}

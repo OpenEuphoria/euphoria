@@ -1,7 +1,6 @@
 t_c_fwd_enum_type.e:11
-<0331>:: Forward references are not supported for enums
+<0074>:: Errors resolving the following references:
+	'foo' (t_c_fwd_enum_type.e:11) has not been declared.
+
 	THURSDAY = foo,
-	             ^
-
-
-
+	              ^
