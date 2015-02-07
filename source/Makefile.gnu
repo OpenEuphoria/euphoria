@@ -299,12 +299,15 @@ FE_FLAGS =  $(ARCH_FLAG) $(COVERAGEFLAG) $(MSIZE) $(EPTHREAD) -c -fsigned-char $
 endif
 BE_FLAGS =  $(ARCH_FLAG) $(COVERAGEFLAG) $(MSIZE) $(EPTHREAD) -c -Wall $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(FP_FLAGS) $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE) $(FPIC) -I$(TRUNKDIR)/source
 
+# TODO XXX should syncolor.e really be in EU_INTERPRETER_FILES ?
+
 EU_CORE_FILES = \
 	$(TRUNKDIR)/source/block.e \
 	$(TRUNKDIR)/source/common.e \
 	$(TRUNKDIR)/source/coverage.e \
 	$(TRUNKDIR)/source/emit.e \
 	$(TRUNKDIR)/source/error.e \
+	$(TRUNKDIR)/include/std/fenv.e \
 	$(TRUNKDIR)/source/fwdref.e \
 	$(TRUNKDIR)/source/inline.e \
 	$(TRUNKDIR)/source/keylist.e \
@@ -322,7 +325,6 @@ EU_CORE_FILES = \
 	$(TRUNKDIR)/source/syncolor.e \
 	$(TRUNKDIR)/source/symtab.e 
 
-# TODO XXX should syncolor.e really be in EU_INTERPRETER_FILES ?
 
 EU_INTERPRETER_FILES = \
 	$(TRUNKDIR)/source/backend.e \
@@ -408,6 +410,13 @@ DOCDIR = $(TRUNKDIR)/docs
 EU_DOC_SOURCE = \
 	$(EU_STD_INC) \
 	$(DOCDIR)/manual.af \
+	$(wildcard $(TRUNKDIR)/include/*.*) \
+	$(wildcard $(TRUNKDIR)/demo/*.ex) \
+	$(wildcard $(TRUNKDIR)/demo/win32/*.ew) \
+	$(wildcard $(TRUNKDIR)/demo/bench/*.ex) \
+	$(wildcard $(TRUNKDIR)/demo/net/*.ex) \
+	$(wildcard $(TRUNKDIR)/demo/preproc/*.ex) \
+	$(wildcard $(TRUNKDIR)/demo/unix/*.ex) \
 	$(wildcard $(DOCDIR)/*.txt) \
 	$(wildcard $(INCDIR)/euphoria/debug/*.e) \
 	$(wildcard $(DOCDIR)/release/*.txt)
@@ -546,6 +555,7 @@ translator  : eucsource
 backend     : backendsource
 endif
 
+
 interpreter : builddirs $(EU_BACKEND_OBJECTS)
 	$(MAKE) $(BUILDDIR)/$(EEXU) OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 
@@ -628,6 +638,7 @@ endif
 
 $(BUILDDIR)/$(EEXU) :  EU_TARGET = eui.ex
 $(BUILDDIR)/$(EEXU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) $(EU_STD_INC)
+$(BUILDDIR)/$(EEXU) :  $(BUILDDIR)/intobj $(BUILDDIR)/intobj/back
 $(BUILDDIR)/$(EEXU) :  EU_OBJS = $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
 $(BUILDDIR)/$(EEXU) :  $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(EU_TRANSLATOR_FILES) $(EUI_RES) $(EUIW_RES)
 	@$(ECHO) making $(EEXU)
@@ -791,7 +802,7 @@ test : EUCOMPILEDIR=$(TRUNKDIR)
 test : EUCOMPILEDIR=$(TRUNKDIR)	
 test : C_INCLUDE_PATH=$(TRUNKDIR):..:$(C_INCLUDE_PATH)
 test : LIBRARY_PATH=$(%LIBRARY_PATH)
-test : $(TRUNKDIR)/tests/lib818.dll
+test : $(TRUNKDIR)/tests/lib818.dll $(BUILDDIR)/$(EEXU) $(CYPBUILDDIR)/$(EECU) $(CYPBUILDDIR)/$(LIBRARY_NAME) $(CYPBUILDDIR)/$(EUBIND)
 test :  
 	cd $(TRUNKDIR)/tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
 		$(EXE) -i $(TRUNKDIR)/include $(TRUNKDIR)/source/eutest.ex -i $(TRUNKDIR)/include -cc gcc $(VERBOSE_TESTS) \

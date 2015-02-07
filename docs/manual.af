@@ -104,6 +104,7 @@ ifdef HTML
 ../demo/color.ex
 ../demo/csort.ex
 ../demo/dep.exw
+../demo/dsearch.ex
 ../demo/eprint.ex
 ../demo/eused.ex
 ../demo/guru.ex
@@ -120,7 +121,6 @@ ifdef HTML
 ../demo/tree.ex
 ../demo/where.ex
 ../demo/bench/sieve8k.ex
-../demo/win32/dsearch.exw
 ../demo/win32/taskwire.exw
 ../demo/win32/window.exw
 ../demo/win32/winwire.exw

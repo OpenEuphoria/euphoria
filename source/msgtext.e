@@ -381,10 +381,14 @@ public type enum message_index
     BAD_TRACE_LINES,
     BUILDDIR_IS_FILE,
     BUILDDIR_IS_UNDEFINED,
+	NUMBER_IS_TOO_SMALL,
+	NUMBER_IS_TOO_BIG,
     $
 end type
 
+
 constant StdErrMsgs = {
+
     { ADD_A_DIRECTORY_TO_BE_SEARCHED_FOR_INCLUDE_FILES, "Add a directory to be searched for include files" },
     { AN_ENUM_CONSTANT_MUST_BE_AN_INTEGER          , "An enum constant must be an integer" },
     { AN_IDENTIFIER_IS_EXPECTED_HERE               , "an identifier is expected here" },
@@ -640,6 +644,8 @@ constant StdErrMsgs = {
     { NO_ROUTINE_ID_FOR_1                          , "no routine id for [1]" },
     { NO_VALUE_RETURNED_FROM_FUNCTION              , "no value returned from function" },
     { NO_WORD_WAS_FOUND_FOLLOWING_1                , "no 'word' was found following [1]" },
+	{ NUMBER_IS_TOO_SMALL                          , "The number specified here is too small."},
+	{ NUMBER_IS_TOO_BIG                            , "The number specified here is too big."},
     { NUMBER_NOT_FORMED_CORRECTLY                  , "number not formed correctly" },
     { OBSOLETE_IL_FILE_PLEASE_RECREATE_IT_USING_EUPHORIA_40_OR_LATER, "Obsolete .il file. Please recreate it using Euphoria 4.0 or later." },
     { ONLY_ENUMS_MAY_BE_DECLARED_AS_TYPES          , "Only enums may be declared as types" },
@@ -752,6 +758,7 @@ constant StdErrMsgs = {
     { YOU_MAY_NOW_USE_1_TO_RUN_2                   , "You may now use [1] to run [2]" },
     $
 }
+	
 
 public function GetMsgText( message_index MsgNum, integer WithNum = 1, object Args = {})
 	integer idx = 1

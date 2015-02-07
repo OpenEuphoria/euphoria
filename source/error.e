@@ -17,6 +17,7 @@ include reswords.e
 include msgtext.e
 include coverage.e
 include scanner.e
+include std/error.e
 
 ifdef CRASH_ON_ERROR then
 	include std/console.e
@@ -260,7 +261,7 @@ export procedure CompileErr(object msg, object args = {}, integer preproc = 0 )
 	if integer(msg) then
 		msg = GetMsgText(msg)
 	end if
-
+	
 	msg = format(msg, args)
 
 	Errors += 1

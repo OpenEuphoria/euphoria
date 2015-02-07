@@ -38,6 +38,26 @@ constant
 test_equal("value() backtick", { GET_SUCCESS, BACKTICK }, value( '`' & BACKTICK & '`' ) )
 test_equal("value() triple quote", { GET_SUCCESS, TRIPLE }, value( `"""` & TRIPLE & `"""` ) )
 
+test_equal("value() below subnormal number (scientific notation)", {GET_SUCCESS, 0}, value("1e-380"))
+test_equal("value() ridiculously below subnormal number (scientific notation)", {GET_SUCCESS, 0}, value("1e-50_000"))
+test_equal("value() below subnormal number (standard decimal notation)", {GET_SUCCESS, 0}, value("0." & repeat('0',380) & '1'))
+test_equal("value() subnormal number (scientific notation)", {GET_SUCCESS, 1e-310}, value("1e-310"))
+test_equal("value() subnormal number (standard decimal notation)", {GET_SUCCESS, 1e-310}, value("0." & repeat('0',310) & '1'))
+
+test_equal("value() bigger than maximum positive number (scientific notation)", {GET_SUCCESS, PINF}, value("1e380"))
+test_equal("value() bigger than maximum negative number (scientific notation)", {GET_SUCCESS, MINF}, value("-1e380"))
+test_equal("value() ridiculously bigger than maximum positive number (scientific notation)", {GET_SUCCESS, PINF}, value("1e200000"))
+test_equal("value() ridiculously bigger than maximum negative number (scientific notation)", {GET_SUCCESS, MINF}, value("-1e200000"))
+
+test_equal("value() bigger than maximum positive number (standard decimal notation)", {GET_SUCCESS, PINF}, value("1" & repeat('0', 380)))
+-- The docs do not say that it supports non-decimal numbers.  So, don't test for that.  Don't try to read non-decimal numbers
+-- in code you write using value() or get().
+-- test_equal("value() bigger than maximum positive number (standard hexadecimal notation)", {GET_SUCCESS, PINF}, value("#1" & repeat('0', 315)))
+-- test_equal("value() bigger than maximum positive number (standard octal notation)", {GET_SUCCESS, PINF}, value("0q1" & repeat('0', 420)))
+-- test_equal("value() bigger than maximum positive number (standard binary notation)", {GET_SUCCESS, PINF}, value("0b1" & repeat('0', 1260)))
+
+
+
 constant 
 	OBJECT = { 1, 2, 3, "foo", {-9},{}},
 	TEXT = "some text",

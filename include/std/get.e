@@ -545,6 +545,11 @@ end function
 -- A single call to ##get## will read in this entire sequence,  return its value as a result, and
 -- return complementary information.
 --
+-- The function get() is guaranteed to read a value produced by print().  It is often
+-- necessary to leave a new line between objects printed though.  The user should not use
+-- get() or value() to read number notations that use bases other than ten or sixteen.
+-- Hexadecimal values will not be read unless they are preceeded by a hash mark (#).
+--
 -- If a nonzero offset is supplied, it is interpreted as an offset to the current file
 -- position; the file will start ##seek## from there first.
 --

@@ -1,13 +1,22 @@
 --****
--- === win32/dsearch.exw
+-- === dsearch.ex
 -- 
 -- search for a .DLL that contains a given routine
 -- ==== Usage
 -- {{{
--- eui dsearch [routine] 
+-- eui dsearch [options] [routine] 
 -- }}}
 --
--- If you don't supply a string on the command line you will be prompted 
+-- //Options// are any combination of ##-h##, ##-a##. ##-q##. ##-l //library//## 
+-- ##--help##, ##--lib  //library//##, ##--all##, and ##--quiet##.
+--
+-- |Long Option|Short Option|Meaning|
+-- |--all      |-a| don't stop at the first occurence of //routine//, find all occurences of //routine//.  This implies the '--quiet' option.|
+-- |--help     |-h| show the user help|
+-- |--lib //library//     |-l //library//| search only //library// for the routine|
+-- |--quiet    |-q| don't print the library filenames that are searched|
+--
+-- If you don't supply a string on the command line, you will be prompted 
 -- for it. 
 --
 
@@ -21,6 +30,7 @@ include std/error.e
 include std/sequence.e as stdseq
 include std/io.e
 include std/console.e
+include std/search.e
 
 constant TRUE = 1, FALSE = 0
 
@@ -37,6 +47,8 @@ sequence cmd, orig_string
 integer scanned, no_open
 scanned = 0
 no_open = 0
+
+boolean only_first = TRUE, found_at_least_one = FALSE, quiet = FALSE
 
 ifdef WINDOWS then
     c_routine FreeLibrary, GetProcAddress, OpenLibrary
@@ -117,7 +129,7 @@ end type
 
 function dl_open(sequence name)
     ifdef WINDOWS then
-        return eu:open_dll(name)
+        return open_dll(name)
     elsifdef LINUX then
         atom name_string_pointer = allocate_string(name, TRUE)
         object pipe = pipeio:exec(  "nm -D " & name,   pipeio:create()  )
@@ -204,7 +216,9 @@ function scan(sequence file_name)
 	puts(io:STDERR, file_name & ": Couldn't open.\n")
 	return 0
     end if
-    printf(io:STDOUT, "%s: ", {file_name})
+    if not quiet then
+        printf(io:STDOUT, "%s: ", {file_name})
+    end if
     scanned += 1
     found_in_file = FALSE
     if dl_sym(lib, routine_name) then
@@ -236,6 +250,7 @@ for i = 1 to length(file_list) by 2 do
     end for
 end for
 
+<<<<<<< local
 CSetup()
 
 cmd = command_line()   -- eui dsearch [string]
@@ -264,7 +279,7 @@ procedure locate(sequence name)
     routine_name = name
     puts(io:STDOUT, "Looking for " & routine_name & "\n ")
     for i = 1 to length(dll_list) do
-	if scan(dll_list[i]) then
+	if scan(dll_list[i]) and only_first then
             console:any_key("Press any key to exit..", io:STDOUT)
 	    abort(1)
 	end if
@@ -272,12 +287,82 @@ procedure locate(sequence name)
     puts(1, '\n')
 end procedure
 
+CSetup()
+
+cmd = command_line()   -- eui dsearch [string]
+
+
+orig_string = ""
+integer cmd_i = 3
+while cmd_i <= length(cmd) do
+    sequence arg = cmd[cmd_i]
+    if search:begins(arg, "--help") then
+		puts(io:STDOUT, 
+"""eui dsearch.ex [options] c_function_name
+			--all   : find all such libraries with the named function (implies -quiet)
+			--help  : display this help message
+			--lib   : use the argument following lib as the sole library to search
+			--quiet : do not display searched libraries while running. 
+""" )
+			abort(0)
+	elsif search:begins(arg, "--lib") then
+		if cmd_i < length(cmd) then
+			dll_list = {cmd[cmd_i+1]}
+			cmd_i += 1
+		end if
+	elsif search:begins(arg, "--all") then
+			only_first = FALSE
+			quiet = TRUE
+	elsif search:begins(arg, "--quiet") then
+			quiet = TRUE
+	elsif length(arg) > 1 and arg[1] = '-' and arg[2] != '-' then
+		  	sequence new_arg = {}
+		  	for ai = 2 to length(arg) do
+				integer c  = arg[ai]
+				switch c do
+					case 'h' then
+					  new_arg = append(new_arg, "--help")
+					case 'a' then
+					  new_arg = append(new_arg, "--all")
+					case 'q' then
+					  new_arg = append(new_arg, "--quiet")
+					case 'l' then
+					  new_arg = append(new_arg, "--lib")
+					  if length(arg) > ai then
+						new_arg = append(new_arg, arg[ai+1..$])
+						exit
+					  end if
+					case else
+					printf(io:STDERR, "Unknown option %s\n", {c})
+					abort(0)
+				 end switch				 
+            end for
+            -- replace arguments and avoid cmd_i increment.
+            cmd = cmd[1..cmd_i-1] & new_arg & cmd[cmd_i+1..$]
+            continue
+    elsif length(arg) >= 1 and arg[1]= '-' then
+			printf(io:STDERR, "Unknown option %s\n", {arg})
+			abort(0)
+	else 
+			orig_string = arg
+	end if
+    cmd_i += 1
+end while
+
+if equal(orig_string,"") then
+    orig_string = delete_trailing_white( console:prompt_string("C function name:") )
+end if
+
+routine_name = orig_string
+
 if length(routine_name) = 0 then
     abort(0)
 end if
 
 locate(orig_string)
 
-puts(io:STDOUT, "\nCouldn't find " & orig_string & '\n')
+if not found_at_least_one then
+    puts(io:STDOUT, "\nCouldn't find " & orig_string & '\n')
+end if
 console:any_key("Press any key to exit..", io:STDOUT)
 
