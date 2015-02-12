@@ -7,8 +7,8 @@ end ifdef
 
 include std/convert.e
 include std/dll.e
-include fenv.e as fenv
-
+include std/fenv.e as fenv
+include std/mathcons.e
 --****
 -- == Scientific Notation Parsing
 --
@@ -285,9 +285,9 @@ constant
 	
 	EXTENDED_SIGNIFICAND =     64,
 	EXTENDED_EXPONENT    =     15,
-	EXTENDED_MIN_EXP     = -16383,
+	EXTENDED_MIN_EXP     = -16382,
 	EXTENDED_EXP_BIAS    =  16383,
-	EXTENDED_MAX_EXP     =  16383, 
+	EXTENDED_MAX_EXP     =  16384,
 	-- not sure about this one.
 	$
 
@@ -399,18 +399,24 @@ public  function scientific_to_float( sequence s, floating_point fp = NATIVE )
 	
 	if exp + length(s) - 1 > base10_ceiling then
 		-- make inf or -inf
-		if fp = DOUBLE then
-			exp = 1024
-			int_bits = repeat(0, 52)
-			frac_bits = {}
+		atom inf = PINF
+		if equal( sbits, {1} ) then
+			inf = MINF
 		end if
-	elsif exp + length(s) - 1 < base10_floor then -- -324 = floor((-1022-52)*log(2)/log(10))
+		
+		if fp = DOUBLE then
+			return atom_to_float64( inf )
+		else
+			return atom_to_float80( inf )
+		end if
+		
+	elsif exp + length(s) - 1 < base10_floor then
 		-- make 0
 		fenv:raise(FE_UNDERFLOW)
 		if fp = DOUBLE then
-			exp = -1023
-			int_bits = repeat(0, 52)
-			frac_bits = {}
+			return atom_to_float64( 0 )
+		else
+			return atom_to_float80( 0 )
 		end if
 	elsif exp >= 0 then
 		-- We have a large exponent, so it's all integral.  Pad it to account for 
@@ -547,7 +553,7 @@ public  function scientific_to_float( sequence s, floating_point fp = NATIVE )
 		-- non-zero number when parsed turns out to be too small for EUPHORIA.
 		fenv:raise(fenv:FE_UNDERFLOW)
 	end if
-		
+	
 	-- Combine everything and convert to bytes (float64 or float80)
 	return bits_to_bytes( mbits & ebits & sbits )
 end function
