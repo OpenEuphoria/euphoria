@@ -103,7 +103,7 @@ procedure resolved_reference( integer ref )
 	integer 
 		file    = forward_references[ref][FR_FILE],
 		subprog = forward_references[ref][FR_SUBPROG]
-	
+
 	integer 
 		tx = 0,
 		ax = 0,
@@ -433,31 +433,38 @@ procedure patch_forward_msmember( token tok, integer ref )
 	sequence fr = forward_references[ref]
 	symtab_index sym = tok[T_SYM]
 	
-	if fr[FR_OP] = MEMSTRUCT_DECL then
-		symtab_index member = fr[FR_DATA]
-		switch tok[T_ID] do
-			case MEMSTRUCT_DECL, MEMSTRUCT then
-				-- a forward reference inside a declaration
-				SymTab[member][S_MEM_STRUCT] = sym
-			case  MEMTYPE then
-				-- memtype alias
-				integer real_type_sym = SymTab[sym][S_MEM_PARENT]
-				SymTab[member][S_MEM_STRUCT] = real_type_sym
-				SymTab[member][S_TOKEN]      = sym_token( real_type_sym )
-			case else
-				-- ?? not handled...leave it unreferenced 
-				return
-		end switch
+	switch fr[FR_OP] do
 		
-		SymTab[member][S_SCOPE]    = SC_MEMSTRUCT
-		SymTab[member][S_MEM_SIZE] = SymTab[sym][S_MEM_SIZE]
-		
-		if not SymTab[member][S_MEM_POINTER] then
-			symtab_index parent_sym = SymTab[member][S_MEM_PARENT]
-			recalculate_size( parent_sym )
-		end if
-		resolved_reference( ref )
-	end if
+		case MEMSTRUCT_DECL then
+			symtab_index member = fr[FR_DATA]
+			switch tok[T_ID] do
+				case MEMSTRUCT_DECL, MEMSTRUCT then
+					-- a forward reference inside a declaration
+					SymTab[member][S_MEM_STRUCT] = sym
+				case  MEMTYPE then
+					-- memtype alias
+					integer real_type_sym = SymTab[sym][S_MEM_PARENT]
+					SymTab[member][S_MEM_STRUCT] = real_type_sym
+					SymTab[member][S_TOKEN]      = sym_token( real_type_sym )
+				case else
+					-- ?? not handled...leave it unreferenced 
+					return
+			end switch
+			
+			SymTab[member][S_SCOPE]    = SC_MEMSTRUCT
+			SymTab[member][S_MEM_SIZE] = SymTab[sym][S_MEM_SIZE]
+			
+			if not SymTab[member][S_MEM_POINTER] then
+				symtab_index parent_sym = SymTab[member][S_MEM_PARENT]
+				recalculate_size( parent_sym )
+			end if
+			resolved_reference( ref )
+		case PEEK_MEMBER, MEMSTRUCT_ACCESS then
+			patch_var_use( ref, fr, sym, 1 )
+		case else
+			-- TODO: ??
+			CompileErr( "Unimplemented: patching forward member with op - []\n", fr[FR_OP] )
+	end switch
 	
 end procedure
 
@@ -504,15 +511,17 @@ procedure patch_forward_memstruct( token tok, integer ref )
 						Code[rx] = m_sym
 						resolved_reference( m_ref )
 					end if
-				else
+				elsif sequence( forward_references[m_ref] ) then
+					
 					resolved_reference( m_ref )
 				end if
+				
 			end for
 			reset_code()
 	
-			case else
+		case else
 			-- TODO: ??
-			CompileErr( "Unimplemented: patching forward memstruct with op - %d\n", fr[FR_OP] )
+			CompileErr( "Unimplemented: patching forward memstruct with op - []\n", fr[FR_OP] )
 	end switch
 	
 end procedure
@@ -857,7 +866,21 @@ function find_reference( sequence fr )
 	end if
 	
 	No_new_entry = 1
-	object tok = keyfind( name, ns_file, file, , fr[FR_HASHVAL] )
+	object  tok
+	
+	if fr[FR_TYPE] != MS_MEMBER or atom( fr[FR_DATA] ) then
+		tok = keyfind( name, ns_file, file, , fr[FR_HASHVAL] )
+	else
+		tok = keyfind( fr[FR_DATA][1], ns_file, file )
+		if tok[T_ID] != IGNORED then
+			symtab_pointer member = resolve_members( fr[FR_DATA][2..$], tok[T_SYM] )
+			if member != 0 then
+				tok[T_ID]  = MEMSTRUCT -- sym_token( member )
+				tok[T_SYM] = member
+			end if
+		end if
+	end if
+	
 	No_new_entry = 0
 	return tok
 end function
@@ -1007,6 +1030,7 @@ procedure remove_active_reference( integer ref, integer file_no = current_file_n
 end procedure
 
 function resolve_file( sequence refs, integer report_errors, integer unincluded_ok )
+
 	sequence errors = {}
 	for ar = length( refs ) to 1 by -1 do
 		integer ref = refs[ar]

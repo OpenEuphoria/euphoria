@@ -374,4 +374,11 @@ procedure ptr_in_seq()
 end procedure
 ptr_in_seq()
 
+procedure resolve_member_in_include()
+	atom s = allocate( sizeof( STARTUPINFO ), 1 )
+	s.STARTUPINFO.cb = sizeof( STARTUPINFO )
+	test_equal( "resolve member in include", sizeof( STARTUPINFO ), s.STARTUPINFO.cb )
+end procedure
+resolve_member_in_include()
+
 test_report()
