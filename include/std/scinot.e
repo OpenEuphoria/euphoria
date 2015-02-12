@@ -287,7 +287,7 @@ constant
 	EXTENDED_EXPONENT    =     15,
 	EXTENDED_MIN_EXP     = -16383,
 	EXTENDED_EXP_BIAS    =  16383,
-	EXTENDED_MAX_EXP     =  "fix me", 
+	EXTENDED_MAX_EXP     =  16383, 
 	-- not sure about this one.
 	$
 

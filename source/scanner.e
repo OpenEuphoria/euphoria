@@ -1002,7 +1002,9 @@ ifdef BITS32 then
 		-- take no chances with the parsing engine to declare the maximum double here or we will
 		-- inherit a limit from the way the translator parses the number!
 		MAX_ATOM = float64_to_atom( bits_to_bytes( repeat(1,52) & 0 & repeat(1,10) & 0 ) ),
+		almost_max_16   = (MAX_ATOM-15) / 16,
 		$
+	
 elsifdef BITS64 then
 	constant
 		MAXCHK2  = 0x1FFFFFFF_FFFFFFFD,
@@ -1014,7 +1016,7 @@ elsedef
 	InternalErr( 351, "Configuring integer scanning" )
 end ifdef
 
-constant almost_max_16   = (MAX_ATOM-15) / 16
+
 
 constant common_int_text = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "20", "50", "100", "1000"}
 constant common_ints     = { 0,   1,   2,   3,   4,   5,   6,   7,   8,   9,   10,   11,   12,   13,   20,   50,   100,   1000 }
@@ -1068,13 +1070,17 @@ function MakeInt(sequence text, integer nBase = 10)
 				fnum = num * nBase + digit
 			end if
 		else
-			if fnum >= almost_max_16 then
-				-- mathematically equivalent to: fnum * nBase + digit > MAX_DOUBLE
-				-- but possible to calculate with Euphoria atoms
-				if fnum > (MAX_ATOM - digit)/nBase then
-					fenv:raise(FE_OVERFLOW)					
+			ifdef BITS32 then
+				if fnum >= almost_max_16 then
+					ifdef BITS32 then
+						-- mathematically equivalent to: fnum * nBase + digit > MAX_DOUBLE
+						-- but possible to calculate with Euphoria atoms
+						if fnum > (MAX_ATOM - digit)/nBase then
+							fenv:raise(FE_OVERFLOW)					
+						end if
+					end ifdef
 				end if
-			end if
+			end ifdef
 			fnum = fnum * nBase + digit
 		end if
 	end for

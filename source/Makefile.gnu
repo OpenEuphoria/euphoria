@@ -802,7 +802,7 @@ test : EUCOMPILEDIR=$(TRUNKDIR)
 test : EUCOMPILEDIR=$(TRUNKDIR)	
 test : C_INCLUDE_PATH=$(TRUNKDIR):..:$(C_INCLUDE_PATH)
 test : LIBRARY_PATH=$(%LIBRARY_PATH)
-test : $(TRUNKDIR)/tests/lib818.dll $(BUILDDIR)/$(EEXU) $(CYPBUILDDIR)/$(EECU) $(CYPBUILDDIR)/$(LIBRARY_NAME) $(CYPBUILDDIR)/$(EUBIND)
+test : $(TRUNKDIR)/tests/lib818.dll interpreter translator library binder
 test :  
 	cd $(TRUNKDIR)/tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
 		$(EXE) -i $(TRUNKDIR)/include $(TRUNKDIR)/source/eutest.ex -i $(TRUNKDIR)/include -cc gcc $(VERBOSE_TESTS) \

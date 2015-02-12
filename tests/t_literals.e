@@ -1,7 +1,7 @@
 -- t_literals.e
 
 include std/unittest.e
-include ../source/scinot.e
+include std/scinot.e
 
 -- Hexadecimal literals
 test_equal("Hex Lit 1", -4275878552, -#FEDC_BA98)
