@@ -410,8 +410,8 @@ public  function scientific_to_float( sequence s, floating_point fp = NATIVE )
 	
 	if exp + length(s) - 1 > base10_ceiling then
 		-- make inf or -inf
-		? exp & length(s) & base10_ceiling
-		? s
+		fenv:raise(fenv:FE_OVERFLOW)
+		
 		atom inf = PINF
 		if equal( sbits, {1} ) then
 			inf = MINF
