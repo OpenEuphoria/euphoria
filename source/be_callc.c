@@ -1348,12 +1348,10 @@ object call_c(int func, object proc_ad, object arg_list)
 				arg = next_arg;
 				PUSH_INT_ARG
 			}
-			else if (IS_ATOM(next_arg) && DBL_PTR(next_arg)->dbl > 0.0
-					&& DBL_PTR(next_arg)->dbl <= (eudouble)UINT64_MAX) {
-				// atoms are rounded to integers
-				// Do we really need both casts? Maybe do a sign check.
-				// We can usually assume that pointers > 0 but is that a
-				// valid assumption? Do we need to check bounds? JAG
+			else if (IS_ATOM(next_arg) 
+				&& DBL_PTR(next_arg)->dbl >= MIN_BITWISE_DBL
+				&& DBL_PTR(next_arg)->dbl <= MAX_BITWISE_DBL ){
+				// allow signed -> unsigned cast, but makes sure we don't overflow
 				arg = (uint64_t)(uintptr_t)DBL_PTR(next_arg)->dbl; //correct
 				// if it's a -ve f.p. number, Watcom converts it to long and
 				// then to unsigned long. This is exactly what we want.
