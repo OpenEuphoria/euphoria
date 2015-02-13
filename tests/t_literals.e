@@ -186,20 +186,26 @@ end function
 test_equal( "Constant floating point with zero fraction", 0, doit() )
 test_equal( "0b1.11111111e354", power(2,300)*(power(2,55)-2), scientific_to_atom("73391955711682284297474315980694609568598702834628673856666055528509030762550615149477994172850609602953216e0") )
 -- the following four are equivalent.
-test_equal( "0b1.11111111e1022 #1", power(2,968)*(power(2,55)-2), scientific_to_atom("0.89884656743115795e308") )
-test_equal( "0b1.11111111e1022 #2", power(2,968)*(power(2,55)-2), scientific_to_atom("898846567.43115795e299" ) )
-test_equal( "0b1.11111111e1022 #3", power(2,968)*(power(2,55)-2), scientific_to_atom("89884656743115795e291") )
-test_equal( "0b1.11111111e1022 #4", power(2,968)*(power(2,55)-2), scientific_to_atom("8.9884656743115795e307") )
-test_equal( "1E308 #1",             power(10,308), scientific_to_atom("1e308") )
-test_equal( "1E308 #2",             power(10,308), scientific_to_atom("0.001e311") )
-test_equal( "1E308 #3",             power(10,308), scientific_to_atom("0.1e309") )
-test_equal( "1E308 #4",             power(10,308), scientific_to_atom("10e307") )
-test_equal( "1E308 #5",             power(10,308), scientific_to_atom("1000e305") )
-test_equal( "inf  #1", 1e308*10, scientific_to_atom("1e309") )
-test_equal( "inf  #2", 1e308*10, scientific_to_atom("0.001e312") )
-test_equal( "inf  #3", 1e308*10, scientific_to_atom("0.1e310") )
-test_equal( "inf  #4", 1e308*10, scientific_to_atom("10e308") )
-test_equal( "inf  #5", 1e308*10, scientific_to_atom("1000e306") )
+ifdef BITS32 then
+	test_equal( "0b1.11111111e1022 #1", power(2,968)*(power(2,55)-2), scientific_to_atom("0.89884656743115795e308") )
+	test_equal( "0b1.11111111e1022 #2", power(2,968)*(power(2,55)-2), scientific_to_atom("898846567.43115795e299" ) )
+	test_equal( "0b1.11111111e1022 #3", power(2,968)*(power(2,55)-2), scientific_to_atom("89884656743115795e291") )
+	test_equal( "0b1.11111111e1022 #4", power(2,968)*(power(2,55)-2), scientific_to_atom("8.9884656743115795e307") )
+	
+	test_equal( "1E308 #1",             power(10,308), scientific_to_atom("1e308") )
+	test_equal( "1E308 #2",             power(10,308), scientific_to_atom("0.001e311") )
+	test_equal( "1E308 #3",             power(10,308), scientific_to_atom("0.1e309") )
+	test_equal( "1E308 #4",             power(10,308), scientific_to_atom("10e307") )
+	test_equal( "1E308 #5",             power(10,308), scientific_to_atom("1000e305") )
+	
+	test_equal( "inf  #1", 1e308*10, scientific_to_atom("1e309") )
+	test_equal( "inf  #2", 1e308*10, scientific_to_atom("0.001e312") )
+	test_equal( "inf  #3", 1e308*10, scientific_to_atom("0.1e310") )
+	test_equal( "inf  #4", 1e308*10, scientific_to_atom("10e308") )
+	test_equal( "inf  #5", 1e308*10, scientific_to_atom("1000e306") )
+	
+end ifdef
+
 test_equal( "42555", 42555, 4.2555e4 )
 test_equal( "Plank", 6.62606957 * power(10,-34), 6.62606957e-34 )
 test_equal( "Avagadro #1", 6.022141 * power(10,23), scientific_to_atom("6.022141e23") )

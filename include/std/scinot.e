@@ -386,6 +386,17 @@ public  function scientific_to_float( sequence s, floating_point fp = NATIVE )
 	
 	-- We split the integral and fractional parts, because they have to be
 	-- calculated differently.
+	
+	-- strip off leading zeroes on the significand
+	integer zx = 1
+	while zx < length(s) and s[zx] = '0' do
+		zx += 1
+	end while
+	if length(s) then
+		s = remove( s, 1, zx-1)
+		e -= zx-1
+	end if
+	
 	s = s[1..e-1] - '0'
 	
 	-- If LHS only consists of zeros, then return zero.
@@ -399,6 +410,8 @@ public  function scientific_to_float( sequence s, floating_point fp = NATIVE )
 	
 	if exp + length(s) - 1 > base10_ceiling then
 		-- make inf or -inf
+		? exp & length(s) & base10_ceiling
+		? s
 		atom inf = PINF
 		if equal( sbits, {1} ) then
 			inf = MINF
