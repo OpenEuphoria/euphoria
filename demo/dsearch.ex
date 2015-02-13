@@ -250,7 +250,6 @@ for i = 1 to length(file_list) by 2 do
     end for
 end for
 
-<<<<<<< local
 CSetup()
 
 cmd = command_line()   -- eui dsearch [string]
