@@ -300,15 +300,18 @@ test_equal("format 'AG'", exp, res)
 
 res = format("[B]", -177)
 exp = "11111111111111111111111101001111"
-test_equal("format 'AH'", exp, res)
+ifdef BITS64 then
+	exp = repeat( '1', 32 ) & exp
+end ifdef
+test_equal("format '[B]'", exp, res)
 
 res = format("[B:16]", 177)
 exp = "        10110001"
-test_equal("format 'AI'", exp, res)
+test_equal("format '[B:16]'", exp, res)
 
 res = format("[, B]", 177)
 exp = "1011 0001"
-test_equal("format 'AJ'", exp, res)
+test_equal("format '[, B]'", exp, res)
 
 res = format("[, X]", 0x123456ab)
 exp = "1234 56AB"

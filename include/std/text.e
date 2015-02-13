@@ -1409,6 +1409,22 @@ end function
 --   [[:sprintf]]
 --
 
+ifdef BITS64 then
+    constant MAX_BITS =  64
+    constant MAX_DIGS =  18
+    constant MAX_INT  =  0x3FFF_FFFF_FFFF_FFFF
+    constant MIN_INT  = -0x4000_0000_0000_0000
+elsedef
+    constant MAX_BITS =  32
+    constant MAX_DIGS =  15
+    constant MAX_INT  =  0x3FFF_FFFF
+    constant MIN_INT  = -0x4000_0000
+end ifdef
+
+constant MAX_UCS4 =  0xFFFF_FFFF
+constant MAX_IFMT =  0x3FFF_FFFF
+constant MIN_IFMT = -0x4000_0000
+
 public function format(sequence format_pattern, object arg_list = {})
 	sequence result
 	integer in_token
@@ -1441,7 +1457,9 @@ public function format(sequence format_pattern, object arg_list = {})
 	integer ep
 	integer pflag
 	integer count
-	
+	sequence fmt
+	atom argval
+		
 	if atom(arg_list) then
 		arg_list = {arg_list}
 	end if
@@ -1548,7 +1566,7 @@ public function format(sequence format_pattern, object arg_list = {})
 	    				end if
 	    				width = width * 10 + pos - 1
 	    				if width = 0 then
-	    					zfill = '0'
+	    					zfill = 1
 	    				end if
 	    			end while
 
@@ -1677,18 +1695,18 @@ public function format(sequence format_pattern, object arg_list = {})
 							argtext = arg_list[argn]
 						end if
 						
-					elsif integer(arg_list[argn]) 
-					-- for consistent formatting, we need to test in case of 64-bit euphoria
-					and arg_list[argn] <= 0x3fff_ffff
-					and arg_list[argn] >= -0x4000_0000 then
+					elsif integer(arg_list[argn])
+					    -- for consistent formatting, we need to test in case of 64-bit euphoria
+					    and arg_list[argn] <= MAX_IFMT
+					    and arg_list[argn] >= MIN_IFMT then
 						if istext then
-							argtext = {and_bits(0xFFFF_FFFF, math:abs(arg_list[argn]))}
+							argtext = {and_bits(MAX_UCS4, math:abs(arg_list[argn]))}
 							
 						elsif bwz != 0 and arg_list[argn] = 0 then
 							argtext = repeat(' ', width)
 							
 						elsif binout = 1 then
-							argtext = stdseq:reverse( convert:int_to_bits(arg_list[argn], 32)) + '0'
+							argtext = stdseq:reverse( convert:int_to_bits(arg_list[argn], MAX_BITS)) + '0'
 							if zfill != 0 and width > 0 then
 								if width > length(argtext) then
 									argtext = repeat('0', width - length(argtext)) & argtext
@@ -1749,7 +1767,7 @@ public function format(sequence format_pattern, object arg_list = {})
 
 					elsif atom(arg_list[argn]) then
 						if istext then
-							argtext = {and_bits(0xFFFF_FFFF, math:abs(floor(arg_list[argn])))}
+							argtext = {and_bits(MAX_UCS4, math:abs(floor(arg_list[argn])))}
 							
 						else
 							if hexout then
@@ -1760,7 +1778,19 @@ public function format(sequence format_pattern, object arg_list = {})
 									end if
 								end if
 							else
-								argtext = trim(sprintf("%15.15g", arg_list[argn]))
+								argval = arg_list[argn]
+								if argval < 0 then
+								   argval = -argval
+								end if
+								if decs < 0 then
+									fmt = sprintf("%%.%dg", MAX_DIGS)   -- default '%g' format precision
+								elsif argval >= power(10, 15) or
+									  argval < 1e-4 then
+									fmt = sprintf("%%.%de", decs)
+								else
+									fmt = sprintf("%%.%df", decs)
+								end if
+								argtext = sprintf(fmt, arg_list[argn])
 								-- Remove any leading 0 after e+
 								while ep != 0 with entry do
 									argtext = remove(argtext, ep+2)
@@ -1770,7 +1800,7 @@ public function format(sequence format_pattern, object arg_list = {})
 								if zfill != 0 and width > 0 then
 									if width > length(argtext) then
 										if argtext[1] = '-' then
-											argtext = '-' & repeat('0', width - length(argtext)) & argtext[2..$]
+											argtext = '-' & repeat('0', width - length(argtext) - msign) & argtext[2..$]
 										else
 											argtext = repeat('0', width - length(argtext)) & argtext
 										end if
@@ -1790,7 +1820,7 @@ public function format(sequence format_pattern, object arg_list = {})
 											argtext = '(' & argtext[2..$] & ')'
 										else
 											if argtext[2] = '0' then
-												argtext = '(' & argtext[3..$] & ')'
+												argtext = '(' & argtext[2..$] & ')'
 											else
 												argtext = argtext[2..$] & ')'
 											end if
@@ -1821,7 +1851,7 @@ public function format(sequence format_pattern, object arg_list = {})
 								argtext = tempv
 							elsif integer(tempv) then
 								if istext then
-									argtext = {and_bits(0xFFFF_FFFF, math:abs(tempv))}
+									argtext = {and_bits(MAX_UCS4, math:abs(tempv))}
 							
 								elsif bwz != 0 and tempv = 0 then
 									argtext = repeat(' ', width)
@@ -1831,20 +1861,23 @@ public function format(sequence format_pattern, object arg_list = {})
 
 							elsif atom(tempv) then
 								if istext then
-									argtext = {and_bits(0xFFFF_FFFF, math:abs(floor(tempv)))}
+									argtext = {and_bits(MAX_UCS4, math:abs(floor(tempv)))}
 								elsif bwz != 0 and tempv = 0 then
 									argtext = repeat(' ', width)
 								else
-									argtext = trim(sprintf("%15.15g", tempv))
+									fmt = sprintf("%%%d.%dg", {MAX_DIGS, MAX_DIGS})
+									argtext = trim(sprintf(fmt, tempv))
 								end if
 							else
+								fmt = sprintf("%%.%dg", MAX_DIGS)
 								argtext = pretty:pretty_sprint( tempv,
-											{2,0,1,1000,"%d","%.15g",32,127,1,0}
+											{2,0,1,1000,"%d",fmt,32,127,1,0}
 											)
 							end if
 						else
+							fmt = sprintf("%%.%dg", MAX_DIGS)
 							argtext = pretty:pretty_sprint( arg_list[argn],
-										{2,0,1,1000,"%d","%.15g",32,127,1,0}
+										{2,0,1,1000,"%d",fmt,32,127,1,0}
 										)
 						end if
 						-- Remove any leading 0 after e+
@@ -1886,7 +1919,7 @@ public function format(sequence format_pattern, object arg_list = {})
 								pos = find('.', argtext)
 								if pos then
 									if decs = 0 then
-										argtext = argtext [1 .. pos-1 ]
+										argtext = argtext [1 .. pos - 1 ]
 									else
 										pos = length(argtext) - pos - pflag
 										if pos > decs then

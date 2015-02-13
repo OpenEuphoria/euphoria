@@ -104,6 +104,9 @@ CCOM=wat
 LIBEXT=lib
 !endif
 
+CREATEDLLFLAGS=-l=NT_DLL
+LN=wcl386
+DLLOUTPUTIS=/fe=
 BASEPATH=$(BUILDDIR)\pcre
 !include pcre\objects.wat
 
@@ -115,6 +118,7 @@ EU_CORE_FILES = &
 	coverage.e &
 	emit.e &
 	error.e &
+	fenv.e &
 	fwdref.e &
 	global.e &
 	inline.e &
@@ -502,7 +506,20 @@ translate source : .SYMBOLIC
 	wmake -h backendsource EX="$(EUBIN)\eui.exe" EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
 
 
-testeu : .SYMBOLIC
+$(TRUNKDIR)\tests\ecp.dat : $(BUILDDIR)\ecp.dat
+	-copy $(BUILDDIR)\ecp.dat $(TRUNKDIR)\tests
+
+$(BUILDDIR)\test818.obj : ..\source\test818.c
+	$(CC)  $(LIB818_FPIC) -I=..\include $(FE_FLAGS) ..\source\test818.c -fo=$(BUILDDIR)\test818.obj
+
+lib818 : .SYMBOLIC .recheck
+	$(MAKE) ..\tests\lib818.dll
+
+..\tests\lib818.dll : $(BUILDDIR)\test818.obj
+	$(LN)  $(MSIZE) $(LIB818_FPIC) $(DLLOUTPUTIS)..\tests\lib818.dll $(CREATEDLLFLAGS) $(BUILDDIR)\test818.obj
+	
+	
+testeu : .SYMBOLIC  $(TRUNKDIR)\tests\ecp.dat $(EU_INTERPRETER_FILES) $(EU_CORE_FILES)
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR)
 	-$(EUTEST) -i ..\include $(TEST_EXTRA) --nocheck -eui "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\eu.ex" -euc "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\euc.ex" $(LIST) $(TESTFILE)
@@ -510,7 +527,7 @@ testeu : .SYMBOLIC
 
 !endif #EUPHORIA
 
-test : .SYMBOLIC $(BUILDDIR)\eubind.exe $(FULLBUILDDIR)\eu.$(LIBEXT) $(BUILDDIR)\eub.exe
+test : .SYMBOLIC $(BUILDDIR)\eubind.exe  $(TRUNKDIR)\tests\ecp.dat $(FULLBUILDDIR)\eu.$(LIBEXT) $(BUILDDIR)\eub.exe $(BUILDDIR)\euc.exe 
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR) 
 	-$(EUTEST) $(TEST_EXTRA) $(VERBOSE_TESTS) -i ..\include -cc wat -eui $(FULLBUILDDIR)\eui.exe -euc $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -bind $(FULLBUILDDIR)\eubind.exe -eub $(BUILDDIR)\eub.exe -log $(LIST) $(TESTFILE)
@@ -581,10 +598,10 @@ get-creole: $(TRUNKDIR)\source\creole\creole.ex
 get-eudoc: $(TRUNKDIR)\source\eudoc\eudoc.ex
 
 $(TRUNKDIR)\source\creole\creole.ex :
-	hg clone http://scm.openeuphoria.org/hg/creole $(TRUNKDIR)\source\creole
+	-hg clone http://scm.openeuphoria.org/hg/creole $(TRUNKDIR)\source\creole
 
 $(TRUNKDIR)\source\eudoc\eudoc.ex :
-	hg clone http://scm.openeuphoria.org/hg/eudoc $(TRUNKDIR)\source\eudoc
+	-hg clone http://scm.openeuphoria.org/hg/eudoc $(TRUNKDIR)\source\eudoc
 
 
 
@@ -603,7 +620,7 @@ $(BUILDDIR)\mkver.exe: mkver.c
 
 update-version-cache : .SYMBOLIC $(INCLUDE_DIR)\be_ver.h
 
-$(INCLUDE_DIR)\be_ver.h $(BUILDDIR)\ver.cache : $(INCLUDE_DIR) $(BUILDDIR)\mkver.exe .always .recheck
+$(INCLUDE_DIR)\be_ver.h $(BUILDDIR)\ver.cache : $(INCLUDE_DIR) $(BUILDDIR)\mkver.exe .recheck
 	$(BUILDDIR)\mkver.exe $(HG) $(BUILDDIR)\ver.cache $(INCLUDE_DIR)\be_ver.h
 
 !ifdef OBJDIR
@@ -674,12 +691,15 @@ installbin : .SYMBOLIC
 
 !ifdef OBJDIR
 
-$(BUILDDIR)\euc.exe : $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) eu.manifest
-	$(RM) $(BUILDDIR)\$(OBJDIR)\euc.lbc
+$(BUILDDIR)\$(OBJDIR)\euc.lbc : $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) eu.manifest
+	-$(RM) $(BUILDDIR)\$(OBJDIR)\euc.lbc
 	@%create $(BUILDDIR)\$(OBJDIR)\euc.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\euc.lbc option quiet
 	@%append $(BUILDDIR)\$(OBJDIR)\euc.lbc option caseexact
 	@for %i in ($(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\euc.lbc file %i
+
+
+$(BUILDDIR)\euc.exe : $(BUILDDIR)\$(OBJDIR)\main-.c $(BUILDDIR)\$(OBJDIR)\euc.lbc $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) eu.manifest
 	wlink $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\euc.lbc name $(BUILDDIR)\euc.exe
 	wrc -q -ad euc.rc $(BUILDDIR)\euc.exe
 
@@ -693,7 +713,7 @@ $(BUILDDIR)\euc.exe : .always .recheck
 
 !endif
 
-translator : .SYMBOLIC $(BUILDDIR)\euc.exe
+translator : .SYMBOLIC $(BUILDDIR)\euc.exe $(BUILDDIR)\eubind.exe
 
 !ifdef OBJDIR
 $(BUILDDIR)\eub.exe $(BUILDDIR)\eubw.exe :  $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) eu.manifest
@@ -706,7 +726,9 @@ $(BUILDDIR)\eub.exe $(BUILDDIR)\eubw.exe :  $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_B
 	wrc -q -ad eub.rc $(BUILDDIR)\eub.exe
 	wlink $(DEBUGLINK) SYS nt_win op maxe=2 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\eub.lbc name $(BUILDDIR)\eubw.exe
 	wrc -q -ad eubw.rc $(BUILDDIR)\eubw.exe
-
+!else
+$(BUILDDIR)\eub.exe $(BUILDDIR)\eubw.exe : $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES) .recheck
+	wmake backend
 !endif
 
 backend : .SYMBOLIC

@@ -7,7 +7,8 @@ end ifdef
 
 include std/convert.e
 include std/dll.e
-
+include std/fenv.e as fenv
+include std/mathcons.e
 --****
 -- == Scientific Notation Parsing
 --
@@ -280,11 +281,14 @@ constant
 	DOUBLE_EXPONENT      =    11,
 	DOUBLE_MIN_EXP       = -1023,
 	DOUBLE_EXP_BIAS      =  1023,
+	DOUBLE_MAX_EXP       =  1023,
 	
 	EXTENDED_SIGNIFICAND =     64,
 	EXTENDED_EXPONENT    =     15,
-	EXTENDED_MIN_EXP     = -16383,
+	EXTENDED_MIN_EXP     = -16382,
 	EXTENDED_EXP_BIAS    =  16383,
+	EXTENDED_MAX_EXP     =  16384,
+	-- not sure about this one.
 	$
 
 
@@ -312,22 +316,33 @@ public  function scientific_to_float( sequence s, floating_point fp = NATIVE )
 	integer dp, e, exp
 	sequence int_bits, frac_bits, mbits, ebits, sbits
 	
-	integer significand, exponent, min_exp, exp_bias
+	integer significand, exponent, min_exp, exp_bias, max_exp
+	
+	-- if true, this number might evaluate to zero although the user wrote a non-zero matissa
+	integer almost_nothing = 0
+	-- if true, the mbits has overflowed and we need to adjust exp
+	integer carried = 0
+	
+	
 	if fp = NATIVE then
 		fp = NATIVE_FORMAT
 	end if
 	if fp = DOUBLE then
-		significand = DOUBLE_SIGNIFICAND
-		exponent    = DOUBLE_EXPONENT
-		min_exp     = DOUBLE_MIN_EXP
-		exp_bias    = DOUBLE_EXP_BIAS
+		significand = DOUBLE_SIGNIFICAND   --    52,
+		exponent    = DOUBLE_EXPONENT      --    11,
+		min_exp     = DOUBLE_MIN_EXP       -- -1023,
+		exp_bias    = DOUBLE_EXP_BIAS      --  1023,
+		max_exp     = DOUBLE_MAX_EXP       --  1023,
 		
 	elsif fp = EXTENDED then
 		significand = EXTENDED_SIGNIFICAND
 		exponent    = EXTENDED_EXPONENT
 		min_exp     = EXTENDED_MIN_EXP
 		exp_bias    = EXTENDED_EXP_BIAS
+		max_exp     = EXTENDED_MAX_EXP
 	end if
+	integer base10_ceiling = floor((exponent+1+max_exp) * log(2) / log(10))
+	integer base10_floor   = floor((min_exp+1-significand)*log(2)/log(10))
 	
 	-- Determine if negative or positive
 	if s[1] = '-' then
@@ -371,6 +386,17 @@ public  function scientific_to_float( sequence s, floating_point fp = NATIVE )
 	
 	-- We split the integral and fractional parts, because they have to be
 	-- calculated differently.
+	
+	-- strip off leading zeroes on the significand
+	integer zx = 1
+	while zx < length(s) and s[zx] = '0' do
+		zx += 1
+	end while
+	if length(s) then
+		s = remove( s, 1, zx-1)
+		e -= zx-1
+	end if
+	
 	s = s[1..e-1] - '0'
 	
 	-- If LHS only consists of zeros, then return zero.
@@ -382,22 +408,43 @@ public  function scientific_to_float( sequence s, floating_point fp = NATIVE )
 		end if
 	end if
 	
-	if exp >= 0 then
+	if exp + length(s) - 1 > base10_ceiling then
+		-- make inf or -inf
+		fenv:raise(fenv:FE_OVERFLOW)
+		
+		atom inf = PINF
+		if equal( sbits, {1} ) then
+			inf = MINF
+		end if
+		
+		if fp = DOUBLE then
+			return atom_to_float64( inf )
+		else
+			return atom_to_float80( inf )
+		end if
+		
+	elsif exp + length(s) - 1 < base10_floor then
+		-- make 0
+		fenv:raise(FE_UNDERFLOW)
+		if fp = DOUBLE then
+			return atom_to_float64( 0 )
+		else
+			return atom_to_float80( 0 )
+		end if
+	elsif exp >= 0 then
 		-- We have a large exponent, so it's all integral.  Pad it to account for 
 		-- the positive exponent.
 		int_bits = trim_bits( bytes_to_bits( convert_radix( repeat( 0, exp ) & reverse( s ), 10, #100 ) ) )
 		frac_bits = {}
-	else
-		if -exp > length(s) then
+	elsif -exp > length(s) then
 			-- all fractional
 			int_bits = {}
 			frac_bits = decimals_to_bits( repeat( 0, -exp-length(s) ) & s, significand ) 
 		
-		else
+	else
 			-- some int, some frac
 			int_bits = trim_bits( bytes_to_bits( convert_radix( reverse( s[1..$+exp] ), 10, #100 ) ) )
 			frac_bits =  decimals_to_bits( s[$+exp+1..$], significand )
-		end if
 	end if
 	
 	if length(int_bits) > significand then
@@ -415,6 +462,25 @@ public  function scientific_to_float( sequence s, floating_point fp = NATIVE )
 			-- If the first bit that missed the precision is '1', then round up
 			mbits[1] += 1
 			mbits = carry( mbits, 2 )
+			if length(mbits) = significand+1 then
+				-- this only happens if mbits is now: { 0, 0, ..., 0, 0, 1 }
+				-- and is heavy one because it was    { 1, 1, ....,1, 1 }
+				--    1.000000000000 (implicit 1)
+				-- +  0.111111111111 (mbits before)
+				--    0.000000000001 (value to round off the number)
+				--    --------------
+				-- + 10.000000000000 (implicit 1)
+				--    0.000000000000 (new mbits)
+				if fp = DOUBLE then
+					-- When fp is DOUBLE, mbits should be 52 zeroes and it so 
+					-- happens mbits[1..$-1] is just that.
+					mbits = mbits[1..$-1]
+				elsif fp = EXTENDED then
+					mbits = mbits[2..$]
+				end if
+				-- set carried flag so we increment exp later.
+				carried = 1
+			end if
 		end if
 		exp = length(int_bits)-1
 			
@@ -444,12 +510,16 @@ public  function scientific_to_float( sequence s, floating_point fp = NATIVE )
 		mbits = frac_bits & int_bits
 		mbits = repeat( 0, significand + 1 ) & mbits
 			
+		integer mbits_len = length(mbits)
 		if exp > min_exp then
 			-- normalized
 			if mbits[$-(significand+1)] then
 				-- If the first bit that missed the precision is '1', then round up
 				mbits[$-significand] += 1
 				mbits = carry( mbits, 2 )
+				if length(mbits) = mbits_len + 1 then
+					carried = 1
+				end if
 			end if
 			if fp = DOUBLE then
 				-- the first 1 is implicit in a double
@@ -464,16 +534,40 @@ public  function scientific_to_float( sequence s, floating_point fp = NATIVE )
 				-- If the first bit that missed the precision is '1', then round up
 				mbits[$-significand] += 1
 				mbits = carry( mbits, 2 )
+				if length(mbits) = mbits_len + 1 then
+					carried = 1
+				end if
 			end if
 			mbits = remove( mbits, 1, length(mbits) - significand )
 		end if
 			
 	end if
 	
+	exp += carried
+	
+	if exp > max_exp then
+		-- we have exceeded exp's legal values for real numbers
+		-- meaning that we cannot represent this number being parsed
+		-- set to inf or -inf and raise an overflow floating point exception.
+		-- This value is a special value for infinity.
+		exp   = max_exp+1
+		mbits = repeat(0, significand)
+		fenv:raise(fenv:FE_OVERFLOW)
+	end if
+
 	-- Add the IEEE 784 specified exponent bias and turn it into bits
 	ebits = int_to_bits( exp + exp_bias, exponent )
 	
-	-- Combine everything and convert to bytes (float64)
+	if almost_nothing and not find(1, mbits & ebits) then
+		-- the user wrote a non-zero value but in the end it is evaluated as 0.
+		-- ebits is only all 0, in the subnormal or 0 cases
+		-- mbits is only all 0, in the case of 0.
+		-- but the case of 0 is handled about 120 lines above, so this 
+		-- non-zero number when parsed turns out to be too small for EUPHORIA.
+		fenv:raise(fenv:FE_UNDERFLOW)
+	end if
+	
+	-- Combine everything and convert to bytes (float64 or float80)
 	return bits_to_bytes( mbits & ebits & sbits )
 end function
 

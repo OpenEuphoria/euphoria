@@ -363,6 +363,8 @@ constant r_f  = routine_id( "f")
 constant cb_f = call_back( r_f ) 
 constant c_f = define_c_func( {}, cb_f, {C_POINTER}, E_INTEGER ) 
 test_equal( "callback properly handles -1", -1, c_func( c_f, {-1} ) )
+atom d = -0.5
+test_equal( "callback properly handles -1 (double)", -1 , c_func( c_f, {d + d} ) )
 
 test_report()
 
