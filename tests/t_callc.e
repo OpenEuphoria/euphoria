@@ -11,16 +11,19 @@ ifdef not EU4_0 then
 	constant pointer_size = sizeof(C_POINTER)
 elsedef
 	constant C_LONGLONG = -1
+	constant C_ULONGLONG = -1
 	constant pointer_size = 4
 end ifdef
 
 -- one nibble less in magnitude than the smallest number too big to fit into a pointer. 
 constant BASE_PTR           = #10 * power(#100,(pointer_size-1))
 constant BASE_4             = #10 * power(#100, 3)
+constant BASE_8             = #10 * power(#100, 7)
 constant SEQ_MASK           = #8 * BASE_PTR
 constant NOVALUE            = #C * BASE_PTR - 1
 constant MAXUPTR            = #10 * BASE_PTR - 1
 constant MAXUINT32          = #10 * BASE_4 - 1 
+constant MAXUINT64          = #10 * BASE_8 - 1
 constant MAXUSHORT          = power(2,16)-1
 constant MAXUBYTE           = #FF
 constant MININT_EUPHORIA    = -0b0100 * BASE_PTR -- on 32-bit: -1_073_741_824
@@ -59,13 +62,14 @@ end function
 
 constant ubyte_values = { ' ', 192, 172, ')'}
 
-constant unsigned_types      = {  C_UCHAR,   C_UBYTE,   C_USHORT,   C_UINT,    C_POINTER }
-constant unsigned_type_names = { "C_UCHAR", "C_UBYTE", "C_USHORT", "C_UINT",  "C_POINTER" }
-constant minus_1_values      = { #FF,       #FF,       #FF_FF,      MAXUINT32, MAXUPTR }
+constant unsigned_types      = {  C_UCHAR,   C_UBYTE,   C_USHORT,   C_UINT,    C_POINTER,   C_ULONGLONG  }
+constant unsigned_type_names = { "C_UCHAR", "C_UBYTE", "C_USHORT", "C_UINT",  "C_POINTER", "C_ULONGLONG" }
+constant minus_1_values      = { #FF,       #FF,       #FF_FF,      MAXUINT32, MAXUPTR,     MAXUINT64 }
 constant unsigned_values     = {ubyte_values, ubyte_values,
 														50_000 & 8_000 & 20_000,
 																	4_000_000_000 & 420_000_000 & 42,
-																				#BEEFDEAD & #C001D00D}
+																				#BEEFDEAD & #C001D00D,
+																							(3 & 7) * power(2,40)}
 											
 constant floating_point_types = { C_FLOAT, C_DOUBLE },
          floating_point_type_names = { "C_FLOAT", "C_DOUBLE" },

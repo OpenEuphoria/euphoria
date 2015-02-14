@@ -52,6 +52,8 @@ public constant
 	C_POINTER = #03000001,
 	--** longlong 64-bits
 	C_LONGLONG  = #03000002,
+	--** unsigned longlong 64-bits
+	C_ULONGLONG  = #03000010,
 	$
 ifdef BITS32 then
 public constant

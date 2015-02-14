@@ -1361,7 +1361,7 @@ object call_c(int func, object proc_ad, object arg_list)
 				RTFatal("argument out of range.");
 			}
 		}
-		else if( size == C_LONGLONG ){
+		else if( size == C_LONGLONG || size == C_ULONGLONG ){
 			if (IS_ATOM_INT(next_arg)) {
 				PUSH_INT64_ARG(next_arg);
 			}
@@ -1502,6 +1502,24 @@ object call_c(int func, object proc_ad, object arg_list)
 		}
 		else{
 			return NewDouble( (eudouble) int64_t_result );
+		}
+	}
+	else if (return_type == C_ULONGLONG ){
+		
+		#if UINTPTR_MAX == UINT32_MAX
+			unsigned long long int uint64_t_result;
+		#else
+			#define uint64_t_result int_result
+		#endif
+		#if __ARM_PCS_VFP == 1
+			uint64_t_result = icall_x86_64( long_proc_address, (double*)dbl_op, arg_op, int_args SIGNATURE_PARAM );
+		#endif
+		call_routine(uint64_t);
+		if( uint64_t_result <= (unsigned long long int)MAXINT && int64_t_result >= (unsigned long long int)0 ){
+			return (intptr_t) uint64_t_result;
+		}
+		else{
+			return NewDouble( (eudouble) uint64_t_result );
 		}
 	}
 	else if (return_type == C_FLOAT) {

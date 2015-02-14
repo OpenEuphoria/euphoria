@@ -2307,7 +2307,7 @@ object DefineC(object x)
 
 		if (t >= E_INTEGER && t <= E_OBJECT)
 			eu_dll_exists = TRUE;
-		else if (t < C_CHAR || t > C_DOUBLE)
+		else if (t < C_CHAR || t > C_ULONGLONG)
 			RTFatal("Invalid argument type");
 
 		arg++;
@@ -2326,7 +2326,7 @@ object DefineC(object x)
 
 	if (t >= E_INTEGER && t <= E_OBJECT)
 		eu_dll_exists = TRUE;
-	else if (t != 0 && (t < C_CHAR || t > C_DOUBLE))
+	else if (t != 0 && (t < C_CHAR || t > C_ULONGLONG))
 		RTFatal("Invalid return type");
 
 	c_routine[c_routine_next].address = proc_address;

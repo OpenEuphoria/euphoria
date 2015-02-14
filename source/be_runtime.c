@@ -6467,6 +6467,8 @@ object eu_sizeof( object data_type ){
 			return sizeof( long );
 		case C_LONGLONG:
 			return sizeof( long long );
+		case C_ULONGLONG:
+			return sizeof( unsigned long long );
 		default:
 			return 0;
 	}
