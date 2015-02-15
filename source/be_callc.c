@@ -1515,11 +1515,11 @@ object call_c(int func, object proc_ad, object arg_list)
 			uint64_t_result = icall_x86_64( long_proc_address, (double*)dbl_op, arg_op, int_args SIGNATURE_PARAM );
 		#endif
 		call_routine(uint64_t);
-		if( uint64_t_result <= (unsigned long long int)MAXINT && uint64_t_result >= (unsigned long long int)0 ){
+		if( uint64_t_result <= (unsigned long long int)MAXINT ){
 			return (intptr_t) uint64_t_result;
 		}
 		else{
-			return NewDouble( (eudouble) uint64_t_result );
+			return NewDouble( (eudouble)(uint64_t) uint64_t_result );
 		}
 	}
 	else if (return_type == C_FLOAT) {
