@@ -36,6 +36,7 @@
 #include "be_runtime.h"
 #include "be_symtab.h"
 #include "be_machine.h"
+#include "be_jsmn.h"
 #include "be_pcre.h"
 #include "be_task.h"
 #include "be_alloc.h"
@@ -3407,6 +3408,9 @@ object machine(object opcode, object x)
 
             case M_KEY_CODES:
                 return key_codes(x);
+
+			case M_JSON_PARSE:
+				return json_parse(x);
 	
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:

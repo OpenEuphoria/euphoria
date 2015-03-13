@@ -1,0 +1,1 @@
+JSMN_OBJECTS=jsmn.o

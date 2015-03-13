@@ -1,0 +1,2 @@
+#define JSMN_PARENT_LINKS
+#define JSMN_STRICT

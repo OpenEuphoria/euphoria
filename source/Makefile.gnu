@@ -50,10 +50,12 @@ ifndef CONFIG
 CONFIG = ${CURDIR}/$(CONFIG_FILE)
 endif
 
+JSMN_CC=$(CC)
 PCRE_CC=$(CC)
 
 
 include $(CONFIG)
+include $(TRUNKDIR)/source/jsmn/objects.mak
 include $(TRUNKDIR)/source/pcre/objects.mak
 
 ifeq "$(EHOST)" "$(ETARGET)"
@@ -106,6 +108,7 @@ ifeq "$(EMINGW)" "1"
 	SEDFLAG=-ri
 	EOSFLAGS=$(NO_CYGWIN) -mwindows
 	EOSFLAGSCONSOLE=$(NO_CYGWIN)
+	EOSJSMNFLAGS=$(NO_CYGWIN) -DJSMN_PARENT_LINKS -DJSMN_STRICT
 	EOSPCREFLAGS=$(NO_CYGWIN)
 	EECUA=eu.a
 	EECUDBGA=eudbg.a
@@ -151,6 +154,7 @@ else
 	EOSTYPE=-DEUNIX
 	EOSFLAGS=
 	EOSFLAGSCONSOLE=
+	EOSJSMNFLAGS=-DJSMN_PARENT_LINKS -DJSMN_STRICT
 	EOSPCREFLAGS=
 	EECUA=eu.a
 	EECUDBGA=eudbg.a
@@ -358,6 +362,7 @@ EU_BACKEND_RUNNER_FILES = \
 	$(TRUNKDIR)/source/pathopen.e \
 	$(TRUNKDIR)/source/common.e \
 	$(TRUNKDIR)/source/backend.ex
+PREFIXED_JSMN_OBJECTS = $(addprefix $(BUILDDIR)/jsmn$(FPIC)/,$(JSMN_OBJECTS))
 PREFIXED_PCRE_OBJECTS = $(addprefix $(BUILDDIR)/pcre$(FPIC)/,$(PCRE_OBJECTS))
 
 EU_BACKEND_OBJECTS = \
@@ -371,6 +376,7 @@ EU_BACKEND_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_inline.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_machine.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_coverage.o \
+	$(BUILDDIR)/$(OBJDIR)/back/be_jsmn.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_pcre.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_rterror.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_syncolor.o \
@@ -378,6 +384,7 @@ EU_BACKEND_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_symtab.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_socket.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_w.o \
+	$(PREFIXED_JSMN_OBJECTS) \
 	$(PREFIXED_PCRE_OBJECTS)
 
 EU_LIB_OBJECTS = \
@@ -387,12 +394,14 @@ EU_LIB_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_w.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_alloc.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_inline.o \
+	$(BUILDDIR)/$(OBJDIR)/back/be_jsmn.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_pcre.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_socket.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_syncolor.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_runtime.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_task.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_callc.o \
+	$(PREFIXED_JSMN_OBJECTS) \
 	$(PREFIXED_PCRE_OBJECTS)
 	
 # The bare include directory in this checkout as we want the make file to see it.  Forward slashes, no 'C:'. 
@@ -452,6 +461,8 @@ clean :
 	-for f in $(BUILD_DIRS) ; do \
 		rm -r $${f} ; \
 	done ;
+	-rm -r $(BUILDDIR)/jsmn
+	-rm -r $(BUILDDIR)/jsmn_fpic
 	-rm -r $(BUILDDIR)/pcre
 	-rm -r $(BUILDDIR)/pcre_fpic
 	-rm $(BUILDDIR)/*pdf
@@ -483,6 +494,8 @@ clobber distclean : clean
 	-rm -fr $(BUILDDIR)
 	-rm eu.cfg
 
+	$(MAKE) -C jsmn CONFIG=$(BUILDDIR)/$(CONFIG) clean
+	$(MAKE) -C jsmn CONFIG=$(BUILDDIR)/$(CONFIG) FPIC=-fPIC clean
 	$(MAKE) -C pcre CONFIG=$(BUILDDIR)/$(CONFIG) clean
 	$(MAKE) -C pcre CONFIG=$(BUILDDIR)/$(CONFIG) FPIC=-fPIC clean
 	
@@ -1115,6 +1128,10 @@ $(BUILDDIR)/$(OBJDIR)/back/be_callc.o : $(TRUNKDIR)/source/$(BE_CALLC).c $(CONFI
 $(BUILDDIR)/$(OBJDIR)/back/be_inline.o : $(TRUNKDIR)/source/be_inline.c $(CONFIG_FILE)
 	$(CC) -finline-functions $(BE_FLAGS) $(EBSDFLAG) $(RUNTIME_FLAGS) $(TRUNKDIR)/source/be_inline.c -o$(BUILDDIR)/$(OBJDIR)/back/be_inline.o
 endif
+ifdef JSMN_OBJECTS	
+$(PREFIXED_JSMN_OBJECTS) : $(patsubst %.o,$(TRUNKDIR)/source/jsmn/%.c,$(JSMN_OBJECTS)) $(TRUNKDIR)/source/jsmn/config.h $(TRUNKDIR)/source/jsmn/jsmn.h
+	$(MAKE) -C $(TRUNKDIR)/source/jsmn all CC="$(JSMN_CC)" JSMN_CC="$(JSMN_CC)" EOSTYPE="$(EOSTYPE)" EOSFLAGS="$(EOSJSMNFLAGS)" FPIC=$(FPIC)
+endif
 ifdef PCRE_OBJECTS	
 $(PREFIXED_PCRE_OBJECTS) : $(patsubst %.o,$(TRUNKDIR)/source/pcre/%.c,$(PCRE_OBJECTS)) $(TRUNKDIR)/source/pcre/config.h.unix $(TRUNKDIR)/source/pcre/pcre.h.unix
 	$(MAKE) -C $(TRUNKDIR)/source/pcre all CC="$(PCRE_CC)" PCRE_CC="$(PCRE_CC)" EOSTYPE="$(EOSTYPE)" EOSFLAGS="$(EOSPCREFLAGS)" FPIC=$(FPIC)
@@ -1157,6 +1174,7 @@ $(BUILDDIR)/intobj/back/be_machine.o: $(TRUNKDIR)/source/global.h $(TRUNKDIR)/so
 $(BUILDDIR)/intobj/back/be_machine.o: $(TRUNKDIR)/source/execute.h $(TRUNKDIR)/source/reswords.h $(TRUNKDIR)/source/version.h
 $(BUILDDIR)/intobj/back/be_machine.o: $(TRUNKDIR)/source/be_runtime.h $(TRUNKDIR)/source/be_rterror.h $(TRUNKDIR)/source/be_main.h
 $(BUILDDIR)/intobj/back/be_machine.o: $(TRUNKDIR)/source/be_w.h $(TRUNKDIR)/source/be_symtab.h $(TRUNKDIR)/source/be_machine.h
+$(BUILDDIR)/intobj/back/be_machine.o: $(TRUNKDIR)/source/be_jsmn.h $(TRUNKDIR)/source/jsmn/jsmn.h $(TRUNKDIR)/source/be_task.h
 $(BUILDDIR)/intobj/back/be_machine.o: $(TRUNKDIR)/source/be_pcre.h $(TRUNKDIR)/source/pcre/pcre.h $(TRUNKDIR)/source/be_task.h
 $(BUILDDIR)/intobj/back/be_machine.o: $(TRUNKDIR)/source/be_alloc.h $(TRUNKDIR)/source/be_execute.h $(TRUNKDIR)/source/be_socket.h
 $(BUILDDIR)/intobj/back/be_machine.o: $(TRUNKDIR)/source/be_coverage.h $(TRUNKDIR)/source/be_syncolor.h $(TRUNKDIR)/source/be_debug.h
@@ -1164,6 +1182,10 @@ $(BUILDDIR)/intobj/back/be_main.o: $(TRUNKDIR)/source/alldefs.h $(TRUNKDIR)/sour
 $(BUILDDIR)/intobj/back/be_main.o: $(TRUNKDIR)/source/execute.h $(TRUNKDIR)/source/reswords.h $(TRUNKDIR)/source/be_runtime.h
 $(BUILDDIR)/intobj/back/be_main.o: $(TRUNKDIR)/source/be_execute.h $(TRUNKDIR)/source/be_alloc.h $(TRUNKDIR)/source/be_rterror.h
 $(BUILDDIR)/intobj/back/be_main.o: $(TRUNKDIR)/source/be_w.h
+$(BUILDDIR)/intobj/back/be_jsmn.o: $(TRUNKDIR)/source/alldefs.h $(TRUNKDIR)/source/global.h $(TRUNKDIR)/source/object.h $(TRUNKDIR)/source/symtab.h
+$(BUILDDIR)/intobj/back/be_jsmn.o: $(TRUNKDIR)/source/execute.h $(TRUNKDIR)/source/reswords.h $(TRUNKDIR)/source/be_alloc.h
+$(BUILDDIR)/intobj/back/be_jsmn.o: $(TRUNKDIR)/source/be_runtime.h $(TRUNKDIR)/source/be_jsmn.h $(TRUNKDIR)/source/jsmn/jsmn.h
+$(BUILDDIR)/intobj/back/be_jsmn.o: $(TRUNKDIR)/source/be_machine.h
 $(BUILDDIR)/intobj/back/be_pcre.o: $(TRUNKDIR)/source/alldefs.h $(TRUNKDIR)/source/global.h $(TRUNKDIR)/source/object.h $(TRUNKDIR)/source/symtab.h
 $(BUILDDIR)/intobj/back/be_pcre.o: $(TRUNKDIR)/source/execute.h $(TRUNKDIR)/source/reswords.h $(TRUNKDIR)/source/be_alloc.h
 $(BUILDDIR)/intobj/back/be_pcre.o: $(TRUNKDIR)/source/be_runtime.h $(TRUNKDIR)/source/be_pcre.h $(TRUNKDIR)/source/pcre/pcre.h
@@ -1226,6 +1248,7 @@ $(BUILDDIR)/transobj/back/be_machine.o: $(TRUNKDIR)/source/global.h $(TRUNKDIR)/
 $(BUILDDIR)/transobj/back/be_machine.o: $(TRUNKDIR)/source/execute.h $(TRUNKDIR)/source/reswords.h $(TRUNKDIR)/source/version.h
 $(BUILDDIR)/transobj/back/be_machine.o: $(TRUNKDIR)/source/be_runtime.h $(TRUNKDIR)/source/be_rterror.h $(TRUNKDIR)/source/be_main.h
 $(BUILDDIR)/transobj/back/be_machine.o: $(TRUNKDIR)/source/be_w.h $(TRUNKDIR)/source/be_symtab.h $(TRUNKDIR)/source/be_machine.h
+$(BUILDDIR)/transobj/back/be_machine.o: $(TRUNKDIR)/source/be_jsmn.h $(TRUNKDIR)/source/jsmn/jsmn.h $(TRUNKDIR)/source/be_task.h
 $(BUILDDIR)/transobj/back/be_machine.o: $(TRUNKDIR)/source/be_pcre.h $(TRUNKDIR)/source/pcre/pcre.h $(TRUNKDIR)/source/be_task.h
 $(BUILDDIR)/transobj/back/be_machine.o: $(TRUNKDIR)/source/be_alloc.h $(TRUNKDIR)/source/be_execute.h $(TRUNKDIR)/source/be_socket.h
 $(BUILDDIR)/transobj/back/be_machine.o: $(TRUNKDIR)/source/be_coverage.h $(TRUNKDIR)/source/be_syncolor.h
@@ -1234,6 +1257,10 @@ $(BUILDDIR)/transobj/back/be_main.o: $(TRUNKDIR)/source/alldefs.h $(TRUNKDIR)/so
 $(BUILDDIR)/transobj/back/be_main.o: $(TRUNKDIR)/source/execute.h $(TRUNKDIR)/source/reswords.h $(TRUNKDIR)/source/be_runtime.h
 $(BUILDDIR)/transobj/back/be_main.o: $(TRUNKDIR)/source/be_execute.h $(TRUNKDIR)/source/be_alloc.h $(TRUNKDIR)/source/be_rterror.h
 $(BUILDDIR)/transobj/back/be_main.o: $(TRUNKDIR)/source/be_w.h
+$(BUILDDIR)/transobj/back/be_jsmn.o: $(TRUNKDIR)/source/alldefs.h $(TRUNKDIR)/source/global.h $(TRUNKDIR)/source/object.h $(TRUNKDIR)/source/symtab.h
+$(BUILDDIR)/transobj/back/be_jsmn.o: $(TRUNKDIR)/source/execute.h $(TRUNKDIR)/source/reswords.h $(TRUNKDIR)/source/be_alloc.h
+$(BUILDDIR)/transobj/back/be_jsmn.o: $(TRUNKDIR)/source/be_runtime.h $(TRUNKDIR)/source/be_jsmn.h $(TRUNKDIR)/source/jsmn/jsmn.h
+$(BUILDDIR)/transobj/back/be_jsmn.o: $(TRUNKDIR)/source/be_machine.h
 $(BUILDDIR)/transobj/back/be_pcre.o: $(TRUNKDIR)/source/alldefs.h $(TRUNKDIR)/source/global.h $(TRUNKDIR)/source/object.h $(TRUNKDIR)/source/symtab.h
 $(BUILDDIR)/transobj/back/be_pcre.o: $(TRUNKDIR)/source/execute.h $(TRUNKDIR)/source/reswords.h $(TRUNKDIR)/source/be_alloc.h
 $(BUILDDIR)/transobj/back/be_pcre.o: $(TRUNKDIR)/source/be_runtime.h $(TRUNKDIR)/source/be_pcre.h $(TRUNKDIR)/source/pcre/pcre.h
@@ -1297,6 +1324,7 @@ $(BUILDDIR)/backobj/back/be_machine.o: $(TRUNKDIR)/source/global.h $(TRUNKDIR)/s
 $(BUILDDIR)/backobj/back/be_machine.o: $(TRUNKDIR)/source/execute.h $(TRUNKDIR)/source/reswords.h $(TRUNKDIR)/source/version.h
 $(BUILDDIR)/backobj/back/be_machine.o: $(TRUNKDIR)/source/be_runtime.h $(TRUNKDIR)/source/be_rterror.h $(TRUNKDIR)/source/be_main.h
 $(BUILDDIR)/backobj/back/be_machine.o: $(TRUNKDIR)/source/be_w.h $(TRUNKDIR)/source/be_symtab.h $(TRUNKDIR)/source/be_machine.h
+$(BUILDDIR)/backobj/back/be_machine.o: $(TRUNKDIR)/source/be_jsmn.h $(TRUNKDIR)/source/jsmn/jsmn.h $(TRUNKDIR)/source/be_task.h
 $(BUILDDIR)/backobj/back/be_machine.o: $(TRUNKDIR)/source/be_pcre.h $(TRUNKDIR)/source/pcre/pcre.h $(TRUNKDIR)/source/be_task.h
 $(BUILDDIR)/backobj/back/be_machine.o: $(TRUNKDIR)/source/be_alloc.h $(TRUNKDIR)/source/be_execute.h $(TRUNKDIR)/source/be_socket.h
 $(BUILDDIR)/backobj/back/be_machine.o: $(TRUNKDIR)/source/be_coverage.h $(TRUNKDIR)/source/be_syncolor.h $(TRUNKDIR)/source/be_debug.h
@@ -1304,6 +1332,10 @@ $(BUILDDIR)/backobj/back/be_main.o: $(TRUNKDIR)/source/alldefs.h $(TRUNKDIR)/sou
 $(BUILDDIR)/backobj/back/be_main.o: $(TRUNKDIR)/source/execute.h $(TRUNKDIR)/source/reswords.h $(TRUNKDIR)/source/be_runtime.h
 $(BUILDDIR)/backobj/back/be_main.o: $(TRUNKDIR)/source/be_execute.h $(TRUNKDIR)/source/be_alloc.h $(TRUNKDIR)/source/be_rterror.h
 $(BUILDDIR)/backobj/back/be_main.o: $(TRUNKDIR)/source/be_w.h
+$(BUILDDIR)/backobj/back/be_jsmn.o: $(TRUNKDIR)/source/alldefs.h $(TRUNKDIR)/source/global.h $(TRUNKDIR)/source/object.h $(TRUNKDIR)/source/symtab.h
+$(BUILDDIR)/backobj/back/be_jsmn.o: $(TRUNKDIR)/source/execute.h $(TRUNKDIR)/source/reswords.h $(TRUNKDIR)/source/be_alloc.h
+$(BUILDDIR)/backobj/back/be_jsmn.o: $(TRUNKDIR)/source/be_runtime.h $(TRUNKDIR)/source/be_jsmn.h $(TRUNKDIR)/source/jsmn/jsmn.h
+$(BUILDDIR)/backobj/back/be_jsmn.o: $(TRUNKDIR)/source/be_machine.h
 $(BUILDDIR)/backobj/back/be_pcre.o: $(TRUNKDIR)/source/alldefs.h $(TRUNKDIR)/source/global.h $(TRUNKDIR)/source/object.h $(TRUNKDIR)/source/symtab.h
 $(BUILDDIR)/backobj/back/be_pcre.o: $(TRUNKDIR)/source/execute.h $(TRUNKDIR)/source/reswords.h $(TRUNKDIR)/source/be_alloc.h
 $(BUILDDIR)/backobj/back/be_pcre.o: $(TRUNKDIR)/source/be_runtime.h $(TRUNKDIR)/source/be_pcre.h $(TRUNKDIR)/source/pcre/pcre.h
@@ -1366,6 +1398,7 @@ $(BUILDDIR)/libobj/back/be_machine.o: $(TRUNKDIR)/source/global.h $(TRUNKDIR)/so
 $(BUILDDIR)/libobj/back/be_machine.o: $(TRUNKDIR)/source/execute.h $(TRUNKDIR)/source/reswords.h $(TRUNKDIR)/source/version.h
 $(BUILDDIR)/libobj/back/be_machine.o: $(TRUNKDIR)/source/be_runtime.h $(TRUNKDIR)/source/be_rterror.h $(TRUNKDIR)/source/be_main.h
 $(BUILDDIR)/libobj/back/be_machine.o: $(TRUNKDIR)/source/be_w.h $(TRUNKDIR)/source/be_symtab.h $(TRUNKDIR)/source/be_machine.h
+$(BUILDDIR)/libobj/back/be_machine.o: $(TRUNKDIR)/source/be_jsmn.h $(TRUNKDIR)/source/jsmn/jsmn.h $(TRUNKDIR)/source/be_task.h
 $(BUILDDIR)/libobj/back/be_machine.o: $(TRUNKDIR)/source/be_pcre.h $(TRUNKDIR)/source/pcre/pcre.h $(TRUNKDIR)/source/be_task.h
 $(BUILDDIR)/libobj/back/be_machine.o: $(TRUNKDIR)/source/be_alloc.h $(TRUNKDIR)/source/be_execute.h $(TRUNKDIR)/source/be_socket.h
 $(BUILDDIR)/libobj/back/be_machine.o: $(TRUNKDIR)/source/be_coverage.h $(TRUNKDIR)/source/be_syncolor.h $(TRUNKDIR)/source/be_debug.h
@@ -1373,6 +1406,10 @@ $(BUILDDIR)/libobj/back/be_main.o: $(TRUNKDIR)/source/alldefs.h $(TRUNKDIR)/sour
 $(BUILDDIR)/libobj/back/be_main.o: $(TRUNKDIR)/source/execute.h $(TRUNKDIR)/source/reswords.h $(TRUNKDIR)/source/be_runtime.h
 $(BUILDDIR)/libobj/back/be_main.o: $(TRUNKDIR)/source/be_execute.h $(TRUNKDIR)/source/be_alloc.h $(TRUNKDIR)/source/be_rterror.h
 $(BUILDDIR)/libobj/back/be_main.o: $(TRUNKDIR)/source/be_w.h
+$(BUILDDIR)/libobj/back/be_jsmn.o: $(TRUNKDIR)/source/alldefs.h $(TRUNKDIR)/source/global.h $(TRUNKDIR)/source/object.h $(TRUNKDIR)/source/symtab.h
+$(BUILDDIR)/libobj/back/be_jsmn.o: $(TRUNKDIR)/source/execute.h $(TRUNKDIR)/source/reswords.h $(TRUNKDIR)/source/be_alloc.h
+$(BUILDDIR)/libobj/back/be_jsmn.o: $(TRUNKDIR)/source/be_runtime.h $(TRUNKDIR)/source/be_jsmn.h $(TRUNKDIR)/source/jsmn/jsmn.h
+$(BUILDDIR)/libobj/back/be_jsmn.o: $(TRUNKDIR)/source/be_machine.h
 $(BUILDDIR)/libobj/back/be_pcre.o: $(TRUNKDIR)/source/alldefs.h $(TRUNKDIR)/source/global.h $(TRUNKDIR)/source/object.h $(TRUNKDIR)/source/symtab.h
 $(BUILDDIR)/libobj/back/be_pcre.o: $(TRUNKDIR)/source/execute.h $(TRUNKDIR)/source/reswords.h $(TRUNKDIR)/source/be_alloc.h
 $(BUILDDIR)/libobj/back/be_pcre.o: $(TRUNKDIR)/source/be_runtime.h $(TRUNKDIR)/source/be_pcre.h $(TRUNKDIR)/source/pcre/pcre.h
