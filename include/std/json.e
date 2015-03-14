@@ -201,7 +201,7 @@ public function parse( string js )
 end function
 
 --**
--- Parses a sequence of JSON tokens into a usable Euphoria object.
+-- Parse a sequence of JSON tokens into a Euphoria object.
 --
 -- Parameters:
 --   # ##js## : a string containing raw JSON data
@@ -230,8 +230,8 @@ end function
 --
 -- map m = result[J_VALUE]
 --
--- sequence key   = map:get( m, "key" )
--- sequence value = map:get( m, "value" )
+-- object key   = map:get( m, "key" )
+-- object value = map:get( m, "value" )
 --
 -- display( `key = "[1]", value = "[2]"`,
 --     {key[J_VALUE],value[J_VALUE]} )
