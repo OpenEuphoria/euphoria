@@ -57,7 +57,10 @@ constant M_CALL_BACK = 52,
 		 M_CRASH_MESSAGE = 37,
 		 M_CRASH_FILE = 57,
 		 M_TICK_RATE = 38,
-		 M_WARNING_FILE	= 72
+		 M_WARNING_FILE	= 72,
+		 M_GET_IL_CURRENT_POS	= 888,
+		 M_INSERT_IL_AT = 999,
+		 M_DELETE_IL_AT = 777
 
 constant C_MY_ROUTINE = 1,
 		 C_USER_ROUTINE = 2,
@@ -3772,6 +3775,8 @@ procedure opMACHINE_FUNC()
 	if val[a] = M_CALL_BACK then
 		-- routine id's must be handled at our level
 		do_callback(b)
+	elsif val[a] = M_GET_IL_CURRENT_POS then
+		val[target] = get_il_current_pos()
 	else
 		val[target] = machine_func(val[a], val[b])
 	end if
@@ -3804,6 +3809,16 @@ procedure opMACHINE_PROC()
 	v = val[a]
 	-- some things must be handled at our level, not a lower level
 	switch v do
+		case M_INSERT_IL_AT then
+			if sequence(val[b]) and length(val[b]) >= 2 then
+			insert_il_at(val[b][1], val[b][2])
+			end if
+
+		case M_DELETE_IL_AT then
+			if sequence(val[b]) and length(val[b]) >= 2 then
+			delete_il_at(val[b][1], val[b][2])
+			end if
+
 		case M_CRASH_ROUTINE then
 		-- routine id's must be handled at our level
 			do_crash_routine(b)
@@ -4008,6 +4023,26 @@ procedure opDELETE_OBJECT()
 	delete( val[Code[pc+1]] )
 	pc += 2
 end procedure
+
+procedure insert_il_at(integer pos, sequence newIL)
+	if pos >= 0 and pos <= length(Code) then
+		Code = Code[1..pos] & newIL & Code[pos+1..length(Code)]
+	end if
+end procedure
+
+procedure delete_il_at(integer pos, integer len)
+	len += pos
+	if len > length(Code)+1 then
+		len = length(Code)+1
+	end if
+	if pos >= 0 and pos <= length(Code) then
+		Code = Code[1..pos] & Code[len..length(Code)]
+	end if
+end procedure
+
+function get_il_current_pos()
+	return pc
+end function
 
 procedure do_exec()
 -- execute IL code, starting at pc
