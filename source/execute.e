@@ -58,6 +58,7 @@ constant M_CALL_BACK = 52,
 		 M_CRASH_FILE = 57,
 		 M_TICK_RATE = 38,
 		 M_WARNING_FILE	= 72,
+		 M_SET_IL_CURRENT_POS	= 666,
 		 M_GET_IL_CURRENT_POS	= 888,
 		 M_INSERT_IL_AT = 999,
 		 M_DELETE_IL_AT = 777
@@ -3809,6 +3810,11 @@ procedure opMACHINE_PROC()
 	v = val[a]
 	-- some things must be handled at our level, not a lower level
 	switch v do
+		case M_SET_IL_CURRENT_POS then
+			if integer(val[b]) then
+				set_il_current_pos(val[b])
+			end if
+
 		case M_INSERT_IL_AT then
 			if sequence(val[b]) and length(val[b]) >= 2 then
 			insert_il_at(val[b][1], val[b][2])
@@ -4038,6 +4044,10 @@ procedure delete_il_at(integer pos, integer len)
 	if pos >= 0 and pos <= length(Code) then
 		Code = Code[1..pos] & Code[len..length(Code)]
 	end if
+end procedure 
+
+procedure set_il_current_pos(integer newpc)
+	pc = newpc
 end procedure
 
 function get_il_current_pos()
