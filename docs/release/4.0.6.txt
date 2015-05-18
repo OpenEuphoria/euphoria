@@ -2,6 +2,10 @@
 
 === Bug Fixes
 
+* [[ticket:893]] Backported map fixes to 4.0
+* [[ticket:877]] Fixed the bug where some very large values or very small values might give silly results.
+* [[ticket:901]] Made dsearch.exw into a portable demo, [[:dsearch.ex]], for both Windows and Linux
+* [[ticket:881]] In frontend, update previous op cache when an assignment gets optimized out.
 * [[ticket:872]] fix documentation error involving ##[[:or_all]]##
 * [[ticket:880]] fix documentaiton error involving ##[[:poke2]]##
 * [[ticket:708]] specified that color triples are specified between 0..255 in ##[[:read_bitmap]]## and ##[[:save_bitmap]]##.

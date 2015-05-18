@@ -3356,7 +3356,9 @@ function Global_declaration(integer type_ptr, integer scope)
 			end if
 		else
 			deltasym = NewIntSym(1)
-			SymTab[deltasym][S_USAGE] = U_READ
+			if deltasym > 0 then
+				SymTab[deltasym][S_USAGE] = U_READ
+			end if
 			putback(ptok)
 		end if
 	end if
@@ -3409,7 +3411,7 @@ function Global_declaration(integer type_ptr, integer scope)
 			SymTab[sym][S_USAGE] = U_WRITTEN
 			if TRANSLATE then
 				SymTab[sym][S_GTYPE] = TYPE_OBJECT
-				SymTab[sym][S_OBJ] = NOVALUE     -- distinguish from literals
+				SymTab[sym][S_OBJ] = NOVALUE -- distinguish from literals
 			end if
 			valsym = Top()
 			
@@ -3456,7 +3458,14 @@ function Global_declaration(integer type_ptr, integer scope)
 				Expr()
 				buckets[SymTab[sym][S_HASHVAL]] = sym
 				SymTab[sym][S_USAGE] = U_WRITTEN
+
+				valsym = Top()
 				
+				if TRANSLATE then
+					SymTab[sym][S_GTYPE] = TYPE_OBJECT
+					SymTab[sym][S_OBJ] = NOVALUE     -- distinguish from literals
+				end if
+
 				valsym = Top()
 				
 				emit_op(ASSIGN)
@@ -3466,6 +3475,7 @@ function Global_declaration(integer type_ptr, integer scope)
 					-- something else happened...could be a built-in
 					valsym = -1
 				end if
+
 				if valsym > 0 and compare( SymTab[valsym][S_OBJ], NOVALUE ) then
 					-- need to remember this for select/case statements
 					SymTab[sym][S_CODE] = valsym
@@ -3478,6 +3488,8 @@ function Global_declaration(integer type_ptr, integer scope)
 						-- break up really long declarations
 						emit_op( RETURNT )
 					end if
+					SymTab[sym][S_USAGE] = U_READ
+					valsym = get_assigned_sym()
 				end if
 				
 			else
@@ -3516,7 +3528,6 @@ function Global_declaration(integer type_ptr, integer scope)
 				end if					
 				putback(tok)
 				valsym = 0
-
 			end if
 			-- forbid sequences
 			emit_opnd(sym)
@@ -4183,12 +4194,10 @@ procedure SubProg(integer prog_type, integer scope)
 		-- Parse a list of statements
 		stmt_nest += 1
 		tok_match(RETURN)
-		
 		emit_opnd(i1_sym[T_SYM])
 		emit_opnd(enum_syms[1])
 		emit_op(EQUAL)
 		SymTab[Top()][S_USAGE] = U_USED
-		
 		for ei = 2 to length(enum_syms) do
 			symtab_index last_comparison = Top()
 			emit_opnd(i1_sym[T_SYM])

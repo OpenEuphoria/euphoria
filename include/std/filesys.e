@@ -588,7 +588,7 @@ public function walk_dir(sequence path_name, object your_function, integer scan_
 		end if
 		
 	elsif my_dir = DEFAULT_DIR_SOURCE then
-		d = default_dir(path_name)
+		d = machine_func(M_DIR, path_name)
 	else
 		d = call_func(my_dir, {path_name})
 	end if

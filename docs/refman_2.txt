@@ -2677,11 +2677,11 @@ Euphoria predefines some words itself:
 
 * **EU4** - Major Euphoria Version
 * **EU4_0** - Major and Minor Euphoria Version
-* **EU4_0_4** - Major, Minor and Release Euphoria Version
+* **EU4_0_6** - Major, Minor and Release Euphoria Version
 
 Euphoria is released with the common version scheme of Major, Minor and Release
-version identifiers in the form of major.minor.release. When 4.0.5 is
-released, ##EU4_0_5## will be defined and ##EU4_0## will still be defined, but ##EU4_0_4## will no longer be defined.  When 4.1 is released, ##EU4_0## will no longer be defined, but ##EU4_1## will be defined. Finally, when 5.0 is released, ##EU4## will no longer be
+version identifiers in the form of major.minor.release. If 4.0.7 is
+released, ##EU4_0_7## will be defined and ##EU4_0## will still be defined, but ##EU4_0_6## will no longer be defined.  When 4.1 is released, ##EU4_0## will no longer be defined, but ##EU4_1## will be defined. Finally, when 5.0 is released, ##EU4## will no longer be
 defined, but ##EU5## will be defined.
 
 ==== Platform Definitions

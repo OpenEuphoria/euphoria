@@ -1,0 +1,5 @@
+t_c_overflow_sci4.e:6
+<0357>:: The number specified here is too big.
+atom        a = -1e309
+                     ^
+

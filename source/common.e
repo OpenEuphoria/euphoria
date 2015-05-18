@@ -9,6 +9,8 @@ elsedef
 	without type_check
 end ifdef
 
+with type_check
+
 include std/os.e
 include std/filesys.e
 include std/search.e
@@ -22,6 +24,7 @@ public constant
 	DIRECT_OR_PUBLIC_INCLUDE = DIRECT_INCLUDE + PUBLIC_INCLUDE,
 	ANY_INCLUDE = DIRECT_OR_PUBLIC_INCLUDE + INDIRECT_INCLUDE
 
+	
 public sequence SymTab = {}  -- the symbol table
 
 public sequence known_files = {}
@@ -155,3 +158,12 @@ end procedure
 public function is_eudir_from_cmdline()
 	return cmdline_eudir
 end function
+
+export enum
+	MISSING_CMD_PARAMETER = 353,
+	BUILDDIR_IS_FILE,
+	BUILDDIR_IS_UNDEFINED,
+	NUMBER_IS_TOO_SMALL,
+	NUMBER_IS_TOO_BIG,
+	$
+

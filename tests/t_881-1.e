@@ -5,5 +5,7 @@ end function
 constant b = #AA 
  
 sequence s0 = foo(b) 
+
 include std/unittest.e
+
 test_report()

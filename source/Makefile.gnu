@@ -262,6 +262,7 @@ EU_CORE_FILES = \
 	coverage.e \
 	emit.e \
 	error.e \
+	fenv.e \
 	fwdref.e \
 	inline.e \
 	keylist.e \
@@ -360,6 +361,13 @@ DOCDIR = $(TRUNKDIR)/docs
 EU_DOC_SOURCE = \
 	$(EU_STD_INC) \
 	$(DOCDIR)/manual.af \
+	$(wildcard $(TRUNKDIR)/include/*.*) \
+	$(wildcard $(TRUNKDIR)/demo/*.ex) \
+	$(wildcard $(TRUNKDIR)/demo/win32/*.ew) \
+	$(wildcard $(TRUNKDIR)/demo/bench/*.ex) \
+	$(wildcard $(TRUNKDIR)/demo/net/*.ex) \
+	$(wildcard $(TRUNKDIR)/demo/preproc/*.ex) \
+	$(wildcard $(TRUNKDIR)/demo/unix/*.ex) \
 	$(wildcard $(DOCDIR)/*.txt) \
 	$(wildcard $(DOCDIR)/release/*.txt)
 
@@ -842,7 +850,7 @@ $(BUILDDIR)/eudis-build/main-.c : $(EU_INTERPRETER_FILES)
 $(BUILDDIR)/$(EUDIS) : translator library $(BUILDDIR)/eudis-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/eudis-build" -f dis.mak
 
-$(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/bind.ex $(EU_BACKEND_RUNNER_FILES)
+$(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/bind.ex $(EU_BACKEND_RUNNER_FILES) $(EU_CORE_FILES)
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/bind-build" \
 		-o "$(BUILDDIR)/$(EUBIND)" \
 		-makefile -eudir $(TRUNKDIR) \
@@ -851,7 +859,7 @@ $(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/bind.ex $(EU_BACKEND_RUNNER_
 $(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/bind-build" -f bind.mak
 
-$(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/shroud.ex
+$(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/shroud.ex $(EU_BACKEND_RUNNER_FILES) $(EU_CORE_FILES)
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/shroud-build" \
 		-o "$(BUILDDIR)/$(EUSHROUD)" \
 		-makefile -eudir $(TRUNKDIR) \
@@ -869,7 +877,7 @@ $(BUILDDIR)/eutest-build/main-.c : $(TRUNKDIR)/source/eutest.ex
 $(BUILDDIR)/$(EUTEST) : $(BUILDDIR)/eutest-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/eutest-build" -f eutest.mak
 
-$(BUILDDIR)/eucoverage-build/main-.c : $(TRUNKDIR)/bin/eucoverage.ex
+$(BUILDDIR)/eucoverage-build/main-.c : $(TRUNKDIR)/bin/eucoverage.ex $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eucoverage-build" \
 		-o "$(BUILDDIR)/$(EUCOVERAGE)" \
 		-makefile -eudir $(TRUNKDIR) \

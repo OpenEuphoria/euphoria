@@ -12,12 +12,6 @@ include std/text.e
 
 include common.e
 
-export enum
-	MISSING_CMD_PARAMETER = 353,
-	BUILDDIR_IS_FILE,
-	BUILDDIR_IS_UNDEFINED,
-	$
-
 -- don't change this please, but please look for -deleted- items before adding new options
 -- to the bottom of this list. Re-use -deleted- items.
 constant StdErrMsgs = {
@@ -377,6 +371,8 @@ constant StdErrMsgs = {
 	{MISSING_CMD_PARAMETER, "Command line argument [1] requires a parameter"},
 	{BUILDDIR_IS_FILE, "Error: Specified build directory is a file"},
 	{BUILDDIR_IS_UNDEFINED, "Error: Specified build directory is undefined (wildcards are not allowed)"},
+	{NUMBER_IS_TOO_SMALL, "The number specified here is too small."},
+	{NUMBER_IS_TOO_BIG, "The number specified here is too big."},
 	$
 }
 
