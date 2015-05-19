@@ -16,7 +16,7 @@ include std/types.e
 include std/search.e
 include std/net/dns.e
 include std/net/url.e as url
-
+include std/get.e
 include euphoria/info.e
 
 with trace
@@ -435,11 +435,42 @@ public function http_post(sequence url, object data, object headers = 0,
 		request[R_REQUEST] &= data
 		content = execute_request(request[R_HOST], request[R_PORT], request[R_REQUEST], timeout)
 		if length(content) != 2 or atom(content[1]) then
-			exit
+			return ERR_INVALID_DATA_ENCODING
 		end if
 		content_1 = content[1]
 	end while
 	
+	-- The value in content[2] is in Chunked Transfer encoding.
+	-- See:http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.6.1
+	
+	-- We get in content[2] something like "7\r\nsucess\r\n0\r\n"
+	--                                           ^    ^
+	--                                           |    |
+	--                                           |  eo_chunk
+	--                                         bo_chunk
+	--                                      
+	sequence chunk_size = value(content[2])
+	integer bo_chunk = match({13,10}, content[2]) + 2
+
+	if bo_chunk = 2 or -- no size specified
+		chunk_size[1] != GET_SUCCESS or  -- size wasn't a readable object
+		not integer(chunk_size[2]) or  -- size wasn't an integer
+		bo_chunk+chunk_size[2] > length(content[2]) then -- end of chunk theoretically extends past content[2]
+		return ERR_INVALID_DATA_ENCODING
+	end if
+	
+	-- Using chunk_size[2] as the length causes this code to fail a unit test.
+	-- So don't do that.  Even though that is what the RFC specifies.
+	
+	-- Don't trust chunk_size[2] instead ensure the chunk extends up to the next \r\n
+	
+	-- We use a forward search from chunk_size[2].
+	integer eo_chunk = match({13,10}, content[2], bo_chunk+chunk_size[2]-1)-1
+	
+	if eo_chunk = -1 then
+		return ERR_INVALID_DATA_ENCODING
+	end if
+	content[2] = content[2][bo_chunk..eo_chunk]
 	return content
 end function
 
