@@ -1348,12 +1348,10 @@ object call_c(int func, object proc_ad, object arg_list)
 				arg = next_arg;
 				PUSH_INT_ARG
 			}
-			else if (IS_ATOM(next_arg) && DBL_PTR(next_arg)->dbl > 0.0
-					&& DBL_PTR(next_arg)->dbl <= (eudouble)UINT64_MAX) {
-				// atoms are rounded to integers
-				// Do we really need both casts? Maybe do a sign check.
-				// We can usually assume that pointers > 0 but is that a
-				// valid assumption? Do we need to check bounds? JAG
+			else if (IS_ATOM(next_arg) 
+				&& DBL_PTR(next_arg)->dbl >= MIN_BITWISE_DBL
+				&& DBL_PTR(next_arg)->dbl <= MAX_BITWISE_DBL ){
+				// allow signed -> unsigned cast, but makes sure we don't overflow
 				arg = (uint64_t)(uintptr_t)DBL_PTR(next_arg)->dbl; //correct
 				// if it's a -ve f.p. number, Watcom converts it to long and
 				// then to unsigned long. This is exactly what we want.
@@ -1363,7 +1361,7 @@ object call_c(int func, object proc_ad, object arg_list)
 				RTFatal("argument out of range.");
 			}
 		}
-		else if( size == C_LONGLONG ){
+		else if( size == C_LONGLONG || size == C_ULONGLONG ){
 			if (IS_ATOM_INT(next_arg)) {
 				PUSH_INT64_ARG(next_arg);
 			}
@@ -1504,6 +1502,24 @@ object call_c(int func, object proc_ad, object arg_list)
 		}
 		else{
 			return NewDouble( (eudouble) int64_t_result );
+		}
+	}
+	else if (return_type == C_ULONGLONG ){
+		
+		#if UINTPTR_MAX == UINT32_MAX
+			unsigned long long int uint64_t_result;
+		#else
+			#define uint64_t_result int_result
+		#endif
+		#if __ARM_PCS_VFP == 1
+			uint64_t_result = icall_x86_64( long_proc_address, (double*)dbl_op, arg_op, int_args SIGNATURE_PARAM );
+		#endif
+		call_routine(uint64_t);
+		if( uint64_t_result <= (unsigned long long int)MAXINT ){
+			return (intptr_t) uint64_t_result;
+		}
+		else{
+			return NewDouble( (eudouble)(uint64_t) uint64_t_result );
 		}
 	}
 	else if (return_type == C_FLOAT) {

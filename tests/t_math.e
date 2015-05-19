@@ -228,8 +228,10 @@ test_equal("trig_range 1c ", {1.104, {1.104}}, round(arccos({.45, {.45}}), 1e4) 
 test_equal("abs_below_1 1c ", {.4847, {.4847}}, round(arctanh({.45, {.45}}), 1e4)  )
 test_equal("not_below_1 1c ", {0.9163, {.9163}}, round(arccosh({1.45, {1.45}}), 1e4)  )
 
-
-
+test_equal("sin(1)", 0.841, round( sin(1), 1e3 ))
+test_equal("cos(1)", 0.540, round( cos(1), 1e3 ))
+test_equal("tan(1)", 1.557, round( tan(1), 1e3 ))
+test_equal("arctan(1)", 0.785, round( arctan(1), 1e3 ))
 
 test_true("Hex Literal #1", #abcdef = #ABCDEF)
 test_true("Hex Literal #2", #012345 = #012345)
@@ -309,8 +311,14 @@ end function
 test_equal( "privates not initialized in BB when set to novalue", 2, ticket_730() )
 end ifdef
 
-ifdef BITS64 then
+test_equal( "Trig sine function works the same whether it is an integer or float 1:", sin(1.0000), sin(1) )
+test_equal( "Trig sine function works the same whether it is an integer or float 2:", sin(2.0000), sin(2) )
+test_equal( "Trig cosine function works the same whether it is an integer or float 1:", cos(1.0000), cos(1) )
+test_equal( "Trig cosine function works the same whether it is an integer or float 2:", cos(2.0000), cos(2) )
+test_equal( "Trig tan function works the same whether it is an integer or float 1:", tan(1.0000), tan(1) )
+test_equal( "Trig tan function works the same whether it is an integer or float d2:", tan(2.0000), tan(2) )
 
+ifdef BITS64 then
 -- correctly capture 64-bit multiplication and promotion of
 -- products that fix in 64-bit integers, but not 63-bit integers
 procedure bigmult64()
@@ -331,7 +339,6 @@ procedure bigmult64()
 	test_pass("no machine crash")
 end procedure
 bigmult64()
-
 end ifdef
 
 test_report()

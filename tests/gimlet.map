@@ -1,0 +1,5 @@
+":=" = "assignment" 
+"==" = "comparison" 
+",$" = "placeholder" 
+", $" = "erroneous - no spaces" 
+"--" = "comment" ---- to end of line

@@ -22,6 +22,7 @@
 * [[ticket:884]] 32-bit translator crash when translating a 64-bit target
 * [[ticket:886]] system_exec with quotes on Windows failed due to quotes being removed
 * [[ticket:887]] EDS: crash if create_table and clear_table init_records parameter was less than MAX_INDEX
+* [[ticket:898]] fix ##[[:uname]]## to report Windows 8 correctly
 
 === Enhancements
 
@@ -54,12 +55,12 @@
 * [[t_integer32]] type for checking to see if an object is an integer based on 32-bit Euphoria's definition
 * Improved identification of ##routine_id()## targets by the translator
 * Smaller translated DLLs are produced by improved identification of routines that need to be exported
-* Eutest now has an eubin option for specifying all binaries in a single option.  
+* Eutest now has an eubin option for specifying all binaries in a single option.
 * Eutest has a retest option for retesting all tests that had previously failed.
 * Front end optimizations to reduce parsing time
 * Added dynamic library uninitialization to reduce memory leaks if a euphoria translated .dll or .so
   is unloaded
-* [[ticket:838]] Eutest now reports the date of the Interpreter, and when the test was completed.  
+* [[ticket:838]] Eutest now reports the date of the Interpreter, and when the test was completed.
 * Much faster and simpler implementation of maps in std/map.e inspired by the implementation of python's
   dictionary object. Some functions and parameters have been deprecated (such as any distinction between
   small and large maps), as they no longer make sense for the new implementation.

@@ -1,0 +1,5 @@
+t_c_deseq_seq.e:4
+subscript value 1 is out of bounds, reading from a sequence of length 0 - in assignment to 'a' 
+
+
+Public & Export & Global & Local Variables

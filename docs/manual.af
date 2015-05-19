@@ -104,6 +104,7 @@ ifdef HTML
 ../demo/color.ex
 ../demo/csort.ex
 ../demo/dep.exw
+../demo/dsearch.ex
 ../demo/eprint.ex
 ../demo/eused.ex
 ../demo/guru.ex

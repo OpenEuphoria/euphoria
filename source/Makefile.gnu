@@ -96,7 +96,7 @@ else
 endif
 ifeq "$(EMINGW)" "1"
 	EXE_EXT=.exe
-	ifeq "$(EHOST)" "EWIN"
+	ifeq "$(EHOST)" "EWINDOWS"
 		HOST_EXE_EXT=.exe
 	endif
 	EPTHREAD=
@@ -299,12 +299,15 @@ FE_FLAGS =  $(ARCH_FLAG) $(COVERAGEFLAG) $(MSIZE) $(EPTHREAD) -c -fsigned-char $
 endif
 BE_FLAGS =  $(ARCH_FLAG) $(COVERAGEFLAG) $(MSIZE) $(EPTHREAD) -c -Wall $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(FP_FLAGS) $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE) $(FPIC) -I$(TRUNKDIR)/source
 
+# TODO XXX should syncolor.e really be in EU_INTERPRETER_FILES ?
+
 EU_CORE_FILES = \
 	$(TRUNKDIR)/source/block.e \
 	$(TRUNKDIR)/source/common.e \
 	$(TRUNKDIR)/source/coverage.e \
 	$(TRUNKDIR)/source/emit.e \
 	$(TRUNKDIR)/source/error.e \
+	$(TRUNKDIR)/include/std/fenv.e \
 	$(TRUNKDIR)/source/fwdref.e \
 	$(TRUNKDIR)/source/inline.e \
 	$(TRUNKDIR)/source/keylist.e \
@@ -322,7 +325,6 @@ EU_CORE_FILES = \
 	$(TRUNKDIR)/source/syncolor.e \
 	$(TRUNKDIR)/source/symtab.e 
 
-# TODO XXX should syncolor.e really be in EU_INTERPRETER_FILES ?
 
 EU_INTERPRETER_FILES = \
 	$(TRUNKDIR)/source/backend.e \
@@ -550,6 +552,7 @@ translator  : eucsource
 backend     : backendsource
 endif
 
+
 interpreter : builddirs $(EU_BACKEND_OBJECTS)
 	$(MAKE) $(BUILDDIR)/$(EEXU) OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 
@@ -632,6 +635,7 @@ endif
 
 $(BUILDDIR)/$(EEXU) :  EU_TARGET = eui.ex
 $(BUILDDIR)/$(EEXU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) $(EU_STD_INC)
+$(BUILDDIR)/$(EEXU) :  $(BUILDDIR)/intobj $(BUILDDIR)/intobj/back
 $(BUILDDIR)/$(EEXU) :  EU_OBJS = $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
 $(BUILDDIR)/$(EEXU) :  $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(EU_TRANSLATOR_FILES) $(EUI_RES) $(EUIW_RES)
 	@$(ECHO) making $(EEXU)
@@ -795,7 +799,7 @@ test : EUCOMPILEDIR=$(TRUNKDIR)
 test : EUCOMPILEDIR=$(TRUNKDIR)	
 test : C_INCLUDE_PATH=$(TRUNKDIR):..:$(C_INCLUDE_PATH)
 test : LIBRARY_PATH=$(%LIBRARY_PATH)
-test : $(TRUNKDIR)/tests/lib818.dll
+test : $(TRUNKDIR)/tests/lib818.dll interpreter translator library binder
 test :  
 	cd $(TRUNKDIR)/tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
 		$(EXE) -i $(TRUNKDIR)/include $(TRUNKDIR)/source/eutest.ex -i $(TRUNKDIR)/include -cc gcc $(VERBOSE_TESTS) \
@@ -904,7 +908,7 @@ endif
 	install $(TRUNKDIR)/demo/preproc/* $(DESTDIR)$(PREFIX)/share/euphoria/demo/preproc
 	install $(TRUNKDIR)/tutorial/* $(DESTDIR)$(PREFIX)/share/euphoria/tutorial
 	install  \
-	           $(TRUNKDIR)/bin/ed.ex \
+	           $(TRUNKDIR)/bin/edx.ex \
 	           $(TRUNKDIR)/bin/bugreport.ex \
 	           $(TRUNKDIR)/bin/buildcpdb.ex \
 	           $(TRUNKDIR)/bin/ecp.dat \
