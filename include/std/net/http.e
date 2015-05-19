@@ -13,12 +13,13 @@ include std/sequence.e
 include std/socket.e as sock
 include std/text.e
 include std/types.e
-
+include std/search.e
 include std/net/dns.e
 include std/net/url.e as url
 
 include euphoria/info.e
 
+with trace
 constant USER_AGENT_HEADER = 
 	sprintf("User-Agent: Euphoria-HTTP/%d.%d\r\n", {
 		version_major(), version_minor() })
@@ -102,17 +103,23 @@ function format_base_request(sequence request_type, sequence url, object headers
 
 	-- only specify the port in the request if the caller did so explicitly
 	-- some sites, such as euphoria.pastey.net, will break otherwise
+	-- HTTP/1.0 lacks the host header field.  Use HTTP/1.1.
 	if noport then
-	request = sprintf("%s %s HTTP/1.0\r\nHost: %s\r\n", {
+	request = sprintf("%s %s HTTP/1.1\r\nHost: %s\r\n", {
 		request_type, path, host })
 	else
-	request = sprintf("%s %s HTTP/1.0\r\nHost: %s:%d\r\n", {
+	request = sprintf("%s %s HTTP/1.1\r\nHost: %s:%d\r\n", {
 		request_type, path, host, port })
 	end if
 
 	integer has_user_agent = 0
 	integer has_connection = 0
 
+	if sequence(parsedUrl[URL_USER]) and sequence(parsedUrl[URL_PASSWORD]) then
+		--request &= sprintf("%s: %s:%s\r\n", {"Authorization",parsedUrl[URL_USER],parsedUrl[URL_PASSWORD]})
+		
+	end if
+	
 	if sequence(headers) then
 		for i = 1 to length(headers) do
 			object header = headers[i]
@@ -222,6 +229,7 @@ function execute_request(sequence host, integer port, sequence request, natural 
 	sock:socket sock = sock:create(sock:AF_INET, sock:SOCK_STREAM, 0)
 
 	if sock:connect(sock, addrinfo[3][1], port) != sock:OK then
+		sock:close(sock)
 		return ERR_CONNECT_FAILED
 	end if
 
@@ -248,6 +256,7 @@ function execute_request(sequence host, integer port, sequence request, natural 
 					-- a disconnect.
 					exit "top"
 				else
+					sock:close(sock)
 					return ERR_RECEIVE_FAILED
 				end if
 			end if
@@ -281,8 +290,32 @@ function execute_request(sequence host, integer port, sequence request, natural 
 		end if
 	end while
 
+	sock:close(sock)
 	return { headers, content }
 end function
+
+--****
+--@nodoc@
+-- When returned headers redirect to another url, return a fully  
+-- qualified proper url.   
+function redirect_url(sequence request, sequence headers)
+	for i = 1 to length(headers) do
+		sequence headers_i = headers[i]
+		if equal(headers_i[1],"location") then
+			sequence new_url = headers_i[2]
+			if new_url[1] = '/' then
+				if not find(request[R_PORT], {0,""}) then
+					new_url = ":" & request[R_PORT] & new_url
+				end if
+				new_url = "http://" & request[R_HOST] & new_url
+			end if
+			return new_url
+		end if
+	end for
+	return sprintf("http://%s:%s/%s", { request[R_HOST], request[R_PORT], request[R_PATH] }) 
+end function
+
+
 
 --****
 -- === Get/Post Routines
@@ -345,66 +378,67 @@ end function
 public function http_post(sequence url, object data, object headers = 0,
 		natural follow_redirects = 10, natural timeout = 15)
 		
+
 	if not sequence(data) or length(data) = 0 then
 		return ERR_INVALID_DATA
 	end if
 
-	object request = format_base_request("POST", url, headers)
-	if atom(request) then
-		return request
-	end if
-
-	integer data_type
-	if ascii_string(data) or sequence(data[1]) then
-		data_type = FORM_URLENCODED
-	else
-		if data[1] < 1 or data[1] > 2 then
-			return ERR_INVALID_DATA_ENCODING
+	object content, request
+	sequence content_1
+	while follow_redirects > 0 and length(content)=2 and length(content_1) >= 1 and length(content_1[1]) >= 2 and equal(content_1[2][2], "303") with entry do
+		follow_redirects -= 1
+		--sequence http_response_code = content[1][1][2]
+		-- 301, 302, 307 : must not be redirected without user interaction (RFC 2616)
+		url = redirect_url(request, content_1)
+	entry
+	
+		request = format_base_request("POST", url, headers)
+		if atom(request) then
+			return request
 		end if
-
-		data_type = data[1]
-		data = data[2]
-	end if
-
-	-- data now contains either a string sequence already encoded or
-	-- a sequence of key/value pairs to be encoded. We know the length
-	-- is greater than 0, so check the first element to see if it's a
-	-- sequence or an atom. That will tell us what we have.
-	--
-	-- If we have key/value pairs then we will need to encode that data
-	-- according to our data_type.
-
-	sequence content_type = ENCODING_STRINGS[data_type]
-	if sequence(data[1]) then
-		-- We have key/value pairs
-		if data_type = FORM_URLENCODED then
-			data = form_urlencode(data)
+	
+		integer data_type
+		if ascii_string(data) or sequence(data[1]) then
+			data_type = FORM_URLENCODED
 		else
-			sequence boundary = random_boundary(20)
-			content_type &= "; boundary=" & boundary
-			data = multipart_form_data_encode(data, boundary)
+			if data[1] < 1 or data[1] > 2 then
+				return ERR_INVALID_DATA_ENCODING
+			end if
+	
+			data_type = data[1]
+			data = data[2]
 		end if
-	end if
-
-	request[R_REQUEST] &= sprintf("Content-Type: %s\r\n", { content_type })
-	request[R_REQUEST] &= sprintf("Content-Length: %d\r\n", { length(data) })
-	request[R_REQUEST] &= "\r\n"
-	request[R_REQUEST] &= data
-
-	object content = execute_request(request[R_HOST], request[R_PORT], request[R_REQUEST], timeout)
-	if follow_redirects and length(content)=2 then
-		sequence content_1 = content[1]
-		if length(content_1) >= 1 and length(content_1[1]) >= 2 and equal(content_1[2][2], "303") then
-			--sequence http_response_code = content[1][1][2]
-			-- 301, 302, 307 : must not be redirected without user interaction (RFC 2616)
-			for i = 1 to length(content_1) do
-				sequence headers_i = content_1[i]
-				if equal(headers_i[1],"location") then
-					return http_get(headers_i[2], headers, follow_redirects-1, timeout)
-				end if
-			end for
+	
+		-- data now contains either a string sequence already encoded or
+		-- a sequence of key/value pairs to be encoded. We know the length
+		-- is greater than 0, so check the first element to see if it's a
+		-- sequence or an atom. That will tell us what we have.
+		--
+		-- If we have key/value pairs then we will need to encode that data
+		-- according to our data_type.
+	
+		sequence content_type = ENCODING_STRINGS[data_type]
+		if sequence(data[1]) then
+			-- We have key/value pairs
+			if data_type = FORM_URLENCODED then
+				data = form_urlencode(data)
+			else
+				sequence boundary = random_boundary(20)
+				content_type &= "; boundary=" & boundary
+				data = multipart_form_data_encode(data, boundary)
+			end if
 		end if
-	end if
+		request = format_base_request("POST", url, headers)
+		request[R_REQUEST] &= sprintf("Content-Type: %s\r\n", { content_type })
+		request[R_REQUEST] &= sprintf("Content-Length: %d\r\n", { length(data) })
+		request[R_REQUEST] &= "\r\n"
+		request[R_REQUEST] &= data
+		content = execute_request(request[R_HOST], request[R_PORT], request[R_REQUEST], timeout)
+		if length(content) != 2 or atom(content[1]) then
+			exit
+		end if
+		content_1 = content[1]
+	end while
 	
 	return content
 end function
@@ -444,30 +478,28 @@ end function
 
 public function http_get(sequence url, object headers = 0, natural follow_redirects = 10,
 		natural timeout = 15)
-	object request
-		
-	request = format_base_request("GET", url, headers)
+	object request, content
+	sequence content_1
 	
-	if atom(request) then
-		return request
-	end if
-
-	-- No more work necessary, terminate the request with our ending CR LF
-	request[R_REQUEST] &= "\r\n"
-
-	object content = execute_request(request[R_HOST], request[R_PORT], request[R_REQUEST], timeout)
-	if follow_redirects and length(content)=2 then
-		sequence content_1 = content[1] 
-		if length(content_1) >= 1 and length(content_1[1]) >= 2 and
-				find(content_1[1][2], {"301","302","303","307","308"}) then
-			for i = 1 to length(content_1) do
-				sequence headers_i = content_1[i]
-				if equal(headers_i[1],"location") then
-					return http_get(headers_i[2], headers, follow_redirects-1, timeout)
-				end if
-			end for
+	while follow_redirects > 0 and length(content_1) >= 1 and length(content_1[1]) >= 2 and
+				find(content_1[1][2], {"301","302","303","307","308"}) with entry do
+		follow_redirects -= 1
+		
+		url = redirect_url(request, content_1)
+	entry
+		request = format_base_request("GET", url, headers)
+		
+		if atom(request) then
+			return request
 		end if
-	end if
+		-- No more work necessary, terminate the request with our ending CR LF
+		request[R_REQUEST] &= "\r\n"
+		content = execute_request(request[R_HOST], request[R_PORT], request[R_REQUEST], timeout)
+		if length(content) != 2 then
+			exit
+		end if
+		content_1 = content[1]
+	end while
 
 	return content	
 end function
