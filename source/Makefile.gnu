@@ -491,7 +491,7 @@ eucsource :  EU_TARGET = ec.ex
 eucsource : $(BUILDDIR)/$(OBJDIR)/back/coverage.h
 eucsource : $(BUILDDIR)/include/be_ver.h
 backendsource : $(BUILDDIR)/backobj/main-.c
-backendsource :  EU_TARGET = backend.ex
+backendsource :  EU_TARGET=backend.ex
 backendsource : $(BUILDDIR)/$(OBJDIR)/back/coverage.h
 backendsource : $(BUILDDIR)/include/be_ver.h
 
@@ -533,9 +533,11 @@ endif
 .PHONY : backendsource
 .PHONY : source
 
+ifneq "$(OBJDIR)" ""
 $(BUILDDIR)/$(OBJDIR)/back/coverage.h : $(BUILDDIR)/$(OBJDIR)/main-.c
 	$(EXE) -i $(CYPTRUNKDIR)/include coverage.ex $(CYPBUILDDIR)/$(OBJDIR)
-
+endif
+	
 $(BUILDDIR)/intobj/back/be_execute.o : $(BUILDDIR)/intobj/back/coverage.h
 $(BUILDDIR)/transobj/back/be_execute.o : $(BUILDDIR)/transobj/back/coverage.h
 $(BUILDDIR)/backobj/back/be_execute.o : $(BUILDDIR)/backobj/back/coverage.h
@@ -544,7 +546,9 @@ $(BUILDDIR)/intobj/back/be_runtime.o : $(BUILDDIR)/intobj/back/coverage.h
 $(BUILDDIR)/transobj/back/be_runtime.o : $(BUILDDIR)/transobj/back/coverage.h
 $(BUILDDIR)/backobj/back/be_runtime.o : $(BUILDDIR)/backobj/back/coverage.h
 
+ifneq "$(OBJDIR)" ""
 $(BUILDDIR)/$(OBJDIR)/back/be_machine.o : $(BUILDDIR)/include/be_ver.h
+endif
 
 ifeq "$(EMINGW)" "1"
 $(EUI_RES) : eui.rc version_info.rc eu.manifest
@@ -568,15 +572,15 @@ ifeq "$(EMINGW)" "1"
 $(EUC_RES) : euc.rc version_info.rc eu.manifest
 endif
 
-$(BUILDDIR)/$(EECU) :  OBJDIR = transobj
-$(BUILDDIR)/$(EECU) :  EU_TARGET = ec.ex
-$(BUILDDIR)/$(EECU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_STD_INC)
-$(BUILDDIR)/$(EECU) :  EU_OBJS = $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
+$(BUILDDIR)/$(EECU) :  OBJDIR=transobj
+$(BUILDDIR)/$(EECU) :  EU_TARGET=ec.ex
+$(BUILDDIR)/$(EECU) :  EU_MAIN=$(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_STD_INC)
+$(BUILDDIR)/$(EECU) :  EU_OBJS=$(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 $(BUILDDIR)/$(EECU) : $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) $(EUC_RES)
 	@$(ECHO) making $(EECU)
 	$(CC) $(EOSFLAGSCONSOLE) $(EUC_RES) $(EU_TRANSLATOR_OBJECTS) $(DEBUG_FLAGS) $(PROFILE_FLAGS) $(EU_BACKEND_OBJECTS) $(MSIZE) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EECU) 
 	
-backend : builddirs
+backend : builddirs 
 ifeq "$(EUPHORIA)" "1"
 	$(MAKE) backendsource EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG)  EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 endif	
@@ -590,10 +594,10 @@ $(EUB_RES) : eub.rc version_info.rc eu.manifest
 $(EUBW_RES) : eubw.rc version_info.rc eu.manifest
 endif
 
-$(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) : OBJDIR = backobj
-$(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) : EU_TARGET = backend.ex
-$(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) : EU_MAIN = $(EU_BACKEND_RUNNER_FILES)
-$(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) : EU_OBJS = $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+$(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) : OBJDIR=backobj
+$(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) : EU_TARGET=backend.ex
+$(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) : EU_MAIN=$(EU_BACKEND_RUNNER_FILES)
+$(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) : EU_OBJS=$(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) $(EUB_RES) $(EUBW_RES)
 	@$(ECHO) making $(EBACKENDC) $(OBJDIR)
 	$(CC) $(EOSFLAGS) $(EUB_RES) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(DEBUG_FLAGS) $(MSIZE) $(PROFILE_FLAGS) -o $(BUILDDIR)/$(EBACKENDC)
@@ -713,7 +717,7 @@ test : EUCOMPILEDIR=$(TRUNKDIR)
 test : EUCOMPILEDIR=$(TRUNKDIR)	
 test : C_INCLUDE_PATH=$(TRUNKDIR):..:$(C_INCLUDE_PATH)
 test : LIBRARY_PATH=$(%LIBRARY_PATH)
-test : ../tests/lib818.dll
+test : ../tests/lib818.dll $(CYPBUILDDIR)/$(EEXU) $(BUILDDIR)/$(EUBIND) $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EECU) $(CYPBUILDDIR)/$(LIBRARY_NAME)
 test :  
 	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
 		$(EXE) -i ../include ../source/eutest.ex -i ../include -cc gcc $(VERBOSE_TESTS) \
@@ -962,19 +966,25 @@ lib818 :
 
 ../tests/lib818.dll : $(BUILDDIR)/test818.o
 	$(CC)  $(MSIZE) $(LIB818_FPIC) -shared -o ../tests/lib818.dll $(CREATEDLLFLAGS) $(BUILDDIR)/test818.o
+
+ifneq "$(OBJDIR)" ""
 	
 $(BUILDDIR)/$(OBJDIR)/%.o : $(BUILDDIR)/$(OBJDIR)/%.c
 	$(CC) $(EBSDFLAG) $(FE_FLAGS) $(BUILDDIR)/$(OBJDIR)/$*.c -I/usr/share/euphoria -o$(BUILDDIR)/$(OBJDIR)/$*.o
 
+endif
 
 ifeq "$(EUPHORIA)" "1"
+ifneq "$(OBJDIR)" ""
 
 $(BUILDDIR)/$(OBJDIR)/%.c : $(EU_MAIN)
 	@$(ECHO) Translating $(EU_TARGET) to create $(EU_MAIN)
 	rm -f $(BUILDDIR)/$(OBJDIR)/{*.c,*.o}
 	(cd $(BUILDDIR)/$(OBJDIR);$(TRANSLATE) -nobuild $(RELEASE_FLAG) \
 		-c $(BUILDDIR)/eu.cfg $(CYPTRUNKDIR)/source/$(EU_TARGET) )
-	
+
+
+endif	
 endif
 
 ifneq "$(OBJDIR)" ""
