@@ -264,14 +264,19 @@ test_equal("breakup(int, CUSTOM) bad size 1", {"", "ABCDE"}, breakup("ABCDE", {0
 test_equal("breakup(int, CUSTOM) bad size 2", {"ABCDE"}, breakup("ABCDE", {99}))
 test_equal("breakup(int, CUSTOM) bad size 3", {"ABCDE"}, breakup("ABCDE", {}))
 
+test_equal("flatten() one level nesting", {18, 19, 45, 18.4, 29.3}, flatten({{18, 19}, 45,  {18.4,     29.3}}))
+test_equal("flatten() deeper nesting", {18, 19, 45, 18.4, 29.3}, flatten({18, {{{19, {45}}},{18.4, {}}, 29.3}}))
+test_equal("flatten() long delim", "abc , def , ghi", flatten({"abc", "def", "ghi"}, " , "))
+test_equal("flatten() mixed source and atom delim", "abc,,ghi,ajkl,mno,pqr,stu,vwx,yz", flatten({"abc", "", "ghi", 'a', {"jkl", "mno", "pqr"}, "stu", "vwx", "yz"}, ','))
+test_equal("flatten() nested source and nested delim", "file/_/name", flatten({{"file"},"name"},{"/", "_/"}))
 test_equal("flatten() nested", {1,2,3}, flatten({{1}, {2}, {3}}))
-test_equal("flatten() deeply nested", {1,2,3}, flatten({{{{1}}}, 2, {{{{{3}}}}}}))
-test_equal("flatten() string", "JohnDoe", flatten({{"John", {"Doe"}}}))
+test_equal("flatten() deeply nested", {1,2,3,4}, flatten({{{{1}}}, 2, {{{{{3}}},4}}}))
+test_equal("flatten() strings no delim", "JohnDoe", flatten({{"John", {"Doe"}}}))
 test_equal("flatten() empty", "", flatten({{"", {""}},{{}}}))
-
-test_equal("flatten() nested text delim", "abc def g h i", flatten({"abc", "def", "g h i"}, " "))
+test_equal("flatten() nested text, delim", "abc def g h i", flatten({"abc", "def", "g h i"}, " "))
 test_equal("flatten() nested no delim", "abcdefg h i", flatten({"abc", "def", "g h i"}, ""))
 test_equal("flatten() nested char delim", "abc,def,g h i", flatten({"abc", "def", "g h i"}, ","))
+
 
 test_equal("vslice 1", {1,2,3}, vslice({{5,1}, {5,2}, {5,3}}, 2))
 test_equal("vslice 2", {5,5,5}, vslice({{5,1}, {5,2}, {5,3}}, 1))
