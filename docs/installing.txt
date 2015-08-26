@@ -183,6 +183,25 @@ Look for an installation package for Apple installations.
 There is DOS support only up to Euphoria 3.1. DOS developers are 
 invited to contribute their skills.
 
+
+=== Nightly Builds
+
+
+You have access to the latest Euphoria source-code that the Developers are
+working on via the official OpenEuphoria Mercurial repository:
+http://scm.openeuphoria.org
+
+Binary files are called //Eubins//, and are automated "Nightly Builds"
+produced from the latest code in the code repository:
+http://openeuphoria.org/eubins/
+
+A complete installation requires merging the original source files,
+and the contents of the eubins download. Then, the path to euphoria/bin
+must be set and a cfg file must be written.
+
+For the adventurous only.
+
+
 == Post Install
 
 The directory maps will help you locate the Euphoria executables, documentation,
