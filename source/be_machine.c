@@ -852,11 +852,8 @@ static object user_allocate(object x)
 	first = (uintptr_t)addr & (~gp1); // start of page
 	last = (uintptr_t)addr+nbytes-1; // last address
 	last = last | gp1; // end of page
-	mprotect((void *)first, last - first + 1,
-			 PROT_READ+PROT_WRITE+PROT_EXEC);
 #elif defined(ELINUX)
 	addr = (char*) memalign( pagesize, nbytes );
-	mprotect( addr, nbytes, PROT_EXEC | PROT_READ | PROT_WRITE );
 #else
 	addr = EMalloc(nbytes);
 #endif
@@ -2351,11 +2348,11 @@ object DefineC(object x)
 
 		#elif INTPTR_MAX == INT64_MAX
 
-		#define CALLBACK_SIZE 143
+		#define CALLBACK_SIZE (300)
 
 		#endif
 	#else
-		#define CALLBACK_SIZE (80)
+		#define CALLBACK_SIZE (300)
 	#endif
 #endif
 #endif
