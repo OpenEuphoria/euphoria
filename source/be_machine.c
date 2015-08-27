@@ -2348,11 +2348,11 @@ object DefineC(object x)
 
 		#elif INTPTR_MAX == INT64_MAX
 
-		#define CALLBACK_SIZE (300)
+		#define CALLBACK_SIZE (143)
 
 		#endif
 	#else
-		#define CALLBACK_SIZE (300)
+		#define CALLBACK_SIZE (80)
 	#endif
 #endif
 #endif
@@ -2464,9 +2464,10 @@ object CallBack(object x)
 #endif
 	}
 
-#if defined( EWINDOWS ) && INTPTR_MAX == INT64_MAX
+#if INTPTR_MAX == INT64_MAX
 	// For some reason the cdecl callback crashes on windows, but this always works.
 	// We're not really using stdcall or cdecl anyways
+	// It also seems to crash on 64-bit Linux/GNU in some cases.
 	convention = C_STDCALL;
 #endif
 	/* Check routine_id value and get the number of arguments */
@@ -2611,7 +2612,7 @@ object CallBack(object x)
 	set_page_to_read_execute_only(page_addr);
 	
 	if (not_patched) {
-		RTFatal("Internal error: CallBack routine id patch failed: missing magic.");
+		RTFatal("Internal error: CallBack routine id patch failed: missing magic (%d).", not_patched);
 	}
 	
 	addr = (uintptr_t)copy_addr;
