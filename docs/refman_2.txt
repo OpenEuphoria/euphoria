@@ -1516,7 +1516,7 @@ end procedure
 However there is one significant difference when it comes to enum types. For
 normal types, when calling the type function, it returns either ##0## or ##1##. 
 The enum type function returns ##0## if the argument is not a member of the 
-enum set, and it returns a non-zero atom when the argument is a member. The value returned might be ##1## or it might not be ##1##.  Don't rely on the type returning one.  In EUPHORIA any atom that is not ##0## is true.  The non-zero value returned will defer between 4.0 and 4.1.
+enum set, and it returns a non-zero atom when the argument is a member. The value returned might be ##1## or it might not be ##1##.  Don't rely on the type returning one.  In EUPHORIA any atom that is not ##0## is true.  The non-zero value returned differs between 4.0 and 4.1.
 
 For example,
 <eucode>
@@ -1541,19 +1541,6 @@ end if
 
 </eucode>
 
-But with the exception,
-
-<eucode>
-enum type color RED, GREEN=7, BLACK=1, BLUE=3 , PINK=10 end type
-? color(RED) --> 1
-? color(GREEN) --> 2
-? color(BLACK) --> 1
-? color(BLUE) --> 4
-? color(PINK) --> 5
-</eucode>
-Note that none of the enums have an ordinal number with a value of 3. This is
-simply skipped.
-
 <eucode>
 enum by DELTA member1, member2, ... ,memberN
 </eucode>
@@ -1568,11 +1555,11 @@ enum by * 2 A,B,C,D,E    --> values are 1,2,4,8,16
 enum by / 3 A=81,B,C,D,E --> values are 81,27,9,3,1
 </eucode>
 
+
 Also note that enum members do not have to be integers.
 <eucode>
 enum by / 2 A=5,B,C --> values are 5, 2.5, 1.25
 </eucode>
-
 
 === Specifying the type of a variable
 
@@ -1695,8 +1682,7 @@ many cases.  So you may still get a type check failure even when you have
 turned off type checking. Whether type checking is on or off, you will never
 get a **//machine-level//** exception.  **You will always get a
 meaningful message from Euphoria when something goes wrong**.  (//This
-might not be the case when you [[:poke]] directly
-!!zzzz-------------------------^^^^^^^^^
+might not be the case when you [[:poke]] directly 
 into memory, or call routines written in C or machine code.//)
 
 Euphoria's way of defining types is simpler than what you will find in other

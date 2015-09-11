@@ -605,11 +605,15 @@ test_equal("map:get(gimlet, --)", "comment", map:get(gimlet, "--"))
 
 map init_routines = map:new()
 
+
 sequence names = {}
 procedure register( sequence name, integer foo=0 )
 	map:put( init_routines, name, foo )
 	names = append( names, name )
 end procedure
+
+
+
 
 procedure validate_map( sequence name, integer has )
 	sequence keys = map:keys( init_routines, 1 )
@@ -628,6 +632,8 @@ procedure validate_map( sequence name, integer has )
 	end if
 	test_equal( sprintf( "validate_map %s %d", {name, has}), "", text )
 end procedure
+
+
 
 procedure remove_name( sequence name )
 	validate_map( name, 1 )
