@@ -120,6 +120,7 @@ ifdef HTML
 ../demo/search.ex
 ../demo/tree.ex
 ../demo/where.ex
+../demo/dsearch.ex
 ../demo/bench/sieve8k.ex
 ../demo/win32/taskwire.exw
 ../demo/win32/window.exw

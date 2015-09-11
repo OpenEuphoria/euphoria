@@ -421,7 +421,7 @@ You can examine a ##dll## file by right-clicking on it, and choosing
 routines that the ##dll## exports.
 
 To find out which **.**dll file contains a particular //Windows// C function,
-run **Euphoria\demo\win32\dsearch.exw**
+run **Euphoria\demo\dsearch.ex**
 
 ==== Accessing C Variables
 
