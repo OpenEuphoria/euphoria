@@ -28,13 +28,23 @@ public constant FE_INEXACT = 'e',
 	 FE_INVALID   = 'i',
 	 FE_ALL_EXCEPT = "eiouz"
 
-type enum c_fe by *2
-	C_FE_INVALID,
-	C_FE_DIVBYZERO = 4,
-	C_FE_OVERFLOW,
-	C_FE_UNDERFLOW,
-	C_FE_INEXACT
-end type
+ifdef ARM then
+        type enum c_fe by *2
+                C_FE_INVALID = 1,
+                C_FE_DIVBYZERO = 2,
+                C_FE_OVERFLOW = 4,
+                C_FE_UNDERFLOW = 8,
+                C_FE_INEXACT= 16
+        end type
+elsedef
+        type enum c_fe by *2
+                C_FE_INVALID,
+                C_FE_DIVBYZERO = 4,
+                C_FE_OVERFLOW,
+                C_FE_UNDERFLOW,
+                C_FE_INEXACT
+        end type
+end ifdef
 
 sequence conv_table = repeat(0, 'z')
 conv_table[FE_INEXACT] = C_FE_INEXACT
