@@ -10,6 +10,10 @@ sequence incdir = ".." & SLASH & ".." & SLASH & "include"
 sequence exe    = command_line()
 exe = exe[1]
 
+if not file_exists(exe) then
+	exe = locate_file(exe, getenv("PATH"))
+end if
+
 sequence files = dir( "eutest" & SLASH & "t_*.e" )
 
 chdir( "eutest" )
