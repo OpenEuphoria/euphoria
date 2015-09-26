@@ -1,0 +1,6 @@
+t_c_enum_strings_sneaky.e:4
+type_check failure, FLAG1 is {0,1} 
+
+
+Public & Export & Global & Local Variables
+

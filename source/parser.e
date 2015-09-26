@@ -3446,7 +3446,7 @@ function Global_declaration(integer type_ptr, integer scope)
 	token tok
 	object tsym
 	object prevtok = 0
-	symtab_index sym, valsym
+	symtab_index sym, valsym, prevsym = 0, deltasym = 0
 	integer h, count = 0
 	atom val = 1, usedval
 	integer deltafunc = '+'
@@ -3499,6 +3499,8 @@ function Global_declaration(integer type_ptr, integer scope)
 				negate = 1
 				ptok = next_token()
 			end if
+			
+
 			if ptok[T_ID] != ATOM then
 				CompileErr( A_NUMERIC_LITERAL_WAS_EXPECTED)
 			end if
@@ -3519,7 +3521,16 @@ function Global_declaration(integer type_ptr, integer scope)
 
 			end switch
 
+			if integer(delta) then
+				deltasym = NewIntSym(delta)
+			else
+				deltasym = NewDoubleSym(delta)
+			end if
 		else
+			deltasym = NewIntSym(1)
+			if deltasym > 0 then
+				SymTab[deltasym][S_USAGE] = U_READ
+			end if
 			putback(ptok)
 		end if
 	end if
@@ -3572,7 +3583,7 @@ function Global_declaration(integer type_ptr, integer scope)
 			SymTab[sym][S_USAGE] = U_WRITTEN
 			if TRANSLATE then
 				SymTab[sym][S_GTYPE] = TYPE_OBJECT
-				SymTab[sym][S_OBJ] = NOVALUE     -- distinguish from literals
+				SymTab[sym][S_OBJ] = NOVALUE -- distinguish from literals
 			end if
 			valsym = Top()
 			
@@ -3603,6 +3614,8 @@ function Global_declaration(integer type_ptr, integer scope)
 				end if
 
 			end if
+			
+			-- end CONSTANT
 		elsif type_ptr = -1 and not is_fwd_ref then
 			-- ENUM
 			StartSourceLine(FALSE, , COVERAGE_OVERRIDE )
@@ -3610,77 +3623,87 @@ function Global_declaration(integer type_ptr, integer scope)
 			-- temporarily hide sym so it can't be used in defining itself
 			buckets[SymTab[sym][S_HASHVAL]] = SymTab[sym][S_SAMEHASH]
 			tok = next_token()
-
-
+			StartSourceLine(FALSE, , COVERAGE_OVERRIDE)
 			emit_opnd(sym)
 
 			if tok[T_ID] = EQUALS then
-				integer negate = 1
+				Expr()
+				buckets[SymTab[sym][S_HASHVAL]] = sym
+				SymTab[sym][S_USAGE] = U_WRITTEN
 
-				tok = next_token()
-				if tok[T_ID] = MINUS then
-					negate = -1
-					tok = next_token()
+				valsym = Top()
+				
+				if TRANSLATE then
+					SymTab[sym][S_GTYPE] = TYPE_OBJECT
+					SymTab[sym][S_OBJ] = NOVALUE     -- distinguish from literals
 				end if
 
-				if tok[T_ID] = ATOM then
-					valsym = tok[T_SYM]
-				elsif tok[T_SYM] > 0 then
-					tsym = SymTab[tok[T_SYM]]
-					if tsym[S_MODE] = M_CONSTANT then
-						if length(tsym) >= S_CODE and tsym[S_CODE] then
-							valsym = tsym[S_CODE]
+				valsym = Top()
+				
+				emit_op(ASSIGN)
+				if Last_op() = ASSIGN then
+					valsym = get_assigned_sym()
+				else
+					-- something else happened...could be a built-in
+					valsym = -1
+				end if
+				if valsym > 0 and compare( SymTab[valsym][S_OBJ], NOVALUE ) then
+					-- need to remember this for select/case statements
+					SymTab[sym][S_CODE] = valsym
+				end if
 
-						elsif not equal( tsym[S_OBJ], NOVALUE ) then
-							if is_integer(tsym[S_OBJ]) then
-								valsym = tok[T_SYM]
-							else
-								CompileErr(AN_ENUM_CONSTANT_MUST_BE_AN_INTEGER)
-							end if
-						else
-							CompileErr(ENUM_CONSTANTS_MUST_BE_ASSIGNED_AN_INTEGER)
-						end if
-					elsif tsym[S_OBJ] = NOVALUE then
-						-- forward reference
-						CompileErr(ENUM_FWD_REFERENCES_NOT_SUPPORTED)
-					else
-						CompileErr(INTEGER_OR_CONSTANT_EXPECTED)
-
+				if TRANSLATE then
+					count += 1
+					if count = 10 then
+						count = 0
+						-- break up really long declarations
+						emit_op( RETURNT )
 					end if
-				else -- tok[T_ID] != ATOM and tok[T_SYM] !> 0
-						CompileErr(INTEGER_OR_CONSTANT_EXPECTED)
+					SymTab[sym][S_USAGE] = U_READ
+					valsym = get_assigned_sym()
 				end if
-				valsym = tok[T_SYM]
-				if not atom( SymTab[valsym][S_OBJ] ) and tsym[S_SCOPE] != SC_UNDEFINED then
-					CompileErr(ENUM_CONSTANTS_MUST_BE_INTEGERS)
-				end if
-				val = SymTab[valsym][S_OBJ] * negate
-				if is_integer(val) then
-					Push(NewIntSym(val))
-				else
-					Push(NewDoubleSym(val))
-				end if
-				usedval = val
-				if deltafunc = '+' then
-					val += delta
-				else
-					val *= delta
-				end if
+				
 			else
+
+				buckets[SymTab[sym][S_HASHVAL]] = sym
+				SymTab[sym][S_USAGE] = U_WRITTEN
+				if prevsym = 0 then
+				    symtab_index one = NewIntSym(1)
+				    SymTab[one][S_USAGE] = U_USED
+					emit_opnd(sym)
+					emit_opnd(one)
+					SymTab[sym][S_CODE] = one
+					emit_op(ASSIGN)
+					valsym = Top()
+				else
+					emit_opnd(deltasym)
+					emit_opnd(prevsym)
+					SymTab[deltasym][S_USAGE] = U_READ					
+					switch deltafunc do
+					case '+', '-' then
+						emit_op(reserved:PLUS)
+					case else
+						emit_op(reserved:MULTIPLY)
+					end switch
+					SymTab[Top()][S_USAGE] = U_READ
+					emit_opnd(sym)
+					emit_opnd(Top())
+					emit_op(ASSIGN)
+						
+					SymTab[sym][S_USAGE] = U_READ
+					valsym = get_assigned_sym()
+				end if
+				if valsym > 0 and compare( SymTab[valsym][S_OBJ], NOVALUE ) then
+					-- need to remember this for select/case statements
+					SymTab[sym][S_CODE] = valsym
+				end if					
 				putback(tok)
-				if is_integer(val) then
-					Push(NewIntSym(val))
-				else
-					Push(NewDoubleSym(val))
-				end if
-				usedval = val
-				if deltafunc = '+' then
-					val += delta
-				else
-					val *= delta
-				end if
 				valsym = 0
 			end if
+			-- forbid sequences
+			emit_opnd(sym)
+			op_info1 = sym
+			emit_op(ATOM_CHECK)
 			buckets[SymTab[sym][S_HASHVAL]] = sym
 			SymTab[sym][S_USAGE] = U_WRITTEN
 
@@ -3689,41 +3712,7 @@ function Global_declaration(integer type_ptr, integer scope)
 				SymTab[sym][S_OBJ] = NOVALUE     -- distinguish from literals
 			end if
 
-			if valsym < 0 then
-				-- fwd reference
-
-			end if
-
-			if valsym and compare( SymTab[valsym][S_OBJ], NOVALUE ) then
-				-- need to remember this for select/case statements
-				SymTab[sym][S_CODE] = valsym
-				SymTab[sym][S_OBJ]  = usedval
-
-				if TRANSLATE then
-					-- Let the translator know about its value
-					SymTab[sym][S_GTYPE] = SymTab[valsym][S_GTYPE]
-					SymTab[sym][S_SEQ_ELEM] = SymTab[valsym][S_SEQ_ELEM]
-					SymTab[sym][S_OBJ_MIN] = usedval
-					SymTab[sym][S_OBJ_MAX] = usedval
-					SymTab[sym][S_SEQ_LEN] = SymTab[valsym][S_SEQ_LEN]
-				end if
-			else
-				SymTab[sym][S_OBJ] = usedval
-				if TRANSLATE then
-					-- Let the translator know about its value
-					if is_integer( usedval ) then
-						SymTab[sym][S_GTYPE] = TYPE_INTEGER
-					else
-						SymTab[sym][S_GTYPE] = TYPE_DOUBLE
-					end if
-					SymTab[sym][S_SEQ_ELEM] = 0
-					SymTab[sym][S_OBJ_MIN] = usedval
-					SymTab[sym][S_OBJ_MAX] = usedval
-					SymTab[sym][S_SEQ_LEN] = 0 --SymTab[valsym][S_SEQ_LEN]
-				end if
-			end if
-			valsym = Pop()
-			valsym = Pop()
+			-- end of ENUM
 		else
 			-- variable
 			SymTab[sym][S_MODE] = M_NORMAL
@@ -3752,6 +3741,7 @@ function Global_declaration(integer type_ptr, integer scope)
 			exit
 		end if
 		prevtok = tok
+		prevsym = sym
 	end while
 	putback(tok)
 	return new_symbols
@@ -4105,7 +4095,6 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 	integer first_def_arg
 	integer again
 	integer type_enum
-	object seq_sym
 	object i1_sym
 	sequence enum_syms = {}
 	integer type_enum_gline, real_gline
@@ -4140,7 +4129,6 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 			-- range of the enum is accepted
 			-- as valid.
 			i1_sym = keyfind("i1",-1)
-			seq_sym = NewStringSym(seq_symbol)
 			putback(keyfind("return",-1))
 			putback({RIGHT_ROUND,0})
 			putback(i1_sym)
@@ -4379,25 +4367,29 @@ procedure SubProg(integer prog_type, integer scope, integer deprecated)
 		-- Parse a list of statements
 		stmt_nest += 1
 		tok_match(RETURN)
-		putback({RIGHT_ROUND,0})
-		putback({VARIABLE,seq_sym})
-		putback({COMMA,0})
-		putback(i1_sym)
-		putback({LEFT_ROUND,0})
-		putback(keyfind("find",-1))
-		if not TRANSLATE then
-			if OpTrace then
-				emit_op(ERASE_PRIVATE_NAMES)
-				emit_addr(CurrentSub)
-			end if
-		end if
-		Expr()
-		FuncReturn = TRUE
+		emit_opnd(i1_sym[T_SYM])
+		emit_opnd(enum_syms[1])
+		emit_op(EQUAL)
+		SymTab[Top()][S_USAGE] = U_USED
+		for ei = 2 to length(enum_syms) do
+			symtab_index last_comparison = Top()
+			emit_opnd(i1_sym[T_SYM])
+			emit_opnd(enum_syms[ei])
+			emit_op(EQUAL)
+			SymTab[Top()][S_USAGE] = U_USED
+			emit_opnd(Top())
+			emit_opnd(last_comparison)
+			emit_op(OR)
+			SymTab[Top()][S_USAGE] = U_USED
+		end for
+		emit_opnd(Top())
 		emit_op(RETURNF)
 		flush_temps()
 		stmt_nest -= 1
 		InitDelete()
 		flush_temps()
+		FuncReturn = TRUE
+		tok_match(END)
 	else
 		Statement_list()
 		-- parse routine end.

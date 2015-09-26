@@ -57,6 +57,40 @@ public function iif(atom test, object ifTrue, object ifFalse)
 	return ifFalse
 end function
 
+public function assign(integer i1, object val1, 
+                       integer i2  = 0, object val2  = 0,
+                       integer i3  = 0, object val3  = 0,
+                       integer i4  = 0, object val4  = 0,
+                       integer i5  = 0, object val5  = 0,
+                       integer i6  = 0, object val6  = 0,
+                       integer i7  = 0, object val7  = 0,
+                       integer i8  = 0, object val8  = 0,
+                       integer i9  = 0, object val9  = 0,
+                       integer i10 = 0, object val10 = 0)
+	   sequence s = {i1, val1, i2, val2, i3, val3, i4, val4, i5, val5, i6, val6, i7, val7, i8, val8, i9, val9, i10, val10}
+	   for i = 3 to 19 by 2 do
+	       if s[i] = 0 then
+	           return assign_s(s[1..i-1])
+	       end if
+	   end for
+	   return assign_s(s)
+end function
+
+function assign_s(sequence s)
+    integer maxi
+    sequence ret
+    maxi=0
+    for i = 1 to length(s) by 2 do
+            if s[i] > maxi then
+                    maxi = s[i]
+            end if
+    end for
+    ret = repeat(0,maxi)
+    for i = 1 to length(s) by 2 do
+            ret[s[i]] = s[i+1]
+    end for
+    return ret     
+end function
 --**
 -- @nodoc@
 
