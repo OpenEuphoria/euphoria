@@ -633,10 +633,8 @@ static void do_poke8(object a, object top)
 	eudouble temp_dbl;
 	s1_ptr s1;
 	object_ptr obj_ptr;
-#ifdef __arm__
-	uint64_t tmp64;
-#endif
-
+	int64_t tmp64;
+	
 	/* determine the address to be poked */
 	if (IS_ATOM_INT(a)) {
 		poke8_addr = (uint64_t *)INT_VAL(a);
@@ -655,12 +653,8 @@ static void do_poke8(object a, object top)
 		temp_dbl = DBL_PTR(top)->dbl;
 		if (temp_dbl < MIN_LONGLONG_DBL || temp_dbl > MAX_LONGLONG_DBL)
 			RTFatal("poke8 is limited to 64-bit numbers");
-#ifdef __arm__
 		tmp64 = trunc( temp_dbl );
-		*poke8_addr = tmp64;
-#else
-		*poke8_addr = (uint64_t) temp_dbl;
-#endif
+		*(int64_t*)poke8_addr = tmp64;
 	}
 	else {
 		/* second arg is sequence */
@@ -678,12 +672,8 @@ static void do_poke8(object a, object top)
 				temp_dbl = DBL_PTR(top)->dbl;
 				if (temp_dbl < MIN_LONGLONG_DBL || temp_dbl > MAX_LONGLONG_DBL)
 					RTFatal("poke8 is limited to 64-bit numbers");
-#ifdef __arm__
 				tmp64 = trunc( temp_dbl );
-				*poke8_addr = (uint64_t) tmp64;
-#else
-				*poke8_addr = (uint64_t) temp_dbl;
-#endif
+				*(int64_t*)poke8_addr = tmp64;
 				++poke8_addr;
 			}
 			else {
