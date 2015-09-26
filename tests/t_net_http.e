@@ -3,7 +3,6 @@ include std/net/http.e
 include std/search.e
 include std/math.e
 include std/os.e
-with trace
 
 ifdef not NOINET_TESTS then
 	-- this gives the server user:pass of devel:devel
