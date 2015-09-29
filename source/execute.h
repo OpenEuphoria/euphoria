@@ -287,11 +287,12 @@ struct char_cell {
 #define MAX_DOUBLE_DBL ((eudouble)(unsigned long)0xFFFFFFFF)
 #define MIN_DOUBLE_DBL ((eudouble)(signed long)  0x80000000)
 
-#define MAX_LONGLONG_DBL ((eudouble)(unsigned long long) 0xFFFFFFFFFFFFFFFFLL)
 #define MIN_LONGLONG_DBL ((eudouble)(signed long long)   0x8000000000000000LL)
 
 #if INTPTR_MAX == INT32_MAX
 
+/* In 32-bit 1e64-1 is no smaller than 1e64. */
+#define MAX_LONGLONG_DBL ((eudouble)(unsigned long long) 0xFFFFFFFFFFFFF800LL)
 #define MAX_BITWISE_DBL MAX_DOUBLE_DBL
 #define MIN_BITWISE_DBL MIN_DOUBLE_DBL
 
@@ -299,6 +300,7 @@ struct char_cell {
 #define EUPOW   pow
 #else
 
+#define MAX_LONGLONG_DBL ((eudouble)(unsigned long long) 0xFFFFFFFFFFFFFFFFLL)
 #define MAX_BITWISE_DBL MAX_LONGLONG_DBL
 #define MIN_BITWISE_DBL MIN_LONGLONG_DBL
 

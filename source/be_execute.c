@@ -651,21 +651,19 @@ static void do_poke8(object a, object top)
 		*poke8_addr = (uint64_t) top;
 	}
 	else if (IS_ATOM(top)) {
-		temp_dbl = DBL_PTR(top)->dbl;
-		if (temp_dbl < MIN_LONGLONG_DBL || temp_dbl > MAX_LONGLONG_DBL)
-			RTFatal("poke8 is limited to 64-bit numbers");
-		if (temp_dbl <= 0.0) {
-				/* ARM needs to use trunc before casting */
-				tmp64 = trunc( temp_dbl );
-				*(int64_t*)poke8_addr = tmp64;
-		} else {
-				/* The signed 64-bit type can not hold values 2^63 or bigger. */
-				if ((utmp64 = trunc( temp_dbl )) == 0LL) {
-						/* Number has been corrupted.  How can we convert this number which is inexact? */
-						/* See the 54-bit number test in t_machine.e */
-				}
-				*poke8_addr = utmp64;
+#define poke_atom \
+		temp_dbl = DBL_PTR(top)->dbl;\
+		if (temp_dbl < MIN_LONGLONG_DBL || temp_dbl > MAX_LONGLONG_DBL) \
+			RTFatal("poke8 is limited to 64-bit numbers");\
+		temp_dbl = trunc( temp_dbl );\
+		if (temp_dbl <= 0.0) { \
+				tmp64 = temp_dbl;\
+				*(int64_t*)poke8_addr = tmp64;\
+		} else {\
+				utmp64 = temp_dbl;\
+				*poke8_addr = utmp64;\
 		}
+		poke_atom
 	}
 	else {
 		/* second arg is sequence */
@@ -680,16 +678,7 @@ static void do_poke8(object a, object top)
 			else if (IS_ATOM(top)) {
 				if (top == NOVALUE)
 					break;
-				temp_dbl = DBL_PTR(top)->dbl;
-				if (temp_dbl < MIN_LONGLONG_DBL || temp_dbl > MAX_LONGLONG_DBL)
-					RTFatal("poke8 is limited to 64-bit numbers");
-				if (temp_dbl <= 0.0) {
-						tmp64 = trunc( temp_dbl );
-						*(int64_t*)poke8_addr = tmp64;
-				} else {
-						utmp64 = trunc( temp_dbl );
-						*poke8_addr = utmp64;
-				}
+				poke_atom
 				++poke8_addr;
 			}
 			else {
@@ -697,6 +686,7 @@ static void do_poke8(object a, object top)
 			}
 		}
 	}
+#undef poke_atom
 }
 
 static void do_poke4(object a, object top)
