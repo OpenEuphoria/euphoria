@@ -60,6 +60,4 @@ test_equal( "poke8/peek8u negagive, doubles",{77, 0xffff_ffff_ffff_ffff, 5, 0xff
 poke8( ptr, {0xffff_ffff, 0xffff_ffff_ffff_f800, 0x7fff_ffff_ffff_fe00, 0x3fff_ffff_ffff_ff00})
 test_equal( "poke8/peek8u long long doubles",{0xffff_ffff, 0xffff_ffff_ffff_f800, 0x7fff_ffff_ffff_fe00, 0x3fff_ffff_ffff_ff00}, peek8u( ptr & 4 ) )
 
-poke8( ptr, 0xffff_ffff_ffff_fc00 )
-test_equal( "poke8/peek8u 54-bit number", 0xffff_ffff_ffff_f800, peek8u( ptr ) )
 test_report()
