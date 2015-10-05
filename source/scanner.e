@@ -1219,6 +1219,18 @@ function my_sscanf(sequence yytext)
 		elsedef
 			InternalErr( ERROR_IN_PARSING_SCIENTIFIC_NOTATION, "Scanning scientific notation in my_sscanf" )
 		end ifdef
+		for yi = 1 to length(yytext) do
+			integer ychar = yytext[yi]
+			if ychar = 'e' or ychar = 'E' then
+				-- don't look at the digits after E
+				exit
+			end if
+			if ychar > '0' and ychar <= '9' and mantissa = 0 then
+				-- non zero digit but we got a zero value from the function.
+				fenv:raise(FE_UNDERFLOW)
+				exit
+			end if
+		end for
 		goto "floating_point_check"
 	end if
 	mantissa = 0.0
