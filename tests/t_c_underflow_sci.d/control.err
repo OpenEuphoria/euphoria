@@ -1,4 +1,4 @@
 t_c_underflow_sci.e:8
-<0607>:: The number specified here is too small.
+<0356>:: The number specified here is too small.
 atom a = 2.470_328_229_206_232_7e-324
                                     ^

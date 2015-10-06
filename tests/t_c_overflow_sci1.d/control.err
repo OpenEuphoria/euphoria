@@ -1,5 +1,5 @@
 t_c_overflow_sci1.e:11
-<0608>:: The number specified here is too big.
+<0357>:: The number specified here is too big.
 atom        a = 1.79769313486231582e308
                                       ^
 
