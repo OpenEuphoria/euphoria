@@ -345,5 +345,11 @@ elsedef
 		join_path({ "/usr/", "/home", "john", "hello.txt" }))
 end ifdef
 
+ifdef LINUX then
+	for i = 1 to 100 do
+		copy_file("./t_filesys.e", "/")
+	end for
+end ifdef
+
 test_report()
 
