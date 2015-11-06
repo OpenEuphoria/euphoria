@@ -345,10 +345,16 @@ elsedef
 		join_path({ "/usr/", "/home", "john", "hello.txt" }))
 end ifdef
 
-ifdef LINUX then
+create_directory("unwritable", 0t500)
+create_directory("unreadable", 0t300)
+create_file("unreadable/hidden")
+
+ifdef UNIX then
+	-- Windows users change "unwritable" below to a directory you are normally not allowed to write to
 	for i = 1 to 100 do
-		copy_file("./t_filesys.e", "/")
+		copy_file('.' & SLASH & "t_filesys.e", "unwritable")
 	end for
+	test_pass("When copy_file fails because it cannot write destination, it doesn't leave a file handle open.")
 end ifdef
 
 test_report()
