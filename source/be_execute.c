@@ -2387,6 +2387,8 @@ void do_exec(int *start_pc)
 					tpc = pc;
 					a = DoubleToInt(top);
 					if (IS_ATOM_INT(a)) {
+						if (UNIQUE(DBL_PTR(top)) && (DBL_PTR(top)->cleanup != 0))
+							RTFatal("Cannot assign value with a destructor to an integer");
 						DeRefDS(top);
 						*(object_ptr)pc[-1] = a;
 						BREAK;
