@@ -1,0 +1,5 @@
+t_c_integer_destroys.e:24
+Cannot assign value with a destructor to an integer
+
+
+Public & Export & Global & Local Variables
