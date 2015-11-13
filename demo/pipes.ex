@@ -9,6 +9,8 @@ include std/pipeio.e as pipe
 include std/console.e
 without warning
 
+--**
+-- @nodoc@
 override procedure abort(integer x)
 	maybe_any_key()
 	eu:abort(x)
