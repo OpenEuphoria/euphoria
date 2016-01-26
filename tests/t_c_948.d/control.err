@@ -1,0 +1,6 @@
+t_c_948.e:2
+<0074>:: Errors resolving the following references:
+	'foo' (t_c_948.e:2) has not been declared.
+enum type foo
+     foo 
+end type
