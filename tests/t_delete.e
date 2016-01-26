@@ -1,5 +1,6 @@
 without inline
 include std/unittest.e
+type enum boolean T,F=0 end type 
 
 integer delete_counter = 0
 
@@ -195,5 +196,25 @@ procedure native_derefs_ticket_775()
 	test_true( "sequence check dereferenced temp", sequence_check )
 end procedure
 native_derefs_ticket_775()
+ 
+boolean enable_my_close = F 
+boolean destructor_called = F
+procedure destroy_this_thing(atom fh) 
+    if not enable_my_close then 
+    	test_fail("Premature destruction of thing.")
+    end if
+    destructor_called = T
+    -- if this gets called after all routines, as it should, then we shouldn't run test_pass...
+end procedure
+
+atom  = 100
+ = delete_routine(, routine_id("destroy_this_thing"))
+test_false("Assigning to a atom should does not call it's destructor or cause a crash", destructor_called)
+enable_my_close = T 
+
+-- this should not cause a problem with 's destructor
+integer a1 = 
+integer b1 = 
+test_false("Destructors not triggered by integer check operation on 's copies", destructor_called)
 
 test_report()
