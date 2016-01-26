@@ -1,6 +1,15 @@
-t_c_948.e:2
-<0074>:: Errors resolving the following references:
-	'foo' (t_c_948.e:2) has not been declared.
-enum type foo
-     foo 
-end type
+/home/alumno/development/modified/euphoria/bugfix/tests/t_c_948.e:2
+<0031>:: attempt to redefine foo.
+  foo 
+     ^
+
+
+--- Defined Words ---
+EU4
+EU4_1
+EU4_1_0
+CONSOLE
+UNIX
+LINUX
+EUI
+-------------------
