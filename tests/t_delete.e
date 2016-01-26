@@ -207,14 +207,14 @@ procedure destroy_this_thing(atom fh)
     -- if this gets called after all routines, as it should, then we shouldn't run test_pass...
 end procedure
 
-atom  = 100
- = delete_routine(, routine_id("destroy_this_thing"))
+atom thing = 100
+thing = delete_routine(thing, routine_id("destroy_this_thing"))
 test_false("Assigning to a atom should does not call it's destructor or cause a crash", destructor_called)
 enable_my_close = T 
 
 -- this should not cause a problem with 's destructor
-integer a1 = 
-integer b1 = 
+integer a1 = thing
+integer b1 = thing
 test_false("Destructors not triggered by integer check operation on 's copies", destructor_called)
 
 test_report()
