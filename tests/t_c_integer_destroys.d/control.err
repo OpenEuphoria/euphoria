@@ -1,5 +1,11 @@
-t_c_integer_destroys.e:24
-Cannot assign value with a destructor to an integer
+/home/alumno/development/modified/euphoria/bugfix/tests/t_c_integer_destroys.e:16
+Cannot assign value with a destructor to an integer 
 
 
 Public & Export & Global & Local Variables
+
+ /home/alumno/development/modified/euphoria/bugfix/tests/t_c_integer_destroys.e:
+    enable_my_close = 0
+    f_debug = 100
+
+
