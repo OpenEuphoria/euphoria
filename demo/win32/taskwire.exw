@@ -25,10 +25,9 @@ include std/error.e
 without warning
 
 
---**** 
--- === Windows Data Type constants for function/procedure calls
+-- Windows Data Type constants for function/procedure calls
 
-public constant 
+constant 
 	C_BYTE = C_UCHAR,  
 	C_BOOL = C_INT, 
 	C_ATOM = C_USHORT, 

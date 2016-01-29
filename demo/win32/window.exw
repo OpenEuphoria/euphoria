@@ -11,7 +11,7 @@ include std/machine.e
 include std/math.e
 include std/error.e
 
-public constant 
+constant 
 	C_BYTE = C_UCHAR,  
 	C_BOOL = C_INT, 
 	C_ATOM = C_USHORT, 

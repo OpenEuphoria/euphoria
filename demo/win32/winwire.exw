@@ -21,10 +21,9 @@ include std/console.e
 include std/error.e
 without warning
 
---**** 
--- === Windows Data Type constants for function/procedure calls
+-- Windows Data Type constants for function/procedure calls
 
-public constant 
+constant 
 	C_BYTE = C_UCHAR,  
 	C_BOOL = C_INT, 
 	C_ATOM = C_USHORT, 
@@ -46,7 +45,7 @@ public constant
  
 constant X = 1, Y = 2, Z = 3
 
-global constant BLACK = 0,
+constant BLACK = 0,
 	 BLUE  = 1,
 	 GREEN = 2,
 	 CYAN =  3,
@@ -63,7 +62,7 @@ global constant BLACK = 0,
 	 YELLOW = 14,
 	 BRIGHT_WHITE = 15
 
-global constant VC_COLOR = 1,
+constant VC_COLOR = 1,
 	 VC_MODE  = 2,
 	 VC_LINES = 3,
 	 VC_COLUMNS = 4,

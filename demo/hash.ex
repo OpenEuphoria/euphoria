@@ -127,6 +127,8 @@ sequence vOpts = {
 object vOptMap
 
 without warning
+--**
+-- @nodoc@
 override procedure abort(integer errcode)
 	maybe_any_key("\nPress Any Key to Continue...")
 	eu:abort(errcode)

@@ -345,5 +345,48 @@ elsedef
 		join_path({ "/usr/", "/home", "john", "hello.txt" }))
 end ifdef
 
+-- Please port to Windows...
+ifdef UNIX then
+	delete_file("abnormal")
+	delete_file("other-unreadable")
+	create_directory("normal.d")
+	create_file("unwritable")
+	create_file("unreadable")
+	create_directory("unwritable.d", or_bits(0t100, 0t400))
+	create_directory("unreadable.d", or_bits(0t100, 0t200))
+	create_file("unreadable.d/hidden")
+	system("chmod a-r unreadable")
+	system("chmod a-w unwritable")
+	integer ret
+
+	test_false("Copying a directory with copy_file returns false", copy_file("normal.d", "abnormal"))
+	test_false("Trying to copy a directory with copy_file doesn't create a file.", file_exists("abnormal"))
+	
+	for i = 1 to 100 do
+		ret = copy_file("unreadable", "other-unreadable")
+	end for
+	test_false("When copy_file fails because it cannot read the source, it doesn't leave a file handle open.", ret)
+	
+	for i = 1 to 100 do
+		ret = copy_file("t_filesys.e", "unwritable")
+	end for
+	test_false("When copy_file fails because it cannot write destination, it doesn't leave a file handle open.", ret)
+	
+	for i = 1 to 100 do
+		ret = copy_file("t_filesys.e", "unwritable.d")
+	end for
+	test_false("When copy_file fails because it cannot write destination directory, it doesn't leave a file handle open.", ret)
+	-- the O/S should enforce this but if we get our commands wrong above when porting it could fail.
+	test_false("Trying to copy a file to unwritable directory with copy_file doesn't create a file.", file_exists("unwritable.d/t_filesys.e"))
+	
+	-- cleanup
+	remove_directory("unwritable.d")
+	remove_directory("unreadable.d", 1)
+	remove_directory("normal.d")
+	delete_file("unwritable")
+	delete_file("unreadable")
+	delete_file("abnormal")
+	delete_file("other-unreadable")
+end ifdef
 test_report()
 

@@ -3933,20 +3933,40 @@ procedure SubProg(integer prog_type, integer scope)
 		CompileErr( 32 )
 	end if
 	type_enum =  0
-	if prog_type = TYPE_DECL then
-		object tsym = prog_name[T_SYM]
-		if equal(sym_name(prog_name[T_SYM]),"enum") then
+	p = prog_name[T_SYM]
+	if equal(sym_name(p),"enum") and prog_type = TYPE_DECL then
+		type_enum = 1
+		prog_name = next_token()
+		p = prog_name[T_SYM]
+	end if
+	
+	if not find(prog_name[T_ID], ADDR_TOKS) then
+		CompileErr(25, {find_category(prog_name[T_ID])} )
+	end if
+	DefinedYet(p)
+	if prog_type = PROCEDURE then
+		pt = PROC
+	elsif prog_type = FUNCTION then
+		pt = FUNC
+	else
+		pt = TYPE
+	end if
+
+	if type_enum then
 			-- because enum types are both top level declarations and type routines, we
 			-- have to Enter and Leave the top level, fixing up the LineTable, in order
 			-- to prevent corruption of the LineTables
 			EnterTopLevel( FALSE )
 			type_enum_gline = gline_number
-			type_enum = 1
 			sequence seq_symbol
-			prog_name = next_token()
 			if not find(prog_name[T_ID], ADDR_TOKS) then
 				CompileErr(25, {find_category(prog_name[T_ID])} )
 			end if
+			-- Add the hash of the type to buckets, so an enum constant with the name of the type
+			-- wont be allowed.  See ticket 948.
+			h = SymTab[p][S_HASHVAL]			
+			p = NewEntry(SymTab[p][S_NAME], 0, 0, pt, h, buckets[h], 0)
+			buckets[h] = p
 			enum_syms = Global_declaration(-1, scope)
 			seq_symbol = enum_syms
 			for i = 1 to length( enum_syms ) do
@@ -3964,19 +3984,6 @@ procedure SubProg(integer prog_type, integer scope)
 			putback({LEFT_ROUND,0})
 			
 			LeaveTopLevel()
-		end if
-	end if
-	if not find(prog_name[T_ID], ADDR_TOKS) then
-		CompileErr(25, {find_category(prog_name[T_ID])} )
-	end if
-	p = prog_name[T_SYM]
-	DefinedYet(p)
-	if prog_type = PROCEDURE then
-		pt = PROC
-	elsif prog_type = FUNCTION then
-		pt = FUNC
-	else
-		pt = TYPE
 	end if
 
 	clear_fwd_refs()
