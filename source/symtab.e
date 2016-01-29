@@ -1205,7 +1205,7 @@ export procedure LintCheck(symtab_index s)
 						-- Only issue this warning if -strict is in play.
 						Warning(230, not_used_warning_flag, {file,  vname, SymTab[CurrentSub][S_NAME]})
 					end if
-				else
+				else -- elsif warn_level = 2 then
 					Warning(321, not_used_warning_flag, {file,  vname, SymTab[CurrentSub][S_NAME]})
 				end if
 			else
@@ -1215,10 +1215,10 @@ export procedure LintCheck(symtab_index s)
 						-- Only issue this warning if -strict is in play.
 						Warning(231, not_used_warning_flag, {file,  vname, SymTab[CurrentSub][S_NAME]})
 					end if
-				else
+				else -- elsif warn_level = 2 then
 					Warning(322, not_used_warning_flag, {file,  vname, SymTab[CurrentSub][S_NAME]})
 				end if
-			end if		
+			end if
 		end if
 	end if
 
