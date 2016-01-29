@@ -104,8 +104,8 @@ test_equal("trsprintf #2", "hello, Bob!", trsprintf("greeting", {"__" & "hello",
 
 test_equal("get_text unknown number", 0, get_text(-2))
 
-test_equal("get_text known number A", "Block comment from line [1] not terminated.", get_text(42,"two"))
-test_equal("get_text known number B", "Block comment from line [1] not terminated.", get_text(42,{"zero","two"}))
-test_equal("get_text known number C", "Block comment from line [1] not terminated.", get_text(42, {"zero"}))
+test_equal("get_text known number A", "Block comment from line [1] not terminated.", get_text(42,"two","testlocale"))
+test_equal("get_text known number B", "Block comment from line [1] not terminated.", get_text(42,{"zero","two"},"testlocale"))
+test_equal("get_text known number C", "Block comment from line [1] not terminated.", get_text(42, {"zero"},"testlocale"))
 
 test_report()
