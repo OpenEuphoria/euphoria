@@ -1149,13 +1149,6 @@ export procedure LintCheck(symtab_index s)
 			if vscope > SC_LOCAL then
 				-- Exposed vars/consts can be read by other files.
 				warn_level = 0 
-			
-			elsif SymTab[s][S_MODE] = M_CONSTANT then
-				if not Strict_is_on then
-					-- Unused local constants are fairly common, so only report
-					-- on them if explictly required to.
-					warn_level = 0 
-				end if
 			end if
 		
 		case U_READ then -- Read but never set
@@ -1211,10 +1204,7 @@ export procedure LintCheck(symtab_index s)
 			else
 				-- Private Vars
 				if warn_level = 1 then
-					if Strict_is_on then
-						-- Only issue this warning if -strict is in play.
-						Warning(231, not_used_warning_flag, {file,  vname, SymTab[CurrentSub][S_NAME]})
-					end if
+					Warning(231, not_used_warning_flag, {file,  vname, SymTab[CurrentSub][S_NAME]})
 				else -- elsif warn_level = 2 then
 					Warning(322, not_used_warning_flag, {file,  vname, SymTab[CurrentSub][S_NAME]})
 				end if
