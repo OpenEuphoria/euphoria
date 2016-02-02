@@ -2530,7 +2530,7 @@ long __stdcall Win_Machine_Handler(LPEXCEPTION_POINTERS p) {
 void Machine_Handler(int sig_no)
 /* illegal instruction, segmentation violation */
 {
-#ifdef WINDOWS
+#ifdef EWINDOWS
 	is_batch = console_application();
 #endif
 #ifdef ERUNTIME
