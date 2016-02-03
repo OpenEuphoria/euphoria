@@ -376,7 +376,7 @@ EU_BACKEND_RUNNER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/backobj/*.
 EU_INTERPRETER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/intobj/*.c))
 
 all : 
-	$(MAKE) interpreter translator library debug-library backend
+	$(MAKE) $(TRUNKDIR)/tests/ecp.dat interpreter translator library debug-library backend
 	$(MAKE) tools
 
 
@@ -450,11 +450,14 @@ ifeq "$(ROOTDIR)" ""
 ROOTDIR=$(TRUNKDIR)
 endif
 
-code-page-db : $(BUILDDIR)/ecp.dat
+code-page-db : $(BUILDDIR)/ecp.dat $(TRUNKDIR)/tests/ecp.dat
 
 $(BUILDDIR)/ecp.dat : $(TRUNKDIR)/source/codepage/*.ecp msgtext.e
 	$(BUILDDIR)/$(EEXU) -i $(CYPTRUNKDIR)/include $(CYPTRUNKDIR)/bin/buildcpdb.ex -p$(CYPTRUNKDIR)/source/codepage -o$(CYPBUILDDIR)
 
+$(TRUNKDIR)/tests/ecp.dat : $(BUILDDIR)/ecp.dat
+	cp -fl $(BUILDDIR)/ecp.dat $(TRUNKDIR)/tests/ecp.dat || cp -f $(BUILDDIR)/ecp.dat $(TRUNKDIR)/tests/ecp.dat 
+	
 interpreter : builddirs
 ifeq "$(EUPHORIA)" "1"
 	$(MAKE) euisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
@@ -717,7 +720,7 @@ test : EUCOMPILEDIR=$(TRUNKDIR)
 test : EUCOMPILEDIR=$(TRUNKDIR)	
 test : C_INCLUDE_PATH=$(TRUNKDIR):..:$(C_INCLUDE_PATH)
 test : LIBRARY_PATH=$(%LIBRARY_PATH)
-test : ../tests/lib818.dll $(CYPBUILDDIR)/$(EEXU) $(BUILDDIR)/$(EUBIND) $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EECU) $(CYPBUILDDIR)/$(LIBRARY_NAME)
+test : ../tests/lib818.dll $(TRUNKDIR)/tests/ecp.dat $(CYPBUILDDIR)/$(EEXU) $(BUILDDIR)/$(EUBIND) $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EECU) $(CYPBUILDDIR)/$(LIBRARY_NAME)
 test :  
 	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
 		$(EXE) -i ../include ../source/eutest.ex -i ../include -cc gcc $(VERBOSE_TESTS) \
