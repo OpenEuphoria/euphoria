@@ -452,17 +452,13 @@ endif
 
 code-page-db : $(BUILDDIR)/ecp.dat $(TRUNKDIR)/tests/ecp.dat
 
-$(BUILDDIR)/ecp.dat : $(TRUNKDIR)/source/codepage/*.ecp msgtext.e
+$(BUILDDIR)/ecp.dat : $(TRUNKDIR)/source/codepage/*.ecp msgtext.e $(BUILDDIR)/$(EEXU)
 	$(BUILDDIR)/$(EEXU) -i $(CYPTRUNKDIR)/include $(CYPTRUNKDIR)/bin/buildcpdb.ex -p$(CYPTRUNKDIR)/source/codepage -o$(CYPBUILDDIR)
 
 $(TRUNKDIR)/tests/ecp.dat : $(BUILDDIR)/ecp.dat
 	cp -fl $(BUILDDIR)/ecp.dat $(TRUNKDIR)/tests/ecp.dat || cp -f $(BUILDDIR)/ecp.dat $(TRUNKDIR)/tests/ecp.dat 
 	
-interpreter : builddirs
-ifeq "$(EUPHORIA)" "1"
-	$(MAKE) euisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
-endif	
-	$(MAKE) $(BUILDDIR)/$(EEXU) OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+interpreter : $(BUILDDIR)/$(EEXU)
 
 translator : builddirs
 ifeq "$(EUPHORIA)" "1"
@@ -558,6 +554,7 @@ $(EUI_RES) : eui.rc version_info.rc eu.manifest
 $(EUIW_RES) : euiw.rc version_info.rc eu.manifest
 endif
 
+ifdef OBJDIR
 $(BUILDDIR)/$(EEXU) :  EU_TARGET = int.ex
 $(BUILDDIR)/$(EEXU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) $(EU_STD_INC)
 $(BUILDDIR)/$(EEXU) :  EU_OBJS = $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
@@ -569,6 +566,13 @@ ifeq "$(EMINGW)" "1"
 	$(CC) $(EOSFLAGS) $(EUIW_RES) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EEXUW)
 else
 	$(CC) $(EOSFLAGS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(PROFILE_FLAGS) $(MSIZE) -o $(BUILDDIR)/$(EEXU)
+endif
+else
+$(BUILDDIR)/$(EEXU) : builddirs
+ifeq "$(EUPHORIA)" "1"
+	$(MAKE) euisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+endif	
+	$(MAKE) $(BUILDDIR)/$(EEXU) OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 endif
 
 ifeq "$(EMINGW)" "1"
