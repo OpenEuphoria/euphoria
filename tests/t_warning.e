@@ -137,7 +137,7 @@ ifdef UNIX then
 	nul = "/dev/null"
 end ifdef
 
-constant answers = { "TTTTFT", "TTTTTT" } = 'T'
+constant answers = { "TTTTFTTTT", "TTTTTTTTT" } = 'T'
 constant questions = {
 {"File wide variables that are used but never assigned a value are warned about", 
 	"module variable \'i5\' is never assigned a value"}, -- 226
@@ -146,8 +146,16 @@ constant questions = {
 {"File wide constants that are not used are warned about", "module constant \'a6\' is not used"}, -- 228
 {"File wide variables that are not used are warned about", "module variable \'i1\' is not used"}, -- 229
 {"Parameters of routines that are not used are warned about", "parameter \'i2\' of p1() is not used"}, -- 230
-{"Private variables of routines that are never used are warned about", "private variable \'i3\' of p1() is not used"} -- 231
+{"Private variables of routines that are never used are warned about", "private variable \'i3\' of p1() is not used"}, -- 231
+{"Calls that might get skipped by short-circuit evaluation are warned about", "call to time() might be short-circuited" }, -- short_circuit
+{"Override of routine gets a warning", "built-in routine time() overridden"}, -- override
+{"Built-in chosen over declared routine gets a warning", "The built-in puts() in warning_code.ex overrides the global/public puts() in:warning_code1.e"},
+ $
 }
+
+if length(answers[1]) != length(answers[2]) or length(answers[2]) != length(questions) then
+	puts(2,"Lengths are wrong")
+end if
 constant cl = command_line()
 constant eui = cl[1]
 ifdef EUI then
