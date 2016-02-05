@@ -137,7 +137,7 @@ ifdef UNIX then
 	nul = "/dev/null"
 end ifdef
 
-constant answers = { "TTTTFTTTT", "TTTTTTTTT" } = 'T'
+constant answers = { "TTTTFTTTTF", "TTTTTTTTTF" } = 'T'
 constant questions = {
 {"File wide variables that are used but never assigned a value are warned about", 
 	"module variable \'i5\' is never assigned a value"}, -- 226
@@ -150,6 +150,7 @@ constant questions = {
 {"Calls that might get skipped by short-circuit evaluation are warned about", "call to time() might be short-circuited" }, -- short_circuit
 {"Override of routine gets a warning", "built-in routine time() overridden"}, -- override
 {"Built-in chosen over declared routine gets a warning", "The built-in puts() in warning_code.ex overrides the global/public puts() in:warning_code1.e"},
+{"statement after abort() will never be executed", "statement after abort() will never be executed"},
  $
 }
 
