@@ -376,7 +376,7 @@ EU_BACKEND_RUNNER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/backobj/*.
 EU_INTERPRETER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/intobj/*.c))
 
 all : 
-	$(MAKE) $(TRUNKDIR)/tests/ecp.dat interpreter translator library debug-library backend
+	$(MAKE) code-page-db interpreter translator library debug-library backend
 	$(MAKE) tools
 
 
