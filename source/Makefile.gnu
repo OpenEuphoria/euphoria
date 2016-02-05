@@ -482,7 +482,7 @@ binder : translator library
 .PHONY : interpreter
 .PHONY : translator
 .PHONY : svn_rev
-.PHONY : code-page-db-rm $(BUILDDIR)/eui
+.PHONY : code-page-db
 .PHONY : binder
 
 euisource : $(BUILDDIR)/intobj/main-.c
