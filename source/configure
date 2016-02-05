@@ -410,10 +410,6 @@ export TRUNKDIR=$PPWD
 mkdir -p $BUILDDIR
 export BUILDDIR=`cd "$BUILDDIR" && pwd $PWDARG`
 
-# Make sure the tests use the ecp.dat we generate rather than 
-# the system ecp.dat which is somewhere in PATH.
-ln -sf $BUILDDIR/ecp.dat ../tests/ecp.dat
-
 echo TRUNKDIR=$TRUNKDIR >> "$PREFIX"${CONFIG_FILE}
 echo BUILDDIR=$BUILDDIR >> "$PREFIX"${CONFIG_FILE}
 
