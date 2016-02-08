@@ -431,15 +431,19 @@ clobber distclean : clean
 
 .PHONY : clean distclean clobber all htmldoc manual
 
-debug-library : builddirs
+ifndef OBJDIR
+$(BUILDDIR)/$(EECUDBGA) : $(BUILD_DIRS) $(wildcard $(TRUNKDIR)/source/*.[ch]) $(wildcard $(TRUNKDIR)/source/pcre/*.[ch])
 	$(MAKE) $(BUILDDIR)/$(EECUDBGA) OBJDIR=libobjdbg ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE)
 
-library : builddirs
+library $(BUILDDIR)/$(EECUA) : $(BUILD_DIRS) $(wildcard $(TRUNKDIR)/source/*.{c,h}) $(wildcard $(TRUNKDIR)/source/pcre/*.{c,h})
 	$(MAKE) $(BUILDDIR)/$(EECUA) OBJDIR=libobj ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG= EPROFILE=$(EPROFILE)
-
+else
 $(BUILDDIR)/$(LIBRARY_NAME) : $(EU_LIB_OBJECTS)
 	ar -rc $(BUILDDIR)/$(LIBRARY_NAME) $(EU_LIB_OBJECTS)
 	$(ECHO) $(MAKEARGS)
+endif
+
+debug-library : $(BUILDDIR)/$(EECUDBGA)
 
 builddirs : $(BUILD_DIRS)
 
@@ -469,9 +473,9 @@ endif
 EUBIND=eubind$(EXE_EXT)
 EUSHROUD=eushroud$(EXE_EXT)
 
-binder : translator library 
-	$(MAKE) $(BUILDDIR)/$(EUBIND)
-	$(MAKE) $(BUILDDIR)/$(EUSHROUD)
+binder : $(BUILDDIR)/$(EUBIND)
+
+shrouder : $(BUILDDIR)/$(EUSHROUD)
 
 .PHONY : library debug-library
 .PHONY : builddirs
@@ -847,7 +851,7 @@ $(BUILDDIR)/eudist-build/main-.c : eudist.ex
 		-makefile -eudir $(TRUNKDIR) \
 		$(TRUNKDIR)/source/eudist.ex
 
-$(BUILDDIR)/$(EUDIST) : $(TRUNKDIR)/source/eudist.ex translator library $(BUILDDIR)/eudist-build/main-.c
+$(BUILDDIR)/$(EUDIST) : $(TRUNKDIR)/source/eudist.ex translator $(BUILDDIR)/$(LIBRARY_NAME) $(BUILDDIR)/eudist-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/eudist-build" -f eudist.mak
 
 $(BUILDDIR)/eudis-build/main-.c : $(TRUNKDIR)/source/dis.ex  $(TRUNKDIR)/source/dis.e $(TRUNKDIR)/source/dox.e
@@ -858,7 +862,7 @@ $(BUILDDIR)/eudis-build/main-.c : $(EU_INTERPRETER_FILES)
 		-makefile -eudir $(TRUNKDIR) \
 		$(TRUNKDIR)/source/dis.ex
 
-$(BUILDDIR)/$(EUDIS) : translator library $(BUILDDIR)/eudis-build/main-.c
+$(BUILDDIR)/$(EUDIS) : translator $(BUILDDIR)/$(EECUA) $(BUILDDIR)/eudis-build/main-.c  $(BUILDDIR)/$(LIBRARY_NAME)
 		$(MAKE) -C "$(BUILDDIR)/eudis-build" -f dis.mak
 
 $(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/bind.ex $(EU_BACKEND_RUNNER_FILES) $(EU_CORE_FILES)
@@ -867,7 +871,7 @@ $(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/bind.ex $(EU_BACKEND_RUNNER_
 		-makefile -eudir $(TRUNKDIR) \
 		$(TRUNKDIR)/source/bind.ex
 
-$(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c
+$(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c translator $(BUILDDIR)/$(LIBRARY_NAME) 
 		$(MAKE) -C "$(BUILDDIR)/bind-build" -f bind.mak
 
 $(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/shroud.ex $(EU_BACKEND_RUNNER_FILES) $(EU_CORE_FILES)
@@ -876,7 +880,7 @@ $(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/shroud.ex $(EU_BACKEND_RUN
 		-makefile -eudir $(TRUNKDIR) \
 		$(TRUNKDIR)/source/shroud.ex
 
-$(BUILDDIR)/$(EUSHROUD) : $(BUILDDIR)/shroud-build/main-.c
+$(BUILDDIR)/$(EUSHROUD) : $(BUILDDIR)/shroud-build/main-.c translator $(BUILDDIR)/$(LIBRARY_NAME) 
 		$(MAKE) -C "$(BUILDDIR)/shroud-build" -f shroud.mak
 
 $(BUILDDIR)/eutest-build/main-.c : $(TRUNKDIR)/source/eutest.ex
@@ -885,7 +889,7 @@ $(BUILDDIR)/eutest-build/main-.c : $(TRUNKDIR)/source/eutest.ex
 		-makefile -eudir $(TRUNKDIR) \
 		$(TRUNKDIR)/source/eutest.ex
 
-$(BUILDDIR)/$(EUTEST) : $(BUILDDIR)/eutest-build/main-.c
+$(BUILDDIR)/$(EUTEST) : $(BUILDDIR)/eutest-build/main-.c $(BUILDDIR)/$(LIBRARY_NAME) 
 		$(MAKE) -C "$(BUILDDIR)/eutest-build" -f eutest.mak
 
 $(BUILDDIR)/eucoverage-build/main-.c : $(TRUNKDIR)/bin/eucoverage.ex $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
@@ -894,7 +898,7 @@ $(BUILDDIR)/eucoverage-build/main-.c : $(TRUNKDIR)/bin/eucoverage.ex $(EU_CORE_F
 		-makefile -eudir $(TRUNKDIR) \
 		$(TRUNKDIR)/bin/eucoverage.ex
 
-$(BUILDDIR)/$(EUCOVERAGE) : $(BUILDDIR)/eucoverage-build/main-.c
+$(BUILDDIR)/$(EUCOVERAGE) : $(BUILDDIR)/eucoverage-build/main-.c $(BUILDDIR)/$(LIBRARY_NAME) 
 		$(MAKE) -C "$(BUILDDIR)/eucoverage-build" -f eucoverage.mak
 
 EU_TOOLS= $(BUILDDIR)/$(EUDIST) \
