@@ -464,11 +464,15 @@ $(TRUNKDIR)/tests/ecp.dat : $(BUILDDIR)/ecp.dat
 	
 interpreter : $(BUILDDIR)/$(EEXU)
 
-translator : builddirs
+translator : $(BUILDDIR)/$(EECU)
+
+ifndef OBJDIR
+$(BUILDDIR)/$(EECU) : $(BUILD_DIRS)
 ifeq "$(EUPHORIA)" "1"
 	$(MAKE) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 endif	
 	$(MAKE) $(BUILDDIR)/$(EECU) OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+endif
 
 EUBIND=eubind$(EXE_EXT)
 EUSHROUD=eushroud$(EXE_EXT)
@@ -583,14 +587,15 @@ ifeq "$(EMINGW)" "1"
 $(EUC_RES) : euc.rc version_info.rc eu.manifest
 endif
 
-$(BUILDDIR)/$(EECU) :  OBJDIR=transobj
+ifeq "$(OBJDIR)" "transobj"
 $(BUILDDIR)/$(EECU) :  EU_TARGET=ec.ex
 $(BUILDDIR)/$(EECU) :  EU_MAIN=$(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_STD_INC)
 $(BUILDDIR)/$(EECU) :  EU_OBJS=$(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 $(BUILDDIR)/$(EECU) : $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) $(EUC_RES)
 	@$(ECHO) making $(EECU)
 	$(CC) $(EOSFLAGSCONSOLE) $(EUC_RES) $(EU_TRANSLATOR_OBJECTS) $(DEBUG_FLAGS) $(PROFILE_FLAGS) $(EU_BACKEND_OBJECTS) $(MSIZE) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EECU) 
-	
+endif
+
 backend : builddirs 
 ifeq "$(EUPHORIA)" "1"
 	$(MAKE) backendsource EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG)  EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
@@ -851,7 +856,7 @@ $(BUILDDIR)/eudist-build/main-.c : eudist.ex
 		-makefile -eudir $(TRUNKDIR) \
 		$(TRUNKDIR)/source/eudist.ex
 
-$(BUILDDIR)/$(EUDIST) : $(TRUNKDIR)/source/eudist.ex translator $(BUILDDIR)/$(LIBRARY_NAME) $(BUILDDIR)/eudist-build/main-.c
+$(BUILDDIR)/$(EUDIST) : $(TRUNKDIR)/source/eudist.ex $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(LIBRARY_NAME) $(BUILDDIR)/eudist-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/eudist-build" -f eudist.mak
 
 $(BUILDDIR)/eudis-build/main-.c : $(TRUNKDIR)/source/dis.ex  $(TRUNKDIR)/source/dis.e $(TRUNKDIR)/source/dox.e
@@ -862,7 +867,7 @@ $(BUILDDIR)/eudis-build/main-.c : $(EU_INTERPRETER_FILES)
 		-makefile -eudir $(TRUNKDIR) \
 		$(TRUNKDIR)/source/dis.ex
 
-$(BUILDDIR)/$(EUDIS) : translator $(BUILDDIR)/$(EECUA) $(BUILDDIR)/eudis-build/main-.c  $(BUILDDIR)/$(LIBRARY_NAME)
+$(BUILDDIR)/$(EUDIS) : $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA) $(BUILDDIR)/eudis-build/main-.c  $(BUILDDIR)/$(LIBRARY_NAME)
 		$(MAKE) -C "$(BUILDDIR)/eudis-build" -f dis.mak
 
 $(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/bind.ex $(EU_BACKEND_RUNNER_FILES) $(EU_CORE_FILES)
@@ -871,7 +876,7 @@ $(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/bind.ex $(EU_BACKEND_RUNNER_
 		-makefile -eudir $(TRUNKDIR) \
 		$(TRUNKDIR)/source/bind.ex
 
-$(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c translator $(BUILDDIR)/$(LIBRARY_NAME) 
+$(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(LIBRARY_NAME) 
 		$(MAKE) -C "$(BUILDDIR)/bind-build" -f bind.mak
 
 $(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/shroud.ex $(EU_BACKEND_RUNNER_FILES) $(EU_CORE_FILES)
@@ -880,7 +885,7 @@ $(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/shroud.ex $(EU_BACKEND_RUN
 		-makefile -eudir $(TRUNKDIR) \
 		$(TRUNKDIR)/source/shroud.ex
 
-$(BUILDDIR)/$(EUSHROUD) : $(BUILDDIR)/shroud-build/main-.c translator $(BUILDDIR)/$(LIBRARY_NAME) 
+$(BUILDDIR)/$(EUSHROUD) : $(BUILDDIR)/shroud-build/main-.c $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(LIBRARY_NAME) 
 		$(MAKE) -C "$(BUILDDIR)/shroud-build" -f shroud.mak
 
 $(BUILDDIR)/eutest-build/main-.c : $(TRUNKDIR)/source/eutest.ex
