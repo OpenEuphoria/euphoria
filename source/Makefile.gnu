@@ -47,7 +47,7 @@ CONFIG_FILE = config.gnu
 CC=$(CC_PREFIX)$(CC_SUFFIX)
 RC=$(CC_PREFIX)$(RC_SUFFIX)
 ifndef CONFIG
-CONFIG = ${CURDIR}/$(CONFIG_FILE)
+  CONFIG = ${CURDIR}/$(CONFIG_FILE)
 endif
 
 PCRE_CC=$(CC)
@@ -57,22 +57,22 @@ include $(CONFIG)
 include $(TRUNKDIR)/source/pcre/objects.mak
 
 ifeq "$(EHOST)" "$(ETARGET)"
-HOSTCC=$(CC)
+  HOSTCC=$(CC)
 else
 # so far this is all we support
-HOSTCC=gcc
+  HOSTCC=gcc
 endif
 
 ifeq "$(RELEASE)" "1"
-RELEASE_FLAG = -D EU_FULL_RELEASE
+  RELEASE_FLAG = -D EU_FULL_RELEASE
 endif
 
 ifdef ERUNTIME
-RUNTIME_FLAGS = -DERUNTIME
+  RUNTIME_FLAGS = -DERUNTIME
 endif
 
 ifdef EBACKEND
-BACKEND_FLAGS = -DBACKEND
+  BACKEND_FLAGS = -DBACKEND
 endif
 
 ifeq "$(EBSD)" "1"
@@ -189,69 +189,69 @@ EEXUW=euiw$(EXE_EXT)
 LDLFLAG+= $(EPTHREAD)
 
 ifdef EDEBUG
-DEBUG_FLAGS=-g3 -O0 -Wall
-CALLC_DEBUG=-g3
-EC_DEBUG=-D DEBUG
-EUC_DEBUG_FLAG=-debug
+  DEBUG_FLAGS=-g3 -O0 -Wall
+  CALLC_DEBUG=-g3
+  EC_DEBUG=-D DEBUG
+  EUC_DEBUG_FLAG=-debug
 else
-DEBUG_FLAGS=-fomit-frame-pointer $(EOSMING)
+  DEBUG_FLAGS=-fomit-frame-pointer $(EOSMING)
 endif
 
 ifdef EPROFILE
-PROFILE_FLAGS=-pg -g
-ifndef EDEBUG
-DEBUG_FLAGS=$(EOSMING)
-endif
+  PROFILE_FLAGS=-pg -g
+  ifndef EDEBUG
+    DEBUG_FLAGS=$(EOSMING)
+  endif
 endif
 
 ifdef ENO_DBL_CACHE
-MEM_FLAGS+=-DNO_DBL_CACHE
+  MEM_FLAGS+=-DNO_DBL_CACHE
 endif
 
 ifdef COVERAGE
-COVERAGEFLAG=-fprofile-arcs -ftest-coverage
-DEBUG_FLAGS=-g3 -O0 -Wall
-COVERAGELIB=-lgcov
+    COVERAGEFLAG=-fprofile-arcs -ftest-coverage
+    DEBUG_FLAGS=-g3 -O0 -Wall
+    COVERAGELIB=-lgcov
 endif
 
 ifndef TESTFILE
-COVERAGE_ERASE=-coverage-erase
+    COVERAGE_ERASE=-coverage-erase
 endif
 
 ifeq  "$(ELINUX)" "1"
-EBSDFLAG=-DELINUX
+    EBSDFLAG=-DELINUX
 endif
 
 # backwards compatibility
 # don't make Unix users reconfigure for a MinGW-only change
 ifndef CYPTRUNKDIR
-CYPTRUNKDIR=$(TRUNKDIR)
+    CYPTRUNKDIR=$(TRUNKDIR)
 endif
 ifndef CYPBUILDDIR
-CYPBUILDDIR=$(BUILDDIR)
+    CYPBUILDDIR=$(BUILDDIR)
 endif
 
 ifeq "$(ELINUX)" "1"
-PLAT=LINUX
+    PLAT=LINUX
 else ifeq "$(EOPENBSD)" "1"
-PLAT=OPENBSD
+    PLAT=OPENBSD
 else ifeq "$(ENETBSD)" "1"
-PLAT=NETBSD
+    PLAT=NETBSD
 else ifeq "$(EFREEBSD)" "1"
-PLAT=FREEBSD
+    PLAT=FREEBSD
 else ifeq "$(EOSX)" "1"
-PLAT=OSX
+    PLAT=OSX
 else ifeq "$(EMINGW)" "1"
-PLAT=WINDOWS
+    PLAT=WINDOWS
 endif
 
 # We mustn't use eui rather than $(EEXU) in these three lines below.   When this translates from Unix, the interpreter we call to do the translation must not have a .exe extension. 
 ifeq  "$(EUBIN)" ""
-EXE=$(EEXU)
-HOST_EXE=$(HOST_EEXU)
+    EXE=$(EEXU)
+    HOST_EXE=$(HOST_EEXU)
 else
-EXE=$(EUBIN)/$(EEXU)
-HOST_EXE=$(EUBIN)/$(HOST_EEXU)
+    EXE=$(EUBIN)/$(EEXU)
+    HOST_EXE=$(EUBIN)/$(HOST_EEXU)
 endif
 # The -i command with the include directory in the form we need the EUPHORIA binaries to see them. 
 # (Use a drive id 'C:')
@@ -262,15 +262,15 @@ CYPINCDIR=-i $(CYPTRUNKDIR)/include
 BE_CALLC = be_callc
 
 ifndef ECHO
-ECHO=/bin/echo
+    ECHO=/bin/echo
 endif
 
 ifeq "$(EUDOC)" ""
-EUDOC=eudoc
+    EUDOC=eudoc
 endif
 
 ifeq "$(CREOLE)" ""
-CREOLE=creole
+    CREOLE=creole
 endif
 
 ifeq "$(TRANSLATE)" "euc"
@@ -293,9 +293,9 @@ endif
 
 
 ifeq "$(MANAGED_MEM)" "1"
-FE_FLAGS =  $(ARCH_FLAG) $(COVERAGEFLAG) $(MSIZE) $(EPTHREAD) -c -fsigned-char $(EOSTYPE) $(EOSMING) -ffast-math $(FP_FLAGS) $(EOSFLAGS) $(DEBUG_FLAGS) -I$(CYPTRUNKDIR)/source -I$(CYPTRUNKDIR) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE) $(MEM_FLAGS)
+    FE_FLAGS =  $(ARCH_FLAG) $(COVERAGEFLAG) $(MSIZE) $(EPTHREAD) -c -fsigned-char $(EOSTYPE) $(EOSMING) -ffast-math $(FP_FLAGS)                $(EOSFLAGS) $(DEBUG_FLAGS) -I$(CYPTRUNKDIR)/source -I$(CYPTRUNKDIR) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE) $(MEM_FLAGS)
 else
-FE_FLAGS =  $(ARCH_FLAG) $(COVERAGEFLAG) $(MSIZE) $(EPTHREAD) -c -fsigned-char $(EOSTYPE) $(EOSMING) -ffast-math $(FP_FLAGS) $(EOSFLAGS) $(DEBUG_FLAGS) -I$(CYPTRUNKDIR)/source -I$(CYPTRUNKDIR) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE)
+    FE_FLAGS =  $(ARCH_FLAG) $(COVERAGEFLAG) $(MSIZE) $(EPTHREAD) -c -fsigned-char $(EOSTYPE) $(EOSMING) -ffast-math $(FP_FLAGS) $(EOSFLAGS) $(DEBUG_FLAGS) -I$(CYPTRUNKDIR)/source -I$(CYPTRUNKDIR) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE)
 endif
 BE_FLAGS =  $(ARCH_FLAG) $(COVERAGEFLAG) $(MSIZE) $(EPTHREAD) -c -Wall $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(FP_FLAGS) $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE) $(FPIC) -I$(TRUNKDIR)/source
 
@@ -423,7 +423,7 @@ EU_BACKEND_RUNNER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/backobj/*.
 EU_INTERPRETER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/intobj/*.c))
 
 all : 
-	$(MAKE) interpreter translator library debug-library backend shared-library debug-shared-library lib818
+	$(MAKE) code-page-db interpreter translator library debug-library backend shared-library debug-shared-library lib818
 	$(MAKE) tools
 
 
@@ -486,12 +486,12 @@ clobber distclean : clean
 
 .PHONY : clean distclean clobber all htmldoc manual lib818
 
-debug-library : builddirs
+ifndef OBJDIR
+$(BUILDDIR)/$(EECUDBGA) : $(BUILD_DIRS) $(wildcard $(TRUNKDIR)/source/*.[ch]) $(wildcard $(TRUNKDIR)/source/pcre/*.[ch])
 	$(MAKE) $(BUILDDIR)/$(EECUDBGA) OBJDIR=libobjdbg ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE)
 
-library : builddirs
+library $(BUILDDIR)/$(EECUA) : $(BUILD_DIRS) $(wildcard $(TRUNKDIR)/source/*.{c,h}) $(wildcard $(TRUNKDIR)/source/pcre/*.{c,h})
 	$(MAKE) $(BUILDDIR)/$(EECUA) OBJDIR=libobj ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG= EPROFILE=$(EPROFILE)
-
 
 shared-library :
 ifneq "$(EMINGW)" "1"
@@ -518,11 +518,10 @@ $(BUILDDIR)/$(LIBRARY_NAME) : $(EU_LIB_OBJECTS)
 	$(CC_PREFIX)ar -rc $(BUILDDIR)/$(LIBRARY_NAME) $(EU_LIB_OBJECTS)
 	$(ECHO) $(MAKEARGS)
 endif
-else
-$(BUILDDIR)/$(LIBRARY_NAME) : $(EU_LIB_OBJECTS)
-	$(CC_PREFIX)ar -rc $(BUILDDIR)/$(LIBRARY_NAME) $(EU_LIB_OBJECTS)
-	$(ECHO) $(MAKEARGS)
 endif
+
+debug-library : $(BUILDDIR)/$(EECUDBGA)
+
 builddirs : $(BUILD_DIRS)
 
 $(BUILD_DIRS) :
@@ -532,19 +531,10 @@ ifeq "$(ROOTDIR)" ""
 ROOTDIR=$(TRUNKDIR)
 endif
 
-code-page-db : $(BUILDDIR)/ecp.dat
+code-page-db : $(BUILDDIR)/ecp.dat $(TRUNKDIR)/tests/ecp.dat
 
-$(BUILDDIR)/ecp.dat : $(TRUNKDIR)/source/codepage/*.ecp
+$(BUILDDIR)/ecp.dat : $(TRUNKDIR)/source/codepage/*.ecp msgtext.e $(BUILDDIR)/$(EEXU)
 	$(BUILDDIR)/$(EEXU) -i $(CYPTRUNKDIR)/include $(CYPTRUNKDIR)/bin/buildcpdb.ex -p$(CYPTRUNKDIR)/source/codepage -o$(CYPBUILDDIR)
-
-
-ifeq "$(OBJDIR)" ""
-interpreter :
-	$(MAKE) interpreter OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
-
-translator :
-	$(MAKE) translator OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
-else
 
 ifeq "$(EUPHORIA)" "1"
 interpreter : euisource
@@ -553,11 +543,23 @@ backend     : backendsource
 endif
 
 
-interpreter : builddirs $(EU_BACKEND_OBJECTS)
-	$(MAKE) $(BUILDDIR)/$(EEXU) OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+$(TRUNKDIR)/tests/ecp.dat : $(BUILDDIR)/ecp.dat
+	cp -fl $(BUILDDIR)/ecp.dat $(TRUNKDIR)/tests/ecp.dat || cp -f $(BUILDDIR)/ecp.dat $(TRUNKDIR)/tests/ecp.dat 
+	
+interpreter : $(BUILDDIR)/$(EEXU)
 
-translator  : builddirs $(EU_BACKEND_OBJECTS)
+translator : $(BUILDDIR)/$(EECU) 
+
+
+ifndef OBJDIR
+$(BUILDDIR)/$(EECU) : $(BUILD_DIRS)
+$(BUILDDIR)/$(EECU) : euc.ex $(EU_TRANSLATOR_FILES) $(EU_CORE_FILES) $(EUI_RES) $(EUIW_RES) 
+$(BUILDDIR)/$(EECU) : $(wildcard $(TRUNKDIR)/source/be_*.c) $(BUILDDIR)/transobj/main-.c
+ifeq "$(EUPHORIA)" "1"
+	$(MAKE) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+endif	
 	$(MAKE) $(BUILDDIR)/$(EECU) OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+endif
 
 endif
 
@@ -566,16 +568,15 @@ endif
 EUBIND=eubind$(EXE_EXT)
 EUSHROUD=eushroud$(EXE_EXT)
 
-binder : translator library $(EU_BACKEND_RUNNER_FILES)
-	$(MAKE) $(BUILDDIR)/$(EUBIND)
-	$(MAKE) $(BUILDDIR)/$(EUSHROUD)
+binder : $(BUILDDIR)/$(EUBIND)
+shrouder : $(BUILDDIR)/$(EUSHROUD)
 
 .PHONY : library debug-library
 .PHONY : builddirs
 .PHONY : interpreter
 .PHONY : translator
 .PHONY : svn_rev
-.PHONY : code-page-db-rm $(BUILDDIR)/eui
+.PHONY : code-page-db
 .PHONY : binder
 
 euisource : $(BUILDDIR)/intobj/main-.c
@@ -633,6 +634,7 @@ $(EUI_RES) :  $(TRUNKDIR)/source/eui.rc  $(TRUNKDIR)/source/version_info.rc  $(T
 $(EUIW_RES) :  $(TRUNKDIR)/source/euiw.rc  $(TRUNKDIR)/source/version_info.rc  $(TRUNKDIR)/source/eu.manifest
 endif
 
+ifdef OBJDIR
 $(BUILDDIR)/$(EEXU) :  EU_TARGET = eui.ex
 $(BUILDDIR)/$(EEXU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) $(EU_STD_INC)
 $(BUILDDIR)/$(EEXU) :  $(BUILDDIR)/intobj $(BUILDDIR)/intobj/back
@@ -646,6 +648,13 @@ ifeq "$(EMINGW)" "1"
 else
 	$(CC) $(EOSFLAGS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(PROFILE_FLAGS) $(MSIZE) -o $(BUILDDIR)/$(EEXU)
 endif
+else
+$(BUILDDIR)/$(EEXU) : builddirs $(EU_INTERPRETER_FILES) $(EU_CORE_FILES) $(EUI_RES) $(EUIW_RES) $(wildcard $(TRUNKDIR)/source/be_*.c) $(BUILDDIR)/intobj/main-.c
+ifeq "$(EUPHORIA)" "1"
+	$(MAKE) euisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+endif	
+	$(MAKE) $(BUILDDIR)/$(EEXU) OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+endif
 
 $(BUILDDIR)/$(OBJDIR)/back/be_machine.o : $(BUILDDIR)/include/be_ver.h
 
@@ -653,15 +662,17 @@ ifeq "$(EMINGW)" "1"
 $(EUC_RES) :  $(TRUNKDIR)/source/euc.rc  $(TRUNKDIR)/source/version_info.rc  $(TRUNKDIR)/source/eu.manifest
 endif
 
-$(BUILDDIR)/$(EECU) :  OBJDIR = transobj
-$(BUILDDIR)/$(EECU) :  EU_TARGET = euc.ex
-$(BUILDDIR)/$(EECU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_STD_INC)
-$(BUILDDIR)/$(EECU) :  EU_OBJS = $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
+ifeq "$(OBJDIR)" "transobj"
+$(BUILDDIR)/$(EECU) :  EU_TARGET=euc.ex
+$(BUILDDIR)/$(EECU) :  EU_MAIN=$(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_STD_INC)
+$(BUILDDIR)/$(EECU) :  EU_OBJS=$(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 $(BUILDDIR)/$(EECU) : $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) $(EUC_RES)
 	@$(ECHO) making $(EECU)
-	$(CC) $(EOSFLAGSCONSOLE) $(EUC_RES) $(EU_TRANSLATOR_OBJECTS) $(DEBUG_FLAGS) $(PROFILE_FLAGS) $(EU_BACKEND_OBJECTS) $(MSIZE) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EECU) 
-	
-backend : builddirs
+	$(CC) $(EOSFLAGSCONSOLE) $(EUC_RES) $(EU_TRANSLATOR_OBJECTS) $(DEBUG_FLAGS) $(PROFILE_FLAGS) $(EU_BACKEND_OBJECTS) $(MSIZE) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EECU)
+
+endif
+
+backend : builddirs 
 ifeq "$(EUPHORIA)" "1"
 	$(MAKE) backendsource EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG)  EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 endif	
@@ -799,7 +810,7 @@ test : EUCOMPILEDIR=$(TRUNKDIR)
 test : EUCOMPILEDIR=$(TRUNKDIR)	
 test : C_INCLUDE_PATH=$(TRUNKDIR):..:$(C_INCLUDE_PATH)
 test : LIBRARY_PATH=$(%LIBRARY_PATH)
-test : $(TRUNKDIR)/tests/lib818.dll interpreter translator library binder
+test : $(TRUNKDIR)/tests/lib818.dll $(TRUNKDIR)/tests/ecp.dat $(CYPBUILDDIR)/$(EEXU) $(BUILDDIR)/$(EECU) $(CYPBUILDDIR)/$(LIBRARY_NAME) $(BUILDDIR)/$(EUBIND) $(BUILDDIR)/$(EBACKENDC)
 test :  
 	cd $(TRUNKDIR)/tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
 		$(EXE) -i $(TRUNKDIR)/include $(TRUNKDIR)/source/eutest.ex -i $(TRUNKDIR)/include -cc gcc $(VERBOSE_TESTS) \
@@ -949,7 +960,7 @@ $(BUILDDIR)/eudist-build/main-.c : $(TRUNKDIR)/source/eudist.ex
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/eudist.ex
 
-$(BUILDDIR)/$(EUDIST) : $(TRUNKDIR)/source/eudist.ex translator library $(BUILDDIR)/eudist-build/main-.c
+$(BUILDDIR)/$(EUDIST) : $(TRUNKDIR)/source/eudist.ex $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(LIBRARY_NAME) $(BUILDDIR)/eudist-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/eudist-build" -f eudist.mak
 
 $(BUILDDIR)/eudis-build/main-.c : $(TRUNKDIR)/source/dis.ex  $(TRUNKDIR)/source/dis.e $(TRUNKDIR)/source/dox.e
@@ -962,7 +973,7 @@ $(BUILDDIR)/eudis-build/main-.c : $(EU_INTERPRETER_FILES)
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/dis.ex
 
-$(BUILDDIR)/$(EUDIS) : translator library $(BUILDDIR)/eudis-build/main-.c
+$(BUILDDIR)/$(EUDIS) : $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA) $(BUILDDIR)/eudis-build/main-.c  $(BUILDDIR)/$(LIBRARY_NAME)
 		$(MAKE) -C "$(BUILDDIR)/eudis-build" -f dis.mak
 
 $(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/eubind.ex $(EU_INTERPRETER_FILES) $(EU_BACKEND_RUNNER_FILES) $(EU_CORE_FILES)
@@ -973,7 +984,7 @@ $(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/eubind.ex $(EU_INTERPRETER_F
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/eubind.ex
 
-$(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c
+$(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(LIBRARY_NAME) 
 		$(MAKE) -C "$(BUILDDIR)/bind-build" -f eubind.mak
 
 $(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/eushroud.ex  $(EU_INTERPRETER_FILES) $(EU_BACKEND_RUNNER_FILES) $(EU_CORE_FILES)
@@ -984,7 +995,7 @@ $(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/eushroud.ex  $(EU_INTERPRE
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/eushroud.ex
 
-$(BUILDDIR)/$(EUSHROUD) : $(BUILDDIR)/shroud-build/main-.c
+$(BUILDDIR)/$(EUSHROUD) : $(BUILDDIR)/shroud-build/main-.c $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(LIBRARY_NAME)
 		$(MAKE) -C "$(BUILDDIR)/shroud-build" -f eushroud.mak
 
 $(BUILDDIR)/eutest-build/main-.c : $(TRUNKDIR)/source/eutest.ex
@@ -995,7 +1006,7 @@ $(BUILDDIR)/eutest-build/main-.c : $(TRUNKDIR)/source/eutest.ex
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/eutest.ex
 
-$(BUILDDIR)/$(EUTEST) : $(BUILDDIR)/eutest-build/main-.c
+$(BUILDDIR)/$(EUTEST) : $(BUILDDIR)/eutest-build/main-.c $(BUILDDIR)/$(LIBRARY_NAME) 
 		$(MAKE) -C "$(BUILDDIR)/eutest-build" -f eutest.mak
 
 $(BUILDDIR)/eucoverage-build/main-.c : $(TRUNKDIR)/bin/eucoverage.ex
@@ -1006,7 +1017,7 @@ $(BUILDDIR)/eucoverage-build/main-.c : $(TRUNKDIR)/bin/eucoverage.ex
 		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
 		$(MINGW_FLAGS) $(TRUNKDIR)/bin/eucoverage.ex
 
-$(BUILDDIR)/$(EUCOVERAGE) : $(BUILDDIR)/eucoverage-build/main-.c
+$(BUILDDIR)/$(EUCOVERAGE) : $(BUILDDIR)/eucoverage-build/main-.c $(BUILDDIR)/$(LIBRARY_NAME) 
 		$(MAKE) -C "$(BUILDDIR)/eucoverage-build" -f eucoverage.mak
 
 EU_TOOLS= $(BUILDDIR)/$(EUDIST) \

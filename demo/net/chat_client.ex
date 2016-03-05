@@ -10,8 +10,6 @@ include std/console.e
 include std/text.e
 include std/socket.e as slib
 without warning
-
-without warning
 --**
 --@nodoc@
 override procedure abort(integer x)

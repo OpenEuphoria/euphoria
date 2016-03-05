@@ -89,7 +89,7 @@
 #define CONTROL_Z 26
 #define CR 13
 #define LF 10
-#ifdef WINDOWS
+#ifdef EWINDOWS
 #define BS 8
 #else
 #define BS 127
@@ -5960,7 +5960,7 @@ void key_gets(char *input_string, int buffsize)
 		if (c == CR || c == LF || c == numpad_enter)
 			break;
 
-#ifndef WINDOWS
+#ifndef EWINDOWS
 		if( c == 27 ){
 			char d, e;
 			// escape code!

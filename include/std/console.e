@@ -908,12 +908,12 @@ end procedure
 --
 -- Example 1:
 -- <eucode>
--- any_key() -- "Press Any Key to continue..."
+-- maybe_any_key() -- "Press Any Key to continue..."
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
--- any_key("Press Any Key to quit")
+-- maybe_any_key("Press Any Key to quit")
 -- </eucode>
 --
 -- See Also:

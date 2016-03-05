@@ -2724,7 +2724,6 @@ But if opt is 2 and alt is "Y" then it runs ...\\
 FuncB()
 FuncD()
 FuncF()
-FuncG()
 FuncM()
 
 In other words, the ##break "LBLa"## skips to the end of the switch called
@@ -4052,7 +4051,7 @@ The forms available are ...
 
 The **with/without warnings** directives will have no effect if the
 ##-STRICT## command line switch is used. The latter turns on all warnings
-and ignores any **with/without warnings** statement. However, it can be
+and ignores any **with/without warnings** statement. It also warns if a parameter of a routine is unused.  However, it can be
 temporarily affected by the "##without warning strict##" directive.
 
 ----

@@ -1795,7 +1795,7 @@ end function
 --
 
 --**
--- returns the greater common divisor of to atoms.
+-- Returns the greater common divisor of two atoms
 --
 -- Parameters:
 --		# ##p## : one of the atoms to consider

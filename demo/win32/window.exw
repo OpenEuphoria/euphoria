@@ -11,8 +11,27 @@ include std/machine.e
 include std/math.e
 include std/error.e
 
+ifdef not EU4_0 then
 include winstruct.ew
-
+elsedef
+constant 
+	C_BYTE = C_UCHAR,  
+	C_BOOL = C_INT, 
+	C_ATOM = C_USHORT, 
+	C_WORD = C_USHORT, 
+	C_DWORD=  C_ULONG, 
+	C_WPARAM = C_POINTER, 
+	C_LPARAM = C_POINTER, 
+	C_HFILE = C_INT,  
+	C_HWND = C_POINTER, 
+	C_HANDLE = C_POINTER,  --all other H* are HANDLE 
+	C_WNDPROC = C_POINTER, 
+	C_LPSTR = C_POINTER, 
+	C_LRESULT = C_POINTER, 
+	C_LANGID =  C_WORD,   
+	C_COLORREF =  C_DWORD,    --0x00bbggrr 
+	$
+end ifdef
 
 
 atom 
