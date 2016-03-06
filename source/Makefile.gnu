@@ -489,20 +489,23 @@ shrouder : $(BUILDDIR)/$(EUSHROUD)
 .PHONY : code-page-db
 .PHONY : binder
 
+
 euisource : $(BUILDDIR)/intobj/main-.c
 euisource :  EU_TARGET = int.ex
-euisource : $(BUILDDIR)/$(OBJDIR)/back/coverage.h
+euisource : $(BUILDDIR)/intobj/back/coverage.h
 euisource : $(BUILDDIR)/include/be_ver.h
+
 eucsource : $(BUILDDIR)/transobj/main-.c
 eucsource :  EU_TARGET = ec.ex
-eucsource : $(BUILDDIR)/$(OBJDIR)/back/coverage.h
+eucsource : $(BUILDDIR)/transobj/back/coverage.h
 eucsource : $(BUILDDIR)/include/be_ver.h
+
 backendsource : $(BUILDDIR)/backobj/main-.c
 backendsource :  EU_TARGET=backend.ex
-backendsource : $(BUILDDIR)/$(OBJDIR)/back/coverage.h
+backendsource : $(BUILDDIR)/backobj/back/coverage.h
 backendsource : $(BUILDDIR)/include/be_ver.h
 
-source : builddirs
+source : $(BUILD_DIRS)
 	$(MAKE) euisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 	$(MAKE) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 	$(MAKE) backendsource OBJDIR=backobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
@@ -543,6 +546,15 @@ endif
 ifneq "$(OBJDIR)" ""
 $(BUILDDIR)/$(OBJDIR)/back/coverage.h : $(BUILDDIR)/$(OBJDIR)/main-.c
 	$(EXE) -i $(CYPTRUNKDIR)/include coverage.ex $(CYPBUILDDIR)/$(OBJDIR)
+else
+$(BUILDDIR)/intobj/back/coverage.h : $(BUILD_DIRS)
+	$(MAKE) euisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+
+$(BUILDDIR)/transobj/back/coverage.h : $(BUILD_DIRS)
+	$(MAKE) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+
+$(BUILDDIR)/backobj/back/coverage.h : $(BUILD_DIRS)
+	$(MAKE) backendsource OBJDIR=backobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 endif
 	
 $(BUILDDIR)/intobj/back/be_execute.o : $(BUILDDIR)/intobj/back/coverage.h
@@ -993,7 +1005,7 @@ endif
 ifeq "$(EUPHORIA)" "1"
 ifneq "$(OBJDIR)" ""
 
-$(BUILDDIR)/$(OBJDIR)/%.c : $(EU_MAIN)
+$(BUILDDIR)/$(OBJDIR)/%.c : $(BUILDDIR)/$(OBJDIR) $(EU_MAIN)
 	@$(ECHO) Translating $(EU_TARGET) to create $(EU_MAIN)
 	rm -f $(BUILDDIR)/$(OBJDIR)/{*.c,*.o}
 	(cd $(BUILDDIR)/$(OBJDIR);$(TRANSLATE) -nobuild $(RELEASE_FLAG) \
