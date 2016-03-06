@@ -21,6 +21,9 @@ include std/console.e
 include std/error.e
 without warning
 
+ifdef not EU4_0 then
+include winstruct.ew
+elsedef
 -- Windows Data Type constants for function/procedure calls
 
 constant 
@@ -40,7 +43,7 @@ constant
 	C_LANGID =  C_WORD,   
 	C_COLORREF =  C_DWORD,    --0x00bbggrr 
 	$
-
+end ifdef
 
  
 constant X = 1, Y = 2, Z = 3
@@ -78,16 +81,17 @@ constant PS_SOLID = 0
 
 sequence vc -- video configuration
 
-integer CreateDC, GetDC, MoveToEx, LineTo, CreatePen, SelectObject
-integer GetStockObject
-atom black_pen, white_pen, red_pen, green_pen, blue_pen
-atom hdc
-
-integer LoadIcon, LoadCursor, RegisterClassEx,
+ifdef EU4_0 then
+	integer CreateDC, GetDC, MoveToEx, LineTo, CreatePen, SelectObject, LoadIcon, LoadCursor, RegisterClassEx,
 	CreateWindow, ShowWindow, UpdateWindow, GetMessage,
 	TranslateMessage, DispatchMessage, PlaySound, BeginPaint,
 	GetClientRect, DrawText, EndPaint, PostQuitMessage, DefWindowProc,
 	SetTimer, KillTimer, ReleaseDC
+	integer GetStockObject
+end ifdef
+
+atom black_pen, white_pen, red_pen, green_pen, blue_pen
+atom hdc
 
 type point(sequence x)
 	return length(x) = 3
@@ -136,6 +140,7 @@ function product(sequence factor)
 	return c
 end function
 
+ifdef EU4_0
 procedure not_found(sequence name)
 	crash("Couldn't find " & name)
 end procedure
@@ -236,7 +241,7 @@ end procedure
 
 link_dll_routines()
 
-
+end ifdef
 
 
 procedure draw_line(integer color, sequence coords)
@@ -502,6 +507,7 @@ procedure spin()
 	shape = compute_rotate(axis, shape)
 end procedure
 
+ifdef EU4_0 then
 constant cbSize = 0,
 	 style  = 4,
 	 lpfnWndProc = 8,
@@ -551,7 +557,7 @@ constant IDI_APPLICATION = 32512,
 	 WS_OVERLAPPEDWINDOW = or_all({WS_OVERLAPPED, WS_CAPTION, WS_SYSMENU,
 					   WS_THICKFRAME, WS_MINIMIZEBOX, 
 					   WS_MAXIMIZEBOX})
-
+end ifdef
 
 function WndProc(atom hwnd, atom iMsg, atom wParam, atom lParam)
 -- callback routine to handle Window class
@@ -605,21 +611,26 @@ procedure WinMain()
 		crash("routine_id failed!")
 	end if
 	atom WndProcAddress = call_back(id) -- get address for callback
+	
+	atom class
+	ifdef EU4_0 then
+		poke4(wndclass + cbSize, SIZE_OF_WNDCLASS)
+		poke4(wndclass + style, or_bits(CS_HREDRAW, CS_VREDRAW))
+		poke4(wndclass + lpfnWndProc, WndProcAddress)
+		poke4(wndclass + cbClsExtra, 0)
+		poke4(wndclass + cbWndExtra, 0)
+		poke4(wndclass + hInstance, 0) --hInstance
+		poke4(wndclass + hIcon, c_func(LoadIcon, {NULL, IDI_APPLICATION}))
+		poke4(wndclass + hCursor, c_func(LoadCursor, {NULL, IDC_ARROW}))
+		poke4(wndclass + hbrBackground, c_func(GetStockObject, {WHITE_BRUSH}))
+		poke4(wndclass + lpszMenuName, NULL)
+		poke4(wndclass + lpszClassName, szAppName)
+		poke4(wndclass + hIconSm, c_func(LoadIcon, {NULL, IDI_APPLICATION}))
 
-	poke4(wndclass + cbSize, SIZE_OF_WNDCLASS)
-	poke4(wndclass + style, or_bits(CS_HREDRAW, CS_VREDRAW))
-	poke4(wndclass + lpfnWndProc, WndProcAddress)
-	poke4(wndclass + cbClsExtra, 0)
-	poke4(wndclass + cbWndExtra, 0)
-	poke4(wndclass + hInstance, 0) --hInstance
-	poke4(wndclass + hIcon, c_func(LoadIcon, {NULL, IDI_APPLICATION}))
-	poke4(wndclass + hCursor, c_func(LoadCursor, {NULL, IDC_ARROW}))
-	poke4(wndclass + hbrBackground, c_func(GetStockObject, {WHITE_BRUSH}))
-	poke4(wndclass + lpszMenuName, NULL)
-	poke4(wndclass + lpszClassName, szAppName)
-	poke4(wndclass + hIconSm, c_func(LoadIcon, {NULL, IDI_APPLICATION}))
-
-	atom class = c_func(RegisterClassEx, {wndclass})
+	    class = c_func(RegisterClassEx, {wndclass})
+	elsedef
+		class = register_class( wndclass, WndProcAddress, szAppName )
+	end ifdef
 	if class = 0 then
 		crash("Couldn't register class")
 	end if

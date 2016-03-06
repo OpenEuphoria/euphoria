@@ -241,15 +241,6 @@ function delete_trailing_white(sequence name)
     return name
 end function
 
-for i = 1 to length(file_list) by 2 do
-    if integer(file_list[i+1]) then
-        continue
-    end if
-    for j = 1 to length(file_list[i+1]) do
-	dll_list = append( dll_list, file_list[i] & SLASH & file_list[i+1][j][D_NAME] )
-    end for
-end for
-
 procedure locate(sequence name)
     routine_name = name
     puts(io:STDOUT, "Looking for " & routine_name & "\n ")
@@ -263,10 +254,27 @@ procedure locate(sequence name)
 end procedure
 
 CSetup()
-
 cmd = command_line()   -- eui dsearch [string]
+for i = 1 to length(file_list) by 2 do
+    if integer(file_list[i+1]) then
+        continue
+    end if
+    for j = 1 to length(file_list[i+1]) do
+	dll_list = append( dll_list, file_list[i] & SLASH & file_list[i+1][j][D_NAME] )
+    end for
+end for
 
-
+for cmd_i = 3 to length(cmd) do
+    if cmd_i > length(cmd) then
+        exit
+    end if
+    if equal(cmd[cmd_i], "--lib") then
+        if cmd_i < length(cmd) then
+            dll_list = {cmd[cmd_i+1]}
+            cmd = cmd[1..cmd_i-1] & cmd[cmd_i+2..$]
+        end if
+    end if
+end for
 orig_string = ""
 integer cmd_i = 3
 while cmd_i <= length(cmd) do
@@ -324,7 +332,7 @@ while cmd_i <= length(cmd) do
     cmd_i += 1
 end while
 
-if equal(orig_string,"") then
+if equal(orig_string, "") then
     orig_string = delete_trailing_white( console:prompt_string("C function name:") )
 end if
 

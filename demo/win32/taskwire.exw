@@ -22,11 +22,12 @@ include std/machine.e
 include std/math.e
 include std/wildcard.e
 include std/error.e
+ifdef not EU4_0 then
+	include winstruct.ew
+elsedef
 without warning
 
-
 -- Windows Data Type constants for function/procedure calls
-
 constant 
 	C_BYTE = C_UCHAR,  
 	C_BOOL = C_INT, 
@@ -44,7 +45,7 @@ constant
 	C_LANGID =  C_WORD,   
 	C_COLORREF =  C_DWORD,    --0x00bbggrr 
 	$
-
+end ifdef
 
 
 constant X = 1, Y = 2, Z = 3
@@ -119,6 +120,7 @@ constant E = {
 {{.2, 1.2, 1.6}, {-.2, 1.2, 1.6}, BRIGHT_GREEN}
 }
 
+ifdef EU4_0 then
 constant cbSize = 0,
 	 style  = 4,
 	 lpfnWndProc = 8,
@@ -179,6 +181,7 @@ constant IDI_APPLICATION = 32512,
 	 WS_OVERLAPPEDWINDOW = or_all({WS_OVERLAPPED, WS_CAPTION, WS_SYSMENU,
 					   WS_THICKFRAME, WS_MINIMIZEBOX, 
 					   WS_MAXIMIZEBOX})
+end ifdef
 
 type point(sequence x)
 	return length(x) = 3
@@ -194,9 +197,13 @@ end type
 
 atom screen_size_x = 400, screen_size_y = 400 -- current screen size
 
+ifdef EU4_0 then
 integer CreateDC, GetDC, MoveToEx, LineTo, CreatePen, SelectObject
 integer GetStockObject
+end ifdef
+
 atom black_pen, white_pen, red_pen, green_pen, blue_pen
+ifdef EU4_0 then
 atom hdc
 integer axis
 atom sin_angle, cos_angle
@@ -206,6 +213,7 @@ integer LoadIcon, LoadCursor, RegisterClassEx,
 	TranslateMessage, DispatchMessage, PlaySound, BeginPaint,
 	GetClientRect, DrawText, EndPaint, PostQuitMessage, DefWindowProc,
 	SetTimer, KillTimer, ReleaseDC
+end ifdef
 
 function product(sequence factor)
 -- matrix multiply a number of 4-vectors/4x4 matrices
@@ -241,6 +249,7 @@ function product(sequence factor)
 	return c
 end function
 
+ifdef EU4_0 then
 procedure not_found(sequence name)
 	crash("Couldn't find " & name)
 end procedure
@@ -339,6 +348,7 @@ procedure link_dll_routines()
 end procedure
 
 link_dll_routines()
+end ifdef
 
 procedure draw_line(integer color, sequence coords)
 -- WIN32 line drawing routine
@@ -638,6 +648,8 @@ procedure WinMain()
 	if id = -1 then
 		crash("routine_id failed!")
 	end if
+	
+	ifdef EU4_0 then
 	WndProcAddress = call_back(id) -- get address for callback
 	
 	poke4(wndclass + cbSize, SIZE_OF_WNDCLASS)
@@ -654,6 +666,9 @@ procedure WinMain()
 	poke4(wndclass + hIconSm, c_func(LoadIcon, {NULL, IDI_APPLICATION}))
 
 	class = c_func(RegisterClassEx, {wndclass})
+	elsedef
+	class = register_class( wndclass, WndProcAddress, szAppName )
+	end ifdef
 	if class = 0 then
 		crash("Couldn't register class")
 	end if

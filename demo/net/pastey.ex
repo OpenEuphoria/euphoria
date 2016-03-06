@@ -23,7 +23,7 @@ sequence username, password, title
 
 without warning
 --**
--- @nodoc@
+--@nodoc@
 override procedure abort(integer x, sequence msg = {}, sequence data = {})
 	if length(msg) then
     	printf(2, msg & "\n", data)
