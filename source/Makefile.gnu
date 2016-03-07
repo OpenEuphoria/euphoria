@@ -432,10 +432,10 @@ clobber distclean : clean
 .PHONY : clean distclean clobber all htmldoc manual
 
 ifndef OBJDIR
-$(BUILDDIR)/$(EECUDBGA) : $(BUILD_DIRS) $(wildcard $(TRUNKDIR)/source/*.[ch]) $(wildcard $(TRUNKDIR)/source/pcre/*.[ch])
+$(BUILDDIR)/$(EECUDBGA) : $(wildcard $(TRUNKDIR)/source/*.[ch]) $(wildcard $(TRUNKDIR)/source/pcre/*.[ch]) | $(BUILD_DIRS)
 	$(MAKE) $(BUILDDIR)/$(EECUDBGA) OBJDIR=libobjdbg ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE)
 
-library $(BUILDDIR)/$(EECUA) : $(BUILD_DIRS) $(wildcard $(TRUNKDIR)/source/*.{c,h}) $(wildcard $(TRUNKDIR)/source/pcre/*.{c,h})
+library $(BUILDDIR)/$(EECUA) : $(wildcard $(TRUNKDIR)/source/*.{c,h}) $(wildcard $(TRUNKDIR)/source/pcre/*.{c,h}) | $(BUILD_DIRS)
 	$(MAKE) $(BUILDDIR)/$(EECUA) OBJDIR=libobj ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG= EPROFILE=$(EPROFILE)
 else
 $(BUILDDIR)/$(LIBRARY_NAME) : $(EU_LIB_OBJECTS)
@@ -445,7 +445,7 @@ endif
 
 debug-library : $(BUILDDIR)/$(EECUDBGA)
 
-builddirs : $(BUILD_DIRS)
+builddirs : | $(BUILD_DIRS)
 
 $(BUILD_DIRS) :
 	mkdir -p $(BUILD_DIRS) 
@@ -467,7 +467,7 @@ interpreter : $(BUILDDIR)/$(EEXU)
 translator : $(BUILDDIR)/$(EECU)
 
 ifndef OBJDIR
-$(BUILDDIR)/$(EECU) : $(BUILD_DIRS)
+$(BUILDDIR)/$(EECU) : | $(BUILD_DIRS)
 ifeq "$(EUPHORIA)" "1"
 	$(MAKE) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 endif	
@@ -505,7 +505,7 @@ backendsource :  EU_TARGET=backend.ex
 backendsource : $(BUILDDIR)/backobj/back/coverage.h
 backendsource : $(BUILDDIR)/include/be_ver.h
 
-source : $(BUILD_DIRS)
+source : | $(BUILD_DIRS)
 	$(MAKE) euisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 	$(MAKE) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 	$(MAKE) backendsource OBJDIR=backobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
@@ -547,13 +547,13 @@ ifneq "$(OBJDIR)" ""
 $(BUILDDIR)/$(OBJDIR)/back/coverage.h : $(BUILDDIR)/$(OBJDIR)/main-.c
 	$(EXE) -i $(CYPTRUNKDIR)/include coverage.ex $(CYPBUILDDIR)/$(OBJDIR)
 else
-$(BUILDDIR)/intobj/back/coverage.h : $(BUILD_DIRS)
+$(BUILDDIR)/intobj/back/coverage.h : | $(BUILD_DIRS)
 	$(MAKE) euisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 
-$(BUILDDIR)/transobj/back/coverage.h : $(BUILD_DIRS)
+$(BUILDDIR)/transobj/back/coverage.h : | $(BUILD_DIRS)
 	$(MAKE) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 
-$(BUILDDIR)/backobj/back/coverage.h : $(BUILD_DIRS)
+$(BUILDDIR)/backobj/back/coverage.h : | $(BUILD_DIRS)
 	$(MAKE) backendsource OBJDIR=backobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 endif
 	
@@ -588,7 +588,7 @@ else
 	$(CC) $(EOSFLAGS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(PROFILE_FLAGS) $(MSIZE) -o $(BUILDDIR)/$(EEXU)
 endif
 else
-$(BUILDDIR)/$(EEXU) : builddirs
+$(BUILDDIR)/$(EEXU) : | $(BUILDDIR)/intobj
 ifeq "$(EUPHORIA)" "1"
 	$(MAKE) euisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 endif	
@@ -691,10 +691,10 @@ $(BUILDDIR)/html/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/offline-templat
 	cp $(DOCDIR)/html/images/* $(BUILDDIR)/html/images
 	cp $(DOCDIR)/style.css $(BUILDDIR)/html
 
-$(BUILDDIR)/html/js/scriptaculous.js: $(DOCDIR)/scriptaculous.js  $(BUILDDIR)/html/js
+$(BUILDDIR)/html/js/scriptaculous.js: $(DOCDIR)/scriptaculous.js  | $(BUILDDIR)/html/js
 	copy $(DOCDIR)/scriptaculous.js $^@
 
-$(BUILDDIR)/html/js/prototype.js: $(DOCDIR)/prototype.js  $(BUILDDIR)/html/js
+$(BUILDDIR)/html/js/prototype.js: $(DOCDIR)/prototype.js  | $(BUILDDIR)/html/js
 	copy $(DOCDIR)/prototype.js $^@
 
 htmldoc : $(BUILDDIR)/html/index.html
