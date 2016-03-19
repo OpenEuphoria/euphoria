@@ -466,14 +466,6 @@ interpreter : $(BUILDDIR)/$(EEXU)
 
 translator : $(BUILDDIR)/$(EECU)
 
-ifndef OBJDIR
-$(BUILDDIR)/$(EECU) : | $(BUILD_DIRS)
-ifeq "$(EUPHORIA)" "1"
-	$(MAKE) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
-endif	
-	$(MAKE) $(BUILDDIR)/$(EECU) OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
-endif
-
 EUBIND=eubind$(EXE_EXT)
 EUSHROUD=eushroud$(EXE_EXT)
 
@@ -574,11 +566,12 @@ $(EUI_RES) : eui.rc version_info.rc eu.manifest
 $(EUIW_RES) : euiw.rc version_info.rc eu.manifest
 endif
 
-ifdef OBJDIR
 $(BUILDDIR)/$(EEXU) :  EU_TARGET = int.ex
 $(BUILDDIR)/$(EEXU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) $(EU_STD_INC)
 $(BUILDDIR)/$(EEXU) :  EU_OBJS = $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
-$(BUILDDIR)/$(EEXU) :  $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(EU_TRANSLATOR_FILES) $(EUI_RES) $(EUIW_RES)
+$(BUILDDIR)/$(EEXU) :  $(EU_INTERPRETER_OBJECTS) $(EU_MAIN) $(EU_TRANSLATOR_FILES) $(EUI_RES) $(EUIW_RES) $(wildcard be_*.c)
+ifeq "$(OBJDIR)" "intobj"
+$(BUILDDIR)/$(EEXU) :  $(EU_BACKEND_OBJECTS)
 	@$(ECHO) making $(EEXU)
 	@echo $(OS)
 ifeq "$(EMINGW)" "1"
@@ -595,18 +588,28 @@ endif
 	$(MAKE) $(BUILDDIR)/$(EEXU) OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 endif
 
+
 ifeq "$(EMINGW)" "1"
 $(EUC_RES) : euc.rc version_info.rc eu.manifest
 endif
 
-ifeq "$(OBJDIR)" "transobj"
 $(BUILDDIR)/$(EECU) :  EU_TARGET=ec.ex
 $(BUILDDIR)/$(EECU) :  EU_MAIN=$(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_STD_INC)
 $(BUILDDIR)/$(EECU) :  EU_OBJS=$(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
-$(BUILDDIR)/$(EECU) : $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) $(EUC_RES)
+$(BUILDDIR)/$(EECU) : $(EU_TRANSLATOR_OBJECTS) $(EU_MAIN) $(EUC_RES) $(wildcard be_*.c)
+ifeq "$(OBJDIR)" "transobj"
+$(BUILDDIR)/$(EECU) : $(EU_BACKEND_OBJECTS)
+$(BUILDDIR)/$(EECU) : | $(BUILDDIR)/transobj $(BUILDDIR)/transobj/back
 	@$(ECHO) making $(EECU)
 	$(CC) $(EOSFLAGSCONSOLE) $(EUC_RES) $(EU_TRANSLATOR_OBJECTS) $(DEBUG_FLAGS) $(PROFILE_FLAGS) $(EU_BACKEND_OBJECTS) $(MSIZE) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EECU) 
+else
+ifeq "$(EUPHORIA)" "1"
+	$(MAKE) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+endif	
+	$(MAKE) $(BUILDDIR)/$(EECU) OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 endif
+
+
 
 backend : builddirs 
 ifeq "$(EUPHORIA)" "1"
@@ -996,16 +999,26 @@ lib818 :
 	$(CC)  $(MSIZE) $(LIB818_FPIC) -shared -o ../tests/lib818.dll $(CREATEDLLFLAGS) $(BUILDDIR)/test818.o
 
 ifneq "$(OBJDIR)" ""
-	
+
 $(BUILDDIR)/$(OBJDIR)/%.o : $(BUILDDIR)/$(OBJDIR)/%.c
 	$(CC) $(EBSDFLAG) $(FE_FLAGS) $(BUILDDIR)/$(OBJDIR)/$*.c -I/usr/share/euphoria -o$(BUILDDIR)/$(OBJDIR)/$*.o
+else
+$(BUILDDIR)/intobj/%.o : $(BUILDDIR)/intobj/%.c
+	$(MAKE) OBJDIR=intobj $(BUILDDIR)/intobj/$*.o
 
+$(BUILDDIR)/transobj/%.o : $(BUILDDIR)/transobj/%.c
+	$(MAKE) OBJDIR=transobj $(BUILDDIR)/transobj/$*.o
+
+$(BUILDDIR)/backobj/%.o : $(BUILDDIR)/backobj/%.c
+	$(MAKE) OBJDIR=backobj $(BUILDDIR)/backobj/$*.o
+
+	
 endif
 
 ifeq "$(EUPHORIA)" "1"
 ifneq "$(OBJDIR)" ""
 
-$(BUILDDIR)/$(OBJDIR)/%.c : $(BUILDDIR)/$(OBJDIR) $(EU_MAIN)
+$(BUILDDIR)/$(OBJDIR)/%.c : $(EU_MAIN) |  $(BUILDDIR)/$(OBJDIR)  $(BUILDDIR)/$(OBJDIR)/back
 	@$(ECHO) Translating $(EU_TARGET) to create $(EU_MAIN)
 	rm -f $(BUILDDIR)/$(OBJDIR)/{*.c,*.o}
 	(cd $(BUILDDIR)/$(OBJDIR);$(TRANSLATE) -nobuild $(RELEASE_FLAG) \
