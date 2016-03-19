@@ -1,10 +1,12 @@
 #!/bin/sh
 
 CONFIG_FILE=config.gnu
-PLAT="default platform"
+PLAT="default_platform"
+ARCH="default_arch"
 
 UNAME_SYSTEM=`(uname -s) 2>/dev/null`  || UNAME_SYSTEM=unknown
 UNAME_MACHINE=`(uname -m) 2>/dev/null` || UNAME_MACHINE=unknown
+UNAME_REL=`(uname -r) 2>/dev/null` || UNAME_REL=unknown
 
 # If under Cygwin or Mingw, we have 2 sets of paths: the normal TRUNKDIR/BUILDDIR/INCDIR defined by
 # the Cygwin path (/cygdrive/c/dir/file) or under Mingw the Mingw path (/c/dir/file); as well as the
@@ -16,6 +18,8 @@ UNAME_MACHINE=`(uname -m) 2>/dev/null` || UNAME_MACHINE=unknown
 
 USECYPPATH="false"
 
+# argument sent to the pwd command.  Most platforms no arguments.
+PWDARG=
 if echo "$UNAME_SYSTEM" | grep CYGWIN > /dev/null; then
 	# for now, we build with -mno-cygwin under cygwin, so this is treated
 	# identically to MinGW
@@ -42,55 +46,161 @@ else
 	PREFIX=./
 fi
 
+SOURCEDIR="`dirname \"$0\"`"              # relative
+SOURCEDIR="`( cd \"$SOURCEDIR\" && pwd $PWDARG )`"  # absolutized and normalized
+if [ -z "SOURCEDIR" ] ; then
+  # error; for some reason, the path is not accessible
+  # to the script (e.g. permissions re-evaled after suid)
+  exit 1  # fail
+fi
+TRUNKDIR="`(cd \"$SOURCEDIR\" && cd .. && pwd $PWDARG)`"
+
+MIN_VER=`egrep "define +MIN_VER" version.h | awk ' { print $3; }'`
+
+
+# gcc doesn't seem to like -m32 on 32-bit machines when there are 
+# no 64-bit machines 
+# with an instruction super set of the 32-bit machine.  This means,
+# -m32 is fine for ix86 32bit machines but bad for ARM and Motorola based
+# machines.
+
+MFLAG=-m32
+
+if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
+	HOST_ARCH=ix86
+	MFLAG=-m32
+	
+elif echo "$UNAME_MACHINE" | egrep "x86_64|amd64" > /dev/null; then
+	HOST_ARCH=ix86_64
+	MFLAG=-m64
+	
+elif echo "$UNAME_MACHINE" | grep -i ARM > /dev/null; then
+	HOST_ARCH=ARM
+	MFLAG=
+fi
+ARCH=$HOST_ARCH
+
+if test $UNAME_SYSTEM = "Linux"; then
+	EHOST=ELINUX
+	TARGET=ELINUX
+elif test $UNAME_SYSTEM = "WINDOWS"; then
+	EHOST=EWINDOWS
+	TARGET=EWINDOWS
+elif test $UNAME_SYSTEM = "OpenBSD"; then
+	EHOST=OPENBSD
+	TARGET=EOPENBSD
+	EBSD=1
+elif test $UNAME_SYSTEM = "NetBSD"; then
+	EHOST=NETBSD
+	TARGET=EBSD
+	EBSD=1
+elif test $UNAME_SYSTEM = "FreeBSD"; then
+	EHOST=FREEBSD
+	TARGET=EFREEBSD
+	EBSD=1
+# OS X > 10.4 (Darwin version 8 and up) supports 64-bit applications.
+elif test $UNAME_SYSTEM = "Darwin"; then
+	EHOST=EOSX
+	TARGET=EOSX
+	EBSD=1
+	VAL=`echo "$UNAME_REL" | cut -d \. -f 1`
+	if test $VAL -gt 8; then
+		ARCH=ix86_64
+		MFLAG=-m64
+		
+	# PPC will have to be supported manually; Euphoria doesn't currently support PPC.
+	else 
+		ARCH=x86
+		MFLAG=-m32
+		
+	fi
+else
+	EHOST=EBSD
+	TARGET=EBSD
+fi
+
 
 # default use source
-export EC="eui ec.ex"
-export BUILDDIR=build
-export XLTTARGETCC=gcc
-export CC=gcc
-export EDEBUG=
+if [ "$SOURCEDIR" = `pwd $PWDARG` ] ; then
+	 BUILDDIR=`pwd $PWDARG`/build
+else
+	 BUILDDIR=`pwd $PWDARG`
+fi
+
+if [ -x "$BUILDDIR"/euc ]; then
+	EC="${BUILDDIR}/euc"
+else
+	EC="eui ${SOURCEDIR}/euc.ex"
+fi
+
+ XLTTARGETCC=gcc
+ CC=gcc
+ EDEBUG=
+
 SCP="scp -C"
 SSH="ssh -C"
 HG="hg"
+INSTALL_PREFIX="/usr/local"
+EREL_TYPE="development"
+ROOTDIR="$TRUNKDIR"
 
-echo "# File generated from configure" > ${CONFIG_FILE}
-echo CONFIGURE_PARAMS=$@ >> "$PREFIX"${CONFIG_FILE}
+CONFIGURE_PARAMS="$@"
 
 # parameters
 while [ "$1" != "" ]; do
     case $1 in
-	--plat*)
+	--plat*|--target)
+		VAL=`echo $1 | cut -d = -f 2`
+		if [ "$VAL" = "$1" ]; then
+			shift ; VAL=$1
+		fi
+		TARGET=E$VAL
+		PLAT=$VAL
+		;;
+
+	--watcom )
+		 XLTTARGETCC=wat
+		;;
+
+	--cc-prefix*)
 		VAL=`echo $1 | cut -d = -f 2`
 		if [ "$VAL" = "$1" ]; then
 			shift ; VAL=$1
 		fi
 
-		PLAT=$VAL
+		 CC_PREFIX=$VAL
 		;;
-
-	--watcom )
-		export XLTTARGETCC=wat
-		;;
-
 	--cc*)
 		VAL=`echo $1 | cut -d = -f 2`
 		if [ "$VAL" = "$1" ]; then
 			shift ; VAL=$1
 		fi
 
-		export CC=$VAL
+		 CC=$VAL
+		;;
+	--rc*)
+		VAL=`echo $1 | cut -d = -f 2`
+		if [ "$VAL" = "$1" ]; then
+			shift ; VAL=$1
+		fi
+
+		 RC=$VAL
+		;;
+	
+	--no-managed-mem )
+		 MANAGED_MEM=0
 		;;
 
-	--no-managed-mem )
-		export MANAGED_MEM=0
+	--managed-mem)
+		 MANAGED_MEM=1
 		;;
 
 	--align4 )
-		export ALIGN4=1
+		 ALIGN4=1
 		;;
 
 	--without-euphoria )
-		export EUPHORIA=0
+		 EUPHORIA=0
 		;;
 
 	--eubin*)
@@ -99,7 +209,7 @@ while [ "$1" != "" ]; do
 			shift ; VAL=$1
 		fi
 
-		export LEN=`echo $VAL/eucd.exe | wc -c`
+		 LEN=`echo $VAL/eucd.exe | wc -c`
 		if test $LEN -gt 85; then
 			if test $UNAME_SYSTEM = "MS-DOS"; then
 				echo "Cannot configure with such a long path for DJGPP."
@@ -107,8 +217,10 @@ while [ "$1" != "" ]; do
 				exit
 			fi
 		fi
-		echo "EUBIN=$VAL" >> "$PREFIX"${CONFIG_FILE}
 		EUBIN=$VAL
+		if [ -x "${EUBIN}/eui" ]; then
+			EC="${EUBIN}/eui ${SOURCEDIR}/euc.ex"
+		fi
 		;;
 
 	--build*)
@@ -117,11 +229,11 @@ while [ "$1" != "" ]; do
 			shift ; VAL=$1
 		fi
 
-		export BUILDDIR=$VAL
+		 BUILDDIR=$VAL
 		;;
 
 	--debug )
-		export EDEBUG=1
+		 EDEBUG=1
 		;;
 
 	--prefix*)
@@ -130,19 +242,27 @@ while [ "$1" != "" ]; do
 			shift ; VAL=$1
 		fi
 
-		echo "PREFIX=$VAL" >> ${CONFIG_FILE}
+		INSTALL_PREFIX=$VAL
 		;;
 
 	--use-binary-translator )
-		export EC="euc"
+		if [ -x "$BUILDDIR"/euc ]; then
+			EC="${BUILDDIR}/euc"
+		elif [ -x "$EUBIN/euc" ]; then
+			EC="${EUBIN}/euc"
+		else
+			EC="euc"
+		fi
 		;;
 
 	--use-source-translator )
-		export EC="eui ec.ex"
-		;;
-
-	--final)
-		echo EREL_TYPE=-DEREL_TYPE=1 >> ${CONFIG_FILE}
+		if [ -x "${BUILDDIR}"/eui ]; then
+			EC="${BUILDDIR}/eui ${SOURCEDIR}/euc.ex"
+		elif [ -x "${EUBIN}"/eui ]; then
+			EC="${EUBIN}/eui ${SOURCEDIR}/euc.ex"
+		else
+			EC="eui ${SOURCEDIR}/euc.ex"
+		fi
 		;;
 
 	--release*)
@@ -151,12 +271,12 @@ while [ "$1" != "" ]; do
 			shift ; VAL=$1
 		fi
 
-		echo EREL_TYPE=-DEREL_TYPE=\"$VAL\" >> ${CONFIG_FILE}
+		EREL_TYPE=$VAL
 		#" comment to help display in some editors
 		;;
 
 	--verbose-tests )
-		echo VERBOSE_TESTS=-verbose >> ${CONFIG_FILE}
+		VERBOSE_TESTS="-verbose"
 		;;
 
 	--rootdir*)
@@ -165,7 +285,7 @@ while [ "$1" != "" ]; do
 			shift ; VAL=$1
 		fi
 
-		echo ROOTDIR=$VAL >> ${CONFIG_FILE}
+		ROOTDIR=$VAL
 		;;
 
 	--oe-username*)
@@ -174,7 +294,7 @@ while [ "$1" != "" ]; do
 			shift ; VAL=$1
 		fi
 
-		echo OE_USERNAME=$VAL >> ${CONFIG_FILE}
+		OE_USERNAME=$VAL
 		;;
 
 	--scp-client*)
@@ -203,6 +323,50 @@ while [ "$1" != "" ]; do
 
 		HG=$VAL
 		;;
+	
+	--arch*)
+		VAL=`echo $1 | cut -d = -f 2`
+		if [ "$VAL" = "$1" ]; then
+			shift ; VAL=$1
+		fi
+		if [ $MIN_VER = 0 ]; then
+			echo "Option --arch not available for 4.0 installs."
+			exit
+		fi
+		ARCH=$VAL
+		case $ARCH in
+			x86[_\-\.]64)
+				ARCH=ix86_64
+				MFLAG=-m64
+				
+			;;
+			x86|ix86)
+				ARCH=ix86
+				MFLAG=-m32
+				
+			;;
+			ARM)
+				ARCH=ARM
+				MFLAG=
+				
+			;;
+			*)
+				echo "Unknown Architecture '$VAL'"
+				echo "Supported Architectures:"
+				echo "   x86"
+				echo "   x86_64"
+				echo "   ARM"
+				exit
+		esac
+		;;
+		
+	--wine*)
+		VAL=`echo $1 | cut -d = -f 2`
+		if [ "$VAL" = "$1" ]; then
+			shift ; VAL=$1
+		fi
+		WINE=$VAL
+		;;
 
 	--no-cygwin )
 		NO_CYGWIN=-mno-cygwin
@@ -214,161 +378,126 @@ while [ "$1" != "" ]; do
 		echo "configure [options]"
 		echo
 		echo "Options:"
-		echo "   --without-euphoria"
-		echo "   --eubin value"
-		echo "   --build value       set the build directory"
-		echo "   --full"
-		echo "   --release value     set the release type for the version string"
-		echo "   --debug             turn debugging on"
-		echo "   --prefix value      set the install directory (default /usr/local)"
-		echo "   --plat value        set the OS that we will translate to."
-		echo "                       values can be: WINDOWS, OSX, LINUX, FREEBSD, OPENBSD or NETBSD."
-		echo "   --watcom            set this so the translator will create C code for"
-		echo "                       Watcom C."
-		echo "   --no-managed-mem    disable managed memory"
-		echo "   --align4            malloc allocates addresses that are"
-		echo "                       always 4 byte aligned."
-		echo "   --eubin value       Use this option to specify the location of the"
-		echo "   --cc value          set this to the name of your GNU C compiler file name if its "
-		echo "                       name is not 'gcc'"
-		echo "   --rootdir value      the root dir to use for checking the svn revision"
-		echo "                       default is the parent directory"
+		echo "   --target value or --plat value"
+		echo "                       Set the OS that we will translate to."
+		echo "                       Values can be: WINDOWS, OSX, LINUX,"
+		echo "                       FREEBSD, OPENBSD or NETBSD."
+		echo "   --watcom            The translator will create C code"
+		echo "                       for the Watcom compiler."
+		echo "   --cc-prefix         Prefix to use with the compiler and"
+		echo "                       other build binaries.  This is"
+		echo "                       generally used from cross compilers,"
+		echo "                       or Windows MinGW installations that"
+		echo "                       use a prefix."
+		echo "   --cc value          The name of your GNU C compiler file name if its "
+		echo "                       name is not 'gcc'."
+		echo "   --rc value          Name of the windows resource compiler."
+		echo "                       This is used with MinGW builds."
+		echo "   --no-managed-mem    Disable managed memory. Used on Windows."
+		echo "   --managed-mem       Enable managed memory. Used on Windows."
+		echo "   --align4            Malloc allocates addresses that are"
+		echo "                       always 4 byte aligned. Used on Windows."
+		echo "   --without-euphoria  Don't use a precompiled version of Euphoria to build."
+		echo "   --eubin value       Set the path of the precompiled"
+		echo "                       binaries used to intrepret and translate the sources."
+		echo "   --build value       Set the build directory. The default is"
+		echo "                       'build' off of the source directory."
+		echo "   --debug             Turn debugging on."
+		# echo "   --full"
+		echo "   --prefix value      Set the install directory (default /usr/local)."
 		echo "   --use-binary-translator"
 		echo "                       Use the already built translator rather"
-		echo "                       than interpreting its source           "
+		echo "                       than interpreting its source.           "
 		echo "   --use-source-translator                                    "
 		echo "                       Interpret the translator's source rather" 
 		#'" (comment to help display in some editors)
 		echo "                       than using the already built translator"
-		echo "                       (default)"
-		echo "   --verbose-tests     cause the 'test' target to use the verbose flag"
-		echo "                       with eutest"
+		echo "                       (default)."
+		echo "   --release value     Set the release type for the version string."
+		echo "   --verbose-tests     Cause the 'test' target to use the -verbose flag"
+		echo "                       with eutest."
+		echo "   --rootdir value     The root dir to use for checking the svn revision."
+		echo "                       The default is the parent directory."
 		echo "   --oe-username value Developer user name on openeuphoria.org for various scp"
-		echo "                       operations such as manual upload"
-		echo "   --scp-client value  SCP program to use for scp uploads (default scp -C)"
-		echo "   --ssh-client value  SSH program to use for ssh commands (default ssh -C)"
-		echo "   --hg value          Mercurial binary command (default 'which hg')"
-		echo "   --no-cygwin         Use the -mno-cygwin flag with MinGW.  This flag is obsoltete,"
-		echo "                       and may cause errors on newer versions of MinGW."
+		echo "                       operations such as manual upload."
+		echo "   --scp-client value  SCP program to use for scp uploads (default scp -C)."
+		echo "   --ssh-client value  SSH program to use for ssh commands (default ssh -C)."
+		echo "   --hg value          Mercurial binary command (default 'which hg')."
+		if [ $MIN_VER -gt 0 ]; then
+			echo "   --arch value        Set architecture to ARM, x86, or x86-64."
+		fi
+		# Is --wine still needed?
+		echo "   --wine value        Path to wine (useful for cross compilation to windows)."
+		echo "   --no-cygwin         Use the -mno-cygwin flag with MinGW."
+		echo "                       This flag is obsoltete, and may cause errors"
+		echo "                       on newer versions of MinGW."
 		exit
 		;;
 	esac
 	shift
 done
 
-if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
-	echo ARCH=ix86 >> "$PREFIX"${CONFIG_FILE}
-elif echo "$UNAME_MACHINE" | grep "x86_64" > /dev/null; then
-	echo ARCH=ix86 >> "$PREFIX"${CONFIG_FILE}
-elif echo "$UNAME_MACHINE" | grep -i ARM > /dev/null; then
-	echo ARCH=ARM >> "$PREFIX"${CONFIG_FILE}
+if [ "$TARGET" = "EBSD" ]; then
+	EBSD=1
+elif [ "$TARGET" = "EOPENBSD" ]; then
+	EOPENBSD=1
+elif [ "$TARGET" = "EFREEBSD" ]; then
+	EFREEBSD=1
+elif [ "$TARGET" = "EOSX" ]; then
+	EOSX=1
+elif [ "$TARGET" = "ELINUX" ]; then
+	ELINUX=1
+elif [ "$TARGET" = "EWINDOWS" ]; then
+	EMINGW=1
 fi
 
-if test "x$PLAT" = "xLINUX"; then
-	UNAME_SYSTEM="Linux"
-elif test "x$PLAT" = "xOSX"; then
-	UNAME_SYSTEM="Darwin"
-elif test "x$PLAT" = "xOPENBSD"; then
-	UNAME_SYSTEM="OpenBSD"
-elif test "x$PLAT" = "xNETBSD"; then
-	UNAME_SYSTEM="NetBSD"
-elif test "x$PLAT" = "xFREEBSD"; then
-	UNAME_SYSTEM="FreeBSD"
-elif test "x$PLAT" = "xWINDOWS"; then
-	UNAME_SYSTEM="WINDOWS"
-fi
-
-echo Configuring to build for target: $UNAME_SYSTEM / $PLAT
-
-if test $UNAME_SYSTEM = "Linux"; then
-	echo EBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
-	echo ELINUX=1 >> "$PREFIX"${CONFIG_FILE}
-	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
-	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
-elif test $UNAME_SYSTEM = "MS-DOS"; then
-	echo EBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
-	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
-	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
-	echo EDJGPP=1 >> "$PREFIX"${CONFIG_FILE}
-	echo SHELL=bash >> "$PREFIX"${CONFIG_FILE}
-	cp Makefile.gnu "$PREFIX"../tests/Makefile.gnu
-elif test $UNAME_SYSTEM = "WINDOWS"; then
-	echo EBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
-	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
-	echo EMINGW=1 >> "$PREFIX"${CONFIG_FILE}
-	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
-elif test $UNAME_SYSTEM = "OpenBSD"; then
-	echo EBSD=1 >> "$PREFIX"${CONFIG_FILE}
-	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOPENBSD=1 >> "$PREFIX"${CONFIG_FILE}
-	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
-	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
-	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
-	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
-elif test $UNAME_SYSTEM = "NetBSD"; then
-	echo EBSD=1 >> "$PREFIX"${CONFIG_FILE}
-	echo ENETBSD=1 >> "$PREFIX"${CONFIG_FILE}
-	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
-	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
-	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
-	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
-elif test $UNAME_SYSTEM = "FreeBSD"; then
-	echo EBSD=1 >> "$PREFIX"${CONFIG_FILE}
-	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EFREEBSD=1 >> "$PREFIX"${CONFIG_FILE}
-	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
-	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
-	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
-	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
-elif test $UNAME_SYSTEM = "Darwin"; then
-	echo EBSD=1 >> "$PREFIX"${CONFIG_FILE}
-	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EFREEBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOSX=1 >> "$PREFIX"${CONFIG_FILE}
-	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
-	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
-fi
+echo Writing configuration to "$PREFIX"${CONFIG_FILE}...
+echo > "$PREFIX"${CONFIG_FILE}
+echo "# File generated from configure" >> ${CONFIG_FILE}
+echo "CONFIGURE_PARAMS=$CONFIGURE_PARAMS" >> "$PREFIX"${CONFIG_FILE}
+echo >> "$PREFIX"${CONFIG_FILE}
+[ -n "$EHOST" ] && echo "EHOST=$EHOST" >>  "$PREFIX"${CONFIG_FILE}
+[ -n "$EUBIN" ] && echo "EUBIN=$EUBIN" >> "$PREFIX"${CONFIG_FILE}
+[ -n "$INSTALL_PREFIX" ] && echo "PREFIX=$INSTALL_PREFIX" >> ${CONFIG_FILE}
+[ -n "$EREL_TYPE" ] && echo "EREL_TYPE=-DEREL_TYPE=\"$EREL_TYPE\"" >> ${CONFIG_FILE}
+#" comment to help display in some editors
+[ -n "$VERBOSE_TESTS" ] && echo "VERBOSE_TESTS=$VERBOSE_TESTS" >> ${CONFIG_FILE}
+[ -n "$ROOTDIR" ] && echo ROOTDIR="$ROOTDIR" >> ${CONFIG_FILE}
+[ -n "$OE_USERNAME" ] && echo OE_USERNAME="$OE_USERNAME" >> ${CONFIG_FILE}
+[ -n "$WINE" ] && echo WINE="$WINE" >> "$PREFIX"${CONFIG_FILE}
 
 if [ "x$EDEBUG" = "x1" ]; then
 	echo EDEBUG=1 >> "$PREFIX"${CONFIG_FILE}
 fi
+
+[ -n "$EBSD" ] && echo EBSD="$EBSD" >> "$PREFIX"${CONFIG_FILE}
+[ -n "$EOPENBSD" ] && echo EOPENBSD="$EOPENBSD" >> "$PREFIX"${CONFIG_FILE}
+[ -n "$ENETBSD" ]  && echo ENETBSD="$ENETBSD" >> "$PREFIX"${CONFIG_FILE}
+[ -n "$EOSX" ] && echo EOSX="$EOSX" >> "$PREFIX"${CONFIG_FILE}
+[ -n "$ELINUX" ] && echo ELINUX="$ELINUX" >> "$PREFIX"${CONFIG_FILE}
+[ -n "$EMINGW" ] && echo EMINGW="$EMINGW" >> "$PREFIX"${CONFIG_FILE}
+
 # if eui doesn't exist the error message goes into
 # the device file /dev/null. [works on Mingw too.]
-if [ "x$EUBIN" = "x" ]; then
-	if eui -? 1> /dev/null 2> /dev/null; then
-		if [ "x$EUPHORIA" = "x" ]; then
-			export EUPHORIA=1
+if [ "x$EUPHORIA" = "x" ]; then
+	if [ "x$EUBIN" = "x" ]; then
+		if eui -? 1> /dev/null 2> /dev/null; then
+			 EUPHORIA=1
+		else
+			 EUPHORIA=0
 		fi
 	else
-		export EUPHORIA=0
+		 EUPHORIA=1
 	fi
-else
-	export EUPHORIA=1
 fi
 
-if [ "x$EUPHORIA" = "x1" ]; then
+if [ "$EUPHORIA" = "1" ]; then
 	echo EUPHORIA=1 >> "$PREFIX"${CONFIG_FILE}
 else
 	echo EUPHORIA=0 >> "$PREFIX"${CONFIG_FILE}
 fi
 
-if test $UNAME_SYSTEM = "MS-DOS"; then
-	# "Information: Managed memory always on for DJGPP."
-	echo MANAGED_MEM=1 >> "$PREFIX"${CONFIG_FILE}
-	echo ALIGN4=1 >> "$PREFIX"${CONFIG_FILE}
-elif test $UNAME_SYSTEM = "WINDOWS"; then
+if [ "$TARGET" = "EWINDOWS" ]; then
 	# MANAGED_MEM and ALIGN4 are on by default for Windows
 	# and only Windows
 	if [ "x$MANAGED_MEM" = "x" ]; then
@@ -384,17 +513,28 @@ elif test $UNAME_SYSTEM = "WINDOWS"; then
 	fi
 fi
 
-if [ "$EC" != "" ]; then
-	echo "TRANSLATE=$EC" >> "$PREFIX"${CONFIG_FILE}
+if [ "$TARGET" = "EWINDOWS" ]; then
+	if [ "x$RC" = "x" ]; then
+		 RC=windres
+	fi
 fi
 
-echo "CC=$CC" >> "$PREFIX"${CONFIG_FILE}
-echo "SCP=$SCP" >> "$PREFIX"${CONFIG_FILE}
-echo "SSH=$SSH" >> "$PREFIX"${CONFIG_FILE}
-echo "HG=$HG" >> "$PREFIX"${CONFIG_FILE}
+echo >> "$PREFIX"${CONFIG_FILE}
 
-export PWD=`pwd $PWDARG`
-export PPWD=`cd .. && pwd $PWDARG`
+echo "TRANSLATE=$EC" >> "$PREFIX"${CONFIG_FILE}
+
+[ -n "$TARGET" ] && echo "ETARGET=$TARGET" >> "$PREFIX"${CONFIG_FILE}
+[ -n "$ARCH" ] && echo "ARCH=$ARCH" >> "$PREFIX"${CONFIG_FILE}
+[ -n "$MFLAG" ] && echo "MSIZE=$MFLAG" >> "$PREFIX"${CONFIG_FILE}
+[ -n "$CC" ] && echo "CC_SUFFIX=$CC" >> "$PREFIX"${CONFIG_FILE}
+[ -n "$CC_PREFIX" ] && echo "CC_PREFIX=$CC_PREFIX" >> "$PREFIX"${CONFIG_FILE}
+[ -n "$RC" ] && echo "RC_SUFFIX=$RC" >> "$PREFIX"${CONFIG_FILE}
+[ -n "$SCP" ] && echo "SCP=$SCP" >> "$PREFIX"${CONFIG_FILE}
+[ -n "$SSH" ] && echo "SSH=$SSH" >> "$PREFIX"${CONFIG_FILE}
+[ -n "$HG" ] && echo "HG=$HG" >> "$PREFIX"${CONFIG_FILE}
+
+ PWD=`pwd $PWDARG`
+ PPWD=`cd .. && pwd $PWDARG`
 
 # The following works around a bug in djgpp's pwd
 # that at times returns the parent of the current
@@ -402,55 +542,77 @@ export PPWD=`cd .. && pwd $PWDARG`
 if [ ! -e "$PPWD"/source ] && [ -e "$PWD"/source ]; then
 	# bug is present
 	echo "Information: Working around djgpp's PWD bug"
-	export PPWD=$PWD
+	 PPWD=$PWD
 fi
 
-export TRUNKDIR=$PPWD
+#  TRUNKDIR=$PPWD
 
 mkdir -p $BUILDDIR
-export BUILDDIR=`cd "$BUILDDIR" && pwd $PWDARG`
+ BUILDDIR=`cd "$BUILDDIR" && pwd $PWDARG`
 
-echo TRUNKDIR=$TRUNKDIR >> "$PREFIX"${CONFIG_FILE}
-echo BUILDDIR=$BUILDDIR >> "$PREFIX"${CONFIG_FILE}
+[ -n "$TRUNKDIR" ] && echo TRUNKDIR=$TRUNKDIR >> "$PREFIX"${CONFIG_FILE}
+[ -n "$SOURCEDIR" ] && echo SOURCEDIR=$SOURCEDIR >> "$PREFIX"${CONFIG_FILE}
+[ -n "$BUILDDIR" ] && echo BUILDDIR=$BUILDDIR >> "$PREFIX"${CONFIG_FILE}
 
 if [ "$USECYPPATH" = "true" ]; then
-	export CYPTRUNKDIR=`cygpath -a -m $TRUNKDIR`
-	export CYPBUILDDIR=`cygpath -a -m $BUILDDIR`
+	 CYPTRUNKDIR=`cygpath -a -m $TRUNKDIR`
+	 CYPBUILDDIR=`cygpath -a -m $BUILDDIR`
 else
-	# MinGW
-	export CYPTRUNKDIR=$TRUNKDIR
-	export CYPBUILDDIR=$BUILDDIR
+	# MinGW and others
+	 CYPTRUNKDIR=$TRUNKDIR
+	 CYPBUILDDIR=$BUILDDIR
 fi
-echo CYPTRUNKDIR=$CYPTRUNKDIR >> "$PREFIX"${CONFIG_FILE}
-echo CYPBUILDDIR=$CYPBUILDDIR >> "$PREFIX"${CONFIG_FILE}
+[ -n "$CYPTRUNKDIR" ] && echo CYPTRUNKDIR=$CYPTRUNKDIR >> "$PREFIX"${CONFIG_FILE}
+[ -n "$CYPBUILDDIR" ] && echo CYPBUILDDIR=$CYPBUILDDIR >> "$PREFIX"${CONFIG_FILE}
 
-echo XLTTARGETCC=$XLTTARGETCC >> "$PREFIX"${CONFIG_FILE}
-echo NO_CYGWIN=$NO_CYGWIN >> "$PREFIX"${CONFIG_FILE}
+[ -n "$XLTTARGETCC" ] && echo XLTTARGETCC=$XLTTARGETCC >> "$PREFIX"${CONFIG_FILE}
+[ -n "$NO_CYGWIN" ] && echo NO_CYGWIN=$NO_CYGWIN >> "$PREFIX"${CONFIG_FILE}
 
-$CC -o $BUILDDIR/echoversion$EXE echoversion.c
-echo VERSION=`$BUILDDIR/echoversion$EXE` >> "$PREFIX"${CONFIG_FILE}
+echo Getting version string...
+$CC -o $BUILDDIR/echoversion$EXE $SOURCEDIR/echoversion.c
+echo VERSION=`$BUILDDIR/echoversion$EXE` | tee -a "$PREFIX"${CONFIG_FILE}
+
+
 
 # Make a generic Makefile that simply includes Makefile.gnu
-echo include Makefile.gnu > Makefile
+echo Writing Makefile...
+echo include $SOURCEDIR/Makefile.gnu > Makefile
 
-
-echo Writing eu.cfg to $BUILDDIR/eu.cfg
+echo Writing eu.cfg to $BUILDDIR/eu.cfg...
 echo "[all]" > $BUILDDIR/eu.cfg
-echo -i $CYPTRUNKDIR/include >> $BUILDDIR/eu.cfg
 echo -eudir $CYPTRUNKDIR >> $BUILDDIR/eu.cfg
+echo -i $CYPTRUNKDIR/include >> $BUILDDIR/eu.cfg
+
 echo "[translate]" >> $BUILDDIR/eu.cfg
-if [ x"$PLAT" != "xdefault platform" ]; then
+if [ "x$PLAT" != "xdefault_platform" ]; then
 	echo "-plat" $PLAT  >> $BUILDDIR/eu.cfg
+	echo PLAT=$PLAT >> "$PREFIX"${CONFIG_FILE}
 fi
+if [ "x$ARCH" != "x$HOST_ARCH" ]; then
+	echo "-arch" $ARCH >> $BUILDDIR/eu.cfg
+fi
+	
 echo "-$XLTTARGETCC " >> $BUILDDIR/eu.cfg
 echo "-con " >> $BUILDDIR/eu.cfg
 echo "-com" $CYPTRUNKDIR >> $BUILDDIR/eu.cfg
+if [ $MIN_VER -gt 0 ]; then
+	echo "-lib-pic" $CYPBUILDDIR/euso.a >> $BUILDDIR/eu.cfg
+fi
+if [ "x$CC_PREFIX" != "x" ]; then
+	echo "-cc-prefix" $CC_PREFIX  >> $BUILDDIR/eu.cfg
+fi
+
 if [ "x$EDEBUG" = "x1" ]; then
 	echo "-lib" $CYPBUILDDIR/eudbg.a >> $BUILDDIR/eu.cfg
 else
 	echo "-lib" $CYPBUILDDIR/eu.a >> $BUILDDIR/eu.cfg
 fi
+
 echo "[bind]"  >> $BUILDDIR/eu.cfg
 echo "-eub" $CYPBUILDDIR/eub >> $BUILDDIR/eu.cfg
 
-cp $BUILDDIR/eu.cfg $TRUNKDIR/source/eu.cfg
+if [ -f "$TRUNKDIR/source/eu.cfg" ] ; then
+	rm "$TRUNKDIR/source/eu.cfg"
+fi
+
+echo >> ${CONFIG_FILE}
