@@ -44,6 +44,9 @@ type c_routine(integer x)
     return x >= -1 and x <= 1000
 end type
 
+-- These types use user defined types inside of them
+-- although you shouldn't use these next two as functions to test data with,
+-- it can be useful to crash inside a type routine for diagnosing problems.
 type string(sequence s)
     for i = 1 to length(s) do
 	integer si = s[i]	
@@ -62,7 +65,8 @@ type sequence_of_strings(object x)
 end type
 
 
-sequence cmd, orig_string
+sequence_of_strings cmd
+string orig_string
 
 integer scanned, no_open
 scanned = 0
@@ -81,7 +85,7 @@ ifdef LINUX then
 end ifdef
 
 atom string_pointer
-sequence routine_name
+string routine_name
 sequence_of_strings dll_list
 dll_list = {}
 
@@ -93,8 +97,8 @@ function process_so_conf(atom fd)
         object line
         while sequence(line) with entry do
 	    if search:begins("include ", line) then
-		sequence conf_file_spec = text:trim(line[length("include")+2..$-1])
-		sequence path = filesys:pathname(conf_file_spec)
+		string conf_file_spec = text:trim(line[length("include")+2..$-1])
+		string path = filesys:pathname(conf_file_spec)
 	        object conf_directories = dir(conf_file_spec)
 	        if sequence(conf_directories) then
 		    for i = 1 to length(conf_directories) do
@@ -321,15 +325,15 @@ CSetup()
 
 cmd = command_line()   -- eui dsearch [string]
 function add_to_dlls(sequence path)
-    sequence ret = {}
+    sequence_of_strings ret = {}
     object list = dir(path)
     if atom(list) then
         return {}
     end if
     for k = 1 to length(list) do
         sequence file_entry = list[k]
-        sequence name = file_entry[D_NAME]
-        sequence attr = file_entry[D_ATTRIBUTES]
+        string name = file_entry[D_NAME]
+        string attr = file_entry[D_ATTRIBUTES]
 	if not find('d', attr) then
 	    if search:ends("dll", name) or match(".so.", name) or search:ends(".so", name) then
 		ret = append( ret, path & SLASH & file_entry[D_NAME] )
@@ -345,7 +349,7 @@ boolean libraries_specified_at_command_line = FALSE
 orig_string = ""
 integer cmd_i = 3
 while cmd_i <= length(cmd) do
-    sequence arg = cmd[cmd_i]
+    string arg = cmd[cmd_i]
     if search:begins(arg, "--help") then
 		puts(io:STDOUT, 
 """eui dsearch.ex [options] c_function_name
@@ -358,7 +362,7 @@ while cmd_i <= length(cmd) do
 			abort(0)
 	elsif search:begins(arg, "--lib") then
 		if cmd_i < length(cmd) then
-		    sequence next = cmd[cmd_i+1]
+		    string next = cmd[cmd_i+1]
 		    object add_lib = dir(next)
 		    if not libraries_specified_at_command_line then
 			directory_list = {}
