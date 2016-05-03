@@ -57,12 +57,6 @@ public function get_next( symtab_index sym )
 	return sym
 end function
 
-ifdef EU4_0 then
-	function sizeof(integer i)
-		return and_bits(#f, i)
-	end function
-end ifdef
-
 
 procedure BackEnd(integer il_file)
 -- Store the required front-end data structures in memory.
