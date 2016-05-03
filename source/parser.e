@@ -2752,7 +2752,8 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 
 	elsif all_ints then
 		atom delta = max - min
-		if not TRANSLATE and  delta < 1024 and delta >= 0 then
+		-- disabled to fix ticket 944
+		if 0 and not TRANSLATE and  delta < 1024 and delta >= 0 then
 			opcode = SWITCH_SPI
 -- 			sequence jump = switch_stack[$][SWITCH_JUMP_TABLE]
 			sequence switch_table = repeat( else_target, delta + 1 )
