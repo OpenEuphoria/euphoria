@@ -1901,12 +1901,7 @@ procedure Return_statement()
 
 	integer
 		last_op = Last_op(),
-		last_pc = Last_pc(),
-		is_tail = 0
-
-	if last_op = PROC and length(Code) > last_pc and Code[last_pc+1] = CurrentSub then
-		is_tail = 1
-	end if
+		last_pc = Last_pc()
 
 	if not TRANSLATE then
 		if OpTrace then
@@ -1918,20 +1913,10 @@ procedure Return_statement()
 		Expr()
 		last_op = Last_op()
 		last_pc = Last_pc()
-		if last_op = PROC and length(Code) > last_pc and Code[last_pc+1] = CurrentSub then
-			pop = Pop() -- prevent cg_stack (code generation stack) leakage
-			Code[Last_pc()] = PROC_TAIL
-			if object(pop_temps()) then end if
-		else
-			FuncReturn = TRUE
-			emit_op(RETURNF)
-		end if
+		FuncReturn = TRUE
+		emit_op(RETURNF)
 	else
-		if is_tail then
-			Code[Last_pc()] = PROC_TAIL
-		end if
 		emit_op(RETURNP)
-
 	end if
 	tok = next_token()
 	putback(tok)
