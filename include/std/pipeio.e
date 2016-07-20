@@ -27,7 +27,7 @@ ifdef WINDOWS then
 		iCloseHandle = dll:define_c_func(kernel32,"CloseHandle",{dll:C_POINTER}, dll:C_BOOL),
 		iTerminateProcess=dll:define_c_func(kernel32,"TerminateProcess",{dll:C_POINTER, dll:C_UINT}, dll:C_BOOL),
 		iGetLastError = dll:define_c_func(kernel32,"GetLastError",{},dll:C_DWORD),
-		iGetStdHandle = dll:define_c_func(kernel32,"GetStdHandle",{dll:C_DWORD}, dll:C_HANDLE),
+		iGetStdHandle = dll:define_c_func(kernel32,"GetStdHandle",{dll:C_DWORD}, dll:C_LONG_PTR),
 		iSetHandleInformation = dll:define_c_func(kernel32,"SetHandleInformation",{dll:C_POINTER, dll:C_DWORD, dll:C_DWORD}, dll:C_BOOL),
 		iCreateProcess = dll:define_c_func(kernel32,"CreateProcessA",{dll:C_POINTER, dll:C_POINTER, dll:C_POINTER,
 			dll:C_POINTER, dll:C_BOOL, dll:C_DWORD, dll:C_POINTER, dll:C_POINTER, dll:C_POINTER, dll:C_POINTER},dll:C_BOOL)

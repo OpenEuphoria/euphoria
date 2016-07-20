@@ -15,6 +15,14 @@ public constant
 	C_LRESULT = C_POINTER,
 	C_LANGID =  C_WORD,
 	C_COLORREF =  C_DWORD,    --0x00bbggrr
+	--** handle sizeof pointer
+	C_HANDLE  = C_LONG_PTR,
+	--** hwnd sizeof pointer
+	C_HWND    = C_LONG_PTR,
+	--** wparam sizeof pointer (why 32bits?)
+	C_WPARAM  = C_POINTER,
+	--** lparam sizeof pointer (why 32bits?)
+	C_LPARAM  = C_POINTER,
 	$
 
 public constant

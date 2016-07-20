@@ -64,18 +64,8 @@ public constant
 	C_LONG_PTR = C_LONGLONG
 end ifdef
 public constant
-	--** handle sizeof pointer
-	C_HANDLE  = C_LONG_PTR,
-	--** hwnd sizeof pointer
-	C_HWND    = C_LONG_PTR,
 	--** dword 32-bits
 	C_DWORD   = C_UINT,
-	--** wparam sizeof pointer
-	C_WPARAM  = C_POINTER,
-	--** lparam sizeof pointer
-	C_LPARAM  = C_POINTER,
-	--** hresult 32-bits
-	C_HRESULT = C_LONG,
 	--** float 32-bits
 	C_FLOAT   = #03000004,
 	--** double 64-bits
