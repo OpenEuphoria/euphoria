@@ -1,0 +1,34 @@
+--****
+-- == Dynamic Linking to External Code - Windows specific definitions
+--
+-- <<LEVELTOC level=2 depth=4>>
+--
+
+namespace w32dll
+
+include std/dll.e
+
+--****
+-- === C Type Constants
+-- These C type constants are used when defining external C functions in a shared
+-- library file.
+--
+-- Example 1:
+--   See [[:define_c_proc]]
+--
+-- See Also:
+--   [[:define_c_proc]], [[:define_c_func]], [[:define_c_var]]
+
+public constant
+	--** handle sizeof pointer
+	C_HANDLE  = C_POINTER,
+	--** hwnd sizeof pointer
+	C_HWND    = C_POINTER,
+	--** wparam sizeof pointer
+	C_WPARAM  = C_POINTER,
+	--** lparam sizeof pointer
+	C_LPARAM  = C_POINTER,
+	--** hresult 32-bits
+	C_HRESULT = C_LONG,
+	$
+

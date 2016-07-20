@@ -18,6 +18,8 @@ include std/error.e
 include std/machine.e
 
 ifdef WINDOWS then
+include std/win32/w32dllconst.ew
+
 	constant
 		kernel32 = dll:open_dll("kernel32.dll"),
 		--iGetExitCodeProcess=define_c_func(kernel32,"GetExitCodeProcess",{C_UINT,C_POINTER},C_INT),
@@ -27,7 +29,7 @@ ifdef WINDOWS then
 		iCloseHandle = dll:define_c_func(kernel32,"CloseHandle",{dll:C_POINTER}, dll:C_BOOL),
 		iTerminateProcess=dll:define_c_func(kernel32,"TerminateProcess",{dll:C_POINTER, dll:C_UINT}, dll:C_BOOL),
 		iGetLastError = dll:define_c_func(kernel32,"GetLastError",{},dll:C_DWORD),
-		iGetStdHandle = dll:define_c_func(kernel32,"GetStdHandle",{dll:C_DWORD}, dll:C_LONG_PTR),
+		iGetStdHandle = dll:define_c_func(kernel32,"GetStdHandle",{dll:C_DWORD}, w32dll:C_HANDLE),
 		iSetHandleInformation = dll:define_c_func(kernel32,"SetHandleInformation",{dll:C_POINTER, dll:C_DWORD, dll:C_DWORD}, dll:C_BOOL),
 		iCreateProcess = dll:define_c_func(kernel32,"CreateProcessA",{dll:C_POINTER, dll:C_POINTER, dll:C_POINTER,
 			dll:C_POINTER, dll:C_BOOL, dll:C_DWORD, dll:C_POINTER, dll:C_POINTER, dll:C_POINTER, dll:C_POINTER},dll:C_BOOL)
