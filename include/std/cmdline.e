@@ -1019,7 +1019,18 @@ function parse_commands( sequence cmds, sequence opts, map parsed_opts, sequence
 	sequence type_
 	integer from_
 	sequence cmd
-	
+    integer find_extra      = 0  -- Idx into the option definitions for the 'EXTRA' ones
+    integer extras_callback = -1 -- Routine ID for calling funtion that handles extra values.
+
+    -- Locate which, of any, of the option specs, relates to the 'EXTRA' values 
+    for i = length(opts) to 1 by -1 do
+        if equal(opts[i][1..3], {0,0,{}}) then
+            find_extra = i
+            extras_callback = opts[find_extra][CALLBACK]
+            exit
+        end if
+    end for
+    
 	while arg_idx < length(cmds) do
 		arg_idx += 1
 
@@ -1034,19 +1045,34 @@ function parse_commands( sequence cmds, sequence opts, map parsed_opts, sequence
 			continue
 		end if
 
-		if (opts_done or find(cmd[1], os:CMD_SWITCHES) = 0 or length(cmd) = 1)
-		then
-			map:put(parsed_opts, EXTRAS, cmd, map:APPEND)
-			has_extra = 1
-			if validation = NO_VALIDATION_AFTER_FIRST_EXTRA then
-				for i = arg_idx + 1 to length(cmds) do
-					map:put(parsed_opts, EXTRAS, cmds[i], map:APPEND)
-				end for
-				
-				exit
-			else
-				continue
-			end if
+		if (opts_done or find(cmd[1], os:CMD_SWITCHES) = 0 or length(cmd) = 1) then
+              
+            if extras_callback >= 0 then
+       		    --                              OPT_IDX        OPT_CNT         OPT_VAL  OPT_REV
+                call_count[find_extra] += 1
+      		    if call_func(extras_callback, {{find_extra, call_count[find_extra], cmd,  0}}) = 0 then
+                    return { arg_idx, call_count }
+          	    end if
+            end if
+    
+     		map:put(parsed_opts, EXTRAS, cmd, map:APPEND)
+    		has_extra = 1
+    		if validation = NO_VALIDATION_AFTER_FIRST_EXTRA then
+    			for i = arg_idx + 1 to length(cmds) do
+                    if extras_callback >= 0 then
+                        --                              OPT_IDX        OPT_CNT         OPT_VAL  OPT_REV
+                        call_count[find_extra] += 1
+      		            if call_func(extras_callback, {{find_extra, call_count[find_extra], cmds[i],  0}}) = 0 then
+                            return { arg_idx, call_count }
+                        end if
+                    end if
+                    map:put(parsed_opts, EXTRAS, cmds[i], map:APPEND)
+    			end for
+    				
+    			exit
+    		else
+    			continue
+    		end if
 		end if
 
 		if equal(cmd, "--") then
@@ -1194,7 +1220,9 @@ end function
 -- command line that are not part of any of the defined options. This is commonly
 -- used to get the list of files entered on the command line. For instance, if
 -- the command line used was //##myprog -verbose file1.txt file2.txt##// then
--- the ##EXTRAS## data value would be ##{"file1.txt", "file2.txt"}##.
+-- the ##EXTRAS## data value would be ##{"file1.txt", "file2.txt"}##.//
+-- NOTE: The extra values are not validated at all by this routine and it is
+-- your code's responsibility to check these values.
 --
 -- When any command item begins with an **##@##** symbol then it is assumed
 -- that it prefixes a file name. That file will then be opened and its contents used
