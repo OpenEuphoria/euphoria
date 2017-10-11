@@ -158,29 +158,6 @@ function html_decorate_diff(sequence asplit_diff)
     return result
 end function
 
-
-
-function html_diff(sequence control, sequence outcome)
-
-    return html_decorate_diff(split_diff(control, outcome))
-    
-    
-    -- integer c1, c0
-    
-    -- -- make the long string begin on a word boundary
-    -- if endc-len < length(control) then
-    --     c1 = control[endc-len+1]
-    -- else
-    --     c1 = 0
-    -- end if
-    -- while len > 0 and not t_space(c1) and not t_space(c0) and not t_punct(c1) and not t_punct(c0) with entry do
-    --     len = len - 1
-    --     c1 = c0
-    -- entry
-    --     c0 = control[endc - len]
-    -- end while
-end function
-
 constant USER_BREAK_EXIT_CODES = {255,-1073741510}
 integer verbose_switch = 0
 object void
@@ -1001,14 +978,15 @@ constant html_unexpected_exerr_table_begin =
 html_error_table_begin &
 `
 <tr><th width="50%%" colspan='1'  class='header'>expected ex.err</th><th colspan='1' class=error>outcome ex.err</th></tr>`
-constant html_unexpected_exerr_row_format = "<tr><td  class='header' colspan='1' ><pre>%s</pre></td><td class=error bcolspan='1' ><pre>%s</pre></td></tr>"
+sequence html_unexpected_exerr_row_format = "<tr><td  class='header' colspan='1' ><pre>%s</pre></td><td class=error bcolspan='1' ><pre>%s</pre></td></tr>"
+constant html_unexpected_exerr_diff_row_format = "<tr><td  colspan='2' ><pre>%s</pre></td></tr>"
 
-constant html_unexpected_exerr_table_end = `
+sequence html_unexpected_exerr_table_end = `
 </table>
 `
 
-constant html_error_table_end = html_unexpected_exerr_table_end
-constant html_table_error_row = `
+sequence html_error_table_end = html_unexpected_exerr_table_end
+sequence html_table_error_row = `
 <tr class=%s>
 <th align="left" width="50%%">%s</td>
 <td colspan="3">%s</td>
@@ -1111,7 +1089,15 @@ procedure html_out(sequence data)
 				object ex_err = regex:matches(differing_ex_err_pattern, error_list[2][err])
 				if sequence(ex_err) then
 					printf(html_fn, html_unexpected_exerr_table_begin, {data[2], data[2]} )
-					printf(html_fn, html_unexpected_exerr_row_format, ex_err[2..3])
+                        		sequence control = ex_err[2]
+                        		sequence outcome = ex_err[3]
+                        		sequence this_diff = split_diff(control,outcome)
+		        		boolean use_diff_format = length(control) + length(outcome) > 1.62 * split_diff_length(this_diff)
+		            		if use_diff_format then
+						printf(html_fn, html_unexpected_exerr_diff_row_format, { html_decorate_diff(this_diff) })
+					else
+						printf(html_fn, html_unexpected_exerr_row_format, ex_err[2..3])
+					end if
 					printf(html_fn, html_unexpected_exerr_table_end, {} )			
 				elsif eu:find(error_list[2][err], {No_valid_control_file_was_supplied, Unexpected_empty_control_file, No_valid_exerr_has_been_generated, Unexpected_empty_exerr}) then
 					printf(html_fn, html_error_table_begin, {data[2], data[2]} )
