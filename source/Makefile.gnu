@@ -276,6 +276,7 @@ ifeq "$(TRANSLATE)" "euc"
 	TRANSLATE="euc"
 else
 #   We MUST pass these arguments to $(EXE), for $(EXE) is not and shouldn't be governed by eu.cfg in BUILDDIR.
+#   Euphoria programs under Windows use paths of the form "c:\euphoria\program" even when compiling under MING or Cygwin!  This means they must take CYP* macros CYPINCDIR and CYPTRUNKDIR as arguments.   
 	TRANSLATE=$(HOST_EXE) $(CYPINCDIR) $(EC_DEBUG) $(EFLAG) $(CYPTRUNKDIR)/source/euc.ex $(EUC_DEBUG_FLAG)
 endif
 
@@ -765,10 +766,10 @@ pdfdoc : $(BUILDDIR)/euphoria.pdf
 
 $(BUILDDIR)/pdf/euphoria.txt : $(EU_DOC_SOURCE)
 	-mkdir -p $(BUILDDIR)/pdf
-	$(EUDOC) -d PDF --single --strip=2 -a $(TRUNKDIR)/docs/manual.af -o $(BUILDDIR)/pdf/euphoria.txt
+	$(EUDOC) -d PDF --single --strip=2 -a $(TRUNKDIR)/docs/manual.af -o $(CYPBUILDDIR)/pdf/euphoria.txt
 
 $(BUILDDIR)/pdf/euphoria.tex : $(BUILDDIR)/pdf/euphoria.txt $(TRUNKDIR)/docs/template.tex
-	cd $(TRUNKDIR)/docs && $(CREOLE) -f latex -A -t=$(TRUNKDIR)/docs/template.tex -o=$(BUILDDIR)/pdf $<
+	cd $(TRUNKDIR)/docs && $(CREOLE) -f latex -A -t=$(TRUNKDIR)/docs/template.tex -o=$(CYPBUILDDIR)/pdf $<
 
 $(BUILDDIR)/euphoria.pdf : $(BUILDDIR)/pdf/euphoria.tex
 	cd $(TRUNKDIR)/docs && pdflatex -output-directory=$(BUILDDIR)/pdf $(BUILDDIR)/pdf/euphoria.tex && pdflatex -output-directory=$(BUILDDIR)/pdf $(BUILDDIR)/pdf/euphoria.tex && cp $(BUILDDIR)/pdf/euphoria.pdf $(BUILDDIR)/
@@ -791,8 +792,8 @@ pdfdoc-initial : $(BUILDDIR)/euphoria.pdf
 .PHONY: test-eucode
 
 test-eucode : 
-	$(EUDOC) --single --verbose --test-eucode --work-dir=$(BUILDDIR)/eudoc_test -o $(BUILDDIR)/test_eucode.txt $(EU_STD_INC)
-	$(CREOLE) -o $(BUILDDIR) $(BUILDDIR)/test_eucode.txt
+	$(EUDOC) --single --verbose --test-eucode --work-dir=$(CYPBUILDDIR)/eudoc_test -o $(BUILDDIR)/test_eucode.txt $(EU_STD_INC)
+	$(CREOLE) -o $(CYPBUILDDIR) $(CYPBUILDDIR)/test_eucode.txt
 
 #
 # Unit Testing
@@ -811,14 +812,14 @@ test : $(BUILDDIR)/$(LIBRARY_NAME)
 test :  
 
 	cd $(TRUNKDIR)/tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
-		$(EXE) -i $(TRUNKDIR)/include $(TRUNKDIR)/source/eutest.ex -i $(TRUNKDIR)/include -cc gcc $(VERBOSE_TESTS) \
+		$(EXE) -i $(CYPTRUNKDIR)/include $(TRUNKDIR)/source/eutest.ex $(CYPINCDIR) -cc gcc $(VERBOSE_TESTS) \
 		-exe "$(CYPBUILDDIR)/$(EEXU)" \
 		-ec "$(CYPBUILDDIR)/$(EECU)" \
 		-eubind "$(CYPBUILDDIR)/$(EUBIND)" -eub $(CYPBUILDDIR)/$(EBACKENDC) \
 		-lib "$(CYPBUILDDIR)/$(LIBRARY_NAME)" \
 		-log $(TESTFILE) ; \
-	$(EXE) -i $(TRUNKDIR)/include $(TRUNKDIR)/source/eutest.ex -exe "$(CYPBUILDDIR)/$(EEXU)" -process-log > $(CYPBUILDDIR)/test-report.txt ; \
-	$(EXE) -i $(TRUNKDIR)/include $(TRUNKDIR)/source/eutest.ex -eui "$(CYPBUILDDIR)/$(EEXU)" -process-log -html > $(CYPBUILDDIR)/test-report.html
+	$(EXE) -i $(CYPTRUNKDIR)/include $(TRUNKDIR)/source/eutest.ex -exe "$(CYPBUILDDIR)/$(EEXU)" -process-log > $(CYPBUILDDIR)/test-report.txt ; \
+	$(EXE) -i $(CYPTRUNKDIR)/include $(TRUNKDIR)/source/eutest.ex -eui "$(CYPBUILDDIR)/$(EEXU)" -process-log -html > $(CYPBUILDDIR)/test-report.html
 	cd $(TRUNKDIR)/tests && sh check_diffs.sh
 
 testeu : $(TRUNKDIR)/tests/lib818.dll
@@ -944,18 +945,18 @@ endif
 
 ifeq "$(ARCH)" "ARM"
 	EUC_CFLAGS=-cflags "-fomit-frame-pointer -c -w -fsigned-char -O2 -I$(TRUNKDIR) -ffast-math"
-	EUC_LFLAGS=-lflags "$(BUILDDIR)/eu.a -ldl -lm -lpthread"
+	EUC_LFLAGS=-lflags "$(CYPBUILDDIR)/eu.a -ldl -lm -lpthread"
 else
 	EUC_CFLAGS=-cflags "$(FE_FLAGS)"
 	EUC_LFLAGS=
 endif
 
 $(BUILDDIR)/eudist-build/main-.c : $(TRUNKDIR)/source/eudist.ex
-	$(TRANSLATE) -build-dir "$(BUILDDIR)/eudist-build" \
+	$(TRANSLATE) -build-dir "$(CYPBUILDDIR)/eudist-build" \
 		-c "$(BUILDDIR)/eu.cfg" \
-		-o "$(BUILDDIR)/$(EUDIST)" \
-		-lib "$(BUILDDIR)/eu.a" \
-		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
+		-o "$(CYPBUILDDIR)/$(EUDIST)" \
+		-lib "$(CYPBUILDDIR)/eu.a" \
+		-makefile -eudir $(CYPTRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/eudist.ex
 
 $(BUILDDIR)/$(EUDIST) : $(TRUNKDIR)/source/eudist.ex $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA) $(BUILDDIR)/eudist-build/main-.c
@@ -964,59 +965,59 @@ $(BUILDDIR)/$(EUDIST) : $(TRUNKDIR)/source/eudist.ex $(BUILDDIR)/$(EECU) $(BUILD
 $(BUILDDIR)/eudis-build/main-.c : $(TRUNKDIR)/source/dis.ex  $(TRUNKDIR)/source/dis.e $(TRUNKDIR)/source/dox.e
 $(BUILDDIR)/eudis-build/main-.c : $(EU_CORE_FILES) 
 $(BUILDDIR)/eudis-build/main-.c : $(EU_INTERPRETER_FILES) 
-	$(TRANSLATE) -build-dir "$(BUILDDIR)/eudis-build" \
-		-c "$(BUILDDIR)/eu.cfg" \
-		-o "$(BUILDDIR)/$(EUDIS)" \
-		-lib "$(BUILDDIR)/eu.a" \
-		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
-		$(MINGW_FLAGS) $(TRUNKDIR)/source/dis.ex
+	$(TRANSLATE) -build-dir "$(CYPBUILDDIR)/eudis-build" \
+		-c "$(CYPBUILDDIR)/eu.cfg" \
+		-o "$(CYPBUILDDIR)/$(EUDIS)" \
+		-lib "$(CYPBUILDDIR)/eu.a" \
+		-makefile -eudir $(CYPTRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
+		$(MINGW_FLAGS) $(CYPTRUNKDIR)/source/dis.ex
 
 $(BUILDDIR)/$(EUDIS) : $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA) $(BUILDDIR)/eudis-build/main-.c  $(BUILDDIR)/$(EECUA)
 		$(MAKE) -C "$(BUILDDIR)/eudis-build" -f dis.mak
 
 $(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/eubind.ex $(EU_INTERPRETER_FILES) $(EU_BACKEND_RUNNER_FILES) $(EU_CORE_FILES)
-	$(TRANSLATE) -build-dir "$(BUILDDIR)/bind-build" \
-		-c "$(BUILDDIR)/eu.cfg" \
-		-o "$(BUILDDIR)/$(EUBIND)" \
-		-lib "$(BUILDDIR)/eu.a" \
-		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
-		$(MINGW_FLAGS) $(TRUNKDIR)/source/eubind.ex
+	$(TRANSLATE) -build-dir "$(CYPBUILDDIR)/bind-build" \
+		-c "$(CYPBUILDDIR)/eu.cfg" \
+		-o "$(CYPBUILDDIR)/$(EUBIND)" \
+		-lib "$(CYPBUILDDIR)/eu.a" \
+		-makefile -eudir $(CYPTRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
+		$(MINGW_FLAGS) $(CYPTRUNKDIR)/source/eubind.ex
 
 $(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA) 
-		$(MAKE) -C "$(BUILDDIR)/bind-build" -f eubind.mak
+		$(MAKE) -C "$(CYPBUILDDIR)/bind-build" -f eubind.mak
 
 $(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/eushroud.ex \
 $(EU_BACKEND_RUNNER_FILES) $(EU_CORE_FILES)
-	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/shroud-build" \
-		-o "$(BUILDDIR)/$(EUSHROUD)" \
-		-lib "$(BUILDDIR)/eu.a" \
-		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
-		$(MINGW_FLAGS) $(TRUNKDIR)/source/eushroud.ex
+	$(BUILDDIR)/$(EECU) -build-dir "$(CYPBUILDDIR)/shroud-build" \
+		-o "$(CYPBUILDDIR)/$(EUSHROUD)" \
+		-lib "$(CYPBUILDDIR)/eu.a" \
+		-makefile -eudir $(CYPTRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
+		$(MINGW_FLAGS) $(CYPTRUNKDIR)/source/eushroud.ex
 
 $(BUILDDIR)/$(EUSHROUD) : $(BUILDDIR)/shroud-build/main-.c $(BUILDDIR)/$(EECUA) 
-		$(MAKE) -C "$(BUILDDIR)/shroud-build" -f eushroud.mak
+		$(MAKE) -C "$(CYPBUILDDIR)/shroud-build" -f eushroud.mak
 
 $(BUILDDIR)/eutest-build/main-.c : $(TRUNKDIR)/source/eutest.ex
-	$(TRANSLATE) -build-dir "$(BUILDDIR)/eutest-build" \
-		-c "$(BUILDDIR)/eu.cfg" \
-		-o "$(BUILDDIR)/$(EUTEST)" \
-		-lib "$(BUILDDIR)/eu.a" \
-		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
-		$(MINGW_FLAGS) $(TRUNKDIR)/source/eutest.ex
+	$(TRANSLATE) -build-dir "$(CYPBUILDDIR)/eutest-build" \
+		-c "$(CYPBUILDDIR)/eu.cfg" \
+		-o "$(CYPBUILDDIR)/$(EUTEST)" \
+		-lib "$(CYPBUILDDIR)/eu.a" \
+		-makefile -eudir $(CYPTRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
+		$(MINGW_FLAGS) $(CYPTRUNKDIR)/source/eutest.ex
 
 $(BUILDDIR)/$(EUTEST) : $(BUILDDIR)/eutest-build/main-.c  $(BUILDDIR)/$(EECUA)
 		$(MAKE) -C "$(BUILDDIR)/eutest-build" -f eutest.mak
 
 $(BUILDDIR)/eucoverage-build/main-.c : $(TRUNKDIR)/bin/eucoverage.ex
-	$(TRANSLATE) -build-dir "$(BUILDDIR)/eucoverage-build" \
-		-c "$(BUILDDIR)/eu.cfg" \
-		-o "$(BUILDDIR)/$(EUCOVERAGE)" \
-		-lib "$(BUILDDIR)/eu.a" \
-		-makefile -eudir $(TRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
-		$(MINGW_FLAGS) $(TRUNKDIR)/bin/eucoverage.ex
+	$(TRANSLATE) -build-dir "$(CYPBUILDDIR)/eucoverage-build" \
+		-c "$(CYPBUILDDIR)/eu.cfg" \
+		-o "$(CYPBUILDDIR)/$(EUCOVERAGE)" \
+		-lib "$(CYPBUILDDIR)/eu.a" \
+		-makefile -eudir $(CYPTRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
+		$(MINGW_FLAGS) $(CYPTRUNKDIR)/bin/eucoverage.ex
 
 $(BUILDDIR)/$(EUCOVERAGE) : $(BUILDDIR)/eucoverage-build/main-.c $(BUILDDIR)/$(EECUA)
-		$(MAKE) -C "$(BUILDDIR)/eucoverage-build" -f eucoverage.mak
+		$(MAKE) -C "$(CYPBUILDDIR)/eucoverage-build" -f eucoverage.mak
 
 EU_TOOLS= $(BUILDDIR)/$(EUDIST) \
 	$(BUILDDIR)/$(EUDIS) \
