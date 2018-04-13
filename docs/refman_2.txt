@@ -3926,8 +3926,7 @@ temporarily affected by the "##without warning strict##" directive.
                  all warnings.
 | ##resolution## | an identifier was used in a file, but was defined in
                    a file this file doesn't (recursively) include.
-| ##short_circuit## | a routine call may not take place because of short circuit
-                       evaluation in a conditional clause.
+| ##short_circuit## | a routine call that **could affect the state of your program** may not take place because of [[:short_circuit "short circuit"]] evaluation in a conditional clause.
 | ##override## | a built-in is being overridden
 | ##builtin_chosen## | an unqualified call caused Euphoria to choose between a
                          built-in and another global which does not override it.
