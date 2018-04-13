@@ -393,6 +393,11 @@ EU_LIB_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_runtime.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_task.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_callc.o \
+	$(BUILDDIR)/$(OBJDIR)/back/be_debug.o \
+	$(BUILDDIR)/$(OBJDIR)/back/be_symtab.o \
+	$(BUILDDIR)/$(OBJDIR)/back/be_execute.o \
+	$(BUILDDIR)/$(OBJDIR)/back/be_rterror.o \
+	$(BUILDDIR)/$(OBJDIR)/back/be_main.o \
 	$(PREFIXED_PCRE_OBJECTS)
 	
 # The bare include directory in this checkout as we want the make file to see it.  Forward slashes, no 'C:'. 
@@ -498,7 +503,7 @@ else
 	
 $(BUILDDIR)/$(LIBRARY_NAME) : $(EU_LIB_OBJECTS)
 	$(AR) -rc $(BUILDDIR)/$(LIBRARY_NAME) $(EU_LIB_OBJECTS)
-	$(ECHO) $(MAKEARGS)
+	@$(ECHO) "$(MAKEARGS)"
 endif
 
 shared-library :
@@ -525,7 +530,7 @@ debug-library : $(BUILDDIR)/$(EECUDBGA)
 builddirs : | $(BUILD_DIRS)
 
 $(BUILD_DIRS) :
-	mkdir -p $(BUILD_DIRS) 
+	mkdir -p $@
 
 ifeq "$(ROOTDIR)" ""
 ROOTDIR=$(TRUNKDIR)
@@ -590,7 +595,7 @@ endif
 endif
 
 source-tarball :
-	echo building source-tarball for $(PLAT)
+	@$(ECHO) "building source-tarball for $(PLAT)"
 	rm -rf $(BUILDDIR)/$(SOURCEDIR)
 	hg archive $(BUILDDIR)/$(SOURCEDIR)
 	mkdir $(BUILDDIR)/$(SOURCEDIR)/build
@@ -620,8 +625,8 @@ $(BUILDDIR)/$(EEXU) :  $(EU_MAIN) $(BUILDDIR)/include/be_ver.h $(TRUNKDIR)/sourc
 ifeq "$(OBJDIR)" "intobj"
 $(BUILDDIR)/$(EEXU) :  EU_OBJS="$(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(PREFIXED_PCRE_OBJECTS)"
 $(BUILDDIR)/$(EEXU) :  $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(PREFIXED_PCRE_OBJECTS)
-	@$(ECHO) making $(EEXU)
-	@echo $(OS)
+	@$(ECHO) "making $(EEXU)"
+	@$(ECHO) "$(OS)"
 ifeq "$(EMINGW)" "1"
 	$(CC) $(EOSFLAGSCONSOLE) $(EUI_RES) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EEXU)
 	$(CC) $(EOSFLAGS) $(EUIW_RES) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EEXUW)
@@ -649,8 +654,8 @@ $(BUILDDIR)/$(EECU) :  $(BUILDDIR)/include/be_ver.h $(TRUNKDIR)/source/pcre/*.c
 ifeq "$(OBJDIR)" "transobj"
 $(BUILDDIR)/$(EECU) :  EU_OBJS="$(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) $(PREFIXED_PCRE_OBJECTS)"
 $(BUILDDIR)/$(EECU) :  $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) $(PREFIXED_PCRE_OBJECTS)
-	@$(ECHO) making $(EEXU)
-	@echo $(OS)
+	@$(ECHO) "making $(EEXU)"
+	@$(ECHO) "$(OS)"
 	$(CC) $(EOSFLAGSCONSOLE) $(EUC_RES) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EECU)
 else
 $(BUILDDIR)/$(EECU) : | $(BUILDDIR)/transobj $(BUILDDIR)/transobj/back
@@ -676,7 +681,7 @@ ifeq "$(OBJDIR)" "backobj"
 $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) :  EU_OBJS="$(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) $(PREFIXED_PCRE_OBJECTS)"
 $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) :  $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) $(PREFIXED_PCRE_OBJECTS)
 $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) :  $(EUB_RES) $(EUBW_RES)
-	@$(ECHO) making $(EBACKENDC)
+	@$(ECHO) "making $(EBACKENDC)"
 	$(CC) $(EOSFLAGS) $(EUB_RES) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(DEBUG_FLAGS) $(MSIZE) $(PROFILE_FLAGS) -o $(BUILDDIR)/$(EBACKENDC)
 ifeq "$(EMINGW)" "1"
 	$(CC) $(EOSFLAGS) $(EUBW_RES) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(DEBUG_FLAGS) $(MSIZE) $(PROFILE_FLAGS) -o $(BUILDDIR)/$(EBACKENDW)
@@ -697,7 +702,7 @@ HG=hg
 endif
 
 .PHONY: update-version-cache
-update-version-cache : $(MKVER)
+update-version-cache : $(MKVER) | $(BUILDDIR)/include/
 	$(MKVER) "$(HG)" "$(BUILDDIR)/ver.cache" "$(BUILDDIR)/include/be_ver.h" $(EREL_TYPE)$(RELEASE)
 
 $(MKVER): mkver.c
@@ -1104,7 +1109,7 @@ $(TRUNKDIR)/tests/lib818.dll : $(BUILDDIR)/test818.o
 ifeq "$(EUPHORIA)" "1"
 
 $(BUILDDIR)/$(OBJDIR)/%.c : $(EU_MAIN)
-	@$(ECHO) Translating $(EU_TARGET) to create $(EU_MAIN)
+	@$(ECHO) "Translating $(EU_TARGET) to create $(EU_MAIN)"
 	rm -f $(BUILDDIR)/$(OBJDIR)/{*.c,*.o}
 	(cd $(BUILDDIR)/$(OBJDIR);$(TRANSLATE) -nobuild $(CYPINCDIR) -$(XLTTARGETCC) $(RELEASE_FLAG) $(TARGETPLAT)  \
 		-c "$(BUILDDIR)/eu.cfg" \
