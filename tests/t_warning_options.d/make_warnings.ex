@@ -19,12 +19,12 @@ if a1 and increment_a1() then
     -- do nothing
 end if
 
--- do warn here that puts is being overridden {override}
-override procedure printf(integer fd, sequence fmt, sequence s)
-    --eu:printf(fd, fmt, s)
-end procedure
+-- do warn here that time is being overridden {override}
+override function time()
+    return 0
+end function
 
-printf(1, "", {})
+time()
 
 -- warn about builtin_chosen
 puts(1, "")
@@ -39,9 +39,13 @@ bar()
 
 
 -- warn about no_value
-procedure baz()
-    integer no_value
-end procedure
+function baz()
+    integer no_value, no_value_2
+    
+    -- bad
+    integer a_value = no_value
+    return a_value
+end function
 
 baz()
 
@@ -75,3 +79,5 @@ abort(0)
 
 -- Code {not_reached}
 a1 = 1
+
+print(1, p_boo)

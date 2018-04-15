@@ -73,7 +73,7 @@ ifdef EUI then
             sequence config = configs[j]
             sequence cwf = config[P_WARNINGS]
 
-	    sequence cmd = eui & ' ' & config[P_PARAM] & " -batch -wf " & warnings_issued & " t_warning_options.d" & SLASH & "make_warnings.ex > " & nul
+	    sequence cmd = eui & ' ' & config[P_PARAM] & " -test -batch -wf " & warnings_issued & " t_warning_options.d" & SLASH & "make_warnings.ex > " & nul
         delete_file(warnings_issued)
 	    system(cmd,2)
 	    sequence wf = {}

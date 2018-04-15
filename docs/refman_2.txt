@@ -3932,7 +3932,7 @@ temporarily affected by the "##without warning strict##" directive.
                          built-in and another global which does not override it.
                          Euphoria chooses the built-in.
 | ##not_used## |  A variable has not been used and is going out of scope.
-| ##no_value## | A variable never got assigned a value and is going out of scope.
+| ##no_value## | A variable is used but *never* gets assigned a value.
 | ##custom## |  Any warning that was defined using the warning() procedure.
 | ##not_reached## | After a keyword that branches unconditionally, the only
                     thing that should appear is an end of block keyword, or
