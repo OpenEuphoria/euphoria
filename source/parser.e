@@ -4602,7 +4602,9 @@ export procedure real_parser(integer nested)
 				ExecCommand()
 
 			elsif id = PROCEDURE or id = FUNCTION or id = TYPE_DECL then
+			        resolve_unincluded_globals( 1 )
 				SubProg(id, scope )
+			        resolve_unincluded_globals( 0 )
 				
 
 			elsif (scope = SC_PUBLIC) and id = INCLUDE then

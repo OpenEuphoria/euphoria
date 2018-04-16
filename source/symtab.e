@@ -715,6 +715,7 @@ export function get_resolve_unincluded_globals()
 	return Resolve_unincluded_globals
 end function
 
+with trace
 export integer No_new_entry = 0
 export function keyfind(sequence word, integer file_no, integer scanning_file = current_file_no, integer namespace_ok = 0, 
 						integer hashval = hashfn( word ) )
@@ -745,6 +746,17 @@ export function keyfind(sequence word, integer file_no, integer scanning_file = 
 	end ifdef
 	st_ptr = buckets[hashval]
 	integer any_symbol = namespace_ok = -1
+	-- We must determine the builtin first, because we will need to check that for every global instance.  We really don't know whether the bultin will always be the first in the list, when people are able to add to the begginning of the linked list after all.
+	if file_no = -1 then
+	    while st_ptr do
+	        if SymTab[st_ptr][S_SCOPE] = SC_PREDEF and equal(word, SymTab[st_ptr][S_NAME]) then
+	            st_builtin = st_ptr
+	        end if
+  	        st_ptr = SymTab[st_ptr][S_SAMEHASH]
+	   end while
+	   st_ptr = buckets[hashval]   
+    end if
+	
 	while st_ptr do
 		if SymTab[st_ptr][S_SCOPE] != SC_UNDEFINED 
 		and equal(word, SymTab[st_ptr][S_NAME]) 
@@ -761,13 +773,13 @@ export function keyfind(sequence word, integer file_no, integer scanning_file = 
 				scope = SymTab[st_ptr][S_SCOPE]
 
 				switch scope with fallthru do
+				case SC_PREDEF then
+				    break
+				
 				case SC_OVERRIDE then
 					dup_overrides &= st_ptr
 					break
 					
-				case SC_PREDEF then
-					st_builtin = st_ptr
-					break
 				case SC_GLOBAL then
 					if scanning_file = SymTab[st_ptr][S_FILE_NO] then
 						-- found global in current file
@@ -778,18 +790,16 @@ export function keyfind(sequence word, integer file_no, integer scanning_file = 
 
 						return tok
 					end if
-
+					
 					-- found global in another file
-					if Resolve_unincluded_globals 
-					or (finished_files[scanning_file]
-					and include_matrix[scanning_file][SymTab[st_ptr][S_FILE_NO]]) -- everything this file needs has been read in
-					or SymTab[st_ptr][S_TOKEN] = NAMESPACE then -- this allows the eu: namespace to work
-						gtok = tok
-						dup_globals &= st_ptr
-						in_include_path &= include_matrix[scanning_file][SymTab[st_ptr][S_FILE_NO]] != 0
-					end if
-					break
-					-- continue looking for more globals with same name
+                    if Resolve_unincluded_globals 
+                    or st_builtin
+                    or finished_files[scanning_file] -- everything this file needs has been read in
+                    or SymTab[st_ptr][S_TOKEN] = NAMESPACE then -- this allows the eu: namespace to work
+                            gtok = tok
+                            dup_globals &= st_ptr
+                            in_include_path &= include_matrix[scanning_file][SymTab[st_ptr][S_FILE_NO]] != 0
+                    end if
 
 				case SC_PUBLIC, SC_EXPORT then
 
@@ -802,17 +812,18 @@ export function keyfind(sequence word, integer file_no, integer scanning_file = 
 						return tok
 					end if
 
-					if (finished_files[scanning_file] -- everything this file needs has been read in
-						or (namespace_ok and SymTab[st_ptr][S_TOKEN] = NAMESPACE)) -- resolve name spaces..probably shouldn't, but not sure how to get around this
-						and ((scope = SC_PUBLIC and  -- now we can look into the include relationship...
-							and_bits( DIRECT_OR_PUBLIC_INCLUDE, include_matrix[scanning_file][SymTab[st_ptr][S_FILE_NO]] ))
-							or (scope = SC_EXPORT and
-							and_bits( DIRECT_INCLUDE, include_matrix[scanning_file][SymTab[st_ptr][S_FILE_NO]] )))
+                   if (finished_files[scanning_file] -- everything this file needs has been read in
+                       or (namespace_ok and SymTab[st_ptr][S_TOKEN] = NAMESPACE) or st_builtin) -- resolve name spaces..probably shouldn't, but not sure how to get around this
+                       and ((scope = SC_PUBLIC and  -- now we can look into the include relationship...
+                        and_bits( DIRECT_OR_PUBLIC_INCLUDE, include_matrix[scanning_file][SymTab[st_ptr][S_FILE_NO]] ))
+                        or (scope = SC_EXPORT and
+                        and_bits( DIRECT_INCLUDE, include_matrix[scanning_file][SymTab[st_ptr][S_FILE_NO]] )))
 					then
 						-- found public or export in another file 
 						gtok = tok
 						dup_globals &= st_ptr
-						in_include_path &= include_matrix[scanning_file][SymTab[st_ptr][S_FILE_NO]] != 0 --symbol_in_include_path( st_ptr, scanning_file, {} )
+						in_include_path &= 1
+						--symbol_in_include_path( st_ptr, scanning_file, {} )
 					
 					end if
 ifdef STDDEBUG then
@@ -927,13 +938,11 @@ end ifdef
 		st_ptr = dup_overrides[1]
 		tok = {SymTab[st_ptr][S_TOKEN], st_ptr}
 
-		--if length(dup_overrides) = 1 then
-			if BIND then
-				add_ref(tok)
-			end if
+        if BIND then
+            add_ref(tok)
+        end if
 
-			return tok
---		end if
+        return tok
 
 	elsif st_builtin != 0 then
 		if length(dup_globals) and find(SymTab[st_builtin][S_NAME], builtin_warnings) = 0 then

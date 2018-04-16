@@ -80,11 +80,7 @@ ifdef EUI then
 		if file_exists(warnings_issued) > 0 then
 			wf = warning_parse(warnings_issued)
         end if
-        integer ti  = find("translator", wf)
-        if ti then
-            wf = remove(wf, ti)
-        end if
-        ti = find("translator", cwf)
+        integer ti = find("translator", cwf)
         if ti then
             cwf = remove(cwf, ti)
         end if
