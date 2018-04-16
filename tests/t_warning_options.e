@@ -96,8 +96,17 @@ ifdef EUI then
                 cwf = remove(cwf, xpi)
             end if
         end ifdef
-        
-	    test_equal(config[P_NAME] & " test", join(cwf, ", "), join(wf, ", "))
+
+        for c = 1 to length(cwf) do
+            test_true(config[P_NAME] & " warning enabled: " & cwf[c], find(cwf[c], wf) != 0)
+        end for
+        for c = 1 to length(cwf) do
+            integer t = find(cwf[c], wf)
+            wf = remove(wf, t)
+        end for
+        for t = 1 to length(wf) do
+            test_false(config[P_NAME] & " warning enabled: " & wf[t], 1)
+        end for
 	end for -- j
 
 	-- avoid confusion of eutest
