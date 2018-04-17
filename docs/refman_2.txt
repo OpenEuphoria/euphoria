@@ -3965,14 +3965,14 @@ with warning restore
 
 Initially, only the following warnings are enabled:
 
-* ##resolution##
-* ##override##
 * ##builtin_chosen##
-* ##translator##
 * ##cmdline##
+* ##custom##
 * ##mixed_profile##
 * ##not_reached##
-* ##custom##
+* ##override##
+* ##resolution##
+* ##translator##
 
 This set can be changed using -W or -X command line switches.
 

@@ -398,6 +398,7 @@ export constant -- maskable warning flags
 constant default_maskable_warnings =
 	resolution_warning_flag + 
 	override_warning_flag + 
+	builtin_chosen_warning_flag +
 	translator_warning_flag + 
 	cmdline_warning_flag + 
 	not_reached_warning_flag +
