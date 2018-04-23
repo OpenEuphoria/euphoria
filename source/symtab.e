@@ -715,7 +715,6 @@ export function get_resolve_unincluded_globals()
 	return Resolve_unincluded_globals
 end function
 
-with trace
 export integer No_new_entry = 0
 export function keyfind(sequence word, integer file_no, integer scanning_file = current_file_no, integer namespace_ok = 0, 
 						integer hashval = hashfn( word ) )
@@ -841,6 +840,7 @@ ifdef STDDEBUG then
 							symbol_resolution_warning = GetMsgText(232, 0, 
 										{name_ext(known_files[scanning_file]),
 										 name_ext(known_files[SymTab[tok[T_SYM]][S_FILE_NO]])})
+						    Warning( symbol_resolution_warning, resolution_warning_flag)
 
 						end if
 						
@@ -1025,20 +1025,24 @@ end ifdef
 		if not in_include_path[1] and
 				not find( {scanning_file,SymTab[gtok[T_SYM]][S_FILE_NO]}, include_warnings )
 		then
+		    sequence gSym = SymTab[gtok[T_SYM]]
 			include_warnings = prepend( include_warnings,
 				{ scanning_file, SymTab[gtok[T_SYM]][S_FILE_NO] })
 ifdef STDDEBUG then
-				if SymTab[gtok[T_SYM]][S_SCOPE] = SC_EXPORT then
+				if gSym[S_SCOPE] = SC_EXPORT then
 				-- we've already issued an export warning, don't need to add this one
 					return gtok
 				end if
 end ifdef
-				symbol_resolution_warning = GetMsgText(233,0,
-									{name_ext(known_files[scanning_file]), 
-									 line_number,
-									 word,
-									 name_ext(known_files[SymTab[gtok[T_SYM]][S_FILE_NO]])
-									 })
+                if find(gSym[S_TOKEN], FUNC & PROC & TYPE & VARIABLE) and file_no = -1 and scanning_file != gSym[S_FILE_NO] then
+                    symbol_resolution_warning = GetMsgText(233,0,
+                                        {name_ext(known_files[scanning_file]), 
+                                         line_number,
+                                         word,
+                                         name_ext(known_files[SymTab[gtok[T_SYM]][S_FILE_NO]])
+                                         })
+                    Warning( symbol_resolution_warning, resolution_warning_flag)
+                end if
 		end if
 		return gtok
 	end if

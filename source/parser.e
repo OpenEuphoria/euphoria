@@ -794,8 +794,6 @@ procedure UndefinedVar(symtab_index s)
 
 		CompileErr(23, {rname, rname, errmsg})
 
-	elsif length(symbol_resolution_warning) then
-		Warning( symbol_resolution_warning, resolution_warning_flag)
 	end if
 end procedure
 
