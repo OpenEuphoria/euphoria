@@ -11,6 +11,7 @@ end ifdef
 
 include std/io.e
 include std/text.e
+include std/filesys.e
 
 include global.e
 include reswords.e
@@ -315,7 +316,7 @@ export procedure InternalErr(integer  msgno, object args = {})
 	if TRANSLATE then
 		screen_output(STDERR, GetMsgText(211, 1, {msg}))
 	else
-		screen_output(STDERR, GetMsgText(212, 1, {known_files[current_file_no], line_number, msg}))
+		screen_output(STDERR, GetMsgText(212, 1, {abbreviate_path(known_files[current_file_no]), line_number, msg}))
 	end if
 
 	if not batch_job and not test_only then

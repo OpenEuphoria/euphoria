@@ -948,7 +948,7 @@ end ifdef
 		if length(dup_globals) and find(SymTab[st_builtin][S_NAME], builtin_warnings) = 0 then
 			sequence msg_file 
 			
-			b_name = SymTab[st_builtin][S_NAME]
+			b_name = SymTab[st_builtin][S_NAME] -- == word
 			builtin_warnings = append(builtin_warnings, b_name)
 			
 			if length(dup_globals) > 1 then
@@ -958,11 +958,11 @@ end ifdef
 			end if
 			-- Get list of files...
 			for i = 1 to length(dup_globals) do
-				msg_file = known_files[SymTab[dup_globals[i]][S_FILE_NO]]
+				msg_file = abbreviate_path(known_files[SymTab[dup_globals[i]][S_FILE_NO]])
 				msg &= "    " & msg_file & "\n"
 			end for
 
-			Warning(234, builtin_chosen_warning_flag, {b_name, known_files[scanning_file], msg})
+			Warning(234, builtin_chosen_warning_flag, {b_name, abbreviate_path(known_files[scanning_file]), msg})
 		end if
 
 		tok = {SymTab[st_builtin][S_TOKEN], st_builtin}
@@ -1036,10 +1036,10 @@ ifdef STDDEBUG then
 end ifdef
                 if find(gSym[S_TOKEN], FUNC & PROC & TYPE & VARIABLE) and file_no = -1 and scanning_file != gSym[S_FILE_NO] then
                     symbol_resolution_warning = GetMsgText(233,0,
-                                        {name_ext(known_files[scanning_file]), 
+                                        {abbreviate_path(known_files[scanning_file]), 
                                          line_number,
                                          word,
-                                         name_ext(known_files[SymTab[gtok[T_SYM]][S_FILE_NO]])
+                                         abbreviate_path(known_files[SymTab[gtok[T_SYM]][S_FILE_NO]])
                                          })
                     Warning( symbol_resolution_warning, resolution_warning_flag)
                 end if
