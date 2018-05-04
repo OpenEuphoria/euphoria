@@ -2,6 +2,9 @@
 
 === Bug Fixes
 
+* [[ticket:906]] Installer problem in 4.0.5 corrected
+* [[ticket:917]] Some numeric literals no longer produce strange fatal errors.
+* [[ticket:800]] invalid c_func/c_proc calls now fail under Linux
 * [[ticket:831]] http_get now retrieves page content
 * [[ticket:907]] warning of unused variable in local routine variables
 * [[ticket:803]] handle lowercase hex in URLs in decode() in std/net/url.e
