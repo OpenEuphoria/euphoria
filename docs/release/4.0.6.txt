@@ -2,6 +2,7 @@
 
 === Bug Fixes
 
+* [[ticket:973]] Fixed resolution, no_value, and builtin_chosen warnings
 * [[ticket:893]] Backported map fixes to 4.0
 * [[ticket:877]] Fixed the bug where some very large values or very small values might give silly results.
 * [[ticket:901]] Made dsearch.exw into a portable demo, [[:dsearch.ex]], for both Windows and Linux
