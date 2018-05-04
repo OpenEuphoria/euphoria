@@ -2,6 +2,13 @@
 
 === Bug Fixes
 
+* [[ticket:941]] Mispelling of words fixed 
+* [[ticket:934]] Translator now tells user how to properly build
+* [[ticket:912]] Documentation moved 
+* [[ticket:942]] Bad signatures fixed
+* [[ticket:943]] Wrong line reported error fixed
+* [[ticket:945]] Fixed documentation error in ##[[:maybe_any_key]]##
+* [[ticket:947]] Fixed documentation errors in switch
 * [[ticket:973]] Fixed resolution, no_value, and builtin_chosen warnings
 * [[ticket:893]] Backported map fixes to 4.0
 * [[ticket:877]] Fixed the bug where some very large values or very small values might give silly results.
