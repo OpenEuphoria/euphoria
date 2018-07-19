@@ -37,6 +37,7 @@
 /******************/
 /* Included files */
 /******************/
+#define _SVID_SOURCE
 #include <stdio.h>
 #include <time.h>
 #ifdef EUNIX
@@ -756,6 +757,12 @@ void InitExecute()
 	// a bit of cleanup - tick rate, profile, active page etc.
 #endif
 
+// detect matherr support
+#if defined(DOMAIN) && defined(SING) && defined(OVERFLOW) && defined(UNDERFLOW) && defined(TLOSS) && defined(PLOSS)
+	// enable our matherr function
+	_LIB_VERSION = _SVID_;
+#endif
+    
 #ifdef EWINDOWS
 		/* Prevent "Send Error Report to Microsoft dialog from coming up
 		   if this thing has an unhandled exception.  */
