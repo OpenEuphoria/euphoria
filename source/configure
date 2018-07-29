@@ -51,7 +51,7 @@ export CC=gcc
 export EDEBUG=
 SCP="scp -C"
 SSH="ssh -C"
-HG="hg"
+HG="git"
 
 echo "# File generated from configure" > ${CONFIG_FILE}
 echo CONFIGURE_PARAMS=$@ >> "$PREFIX"${CONFIG_FILE}
@@ -247,7 +247,7 @@ while [ "$1" != "" ]; do
 		echo "                       operations such as manual upload"
 		echo "   --scp-client value  SCP program to use for scp uploads (default scp -C)"
 		echo "   --ssh-client value  SSH program to use for ssh commands (default ssh -C)"
-		echo "   --hg value          Mercurial binary command (default 'which hg')"
+		echo "   --hg value          Git binary command (default 'which git')"
 		echo "   --no-cygwin         Use the -mno-cygwin flag with MinGW.  This flag is obsoltete,"
 		echo "                       and may cause errors on newer versions of MinGW."
 		exit

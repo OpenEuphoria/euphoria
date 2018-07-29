@@ -456,7 +456,6 @@ binder : translator library
 .PHONY : builddirs
 .PHONY : interpreter
 .PHONY : translator
-.PHONY : svn_rev
 .PHONY : code-page-db-rm $(BUILDDIR)/eui
 .PHONY : binder
 
@@ -478,30 +477,31 @@ source : builddirs
 	$(MAKE) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 	$(MAKE) backendsource OBJDIR=backobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 
+HASH := $(shell git show --format='%H' | head -1)
+SHORT_HASH := $(shell git show --format='%h' | head -1)
+
 ifneq "$(VERSION)" ""
 SOURCEDIR=euphoria-$(PLAT)-$(VERSION)
 else
-ifeq "$(REV)" ""
-REV := $(shell hg parents --template '{node|short}')
-endif
 
 ifeq "$(PLAT)" ""
-SOURCEDIR=euphoria-$(REV)
+SOURCEDIR=euphoria-$(SHORT_HASH)
 else
-SOURCEDIR=euphoria-$(PLAT)-$(REV)
+SOURCEDIR=euphoria-$(PLAT)-$(SHORT_HASH)
 endif
 
 endif
 
-source-tarball :
+source-tarball : $(BUILDDIR)/$(SOURCEDIR)-src.tar.gz
+
+$(BUILDDIR)/$(SOURCEDIR)-src.tar.gz : $(MKVER) $(EU_BACKEND_RUNNER_FILES) $(EU_TRANSLATOR_FILES) $(EU_INTERPRETER_FILES) $(EU_CORE_FILES) $(EU_STD_INC) $(wildcard *.c) $(BUILDDIR)/intobj/main-.c $(BUILDDIR)/transobj/main-.c $(BUILDDIR)/backobj/main-.c
 	echo building source-tarball for $(PLAT)
 	rm -rf $(BUILDDIR)/$(SOURCEDIR)
-	hg archive $(BUILDDIR)/$(SOURCEDIR)
-	cd $(BUILDDIR)/$(SOURCEDIR)/source && ./configure $(CONFIGURE_PARAMS)
-	$(MAKE) -C $(BUILDDIR)/$(SOURCEDIR)/source source
-	-rm $(BUILDDIR)/$(SOURCEDIR)/source/config.gnu
-	-rm $(BUILDDIR)/$(SOURCEDIR)/source/build/mkver$(EXE_EXT)
-	cd $(BUILDDIR) && tar -zcf $(SOURCEDIR)-src.tar.gz $(SOURCEDIR)
+	mkdir -p $(BUILDDIR)/$(SOURCEDIR)/build
+	(cd ..;git archive --format=tar $(HASH) . ) | tar xf - -C $(BUILDDIR)/$(SOURCEDIR)
+	(cd $(BUILDDIR); find  . -maxdepth 2 \( -name '*.[ch]' -o -name ver.cache -o -name mkver$(EXE_EXT) \)  | cpio -oH tar ) | (cd $(BUILDDIR)/$(SOURCEDIR)/build && cpio -i -H tar --make-directories )
+	(cd $(BUILDDIR); tar -czf $(SOURCEDIR)-src.tar.gz $(SOURCEDIR) )
+	rm -rf $(BUILDDIR)/$(SOURCEDIR)
 ifneq "$(VERSION)" ""
 	cd $(BUILDDIR) && mkdir -p $(PLAT) && mv $(SOURCEDIR)-src.tar.gz $(PLAT)
 endif
@@ -577,17 +577,17 @@ ifeq "$(EMINGW)" "1"
 endif
 
 ifeq "$(HG)" ""
-HG=hg
+HG=git
 endif
 
 .PHONY: update-version-cache
-update-version-cache : $(MKVER)
-	$(MKVER) "$(HG)" "$(BUILDDIR)/ver.cache" "$(BUILDDIR)/include/be_ver.h" $(EREL_TYPE)$(RELEASE)
+update-version-cache : $(BUILDDIR)/ver.cache
 
 $(MKVER): mkver.c
 	$(CC) -o $@ $<
 
-$(BUILDDIR)/ver.cache : update-version-cache
+$(BUILDDIR)/ver.cache : $(MKVER) $(EU_BACKEND_RUNNER_FILES) $(EU_TRANSLATOR_FILES) $(EU_INTERPRETER_FILES) $(EU_CORE_FILES) $(EU_STD_INC) $(wildcard *.c)
+	$(MKVER) "$(HG)" "$(BUILDDIR)/ver.cache" "$(BUILDDIR)/include/be_ver.h" $(EREL_TYPE)$(RELEASE)
 
 $(BUILDDIR)/include/be_ver.h:  $(BUILDDIR)/ver.cache
 	
@@ -601,10 +601,10 @@ get-eudoc: $(TRUNKDIR)/source/eudoc/eudoc.ex
 get-creole: $(TRUNKDIR)/source/creole/creole.ex
 
 $(TRUNKDIR)/source/eudoc/eudoc.ex :
-	hg clone http://scm.openeuphoria.org/hg/eudoc $(TRUNKDIR)/source/eudoc
+	git clone git://github.com/openeuphoria/eudoc $(TRUNKDIR)/source/eudoc
 
 $(TRUNKDIR)/source/creole/creole.ex :
-	hg clone http://scm.openeuphoria.org/hg/creole $(TRUNKDIR)/source/creole
+	git clone git://github.com/openeuphoria/creole $(TRUNKDIR)/source/creole
 
 $(BUILDDIR)/euphoria.txt : $(EU_DOC_SOURCE)
 	cd $(TRUNKDIR)/docs && $(EUDOC) -d HTML --strip=2 --verbose -a manual.af -o $(CYPBUILDDIR)/euphoria.txt
