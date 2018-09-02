@@ -31,7 +31,7 @@ struct char_cell alt_image_debug[MAX_LINES][MAX_COLS];
 extern void check_has_console(void);
 extern int console_application(void);
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 void SaveNormal();
 void SaveTrace();
 void RestoreTrace();
@@ -66,7 +66,7 @@ void buffer_screen(void);
 void flush_screen(void);
 
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 	void EClearLines(int first_line, int last_line, int len, WORD attributes);
 #endif
 

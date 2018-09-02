@@ -211,7 +211,7 @@ export procedure adjust_indent_before(sequence stmt)
 
 	c_puts(big_blanks[1..i])
 
-	temp_indent = 0    
+	temp_indent = 0
 end procedure
 
 --**

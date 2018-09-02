@@ -13,7 +13,7 @@
 /******************/
 #include <stdio.h>
 #include <string.h>
-#ifdef EWINDOWS
+#ifdef _WIN32
 #include <windows.h>
 #endif
 #ifdef __WATCOMC__

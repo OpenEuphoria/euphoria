@@ -14,7 +14,7 @@
 #include <math.h>
 #include <time.h>
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 #include <windows.h> /* for Sleep(), Fibers */
 #endif
 
@@ -34,7 +34,7 @@
 /*********************/
 /* Local definitions */
 /*********************/
-#ifndef EWINDOWS
+#ifndef _WIN32
 
 pthread_mutex_t task_mutex;
 pthread_cond_t  task_condition;
@@ -93,7 +93,7 @@ void InitTask()
 	
 #ifdef ERUNTIME 
 	tcb[0].mode = TRANSLATED_TASK;
-#ifdef EWINDOWS
+#ifdef _WIN32
 	tcb[0].impl.translated.task = ConvertThreadToFiber( 0 );
 #else
 	tcb[0].impl.translated.task = pthread_self();
@@ -181,22 +181,22 @@ double Wait(double t)
 	struct timespec req;
 #endif // EUNIX
 	
-#ifdef EWINDOWS
+#ifdef _WIN32
 	t1 = floor(1000.0 * t);
 	t2 = t1 / 1000.0;
-#else // EWINDOWS
+#else // _WIN32
 	t1 = floor(t);
-#endif // EWINDOWS
+#endif // _WIN32
 #ifdef EUNIX
 	t2 = t - t1;
 	t3 = floor(1000000000.0 * t2);
 #endif // EUNIX
 	if (t1 >= 1.0) {
 		it = t1; // overflow?
-#ifdef EWINDOWS
+#ifdef _WIN32
 		Sleep(it);
 		t -= t2;
-#else // EWINDOWS
+#else // _WIN32
 #ifdef EUNIX
 		itsme = (long)t3;
 		req.tv_sec = it;
@@ -208,7 +208,7 @@ double Wait(double t)
 		sleep(it);
 		t -= t1;
 #endif  // EUNIX
-#endif // EWINDOWS
+#endif // _WIN32
 	}
 	
 	// busy Wait for the last bit, < 1 sec
@@ -804,7 +804,7 @@ object task_create(object r_id, object args)
 TASK_HANDLE stale_task = 0;
 
 void release_task( TASK_HANDLE task ){
-	#ifdef EWINDOWS
+	#ifdef _WIN32
 	DeleteFiber( task );
 	#else
 	pthread_cancel( task );
@@ -995,7 +995,7 @@ void run_task( int tx ){
 
 
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 
 static void run_current_task( int task ){
 	current_task = task;

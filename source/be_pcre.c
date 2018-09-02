@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 #  include <windows.h>
 #endif
-#if defined(EWINDOWS)
+#if defined(_WIN32)
 #  include "pcre/config.h" /* cannot make it link w/o it */
 #endif
 #ifdef EMINGW

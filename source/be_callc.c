@@ -34,7 +34,7 @@
  */           
 
 #include <stdio.h>
-#ifdef EWINDOWS
+#ifdef _WIN32
 #include <windows.h>
 #endif
 #include "alldefs.h"
@@ -80,7 +80,7 @@ typedef union {
 	int intval;
 } float_arg;
 
-#if !defined(EMINGW) && !defined(EOSX)
+#if !defined(EMINGW) && !defined(__APPLE__)
 object call_c(int func, object proc_ad, object arg_list)
 /* Call a WIN32 or Linux C function in a DLL or shared library. 
    Alternatively, call a machine-code routine at a given address. */
@@ -102,7 +102,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	unsigned return_type;
 	unsigned long as_offset;
 	unsigned long last_offset;
-#if defined(EWINDOWS) && !defined(__WATCOMC__)
+#if defined(_WIN32) && !defined(__WATCOMC__)
 	int cdecl_call;
 #endif
 
@@ -120,7 +120,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	}
 	
 	int_proc_address = c_routine[proc_index].address;
-#if defined(EWINDOWS) && !defined(__WATCOMC__)
+#if defined(_WIN32) && !defined(__WATCOMC__)
 	cdecl_call = c_routine[proc_index].convention;
 #endif
 	if (IS_ATOM(arg_list)) {
@@ -248,7 +248,7 @@ object call_c(int func, object proc_ad, object arg_list)
 
 	if (return_type == C_DOUBLE) {
 		// expect double to be returned from C routine
-#if defined(EWINDOWS) && !defined(__WATCOMC__)
+#if defined(_WIN32) && !defined(__WATCOMC__)
 		if (cdecl_call) {
 			dresult = (*((double (  __cdecl *)())int_proc_address))();
 			pop();
@@ -265,7 +265,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	
 	else if (return_type == C_FLOAT) {
 		// expect float to be returned from C routine
-#if defined(EWINDOWS) && !defined(__WATCOMC__)
+#if defined(_WIN32) && !defined(__WATCOMC__)
 		if (cdecl_call) {
 			fresult = (*((float (  __cdecl *)())int_proc_address))();
 			pop();
@@ -282,7 +282,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	
 	else {
 		// expect integer to be returned
-#if defined(EWINDOWS) && !defined(__WATCOMC__)
+#if defined(_WIN32) && !defined(__WATCOMC__)
 		if (cdecl_call) {
 			iresult = (*((int (  __cdecl *)())int_proc_address))();
 			pop();
@@ -697,7 +697,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	}
 	
 	long_proc_address = (long)(c_routine[proc_index].address);
-#if defined(EWINDOWS) && !defined(__WATCOMC__)
+#if defined(_WIN32) && !defined(__WATCOMC__)
 	cdecl_call = c_routine[proc_index].convention;
 #else
 	cdecl_call = 1;

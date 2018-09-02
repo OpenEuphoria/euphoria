@@ -11,7 +11,7 @@
 /******************/
 #include <stdio.h>
 #include <time.h>
-#ifdef EWINDOWS
+#ifdef _WIN32
 #  include <windows.h>
 #  include <limits.h>
 #endif

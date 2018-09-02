@@ -1,4 +1,4 @@
-#if defined(EWINDOWS) || defined(EDOS)
+#if defined(_WIN32) || defined(EDOS)
 #	include "pcre.h.windows"
 #else
 #    if defined(EUNIX)

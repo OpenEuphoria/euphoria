@@ -13,7 +13,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 #include <windows.h>
 #endif
 #include "alldefs.h"
