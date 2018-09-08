@@ -1086,21 +1086,23 @@ end procedure
 
 procedure seg_poke1(integer source, boolean dbl)
 -- poke a single byte value into poke_addr
-	if atom(dj_path) then
+	
 		-- WATCOM etc.
-		if dbl then
-			if TWINDOWS and atom(wat_path) then
-				-- do it in two steps to work around an Lcc bug:
-				c_stmt("_1 = (signed char)DBL_PTR(@)->dbl;\n", source)
-				c_stmt0("*poke_addr = _1;\n")
-			else
-				c_stmt("*poke_addr = (signed char)DBL_PTR(@)->dbl;\n", source)
-			end if
+    m_stmtln("#ifndef __DJGPP__")
+        if dbl then
+            -- do it in two steps to work around an Lcc bug:
+            m_stmtln("#if defined(__LCC__) && defined(_WIN32)")
+                c_stmt("_1 = (signed char)DBL_PTR(@)->dbl;\n", source)
+                c_stmt0("*poke_addr = _1;\n")
+            m_stmtln("#else")
+            
+                c_stmt("*poke_addr = (signed char)DBL_PTR(@)->dbl;\n", source)
+            m_stmtln("#endif")
 		else
 			c_stmt("*poke_addr = (unsigned char)@;\n", source)
 		end if
 
-	else
+	m_stmtln("#else // __DJGPP__")
 		-- DJGPP
 		if dbl then
 			c_stmt0("if ((unsigned)poke_addr > LOW_MEMORY_MAX)\n")
@@ -1116,26 +1118,27 @@ procedure seg_poke1(integer source, boolean dbl)
 			c_stmt("_farpokeb(_go32_info_block.selector_for_linear_memory, (unsigned long)poke_addr, (unsigned char)@);\n",
 					source)
 		end if
-	end if
+    m_stmtln("#endif // __DJGPP")
+	
 end procedure
 
 procedure seg_poke2(integer source, boolean dbl)
 -- poke a word value into poke2_addr
-	if atom(dj_path) then
+    m_stmtln("#ifndef __DJGPP__")
 		-- WATCOM etc.
 		if dbl then
-			if TWINDOWS and atom(wat_path) then
+			m_stmtln("#if defined(_WIN32) && defined(__LCC__)") 
 				-- do it in two steps to work around an Lcc bug:
 				c_stmt("_1 = (signed short)DBL_PTR(@)->dbl;\n", source)
 				c_stmt0("*poke2_addr = _1;\n")
-			else
+			m_stmtln("#else // _WIN32")
 				c_stmt("*poke2_addr = (signed short)DBL_PTR(@)->dbl;\n", source)
-			end if
+			m_stmtln("#endif // _WIN32")
 		else
 			c_stmt("*poke2_addr = (unsigned short)@;\n", source)
 		end if
 
-	else
+	m_stmtln("#else // __DJGPP__")
 		-- DJGPP
 		if dbl then
 			c_stmt0("if ((unsigned)poke2_addr > LOW_MEMORY_MAX)\n")
@@ -1151,26 +1154,26 @@ procedure seg_poke2(integer source, boolean dbl)
 			c_stmt("_farpokew(_go32_info_block.selector_for_linear_memory, (unsigned long)poke_addr, (unsigned char)@);\n",
 					source)
 		end if
-	end if
+    m_stmtln("#endif // __DJGPP")
 end procedure
 
 procedure seg_poke4(integer source, boolean dbl)
 -- poke a 4-byte value into poke4_addr
-	if atom(dj_path) then
+    m_stmtln("#ifndef __DJGPP__")
 		-- WATCOM etc.
 		if dbl then
-			if TWINDOWS and atom(wat_path) then
+			m_stmtln("#if defined(_WIN32) && !defined(__WATCOMC__)") 
 				-- do it in two steps to work around an Lcc bug:
 				c_stmt("_1 = (unsigned long)DBL_PTR(@)->dbl;\n", source)
 				c_stmt0("*poke4_addr = (unsigned long)_1;\n")
-			else
+			m_stmtln("#else // _WIN32")
 				c_stmt("*poke4_addr = (unsigned long)DBL_PTR(@)->dbl;\n", source)
-			end if
+			m_stmtln("#endif // _WIN32")
 		else
 			c_stmt("*poke4_addr = (unsigned long)@;\n", source)
 		end if
 
-	else
+	m_stmtln("#else // __DJGPP__")
 		-- DJGPP
 		if dbl then
 			c_stmt0("if ((unsigned)poke4_addr > LOW_MEMORY_MAX)\n")
@@ -1185,7 +1188,7 @@ procedure seg_poke4(integer source, boolean dbl)
 			c_stmt("_farpokel(_go32_info_block.selector_for_linear_memory, (unsigned long)poke4_addr, (unsigned long)@);\n",
 					source)
 		end if
-	end if
+    m_stmtln("#endif // __DJGPP")
 end procedure
 
 function machine_func_type(integer x)
@@ -4503,7 +4506,7 @@ procedure opCALL_PROC()
 					c_printf("%d));\n", k * 4)
 				end for
 
-				if TWINDOWS and dll_option then
+			    m_stmtln("#if _WIN32")
 					c_stmt("if (_00[@].convention) {\n", Code[pc+1])
 					if Code[pc] = CALL_FUNC then
 						c_stmt0("_1 = (*(int (__stdcall *)())_0)(\n")
@@ -4520,14 +4523,14 @@ procedure opCALL_PROC()
 					end if
 					arg_list(i)
 					c_stmt0("}\n")
-				else
+				m_stmtln("#else // _WIN32")
 					if Code[pc] = CALL_FUNC then
 						c_stmt0("_1 = (*(int (*)())_0)(\n")
 					else
 						c_stmt0("(*(int (*)())_0)(\n")
 					end if
 					arg_list(i)
-				end if
+				m_stmtln("#endif // _WIN32")
 
 			end if
 			if len = NOVALUE then
@@ -5824,29 +5827,29 @@ procedure opPOKE()
 		c_stmt0("break;\n")
 		c_stmt0("else {\n")
 		if Code[pc] = POKE4 then
-			if TWINDOWS and atom(wat_path) then
+			m_stmtln("#if defined(_WIN32) && defined(__LCC__)") 
 				-- work around an Lcc bug
 				c_stmt0("_0 = (unsigned long)DBL_PTR(_2)->dbl;\n")
 				c_stmt0("*(int *)poke4_addr++ = (unsigned long)_0;\n")
-			else
+			m_stmtln("#else")
 				c_stmt0("*(int *)poke4_addr++ = (unsigned long)DBL_PTR(_2)->dbl;\n")
-			end if
+			m_stmtln("#endif")
 		elsif Code[pc] = POKE2 then
-			if TWINDOWS and atom(wat_path) then
+			m_stmtln("#if defined(_WIN32) && defined(__LCC__)") 
 				-- work around an Lcc bug
 				c_stmt0("_0 = (unsigned short)DBL_PTR(_2)->dbl;\n")
 				c_stmt0("*poke2_addr++ = (unsigned short)_0;\n")
-			else
+			m_stmtln("#else")
 				c_stmt0("*poke2_addr++ = (unsigned short)DBL_PTR(_2)->dbl;\n")
-			end if
+			m_stmtln("#endif")
 		else
-			if TWINDOWS and atom(wat_path) then
+			m_stmtln("#if defined(_WIN32) && defined(__LCC__)") 
 				-- work around an Lcc bug
 				c_stmt0("_0 = (signed char)DBL_PTR(_2)->dbl;\n")
 				c_stmt0("*poke_addr++ = (signed char)_0;\n")
-			else
+			m_stmtln("#else")
 				c_stmt0("*poke_addr++ = (signed char)DBL_PTR(_2)->dbl;\n")
-			end if
+			m_stmtln("#endif")
 		end if
 		c_stmt0("}\n")
 		c_stmt0("}\n")
@@ -5973,9 +5976,9 @@ procedure opGETC()
 
 	c_stmt0("}\n")
 	c_stmt0("if (last_r_file_ptr == xstdin) {\n")
-	if TWINDOWS then
+    m_stmtln("#if _WIN32")
 		c_stmt0("show_console();\n")
-	end if
+    m_stmtln("#endif")
 	c_stmt0("if (in_from_keyb) {\n")
 	if TUNIX then
 		if EGPM then
@@ -6019,9 +6022,9 @@ end procedure
 
 procedure opGET_KEY()
 -- read an immediate key (if any) from the keyboard or return -1
-	if TWINDOWS then
-		c_stmt0("show_console();\n")
-	end if
+    m_stmtln("#if _WIN32")
+		c_stmt0("show_console()")
+    m_stmtln("#endif")
 	CSaveStr("_0", Code[pc+1], 0, 0, 0)
 	c_stmt("@ = get_key(0);\n", Code[pc+1])
 	CDeRefStr("_0")
@@ -7222,15 +7225,15 @@ procedure BackEnd(atom ignore)
 
 	version()
 
-	c_puts("#include <time.h>\n")
-	c_puts("#include \"include/euphoria.h\"\n")
-	c_puts("#include \"main-.h\"\n\n")
+	m_stmtln("#include <time.h>\n")
+	m_stmtln("#include \"include/euphoria.h\"\n")
+	m_stmtln("#include \"main-.h\"\n\n")
 
-	if TUNIX then
-		c_puts("#include <unistd.h>\n")
-	elsif TWINDOWS then
-		c_puts("#include <Windows.h>\n")
-	end if
+	m_stmtln("#ifndef _WIN32")
+		m_stmtln("#include <unistd.h>")
+    m_stmtln("#else")
+		m_stmtln("#include <Windows.h>")
+    m_stmtln("#endif")
 	c_puts("\n\n")
 	c_puts("int Argc;\n")
 	c_hputs("extern int Argc;\n")
@@ -7238,15 +7241,15 @@ procedure BackEnd(atom ignore)
 	c_puts("char **Argv;\n")
 	c_hputs("extern char **Argv;\n")
 
-	if TWINDOWS then
-		c_puts("unsigned default_heap;\n")
-		if sequence(wat_path) then
-			c_puts("/* this is in the header */\n")
-			c_puts("/*__declspec(dllimport) unsigned __stdcall GetProcessHeap(void)*/;\n")
-		else
-			c_puts("//\'test me!\' is this in the header?: unsigned __stdcall GetProcessHeap(void);\n")
-		end if
-	end if
+	m_stmtln("#ifdef _WIN32")
+		c_stmt0("unsigned default_heap;\n")
+		m_stmtln("#ifdef __WATCOMC__")
+			c_stmt0("/* this is in the header */\n")
+			c_stmt0("/*__declspec(dllimport) unsigned __stdcall GetProcessHeap(void)*/;\n")
+		m_stmtln("#else")
+			c_stmt0("//\'test me!\' is this in the header?: unsigned __stdcall GetProcessHeap(void);\n")
+		m_stmtln("#endif")
+    m_stmtln("#endif")
 
 	c_puts("unsigned long *peek4_addr;\n")
 	c_hputs("extern unsigned long *peek4_addr;\n")
@@ -7269,9 +7272,9 @@ procedure BackEnd(atom ignore)
 	c_puts("char *stack_base;\n")
 	c_hputs("extern char *stack_base;\n")
 
-	if TWINDOWS and not dll_option then
+	m_stmtln("#ifdef _WIN32")
 			c_puts("extern long __stdcall Win_Machine_Handler(LPEXCEPTION_POINTERS p);\n")
-	end if
+    m_stmtln("#endif")
 
 	if total_stack_size = -1 then
 		-- user didn't set the option
@@ -7288,7 +7291,7 @@ procedure BackEnd(atom ignore)
 		c_hputs("extern long bytes_allocated;\n")
 	end if
 
-	if TWINDOWS then
+	m_stmtln("#ifdef _WIN32")
 		if dll_option then
 			if sequence(wat_path) then
 				c_stmt0("\nint __stdcall _CRT_INIT (int, int, void *);\n")
@@ -7299,13 +7302,13 @@ procedure BackEnd(atom ignore)
 			c_stmt0("\nint __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine, int iCmdShow)\n")
 		end if
 
-	else -- TUNIX
+	m_stmtln("#else") -- TUNIX
 		if dll_option then
 			c_stmt0("\nvoid __attribute__ ((constructor)) eu_init()\n")
 		else
 			c_stmt0("\nvoid main(int argc, char *argv[])\n")
 		end if
-	end if
+    m_stmtln("#endif")
 	c_stmt0("{\n")
 
 	c_stmt0("s1_ptr _0switch_ptr;\n")
@@ -7313,7 +7316,7 @@ procedure BackEnd(atom ignore)
 
 	main_temps()
 
-	if TWINDOWS then
+	m_stmtln("#ifdef _WIN32")
 		if dll_option then
 			c_stmt0("\nArgc = 0;\n")
 			c_stmt0("default_heap = GetProcessHeap();\n")
@@ -7328,15 +7331,14 @@ procedure BackEnd(atom ignore)
 			c_stmt0("argv = make_arg_cv(szCmdLine, &argc);\n")
 			c_stmt0("winInstance = hInstance;\n")
 		end if
-	else --TUNIX
+	m_stmtln("#else")
 		if dll_option then
 			c_stmt0("\nArgc = 0;\n")
 		else
 			c_stmt0("Argc = argc;\n")
 			c_stmt0("Argv = argv;\n")
 		end if
-
-	end if
+    m_stmtln("#endif")
 
 	if not dll_option then
 		c_stmt0("stack_base = (char *)&_0;\n")
@@ -7373,19 +7375,19 @@ procedure BackEnd(atom ignore)
 
 	-- fail safe mechanism in case
 	-- Complete Edition library gets out by mistake
-	if TWINDOWS then
-		if atom(wat_path) then
+	m_stmtln("#ifdef _WIN32")
+		m_stmtln("#ifdef __WATCOMC__")
 			c_stmt0("eu_startup(_00, _01, _02, (int)CLOCKS_PER_SEC, (int)CLOCKS_PER_SEC);\n")
-		else
+		m_stmtln("#else")
 			c_stmt0("eu_startup(_00, _01, _02, (int)CLOCKS_PER_SEC, (int)CLK_TCK);\n")
-		end if
-	else
-		c_puts("#ifdef CLK_TCK\n")
-		c_stmt0("eu_startup(_00, _01, _02, (int)CLOCKS_PER_SEC, (int)CLK_TCK);\n")
-		c_puts("#else\n")
-		c_stmt0("eu_startup(_00, _01, _02, (int)CLOCKS_PER_SEC, (int)sysconf(_SC_CLK_TCK));\n")
-		c_puts("#endif\n")
-	end if
+		m_stmtln("#endif")
+	m_stmtln("#else")
+		m_stmtln("#ifdef CLK_TCK\n")
+		    c_stmt0("eu_startup(_00, _01, _02, (int)CLOCKS_PER_SEC, (int)CLK_TCK);\n")
+		m_stmtln("#else\n")
+		    c_stmt0("eu_startup(_00, _01, _02, (int)CLOCKS_PER_SEC, (int)sysconf(_SC_CLK_TCK));\n")
+		m_stmtln("#endif\n")
+    m_stmtln("#endif")
 
 	-- options_switch initialization
 	switches = get_switches()
@@ -7434,18 +7436,19 @@ procedure BackEnd(atom ignore)
 
 	c_stmt0("}\n")
 
-	if TWINDOWS then
 	if dll_option then
-		c_stmt0("\n")
-		-- Lcc and WATCOM seem to need this instead
-		-- (Lcc had __declspec(dllexport))
-		c_stmt0("int __stdcall LibMain(int hDLL, int Reason, void *Reserved)\n")
-		c_stmt0("{\n")
-		c_stmt0("if (Reason == 1)\n")
-		c_stmt0("EuInit();\n")
-		c_stmt0("return 1;\n")
-		c_stmt0("}\n")
-	end if
+    	m_stmtln("#ifdef _WIN32")
+            c_stmt0("\n")
+            
+            -- Lcc and WATCOM seem to need this instead
+            -- (Lcc had __declspec(dllexport))
+            c_stmt0("int __stdcall LibMain(int hDLL, int Reason, void *Reserved)\n")
+            c_stmt0("{\n")
+                c_stmt0("if (Reason == 1)\n")
+                    c_stmt0("EuInit();\n")
+                c_stmt0("return 1;\n")
+            c_stmt0("}\n")
+		m_stmtln("#endif")
 	end if
 
 	-- Final walk through user-defined routines, generating C code
@@ -7567,10 +7570,9 @@ procedure BackEnd(atom ignore)
 	end for
 	c_stmt0("}\n")
 
-
-	if TWINDOWS then
+	c_hputs("#ifdef _WIN32\n")
 		c_hputs("extern void *winInstance;\n\n")
-	end if
+	c_hputs("#endif\n")
 
 	close(c_code)
 	close(c_h)
