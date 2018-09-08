@@ -7,7 +7,7 @@
 object start_backend(object x);
 #endif
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 extern HINSTANCE *open_dll_list;
 extern int open_dll_size;
 extern int open_dll_count;
@@ -63,7 +63,7 @@ unsigned long get_pos_int(char *where, object x);
 
 void NewConfig(int raise_console);
 double current_time( void );
-#ifdef EWINDOWS
+#ifdef _WIN32
 long __stdcall Win_Machine_Handler(LPEXCEPTION_POINTERS p);
 #endif
 void Machine_Handler(int sig_no);

@@ -30,7 +30,7 @@
 
 #include <signal.h>
 #include <string.h>
-#ifdef EWINDOWS
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
@@ -301,7 +301,7 @@ static void Refresh(long line_num, int vars_too)
 	long i;
 	struct EuViewPort vp;
 	
-#ifdef EWINDOWS
+#ifdef _WIN32
 	int top_attrib, bottom_attrib;
 #endif    
 	GetViewPort( &vp );
@@ -309,7 +309,7 @@ static void Refresh(long line_num, int vars_too)
 	/* blank trace part of screen only */
 	set_text_color(15);
 	set_bk_color(_WHITE);     
-#ifdef EWINDOWS
+#ifdef _WIN32
 	if (color_trace && COLOR_DISPLAY) {
 		top_attrib = (7<<4) + 15;
 		bottom_attrib = (1<<4) + 15;
@@ -422,7 +422,7 @@ void MainScreen()
 #endif
 	if (TEXT_MODE) {
 		/* text mode */
-#ifdef EWINDOWS
+#ifdef _WIN32
 		RestoreNormal();
 #endif
 #ifdef EUNIX
@@ -614,7 +614,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 			// not enough room to show whole sequence
 			flush_screen();
 			col = screen_col;
-#ifdef EWINDOWS         
+#ifdef _WIN32         
 			SaveTrace();
 #else
 #ifdef EUNIX
@@ -635,7 +635,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 			screen_output(NULL, "\n\n* Press Enter to resume trace\n");
 			if (print_chars != -1)
 				get_key(TRUE); // wait for Enter key
-#ifdef EWINDOWS         
+#ifdef _WIN32         
 			RestoreTrace();
 #else
 #ifdef EUNIX
@@ -715,7 +715,7 @@ void ShowDebug()
 	screen_col = debug_screen_col;
 	screen_line = debug_screen_line;
 	MainWrap = wrap_around;
-#ifdef EWINDOWS
+#ifdef _WIN32
 	SaveNormal();
 	RestoreTrace();
 #endif
@@ -748,7 +748,7 @@ void ShowDebug()
 static void SaveDebugImage()
 /* save image of debug screen (if there's enough memory) */
 {
-#ifdef EWINDOWS
+#ifdef _WIN32
 	DebugScreenSave = (char *)1;
 #endif
 }
@@ -756,7 +756,7 @@ static void SaveDebugImage()
 static void RestoreDebugImage()
 /* redisplay debug screen image */
 {
-#ifdef EWINDOWS
+#ifdef _WIN32
 	SaveNormal();
 	RestoreTrace();
 #endif
@@ -835,7 +835,7 @@ static void DebugCommand()
 			ShowName();
 		}
 		else if (c == '\r' || c == '\n'
-#ifdef EWINDOWS
+#ifdef _WIN32
 				 || c == 284
 #endif
 		
@@ -909,7 +909,7 @@ static void ShowName()
 	prompt = vp.num_trace_lines + BASE_TRACE_LINE + 1;
 	SetPosition(prompt, 1);
 	buffer_screen();
-#ifdef EWINDOWS
+#ifdef _WIN32
 	screen_output(NULL, "variable name? _");
 #else
 	screen_output(NULL, "variable name?");
@@ -1195,7 +1195,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 					copy_string(TempBuff, "\n^^^ called to handle run-time crash\n", TEMP_SIZE);
 				}
 				else {
-#ifdef EWINDOWS         
+#ifdef _WIN32         
 					copy_string(TempBuff, "\n^^^ call-back from Windows\n", TEMP_SIZE);
 #else           
 					copy_string(TempBuff, "\n^^^ call-back from external source\n", TEMP_SIZE);
@@ -1458,7 +1458,7 @@ void INT_Handler(int sig_no)
 		return;
 	}
 	gameover = TRUE;
-#ifdef EWINDOWS
+#ifdef _WIN32
 	DisableControlCHandling();
 #endif
 	Cleanup(1); 
@@ -1474,7 +1474,7 @@ void GetViewPort(struct EuViewPort *vp)
 	struct winsize ws;
 #endif
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 	CONSOLE_SCREEN_BUFFER_INFO info;
 	
 	GetConsoleScreenBufferInfo(console_output, &info);

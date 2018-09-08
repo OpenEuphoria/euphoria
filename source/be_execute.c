@@ -50,7 +50,7 @@
 #	include <conio.h>
 #endif
 #include <math.h>
-#ifdef EWINDOWS
+#ifdef _WIN32
 #	include <windows.h>
 #endif
 #include <signal.h>
@@ -294,14 +294,14 @@ static void trace_command(object x)
 		else if (i == 1) {
 			TraceOn = trace_enabled;
 			color_trace = TRUE;
-#ifdef EWINDOWS
+#ifdef _WIN32
 			show_console();
 #endif
 		}
 		else if (i == 2) {
 			TraceOn = trace_enabled;
 			color_trace = FALSE;
-#ifdef EWINDOWS
+#ifdef _WIN32
 			show_console();
 #endif
 		}
@@ -602,7 +602,7 @@ static void do_poke4(object a, object top)
 #define FP_EMULATION_NEEDED // FOR WATCOM/DOS to run on old 486/386 without f.p.
 
 #if !defined(EMINGW)
-#if defined(EWINDOWS) || (defined(__WATCOMC__) && !defined(FP_EMULATION_NEEDED))
+#if defined(_WIN32) || (defined(__WATCOMC__) && !defined(FP_EMULATION_NEEDED))
 // #pragma aux thread aborts; does nothing
 
 #define thread() do { wcthread((long)pc); } while (0)
@@ -757,13 +757,14 @@ void InitExecute()
 	// a bit of cleanup - tick rate, profile, active page etc.
 #endif
 
+
 // detect matherr support
 #if defined(DOMAIN) && defined(SING) && defined(OVERFLOW) && defined(UNDERFLOW) && defined(TLOSS) && defined(PLOSS)
 	// enable our matherr function
 	_LIB_VERSION = _SVID_;
 #endif
     
-#ifdef EWINDOWS
+#ifdef _WIN32
 		/* Prevent "Send Error Report to Microsoft dialog from coming up
 		   if this thing has an unhandled exception.  */
 		SetUnhandledExceptionFilter(Win_Machine_Handler);
@@ -1362,7 +1363,7 @@ struct sline *slist;
 
 /* Front-end variables passed via miscellaneous fe.misc */
 char **file_name;
-#ifdef EWINDOWS
+#ifdef _WIN32
 extern DWORD WINAPI WinTimer(LPVOID lpParameter);
 #endif
 int max_stack_per_call;
@@ -1383,7 +1384,7 @@ void fe_set_pointers()
 	AnyStatementProfile= fe.misc[2];
 	sample_size        = fe.misc[3];
 
-#if defined(EWINDOWS)
+#if defined(_WIN32)
 	if (sample_size > 0) {
 		profile_sample = (int *)EMalloc(sample_size * sizeof(int));
 		//lock_region(profile_sample, sample_size * sizeof(int));
@@ -4569,7 +4570,7 @@ void do_exec(int *start_pc)
 						last_r_file_no = NOVALUE;
 				}
 				if (last_r_file_ptr == stdin) {
-#ifdef EWINDOWS
+#ifdef _WIN32
 					// In WIN32 this is needed before
 					// in_from_keyb is set correctly
 					show_console();
@@ -4614,19 +4615,19 @@ void do_exec(int *start_pc)
 #ifdef EUNIX
 				top = 3;  // (UNIX, called Linux for backwards compatibility)
 #endif
-#ifdef EBSD
+#ifdef __FreeBSD__
 				top = 8; // FreeBSD
 #endif
-#ifdef EOSX
+#ifdef __APPLE__
 				top = 4;  // OSX
 #endif
-#ifdef EOPENBSD
+#ifdef __OpenBSD__
 				top = 6; // OpenBSD
 #endif
-#ifdef ENETBSD
+#ifdef __NetBSD__
 				top = 7; // NetBSD
 #endif
-#ifdef EWINDOWS
+#ifdef _WIN32
 				top = 2;  // WIN32
 #endif
 
@@ -4639,7 +4640,7 @@ void do_exec(int *start_pc)
 							 or return -1 */
 			deprintf("case L_GET_KEY:");
 				tpc = pc;
-#if defined(EWINDOWS)
+#if defined(_WIN32)
 				show_console();
 #endif
 				if (current_screen != MAIN_SCREEN) {

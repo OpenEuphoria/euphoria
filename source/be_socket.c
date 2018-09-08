@@ -269,7 +269,7 @@ int eusock_getfamily(int x)
 	case EAF_INET6:
 #ifdef AF_INET6
 		return AF_INET6;
-#elif defined(EWINDOWS)
+#elif defined(_WIN32)
 		// hack as Watcom doesn't have AF_INET6 defined
 		return 23;
 #else
@@ -278,7 +278,7 @@ int eusock_getfamily(int x)
 	case EAF_BTH:
 #ifdef AF_BTH
 		return AF_BTH;
-#elif defined(EWINDOWS)
+#elif defined(_WIN32)
 		// hack as Watcom doesn't have AF_BTH defined
 		return 32;
 #else
@@ -652,7 +652,7 @@ int eusock_getsock_option(int x)
     }
 }
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 
  	#ifndef WSAAPI
 		#define WSAAPI PASCAL
@@ -1087,7 +1087,7 @@ int eusock_getsock_option(int x)
 
     #define eusock_ensure_init() if (eusock_wsastarted == 0) eusock_wsastart();
 
-#else // ifdef EWINDOWS
+#else // ifdef _WIN32
     #include <errno.h>
     int eusock_geterror()
     {
@@ -1180,7 +1180,7 @@ int eusock_getsock_option(int x)
     }
 
     #define eusock_ensure_init()
-#endif // ifdef EWINDOWS else
+#endif // ifdef _WIN32 else
 
 /* ============================================================================
  *

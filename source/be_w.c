@@ -31,7 +31,7 @@
 
 #include <string.h>
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 #  include <windows.h>
 #endif
 
@@ -59,7 +59,7 @@ char *collect = NULL;    /* to collect sprintf/sprint output */
 int have_console = FALSE;  // is there a console window yet?
 int already_had_console = -1; /* were we created with a console window or did we have to allocate our own? */
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 HANDLE console_input;  // HANDLE for WIN32 console input
 HANDLE console_output; // HANDLE for WIN32 console output
 HANDLE console_trace;  // HANDLE for WIN32 output to trace-screen
@@ -270,7 +270,7 @@ int VK_to_EuKBCode[256] = {
 /*******************/
 static int out_to_screen;  /* stdout is going to screen */
 static int err_to_screen;  /* stderr is going to screen (always TRUE) */
-#ifdef EWINDOWS
+#ifdef _WIN32
 static CHAR_INFO* line_buffer = 0;
 static int line_buffer_size = 0;
 
@@ -306,7 +306,7 @@ void SetPosition();
 
 static int _has_console = 1;
 
-#if defined(EWINDOWS)
+#if defined(_WIN32)
 #include <windows.h>
 
 typedef int (WINAPI *GCPLA)(LPDWORD, DWORD);
@@ -351,7 +351,7 @@ int has_console() {
 
 void GetTextPositionP(struct eu_rccoord *p)
 {
-#ifdef EWINDOWS
+#ifdef _WIN32
 	CONSOLE_SCREEN_BUFFER_INFO console_info;
 	
 	show_console();
@@ -426,12 +426,12 @@ void Set_Image(struct char_cell image[MAX_LINES][MAX_COLS], char vch, char fg, c
 #endif
 
 void InitInOut()
-/* Set up stdout and stderr. In EWINDOWS some stuff
+/* Set up stdout and stderr. In _WIN32 some stuff
    is initialized right away. The rest is done later if necesssary on first
    use of the console - see show_console() below. */
 {
     struct eu_rccoord position;
-#ifdef EWINDOWS
+#ifdef _WIN32
     position.col = 1;   // should do these 2 properly
     position.row = 1;
     screen_line = position.row;
@@ -455,7 +455,7 @@ void InitInOut()
 }
 
 int console_application() {
-#if defined(EWINDOWS)
+#if defined(_WIN32)
 	if (!have_console)
 			show_console();
 		
@@ -466,7 +466,7 @@ int console_application() {
 }
 
 
-#if defined(EWINDOWS)
+#if defined(_WIN32)
 void show_console()
 /* set up a console window if not done yet */
 {
@@ -536,7 +536,7 @@ void show_console()
 }
 #endif
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 static void end_of_line(int c)
 // handle \n or \r in Windows console
 {
@@ -581,7 +581,7 @@ static void end_of_line(int c)
     SetConsoleCursorPosition(console_output, console_info.dwCursorPosition);
 }
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 int getKBcode()
 // Get the next keyboard code used by the user on the console
 {
@@ -843,11 +843,11 @@ static void expand_tabs(char *raw_string)
             if (wrap_around) {
                 /* what if 0 chars to write? */
                 *expanded_ptr = '\0';
-#ifdef EWINDOWS
+#ifdef _WIN32
                 MyWriteConsole(expanded_string,
                                expanded_ptr - expanded_string);
                 end_of_line('\n');
-#endif // EWINDOWS
+#endif // _WIN32
 #ifdef EUNIX
                 iputs(expanded_string, stdout);
                 iflush(stdout);
@@ -883,7 +883,7 @@ static void expand_tabs(char *raw_string)
         }
 
         else if (c == '\n' || c == '\r') {
-#ifdef EWINDOWS
+#ifdef _WIN32
             MyWriteConsole(expanded_string, expanded_ptr - expanded_string);
             end_of_line(c);
 #endif
@@ -923,7 +923,7 @@ static void expand_tabs(char *raw_string)
     if (expanded_ptr != expanded_string && must_flush) {
 
         *expanded_ptr = '\0';
-#ifdef EWINDOWS
+#ifdef _WIN32
         MyWriteConsole(expanded_string, expanded_ptr - expanded_string);
 #endif
 #ifdef EUNIX
@@ -987,7 +987,7 @@ void screen_output(IFILE f, char *out_string)
         }
 #else
         if (f == stdout || f == stderr) {
-#ifdef EWINDOWS
+#ifdef _WIN32
             show_console();  // needed to initialize out_to_screen in WIN32
 #endif
             if (current_screen != MAIN_SCREEN)
@@ -1036,7 +1036,7 @@ void screen_output_vararg(IFILE f, char *out_string, ...)
 	va_end(ap);
 }
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 void EClearLines(int first_line, int last_line, int len, WORD attributes)
 {
     int i, n;
@@ -1053,7 +1053,7 @@ void EClearLines(int first_line, int last_line, int len, WORD attributes)
 
 void ClearScreen()
 {
-#ifdef EWINDOWS
+#ifdef _WIN32
     CONSOLE_SCREEN_BUFFER_INFO info;
 
     show_console();
@@ -1089,7 +1089,7 @@ void SetPosition(int line, int col)
     iflush(stdout);
 #endif
 
-#ifdef EWINDOWS
+#ifdef _WIN32
     COORD pos;
 
     pos.X = col-1;
@@ -1101,7 +1101,7 @@ void SetPosition(int line, int col)
     screen_line = line;
 }
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 
 static void ReadInto(WORD * buf, LPTSTR str, int size, unsigned long * n, unsigned long * m, struct eu_rccoord * pos)
 {

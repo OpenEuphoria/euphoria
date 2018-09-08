@@ -144,7 +144,7 @@ typedef struct block_list * block_list_ptr;
 	#endif
 
 #else
-	#ifdef EWINDOWS
+	#ifdef _WIN32
 		#define block_size(p) HeapSize((void *)default_heap, 0, p)
 	#else
 		#define block_size(p) (_msize(p))
