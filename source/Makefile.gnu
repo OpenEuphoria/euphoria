@@ -163,7 +163,7 @@ else
 			LIBRARY_NAME=eudbg.a
 		endif
 	else
-		EOSMING=-ffast-math -O3 -Os
+		EOSMING=-ffast-math -O1 -Os
 		ifdef FPIC
 			LIBRARY_NAME=euso.a
 		else
