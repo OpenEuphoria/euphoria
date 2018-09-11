@@ -139,10 +139,10 @@ fi
 
 SCP="scp -C"
 SSH="ssh -C"
-HG="git"
 INSTALL_PREFIX="/usr/local"
 EREL_TYPE="development"
 ROOTDIR="$TRUNKDIR"
+HG="git"
 
 CONFIGURE_PARAMS="$@"
 

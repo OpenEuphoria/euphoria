@@ -21,6 +21,8 @@ include std/types.e
 -- See Also:
 --   [[:define_c_proc]], [[:define_c_func]], [[:define_c_var]]
 
+with define NO_CHANDLE
+
 public constant
 	--** char  8-bits
 	C_CHAR    = #01000001,
