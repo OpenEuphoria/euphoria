@@ -24,9 +24,19 @@ puts(1, "-")
 with warning = { none }
 with warning = { short_circuit }
 
--- warn here
+-- do not warn here.  Since time() has no side-effect, there is no need to issue a warning
 if a1 and time() then
 	-- do nothing
+end if
+
+function increment_a1()
+    a1 += 1
+    return a1
+end function
+
+-- do warn here because increment_a1() has a side-effect
+if a1 and increment_a1() then
+    -- do nothing
 end if
 
 with warning = { not_used }

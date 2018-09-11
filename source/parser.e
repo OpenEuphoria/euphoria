@@ -807,8 +807,6 @@ procedure UndefinedVar(symtab_index s)
 
 		CompileErr(A_NAMESPACE_QUALIFIER_IS_NEEDED_TO_RESOLVE_1BECAUSE_2_IS_DECLARED_AS_A_GLOBALPUBLIC_SYMBOL_IN3, {rname, rname, errmsg})
 
-	elsif length(symbol_resolution_warning) then
-		Warning( symbol_resolution_warning, resolution_warning_flag)
 	end if
 end procedure
 

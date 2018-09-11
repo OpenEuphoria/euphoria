@@ -388,7 +388,6 @@ end type
 
 
 constant StdErrMsgs = {
-
     { ADD_A_DIRECTORY_TO_BE_SEARCHED_FOR_INCLUDE_FILES, "Add a directory to be searched for include files" },
     { AN_ENUM_CONSTANT_MUST_BE_AN_INTEGER          , "An enum constant must be an integer" },
     { AN_IDENTIFIER_IS_EXPECTED_HERE               , "an identifier is expected here" },
