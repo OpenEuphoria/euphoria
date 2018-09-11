@@ -62,8 +62,7 @@ test_equal("map m1 size#2", 1006, map:size(m1))
 test_equal("map m1 get 5#2",               "5", map:get(m1,  5, 999) )
 test_equal("map m1 get 1000",           "1000", map:get(m1, 1000, 999) )
 
--- add 2000 floats
-o2 = map:threshold(o1)
+-- add 1000 floats
 for i = 1 to 1000 do
 	map:put(m1, -i*1.333333, i)
 end for
