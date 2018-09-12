@@ -79,6 +79,9 @@ enum false=0, true=1
 
 atom r_max_uint_fn
 for i = 1 to length(minus_1_values) do
+    if pointer_size < 8 and minus_1_values[i] = MAXUINT64 then
+        exit
+    end if
 	r_max_uint_fn = define_c_func( "", call_back( routine_id("minus_1_fn") ), {}, unsigned_types[i] )
 	test_equal( sprintf("return type %s makes unsigned value", {unsigned_type_names[i]}), minus_1_values[i], c_func(r_max_uint_fn, {}) )
 end for
@@ -100,6 +103,9 @@ constant types = signed_types & unsigned_types
 constant type_names = signed_type_names & unsigned_type_names
 constant values = signed_values & unsigned_values
 for i = 1 to length(signed_types) do
+    if pointer_size < 8 and signed_types[i] = C_LONGLONG then
+        continue
+    end if
 	-- 32-bit callbacks don't return anything big enough to be a C_LONGLONG, so skip those
 	if find(signed_types[i], floating_point_types) then
 		continue
@@ -163,6 +169,9 @@ object fs
 for i = 1 to length(signed_types) do
 	-- test that values get encoded well when coming out from C.
 	-- test special values and ranges in EUPHORIA
+    if pointer_size < 8 and signed_types[i] = C_LONGLONG then
+        continue
+    end if
 	integer test_boundary_values
 	ifdef not EU4_0 then
 		-- we test bool because bool can be as big as an int. 
