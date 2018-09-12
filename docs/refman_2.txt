@@ -4066,15 +4066,19 @@ temporarily affected by the "##without warning strict##" directive.
                  all warnings.
 | ##resolution## | an identifier was used in a file, but was defined in
                    a file this file doesn't (recursively) include.
-| ##short_circuit## | a routine call may not take place because of short circuit
-                       evaluation in a conditional clause.
+| ##short_circuit## | a routine call that **could affect the state of your program** may not take place because of [[:short_circuit "short circuit"]] evaluation in a conditional clause.
 | ##override## | a built-in is being overridden
 | ##builtin_chosen## | an unqualified call caused Euphoria to choose between a
                          built-in and another global which does not override it.
                          Euphoria chooses the built-in.
 | ##not_used## |  A variable has not been used and is going out of scope.
+<<<<<<< HEAD
 | ##no_value## | A variable never got assigned a value and is going out of scope.
 | ##custom## |  Any warning that was defined using the ##warning## procedure.
+=======
+| ##no_value## | A variable is used but *never* gets assigned a value.
+| ##custom## |  Any warning that was defined using the warning() procedure.
+>>>>>>> origin/4.0
 | ##not_reached## | After a keyword that branches unconditionally, the only
                     thing that should appear is an end of block keyword, or
                     possibly a label that a goto statement can target.
@@ -4106,14 +4110,14 @@ with warning restore
 
 Initially, only the following warnings are enabled:
 
-* ##resolution##
-* ##override##
 * ##builtin_chosen##
-* ##translator##
 * ##cmdline##
+* ##custom##
 * ##mixed_profile##
 * ##not_reached##
-* ##custom##
+* ##override##
+* ##resolution##
+* ##translator##
 
 This set can be changed using -W or -X command line switches.
 

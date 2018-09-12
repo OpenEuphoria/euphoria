@@ -119,7 +119,7 @@ ifeq "$(EMINGW)" "1"
 			LIBRARY_NAME=eudbg.a
 		endif
 	else
-		EOSMING=-ffast-math -O3 -Os
+		EOSMING=-ffast-math -O2 -Os
 		ifdef FPIC
 			LIBRARY_NAME=euso.a
 		else
@@ -163,7 +163,7 @@ else
 			LIBRARY_NAME=eudbg.a
 		endif
 	else
-		EOSMING=-ffast-math -O1 -Os
+		EOSMING=-ffast-math -O2 -Os
 		ifdef FPIC
 			LIBRARY_NAME=euso.a
 		else
@@ -586,9 +586,10 @@ else
 
 ifeq "$(PLAT)" ""
 SOURCEDIR=euphoria-$(SHORT_HASH)
+TARGETPLAT=
 else
-TARGETPLAT=-plat $(PLAT)
 SOURCEDIR=euphoria-$(PLAT)-$(SHORT_HASH)
+TARGETPLAT=-plat $(PLAT)
 endif
 
 endif
@@ -1121,7 +1122,7 @@ $(BUILDDIR)/$(OBJDIR)/back/%.o : $(TRUNKDIR)/source/%.c $(CONFIG_FILE)
 	$(CC) $(BE_FLAGS) $(EBSDFLAG) -I $(BUILDDIR)/$(OBJDIR)/back -I $(BUILDDIR)/include $(TRUNKDIR)/source/$*.c -o$(BUILDDIR)/$(OBJDIR)/back/$*.o
 
 $(BUILDDIR)/$(OBJDIR)/back/be_callc.o : $(TRUNKDIR)/source/$(BE_CALLC).c $(CONFIG_FILE)
-	$(CC) -c -Wall $(EOSTYPE) $(ARCH_FLAG) $(FPIC) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -DARCH=$(ARCH) -fsigned-char -O3 -fno-omit-frame-pointer -ffast-math -fno-defer-pop $(CALLC_DEBUG) $(TRUNKDIR)/source/$(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.o
+	$(CC) -c -Wall $(EOSTYPE) $(ARCH_FLAG) $(FPIC) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -DARCH=$(ARCH) -fsigned-char -O2 -fno-omit-frame-pointer -ffast-math -fno-defer-pop $(CALLC_DEBUG) $(TRUNKDIR)/source/$(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.o
 
 $(BUILDDIR)/$(OBJDIR)/back/be_inline.o : $(TRUNKDIR)/source/be_inline.c $(CONFIG_FILE)
 	$(CC) -finline-functions $(BE_FLAGS) $(EBSDFLAG) $(RUNTIME_FLAGS) $(TRUNKDIR)/source/be_inline.c -o$(BUILDDIR)/$(OBJDIR)/back/be_inline.o

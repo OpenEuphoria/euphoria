@@ -1,35 +1,60 @@
 == Version 4.0.6 Date TBD
 
 === Bug Fixes
-
-* [[ticket:893]] Backported map fixes to 4.0
-* [[ticket:877]] Fixed the bug where some very large values or very small values might give silly results.
-* [[ticket:901]] Made dsearch.exw into a portable demo, [[:dsearch.ex]], for both Windows and Linux
-* [[ticket:881]] In frontend, update previous op cache when an assignment gets optimized out.
-* [[ticket:872]] fix documentation error involving ##[[:or_all]]##
-* [[ticket:880]] fix documentaiton error involving ##[[:poke2]]##
-* [[ticket:708]] specified that color triples are specified between 0..255 in ##[[:read_bitmap]]## and ##[[:save_bitmap]]##.
-* [[ticket:801]] fix translator memory leak for ##[[:insert]]##
-* [[ticket:799]] fix memory leak in ##[[:gets]]## when reading EOF
-* [[ticket:819]] use operating system sleep functions for fractions of seconds to avoid needless CPU utilization
-* [[ticket:824]] fix OpenWatcom installer PCRE directory
-* [[ticket:823]] emit error in translator when user specifies a file for the build directory
-* [[ticket:781]] http_post and http_get now follow redirects
-* [[ticket:835]] translator properly handles sequences passed to ##floor##
-* [[ticket:830]] fixed memory leak in ##[[:replace]]##
-* [[ticket:847]] fixed memory leak in ##[[:remove]]##
-* [[ticket:837]] fixed documentation error involving ##[[:load_map]]##
-* Fix std/sequence.e so store() will correctly handle the one-element index case - it was duplicating the entire sequence before.
+==== Behavior Fixes
+* [[ticket:906]] Installer problem in 4.0.5 corrected
 * [[ticket:638]] ##[[:value]]## and ##[[:get]]## handle multi-line strings
 * [[ticket:836]] ##[[:canonical_path]]## works when path is not on the current drive on Windows
 * [[ticket:630]] shrouder ignores binder options that are not applicable
 * [[ticket:776]] Updated ##[[:walk_dir]]## parameter documentation
 * functions imported from msvcrt.dll should use cdecl (affects ##[[:now_gmt]]##, ##[[:locale:get]]##,
   ##[[:locale:set]]## and ##[[:locale:datetime]]##)
+* Fix std/sequence.e so store() will correctly handle the one-element index case - it was duplicating the entire sequence before.
+* [[ticket:898]] fix ##[[:uname]]## to report Windows 8 correctly
 * [[ticket:882]] Translated ##[[:remove]]## works correctly with empty sequence
 * [[ticket:885]] Translated ##[[:splice]]## properly counts references when splicing an atom
-* [[ticket:898]] fix ##[[:uname]]## to report Windows 8 correctly
+* [[ticket:917]] Some numeric literals no longer produce strange fatal errors.
+* [[ticket:835]] translator properly handles sequences passed to ##floor##
+* [[ticket:800]] invalid c_func/c_proc calls now fail under Linux
+* [[ticket:831]] http_get now retrieves page content
+* [[ticket:803]] handle lowercase hex in URLs in decode() in std/net/url.e
+* [[ticket:853]] ##[[:walk_dir]]## handle strange filenames possible in UNIX like '*.*'
+* [[ticket:752]], [[ticket:915]] Backspace delete fixed under Linux trace screen and console prompts
+* [[ticket:948]] Fixed issue where a symbol could be defined as two distinct things in an enum type statement
+* [[ticket:877]] Fixed the bug where some very large values or very small values might give silly results.
+* [[ticket:893]] Backported map fixes to 4.0
+* [[ticket:824]] fix OpenWatcom installer PCRE directory
+
+==== Resource Leak Fixes
+* [[ticket:938]] ##[[:copy_file]]## no longer leaves files open after copying
+* [[ticket:799]] fix memory leak in ##[[:gets]]## when reading EOF
+* [[ticket:830]] fixed memory leak in ##[[:replace]]##
+* [[ticket:847]] fixed memory leak in ##[[:remove]]##
+* [[ticket:801]] fix translator memory leak for ##[[:insert]]##
+* [[ticket:819]] use operating system sleep functions for fractions of seconds to avoid needless CPU utilization
+
+==== Error and Warning Fixes
+* [[ticket:907]] warning of unused variable in local routine variables
+* [[ticket:973]] Fixed resolution, no_value, and builtin_chosen warnings
+* [[ticket:823]] emit error in translator when user specifies a file for the build directory
+
+==== Documentation Fixes
+* [[ticket:872]] fix documentation error involving ##[[:or_all]]##
+* [[ticket:880]] fix documentation error involving ##[[:poke2]]##
+* [[ticket:941]] Mispelling of words fixed 
+* [[ticket:928]] tests fixed and added
+* [[ticket:934]] Translator now tells user how to properly build
+* [[ticket:912]] Documentation moved 
+* [[ticket:942]] Bad signatures fixed
+* [[ticket:943]] Wrong line reported error fixed
+* [[ticket:945]] Fixed documentation error in ##[[:maybe_any_key]]##
+* [[ticket:947]] Fixed documentation errors in switch
+* [[ticket:881]] In frontend, update previous op cache when an assignment gets optimized out.
+* [[ticket:708]] specified that color triples are specified between 0..255 in ##[[:read_bitmap]]## and ##[[:save_bitmap]]##.
+* [[ticket:837]] fixed documentation error involving ##[[:load_map]]##
 
 === Enhancements
 
 * command line help is now sorted by option
+* [[ticket:901]], [[ticket::921]] Made dsearch.exw into a portable demo, [[:dsearch.ex]], for both Windows and Linux
+* [[ticket:781]] http_post and http_get now follow redirects

@@ -140,6 +140,7 @@ fi
 SCP="scp -C"
 SSH="ssh -C"
 INSTALL_PREFIX="/usr/local"
+EREL_TYPE="development"
 ROOTDIR="$TRUNKDIR"
 HG="git"
 

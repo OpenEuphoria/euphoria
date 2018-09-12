@@ -137,20 +137,21 @@ ifdef UNIX then
 	nul = "/dev/null"
 end ifdef
 
-constant answers = { "TTTTFTTTTF", "TTTTTTTTTF" } = 'T'
+constant answers = { "TTTTFTFTTTT", "TTTTTTFTTTT" } = 'T'
 constant questions = {
 {"File wide variables that are used but never assigned a value are warned about", 
-	"module variable \'i5\' is never assigned a value"}, -- 226
+	"module variable \'i5\' is read from but never assigned a value"}, -- 226
 {"Private variables of routines that are used but never assigned a value are warned about", 
-	"private variable \'i4\' of p1 is never assigned a value"}, -- 227
+	"private variable \'i4\' of p1 is read from but never assigned a value"}, -- 227
 {"File wide constants that are not used are warned about", "module constant \'a6\' is not used"}, -- 228
 {"File wide variables that are not used are warned about", "module variable \'i1\' is not used"}, -- 229
 {"Parameters of routines that are not used are warned about", "parameter \'i2\' of p1() is not used"}, -- 230
 {"Private variables of routines that are never used are warned about", "private variable \'i3\' of p1() is not used"}, -- 231
-{"Calls that might get skipped by short-circuit evaluation are warned about", "call to time() might be short-circuited" }, -- short_circuit
+{"Calls without side-effects that might get skipped by short-circuit evaluation are warned about", "call to time() might be short-circuited" }, -- short_circuit
+{"Calls with side-effects that might get skipped by short-circuit evaluation are warned about", "call to increment_a1() might be short-circuited" },
 {"Override of routine gets a warning", "built-in routine time() overridden"}, -- override
-{"Built-in chosen over declared routine gets a warning", "The built-in puts() in warning_code.ex overrides the global/public puts() in:warning_code1.e"},
-{"statement after abort() will never be executed", "statement after abort() will never be executed"},
+{"Built-in chosen over declared routine gets a warning", "warning_code.ex overrides the global/public puts() in:"},
+{"statement after abort() will never be executed", "- statement after abort() will never be executed"},
  $
 }
 

@@ -9,6 +9,7 @@
 /******************/
 /* Included files */
 /******************/
+#define _SVID_SOURCE             /* See feature_test_macros(7) */
 #define _LARGE_FILE_API
 #define _LARGEFILE64_SOURCE
 #include <stdint.h>
@@ -460,7 +461,7 @@ void MainScreen()
 
 #endif
 
-#if !defined(EBSD62)
+#if defined(DOMAIN) && defined(SING) && defined(OVERFLOW) && defined(UNDERFLOW) && defined(TLOSS) && defined(PLOSS)
 #undef matherr // avoid OpenWATCOM problem
 #if (defined(__WATCOMC__) || defined(EUNIX)) && !defined(EOW)
 int matherr(struct exception *err)   // 10.6 wants this
@@ -498,7 +499,7 @@ int matherr(struct _exception *err)  // OW wants this
 	RTFatal("math function %s error", msg);
 	return 0;
 }
-#endif
+#endif // defined(matherr)
 
 int crash_call_back = FALSE;
 
