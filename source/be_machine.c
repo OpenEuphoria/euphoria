@@ -2373,7 +2373,7 @@ typedef void * (__stdcall *VirtualAlloc_t)(void *, unsigned int size, unsigned i
 #undef roundup
 #endif /* roundup */
 
-inline signed int roundup(unsigned int p_v, unsigned int p_radix) {
+static signed int roundup(unsigned int p_v, unsigned int p_radix) {
 	signed int radix = (signed int)p_radix;
 	signed int v = (signed int)p_v;
 
