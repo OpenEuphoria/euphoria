@@ -119,6 +119,7 @@ else
 	TARGET=EBSD
 fi
 
+BUILDJOBS="1"
 
 # default use source
 if [ "$SOURCEDIR" = `pwd $PWDARG` ] ; then
@@ -221,6 +222,15 @@ while [ "$1" != "" ]; do
 		if [ -x "${EUBIN}/eui" ]; then
 			EC="${EUBIN}/eui ${SOURCEDIR}/euc.ex"
 		fi
+		;;
+
+	--jobs*)
+		VAL=`echo $1 | cut -d = -f 2`
+		if [ "$VAL" = "$1" ]; then
+			shift ; VAL=$1
+		fi
+
+		BUILDJOBS=$VAL
 		;;
 
 	--build*)
@@ -400,6 +410,7 @@ while [ "$1" != "" ]; do
 		echo "   --without-euphoria  Don't use a precompiled version of Euphoria to build."
 		echo "   --eubin value       Set the path of the precompiled"
 		echo "                       binaries used to intrepret and translate the sources."
+		echo "   --jobs value        Set number of build jobs to run in make. Default is 1."
 		echo "   --build value       Set the build directory. The default is"
 		echo "                       'build' off of the source directory."
 		echo "   --debug             Turn debugging on."
@@ -553,6 +564,7 @@ mkdir -p $BUILDDIR
 [ -n "$TRUNKDIR" ] && echo TRUNKDIR=$TRUNKDIR >> "$PREFIX"${CONFIG_FILE}
 [ -n "$SOURCEDIR" ] && echo SOURCEDIR=$SOURCEDIR >> "$PREFIX"${CONFIG_FILE}
 [ -n "$BUILDDIR" ] && echo BUILDDIR=$BUILDDIR >> "$PREFIX"${CONFIG_FILE}
+[ -n "$BUILDJOBS" ] && echo BUILDJOBS=$BUILDJOBS >> "$PREFIX"${CONFIG_FILE}
 
 if [ "$USECYPPATH" = "true" ]; then
 	 CYPTRUNKDIR=`cygpath -a -m $TRUNKDIR`
