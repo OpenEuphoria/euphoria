@@ -704,7 +704,7 @@ endif
 .PHONY: update-version-cache
 update-version-cache : $(BUILDDIR)/ver.cache
 
-$(MKVER): mkver.c $(BUILDDIR)/include
+$(MKVER): mkver.c $(BUILDDIR)/include/
 	$(CC) -o $@ $<
 
 $(BUILDDIR)/ver.cache : $(MKVER) $(EU_BACKEND_RUNNER_FILES) $(EU_TRANSLATOR_FILES) $(EU_INTERPRETER_FILES) $(EU_CORE_FILES) $(EU_STD_INC) $(wildcard *.c)
