@@ -492,19 +492,32 @@ clobber distclean : clean
 
 .PHONY : clean distclean clobber all htmldoc manual lib818
 
-ifndef OBJDIR
-$(BUILDDIR)/$(EECUDBGA) : $(wildcard $(TRUNKDIR)/source/*.[ch]) $(wildcard $(TRUNKDIR)/source/pcre/*.[ch]) | $(BUILD_DIRS)
-	$(MAKE) $(BUILDDIR)/$(EECUDBGA) OBJDIR=libobjdbg ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE)
+ifeq "$(OBJDIR)" "libobj"
 
-$(BUILDDIR)/$(EECUA) : $(wildcard $(TRUNKDIR)/source/*.{c,h}) $(wildcard $(TRUNKDIR)/source/pcre/*.{c,h}) | $(BUILD_DIRS)
-	$(MAKE) $(BUILDDIR)/$(EECUA) OBJDIR=libobj ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG= EPROFILE=$(EPROFILE)
+$(BUILDDIR)/$(EECUA) : $(EU_LIB_OBJECTS)
+	$(AR) -rc $(BUILDDIR)/$(EECUA) $(EU_LIB_OBJECTS)
 
 else
-	
-$(BUILDDIR)/$(LIBRARY_NAME) : $(EU_LIB_OBJECTS)
-	$(AR) -rc $(BUILDDIR)/$(LIBRARY_NAME) $(EU_LIB_OBJECTS)
-	@$(ECHO) "$(MAKEARGS)"
+
+$(BUILDDIR)/$(EECUA) : $(wildcard $(TRUNKDIR)/source/*.{c,h}) $(wildcard $(TRUNKDIR)/source/pcre/*.{c,h}) | $(BUILD_DIRS)
+	echo "No match for objdir=$(OBJDIR) calling Make"
+	$(MAKE) $(BUILDDIR)/$(EECUA) OBJDIR=libobj ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG= EPROFILE=$(EPROFILE)
 endif
+
+ifeq "$(OBJDIR)" "libobjdbg"
+
+$(BUILDDIR)/$(EECUDBGA) : $(EU_LIB_OBJECTS)
+	$(AR) -rc $(BUILDDIR)/$(EECUDBGA) $(EU_LIB_OBJECTS)
+
+else
+
+$(BUILDDIR)/$(EECUDBGA) : $(wildcard $(TRUNKDIR)/source/*.[ch]) $(wildcard $(TRUNKDIR)/source/pcre/*.[ch]) | $(BUILD_DIRS)
+	echo "No match calling Make (debug)"
+	$(MAKE) $(BUILDDIR)/$(EECUDBGA) OBJDIR=libobjdbg ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE)
+
+endif
+
+
 
 shared-library :
 ifneq "$(EMINGW)" "1"
@@ -803,20 +816,22 @@ test-eucode :
 #
 # Unit Testing
 #
+test : $(BUILDDIR)/test-report.html 
 
-test : EUDIR=$(TRUNKDIR)
-test : EUCOMPILEDIR=$(TRUNKDIR)
-test : EUCOMPILEDIR=$(TRUNKDIR)	
-test : C_INCLUDE_PATH=$(TRUNKDIR):..:$(C_INCLUDE_PATH)
-test : LIBRARY_PATH=$(%LIBRARY_PATH)
-test : $(TRUNKDIR)/tests/lib818.dll
-test : $(TRUNKDIR)/tests/ecp.dat
-test : $(BUILDDIR)/$(EEXU) $(BUILDDIR)/$(EUBIND)
-test : $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EECU) 
-test : $(BUILDDIR)/$(LIBRARY_NAME)
-test :  
 
-	cd $(TRUNKDIR)/tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
+$(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : EUDIR=$(TRUNKDIR)
+$(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : EUCOMPILEDIR=$(TRUNKDIR)
+$(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : EUCOMPILEDIR=$(TRUNKDIR)	
+$(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : C_INCLUDE_PATH=$(TRUNKDIR):..:$(C_INCLUDE_PATH)
+$(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : LIBRARY_PATH=$(%LIBRARY_PATH)
+$(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : $(TRUNKDIR)/tests/lib818.dll
+$(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : $(TRUNKDIR)/tests/ecp.dat
+$(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : $(BUILDDIR)/$(EEXU) $(BUILDDIR)/$(EUBIND)
+$(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EECU) 
+$(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : $(BUILDDIR)/$(LIBRARY_NAME)
+$(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html :  
+
+	-cd $(TRUNKDIR)/tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
 		$(EXE) -i $(CYPTRUNKDIR)/include $(TRUNKDIR)/source/eutest.ex $(CYPINCDIR) -cc gcc $(VERBOSE_TESTS) \
 		-exe "$(CYPBUILDDIR)/$(EEXU)" \
 		-ec "$(CYPBUILDDIR)/$(EECU)" \
