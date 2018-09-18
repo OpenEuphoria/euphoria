@@ -7,7 +7,7 @@
 #ifndef H_GLOBAL
 #define H_GLOBAL
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 #include <windows.h>
 #endif
 #ifdef EWATCOM
@@ -35,7 +35,7 @@ typedef signed   char   schar;
 #include "symtab.h"
 
 //TODO if we are on 64bit linux, then we should fall back to the EBSD version
-#if defined(ELINUX) || defined(EMINGW)
+#if defined(__linux__) || defined(EMINGW)
 	/* use glibc 64bit variants */
 #	define _LARGEFILE_SOURCE
 #	define _LARGEFILE64_SOURCE
@@ -73,7 +73,7 @@ typedef signed   char   schar;
 #ifdef EMINGW
 #   include <windef.h>
 #endif
-#elif defined(EWINDOWS) && !defined(EMINGW)
+#elif defined(_WIN32) && !defined(EMINGW)
 #	define IFILE FILE*
 #	define IOFF __int64
 #	define iopen fopen
@@ -90,7 +90,7 @@ typedef signed   char   schar;
 #	define ifileno fileno
 #	define iprintf fprintf
 #   include <windef.h>
-#elif defined(EBSD) || defined(EOSX)
+#elif defined(EBSD) || defined(__APPLE__)
 	/* 64bit support is automatic */
 #	define IFILE FILE*
 #	define IOFF long long
@@ -221,7 +221,7 @@ struct videoconfigEx {
 #define __cdecl
 #endif
 
-#ifdef EWINDOWS 
+#ifdef _WIN32 
 // Use Heap functions for everything.
 extern HANDLE default_heap;
 #define malloc(n) HeapAlloc((void *)default_heap, 0, n)

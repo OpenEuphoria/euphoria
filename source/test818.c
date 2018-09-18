@@ -55,7 +55,7 @@ typedef enum {false,true} Bool;
 MAKE_BORDER_FUNCTIONS(int,C_INT)
 #endif
 
-#if INT32_MAX == INTPTR_MAX || !defined(EWINDOWS)
+#if INT32_MAX == INTPTR_MAX || !defined(_WIN32)
 MAKE_BORDER_FUNCTIONS(long,C_LONG)
 #endif
 MAKE_BORDER_FUNCTIONS(long long,C_LONGLONG)

@@ -39,7 +39,7 @@
 /******************/
 #define _SVID_SOURCE
 #include <stdint.h>
-#if defined(EWINDOWS) && INTPTR_MAX == INT64_MAX
+#if defined(_WIN32) && INTPTR_MAX == INT64_MAX
 // MSVCRT doesn't handle long double output correctly
 #define __USE_MINGW_ANSI_STDIO 1
 #endif
@@ -55,7 +55,7 @@
 #	include <conio.h>
 #endif
 #include <math.h>
-#ifdef EWINDOWS
+#ifdef _WIN32
 #	include <windows.h>
 #endif
 #include <signal.h>
@@ -294,14 +294,14 @@ static void trace_command(object x)
 		else if (i == 1) {
 			TraceOn = trace_enabled;
 			color_trace = TRUE;
-#ifdef EWINDOWS
+#ifdef _WIN32
 			show_console();
 #endif
 		}
 		else if (i == 2) {
 			TraceOn = trace_enabled;
 			color_trace = FALSE;
-#ifdef EWINDOWS
+#ifdef _WIN32
 			show_console();
 #endif
 		}
@@ -497,7 +497,7 @@ static object do_peek4(object a, int b )
 		peek4_addr = (uint32_t *)a;
 	}
 	else if (IS_ATOM(a)) {
-#ifdef __arm__
+#ifdef EARM
 		double d = DBL_PTR(a)->dbl;
 		peek4_addr = (uint32_t*)(uintptr_t)d;
 #else
@@ -588,7 +588,7 @@ static void do_poke2(object a, object top)
 		temp_dbl = DBL_PTR(top)->dbl;
 		if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 			RTFatal(POKE_LIMIT(2));
-#ifdef __arm__
+#ifdef EARM
 			a = trunc( temp_dbl );
 			*poke2_addr = (uint16_t) a;
 #else
@@ -613,7 +613,7 @@ static void do_poke2(object a, object top)
 		
 				if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 					RTFatal( POKE_LIMIT(2) );
-#ifdef __arm__
+#ifdef EARM
 				a = trunc( DBL_PTR(top)->dbl );
 				*poke2_addr = (uint16_t) a;
 #else
@@ -697,7 +697,7 @@ static void do_poke4(object a, object top)
 	eudouble temp_dbl;
 	s1_ptr s1;
 	object_ptr obj_ptr;
-#ifdef __arm__
+#ifdef EARM
 	int32_t tmp_int;
 #endif
 
@@ -706,7 +706,7 @@ static void do_poke4(object a, object top)
 		poke4_addr = (uint32_t *)INT_VAL(a);
 	}
 	else if (IS_ATOM(a)) {
-#ifdef __arm__
+#ifdef EARM
 		temp_dbl = DBL_PTR(a)->dbl;
 		poke4_addr = (uint32_t *)(uintptr_t)temp_dbl;
 #else
@@ -724,7 +724,7 @@ static void do_poke4(object a, object top)
 		temp_dbl = DBL_PTR(top)->dbl;
 		if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 			RTFatal(POKE_LIMIT(4));
-#ifdef __arm__
+#ifdef EARM
 		if( temp_dbl < 0.0 ){
 			tmp_int = (int32_t) temp_dbl;
 		}
@@ -752,7 +752,7 @@ static void do_poke4(object a, object top)
 				temp_dbl = DBL_PTR(top)->dbl;
 				if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 					RTFatal(POKE_LIMIT(4));
-#ifdef __arm__
+#ifdef EARM
 				if( temp_dbl < 0.0 ){
 					tmp_int = (int32_t) temp_dbl;
 				}
@@ -794,7 +794,7 @@ static void do_poke4(object a, object top)
 #define FP_EMULATION_NEEDED // FOR WATCOM/DOS to run on old 486/386 without f.p.
 
 #if !defined(EMINGW)
-#if defined(EWINDOWS) || (defined(__WATCOMC__) && !defined(FP_EMULATION_NEEDED))
+#if defined(_WIN32) || (defined(__WATCOMC__) && !defined(FP_EMULATION_NEEDED))
 #ifdef EMSVC
 long msvc_spare = 0;
 #define thread() do { __asm { JMP [pc] } } while(0)
@@ -968,7 +968,7 @@ void InitExecute()
 	_LIB_VERSION = _SVID_;
 #endif
     
-#ifdef EWINDOWS
+#ifdef _WIN32
 		/* Prevent "Send Error Report to Microsoft dialog from coming up
 		   if this thing has an unhandled exception.  */
 		SetUnhandledExceptionFilter(Win_Machine_Handler);
@@ -1678,7 +1678,7 @@ struct sline *slist;
 
 /* Front-end variables passed via miscellaneous fe.misc */
 char **file_name;
-#ifdef EWINDOWS
+#ifdef _WIN32
 extern DWORD WINAPI WinTimer(LPVOID lpParameter);
 #endif
 int max_stack_per_call;
@@ -1699,7 +1699,7 @@ void fe_set_pointers()
 	AnyStatementProfile= fe.misc[2];
 	sample_size        = fe.misc[3];
 
-#if defined(EWINDOWS)
+#if defined(_WIN32)
 	if (sample_size > 0) {
 		profile_sample = (intptr_t *)EMalloc(sample_size * sizeof(intptr_t));
 		//lock_region(profile_sample, sample_size * sizeof(int));
@@ -4683,7 +4683,7 @@ void do_exec(intptr_t *start_pc)
 					poke_addr = (char *)INT_VAL(a);
 				}
 				else if (IS_ATOM(a)) {
-#ifdef __arm__
+#ifdef EARM
 					double d = DBL_PTR(a)->dbl;
 					poke_addr = (char*) (uintptr_t) d;
 #else
@@ -4831,7 +4831,7 @@ void do_exec(intptr_t *start_pc)
 				}
 				else if (IS_ATOM(b)) {
 					/* no check for overflow here.. hmm*/
-#ifdef __arm__
+#ifdef EARM
 					b = trunc( DBL_PTR(b)->dbl );
 					*poke_addr = (uint8_t) b;
 #else
@@ -4850,7 +4850,7 @@ void do_exec(intptr_t *start_pc)
 						else if (IS_ATOM(b)) {
 							if (b == NOVALUE)
 								break;
-#ifdef __arm__
+#ifdef EARM
 							b = trunc( DBL_PTR(b)->dbl );
 							*poke_addr = (uint8_t) b;
 #else
@@ -4897,7 +4897,7 @@ void do_exec(intptr_t *start_pc)
 					sub_addr = (void(*)())INT_VAL(a);
 				}
 				else if (IS_ATOM(a)) {
-#ifdef __arm__
+#ifdef EARM
 					tuint = (uintptr_t)(DBL_PTR(a)->dbl);
 					sub_addr = (void(*)())tuint;
 #else
@@ -4974,7 +4974,7 @@ void do_exec(intptr_t *start_pc)
 						last_r_file_no = NOVALUE;
 				}
 				if (last_r_file_ptr == stdin) {
-#ifdef EWINDOWS
+#ifdef _WIN32
 					// In WIN32 this is needed before
 					// in_from_keyb is set correctly
 					show_console();
@@ -5022,16 +5022,16 @@ void do_exec(intptr_t *start_pc)
 #ifdef EBSD
 				top = 8; // FreeBSD
 #endif
-#ifdef EOSX
+#ifdef __APPLE__
 				top = 4;  // OSX
 #endif
-#ifdef EOPENBSD
+#ifdef __OpenBSD__
 				top = 6; // OpenBSD
 #endif
-#ifdef ENETBSD
+#ifdef __NetBSD__
 				top = 7; // NetBSD
 #endif
-#ifdef EWINDOWS
+#ifdef _WIN32
 				top = 2;  // WIN32
 #endif
 
@@ -5044,7 +5044,7 @@ void do_exec(intptr_t *start_pc)
 							 or return -1 */
 			deprintf("case L_GET_KEY:");
 				tpc = pc;
-#if defined(EWINDOWS)
+#if defined(_WIN32)
 				show_console();
 #endif
 				if (current_screen != MAIN_SCREEN) {

@@ -40,14 +40,14 @@
  */
  
 #include <stdint.h>
-#if defined(EWINDOWS) && INTPTR_MAX == INT64_MAX
+#if defined(_WIN32) && INTPTR_MAX == INT64_MAX
 // MSVCRT doesn't handle long double output correctly
 #define __USE_MINGW_ANSI_STDIO 1
 #endif
 #include <stdio.h>
 #include <inttypes.h>
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 #include <windows.h>
 #endif
 #include "alldefs.h"
@@ -571,7 +571,7 @@ generate_routine(int64_t_cdecl_func, int64_t, __cdecl, cdllfunc, 0LL)
 #else
 // 64-bit Call-C
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 
 // icall typedefs
 typedef int64_t (*icall_sig1) ( double, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t, intptr_t );
@@ -1026,7 +1026,7 @@ float fcall_x86_64( intptr_t func, double* xmm, intptr_t *r ){
 			r[10], r[11], r[12], r[13], 
 			r[14], r[15], r[16]);
 }
-#endif // EWINDOWS / !EWINDOWS
+#endif // _WIN32 / !_WIN32
 union xmm_param {
 	double d;
 	float f;
@@ -1035,7 +1035,7 @@ union xmm_param {
 
 #if INTPTR_MAX == INT64_MAX
 
-#	ifdef EWINDOWS
+#	ifdef _WIN32
 
 		/* The Windows x86-64 calling convention only uses a maximum of
 		 * four registers for passing parameters, regardless of the type.
@@ -1204,7 +1204,7 @@ object call_c(int func, object proc_ad, object arg_list)
 
 	
 #if INTPTR_MAX == INT64_MAX || __ARM_PCS_VFP == 1
-#ifdef EWINDOWS
+#ifdef _WIN32
 	int signature = 0;
 #else
 	intptr_t xmm_i = 0;
