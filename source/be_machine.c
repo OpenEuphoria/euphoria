@@ -3114,7 +3114,7 @@ object machine(object opcode, object x)
 #ifdef __APPLE__
 				return 4;
 #else
-#ifdef EBSD // FreeBSD by this point
+#ifdef __FreeBSD__
 				return 8;
 #else
 #ifdef __linux__
@@ -3126,7 +3126,7 @@ object machine(object opcode, object x)
 				return 1; // Unknown platform
 #endif // _WIN32
 #endif // __linux__
-#endif // EBSD
+#endif // __FreeBSD__
 #endif // __APPLE__
 #endif // __OpenBSD__
 #endif // __NetBSD__

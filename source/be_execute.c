@@ -5019,7 +5019,7 @@ void do_exec(intptr_t *start_pc)
 #ifdef EUNIX
 				top = 3;  // (UNIX, called Linux for backwards compatibility)
 #endif
-#ifdef EBSD
+#ifdef __FreeBSD__
 				top = 8; // FreeBSD
 #endif
 #ifdef __APPLE__

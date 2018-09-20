@@ -11,6 +11,7 @@ end ifdef
 
 include global.e
 include buildsys.e
+include std/search.e
 
 --****
 -- === gtype values, TRANSLATOR
@@ -176,7 +177,7 @@ export procedure adjust_indent_before(sequence stmt)
 		
 	lb = FALSE
 	rb = FALSE
-
+	
 	for p = 1 to length(stmt) do
 		switch stmt[p] do
 			case '\n' then
@@ -196,7 +197,7 @@ export procedure adjust_indent_before(sequence stmt)
 				
 		end switch
 	end for
-
+	
 	if rb then
 		if not lb then
 			indent -= 4
@@ -217,7 +218,7 @@ end procedure
 --**
 -- Adjust indent after a statement
 export procedure adjust_indent_after(sequence stmt)
-	
+
 	for p = 1 to length(stmt) do
 		switch stmt[p] do
 			case '\n' then
@@ -228,27 +229,5 @@ export procedure adjust_indent_after(sequence stmt)
 				return
 		end switch
 	end for
-	
-	if length(stmt) < 3 then
-		return
-	end if
-	
-	if not equal("if ", stmt[1..3]) then
-		return
-	end if
-
-	if length(stmt) < 5 then
-		return
-	end if
-	
-	if not equal("else", stmt[1..4]) then
-		return
-	end if
-	
-	if not find(stmt[5], {" \n"}) then
-		return
-	end if
-	
-	temp_indent = 4
 	
 end procedure

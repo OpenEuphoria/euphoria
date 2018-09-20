@@ -456,4 +456,14 @@ extern int in_from_keyb;
 extern int TraceOn;
 int check_has_console();
 extern object eu_sizeof();
+
+#if _WIN32
+#define __global_routine __stdcall
+#define ONEFORWINDOWS 1
+#else
+#define __global_routine
+#define ONEFORWINDOWS 0
+#endif
+
+
 #endif

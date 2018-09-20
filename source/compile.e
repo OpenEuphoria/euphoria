@@ -1092,30 +1092,27 @@ end procedure
 
 procedure seg_poke1(integer source, boolean dbl)
 -- poke a single byte value into poke_addr
-	-- WATCOM etc.
 	if dbl then
-		if TARM then
+	    m_stmtln("#if defined(EARM) || (defined(__LCC__) && defined(_WIN32))")
 			c_stmt("_2 = trunc( DBL_PTR(@)->dbl );\n", source)
 			c_stmt0("*poke_addr = (uint8_t)_2;\n" )
-		else
-			c_stmt("*poke_addr = (uint8_t)DBL_PTR(@)->dbl;\n", source)
-		end if
-		
+		m_stmtln("#else")
+		    c_stmt("*poke_addr = (uint8_t)( DBL_PTR(@)->dbl );\n", source)
+		m_stmtln("#endif")
 	else
 		c_stmt("*poke_addr = (uint8_t)@;\n", source)
 	end if
-
 end procedure
 
 procedure seg_poke2(integer source, boolean dbl)
 -- poke a word value into poke2_addr
 	if dbl then
-		if TARM then
+	    m_stmtln("#if defined(EARM) || (defined(__LCC__) && defined(_WIN32))")
 			c_stmt("_2 = trunc( DBL_PTR(@)->dbl );\n", source)
 			c_stmt0("*poke2_addr = (uint16_t)_2;\n" )
-		else
+		m_stmtln("#else")
 			c_stmt("*poke2_addr = (uint16_t)DBL_PTR(@)->dbl;\n", source)
-		end if
+		m_stmtln("#endif")
 	else
 		c_stmt("*poke2_addr = (uint16_t)@;\n", source)
 	end if
@@ -1124,10 +1121,10 @@ end procedure
 procedure seg_poke4(integer source, boolean dbl)
 -- poke a 4-byte value into poke4_addr
 	if dbl then
-		if TARM then
+	    m_stmtln("#if defined(EARM) || (defined(__LCC__) && defined(_WIN32))")
 			c_stmt("if( DBL_PTR(@)->dbl <= MAXINT_DBL ) *poke4_addr = (int32_t)DBL_PTR(@)->dbl; else\n", 
 				{source, source})
-		end if
+		m_stmtln("#endif")
 		c_stmt("*poke4_addr = (uint32_t)DBL_PTR(@)->dbl;\n", source)
 	else
 		c_stmt("*poke4_addr = (uint32_t)@;\n", source)
@@ -1154,7 +1151,6 @@ procedure seg_pokeptr(integer source, boolean dbl)
 	else
 		c_stmt("*pokeptr_addr = (uintptr_t)@;\n", source)
 	end if
-
 end procedure
 
 function machine_func_type(integer x)
@@ -3920,10 +3916,13 @@ procedure opMULTIPLY()
 	intcode2= "@1 = @2 * @3;\n"
 	-- quick range test - could expand later maybe
 	intcode = IntegerMultiply(Code[pc+1], Code[pc+2])
+	
 	if TypeIs(Code[pc+1], TYPE_DOUBLE) or
 	   TypeIs(Code[pc+2], TYPE_DOUBLE) then
 		atom_type = TYPE_DOUBLE
 	end if
+	
+	
 	dblfn="*"
 	
 	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
@@ -4565,7 +4564,7 @@ procedure opCALL_PROC()
 					c_stmt0( sprintf( "Ref( *(( (intptr_t*)_2) + %d) );\n", k ) )
 				end for
 
-				if TWINDOWS and dll_option then
+			    m_stmtln("#if _WIN32")
 					c_stmt("if (_00[@].convention) {\n", Code[pc+1])
 					if Code[pc] = CALL_FUNC then
 						c_stmt0("_1 = (*(intptr_t (__stdcall *)())_0)(\n")
@@ -4582,14 +4581,14 @@ procedure opCALL_PROC()
 					end if
 					arg_list(i)
 					c_stmt0("}\n")
-				else
+				m_stmtln("#else // _WIN32")
 					if Code[pc] = CALL_FUNC then
 						c_stmt0("_1 = (*(intptr_t (*)())_0)(\n")
 					else
 						c_stmt0("(*(intptr_t (*)())_0)(\n")
 					end if
 					arg_list(i)
-				end if
+				m_stmtln("#endif // _WIN32")
 
 			end if
 			if len = NOVALUE then
@@ -5770,32 +5769,32 @@ procedure opPOKE()
 	end if
 
 	if TypeIsNotIn( ptr, TYPES_IS) then
-		sequence dbl_ptr = "(DBL_PTR(@)->dbl)"
-		if TARM then
-			if not TypeIsIn( ptr, TYPES_AO ) then
-				c_stmt0("{\n" )
-			end if
-			c_stmt("eudouble temp_dbl = DBL_PTR(@)->dbl;\n", ptr )
-			dbl_ptr = "temp_dbl"
-		end if
+        if not TypeIsIn( ptr, TYPES_AO) then
+            c_stmt0("{\n" )
+        end if
+        c_stmt("eudouble temp_dbl = DBL_PTR(@)->dbl;\n", ptr )
 		switch op do
 			case POKE_POINTER then
-				c_stmt(sprintf("pokeptr_addr = (uintptr_t *)(uintptr_t)%s;\n", {dbl_ptr}), ptr)
+				c_stmt0("pokeptr_addr = (uintptr_t *)")
 			case POKE8 then
-				c_stmt(sprintf("poke8_addr = (uint64_t *)(uintptr_t)%s;\n", {dbl_ptr}), ptr)
-			case POKE4 then
-				c_stmt(sprintf("poke4_addr = (uint32_t *)(uintptr_t)%s;\n", {dbl_ptr}), ptr)
-			case POKE2 then
-				c_stmt(sprintf("poke2_addr = (uint16_t *)(uintptr_t)%s;\n", {dbl_ptr}),ptr)
+				c_stmt0("poke8_addr = (uint64_t *)")
+			case POKE4 then                        
+				c_stmt0("poke4_addr = (uint32_t *)")
+			case POKE2 then                        
+				c_stmt0("poke2_addr = (uint16_t *)")
 			case else
-				c_stmt(sprintf("poke_addr = (uint8_t *)(uintptr_t)%s;\n", {dbl_ptr}), ptr)
+				c_stmt0("poke_addr = (uint8_t *)")
 		end switch
+		c_stmt0("(uintptr_t)temp_dbl;\n")
+        if not TypeIsIn( ptr, TYPES_AO) then
+		    c_stmt0("}\n" )
+        end if		
 	end if
 	
-	if TypeIsIn( ptr, TYPES_AO) or (TARM and TypeIsNotIn( ptr, TYPES_IS)) then
-		c_stmt0("}\n" )	
+	if TypeIsIn( ptr, TYPES_AO) then
+		c_stmt0("}\n" )
 	end if
-	
+
 	if TypeIsIn( val, TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@)) {\n", val)
 	end if
@@ -5867,13 +5866,15 @@ procedure opPOKE()
 				c_stmt0("*poke_addr++ = (uint8_t)_2;\n")
 		end switch
 		c_stmt0("}\nelse if (_2 == NOVALUE) {\n")
-		c_stmt0("break;\n}\n")
+		c_stmt0("break;\n")
+		c_stmt0("}\n")
 		c_stmt0("else {\n")
-		sequence _2 = "DBL_PTR(_2)->dbl"
-		if TARM then
-			_2 = "_2"
-			c_stmt0( "_2 = trunc( DBL_PTR(_2)->dbl );\n" )
-		end if
+        m_stmtln("#if defined(EARM)")
+        m_stmtln("#define THIS_DOUBLE trunc( DBL_PTR(_2)->dbl")
+        m_stmtln("#else")
+        m_stmtln("#define THIS_DOUBLE DBL_PTR(_2)->dbl")
+        m_stmtln("#endif")
+		sequence _2 = "THIS_DOUBLE"
 		switch op do
 			case POKE_POINTER then
 				c_stmt0( sprintf( "*pokeptr_addr++ = (uintptr_t)%s;\n", {_2}) )
@@ -5891,6 +5892,7 @@ procedure opPOKE()
 					c_stmt0( sprintf( "*poke_addr++ = (uint8_t)%s;\n", {_2}) )
 				
 		end switch
+		m_stmtln("#undef THIS_DOUBLE")
 		c_stmt0("}\n")
 		c_stmt0("}\n") -- while(1)
 
@@ -6013,20 +6015,20 @@ procedure opGETC()
 
 	c_stmt0("}\n")
 	c_stmt0("if (last_r_file_ptr == xstdin) {\n")
-	if TWINDOWS then
+    m_stmtln("#if _WIN32")
 		c_stmt0("show_console();\n")
-	end if
+    m_stmtln("#endif")
 	c_stmt0("if (in_from_keyb) {\n")
-	if TUNIX then
+	m_stmtln("#if defined(__unix__)")
 		if EGPM then
 			c_stmt("@ = mgetch(1);\n", Code[pc+2])  -- echo the character
 		else
 			-- c_stmt("@ = getch(1);\n", Code[pc+2])   -- echo the character
 			c_stmt("@ = getc((FILE*)xstdin);\n", Code[pc+2])   -- echo the character
 		end if
-	else
+	m_stmtln("#else")
 		c_stmt("@ = getKBchar();\n", Code[pc+2])
-	end if
+	m_stmtln("#endif")
 	c_stmt0("}\n")
 	c_stmt0("else{\n")
 
@@ -6059,9 +6061,9 @@ end procedure
 
 procedure opGET_KEY()
 -- read an immediate key (if any) from the keyboard or return -1
-	if TWINDOWS then
-		c_stmt0("show_console();\n")
-	end if
+    m_stmtln("#if _WIN32")
+		c_stmt0("show_console()")
+    m_stmtln("#endif")
 	CSaveStr("_0", Code[pc+1], 0, 0, 0)
 	c_stmt("@ = get_key(0);\n", Code[pc+1])
 	CDeRefStr("_0")
@@ -7219,12 +7221,12 @@ void _0cleanup_vars();
 
 
 `)
-	if TWINDOWS then
+	m_stmtln("#if defined(_WIN32)")
 		c_stmt0("\nvoid EuUninit(){\n")
-	else
+	m_stmtln("#else")
 		c_stmt0("#define EFree free\n" )
 		c_stmt0("\nvoid __attribute__ ((destructor)) eu_uninit(){\n")
-	end if
+	m_stmtln("#endif")
 
 	integer literal_sym = literal_init
 	c_stmt0( "int i;\n" )
@@ -7252,8 +7254,7 @@ end procedure
 --**
 -- Creates the initialize / uninitialize code for a translated dynamic library
 procedure init_dll()
-	
-	if TWINDOWS then
+	m_stmtln("#if defined(_WIN32)")
 		-- Lcc and WATCOM seem to need this instead
 		-- (Lcc had __declspec(dllexport))
 		c_stmt0("int __stdcall LibMain(int hDLL, int Reason, void *Reserved)\n")
@@ -7266,7 +7267,7 @@ procedure init_dll()
 		c_stmt0("}\n")
 		c_stmt0("return 1;\n")
 		c_stmt0("}\n")
-	end if
+	m_stmtln("#endif")
 	uninit_eu()
 end procedure
 
@@ -7338,17 +7339,17 @@ procedure BackEnd(atom ignore)
 
 	version()
 
-	if TWINDOWS then
+    m_stmtln("#if defined(_WIN32)")
 		-- this has to be included before stdint.h (in euphoria.h) at least on Watcom
 		c_puts("#include <windows.h>\n")
-	end if
+	m_stmtln("#endif")
 	c_puts("#include <time.h>\n")
 	c_puts("#include \"include/euphoria.h\"\n")
 	c_puts("#include \"main-.h\"\n\n")
 
-	if TUNIX then
-		c_puts("#include <unistd.h>\n")
-	end if
+	m_stmtln("#ifndef _WIN32")
+		m_stmtln("#include <unistd.h>")
+    m_stmtln("#endif")
 	c_puts("\n\n")
 	c_puts("int Argc;\n")
 	c_hputs("extern int Argc;\n")
@@ -7356,7 +7357,7 @@ procedure BackEnd(atom ignore)
 	c_puts("char **Argv;\n")
 	c_hputs("extern char **Argv;\n")
 
-	if TWINDOWS then
+	m_stmtln("#ifdef _WIN32")
 		c_puts("HANDLE default_heap;\n")
 		if sequence(wat_path) then
 			c_puts("/* this is in the header */\n")
@@ -7364,7 +7365,7 @@ procedure BackEnd(atom ignore)
 		else
 			c_puts("//\'test me!\' is this in the header?: unsigned __stdcall GetProcessHeap(void);\n")
 		end if
-	end if
+    m_stmtln("#endif")
 
 	c_puts("uintptr_t *peekptr_addr;\n")
 	c_hputs("extern uintptr_t *peekptr_addr;\n")
@@ -7407,9 +7408,9 @@ procedure BackEnd(atom ignore)
 	
 	c_puts("void init_literal();\n")
 
-	if TWINDOWS and not dll_option then
+	m_stmtln("#ifdef _WIN32")
 			c_puts("extern long __stdcall Win_Machine_Handler(LPEXCEPTION_POINTERS p);\n")
-	end if
+    m_stmtln("#endif")
 
 	if total_stack_size = -1 then
 		-- user didn't set the option
@@ -7425,8 +7426,8 @@ procedure BackEnd(atom ignore)
 	if EXTRA_CHECK then
 		c_hputs("extern long bytes_allocated;\n")
 	end if
-	
-	if TWINDOWS then
+
+	m_stmtln("#ifdef _WIN32")
 		if dll_option then
 			if sequence(wat_path) then
 				c_stmt0("\nint __stdcall _CRT_INIT (int, int, void *);\n")
@@ -7437,13 +7438,13 @@ procedure BackEnd(atom ignore)
 			c_stmt0("\nint __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine, int iCmdShow)\n")
 		end if
 
-	else -- TUNIX
+	m_stmtln("#else // _WIN32") -- _WIN32
 		if dll_option then
 			c_stmt0("\nint __attribute__ ((constructor)) eu_init()\n")
 		else
 			c_stmt0("\nint main(int argc, char *argv[])\n")
 		end if
-	end if
+    m_stmtln("#endif")
 	c_stmt0("{\n")
 
 	c_stmt0("s1_ptr _0switch_ptr;\n")
@@ -7451,7 +7452,7 @@ procedure BackEnd(atom ignore)
 
 	main_temps()
 
-	if TWINDOWS then
+	m_stmtln("#ifdef _WIN32")
 		if dll_option then
 			c_stmt0("\nArgc = 0;\n")
 			c_stmt0("default_heap = GetProcessHeap();\n")
@@ -7472,15 +7473,14 @@ procedure BackEnd(atom ignore)
 			c_stmt0("}\n")
 			
 		end if
-	else --TUNIX
+	m_stmtln("#else")
 		if dll_option then
 			c_stmt0("\nArgc = 0;\n")
 		else
 			c_stmt0("Argc = argc;\n")
 			c_stmt0("Argv = argv;\n")
 		end if
-
-	end if
+    m_stmtln("#endif")
 
 	if not dll_option then
 		c_stmt0("stack_base = (char *)&_0;\n")
@@ -7509,19 +7509,19 @@ procedure BackEnd(atom ignore)
 
 	-- fail safe mechanism in case
 	-- Complete Edition library gets out by mistake
-	if TWINDOWS then
+	m_stmtln("#ifdef _WIN32")
 		if atom(wat_path) then
 			c_stmt0("eu_startup(_00, _01, _02, (object)CLOCKS_PER_SEC, (object)CLOCKS_PER_SEC);\n")
 		else
 			c_stmt0("eu_startup(_00, _01, _02, (object)CLOCKS_PER_SEC, (object)CLK_TCK);\n")
 		end if
-	else
+	m_stmtln("#else")
 		c_puts("#ifdef CLK_TCK\n")
 		c_stmt0("eu_startup(_00, _01, _02, (object)CLOCKS_PER_SEC, (object)CLK_TCK);\n")
 		c_puts("#else\n")
 		c_stmt0("eu_startup(_00, _01, _02, (object)CLOCKS_PER_SEC, (object)sysconf(_SC_CLK_TCK));\n")
 		c_puts("#endif\n")
-	end if
+    m_stmtln("#endif")
 	
 	c_stmt0( sprintf( "trace_lines = %d;\n", trace_lines ) )
 
@@ -7698,10 +7698,9 @@ procedure BackEnd(atom ignore)
 	end for
 	c_stmt0("}\n")
 
-
-	if TWINDOWS then
+	c_hputs("#ifdef _WIN32\n")
 		c_hputs("extern void *winInstance;\n\n")
-	end if
+	c_hputs("#endif\n")
 
 	close(c_code)
 	close(c_h)

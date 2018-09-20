@@ -11,7 +11,7 @@
 #define EUPHORIA_MAX_INT MAXINT
 #include <string.h>
 
-#ifdef __WIN32
+#ifdef _WIN32
 #define EXPORT __declspec(dllexport)
 #else
 #define EXPORT
