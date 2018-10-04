@@ -615,10 +615,7 @@ export procedure CName(symtab_index s)
 		-- declared user variables
 
 		if LeftSym = FALSE and GType(s) = TYPE_INTEGER and v != NOVALUE then
-			c_printf("%d", v)
-			if TARGET_SIZEOF_POINTER = 8 then
-				c_puts( "LL" )
-			end if
+			c_print_int(v)
 		else
 			if SymTab[s][S_SCOPE] > SC_PRIVATE then
 				c_printf("_%d", SymTab[s][S_FILE_NO])
@@ -638,10 +635,7 @@ export procedure CName(symtab_index s)
 		if (is_integer( sym_obj( s ) ) and SymTab[s][S_GTYPE] != TYPE_DOUBLE ) or (LeftSym = FALSE and TypeIs(s, TYPE_INTEGER) and v != NOVALUE) then
 			-- integer: either literal, or
 			-- declared constant rvalue with integer value
-			c_printf("%d", v)
-			if TARGET_SIZEOF_POINTER = 8 then
-				c_puts( "LL" )
-			end if
+			c_print_int(v)
 		else
 			-- Declared constant
 			c_printf("_%d", SymTab[s][S_FILE_NO])
@@ -654,10 +648,7 @@ export procedure CName(symtab_index s)
  	else   -- M_TEMP
 		-- literal doubles, strings, temporary vars that we create
 		if LeftSym = FALSE and GType(s) = TYPE_INTEGER and v != NOVALUE then
-			c_printf("%d", v)
-			if TARGET_SIZEOF_POINTER = 8 then
-				c_puts( "LL" )
-			end if
+			c_print_int(v)
 		else
 			c_printf("_%d", SymTab[s][S_TEMP_NAME])
 		end if
@@ -815,7 +806,8 @@ export procedure DeclareFileVars()
 			c_printf("_%d", eentry[S_FILE_NO])
 			c_puts(eentry[S_NAME])
 			if is_integer( eentry[S_OBJ] ) then
-					c_printf(" = %d%s;\n", { eentry[S_OBJ], LL_suffix} )
+					c_puts(" = ")
+					c_print_int_scln( eentry[S_OBJ] )
 			else
 				c_puts(" = NOVALUE;\n")
 			end if
@@ -1791,7 +1783,12 @@ export procedure GenerateUserRoutines()
 							-- we have to do some direct output here to make it work:
 							c_stmt0( ret_type & SymTab[s][S_NAME] & "() __attribute__ ((alias (\"" )
 							CName( s )
-							c_puts( sprintf( "@%d\")));\n", SymTab[s][S_NUM_ARGS] * TARGET_SIZEOF_POINTER ) )
+							c_puts("\n")
+							m_stmtln("#if INTPTR_MAX == INT32_MAX")
+							c_puts( sprintf( "@%d\")));\n", SymTab[s][S_NUM_ARGS] * 4 ) )
+							m_stmtln("#else")
+							c_puts( sprintf( "@%d\")));\n", SymTab[s][S_NUM_ARGS] * 8 ) )
+							m_stmtln("#endif")
 						else
 							c_stmt( ret_type & SymTab[s][S_NAME] & "() __attribute__ ((alias (\"@\")));\n", s )
 						end if

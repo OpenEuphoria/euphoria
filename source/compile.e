@@ -21,6 +21,9 @@ include std/io.e
 include std/sort.e
 include std/map.e as map
 include std/search.e
+include std/convert.e
+include std/search.e
+include std/sequence.e
 
 include buildsys.e
 include c_decl.e
@@ -1056,7 +1059,7 @@ procedure seg_peek8(integer target_sym, integer source, boolean dbl, integer op)
 		sign = ""
 	end if
 	if dbl then
-		c_stmt( sprintf( "peek8_longlong = *(%sint64_t *)(uintptr_t)(DBL_PTR(@)->dbl);\n", {sign} ), 
+		c_stmt( sprintf( "peek8_longlong = *(%sint64_t *)(uintptr_t)(DBL_PTR(@)->dbl);\n", {sign} ),
 			source)
 
 	else
@@ -1122,7 +1125,7 @@ procedure seg_poke4(integer source, boolean dbl)
 -- poke a 4-byte value into poke4_addr
 	if dbl then
 	    m_stmtln("#if defined(EARM) || (defined(__LCC__) && defined(_WIN32))")
-			c_stmt("if( DBL_PTR(@)->dbl <= MAXINT_DBL ) *poke4_addr = (int32_t)DBL_PTR(@)->dbl; else\n", 
+			c_stmt("if( DBL_PTR(@)->dbl <= MAXINT_DBL ) *poke4_addr = (int32_t)DBL_PTR(@)->dbl; else\n",
 				{source, source})
 		m_stmtln("#endif")
 		c_stmt("*poke4_addr = (uint32_t)DBL_PTR(@)->dbl;\n", source)
@@ -1302,10 +1305,22 @@ procedure main_temps()
 	Initializing = FALSE
 end procedure
 
-export sequence LL_suffix = ""
-if TARGET_SIZEOF_POINTER = 8 then
-	LL_suffix = "LL"
-end if
+export procedure c_print_int(atom v)
+    if v > #7fff_ffff or v < -#8000_0000 then
+        c_printf("%dLL", {v})
+    else
+        c_printf("%d", {v})
+    end if
+end procedure
+
+export procedure c_print_int_scln(atom v)
+    if v > #7fff_ffff or v < -#8000_0000 then
+        c_printf("%dLL;\n", {v})
+    else
+        c_printf("%d;\n", {v})
+    end if
+end procedure
+
 function FoldInteger(integer op, integer target, integer left, integer right)
 -- try to fold an integer operation: + - * power floor_div
 -- we know that left and right are of type integer.
@@ -1338,7 +1353,7 @@ function FoldInteger(integer op, integer target, integer left, integer right)
 
 		if result[MIN] = result[MAX] and result[MIN] != NOVALUE then
 			c_stmt("@ = ", target)
-			c_printf("%d%s;\n", {result[MIN], LL_suffix})
+			c_print_int_scln(result[MIN])
 		end if
 
 	elsif op = MINUS or op = MINUS_I then
@@ -1361,7 +1376,7 @@ function FoldInteger(integer op, integer target, integer left, integer right)
 
 		if result[MIN] = result[MAX] and result[MIN] != NOVALUE then
 			c_stmt("@ = ", target)
-			c_printf("%d%s;\n", {result[MIN], LL_suffix})
+			c_print_int_scln(result[MIN])
 		end if
 
 	elsif op = rw:MULTIPLY then
@@ -1412,7 +1427,7 @@ function FoldInteger(integer op, integer target, integer left, integer right)
 			if result[MIN] = result[MAX] and result[MIN] != NOVALUE then
 				intres = result[MIN]
 				c_stmt("@ = ", target)
-				c_printf("%d%s;\n", {intres, LL_suffix})
+                c_print_int_scln(intres)
 			end if
 		end if
 
@@ -1427,7 +1442,7 @@ function FoldInteger(integer op, integer target, integer left, integer right)
 				result[MIN] = p1
 				result[MAX] = result[MIN]
 				c_stmt("@ = ", target)
-				c_printf("%d%s;\n", {result[MIN], LL_suffix})
+				c_print_int_scln(result[MIN])
 			end if
 
 		else
@@ -1459,7 +1474,7 @@ function FoldInteger(integer op, integer target, integer left, integer right)
 
 			if intres >= MININT and intres <= MAXINT then
 				c_stmt("@ = ", target)
-				c_printf("%d%s;\n", {intres, LL_suffix})
+				c_print_int_scln(intres)
 				result[MIN] = intres
 				result[MAX] = result[MIN]
 			end if
@@ -1624,95 +1639,185 @@ function int64_mult_testb2( sequence range_b )
 	return test_b2
 end function
 
+function log2ceil(object i)
+    if sequence(i) then
+        for j = 1 to length(i) do
+            i[j] = log2ceil(i[j])
+        end for
+        return i
+    end if
+    if not integer(i) then
+        return -floor(-log(i)/log(2))
+    end if
+    sequence bits = int_to_bits(i)
+    integer first_bit = rfind(1, bits)
+    if first_bit = 0 then
+        return MININT
+    end if
+    integer next_bit  = find(1, bits[1..first_bit-1])
+    return first_bit - 1 + (next_bit != 0)
+end function
+
+type integer62(atom a)
+    return a > -0x3fff_ffff_ffff_ffff and a <= 0x3fff_ffff_ffff_ffff and floor(a) = a
+end type
+
+type realshort(integer i)
+    return abs(i) < 20_000
+end type
 
 function IntegerMultiply(integer a, integer b)
 -- create the optimal code for multiplying two integers,
 -- based on their min and max values.
--- a must be from -INT16 to +INT16
--- b must be from -INT15 to +INT15
+-- code returned must always have a new line at the end
 	sequence multiply_code
 	sequence dblcode
-	object test_a, test_b1, test_b2
 	sequence range_a, range_b
 
 	if TypeIs(a, TYPE_INTEGER) then
 		range_a = ObjMinMax(a)
 	else
-		range_a = {MININT, MAXINT}
+		range_a = {-max_int32-1, max_int32}
 	end if
 
 	if TypeIs(b, TYPE_INTEGER) then
 		range_b = ObjMinMax(b)
 	else
-		range_b = {MININT, MAXINT}
+		range_b = {-max_int32-1, max_int32}
 	end if
 
 	dblcode = "@1 = NewDouble(@2 * (eudouble)@3);\n"
-
-	-- test_a
-	if TARGET_SIZEOF_POINTER = 4 then
-		test_a = int32_mult_testa( range_a )
+	
+	-- calculate maximum log2 of the absolute value of every possible number except for 0
+	realshort max_la = log2ceil(max(max(abs(range_a[1]), abs(range_a[2])), 1))
+	realshort max_lb = log2ceil(max(max(abs(range_b[1]), abs(range_b[2])), 1))
+	
+	-- For the minimum, if the range includes 0, then the minimum is 0
+	realshort min_la
+	realshort min_lb
+	if range_a[1] * range_a[2] > 0 then
+	    min_la = log2ceil((max(min(abs(range_a[1]), abs(range_a[2])), 1)))
+	else
+	    min_la = 0
+	end if
+	
+	if (range_b[1] > 0) = (range_b[2] > 0) then
+	    min_lb = log2ceil((max(min(abs(range_b[1]), abs(range_b[2])), 1)))
+	else
+	    min_lb = 0
+	end if
 		
+	sequence range_lap32 = {min_la+min_lb, max_la+max_lb}
+	
+	-- Now suppose 64-bit ranges and calculate that:
+	if TypeIs(a, TYPE_INTEGER) then
+		range_a = ObjMinMax(a)
 	else
-		test_a = int64_mult_testa( range_a )
+		range_a = {-max_int64-1, max_int64}
 	end if
-	
-	if atom( test_a ) and TARGET_SIZEOF_POINTER = 4 then
-		return dblcode
-	end if
-	
-	-- test_b1
-	if TARGET_SIZEOF_POINTER = 4 then
-		test_b1 = int32_mult_testb1( range_b )
+
+	if TypeIs(b, TYPE_INTEGER) then
+		range_b = ObjMinMax(b)
 	else
-		test_b1 = int64_mult_testb1( range_b )
-	end if
-	if atom( test_b1 ) then
-		return dblcode
+		range_b = {-max_int64-1, max_int64}
 	end if
 	
-	
-	-- test_b2
-	if TARGET_SIZEOF_POINTER = 4 then
-		test_b2 = int32_mult_testb2( range_b )
+	max_la = log2ceil(max(max(abs(range_a[1]), abs(range_a[2])), 1))
+	max_lb = log2ceil(max(max(abs(range_b[1]), abs(range_b[2])), 1))
+
+	if range_a[1] * range_a[2] > 0 then
+	    min_la = log2ceil((max(min(abs(range_a[1]), abs(range_a[2])), 1)))
 	else
-		test_b2 = int64_mult_testb2( range_b )
-	end if
-	if atom( test_b2 ) then
-		return dblcode
+	    min_la = 0
 	end if
 	
-	-- put it all together
-	multiply_code = "if ("
-
-	multiply_code &= test_a
-
-	if length(test_a) and length(test_b1) then
-		multiply_code &= " && "
-	end if
-
-	multiply_code &= test_b1
-
-	if (length(test_a) or length(test_b1)) and length(test_b2) then
-		multiply_code &= " && "
-	end if
-
-	multiply_code &= test_b2
-
-	if length(test_a) or length(test_b1) or length(test_b2) then
-		multiply_code &= "){\n" &
-						 "@1 = @2 * @3;\n}\n" &
-						 "else{\n"
-		if TARGET_SIZEOF_POINTER = 4 then
-			multiply_code &= "@1 = NewDouble(@2 * (eudouble)@3);\n}\n"
-		else
-			multiply_code  = "{\nint128_t p128 = (int128_t)@2 * (int128_t)@3;\n"
-			multiply_code &= "if( p128 != (int128_t)(@1 = (intptr_t)p128) || !IS_ATOM_INT( p128 ) ){\n"
-			multiply_code &= "@1 = NewDouble( (eudouble)p128 );\n"
-			multiply_code &= "}\n}\n"
-		end if
+	if (range_b[1] > 0) = (range_b[2] > 0) then
+	    min_lb = log2ceil((max(min(abs(range_b[1]), abs(range_b[2])), 1)))
 	else
-		multiply_code = "@1 = @2 * @3;\n"  -- no tests, must be integer
+	    min_lb = 0
+	end if
+		
+	sequence range_lap64 = {min_la*min_lb, max_la*max_lb}	
+	
+	
+	sequence intcode = 	 "@1 = @2 * @3;\n"
+    sequence generalcode32 = 	
+    "if (@3 == (short)@3) {\n" &
+    	"/* @3 is 16-bit */\n" &
+    	"if ((@2 <= INT15 && @2 >= -INT15) ||\n" &
+    		"(@3 == (char)@3 && @2 <= INT23 && @2 >= -INT23) ||\n" &
+    		"(@2 == (short)@2 && @3 <= INT15 && @3 >= -INT15)) {\n" &
+    		"@1 = MAKE_INT(@3 * @2);\n" &
+    	"}\n" &
+    	"else {\n" &
+    		"@1 = (object)NewDouble(@3 * (eudouble)@2);\n" &
+    	"}\n" &
+    "}\n" &
+    "else if (@2 == (char)@2 && @3 <= INT23 && @3 >= -INT23) {\n" &
+    	"/* @2 is 8-bit, @3 is 23-bit */\n" &
+    	"@1 = MAKE_INT(@3 * @2);\n" &
+    "}\n" &
+    "else {\n" &
+    	"@1 = (object)NewDouble(@3 * (eudouble)@2);\n" &
+    "}\n"
+	
+	sequence generalcode64 =
+			 "{\nint128_t p128 = (int128_t)@2 * (int128_t)@3;\n" &
+			 "if( p128 != (int128_t)(@1 = (intptr_t)p128) || !IS_ATOM_INT( p128 ) ){\n" &
+			 "@1 = NewDouble( (eudouble)p128 );\n" &
+			 "}\n}\n"
+	
+	if range_lap32[2] < 30 and range_lap64[2] < 62 then
+	    -- product must be integer
+	    multiply_code = intcode
+	elsif range_lap32[1] > 30 and range_lap64[1] > 62 then
+	    -- product cannot fit into a integer, use a double wihtout checking
+	    multiply_code = dblcode
+	else
+	    -- product might not fit into an integer
+	    multiply_code = "#ifdef INTPTR_MAX == INT32_MAX\n"
+	
+	    if max_lb >= 15 then
+	        multiply_code &= "if (@3 == (short)@3) {\n"
+        end if
+        if max_lb >= 7 then
+    	    multiply_code &=    "/* @3 is 16-bit */\n" &
+                                "if ((@2 <= INT15 && @2 >= -INT15) ||\n" &
+                                    "(@3 == (char)@3 && @2 <= INT23 && @2 >= -INT23) ||\n" &
+                                    "(@2 == (short)@2 && @3 <= INT15 && @3 >= -INT15)) {\n"
+        else
+    	    multiply_code &=  "/* @3 is 8-bit */\n" &
+                                "if (@2 <= INT23 && @2 >= -INT23) {\n"
+        end if
+
+        multiply_code &=            "@1 = MAKE_INT(@3 * @2);\n" &
+                                "}\n" &
+                                "else {\n" &
+                                    "@1 = (object)NewDouble(@3 * (eudouble)@2);\n" &
+                                "}\n"
+	    if max_lb >= 15 then
+	        multiply_code &= "}\n"
+	        if min_la < 7 then
+                if max_lb >= 23 then
+                    multiply_code &=
+                              "else if (@2 == (char)@2 && @3 <= INT23 && @3 >= -INT23) {\n"
+                else
+                    multiply_code &=
+                              "else if (@2 == (char)@2) {\n"
+                end if
+
+                multiply_code &=  "/* @2 is 8-bit, @3 is 23-bit */\n" &
+                                  "@1 = MAKE_INT(@3 * @2);\n" &
+                              "}\n"
+             end if -- min_lb < 7
+                multiply_code &= "else {\n" &
+                                  "@1 = (object)NewDouble(@3 * (eudouble)@2);\n" &
+                              "}\n"
+	
+        end if
+	    multiply_code &= "#else\n"
+	    multiply_code &= generalcode64
+	    multiply_code &= "#endif\n"
 	end if
 	
 	return multiply_code
@@ -2883,7 +2988,7 @@ procedure opINTEGER_CHECK()
 		LeftSym = TRUE
 		c_stmt("_1 = (object)(DBL_PTR(@)->dbl);\n", sym)
 		LeftSym = TRUE
-		c_stmt( "if (UNIQUE(DBL_PTR(@)) && (DBL_PTR(@)->cleanup != 0))\n" & 
+		c_stmt( "if (UNIQUE(DBL_PTR(@)) && (DBL_PTR(@)->cleanup != 0))\n" &
 				"RTFatal(\"Cannot assign value with a destructor to an integer\");", {sym, sym})
 		c_stmt("DeRefDS(@);\n", sym)
 		c_stmt("@ = _1;\n", sym)
@@ -3015,7 +3120,7 @@ end procedure
 
 procedure opLENGTH()
 -- LENGTH / PLENGTH
-	integer 
+	integer
 		source_sym = Code[pc+1],
 		target_sym = Code[pc+2]
 	
@@ -3618,7 +3723,7 @@ end procedure
 
 procedure opIS_AN_OBJECT()
 	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
-	-- check 
+	-- check
 	c_stmt("if( NOVALUE == @ ){\n", {Code[pc+1]}, Code[pc+1])
 		c_stmt("@ = 0;\n", Code[pc+2])
 	c_stmt0("}\n")
@@ -3915,8 +4020,7 @@ procedure opMULTIPLY()
 	gencode = "@ = binary_op(MULTIPLY, @, @);\n"
 	intcode2= "@1 = @2 * @3;\n"
 	-- quick range test - could expand later maybe
-	intcode = IntegerMultiply(Code[pc+1], Code[pc+2])
-	
+		
 	if TypeIs(Code[pc+1], TYPE_DOUBLE) or
 	   TypeIs(Code[pc+2], TYPE_DOUBLE) then
 		atom_type = TYPE_DOUBLE
@@ -3924,6 +4028,7 @@ procedure opMULTIPLY()
 	
 	
 	dblfn="*"
+	intcode = IntegerMultiply(Code[pc+1], Code[pc+2])
 	
 	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
@@ -5740,7 +5845,7 @@ end procedure
 procedure opPOKE()
 -- generate code for poke/2/4/8
 -- should optimize constant address
-	integer 
+	integer
 		op  = Code[pc],
 		ptr = Code[pc+1],
 		val = Code[pc+2]
@@ -5778,9 +5883,9 @@ procedure opPOKE()
 				c_stmt0("pokeptr_addr = (uintptr_t *)")
 			case POKE8 then
 				c_stmt0("poke8_addr = (uint64_t *)")
-			case POKE4 then                        
+			case POKE4 then
 				c_stmt0("poke4_addr = (uint32_t *)")
-			case POKE2 then                        
+			case POKE2 then
 				c_stmt0("poke2_addr = (uint16_t *)")
 			case else
 				c_stmt0("poke_addr = (uint8_t *)")
@@ -7009,7 +7114,7 @@ export procedure init_opcodes()
 			case "CALL_FUNC" then
 				operation[i] = routine_id("opCALL_PROC")
 
-			case "PEEK4U", "PEEK4S", "PEEKS", "PEEK2U", "PEEK2S", "PEEK_STRING", 
+			case "PEEK4U", "PEEK4S", "PEEKS", "PEEK2U", "PEEK2S", "PEEK_STRING",
 				"PEEK8S", "PEEK8U", "PEEK_POINTER" then
 				
 				operation[i] = routine_id("opPEEK")

@@ -253,18 +253,18 @@ export enum
 	MIN,
 	MAX
 
-constant
+export constant
 	max_int32 = #3FFFFFFF
 
 ifdef not EU4_0 then
 	atom ptr = machine_func( 16, 8 )
-		poke( ptr, { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x3f } )
-		constant
+	poke( ptr, { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x3f } )
+	export constant
 			max_int64 = peek8s( ptr )
-		machine_proc( 17, ptr )
-elsedef
-	constant
-		max_int64 = max_int32
+	machine_proc( 17, ptr )
+elsedef    
+	export constant
+		max_int64 = 0x3fffffffffffffff
 end ifdef
 
 ifdef BITS64 then
