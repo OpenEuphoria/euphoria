@@ -993,8 +993,8 @@ ifdef STDDEBUG then
 		integer dx = 1
 		while dx <= length( dup_globals ) do
 			if SymTab[dup_globals[dx]][S_SCOPE] = SC_EXPORT then
-				dup_globals = remove( dup_globals, dx )
-				in_include_path = remove( in_include_path, dx )
+				dup_globals = eu:remove( dup_globals, dx )
+				in_include_path = eu:remove( in_include_path, dx )
 			else
 				dx += 1
 			end if
@@ -1009,8 +1009,8 @@ end ifdef
 			if in_include_path[ix] then
 				ix += 1
 			else
-				dup_globals     = remove( dup_globals, ix )
-				in_include_path = remove( in_include_path, ix )
+				dup_globals     = eu:remove( dup_globals, ix )
+				in_include_path = eu:remove( in_include_path, ix )
 			end if
 		end while
 

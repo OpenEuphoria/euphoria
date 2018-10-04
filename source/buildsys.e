@@ -337,7 +337,7 @@ export function adjust_for_command_line_passing(sequence long_path)
 				end if
 				short_path &= slash
 			else
-				if not find(' ',longs[i]) then
+				if not eu:find(' ',longs[i]) then
 					short_path &= longs[i] & slash
 					continue
 				end if
@@ -704,7 +704,7 @@ function windows_to_mingw_path(sequence s)
 		-- Normally, these will pass anyway but not in all Windows versions,
 		-- this conversion breaks this yet it also breaks cygwin so
 		-- we leave this off in production.
-		if length(s)>3 and s[2] = ':' and find(s[3],"/\\") then
+		if length(s)>3 and s[2] = ':' and eu:find(s[3],"/\\") then
 			s = '/' & s[1] & '/' & s[4..$]
 		end if
 	end ifdef

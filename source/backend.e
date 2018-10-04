@@ -149,7 +149,7 @@ procedure BackEnd(integer il_file)
 				end if
 				
 			elsif (length(eentry) < S_NAME and eentry[S_MODE] = M_CONSTANT) or
-			(length(eentry) >= S_TOKEN and compare( eentry[S_OBJ], NOVALUE )) then
+			(length(eentry) >= S_TOKEN and eu:compare( eentry[S_OBJ], NOVALUE )) then
 				-- compress constants and literal values in memory
 				poke_pointer(addr, length(lit_string))  -- record the current offset
 				lit_string &= compress(eentry[S_OBJ])
@@ -346,7 +346,7 @@ function alloc_symbol_names( atom st, atom lit, integer string_size)
 					poke_pointer(entry_addr + ST_NAME, no_name)
 				end if
 				
-				if eentry[S_TOKEN] = NAMESPACE or compare( eentry[S_OBJ], NOVALUE ) then
+				if eentry[S_TOKEN] = NAMESPACE or eu:compare( eentry[S_OBJ], NOVALUE ) then
 					-- convert offset to address
 					poke_pointer(entry_addr, peek_pointer( entry_addr ) + lit )
 				end if

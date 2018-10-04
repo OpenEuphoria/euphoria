@@ -210,7 +210,7 @@ end procedure
 procedure opDEREF_TEMP()
 	integer ix = find( Code[pc+1], saved_temps )
 	if ix then
-		saved_temps = remove( saved_temps, ix )
+		saved_temps = eu:remove( saved_temps, ix )
 	end if	
 	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 2
@@ -1747,7 +1747,7 @@ function IntegerMultiply(integer a, integer b)
     	"if ((@2 <= INT15 && @2 >= -INT15) ||\n" &
     		"(@3 == (char)@3 && @2 <= INT23 && @2 >= -INT23) ||\n" &
     		"(@2 == (short)@2 && @3 <= INT15 && @3 >= -INT15)) {\n" &
-    		"@1 = MAKE_INT(@3 * @2);\n" &
+    		"@1 = @3 * @2;\n" &
     	"}\n" &
     	"else {\n" &
     		"@1 = (object)NewDouble(@3 * (eudouble)@2);\n" &
@@ -1755,7 +1755,7 @@ function IntegerMultiply(integer a, integer b)
     "}\n" &
     "else if (@2 == (char)@2 && @3 <= INT23 && @3 >= -INT23) {\n" &
     	"/* @2 is 8-bit, @3 is 23-bit */\n" &
-    	"@1 = MAKE_INT(@3 * @2);\n" &
+    	"@1 = @3 * @2;\n" &
     "}\n" &
     "else {\n" &
     	"@1 = (object)NewDouble(@3 * (eudouble)@2);\n" &
@@ -1775,7 +1775,7 @@ function IntegerMultiply(integer a, integer b)
 	    multiply_code = dblcode
 	else
 	    -- product might not fit into an integer
-	    multiply_code = "#ifdef INTPTR_MAX == INT32_MAX\n"
+	    multiply_code = "#if INTPTR_MAX == INT32_MAX\n"
 	
 	    if max_lb >= 15 then
 	        multiply_code &= "if (@3 == (short)@3) {\n"
@@ -1790,7 +1790,7 @@ function IntegerMultiply(integer a, integer b)
                                 "if (@2 <= INT23 && @2 >= -INT23) {\n"
         end if
 
-        multiply_code &=            "@1 = MAKE_INT(@3 * @2);\n" &
+        multiply_code &=            "@1 = @3 * @2;\n" &
                                 "}\n" &
                                 "else {\n" &
                                     "@1 = (object)NewDouble(@3 * (eudouble)@2);\n" &
@@ -1807,7 +1807,7 @@ function IntegerMultiply(integer a, integer b)
                 end if
 
                 multiply_code &=  "/* @2 is 8-bit, @3 is 23-bit */\n" &
-                                  "@1 = MAKE_INT(@3 * @2);\n" &
+                                  "@1 = @3 * @2;\n" &
                               "}\n"
              end if -- min_lb < 7
                 multiply_code &= "else {\n" &
