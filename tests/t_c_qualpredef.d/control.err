@@ -1,6 +1,6 @@
-t_c_qualpredef.e:4
+t_c_qualpredef.e:6
 <0074>:: Errors resolving the following references:
-	'puts' (t_c_qualpredef.e:4) was not declared in 't_c_qualpredef.e'.
+	'puts' (t_c_qualpredef.e:6) was not declared in 't_c_qualpredef.e' or is not visible.
 
 fail:puts(1, 1)
         ^

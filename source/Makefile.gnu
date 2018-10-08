@@ -43,6 +43,24 @@
 #   Mercurial installed.
 #
 
+
+# ************************************************************************************************************* #
+#                                       RULES FOR MODIFYING MAKE RULES                                          #
+# ************************************************************************************************************* #
+#  *  Inside make dependency lines DO NOT leave spaces around the equals sign in asssignment statements!        #
+#     It is uglier but instead you must leave the definition stuck together with the variable, like this:       #
+#                  EU_MAIN=$(FOO)                                                                               #
+#     Consequence if this rule is not followed:  Possibly make will say there is nothing to be done to make a   #
+#     target when it is in fact out of date                                                                     #
+#                                                                                                               #
+#                                                                                                               #
+#  * Do not make symbolic targets as dependencies of other targets.                                             #
+#    Consequence if this rule is not followed:   Make will try to make a target even if it is up to date        #
+#                                                                                                               #
+# ************************************************************************************************************* #
+
+
+
 CONFIG_FILE = config.gnu
 CC=$(CC_PREFIX)$(CC_SUFFIX)
 RC=$(CC_PREFIX)$(RC_SUFFIX)
@@ -323,7 +341,8 @@ EU_CORE_FILES = \
 	$(TRUNKDIR)/source/scanner.e \
 	$(TRUNKDIR)/source/shift.e \
 	$(TRUNKDIR)/source/syncolor.e \
-	$(TRUNKDIR)/source/symtab.e 
+	$(TRUNKDIR)/source/symtab.e \
+	$(TRUNKDIR)/source/fwdref.e
 
 
 EU_INTERPRETER_FILES = \
@@ -576,13 +595,13 @@ shrouder : $(BUILDDIR)/$(EUSHROUD)
 .PHONY : binder
 
 euisource : $(BUILDDIR)/intobj/main-.c
-euisource :  EU_TARGET = eui.ex
+euisource :  EU_TARGET=eui.ex
 euisource : $(BUILDDIR)/include/be_ver.h
 eucsource : $(BUILDDIR)/transobj/main-.c
-eucsource :  EU_TARGET = euc.ex
+eucsource :  EU_TARGET=euc.ex
 eucsource : $(BUILDDIR)/include/be_ver.h
 backendsource : $(BUILDDIR)/backobj/main-.c
-backendsource :  EU_TARGET = backend.ex
+backendsource :  EU_TARGET=backend.ex
 backendsource : $(BUILDDIR)/include/be_ver.h
 
 source : builddirs
@@ -631,10 +650,11 @@ $(EUI_RES) :  $(TRUNKDIR)/source/eui.rc  $(TRUNKDIR)/source/version_info.rc  $(T
 $(EUIW_RES) :  $(TRUNKDIR)/source/euiw.rc  $(TRUNKDIR)/source/version_info.rc  $(TRUNKDIR)/source/eu.manifest
 endif
 
-$(BUILDDIR)/$(EEXU) :  EU_TARGET = eui.ex
-$(BUILDDIR)/$(EEXU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) $(EU_STD_INC)
-$(BUILDDIR)/$(EEXU) :  $(wildcard $(BUILDDIR)/intobj/*.c) $(EU_MAIN) $(EU_TRANSLATOR_FILES) $(EUI_RES) $(EUIW_RES) $(wildcard be_*.c)
-$(BUILDDIR)/$(EEXU) :  $(EU_MAIN) $(BUILDDIR)/include/be_ver.h $(TRUNKDIR)/source/pcre/*.c
+$(BUILDDIR)/$(EEXU) :  EU_TARGET=eui.ex
+$(BUILDDIR)/$(EEXU) :  EU_MAIN=$(EU_CORE_FILES) $(EU_INTERPRETER_FILES) $(EU_STD_INC)
+$(BUILDDIR)/$(EEXU) :  $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) $(EU_STD_INC)
+$(BUILDDIR)/$(EEXU) :  $(wildcard $(BUILDDIR)/intobj/*.c) $(EU_TRANSLATOR_FILES) $(EUI_RES) $(EUIW_RES) $(wildcard be_*.c)
+$(BUILDDIR)/$(EEXU) :  $(BUILDDIR)/include/be_ver.h $(TRUNKDIR)/source/pcre/*.c
 ifeq "$(OBJDIR)" "intobj"
 $(BUILDDIR)/$(EEXU) :  EU_OBJS="$(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(PREFIXED_PCRE_OBJECTS)"
 $(BUILDDIR)/$(EEXU) :  $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(PREFIXED_PCRE_OBJECTS)
@@ -685,8 +705,8 @@ $(EUB_RES) :  $(TRUNKDIR)/source/eub.rc  $(TRUNKDIR)/source/version_info.rc  $(T
 $(EUBW_RES) :  $(TRUNKDIR)/source/eubw.rc  $(TRUNKDIR)/source/version_info.rc  $(TRUNKDIR)/source/eu.manifest
 endif
 
-$(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) :  EU_TARGET = backend.ex
-$(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) :  EU_MAIN = $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES)  $(EU_TRANSLATOR_FILES) $(EU_STD_INC)
+$(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) :  EU_TARGET=backend.ex
+$(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) :  EU_MAIN=$(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES)  $(EU_TRANSLATOR_FILES) $(EU_STD_INC)
 $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) :  $(CYPBUILDDIR)/$(LIBRARY_NAME)
 $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) :  $(wildcard $(BUILDDIR)/backobj/*.c) $(EU_MAIN)
 $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) :  $(BUILDDIR)/include/be_ver.h $(TRUNKDIR)/source/pcre/*.c

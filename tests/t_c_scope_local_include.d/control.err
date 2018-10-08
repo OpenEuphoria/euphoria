@@ -1,0 +1,9 @@
+t_c_scope_local_include.e:4
+<0074>:: Errors resolving the following references:
+	'foo' (t_c_scope_local_include.e:4) was not declared in 'scope_local_include.e' or is not visible.
+
+my_include:foo()
+             ^
+
+
+
