@@ -536,24 +536,34 @@ $(BUILDDIR)/$(EECUDBGA) : $(wildcard $(TRUNKDIR)/source/*.[ch]) $(wildcard $(TRU
 
 endif
 
-
-
-shared-library :
+ifeq "$(OBJDIR)" "libobj-fPIC"
+$(BUILDDIR)/$(EECUSOA) : $(EU_LIB_OBJECTS)
+	$(AR) -rc $(BUILDDIR)/$(EECUSOA) $(EU_LIB_OBJECTS)
+else
+$(BUILDDIR)/$(EECUSOA) : $(BUILDDIR)/$(EECUA) $(wildcard $(TRUNKDIR)/source/*.[ch]) $(wildcard $(TRUNKDIR)/source/pcre/*.[ch]) | $(BUILD_DIRS)
 ifneq "$(EMINGW)" "1"
 	$(MAKE) $(BUILDDIR)/$(EECUSOA) OBJDIR=libobj-fPIC ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG= EPROFILE=$(EPROFILE) FPIC=-fPIC
 else
-shared-library : $(BUILDDIR)/$(EECUA)
 	ln -f $(BUILDDIR)/$(EECUA) $(BUILDDIR)/$(EECUSOA)
 endif
+endif
 
-debug-shared-library : builddirs
+
+ifeq "$(OBJDIR)" "libobjdbg-fPIC"
+$(BUILDDIR)/$(EECUSODBGA) : $(EU_LIB_OBJECTS)
+	$(AR) -rc $(BUILDDIR)/$(EECUSODBGA) $(EU_LIB_OBJECTS)
+else
+$(BUILDDIR)/$(EECUSODBGA) : $(BUILDDIR)/$(EECUDBGA) $(wildcard $(TRUNKDIR)/source/*.[ch]) $(wildcard $(TRUNKDIR)/source/pcre/*.[ch]) | $(BUILD_DIRS)
 ifneq "$(EMINGW)" "1"
 	$(MAKE) $(BUILDDIR)/$(EECUSODBGA) OBJDIR=libobjdbg-fPIC ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE) FPIC=-fPIC
 else
-debug-shared-library :  $(BUILDDIR)/$(EECUDBGA)
 	ln -f $(BUILDDIR)/$(EECUDBGA) $(BUILDDIR)/$(EECUSODBGA)
 endif
+endif
 
+shared-library : $(BUILDDIR)/$(EECUSOA)
+
+debug-shared-library : $(BUILDDIR)/$(EECUSODBGA)
 
 library : $(BUILDDIR)/$(EECUA)
 
