@@ -128,12 +128,12 @@ export procedure show_banner()
 		memory_type, 
 		"", 
 		info:version_date(),
-		info:version_node()
+		info:version_node(TRUE) -- full node
 	}
 
-	if info:is_developmental then
-		misc_info[$] = sprintf("%d:%s", { info:version_revision(), info:version_node() })
-	end if
+--	if info:is_developmental then
+--		misc_info[$] = sprintf("%d:%s", { info:version_revision(), info:version_node() })
+--	end if
 
 	object EuConsole = getenv("EUCONS")
 	if equal(EuConsole, "1") then
@@ -142,7 +142,7 @@ export procedure show_banner()
 		misc_info = remove(misc_info, 4)
 	end if
 
-	screen_output(STDERR, sprintf("%s v%s %s\n   %s %s, %s\n   Revision Date: %s, Id: %s\n", {
+	screen_output(STDERR, sprintf("%s v%s %s\n   %s %s, %s\n   Revision Date: %s\n   Id: %s\n", {
 		prod_name, info:version_string_short(), info:version_type() } & misc_info ) )
 end procedure
 

@@ -19,6 +19,8 @@ elsedef
 		end if
 		
 		test_equal("with warning += #3","Warning { not_used }:\n", gets(fn))
+		test_equal("with warning += #4","\t<0228>:: t_declasgn.e - module constant 'cmd' is not used\n", gets(fn))
+		test_equal("with warning += #3","Warning { not_used }:\n", gets(fn))
 		test_equal("with warning += #4","\t<0229>:: t_declasgn.e - module variable 'n0' is not used\n", gets(fn))
 		test_equal("with warning -=", -1, gets(fn))
 		
