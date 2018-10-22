@@ -604,20 +604,29 @@ shrouder : $(BUILDDIR)/$(EUSHROUD)
 .PHONY : code-page-db
 .PHONY : binder
 
+
+$(BUILDDIR)/intobj/main-.c : EU_TARGET=eui.ex
+$(BUILDDIR)/intobj/main-.c : $(BUILDDIR)/include/be_ver.h
+$(BUILDDIR)/intobj/main-.c : $(BUILDDIR)/include/be_ver.h
+
 euisource : $(BUILDDIR)/intobj/main-.c
-euisource :  EU_TARGET=eui.ex
-euisource : $(BUILDDIR)/include/be_ver.h
+
+$(BUILDDIR)/transobj/main-.c : $(BUILDDIR)/transobj/main-.c
+$(BUILDDIR)/transobj/main-.c :  EU_TARGET=euc.ex
+$(BUILDDIR)/transobj/main-.c : $(BUILDDIR)/include/be_ver.h
+
 eucsource : $(BUILDDIR)/transobj/main-.c
-eucsource :  EU_TARGET=euc.ex
-eucsource : $(BUILDDIR)/include/be_ver.h
+
+$(BUILDDIR)/backobj/main-.c : $(BUILDDIR)/backobj/main-.c
+$(BUILDDIR)/backobj/main-.c :  EU_TARGET=backend.ex
+$(BUILDDIR)/backobj/main-.c : $(BUILDDIR)/include/be_ver.h
+
 backendsource : $(BUILDDIR)/backobj/main-.c
-backendsource :  EU_TARGET=backend.ex
-backendsource : $(BUILDDIR)/include/be_ver.h
 
 source : builddirs
-	$(MAKE) -j$(BUILDJOBS) euisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
-	$(MAKE) -j$(BUILDJOBS) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
-	$(MAKE) -j$(BUILDJOBS) backendsource OBJDIR=backobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+	$(MAKE) -j$(BUILDJOBS) $(BUILDDIR)/intobj/main-.c OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+	$(MAKE) -j$(BUILDJOBS) $(BUILDDIR)/transobj/main-.c OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+	$(MAKE) -j$(BUILDJOBS) $(BUILDDIR)/backobj/main-.c OBJDIR=backobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 
 HASH := $(shell git show --format='%H' | head -1)
 SHORT_HASH := $(shell git show --format='%h' | head -1)
@@ -1153,13 +1162,24 @@ $(TRUNKDIR)/tests/lib818.dll : $(BUILDDIR)/test818.o
 
 ifeq "$(EUPHORIA)" "1"
 
-$(BUILDDIR)/$(OBJDIR)/%.c : $(EU_MAIN)
+ifneq "$(OBJDIR)" ""
+$(BUILDDIR)/$(OBJDIR)/%.c : $(BUILDDIR)/$(OBJDIR) $(EU_MAIN)
 	@$(ECHO) "Translating $(EU_TARGET) to create $(EU_MAIN)"
 	rm -f $(BUILDDIR)/$(OBJDIR)/{*.c,*.o}
 	(cd $(BUILDDIR)/$(OBJDIR);$(TRANSLATE) -nobuild $(CYPINCDIR) -$(XLTTARGETCC) $(RELEASE_FLAG) $(TARGETPLAT)  \
 		-c "$(BUILDDIR)/eu.cfg" \
 		$(CYPTRUNKDIR)/source/$(EU_TARGET) )
+else
+$(BUILDDIR)/intobj/main-.c : $(EU_MAIN)
+	$(MAKE) -j$(BUILDJOBS) $(BUILDDIR)/intobj/main-.c OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)        
+
+$(BUILDDIR)/transobj/main-.c : $(EU_MAIN)
+	$(MAKE) -j$(BUILDJOBS) $(BUILDDIR)/transobj/main-.c OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)  
 	
+$(BUILDDIR)/backobj/main-.c : $(EU_MAIN)
+	$(MAKE) -j$(BUILDJOBS) $(BUILDDIR)/backobj/main-.c OBJDIR=backobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)  
+	
+endif
 endif
 
 ifneq "$(OBJDIR)" ""
