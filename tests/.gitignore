@@ -1,0 +1,16 @@
+t_got_different_string.html
+ctc.log
+lib818.dll
+unittest.log
+warnings_issued.txt
+ecp.dat
+foo.map
+test.err
+publicized_from_memory.txt
+publicized_from_safe.txt
+t_abadcase.log
+serialize.dat
+exported_from_memory.txt
+exported_from_safe.txt
+eds-dump.txt
+version.txt

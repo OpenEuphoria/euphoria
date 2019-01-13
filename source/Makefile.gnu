@@ -822,8 +822,8 @@ test :
 		-eubind "$(CYPBUILDDIR)/$(EUBIND)" -eub $(CYPBUILDDIR)/$(EBACKENDC) \
 		-lib "$(CYPBUILDDIR)/$(LIBRARY_NAME)" \
 		-log $(TESTFILE) ; \
-	$(EXE) -i $(CYPTRUNKDIR)/include $(TRUNKDIR)/source/eutest.ex -exe "$(CYPBUILDDIR)/$(EEXU)" -process-log > $(CYPBUILDDIR)/test-report.txt ; \
-	$(EXE) -i $(CYPTRUNKDIR)/include $(TRUNKDIR)/source/eutest.ex -eui "$(CYPBUILDDIR)/$(EEXU)" -process-log -html > $(CYPBUILDDIR)/test-report.html
+	$(EXE) -i $(CYPTRUNKDIR)/include $(TRUNKDIR)/source/eutest.ex -exe "$(CYPBUILDDIR)/$(EEXU)" -process-log  > $(CYPBUILDDIR)/test-report.txt ; \
+	$(EXE) -i $(CYPTRUNKDIR)/include $(TRUNKDIR)/source/eutest.ex -eui "$(CYPBUILDDIR)/$(EEXU)" -process-log -html -css-file $(CYPBUILDDIR)/eutest.css > $(CYPBUILDDIR)/test-report.html
 	cd $(TRUNKDIR)/tests && sh check_diffs.sh
 
 testeu : $(TRUNKDIR)/tests/lib818.dll
