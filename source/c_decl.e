@@ -615,10 +615,7 @@ export procedure CName(symtab_index s)
 		-- declared user variables
 
 		if LeftSym = FALSE and GType(s) = TYPE_INTEGER and v != NOVALUE then
-			c_printf("%d", v)
-			if TARGET_SIZEOF_POINTER = 8 then
-				c_puts( "LL" )
-			end if
+			c_print_int(v)
 		else
 			if SymTab[s][S_SCOPE] > SC_PRIVATE then
 				c_printf("_%d", SymTab[s][S_FILE_NO])
@@ -638,10 +635,7 @@ export procedure CName(symtab_index s)
 		if (is_integer( sym_obj( s ) ) and SymTab[s][S_GTYPE] != TYPE_DOUBLE ) or (LeftSym = FALSE and TypeIs(s, TYPE_INTEGER) and v != NOVALUE) then
 			-- integer: either literal, or
 			-- declared constant rvalue with integer value
-			c_printf("%d", v)
-			if TARGET_SIZEOF_POINTER = 8 then
-				c_puts( "LL" )
-			end if
+			c_print_int(v)
 		else
 			-- Declared constant
 			c_printf("_%d", SymTab[s][S_FILE_NO])
@@ -654,10 +648,7 @@ export procedure CName(symtab_index s)
  	else   -- M_TEMP
 		-- literal doubles, strings, temporary vars that we create
 		if LeftSym = FALSE and GType(s) = TYPE_INTEGER and v != NOVALUE then
-			c_printf("%d", v)
-			if TARGET_SIZEOF_POINTER = 8 then
-				c_puts( "LL" )
-			end if
+			c_print_int(v)
 		else
 			c_printf("_%d", SymTab[s][S_TEMP_NAME])
 		end if
@@ -671,13 +662,13 @@ with warning
 -- output a C statement with replacements for @ or @1 @2 @3, ... @9
 export procedure c_stmt(sequence stmt, object arg, symtab_index lhs_arg = 0)
 	integer argcount, i
-
+	
 	if LAST_PASS = TRUE and Initializing = FALSE then
 		cfile_size += 1
 		update_checksum( stmt )
-
 	end if
 
+	
 	if emit_c_output then
 		adjust_indent_before(stmt)
 	end if
@@ -686,6 +677,7 @@ export procedure c_stmt(sequence stmt, object arg, symtab_index lhs_arg = 0)
 		arg = {arg}
 	end if
 
+	
 	argcount = 1
 	i = 1
 	while i <= length(stmt) and length(stmt) > 0 do
@@ -747,6 +739,7 @@ export procedure c_stmt0(sequence stmt)
 	end if
 end procedure
 
+
 function needs_uninit( sequence eentry )
 	if eentry[S_SCOPE] >= SC_LOCAL
 	and (eentry[S_SCOPE] <= SC_GLOBAL or eentry[S_SCOPE] = SC_EXPORT or eentry[S_SCOPE] = SC_PUBLIC)
@@ -759,6 +752,34 @@ function needs_uninit( sequence eentry )
 		return 0
 	end if
 end function
+
+sequence preprocessor_stack = {}
+
+--**
+-- output a C preprocessor statement with no arguments and put a new line on the end to the C file
+export procedure m_stmtln(sequence stmt)
+    if length(stmt) > 4 then
+        if (equal("#else", stmt[1..5]) or equal("#end", stmt[1..4])) and indent >= 4 then
+            indent -= 4
+        end if
+    end if
+    integer last_nl = find('\n', stmt & '\n')
+    c_stmt0(stmt[1..last_nl-1])
+    if length(stmt) > 4 then
+        if equal("#if", stmt[1..3]) then
+            preprocessor_stack = append(preprocessor_stack, stmt[4..$])
+            indent += 4
+        end if
+        if equal("#else", stmt[1..5]) then
+            indent += 4
+            c_puts(" // " & preprocessor_stack[$])
+        elsif equal("#end", stmt[1..4]) then
+            c_puts(" // " & preprocessor_stack[$])
+            preprocessor_stack = preprocessor_stack[1..$-1]
+        end if
+    end if
+    c_puts("\n")
+end procedure
 
 --**
 -- emit C declaration for each local and global constant and var
@@ -785,7 +806,8 @@ export procedure DeclareFileVars()
 			c_printf("_%d", eentry[S_FILE_NO])
 			c_puts(eentry[S_NAME])
 			if is_integer( eentry[S_OBJ] ) then
-					c_printf(" = %d%s;\n", { eentry[S_OBJ], LL_suffix} )
+					c_puts(" = ")
+					c_print_int_scln( eentry[S_OBJ] )
 			else
 				c_puts(" = NOVALUE;\n")
 			end if
@@ -996,14 +1018,14 @@ procedure declare_prototype( symtab_index s )
 	c_hputs(ret_type)
 	
 	
-	if dll_option and TWINDOWS  then
+	if dll_option then
 		integer scope = SymTab[s][S_SCOPE]
 		if (scope = SC_PUBLIC
 			or scope = SC_EXPORT
 			or scope = SC_GLOBAL)
 		then
 			-- declare the global routine as an exported DLL function
-			c_hputs("__stdcall ")
+			c_hputs("__global_routine ")
 		end if
 	end if
 	
@@ -1037,8 +1059,8 @@ procedure add_to_routine_list( symtab_index s, integer seq_num, integer first )
 	c_printf(", %d", SymTab[s][S_FILE_NO])
 	c_printf(", %d", SymTab[s][S_NUM_ARGS])
 
-	if TWINDOWS and dll_option and find( SymTab[s][S_SCOPE], { SC_GLOBAL, SC_EXPORT, SC_PUBLIC} ) then
-		c_puts(", 1")  -- must call with __stdcall convention
+	if dll_option and find( SymTab[s][S_SCOPE], { SC_GLOBAL, SC_EXPORT, SC_PUBLIC} ) then
+		c_puts(", ONEFORWINDOWS")  -- must call with __stdcall convention
 	else
 		c_puts(", 0")  -- default: call with normal or __cdecl convention
 	end if
@@ -1590,11 +1612,7 @@ export procedure GenerateUserRoutines()
 						LeftSym = TRUE
 
 						-- declare the global routine as an exported DLL function
-						if TWINDOWS then
-							c_stmt(ret_type & " __stdcall @(", s)
-						else
-							c_stmt(ret_type & "@(", s)
-						end if
+						c_stmt(ret_type & " __global_routine @(", s)
 
 					else
 						LeftSym = TRUE
@@ -1765,7 +1783,12 @@ export procedure GenerateUserRoutines()
 							-- we have to do some direct output here to make it work:
 							c_stmt0( ret_type & SymTab[s][S_NAME] & "() __attribute__ ((alias (\"" )
 							CName( s )
-							c_puts( sprintf( "@%d\")));\n", SymTab[s][S_NUM_ARGS] * TARGET_SIZEOF_POINTER ) )
+							c_puts("\n")
+							m_stmtln("#if INTPTR_MAX == INT32_MAX")
+							c_puts( sprintf( "@%d\")));\n", SymTab[s][S_NUM_ARGS] * 4 ) )
+							m_stmtln("#else")
+							c_puts( sprintf( "@%d\")));\n", SymTab[s][S_NUM_ARGS] * 8 ) )
+							m_stmtln("#endif")
 						else
 							c_stmt( ret_type & SymTab[s][S_NAME] & "() __attribute__ ((alias (\"@\")));\n", s )
 						end if

@@ -11,7 +11,7 @@
 #define EUPHORIA_MAX_INT MAXINT
 #include <string.h>
 
-#ifdef __WIN32
+#ifdef _WIN32
 #define EXPORT __declspec(dllexport)
 #else
 #define EXPORT
@@ -55,7 +55,7 @@ typedef enum {false,true} Bool;
 MAKE_BORDER_FUNCTIONS(int,C_INT)
 #endif
 
-#if INT32_MAX == INTPTR_MAX || !defined(EWINDOWS)
+#if INT32_MAX == INTPTR_MAX || !defined(_WIN32)
 MAKE_BORDER_FUNCTIONS(long,C_LONG)
 #endif
 MAKE_BORDER_FUNCTIONS(long long,C_LONGLONG)

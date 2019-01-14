@@ -250,15 +250,14 @@ end if
 constant InitialDir = current_dir() 
 void = chdir(info[PATH_DIR]) 
  
- 
+-- need this line to activate bug 
 crash_file(InitialDir&SLASH&info[PATH_BASENAME]&".err") 
  
 -- install dependencies  
+-- need this line to activate bug
 s = read_lines(InitialDir&SLASH&"dependencies.txt") 
-if atom(s) then 
-	logMsg("dependencies.txt not readable.") 
-	abort(1) 
-end if 
+-- ignore result
+s = {}
 for i = 1 to length(s) do 
 	if dry_run then 
 		logMsg("Pretending to install " & s[i]) 

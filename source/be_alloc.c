@@ -23,7 +23,7 @@
 /* Included files */
 /******************/
 #include <stdint.h>
-#if defined(EWINDOWS) && INTPTR_MAX == INT64_MAX
+#if defined(_WIN32) && INTPTR_MAX == INT64_MAX
 // MSVCRT doesn't handle long double output correctly
 #define __USE_MINGW_ANSI_STDIO 1
 #endif
@@ -34,7 +34,7 @@
 #include <time.h>
 #include <assert.h>
 #include <inttypes.h>
-#ifdef EWINDOWS
+#ifdef _WIN32
 #include <windows.h>
 #else
 #include <unistd.h>
@@ -107,7 +107,7 @@ static struct block_list freeblk_list[NUMBER_OF_FBL]; /* set of free block lists
 /**********************/
 /* Declared functions */
 /**********************/
-#ifndef EWINDOWS
+#ifndef _WIN32
 void free();
 #endif
 
@@ -149,7 +149,7 @@ symtab_ptr tmp_alloc()
 	return (symtab_ptr)EMalloc(sizeof(struct temp_entry));
 }
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 long getpagesize (void) {
     static long g_pagesize = 0;
     if (! g_pagesize) {
@@ -610,7 +610,7 @@ void EFree(char *p)
 }
 
 #else
-#if !defined(EWINDOWS) && !defined(EUNIX)
+#if !defined(_WIN32) && !defined(EUNIX)
 // Version of allocation routines for systems that might not return allocations
 // that are 4-byte aligned.
 char *EMalloc(unsigned long nbytes)
@@ -674,7 +674,7 @@ char *ERealloc(char *orig, uintptr_t newsize)
 #endif
 
 #ifndef EUNIX
-#ifndef EWINDOWS
+#ifndef _WIN32
 #ifdef EXTRA_CHECK
 #include <malloc.h>
 
@@ -715,7 +715,7 @@ int heap_dump(char *ptr)
 	return found;
 }
 #endif // EXTRA_CHECK
-#endif // EWINDOWS
+#endif // _WIN32
 #endif // EUNIX
 
 #ifndef ESIMPLE_MALLOC

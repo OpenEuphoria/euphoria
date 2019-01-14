@@ -807,8 +807,6 @@ procedure UndefinedVar(symtab_index s)
 
 		CompileErr(A_NAMESPACE_QUALIFIER_IS_NEEDED_TO_RESOLVE_1BECAUSE_2_IS_DECLARED_AS_A_GLOBALPUBLIC_SYMBOL_IN3, {rname, rname, errmsg})
 
-	elsif length(symbol_resolution_warning) then
-		Warning( symbol_resolution_warning, resolution_warning_flag)
 	end if
 end procedure
 
@@ -3573,7 +3571,7 @@ function Global_declaration(integer type_ptr, integer scope)
 			end if
 			valsym = Top()
 			
-			if valsym > 0 and compare( SymTab[valsym][S_OBJ], NOVALUE ) then
+			if valsym > 0 and eu:compare( SymTab[valsym][S_OBJ], NOVALUE ) then
 				Assign_Constant( sym )
 				sym = Pop()
 			else
@@ -3585,7 +3583,7 @@ function Global_declaration(integer type_ptr, integer scope)
 					-- something else happened...could be a built-in
 					valsym = -1
 				end if
-				if valsym > 0 and compare( SymTab[valsym][S_OBJ], NOVALUE ) then
+				if valsym > 0 and eu:compare( SymTab[valsym][S_OBJ], NOVALUE ) then
 					-- need to remember this for select/case statements
 					SymTab[sym][S_CODE] = valsym
 				end if
@@ -3633,7 +3631,7 @@ function Global_declaration(integer type_ptr, integer scope)
 					-- something else happened...could be a built-in
 					valsym = -1
 				end if
-				if valsym > 0 and compare( SymTab[valsym][S_OBJ], NOVALUE ) then
+				if valsym > 0 and eu:compare( SymTab[valsym][S_OBJ], NOVALUE ) then
 					-- need to remember this for select/case statements
 					SymTab[sym][S_CODE] = valsym
 				end if
@@ -3679,7 +3677,7 @@ function Global_declaration(integer type_ptr, integer scope)
 					SymTab[sym][S_USAGE] = U_READ
 					valsym = get_assigned_sym()
 				end if
-				if valsym > 0 and compare( SymTab[valsym][S_OBJ], NOVALUE ) then
+				if valsym > 0 and eu:compare( SymTab[valsym][S_OBJ], NOVALUE ) then
 					-- need to remember this for select/case statements
 					SymTab[sym][S_CODE] = valsym
 				end if					

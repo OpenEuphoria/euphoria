@@ -17,7 +17,7 @@ enum task_mode {
 #define TASK_NEVER 1e300
 #define TASK_ID_MAX 9e15 // wrap to 0 after this (and avoid in-use ones)
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 #include <windows.h>
 
 // Address to a fiber:

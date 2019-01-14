@@ -79,7 +79,7 @@ object get_int(object x);
 
 void NewConfig(int raise_console);
 double current_time( void );
-#ifdef EWINDOWS
+#ifdef _WIN32
 long __stdcall Win_Machine_Handler(LPEXCEPTION_POINTERS p);
 #endif
 void Machine_Handler(int sig_no);
