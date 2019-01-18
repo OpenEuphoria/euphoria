@@ -1210,9 +1210,8 @@ procedure html_open()
 	end if
 	
 	if css_fn > -1 then
-            puts(css_fn, "span.missing {text-decoration:line-through;}\n")
-            puts(css_fn, "span.added {color: red;}\n")
-            puts(css_fn, "span.changed {background-color: red;}\n")
+            puts(css_fn, "span.missing {background-color: #dddddd; text-decoration:line-through;}\n")
+            puts(css_fn, "span.added {background-color: #ffaaaa;}\n")
             puts(css_fn, ".header {background-color: #dddddd;} \n")
             puts(css_fn, ".error  {background-color: #ffaaaa }    \n")
             puts(css_fn, ".no_error {{background-color: #aaffaa } \n")
