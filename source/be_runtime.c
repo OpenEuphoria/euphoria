@@ -5274,13 +5274,19 @@ object make_atom32(unsigned c32)
 		return NewDouble((eudouble)c32);
 }
 
+object make_satom(intptr_t c)
+{
+	if (c <= MAXINT && c > MININT) {
+		return c;
+	} else {
+		return NewDouble((eudouble)c);
+	}
+}
+
 object make_atom(uintptr_t c)
 /* make a Euphoria atom from an unsigned C value */
 {
-	if (c <= (uintptr_t)MAXINT)
-		return c;
-	else
-		return NewDouble((eudouble)c);
+	return make_satom((intptr_t)c);
 }
 
 uintptr_t general_call_back(
@@ -5419,7 +5425,7 @@ uintptr_t general_call_back(
 
 	if (num_args >= 1) {
 	  DeRef(call_back_arg1->obj);
-	  call_back_arg1->obj = make_atom((uintptr_t)arg1);
+	  call_back_arg1->obj = make_satom(arg1);
 	  code[2] = (object *)call_back_arg1;
 	  if (num_args >= 2) {
 		DeRef(call_back_arg2->obj);
