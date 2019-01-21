@@ -572,7 +572,8 @@ debug-library : $(BUILDDIR)/$(EECUDBGA)
 builddirs : | $(BUILD_DIRS)
 
 $(BUILD_DIRS) :
-	mkdir -p $@
+	if ! -e "$@":
+		mkdir -p $@
 
 ifeq "$(ROOTDIR)" ""
 ROOTDIR=$(TRUNKDIR)
