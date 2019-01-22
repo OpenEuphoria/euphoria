@@ -23,7 +23,7 @@ constant SEQ_MASK           = #8 * BASE_PTR
 constant NOVALUE            = #C * BASE_PTR - 1
 constant MAXUPTR            = #10 * BASE_PTR - 1
 constant MAXUINT32          = #10 * BASE_4 - 1 
-constant MAXUINT64          = #10 * BASE_8 - 1
+constant MAXUINT64          = power(2,64) - 1
 constant MAXUSHORT          = power(2,16)-1
 constant MAXUBYTE           = #FF
 constant MININT_EUPHORIA    = -0b0100 * BASE_PTR -- on 32-bit: -1_073_741_824
@@ -83,7 +83,8 @@ for i = 1 to length(minus_1_values) do
         exit
     end if
 	r_max_uint_fn = define_c_func( "", call_back( routine_id("minus_1_fn") ), {}, unsigned_types[i] )
-	test_equal( sprintf("return type %s makes unsigned value", {unsigned_type_names[i]}), minus_1_values[i], c_func(r_max_uint_fn, {}) )
+	test_equal( sprintf("return type %s makes unsigned value", 
+		{unsigned_type_names[i]}), minus_1_values[i], c_func(r_max_uint_fn, {}) )
 end for
 
 constant byte_values = ' ' & -32 & -100 & ')'
