@@ -18,6 +18,10 @@ include std/net/dns.e
 include std/net/url.e as url
 include std/get.e
 include euphoria/info.e
+include std/machine.e
+include std/dll.e
+include std/filesys.e
+include std/net/curl.e
 
 ifdef not EUC_DLL then
 include std/task.e
@@ -42,7 +46,9 @@ public enum by -1
 	ERR_HOST_LOOKUP_FAILED,
 	ERR_CONNECT_FAILED,
 	ERR_SEND_FAILED,
-	ERR_RECEIVE_FAILED
+	ERR_RECEIVE_FAILED,
+        ERR_LIBRARY_INIT, -- could not load all of the routines from the CURL library
+	ERR_CURL_INIT     -- could not initialize CURL
 
 --****
 -- === Constants
@@ -198,7 +204,7 @@ function multipart_form_data_encode(sequence kvpairs, sequence boundary)
 			end switch
 		else
 			data &= "\r\n"
-		end if	
+		end if  
 			
 		data &= "\r\n" & kvpair[2]
 	end for
@@ -538,30 +544,194 @@ end function
 --   [[:http_post]]
 --
 
+-- http_get via WinINet for Windows 
+-- 
+ifdef WINDOWS then
+include std/win32/w32dllconst.ew
+ 
+constant 
+    wininet = open_dll("wininet.dll") 
+ 
+constant 
+    InternetOpen = define_c_func(wininet, "InternetOpenA", {C_POINTER, C_DWORD, C_POINTER, C_POINTER, C_DWORD}, C_HANDLE), 
+    InternetCloseHandle = define_c_func(wininet, "InternetCloseHandle", {C_HANDLE}, C_BOOL), 
+    InternetOpenUrl = define_c_func(wininet, "InternetOpenUrlA", {C_HANDLE, C_POINTER, C_POINTER, C_DWORD, C_DWORD, C_POINTER}, C_HANDLE), 
+    InternetReadFile = define_c_func(wininet, "InternetReadFile", {C_HANDLE, C_POINTER, C_DWORD, C_POINTER}, C_BOOL) 
+if InternetOpen = -1 or 
+   InternetCloseHandle = -1 or 
+   InternetOpenUrl = -1 or 
+   InternetReadFile = -1 then 
+    puts(1, "Failed to find functions in wininet\n") 
+    abort(1) 
+end if 
+ 
+constant 
+    INTERNET_OPEN_TYPE_PRECONFIG = 0 
+
+ 
 public function http_get(sequence url, object headers = 0, natural follow_redirects = 10,
 		natural timeout = 15)
-	object request, content
-	sequence content_1
-	
-	while follow_redirects > 0 and length(content_1) >= 1 and length(content_1[1]) >= 2 and
-				find(content_1[1][2], {"301","302","303","307","308"}) with entry do
-		follow_redirects -= 1
-		
-		url = redirect_url(request, content_1)
-	entry
-		request = format_base_request("GET", url, headers)
-		
-		if atom(request) then
-			return request
-		end if
-		-- No more work necessary, terminate the request with our ending CR LF
-		request[R_REQUEST] &= "\r\n"
-		content = execute_request(request[R_HOST], request[R_PORT], request[R_REQUEST], timeout)
-		if length(content) != 2 then
-			exit
-		end if
-		content_1 = content[1]
-	end while
+    if InternetOpen = -1 then
+	return -1
+    end if 
+    atom agent_ptr = allocate_string("Mozilla/4.0 (compatible)") 
+    atom url_ptr = allocate_string(url) 
+    atom ih, ch -- internet handle, connection handle 
+    integer bufsize = 4096 
+    atom buf_ptr = allocate(bufsize) 
+    atom bytesread_ptr = allocate(4) -- LPDWORD 
+    object res = -1 
 
-	return content	
-end function
+	if sequence(headers) then
+		for i = 1 to length(headers) do
+			object header = headers[i]
+			if equal(header[1], "User-Agent") then
+				has_user_agent = 1
+				agent_ptr = allocate_string(header[2], 1)
+			elsif equal(header[1], "Connection") then
+				has_connection = 1
+			end if
+
+			request &= sprintf("%s: %s\r\n", header)
+		end for
+	end if
+
+	if not has_user_agent then
+    		agent_ptr = allocate_string(USER_AGENT_HEADER)
+	end if
+    ih = c_func(InternetOpen, {agent_ptr, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0}) 
+    if ih then 
+	ch = c_func(InternetOpenUrl, {ih, url_ptr, NULL, 0, 0, NULL}) 
+	if ch then 
+	    res = "" 
+	    while c_func(InternetReadFile, {ch, buf_ptr, bufsize, bytesread_ptr}) != 1 or 
+		  peek4u(bytesread_ptr) != 0 do 
+		res &= peek({buf_ptr, peek4u(bytesread_ptr)}) 
+	    end while 
+--            res = {{{"Status","200"}}, res} 
+	    c_func(InternetCloseHandle, {ih}) 
+	end if 
+	c_func(InternetCloseHandle, {ih}) 
+    end if 
+ 
+    free(agent_ptr) 
+    free(url_ptr) 
+    free(buf_ptr) 
+    free(bytesread_ptr) 
+ 
+    if sequence(res) then  
+        return {{}, res}
+    end if 
+    return -res 
+end function 
+end ifdef 
+ 
+-- 
+-- Implement https_get via libcurl for UNIX 
+-- 
+ 
+integer libcurl = open_dll("libcurl.so") 
+if libcurl = 0 then libcurl = open_dll("libcurl.so.3") end if 
+if libcurl = 0 then libcurl = open_dll("libcurl.so.4") end if 
+if libcurl = 0 then  puts(1, "Failed to open libcurl.so\n")  abort(1) end if 
+ 
+constant 
+    CURLOPT_URL = 10002, 
+    CURLOPT_WRITEFUNCTION = 20011, 
+    CURLOPT_WRITEDATA = 10001, 
+    CURLOPT_FOLLOWLOCATION = 52,
+    CURLOPT_HEADERFUNCTION = 79
+ 
+ifdef UNIX then
+sequence cb_data 
+function curl_callback(atom ptr, atom size, atom nmemb, atom writedata) 
+    object line = peek({ptr, size * nmemb}) 
+    cb_data &= line 
+    return nmemb 
+end function 
+constant curl_cb = call_back(routine_id("curl_callback")) 
+sequence cb_header = {} 
+function curl_header_callback(atom ptr, atom size, atom nmemb, atom writedata) 
+    object line = peek({ptr, size * nmemb}) 
+    puts(1, '.')
+    cb_header = append(cb_header, split(line, ":"))
+    return nmemb 
+end function 
+constant curl_header_cb = call_back(routine_id("curl_header_callback")) 
+
+integer curl_easy_init = define_c_func(libcurl, "curl_easy_init", {}, C_POINTER), 
+    curl_easy_setopt =   define_c_proc(libcurl, "curl_easy_setopt", {C_POINTER, C_LONG, C_POINTER}), 
+    curl_easy_perform = define_c_func(libcurl, "curl_easy_perform", {C_POINTER}, C_LONG), 
+    curl_easy_cleanup = define_c_proc(libcurl, "curl_easy_cleanup", {C_POINTER}),
+    curl_slist_append = define_c_func(libcurl, "curl_slist_append", {C_POINTER, C_POINTER}, C_POINTER),
+    curl_slist_free_all = define_c_proc(libcurl, "curl_slist_free_all", {C_POINTER})
+
+public function http_get(
+    sequence url, object headers = 0, 
+    natural follow_redirects = 10, natural timeout = 15)
+    atom url_ptr = allocate_string(url), res, curl, list = 0
+    if libcurl = -1 then
+	return ERR_LIBRARY_INIT 
+    end if
+    if not url_ptr or 
+	curl_easy_init = -1 or
+	curl_easy_init = -1 or    
+	curl_easy_setopt = -1 or 
+	curl_easy_perform = -1 or    
+	curl_easy_cleanup = -1 then 
+	return ERR_LIBRARY_INIT 
+    end if
+    curl = c_func(curl_easy_init, {}) 
+    if not curl then  
+	return ERR_CURL_INIT  
+    end if 
+    c_proc(curl_easy_setopt, {curl, CURLOPT_WRITEFUNCTION, curl_cb}) 
+    c_proc(curl_easy_setopt, {curl, CURLOPT_WRITEDATA, 0}) 
+    c_proc(curl_easy_setopt, {curl, CURLOPT_HEADERFUNCTION, curl_header_cb})
+    c_proc(curl_easy_setopt, {curl, CURLOPT_FOLLOWLOCATION, 1}) 
+    --c_proc(curl_easy_setopt, {curl, CURLOPT_HEADEROPT, CURLHEADER_UNIFIED})
+    if sequence(headers) then
+        trace(1)
+	for i = 1 to length(headers) do
+	    list = c_func(curl_slist_append, {list, allocate_string(headers[i][1] & ": "& headers[i][2])})
+        end for
+	c_proc(curl_easy_setopt, {curl, CURLOPT_HTTPHEADER, list})
+    end if
+    cb_data = ""
+    cb_header = ""
+    c_proc(curl_easy_setopt, {curl, CURLOPT_URL, url_ptr}) 
+    res = c_func(curl_easy_perform, {curl}) 
+    free(url_ptr) 
+    if list != 0 then
+	c_proc(curl_slist_free_all, {list})
+    end if
+    trace(1)
+    c_proc(curl_easy_cleanup, {curl})
+    if res = 0 then  
+        return {cb_header, cb_data}
+    end if 
+    return -res 
+end function 
+ 
+end ifdef
+  
+ 
+public function extract_fn(sequence url) 
+-- extract a file name from a url 
+integer z = length(url) 
+sequence fn="" 
+    for i = z  to 1 by -1  do 
+	if equal({SLASH}, sprintf("%s",url[i])) then  
+	    fn = slice(url, i+1, z) 
+	    exit  
+	end if 
+    end for 
+return fn 
+end function 
+ 
+-- test 
+-- constant archive = "https://archive.usingeuphoria.com/" 
+-- write_file_data(archive & "euhelp.tar")  
+-- displays error message: file not downloaded 
+-- write_file_data(archive & "euhelper.tar") 
+-- write_file_data(archive & "simple.tar") 

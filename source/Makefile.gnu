@@ -447,6 +447,7 @@ EU_BACKEND_RUNNER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/backobj/*.
 EU_INTERPRETER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/intobj/*.c))
 
 all : 
+	$(MAKE) $(TRUNKDIR)/include/std/net/curl.e
 	$(MAKE) code-page-db interpreter translator library debug-library backend lib818
 	$(MAKE) shared-library debug-shared-library 
 	$(MAKE) tools
@@ -648,7 +649,7 @@ endif
 
 source-tarball : $(BUILDDIR)/$(SOURCEDIR)-src.tar.gz
 
-$(BUILDDIR)/$(SOURCEDIR)-src.tar.gz : $(MKVER) $(EU_BACKEND_RUNNER_FILES) $(EU_TRANSLATOR_FILES) $(EU_INTERPRETER_FILES) $(EU_CORE_FILES) $(EU_STD_INC) $(wildcard *.c) $(BUILDDIR)/intobj/main-.c $(BUILDDIR)/transobj/main-.c $(BUILDDIR)/backobj/main-.c
+$(BUILDDIR)/$(SOURCEDIR)-src.tar.gz : $(MKVER) $(EU_BACKEND_RUNNER_FILES) $(EU_TRANSLATOR_FILES) $(EU_INTERPRETER_FILES) $(EU_CORE_FILES) $(EU_STD_INC) $(wildcard *.c) $(BUILDDIR)/intobj/main-.c $(BUILDDIR)/transobj/main-.c $(BUILDDIR)/backobj/main-.c $(TRUNKDIR)/include/std/net/curl.e
 	echo building source-tarball for $(PLAT)
 	rm -rf $(BUILDDIR)/$(SOURCEDIR)
 	mkdir -p $(BUILDDIR)/$(SOURCEDIR)/build
@@ -864,11 +865,11 @@ $(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : EUCOMPILEDIR=$(TRUNKD
 $(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : EUCOMPILEDIR=$(TRUNKDIR)	
 $(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : C_INCLUDE_PATH=$(TRUNKDIR):..:$(C_INCLUDE_PATH)
 $(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : LIBRARY_PATH=$(%LIBRARY_PATH)
-$(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : $(TRUNKDIR)/tests/lib818.dll
+$(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : $(TRUNKDIR)/include/std/net/curl.e $(TRUNKDIR)/tests/lib818.dll
 $(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : $(TRUNKDIR)/tests/ecp.dat
 $(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : $(BUILDDIR)/$(EEXU) $(BUILDDIR)/$(EUBIND)
 $(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EECU)
-$(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : $(BUILDDIR)/$(LIBRARY_NAME)
+$(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : $(BUILDDIR)/$(LIBRARY_NAME) $(TRUNKDIR)/include/std/net/curl.e
 $(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html :  
 
 	-cd $(TRUNKDIR)/tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
@@ -886,7 +887,7 @@ testeu : $(TRUNKDIR)/tests/lib818.dll
 testeu :
 	cd $(TRUNKDIR)/tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) $(EXE) $(TRUNKDIR)/source/eutest.ex --nocheck -i $(TRUNKDIR)/include -cc gcc -exe "$(CYPBUILDDIR)/$(EEXU) -batch $(CYPTRUNKDIR)/source/eu.ex" $(TESTFILE)
 
-test-311 :
+test-311 : $(TRUNKDIR)/include/std/net/curl.e
 	cd $(TRUNKDIR)/tests/311 && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
 		$(EXE) -i $(TRUNKDIR)/include $(CYPTRUNKDIR)/source/eutest.ex -i $(CYPTRUNKDIR)/include -cc gcc $(VERBOSE_TESTS) \
 		-exe "$(CYPBUILDDIR)/$(EEXU)" \
@@ -895,7 +896,7 @@ test-311 :
 		-lib "$(CYPBUILDDIR)/$(LIBRARY_NAME)" \
 		$(TESTFILE)
 		
-coverage-311 : 
+coverage-311 :  $(TRUNKDIR)/include/std/net/curl.e
 	cd $(TRUNKDIR)/tests/311 && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
 		$(EXE) -i $(TRUNKDIR)/include $(CYPTRUNKDIR)/source/eutest.ex -i $(CYPTRUNKDIR)/include \
 		-exe "$(CYPBUILDDIR)/$(EEXU)" $(COVERAGE_ERASE) \
@@ -903,7 +904,7 @@ coverage-311 :
 		-coverage-exclude std -coverage-exclude euphoria \
 		 -coverage-pp "$(EXE) -i $(CYPTRUNKDIR)/include $(CYPTRUNKDIR)/bin/eucoverage.ex" $(TESTFILE)
 
-coverage :  $(TRUNKDIR)/tests/lib818.dll
+coverage : $(TRUNKDIR)/include/std/net/curl.e $(TRUNKDIR)/tests/lib818.dll
 coverage :
 	cd $(TRUNKDIR)/tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
 		$(EXE) -i $(TRUNKDIR)/include $(CYPTRUNKDIR)/source/eutest.ex -i $(CYPTRUNKDIR)/include \
@@ -912,7 +913,7 @@ coverage :
 		-verbose \
 		 -coverage-pp "$(EXE) -i $(CYPTRUNKDIR)/include $(CYPTRUNKDIR)/bin/eucoverage.ex" $(TESTFILE)
 
-coverage-front-end :  $(TRUNKDIR)/tests/lib818.dll
+coverage-front-end : $(TRUNKDIR)/include/std/net/curl.e $(TRUNKDIR)/tests/lib818.dll
 coverage-front-end :
 	-rm $(CYPBUILDDIR)/front-end.edb
 	cd $(TRUNKDIR)/tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
@@ -927,7 +928,7 @@ ifeq "$(PREFIX)" ""
 PREFIX=/usr/local
 endif
 
-install :
+install : $(TRUNKDIR)/include/std/net/curl.e
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria/debug
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/std/win32
@@ -1196,6 +1197,11 @@ endif
 ifdef PCRE_OBJECTS	
 $(PREFIXED_PCRE_OBJECTS) : $(patsubst %.o,$(TRUNKDIR)/source/pcre/%.c,$(PCRE_OBJECTS)) $(TRUNKDIR)/source/pcre/config.h.unix $(TRUNKDIR)/source/pcre/pcre.h.unix
 	$(MAKE) -j$(BUILDJOBS) -C $(TRUNKDIR)/source/pcre all CC="$(PCRE_CC)" PCRE_CC="$(PCRE_CC)" EOSTYPE="$(EOSTYPE)" EOSFLAGS="$(EOSPCREFLAGS)" FPIC=$(FPIC)
+endif
+
+ifeq "$(EUPHORIA)" "1"
+$(TRUNKDIR)/include/std/net/curl.e : /usr/include/curl/curl.h $(TRUNKDIR)/source/curlimport.ex
+	eui $(TRUNKDIR)/source/curlimport.ex < /usr/include/curl/curl.h > $(TRUNKDIR)/include/std/net/curl.e
 endif
 
 .IGNORE : test
