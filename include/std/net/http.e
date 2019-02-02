@@ -685,11 +685,14 @@ public function http_get(
     if not curl then  
 	return ERR_CURL_INIT  
     end if 
+    atom error_buffer = allocate(CURL_ERROR_SIZE)
     c_proc(curl_easy_setopt, {curl, CURLOPT_WRITEFUNCTION, curl_cb}) 
     c_proc(curl_easy_setopt, {curl, CURLOPT_WRITEDATA, 0}) 
     c_proc(curl_easy_setopt, {curl, CURLOPT_HEADERFUNCTION, curl_header_cb})
-    c_proc(curl_easy_setopt, {curl, CURLOPT_FOLLOWLOCATION, 1}) 
+    c_proc(curl_easy_setopt, {curl, CURLOPT_FOLLOWLOCATION, follow_redirects != 0}) 
+    c_proc(curl_easy_setopt, {curl, CURLOPT_ERRORBUFFER, error_buffer}) 
     --c_proc(curl_easy_setopt, {curl, CURLOPT_HEADEROPT, CURLHEADER_UNIFIED})
+
     if sequence(headers) then
         trace(1)
 	for i = 1 to length(headers) do
