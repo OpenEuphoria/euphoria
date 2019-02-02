@@ -685,16 +685,23 @@ public function http_get(
     if not curl then  
 	return ERR_CURL_INIT  
     end if 
+    -- Temporary: <<<< Remove before merge
     atom error_buffer = allocate(CURL_ERROR_SIZE)
+    -- Temporary: >>>> Remove before merge
     c_proc(curl_easy_setopt, {curl, CURLOPT_WRITEFUNCTION, curl_cb}) 
     c_proc(curl_easy_setopt, {curl, CURLOPT_WRITEDATA, 0}) 
     c_proc(curl_easy_setopt, {curl, CURLOPT_HEADERFUNCTION, curl_header_cb})
     c_proc(curl_easy_setopt, {curl, CURLOPT_FOLLOWLOCATION, follow_redirects != 0}) 
+    -- Temporary: <<<< Remove before merge
     c_proc(curl_easy_setopt, {curl, CURLOPT_ERRORBUFFER, error_buffer}) 
-    --c_proc(curl_easy_setopt, {curl, CURLOPT_HEADEROPT, CURLHEADER_UNIFIED})
-
+    c_proc(curl_easy_setopt, {curl, CURLOPT_ERRORBUFFER, error_buffer}) 
+    -- Temporary: >>>> Remove before merge
+    --c_proc(curl_easy_setopt, {curl, CURLOPT_HEADEROPT, CURLHEADER_UNIFIED})A
+    poke(error_buffer,  "No error\n")
     if sequence(headers) then
+        -- Temporary: <<<< Remove before merge
         trace(1)
+        -- Temporary: >>>> Remove before merge
 	for i = 1 to length(headers) do
 	    list = c_func(curl_slist_append, {list, allocate_string(headers[i][1] & ": "& headers[i][2])})
         end for
@@ -704,11 +711,19 @@ public function http_get(
     cb_header = ""
     c_proc(curl_easy_setopt, {curl, CURLOPT_URL, url_ptr}) 
     res = c_func(curl_easy_perform, {curl}) 
+    if res != 0 then
+        -- Temporary: <<<< Remove before merge
+        printf(2, peek_string(error_buffer) & "\n")
+        -- Temporary: >>>> Remove before merge
+    end if
+    free(error_buffer)
     free(url_ptr) 
     if list != 0 then
 	c_proc(curl_slist_free_all, {list})
     end if
+    -- Temporary: <<<< Remove before merge
     trace(1)
+    -- Temporary: >>>> Remove before merge
     c_proc(curl_easy_cleanup, {curl})
     if res = 0 then  
         return {cb_header, cb_data}
