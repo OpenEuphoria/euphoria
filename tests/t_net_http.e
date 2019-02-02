@@ -69,8 +69,13 @@ ifdef not NOINET_TESTS then
 		num = sprintf("%d", { rand_range(1000,10000) })
 		data = sprintf("data=%s", { num })
 		content = http_post("http://test.openeuphoria.org/post_test.ex", data, {authorize_header})
-		assert("http_get with headers #5", length(content) = 2)
-		test_equal("http_get with headers #6", "success", content[2])
+		if atom(content) and length(content) = 2 then
+			test_pass("http_get with headers #5")
+			test_equal("http_get with headers #6", "success", content[2])
+		else
+			test_fail("http_get with headers #5")
+			test_fail("http_get with headers #6")
+		end if
 
 		content = http_get("http://test.openeuphoria.org/post_test.txt", headers)
 		assert("http_get with headers #7", length(content) = 2)
