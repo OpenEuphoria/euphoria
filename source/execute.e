@@ -4320,10 +4320,18 @@ procedure do_exec()
 				opPOKE8()
 			
 			case POKE_POINTER then
-				opPOKE4()
+				ifdef BITS32 then
+				    opPOKE4()
+				elsedef
+				    opPOKE8()
+				end ifdef
 			
 			case PEEK_POINTER then
-				opPEEK4U()
+				ifdef BITS32 then
+				    opPEEK4U()
+				elsedef
+				    opPEEK8U()
+				end ifdef
 				
 			case POSITION then
 				opPOSITION()
