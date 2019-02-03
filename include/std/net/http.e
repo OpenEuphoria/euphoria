@@ -666,7 +666,71 @@ integer curl_easy_init = define_c_func(libcurl, "curl_easy_init", {}, C_POINTER)
     curl_slist_append = define_c_func(libcurl, "curl_slist_append", {C_POINTER, C_POINTER}, C_POINTER),
     curl_slist_free_all = define_c_proc(libcurl, "curl_slist_free_all", {C_POINTER})
 
-public function http_get(
+--**
+-- Get a HTTP resource.
+--
+-- Returns:
+--   An integer error code or a 2 element sequence. Element 1 is a sequence
+--   of key/value pairs representing the result header information. Element
+--   2 is the body of the result.
+--
+--   If result is a negative integer, that represents a local error condition.
+--
+--   If result is a positive integer, that represents a HTTP error value from
+--   the server.
+--
+-- Example:
+--
+-- <eucode>
+-- include std/console.e -- for display()
+-- include std/net/http.e
+--
+-- object result = http_get("http://example.com") 
+-- if atom(result) then 
+--    printf(1, "Web error: %d\n", result) 
+--     abort(1) 
+-- end if 
+-- 
+-- display(result[1]) -- header key/value pairs
+-- printf(1, "Content: %s\n", { result[2] }) 
+-- </eucode>
+--
+-- See Also:
+--   [[:http_post]]
+--
+
+public function http_get(sequence url, object headers = 0, natural follow_redirects = 10,
+		natural timeout = 15)
+	object request, content
+	sequence content_1
+	
+	while follow_redirects > 0 and length(content_1) >= 1 and length(content_1[1]) >= 2 and
+				find(content_1[1][2], {"301","302","303","307","308"}) with entry do
+		follow_redirects -= 1
+		
+		url = redirect_url(request, content_1)
+		if eu:match("https:", url) = 1 then
+		    return https_get(url, headers, follow_redirects, timeout)
+		end if
+	entry
+		request = format_base_request("GET", url, headers)
+		
+		if atom(request) then
+			return request
+		end if
+		-- No more work necessary, terminate the request with our ending CR LF
+		request[R_REQUEST] &= "\r\n"
+		content = execute_request(request[R_HOST], request[R_PORT], request[R_REQUEST], timeout)
+		if length(content) != 2 then
+			exit
+		end if
+		content_1 = content[1]
+	end while
+
+	return content	
+end function
+
+public function https_get(
     sequence url, object headers = 0, 
     natural follow_redirects = 10, natural timeout = 15)
     atom url_ptr = allocate_string(url), res, curl, list = 0
@@ -713,7 +777,7 @@ public function http_get(
     res = c_func(curl_easy_perform, {curl}) 
     if res != 0 then
         -- Temporary: <<<< Remove before merge
-        printf(2, peek_string(error_buffer) & "\n")
+        puts(2, peek_string(error_buffer) & "\n")
         -- Temporary: >>>> Remove before merge
     end if
     free(error_buffer)
