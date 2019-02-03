@@ -692,8 +692,8 @@ public function http_get(
     c_proc(curl_easy_setopt, {curl, CURLOPT_WRITEDATA, 0}) 
     c_proc(curl_easy_setopt, {curl, CURLOPT_HEADERFUNCTION, curl_header_cb})
     c_proc(curl_easy_setopt, {curl, CURLOPT_FOLLOWLOCATION, follow_redirects != 0}) 
+    c_proc(curl_easy_setopt, {curl, CURLOPT_MAXREDIRS, follow_redirects}) 
     -- Temporary: <<<< Remove before merge
-    c_proc(curl_easy_setopt, {curl, CURLOPT_ERRORBUFFER, error_buffer}) 
     c_proc(curl_easy_setopt, {curl, CURLOPT_ERRORBUFFER, error_buffer}) 
     -- Temporary: >>>> Remove before merge
     --c_proc(curl_easy_setopt, {curl, CURLOPT_HEADEROPT, CURLHEADER_UNIFIED})A
