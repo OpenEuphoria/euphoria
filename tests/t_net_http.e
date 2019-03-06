@@ -25,7 +25,6 @@ ifdef not NOINET_TESTS then
 		assert("content readable from http_get with a path", length(content) = 2)
 		test_true("content correct form from http_get with a path", match("<title>", "" & content[2]))
 	end if
-
 	content = http_get("http://www.iana.org:80/domains/example/")
 	if atom(content) then
 		test_fail("content readable from http_get with port and path")

@@ -87,8 +87,6 @@ function format_base_request(sequence request_type, sequence url, object headers
 	object parsedUrl = url:parse(url)
 	if atom(parsedUrl) then
 		return ERR_MALFORMED_URL
-	elsif not equal(parsedUrl[URL_PROTOCOL], "http") then
-		return ERR_INVALID_PROTOCOL
 	end if
 
 	sequence host = parsedUrl[URL_HOSTNAME]
@@ -511,124 +509,6 @@ public function http_post(sequence url, object data, object headers = 0,
 	return content
 end function
 
---**
--- Get a HTTP resource.
---
--- Returns:
---   An integer error code or a 2 element sequence. Element 1 is a sequence
---   of key/value pairs representing the result header information. Element
---   2 is the body of the result.
---
---   If result is a negative integer, that represents a local error condition.
---
---   If result is a positive integer, that represents a HTTP error value from
---   the server.
---
--- Example:
---
--- <eucode>
--- include std/console.e -- for display()
--- include std/net/http.e
---
--- object result = http_get("http://example.com") 
--- if atom(result) then 
---    printf(1, "Web error: %d\n", result) 
---     abort(1) 
--- end if 
--- 
--- display(result[1]) -- header key/value pairs
--- printf(1, "Content: %s\n", { result[2] }) 
--- </eucode>
---
--- See Also:
---   [[:http_post]]
---
-
--- http_get via WinINet for Windows 
--- 
-ifdef WINDOWS then
-include std/win32/w32dllconst.ew
- 
-constant 
-    wininet = open_dll("wininet.dll") 
- 
-constant 
-    InternetOpen = define_c_func(wininet, "InternetOpenA", {C_POINTER, C_DWORD, C_POINTER, C_POINTER, C_DWORD}, C_HANDLE), 
-    InternetCloseHandle = define_c_func(wininet, "InternetCloseHandle", {C_HANDLE}, C_BOOL), 
-    InternetOpenUrl = define_c_func(wininet, "InternetOpenUrlA", {C_HANDLE, C_POINTER, C_POINTER, C_DWORD, C_DWORD, C_POINTER}, C_HANDLE), 
-    InternetReadFile = define_c_func(wininet, "InternetReadFile", {C_HANDLE, C_POINTER, C_DWORD, C_POINTER}, C_BOOL) 
-if InternetOpen = -1 or 
-   InternetCloseHandle = -1 or 
-   InternetOpenUrl = -1 or 
-   InternetReadFile = -1 then 
-    puts(1, "Failed to find functions in wininet\n") 
-    abort(1) 
-end if 
- 
-constant 
-    INTERNET_OPEN_TYPE_PRECONFIG = 0 
-
- 
-public function http_get(sequence url, object headers = 0, natural follow_redirects = 10,
-		natural timeout = 15)
-    if InternetOpen = -1 then
-	return -1
-    end if 
-    atom agent_ptr = allocate_string("Mozilla/4.0 (compatible)") 
-    atom url_ptr = allocate_string(url) 
-    atom ih, ch -- internet handle, connection handle 
-    integer bufsize = 4096 
-    atom buf_ptr = allocate(bufsize) 
-    atom bytesread_ptr = allocate(4) -- LPDWORD 
-    object res = -1 
-
-	if sequence(headers) then
-		for i = 1 to length(headers) do
-			object header = headers[i]
-			if equal(header[1], "User-Agent") then
-				has_user_agent = 1
-				agent_ptr = allocate_string(header[2], 1)
-			elsif equal(header[1], "Connection") then
-				has_connection = 1
-			end if
-
-			request &= sprintf("%s: %s\r\n", header)
-		end for
-	end if
-
-	if not has_user_agent then
-    		agent_ptr = allocate_string(USER_AGENT_HEADER)
-	end if
-    ih = c_func(InternetOpen, {agent_ptr, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0}) 
-    if ih then 
-	ch = c_func(InternetOpenUrl, {ih, url_ptr, NULL, 0, 0, NULL}) 
-	if ch then 
-	    res = "" 
-	    while c_func(InternetReadFile, {ch, buf_ptr, bufsize, bytesread_ptr}) != 1 or 
-		  peek4u(bytesread_ptr) != 0 do 
-		res &= peek({buf_ptr, peek4u(bytesread_ptr)}) 
-	    end while 
---            res = {{{"Status","200"}}, res} 
-	    c_func(InternetCloseHandle, {ih}) 
-	end if 
-	c_func(InternetCloseHandle, {ih}) 
-    end if 
- 
-    free(agent_ptr) 
-    free(url_ptr) 
-    free(buf_ptr) 
-    free(bytesread_ptr) 
- 
-    if sequence(res) then  
-        return {{}, res}
-    end if 
-    return -res 
-end function 
-end ifdef 
- 
--- 
--- Implement https_get via libcurl for UNIX 
--- 
  
 integer libcurl = open_dll("libcurl.so") 
 if libcurl = 0 then libcurl = open_dll("libcurl.so.3") end if 
@@ -642,7 +522,6 @@ constant
     CURLOPT_FOLLOWLOCATION = 52,
     CURLOPT_HEADERFUNCTION = 79
  
-ifdef UNIX then
 sequence cb_data 
 function curl_callback(atom ptr, atom size, atom nmemb, atom writedata) 
     object line = peek({ptr, size * nmemb}) 
@@ -698,39 +577,7 @@ integer curl_easy_init = define_c_func(libcurl, "curl_easy_init", {}, C_POINTER)
 -- See Also:
 --   [[:http_post]]
 --
-
-public function http_get(sequence url, object headers = 0, natural follow_redirects = 10,
-		natural timeout = 15)
-	object request, content
-	sequence content_1
-	
-	while follow_redirects > 0 and length(content_1) >= 1 and length(content_1[1]) >= 2 and
-				find(content_1[1][2], {"301","302","303","307","308"}) with entry do
-		follow_redirects -= 1
-		
-		url = redirect_url(request, content_1)
-		if eu:match("https:", url) = 1 then
-		    return https_get(url, headers, follow_redirects, timeout)
-		end if
-	entry
-		request = format_base_request("GET", url, headers)
-		
-		if atom(request) then
-			return request
-		end if
-		-- No more work necessary, terminate the request with our ending CR LF
-		request[R_REQUEST] &= "\r\n"
-		content = execute_request(request[R_HOST], request[R_PORT], request[R_REQUEST], timeout)
-		if length(content) != 2 then
-			exit
-		end if
-		content_1 = content[1]
-	end while
-
-	return content	
-end function
-
-public function https_get(
+public function http_get(
     sequence url, object headers = 0, 
     natural follow_redirects = 10, natural timeout = 15)
     atom url_ptr = allocate_string(url), res, curl, list = 0
@@ -752,20 +599,26 @@ public function https_get(
     -- Temporary: <<<< Remove before merge
     atom error_buffer = allocate(CURL_ERROR_SIZE)
     -- Temporary: >>>> Remove before merge
+
+    sequence request = format_base_request("GET", url, headers)
+    integer port = request[R_PORT] 
+
+    c_proc(curl_easy_setopt, {curl, CURLOPT_PROTOCOLS, or_bits(CURLPROTO_HTTPS, CURLPROTO_HTTP)})
+    c_proc(curl_easy_setopt, {curl, CURLOPT_URL, url_ptr}) 
+    c_proc(curl_easy_setopt, {curl, CURLOPT_PORT, port})
     c_proc(curl_easy_setopt, {curl, CURLOPT_WRITEFUNCTION, curl_cb}) 
     c_proc(curl_easy_setopt, {curl, CURLOPT_WRITEDATA, 0}) 
     c_proc(curl_easy_setopt, {curl, CURLOPT_HEADERFUNCTION, curl_header_cb})
     c_proc(curl_easy_setopt, {curl, CURLOPT_FOLLOWLOCATION, follow_redirects != 0}) 
-    c_proc(curl_easy_setopt, {curl, CURLOPT_MAXREDIRS, follow_redirects}) 
+    if follow_redirects then
+	c_proc(curl_easy_setopt, {curl, CURLOPT_MAXREDIRS, follow_redirects})
+    end if
     -- Temporary: <<<< Remove before merge
     c_proc(curl_easy_setopt, {curl, CURLOPT_ERRORBUFFER, error_buffer}) 
+    poke(error_buffer,  "No error\n" & 0)
     -- Temporary: >>>> Remove before merge
-    --c_proc(curl_easy_setopt, {curl, CURLOPT_HEADEROPT, CURLHEADER_UNIFIED})A
-    poke(error_buffer,  "No error\n")
+    --c_proc(curl_easy_setopt, {curl, CURLOPT_HEADEROPT, CURLHEADER_UNIFIED})
     if sequence(headers) then
-        -- Temporary: <<<< Remove before merge
-        trace(1)
-        -- Temporary: >>>> Remove before merge
 	for i = 1 to length(headers) do
 	    list = c_func(curl_slist_append, {list, allocate_string(headers[i][1] & ": "& headers[i][2])})
         end for
@@ -773,11 +626,17 @@ public function https_get(
     end if
     cb_data = ""
     cb_header = ""
-    c_proc(curl_easy_setopt, {curl, CURLOPT_URL, url_ptr}) 
     res = c_func(curl_easy_perform, {curl}) 
     if res != 0 then
         -- Temporary: <<<< Remove before merge
-        puts(2, peek_string(error_buffer) & "\n")
+        sequence error = peek_string(error_buffer)
+	if find(1, error > 128) then
+	    printf(2, "Error = ")
+            print(2, error)
+            puts(2, 10)
+        else 
+            puts(2, "Error = " & error & "\n")
+        end if
         -- Temporary: >>>> Remove before merge
     end if
     free(error_buffer)
@@ -785,9 +644,6 @@ public function https_get(
     if list != 0 then
 	c_proc(curl_slist_free_all, {list})
     end if
-    -- Temporary: <<<< Remove before merge
-    trace(1)
-    -- Temporary: >>>> Remove before merge
     c_proc(curl_easy_cleanup, {curl})
     if res = 0 then  
         return {cb_header, cb_data}
@@ -795,7 +651,6 @@ public function https_get(
     return -res 
 end function 
  
-end ifdef
   
  
 public function extract_fn(sequence url) 
