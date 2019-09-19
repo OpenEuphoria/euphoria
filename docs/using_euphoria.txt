@@ -78,7 +78,7 @@ The above example contains a number of statements that are processed in order.
 access to the public symbols declared in the file
 'std/console.e'. This is referred to as a //library//
 file. In our case here, the application will be using
-the ##display## routine from ##console.e# .
+the ##display## routine from ##console.e##.
 
 ; ##sequence original_list## 
 : This declares a variable that is not public but is 
@@ -157,7 +157,7 @@ associations have been setup during the installation process.
 You can use any plain text editor for writing Euphoria source-code.
 
 Code-editors provide a syntax highlighter. The wiki lists many editors suitable for Euphoria. Check 
-[[wiki:Editors|the wiki for more information about Euphoria editors]].
+the wiki for [[https://openeuphoria.org/wiki/view/Editors.wc|more information about Euphoria editors]].
 
 You can examine the source-code for the demonstration editor ##edx## to see how editors and highlighters work.
 Notice the use of colors. You can adjust these colors along with the cursor size and many other 
@@ -203,15 +203,17 @@ at the beginning of any Euphoria source file.
 
 Run some of the tutorial programs in ##euphoria\tutorial##.
 
-==== Modify the Tutorial Programs
+(Read ##euphoria\tutorial\tutorial.txt## for more information on the available tutorial files.)
 
-Try modifying some of the demo programs.
+==== Modify the Demo and Tutorial Programs
+
+Try modifying some of the demo and tutorial programs.
 
 First some //simple// modifications (takes less than a minute):
 
 ===== Simple
 
-What if there were 100 C~+~+ ships in **Language Wars**? What if ##sb.ex## had to move 1000
+What if there were 100 C~+~+ ships in **Language Wars** (##demo\langwar\lw.ex##)? What if ##sb.ex## had to move 1000
 balls instead of 125? Change some parameters in ##polygon.ex##. Can you get prettier
 pictures to appear? Add some funny phrases to ##buzz.ex##.
 
@@ -250,18 +252,18 @@ could in Perl, Java, C/C~+~+ or any other language that we are aware of.
 
 
 %%output=creating_eu_progs
-== Creating Euphoria programs
+== Creating Euphoria Programs
 :<<LEVELTOC level=2 depth=4>>
 
 Euphoria programs can be written with //any// plain text editor. As a
-convenience Euphoria comes with ##edx##, an editor written in Euphoria, that
+convenience, Euphoria comes with ##edx##, an editor written in Euphoria, that
 is handy for editing and executing Euphoria programs. Take a look at
 ##\euphoria\demo## and ##euphoria\tutorial## to see many example programs.
 
 === Running a Program
 
-To run a Euphoria program you type the name of the interpreter followed by the
-filename of the program you want to run. Such as:
+To run a Euphoria program, you type the name of the interpreter (##eui##) followed by the
+filename of the program you want to run. For example:
 
 <eucode>
 eui example.ex
@@ -275,14 +277,13 @@ Depending on the platform you are using the interpreter could be called:
 | ##eui##     | General interpreter on //Windows// and //Unix// variants |
 | ##euiw##    | Console-less //Windows// interpreter                 |
 
-The command-line may contain extra information. Following your program filename
-you may add extra words (known as //arguments//) that can used in your program
-to customize its behavior. These arguments are read within your program by the
-built-in function [[:command_line]].
+The command-line may contain extra information beside the interpreter and filename. 
+You can add what are called ##arguments## to the command-line that are then passed to your program 
+to customize its behavior. These arguments are read within your program 
+by the built-in function [[:command_line]].
 
 Optionally, you may also use [[:command line switches]] that are typed between
-the interpreter name and the program name. Command line switches
-customize  how the interpreter itself behaves.
+the interpreter name and the program name. Command line switches customize how the interpreter itself behaves.
 
 Unlike many other compilers and interpreters, there is no obligation for any
 special command-line options for ##eui## or ##euiw##. Only the
@@ -296,8 +297,8 @@ extension of ##.e##. Note that a GUI application is not necessarily a
 //Windows// program. A GUI application can exist on Linux,
 OS X, FreeBSD, and so on.
 
-You can redirect standard input and standard output when you run a Euphoria
- program, for example:
+You can redirect standard input and standard output when you run a Euphoria program, for example:
+
 <eucode>
 eui filesort.ex < raw.txt > sorted.txt
 </eucode>
@@ -306,7 +307,7 @@ or simply,
 eui filesort < raw.txt > sorted.txt
 </eucode>
 
-For frequently-used programs under //Windows// you might want to make a
+For frequently-used programs under //Windows//, you might want to make a
 small ##.bat## (batch) file, perhaps called ##myprog.bat##, containing two
 statements like:
 <eucode>
@@ -362,12 +363,12 @@ file is shrouded, you must give the path to ##eub##, not ##eui##.
 You can also run ##bind## to combine your Euphoria program
 with the ##eui## interpreter, to make a stand-alone executable file. With a
 stand-alone executable, you //can// redirect standard input and output. Binding
-is discussed further in [[:Distributing a Program]].
+is discussed further in [[:Distributing a Program]] and [[:Shrouding and Binding]].
 
 Using the [[:Euphoria To C Translator]], you can also make a stand-alone
 executable file, and it will normally run much faster than a bound program.
 
-=== Running under Windows
+=== Running Under Windows
 
 You can run Euphoria programs directly from the //Windows// environment, or
 from a console shell that you have opened from //Windows//. By "associating"
@@ -376,18 +377,16 @@ files with ##euiw.exe##. You will then be able to double click a Euphoria source
 file to run it. The installer will perform this operation for you, if you wish.
 
 %%output=editing_source
-== Editing a Program
-
-If you have not selected your "favorite editor," then try ##edx##:
+== Editing A Program
 
 You can use any text editor to edit a Euphoria program. However, Euphoria comes
 with its own special editor that is written entirely in Euphoria. Type: ##edx##
 followed by the complete name of the file you wish to edit. You can use this
-editor to edit any kind of text file. When you edit a Euphoria file some extra
-features such as color syntax highlighting and auto-completion of certain
-statements are available to make your job easier.
+editor to edit any kind of text file. When you edit a Euphoria file, some extra
+features, such as color syntax highlighting and auto-completion of certain
+statements, are available to make your job easier.
 
-Whenever you run a Euphoria program and get an error message, during
+Whenever you run a Euphoria program and get an error message during
 compilation or execution, you can simply type ##edx## with no file name and you
 will be automatically positioned in the file containing the error, at the
 correct line and column, and with the error message displayed at the top of the
@@ -417,37 +416,40 @@ code.
 
 ##edx## is a simple text-mode editor that runs on all platforms and is
 distributed with Euphoria. There is a list of other editors at the
-[[wiki:Editors|OpenEuphoria web site]], many of which include extra
+[[https://openeuphoria.org/wiki/view/Editors.wc|OpenEuphoria web site]], many of which include extra
 features such as syntax highlighting.
 
 %%output=distributing
-== Distributing a Program
+== Distributing A Program
 
 Euphoria provides you with 4 distinct ways of distributing a program.
 
-* "source-code", with the Euphoria "interpreter"
-* "shroud" into ##.il## code, with Euphoria "backend"
-* "bind" into a Euphoria executable
-* "translate" into a C-compiled executable
+* Interpreted
+* Binding
+* Shrouding
+* Translate/Compile
 
 
-In the first way you simply ship your users the interpreter along with your
-Euphoria source files including any Euphoria includes that may be necessary
+The Interpreted method requires you to simply ship your users the Euphoria interpreter along with your
+Euphoria program source files, including any Euphoria includes that may be necessary
 from the ##euphoria/include## directory. If the Euphoria source files and the
-interpreter are placed together in one directory then your user can run your
+interpreter are placed together in one directory, then your user can run your
 program by typing ##eui## followed by the path of your main executable source
 file. You might also provide a small ##.bat## file so people will not actually
 have to type the interpreter name. This way assumes that you are willing to
 share your Euphoria source code with your users.
 
-The Binder gives you two more ways of distribution. You can ##shroud## your
-program, or you can ##bind## your program. **Shrouding** combines all of the
+Binding and Shrouding are two additional ways of distributing your program. You can ##shroud## your
+program, or you can ##bind## your program.
+
+**Shrouding** combines all of the
 Euphoria source code that your program needs to create a single ##.il## file.
+
 **Binding** combines your shrouded program with the Euphoria backend
 (##eub## or ##eubw## on Windows) to create a single, stand-alone executable file.
+
 For example, if your program is called "##myprog.ex##" you can create 
-"##myprog.exe##"
-which will run identically. For more information about shrouding and binding,
+"##myprog.exe##," which will run identically to the interpreted version. For more information about shrouding and binding,
 see [[:Shrouding and Binding]].
 
 Finally, with the [[:Euphoria To C Translator]], you can translate your
@@ -458,7 +460,8 @@ executable program.
 == Command Line Switches
 :<<LEVELTOC level=2 depth=4>>
 
-You can launch Euphoria with some extra command line switches, in order to add
+
+You can launch Euphoria with some extra command line switches in order to add
 or change configuration elements. When running a GUI, there is always some way
 to open a prompt and enter any text with options, arguments and whatever the
 program being launched may need for proper, expected operation. Under 
