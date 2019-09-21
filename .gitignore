@@ -5,3 +5,4 @@ config.gnu
 Makefile
 version.txt
 *.swp
+source/build
