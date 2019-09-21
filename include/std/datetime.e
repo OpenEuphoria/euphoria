@@ -497,13 +497,24 @@ end type
 --   # ##src## : a sequence which ##date## might have returned
 --
 -- Returns:
---   A **sequence**, more precisely a **datetime** corresponding to the same moment 
+--   A **sequence**, more precisely a [[:datetime]], corresponding to the same moment 
 --   in time.
 --
 -- Example 1:
 -- <eucode>
--- d = from_date(date())
--- -- d is the current date and time
+-- include std/datetime.e
+--
+-- sequence a_date
+-- datetime today
+--
+-- a_date = date()
+-- today = from_date(date())
+--
+-- ?a_date
+-- -- {119,9,20,21,0,57,6,263}
+--
+-- ?today
+-- -- {2019,9,20,21,0,57}
 -- </eucode>
 --
 -- See Also:
@@ -517,13 +528,13 @@ end function
 -- creates a new datetime value initialized with the current date and time.
 --
 -- Returns:
---   A **sequence**, more precisely a **datetime** corresponding to the current 
+--   A **sequence**, more precisely a [[:datetime]], corresponding to the current 
 --   moment in time.
 --
 -- Example 1:
 -- <eucode>
 -- dt = now()
--- -- dt is the current date and time
+-- -- dt is the current date and time; e.g., { 2019, 09, 19, 8, 47, 13 }
 -- </eucode>
 --
 -- See Also:
