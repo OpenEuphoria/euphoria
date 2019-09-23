@@ -481,7 +481,8 @@ end type
 -- Example 1:
 --
 -- <eucode>
--- now = date()
+-- include std/datetime.e
+-- sequence now = date()
 -- -- now has: {95,3,24,23,47,38,6,83}
 -- -- i.e. Friday March 24, 1995 at 11:47:38pm, day 83 of the year
 -- </eucode>
@@ -508,7 +509,7 @@ end type
 -- datetime today
 --
 -- a_date = date()
--- today = from_date(date())
+-- today = from_date(a_date)
 --
 -- ?a_date
 -- -- {119,9,20,21,0,57,6,263}
@@ -531,10 +532,15 @@ end function
 --   A **sequence**, more precisely a [[:datetime]], corresponding to the current 
 --   moment in time.
 --
--- Example 1:
+-- Example:
 -- <eucode>
--- dt = now()
--- -- dt is the current date and time; e.g., { 2019, 09, 19, 8, 47, 13 }
+-- include std/datetime.e
+-- datetime dt = now()
+-- ?dt
+--
+-- Result:
+--
+-- {2019,09,19,8,47,13}
 -- </eucode>
 --
 -- See Also:
@@ -553,9 +559,19 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- dt = now_gmt()
--- -- If local time was July 16th, 2008 at 10:34pm CST
--- -- dt would be July 17th, 2008 at 03:34pm GMT
+-- include std/datetime.e
+-- datetime lt = now() -- local time
+-- datetime gmt = now_gmt()
+-- ?lt
+-- ?gmt
+--
+-- Result (varies depending on time and date!):
+--
+-- This result is from Central Standard Timezone.
+--
+-- {2019,9,23,11,3,42}
+-- {2019,9,23,16,3,42}
+--
 -- </eucode>
 --
 -- See Also:
