@@ -254,11 +254,15 @@ end function
 -- Example 1:
 -- <eucode>
 -- include std/convert.e
--- ?atom_to_float64(157.82)
+-- sequence bytes = atom_to_float64( 3.14159265359 )
+-- ? bytes
+-- atom pi = float64_to_atom( bytes )
+-- ? pi
 --
 -- Result:
 --
--- {10,215,163,112,61,186,99,64}
+-- {234,46,68,84,251,33,9,64}
+-- 3.141592654
 -- </eucode>
 --
 -- See Also:
@@ -308,11 +312,15 @@ end function
 -- Example 1:
 -- <eucode>
 -- include std/convert.e
--- ?atom_to_float32(157.82)
+-- sequence bytes = atom_to_float32( 3.14159265359 )
+-- ? bytes
+-- atom pi = float32_to_atom( bytes )
+-- ? pi
 --
 -- Result:
 --
--- {236,209,29,67}
+-- {219,15,73,64}
+-- 3.141592741
 -- </eucode>
 --
 -- See Also:
@@ -335,16 +343,9 @@ end function
 -- Comments:
 -- Any 64-bit IEEE floating-point number can be converted to an atom.
 --
--- Example 1:
--- <eucode>
--- include std/convert.e
--- sequence f = { 1, 2, 3, 4, 5, 6, 7, 8 }
--- atom a = float64_to_atom(f)
--- ?a
--- 
--- Result:
+-- Example:
 --
--- 5.447603722e-270
+-- See [[:atom_to_float64]] for example.
 -- </eucode>
 --
 -- See Also:
@@ -368,17 +369,9 @@ end function
 -- Comments:
 -- Any 32-bit IEEE floating-point number can be converted to an atom.
 --
--- Example 1:
--- <eucode>
--- include std/convert.e
--- sequence f = { 1, 2, 3, 4 }
--- a = float32_to_atom(f)
--- ?a
+-- Example:
 --
--- Result:
--- 
--- 1.539989614e-036
--- </eucode>
+-- See [[:atom_to_float32]] for example
 --
 -- See Also:
 --		[[:float64_to_atom]], [[:bytes_to_int]], [[:atom_to_float32]]
@@ -528,11 +521,14 @@ integer decimal_mark = '.'
 -- include std/convert.e  
 -- atom n1 = to_number("12,345.95")  
 -- ? n1  
--- -- 12345.95
 -- set_decimal_mark(',')  
 -- atom n2 = to_number("12.345,95")  
 -- ? n2 
--- -- 12345.95
+--
+-- Result:
+--
+-- 12345.95
+-- 12345.95
 -- </eucode>
 
 public function set_decimal_mark(integer new_mark)
