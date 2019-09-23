@@ -1,3 +1,17 @@
+%%output=simplersmarterspeedier
+== Simpler Smarter Speedier
+
+Euphoria is the Simpler, Smarter, and Speedier way to program.
+
+A simpler language is easier to learn. Easier to learn means easier to program. Euphoria is **Simpler**.
+
+A smarter language lets you interpret source-code; this lets you rapidly develop programs. A smarter language lets you compile source-code; compiled programs tend to be faster and can be shared with others. Euphoria, interpreted and compiled, is **Smarter**.
+
+A speedier language lets you develop programs faster. A speedier language creates applications that just run better. Euphoria is **Speedier**.
+
+No conventional language performs as well as Euphoria. Euphoria is Simpler|Smarter|Speedier.
+
+
 %%output=quick_over
 == Quick Overview
 
