@@ -253,8 +253,12 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- fn = open("numbers.dat", "wb")
--- puts(fn, atom_to_float64(157.82)) -- write 8 bytes to a file
+-- include std/convert.e
+-- ?atom_to_float64(157.82)
+--
+-- Result:
+--
+-- {10,215,163,112,61,186,99,64}
 -- </eucode>
 --
 -- See Also:
@@ -303,8 +307,12 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- fn = open("numbers.dat", "wb")
--- puts(fn, atom_to_float32(157.82)) -- write 4 bytes to a file
+-- include std/convert.e
+-- ?atom_to_float32(157.82)
+--
+-- Result:
+--
+-- {236,209,29,67}
 -- </eucode>
 --
 -- See Also:
@@ -329,12 +337,14 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- f = repeat(0, 8)
--- fn = open("numbers.dat", "rb")  -- read binary
--- for i = 1 to 8 do
---     f[i] = getc(fn)
--- end for
--- a = float64_to_atom(f)
+-- include std/convert.e
+-- sequence f = { 1, 2, 3, 4, 5, 6, 7, 8 }
+-- atom a = float64_to_atom(f)
+-- ?a
+-- 
+-- Result:
+--
+-- 5.447603722e-270
 -- </eucode>
 --
 -- See Also:
@@ -360,13 +370,14 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- f = repeat(0, 4)
--- fn = open("numbers.dat", "rb") -- read binary
--- f[1] = getc(fn)
--- f[2] = getc(fn)
--- f[3] = getc(fn)
--- f[4] = getc(fn)
+-- include std/convert.e
+-- sequence f = { 1, 2, 3, 4 }
 -- a = float32_to_atom(f)
+-- ?a
+--
+-- Result:
+-- 
+-- 1.539989614e-036
 -- </eucode>
 --
 -- See Also:
@@ -394,10 +405,21 @@ end function
 --
 -- Example 1:
 -- <eucode>
---  atom h = hex_text("-#3_4FA.00E_1BD")
---  -- h is now -13562.003444492816925
---  atom h = hex_text("DEADBEEF")
---  -- h is now 3735928559
+-- include std/convert.e
+-- include std/console.e
+-- atom h1 = hex_text("-#3_4FA.00E_1BD")
+-- ?h1
+-- display("h1 is:[]",h1)
+-- atom h2 = hex_text("DEAD_BEEF")
+-- ?h2
+-- display("h2 is:[]",h2)
+-- 
+-- Results:
+--
+-- -13562.00344
+-- H1 is:-13562.0034444928
+-- 3735928559
+-- H2 is:3735928559
 -- </eucode>
 --
 -- See Also:
@@ -500,6 +522,18 @@ integer decimal_mark = '.'
 -- as the decimal point symbol. The pre-changed value is returned.
 -- * Any other value does not change the current setting. Instead it just returns the current value.
 -- * The initial value of the decimal marker is a period.
+--
+-- Example:
+-- <eucode>
+-- include std/convert.e  
+-- atom n1 = to_number("12,345.95")  
+-- ? n1  
+-- -- 12345.95
+-- set_decimal_mark(',')  
+-- atom n2 = to_number("12.345,95")  
+-- ? n2 
+-- -- 12345.95
+-- </eucode>
 
 public function set_decimal_mark(integer new_mark)
 	integer old_mark
@@ -572,6 +606,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
+-- include std/convert.e
 -- object val
 -- val = to_number("12.34")      ---> 12.34 -- No errors and no error return needed.
 -- val = to_number("12.34", 1)   ---> {12.34, 0} -- No errors.
@@ -795,6 +830,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
+-- include std/convert.e
 -- ? to_integer(12)            --> 12
 -- ? to_integer(12.4)          --> 12
 -- ? to_integer("12")          --> 12
