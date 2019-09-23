@@ -365,10 +365,47 @@ public enum
 -- A datetime type consists of a sequence of length six in the form
 -- ##{year, month, day_of_month, hour, minute, second}##. Checks are made to guarantee
 -- those values are in range. 
--- 
+--
+-- datetime can be used to declare a variable as a datetime type, or used to check if a variable is a datetime type.
+-- (See examples below.)
+--
 -- Note:
 -- All elements must be integers except for
 -- seconds which could either integer or atom values.
+--
+-- Example 1:
+-- <eucode>
+-- include std/datetime.e  
+-- datetime x = now() -- x is a datetime variable, and now() returns a datetime 
+-- ? x  
+-- ? datetime(x) -- is it a datetime variable?  
+--
+-- Result:
+-- {2019,9,8,3,23,23}  
+-- 1 
+-- </eucode>
+--
+-- Example 2:
+-- <eucode>
+-- include std/datetime.e  
+-- object y = {2019,1,10} -- y is not a datetime variable, just a sequence containing a date {year,month,day}
+-- ? y
+-- ? datetime(y) -- is it a datetime variable?  
+--
+-- Result:
+-- {2019,1,10}  
+-- 0
+-- </eucode>
+--
+-- Example 3:
+-- <eucode>
+-- include std/datetime.e  
+-- datetime z = {2019,1,10} -- z is declared as a datetime type; it is validated on assignment
+-- -- Since what we assigned was not a valid datetime variable, we get an error.
+--
+-- Result:
+-- type_check failure, z is {2019,1,1}
+-- </eucode>
 
 public type datetime(object o)
 	if atom(o) then return 0 end if
