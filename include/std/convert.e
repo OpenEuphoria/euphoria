@@ -50,6 +50,7 @@ atom mem  = machine_func(M_ALLOC,8)
 --
 -- Example 1:
 -- <eucode>
+-- include std/convert.e
 -- s = int_to_bytes(999)
 -- -- s is {231, 3, 0, 0}
 -- </eucode>
@@ -57,6 +58,7 @@ atom mem  = machine_func(M_ALLOC,8)
 -- Example 2:
 --
 -- <eucode>
+-- include std/convert.e
 -- s = int_to_bytes(-999)
 -- -- s is {-231, -4, -1, -1}
 -- </eucode>
@@ -852,6 +854,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
+-- include std/convert.e
 -- include std/console.e
 -- display(to_string(12))           --> 12
 -- display(to_string("abc"))        --> abc
