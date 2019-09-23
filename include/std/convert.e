@@ -346,7 +346,6 @@ end function
 -- Example:
 --
 -- See [[:atom_to_float64]] for example.
--- </eucode>
 --
 -- See Also:
 --		[[:float32_to_atom]], [[:bytes_to_int]], [[:atom_to_float64]]
