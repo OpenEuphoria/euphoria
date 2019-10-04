@@ -51,17 +51,23 @@ atom mem  = machine_func(M_ALLOC,8)
 -- Example 1:
 -- <eucode>
 -- include std/convert.e
--- s = int_to_bytes(999)
--- -- s is {231, 3, 0, 0}
+-- sequence s = int_to_bytes(999)
+-- ?s
 -- </eucode>
+--
+-- Result:
+-- {231, 3, 0, 0}
 --
 -- Example 2:
 --
 -- <eucode>
 -- include std/convert.e
--- s = int_to_bytes(-999)
--- -- s is {-231, -4, -1, -1}
+-- sequence s = int_to_bytes(-999)
+-- ?s
 -- </eucode>
+--
+-- Result:
+-- {-231, -4, -1, -1}
 --
 -- See Also:
 --		[[:bytes_to_int]], [[:int_to_bits]], [[:atom_to_float64]], [[:poke4]]
@@ -154,7 +160,8 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- s = int_to_bits(177, 8)
+-- include std/convert.e
+-- sequence s = int_to_bits(177, 8)
 -- -- s is {1,0,0,0,1,1,0,1} -- "reverse" order
 -- </eucode>
 --
