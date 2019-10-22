@@ -524,9 +524,16 @@ testeu : .SYMBOLIC  $(TRUNKDIR)\tests\ecp.dat $(EU_INTERPRETER_FILES) $(EU_CORE_
 
 !endif #EUPHORIA
 
-test : .SYMBOLIC $(BUILDDIR)\eubind.exe  $(TRUNKDIR)\tests\ecp.dat $(FULLBUILDDIR)\eu.$(LIBEXT) $(BUILDDIR)\eub.exe $(BUILDDIR)\euc.exe 
+
+$(BUILDDIR)\return15.exe: return15.c
+	owcc return15.c
+	wlink SYS nt libfile return15.o name $(BUILDDIR)\return15.exe
+	
+
+test : .SYMBOLIC $(BUILDDIR)\return15.exe $(BUILDDIR)\eubind.exe  $(TRUNKDIR)\tests\ecp.dat $(FULLBUILDDIR)\eu.$(LIBEXT) $(BUILDDIR)\eub.exe $(BUILDDIR)\euc.exe 
 	cd ..\tests
-	set EUCOMPILEDIR=$(TRUNKDIR) 
+	set EUCOMPILEDIR=$(TRUNKDIR)
+	
 	-$(EUTEST) $(TEST_EXTRA) $(VERBOSE_TESTS) -i ..\include -cc wat -eui $(FULLBUILDDIR)\eui.exe -euc $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -bind $(FULLBUILDDIR)\eubind.exe -eub $(BUILDDIR)\eub.exe -log $(LIST) $(TESTFILE)
 	$(EUTEST) -process-log > $(BUILDDIR)/test-report.txt
 	$(EUTEST) -process-log -html > $(BUILDDIR)/test-report.html	
