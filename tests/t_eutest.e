@@ -13,12 +13,8 @@ constant diff_style_output_data =
 ifdef EUI then
 sequence eutest = ".." & SLASH &".." & SLASH & "source" & SLASH & "eutest.ex"
 sequence incdir = ".." & SLASH & ".." & SLASH & "include"
-sequence exe    = command_line()
-exe = exe[1]
-
-if not file_exists(exe) then
-	exe = locate_file(exe, getenv("PATH"))
-end if
+constant cl    = command_line()
+constant exe = canonical_path(cl[1])
 
 sequence files = dir( "eutest" & SLASH & "t_*.e" )
 
@@ -26,8 +22,8 @@ chdir( "eutest" )
 for i = 1 to length( files ) do
 	sequence file_name = files[i][D_NAME]
 	integer expected = file_exists(	file_name & ".fail")
-	integer result = system_exec( sprintf("%s -i %s %s -exe \"%s\" %s -verbose %s > %s", 
-		{exe, incdir, eutest, exe, iif(expected,"-log",""), file_name, NULLDEVICE}), 2 )
+	integer result = system_exec( sprintf("%s -i %s %s -exe \"%s\" %s -verbose %s", 
+		{exe, incdir, eutest, exe, iif(expected,"-log",""), file_name}), 2 )
 
 	test_equal( sprintf("eutest %s", {file_name}), expected = 0, result = 0 )
 	if equal("t_got_different_string.e", file_name) then
