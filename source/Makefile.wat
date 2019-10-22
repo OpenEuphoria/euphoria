@@ -118,7 +118,6 @@ EU_CORE_FILES = &
 	coverage.e &
 	emit.e &
 	error.e &
-	fenv.e &
 	fwdref.e &
 	global.e &
 	inline.e &
@@ -437,7 +436,7 @@ OSFLAG=EWINDOWS
 LIBTARGET=$(BUILDDIR)\$(LIBRARY_NAME).lib
 CC = wcc386
 .ERASE
-COMMON_FLAGS = $(DEBUGFLAG) -DARCH=ix86
+COMMON_FLAGS = $(DEBUGFLAG) -DARCH=ix86 -DEX86=1
 FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s  /I$(TRUNKDIR) $(EREL_TYPE)
 BE_FLAGS = /ol /zp4 /d$(OSFLAG) /5r /dEWATCOM  /dEOW $(SETALIGN4) $(NOASSERT) $(HEAPCHECKFLAG) $(%ERUNTIME) $(EXTRACHECKFLAG) $(EXTRASTATSFLAG)  $(MEMFLAG) $(EREL_TYPE)
 
@@ -551,21 +550,19 @@ report: .SYMBOLIC
 	$(EUTEST) -process-log -html > ..\reports\report.html
 	cd ..\source
 
-!ifndef BASE
 tester: .SYMBOLIC 
 	wmake -h $(BUILDDIR)\eutest\eutest.exe  SRCDIR=source BASE=eutest $(VARS)
 
 binder : .SYMBOLIC $(BUILDDIR)\eubind.exe
 
 $(BUILDDIR)\eubind.exe : $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib $(TRUNKDIR)\source\eubind.ex
-	wmake -h $(BUILDDIR)\eubind.exe SRCDIR=source BASE=eubind $(VARS)
+	$(BUILDDIR)\euc.exe -con -wat -lib $(BUILDDIR)\eu.lib $(TRUNKDIR)\source\eubind.ex -o $(BUILDDIR)\eubind.exe
 
 shrouder : .SYMBOLIC $(BUILDDIR)\eushroud.exe
 
 $(BUILDDIR)\eushroud.exe :  $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib $(TRUNKDIR)\source\eushroud.ex
-	wmake -h $(BUILDDIR)\eushroud.exe SRCDIR=source BASE=eushroud $(VARS)
+	$(BUILDDIR)\euc.exe -con -wat -lib $(BUILDDIR)\eu.lib $(TRUNKDIR)\source\eubind.ex -o $(BUILDDIR)\eushroud.exe
 	
-!endif
 tools: .SYMBOLIC
     @echo ------- TOOLS -----------
 	wmake -h $(BUILDDIR)\eutest.exe SRCDIR=source BASE=eutest $(VARS)
