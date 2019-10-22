@@ -112,6 +112,8 @@ BASEPATH=$(BUILDDIR)\pcre
 
 FULLBUILDDIR=$(BUILDDIR)\
 
+.EXTENSIONS: .ex
+
 EU_CORE_FILES = &
 	block.e &
 	common.e &
@@ -557,38 +559,42 @@ report: .SYMBOLIC
 	$(EUTEST) -process-log -html > ..\reports\report.html
 	cd ..\source
 
-tester: .SYMBOLIC 
-	wmake -h $(BUILDDIR)\eutest\eutest.exe  SRCDIR=source BASE=eutest $(VARS)
+tester: .SYMBOLIC $(BUILDDIR)\eutest.exe
 
 binder : .SYMBOLIC $(BUILDDIR)\eubind.exe
 
-$(BUILDDIR)\eubind.exe : $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib $(TRUNKDIR)\source\eubind.ex
-	$(BUILDDIR)\euc.exe -con -wat -lib $(BUILDDIR)\eu.lib $(TRUNKDIR)\source\eubind.ex -o $(BUILDDIR)\eubind.exe
-
 shrouder : .SYMBOLIC $(BUILDDIR)\eushroud.exe
-
-$(BUILDDIR)\eushroud.exe :  $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib $(TRUNKDIR)\source\eushroud.ex
-	$(BUILDDIR)\euc.exe -con -wat -lib $(BUILDDIR)\eu.lib $(TRUNKDIR)\source\eubind.ex -o $(BUILDDIR)\eushroud.exe
 	
-tools: .SYMBOLIC
-    @echo ------- TOOLS -----------
-	wmake -h $(BUILDDIR)\eutest.exe SRCDIR=source BASE=eutest $(VARS)
-	wmake -h $(BUILDDIR)\eucoverage.exe SRCDIR=bin BASE=eucoverage $(VARS)
-	wmake -h $(BUILDDIR)\euloc.exe SRCDIR=bin BASE=euloc $(VARS)
-	wmake -h $(BUILDDIR)\eudist.exe SRCDIR=source BASE=eudist $(VARS)
+tools: .SYMBOLIC $(BUILDDIR)\eutest.exe $(BUILDDIR)\gcov.exe $(BUILDDIR)\eudist\eubind.exe $(BUILDDIR)\eudist\eushroud.exe $(BUILDDIR)\eudist\eudist.exe
 
-!ifdef BASE
+.ex.exe : $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib
+	$(BUILDDIR)\euc.exe -con -wat -lib $(BUILDDIR)\eu.lib $[@ -o $^@
 
-$(BUILDDIR)\$(BASE)\$(BASE).mak : $(TRUNKDIR)\$(SRCDIR)\$(BASE).ex 
-	$(RM) $(BUILDDIR)\$(BASE)
-	$(BUILDDIR)\euc -wat -con -nobuild -keep -build-dir $(BUILDDIR)\$(BASE) -makefile -o $(BUILDDIR)\$(BASE).exe -i $(TRUNKDIR)\include $<
+$(BUILDDIR)\eutest.exe : $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib $(TRUNKDIR)\source\eutest.ex
+$(BUILDDIR)\eubind.exe : $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib $(TRUNKDIR)\source\eubind.ex
+$(BUILDDIR)\eushroud.exe : $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib $(TRUNKDIR)\source\eubind.ex
+$(BUILDDIR)\eudist.exe : $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib $(TRUNKDIR)\source\eudist.ex
+$(BUILDDIR)\gcov.exe : $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib $(TRUNKDIR)\source\gcov.ex
 
-$(BUILDDIR)\$(BASE).exe : $(BUILDDIR)\$(BASE)\$(BASE).mak
-	cd $(BUILDDIR)\$(BASE)
-	wmake /f $(BASE).mak
+# The .mak step has been disabled because the translator no longer produces valid Watcom Makefiles.
+# 
+# .ex.mak : $(BUILDDIR)\euc.exe
+# 	@echo TO DO: make mak file here.
+# 	$(BUILDDIR)\euc -wat -con -nobuild -keep -build-dir $(BUILDDIR)\$^& -makefile -o $(BUILDDIR)\eudist\$^&.exe -i $(TRUNKDIR)\include $]@
 
-!endif
-	
+# $(BUILDDIR)\eudist\eudist.mak : $(TRUNKDIR)\source\eudist.ex
+# 
+# .mak.exe : $[:
+# 	@echo to do: make exe file here.
+# 	cd $(BUILDDIR)
+# 	cd $^&
+# 	wmake /f $[.
+# 	copy $^&.exe ..
+# 	
+# $(BUILDDIR)\eudist.exe : $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib $(BUILDDIR)\eudist\eudist.mak
+
+dister: .SYMBOLIC $(BUILDDIR)\eudist.exe
+
 tools-additional: .SYMBOLIC
     @echo ------- ADDITIONAL TOOLS -----------
 	wmake -h $(BUILDDIR)\eudoc.exe $(VARS) BASE=eudoc
