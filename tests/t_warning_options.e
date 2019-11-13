@@ -7,8 +7,8 @@ include std/sequence.e
 include std/sort.e
 include std/utils.e
 include std/text.e
+include std/types.e
 
-constant warnings_issued = "warnings_issued.txt"
 constant nul = iif(platform() = WINDOWS,"NUL","/dev/null")
 
 constant warn_regex = regex:new("Warning +{ *([a-z_]+) *}:")
@@ -66,38 +66,39 @@ constant
        
        
 ifdef EUI then
-        if find(match("eui", lower(eui)), length(eui)-{2,6}) = 0 then
-            test_fail("Interpreter could not be determined.")
-        end if
-        for j = 1 to length(configs) do
-            sequence config = configs[j]
-            sequence cwf = config[P_WARNINGS]
-
-	    sequence cmd = eui & ' ' & config[P_PARAM] & " -test -batch -wf " & warnings_issued & " t_warning_options.d" & SLASH & "make_warnings.ex > " & nul
-        delete_file(warnings_issued)
-	    system(cmd,2)
-	    sequence wf = {}
+	if eu:find(match("eui", lower(eui)), length(eui)-{2,6}) = 0 then
+		test_fail("Interpreter could not be determined.")
+	end if
+	for j = 1 to length(configs) do
+		sequence config = configs[j]
+		sequence cwf = config[P_WARNINGS]
+		-- Must use distinct name for each loop iteration:  For the file system doesn't syncrhonize.
+		/* constant */ ascii_string warnings_issued = sprintf("warnings_issued-%x.txt", {j})
+		sequence cmd = eui & ' ' & config[P_PARAM] & " -test -batch -wf " & warnings_issued & " t_warning_options.d" & SLASH & "make_warnings.ex > " & nul
+			delete_file(warnings_issued)
+		system(cmd,2)
+		sequence wf = {}
 		if file_exists(warnings_issued) > 0 then
-			wf = warning_parse(warnings_issued)
-        end if
-        integer ti = find("translator", cwf)
-        if ti then
-            cwf = remove(cwf, ti)
-        end if
+				wf = warning_parse(warnings_issued)
+		end if
+		integer ti = eu:find("translator", cwf)
+		if ti then
+			cwf = remove(cwf, ti)
+		end if
         
         ifdef LINUX then
             -- impossible on Linux because with profile_time is an error            
-            integer xpi = find("mixed_profile", cwf)
+            integer xpi = eu:find("mixed_profile", cwf)
             if xpi then
                 cwf = remove(cwf, xpi)
             end if
         end ifdef
 
         for c = 1 to length(cwf) do
-            test_true(config[P_NAME] & " warning enabled: " & cwf[c], find(cwf[c], wf) != 0)
+            test_true(config[P_NAME] & " warning enabled: " & cwf[c], eu:find(cwf[c], wf) != 0)
         end for
         for c = 1 to length(cwf) do
-            integer t = find(cwf[c], wf)
+            integer t = eu:find(cwf[c], wf)
             wf = remove(wf, t)
         end for
         for t = 1 to length(wf) do
