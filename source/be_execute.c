@@ -45,7 +45,7 @@
 #endif
 #include <stdio.h>
 #include <time.h>
-#ifdef EUNIX
+#if defined(__GCC__)
 #	include <sys/times.h>
 #	include <string.h>
 #else
@@ -1021,7 +1021,7 @@ void InitExecute()
 // detect matherr support
 #if defined(DOMAIN) && defined(SING) && defined(OVERFLOW) && defined(UNDERFLOW) && defined(TLOSS) && defined(PLOSS)
 	// enable our matherr function
-#ifndef __WATCOMC__
+#ifdef __LCC__
 	_LIB_VERSION = _SVID_;
 #endif
 #endif

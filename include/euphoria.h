@@ -1,7 +1,12 @@
 #ifndef EUPHORIA_H_
 #define EUPHORIA_H_
 
-#ifdef EWINDOWS
+#if defined(__WATCOMC__)
+#define EWATCOM
+#endif
+
+
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
@@ -467,3 +472,6 @@ extern object eu_sizeof();
 
 
 #endif
+
+int getKBchar();
+
