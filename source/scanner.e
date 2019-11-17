@@ -993,6 +993,7 @@ export function IncludePop()
 end function
 
 
+
 ifdef BITS32 then
 	constant
 		MAXCHK2  = 0x1FFFFFFF,
@@ -1011,7 +1012,10 @@ elsifdef BITS64 then
 		MAXCHK8  = 0x07FFFFFF_FFFFFFF7,
 		MAXCHK10 = 0X06666666_6666665E,
 		MAXCHK16 = 0x03FFFFFF_FFFFFFF0,
+		MAX_ATOM = float80_to_atom({255,255,255,255,255,255,255,255,254,127}),
+		almost_max_16   = (MAX_ATOM-15) / 16,
 		$
+	InternalErr( 351, "Must define MAX_ATOM in scanner.e")
 elsedef
 	InternalErr( 351, "Configuring integer scanning" )
 end ifdef
@@ -1040,22 +1044,28 @@ function MakeInt(sequence text, integer nBase = 10)
 			-- Quick scan for common integers
 			num = find(text, common_int_text)
 			if num then
-				return common_ints[num]
+				return {0, common_ints[num]}
 			end if
 
 			maxchk = MAXCHK10
 
 		case 16 then
 			maxchk = MAXCHK16
-
+			ifdef BITS32 then
+			    if length(text) > 256 or 
+				    (length(text) = 256 and equal(text[1..13], "FFFFFFFFFFFFF") and text[14] > '8')
+				    then
+				    return {NUMBER_IS_TOO_BIG, 0}
+			    end if
+			end ifdef
 	end switch
 
 	num = 0
 	fnum = 0
 	for i = 1 to length(text) do
-		if text[i] > 'a' then
+		if text[i] >= 'a' then
 			digit = text[i] - 'a' + 10
-		elsif text[i] > 'A' then
+		elsif text[i] >= 'A' then
 			digit = text[i] - 'A' + 10
 		else
 			digit = text[i] - '0'
@@ -1072,13 +1082,11 @@ function MakeInt(sequence text, integer nBase = 10)
 		else
 			ifdef BITS32 then
 				if fnum >= almost_max_16 then
-					ifdef BITS32 then
-						-- mathematically equivalent to: fnum * nBase + digit > MAX_DOUBLE
-						-- but possible to calculate with Euphoria atoms
-						if fnum > (MAX_ATOM - digit)/nBase then
-							fenv:raise(FE_OVERFLOW)					
-						end if
-					end ifdef
+					-- mathematically equivalent to: fnum * nBase + digit > MAX_ATOM
+					-- but possible to calculate with Euphoria atoms
+					if fnum > (MAX_ATOM - digit)/nBase then
+						return {NUMBER_IS_TOO_BIG, fnum}					
+					end if
 				end if
 			end ifdef
 			fnum = fnum * nBase + digit
@@ -1086,9 +1094,9 @@ function MakeInt(sequence text, integer nBase = 10)
 	end for
 
 	if fnum = 0 then
-		return num
+		return {0, num}
 	else
-		return fnum
+		return {0, fnum}
 	end if
 end function
 
@@ -1194,6 +1202,158 @@ function EscapeChar(integer delim)
 	return c
 end function
 
+ifdef BITS32 then
+    constant LOG10_NATIVE_DOUBLE_MIN = -324
+    constant MAX_ORDER = power(10,308)
+end ifdef
+
+function sscanf2(sequence yytext)
+-- Converts string to floating-point number
+	integer e_sign, ndigits, e_mag
+	atom mantissa
+	integer c, i
+	atom denom_p = 0 -- exponent of denominator of fraction part of the value
+	atom num = 0 -- numerator part of the fraction part of the value
+	fenv:fexcept_t ex
+	integer real_overflow = 0
+
+	-- No upper bound or other error checking yet.
+	if length(yytext) < 2 then
+		return { NUMBER_NOT_FORMED_CORRECTLY, 0 }
+	end if
+
+	fenv:clear(FE_ALL_EXCEPT)
+	if find( 'e', yytext ) or find( 'E', yytext ) then
+		ifdef BITS32 then
+			mantissa = scientific_to_atom( yytext, DOUBLE )
+		elsifdef BITS64 then
+			mantissa = scientific_to_atom( yytext, EXTENDED )
+		elsedef
+			return { ERROR_IN_PARSING_SCIENTIFIC_NOTATION, "Scanning scientific notation in my_sscanf" }
+		end ifdef
+		if mantissa > MAX_ATOM or mantissa < -MAX_ATOM then
+			return {NUMBER_IS_TOO_BIG, mantissa}
+		end if
+		for yi = 1 to length(yytext) do
+			integer ychar = yytext[yi]
+			if ychar = 'e' or ychar = 'E' then
+				-- don't look at the digits after E
+				exit
+			end if
+			if ychar > '0' and ychar <= '9' and mantissa = 0 then
+				-- non zero digit but we got a zero value from the function.
+				return { NUMBER_IS_TOO_SMALL, 0 }
+			end if
+		end for
+		goto "floating_point_check"
+	end if
+	mantissa = 0.0
+	ndigits = 0
+
+	-- decimal integer or floating point
+
+	yytext &= 0 -- end marker
+	c = yytext[1]
+	i = 2
+	
+	while c >= '0' and c <= '9' do
+		if mantissa > (MAX_ATOM - c + '0') / 10.0 then
+		    return {NUMBER_IS_TOO_BIG, mantissa}
+		end if
+		ndigits += 1
+		mantissa = mantissa * 10.0 + (c - '0')
+		loop do
+		    c = yytext[i]
+		    i += 1
+		until i >= length(yytext) or c != '_'
+		end loop
+	end while
+	
+	-- indicates whether the value the user entered was not zero
+	integer not_zero = 0
+	if c = '.' and not fenv:test(FE_OVERFLOW) then
+		-- get fraction
+		c = yytext[i]
+		i += 1
+		-- backup value of dec
+		atom back_dec
+		-- the denomonator of the fraction part
+
+		-- its backup and the numerator of the fraction part
+		atom num_back
+		while c = '_' or (c >= '0' and c <= '9') do
+			ndigits += 1
+			if c != '0' then
+				not_zero = 1
+			end if
+			num_back = num
+			-- equivalent to :
+			-- will the number exceed a MAX_ATOM when we add the next c?
+			if num >= (MAX_ATOM - c + '0') / 10 then
+				if mantissa <= MAX_ATOM then
+					fenv:clear(fenv:FE_OVERFLOW)
+				end if
+				exit
+			end if
+			
+			num = num_back * 10 + (c - '0')
+			denom_p += 1
+			loop do
+				c = yytext[i]
+				i += 1
+			until c != '_'
+			end loop
+			if denom_p >= -LOG10_NATIVE_DOUBLE_MIN then
+				exit
+			end if
+			if mantissa and denom_p > 52 then
+				exit
+			end if
+		end while
+		-- keep looking for non-zero digits.
+		while c >= '0' and c <= '9' do
+			if c != '0' then
+				not_zero = 1
+				exit
+			end if
+			loop do
+				c = yytext[i]
+				i += 1
+			until c != '_'
+			end loop
+		end while
+		atom frac = num
+		for k = 1 to denom_p do
+			frac = frac / 10
+		end for
+		mantissa += frac
+		if mantissa = 0 and not_zero then
+			-- the literal represents a non-zero number that 
+			-- is too small to be representable as an atom.
+			return {NUMBER_IS_TOO_SMALL, 0}
+		end if
+		if mantissa >= MAX_ORDER then
+			return {NUMBER_IS_TOO_BIG, mantissa}
+		end if
+	end if
+	
+	if ndigits = 0 then
+		return {NUMBER_NOT_FORMED_CORRECTLY, 0}
+	end if
+
+	label "floating_point_check"
+	-- we may have overflowed calculating the fraction part...
+	-- so, it is better we check whether it is underflowed  
+	-- before we check whether it has overflowed.
+	if fenv:test(fenv:FE_UNDERFLOW) then
+		return {NUMBER_IS_TOO_SMALL, 0}
+	elsif fenv:test(fenv:FE_OVERFLOW) or real_overflow then -- ex = {FE_OVERFLOW}
+		return {NUMBER_IS_TOO_BIG, 0 }
+	end if
+	return {0, mantissa}
+end function
+
+
 function my_sscanf(sequence yytext)
 -- Converts string to floating-point number
 -- based on code in get.e
@@ -1225,7 +1385,7 @@ function my_sscanf(sequence yytext)
 				-- don't look at the digits after E
 				exit
 			end if
-			if ychar > '0' and ychar <= '9' and mantissa = 0 then
+			if ychar != '_' and ychar > '0' and ychar <= '9' and mantissa = 0 then
 				-- non zero digit but we got a zero value from the function.
 				fenv:raise(FE_UNDERFLOW)
 				exit
@@ -1861,10 +2021,11 @@ export function Scanner()
 					basetype = 3 -- decimal
 				end if
 				fenv:clear(FE_OVERFLOW)
-				d = MakeInt(yytext, nbase[basetype])
-				if fenv:test(FE_OVERFLOW) then
+				sequence buf = MakeInt(yytext, nbase[basetype])
+				if fenv:test(FE_OVERFLOW) or buf[1] = NUMBER_IS_TOO_BIG then
 					CompileErr(NUMBER_IS_TOO_BIG)
 				end if
+				d = buf[2]
 				if is_integer(d) then
 					return {ATOM, NewIntSym(d)}
 				else
@@ -1878,9 +2039,18 @@ export function Scanner()
 			end if
 
 			-- f.p. or large int
-			d = my_sscanf(yytext)
-			if sequence(d) then
-				CompileErr(NUMBER_NOT_FORMED_CORRECTLY)
+			object err
+			sequence fb = sscanf2(yytext)
+			err = fb[1]
+			d   = fb[2]
+			fenv:clear(fenv:FE_ALL_EXCEPT)
+			
+			if err then
+				if equal(d,0) then
+					CompileErr(err)
+				else
+					CompileErr(err,d)
+				end if
 			elsif is_int and d <= TMAXINT_DBL then
 				return {ATOM, NewIntSym(d)}  -- 1 to 1.07 billion
 			else
@@ -1955,18 +2125,14 @@ export function Scanner()
 			fenv:clear(FE_OVERFLOW)		
 			i = 0
 			is_int = -1
+			yytext = ""
 			while i < TMAXINT/32 do
 				ch = getch()
-				if char_class[ch] = DIGIT then
-					if ch != '_' then
-						i = i * 16 + ch - '0'
-						is_int = TRUE
+				if char_class[ch] = DIGIT or (ch >= 'A' and ch <= 'F') or (ch >= 'a' and ch <= 'f') then
+					if ch = '_' then
+						continue
 					end if
-				elsif ch >= 'A' and ch <= 'F' then
-					i = (i * 16) + ch - ('A'-10)
-					is_int = TRUE
-				elsif ch >= 'a' and ch <= 'f' then
-					i = (i * 16) + ch - ('a'-10)
+					yytext &= ch
 					is_int = TRUE
 				else
 					exit
@@ -1987,33 +2153,15 @@ export function Scanner()
 				else
 					CompileErr(HEX_NUMBER_NOT_FORMED_CORRECTLY)
 				end if
-			else
-				d = i
-				if i >= TMAXINT/32 then
-					is_int = FALSE
-					while TRUE do
-						ch = getch()  -- eventually END_OF_FILE_CHAR or new-line
-						if char_class[ch] = DIGIT then
-							if ch != '_' then
-								d = (d * 16) + ch - '0'
-							end if
-						elsif ch >= 'A' and ch <= 'F' then
-							d = (d * 16) + ch - ('A'- 10)
-						elsif ch >= 'a' and ch <= 'f' then
-							d = (d * 16) + ch - ('a'-10)
-						elsif ch = '_' then
-							-- ignore spacing character
-						else
-							exit
-						end if
-					end while
-				end if
-
-				if fenv:test(FE_OVERFLOW) then
+			else				
+				sequence buf = MakeInt(yytext, 16)
+				if buf[1] = NUMBER_IS_TOO_BIG or fenv:test(FE_OVERFLOW) then
 					CompileErr(NUMBER_IS_TOO_BIG)
 				end if
 				fenv:clear(FE_OVERFLOW)
 				ungetch()
+				i = buf[2]
+				d = buf[2]
 				if is_int and is_integer(i) then
 					return {ATOM, NewIntSym(i)}
 				else
