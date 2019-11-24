@@ -1021,17 +1021,16 @@ void InitExecute()
 // detect matherr support
 #if defined(DOMAIN) && defined(SING) && defined(OVERFLOW) && defined(UNDERFLOW) && defined(TLOSS) && defined(PLOSS)
 	// enable our matherr function
-#ifdef __LCC__
+#if !defined(EMINGW) && !defined(EWATCOM)
 	_LIB_VERSION = _SVID_;
 #endif
-#endif
-    
+	
 #ifdef _WIN32
 		/* Prevent "Send Error Report to Microsoft dialog from coming up
-		   if this thing has an unhandled exception.  */
-		SetUnhandledExceptionFilter(Win_Machine_Handler);
+	   if this thing has an unhandled exception.  */
+	SetUnhandledExceptionFilter(Win_Machine_Handler);
 #endif
-
+#endif
 #ifndef ERUNTIME  // dll shouldn't take handler away from main program
 #ifndef EDEBUG
 	signal(SIGILL,  Machine_Handler);
