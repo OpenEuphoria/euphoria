@@ -1692,18 +1692,11 @@ procedure main()
 		-- routine to find all of the files that need to be
 		-- processed (and assign that to retest_files).
 		-- It doesn't actually produce any output.
-		do_process_log( files, PREPARE_RETEST_output )
+		if file_exists("unittest.log") then
+			do_process_log( files, PREPARE_RETEST_output )
+		end if
 		if map:has( opts, "retest" ) then
 			files = retest_files
-		else
-		    -- put the troublesome ones at the front.
-		    for tfi = 1 to length(retest_files) do
-		    	types:ascii_string rtf = retest_files[tfi]
-		    	integer rtfl = eu:find(rtf, files)
-		    	if rtfl > 0 then
-		    	    files = prepend(eu:remove(files, rtfl, rtfl), files[rtfl])
-		    	end if
-		    end for
 		end if
 		platform_init()
 		do_test( files )
@@ -1713,7 +1706,7 @@ end procedure
 enum DOCUMENT_OPEN, -- a procedure that takes no parameters and opens the html-file if not stdout
 DOCUMENT_CLOSE, --  a procrocedure that takes no parameters and [closes the html-file if not stdout]
 DOCUMENT_PROCESS, -- a procedure takes a single parameter see html_out and ascii_out 
-DOCUMENT_NL, -- a function no parameters that outputs a new-line 
+DOCUMENT_NL, -- a function no parameters that outputs a new-line
 DOCUMENT_LINK, --  a function no parameters that outputs a link
 DOCUMENT_ENDING, -- a printf format string for the document's ending or 0.
 DOCUMENT_P -- a routine that outputs something to indicate a new paragraph is starting
