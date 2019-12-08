@@ -386,7 +386,7 @@ void UserCleanup(int);
 extern int tcb_size;
 extern int current_task;
 extern double clock_period;
-#ifdef EWINDOWS
+#ifdef _WIN32
 #include <windows.h>
 
 // Address to a fiber:

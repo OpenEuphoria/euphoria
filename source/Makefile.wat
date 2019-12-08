@@ -350,8 +350,10 @@ core : .SYMBOLIC
 
 code-page-db : $(BUILDDIR)\ecp.dat .SYMBOLIC
 
+testaux : $(TRUNKDIR)\tests\return15.exe ..\tests\lib818.dll
+
 $(BUILDDIR)\ecp.dat : $(TRUNKDIR)\bin\buildcpdb.ex $(TRUNKDIR)\source\codepage 
-	$(BUILDDIR)\eui -i $(TRUNKDIR)\include $(TRUNKDIR)\bin\buildcpdb.ex -p$(TRUNKDIR)\source\codepage -o$(BUILDDIR)
+	$(BUILDDIR)\eui.exe -i $(TRUNKDIR)\include $(TRUNKDIR)\bin\buildcpdb.ex -p$(TRUNKDIR)\source\codepage -o$(BUILDDIR)
 
 BUILD_DIRS= &
 	$(BUILDDIR)\intobj &
@@ -527,12 +529,12 @@ testeu : .SYMBOLIC  $(TRUNKDIR)\tests\ecp.dat $(EU_INTERPRETER_FILES) $(EU_CORE_
 !endif #EUPHORIA
 
 
-$(BUILDDIR)\return15.exe: return15.c
+..\tests\return15.exe: return15.c
 	owcc return15.c
-	wlink SYS nt libfile return15.o name $(BUILDDIR)\return15.exe
+	wlink SYS nt libfile return15.o name ..\tests\return15.exe
 	
 
-test : .SYMBOLIC $(BUILDDIR)\return15.exe $(BUILDDIR)\eubind.exe  $(TRUNKDIR)\tests\ecp.dat $(FULLBUILDDIR)\eu.$(LIBEXT) $(BUILDDIR)\eub.exe $(BUILDDIR)\euc.exe 
+test : .SYMBOLIC ..\tests\lib818.dll ..\tests\return15.exe $(BUILDDIR)\eubind.exe  $(TRUNKDIR)\tests\ecp.dat $(FULLBUILDDIR)\eu.$(LIBEXT) $(BUILDDIR)\eub.exe $(BUILDDIR)\euc.exe 
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR)
 	
