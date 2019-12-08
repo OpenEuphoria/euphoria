@@ -34,7 +34,8 @@ if echo "$UNAME_SYSTEM" | grep CYGWIN > /dev/null; then
 
 elif echo "$UNAME_SYSTEM" | grep MINGW > /dev/null; then
 	UNAME_SYSTEM=WINDOWS
-	PWDARG=-W
+	USEMINGPATH="true"
+	PWDARG=
 	EXE=.exe
 else
 	PWDARG=
@@ -569,6 +570,9 @@ mkdir -p $BUILDDIR
 if [ "$USECYPPATH" = "true" ]; then
 	 CYPTRUNKDIR=`cygpath -a -m $TRUNKDIR`
 	 CYPBUILDDIR=`cygpath -a -m $BUILDDIR`
+elif [ "$USEMINGPATH" = "true" ]; then
+	 CYPTRUNKDIR=`(cd $TRUNKDIR;pwd -W)`
+	 CYPBUILDDIR=`(cd $BUILDDIR;pwd -W)`
 else
 	# MinGW and others
 	 CYPTRUNKDIR=$TRUNKDIR
