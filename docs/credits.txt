@@ -4,28 +4,29 @@
 Euphoria has been continuously developed since it was started in 1993
 by Robert Craig. In 2006, version 3.0 was released as open source. Various
 releases were made to the 3.x series and then in the 4th quarter of
-2010 the largest update ever was made to Euphoria, starting the
+2010, the largest update ever was made to Euphoria, starting the
 Euphoria 4.x series.
 
 It has taken quite a few people to get this far and we would like to
-recognize them here. Authors/Contributors are listed in alphabetical 
+recognize them here. Contributors are listed in alphabetical 
 order by their last name.
 
-For an up-to-date listing, see the [[wiki:EuphoriaContributors|EuphoriaContributors]]
- page at the [[http://openeuphoria.org/wiki/view/home.wc|OpenEuphoria Wiki]].
+For an up-to-date listing, see the [[https://openeuphoria.org/wiki/view/EuphoriaContributors.wc|Euphoria Contributors]]
+ page at the [[http://openeuphoria.org/wiki/view/home.wc|Euphoria Wiki]].
 
-=== Current Authors
+=== Current Developers
+
+  * Greg Haberek
+  * Tom Ciplijauskas
+  * Shawn Pringle
+  * C. K. Lester
+
+=== Past Developers
 
   * Jim Brown
-  * Tom Ciplijauskas
-  * Jeremy Cowgar
-  * C. K. Lester
   * Matthew Lewis
   * Derek Parnell
-  * Shawn Pringle
-
-=== Past Authors
-
+  * Jeremy Cowgar
   * Robert Craig
   * Chris Cuvier
   * Junko Miura
