@@ -40,7 +40,7 @@ elsifdef OSX then
 	constant lib = dll:open_dll("libc.dylib")
 
 elsifdef UNIX then
-	constant lib = dll:open_dll("libc.so")
+	constant lib = STDLIB
 	
 end ifdef
 
