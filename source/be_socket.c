@@ -773,8 +773,20 @@ int eusock_getsock_option(int x)
 		SOCKET fd,
 		fd_set *set
 	);
-	WSAFDIsSet_fntype WSAFDIsSetPtr;
+	WSAFDIsSet_fntype WSAFDIsSetPtr = NULL;
 
+	// Four hours of searching could find where the code is trying to use
+	// the function with this name in WinSock.  A binary search left me with
+	// a track of code within eusock_select which didn't contain the call.
+	// However, if you remove this following definition you will get a link 
+	// error in Windows.
+	int WSAAPI __WSAFDIsSet(SOCKET fd, fd_set *set) {
+		if (WSAFDIsSetPtr == NULL) {
+			RTFatal("Error: FD_ISSET called before SOCKET initialization.");
+		}
+		return (*WSAFDIsSetPtr)(fd,set);
+	}
+	
 	typedef u_short WSAAPI (*htons_fntype)(
 		__in  u_short hostshort
 	);
