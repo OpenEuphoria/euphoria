@@ -42,7 +42,7 @@
 #  if !defined(EMINGW)
 #    include <graph.h>
 #  endif
-#  include <dos.h>
+#  include <direct.h>
 #  include <process.h>
 #  include <conio.h>
 #endif

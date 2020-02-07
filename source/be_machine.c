@@ -101,7 +101,7 @@
 #  include <i86.h>
 #endif
 
-#include <dos.h>
+#include <direct.h>
 #endif  // not EUNIX
 
 #include <time.h>
