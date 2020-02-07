@@ -787,6 +787,8 @@ int eusock_getsock_option(int x)
 		return (*WSAFDIsSetPtr)(fd,set);
 	}
 	
+	#define FD_ISSET (*WSAFDIsSetPtr)
+
 	typedef u_short WSAAPI (*htons_fntype)(
 		__in  u_short hostshort
 	);
@@ -1752,9 +1754,9 @@ object eusock_select(object x)
 
 		tmp_sp = NewS1(4);
 		tmp_sp->base[1] = socks_pall->base[i];
-		tmp_sp->base[2] = (*WSAFDIsSetPtr)(tmp_socket, &readable) != 0;
-		tmp_sp->base[3] = (*WSAFDIsSetPtr)(tmp_socket, &writable) != 0;
-		tmp_sp->base[4] = (*WSAFDIsSetPtr)(tmp_socket, &errd) != 0;
+		tmp_sp->base[2] = FD_ISSET(tmp_socket, &readable) != 0;
+		tmp_sp->base[3] = FD_ISSET(tmp_socket, &writable) != 0;
+		tmp_sp->base[4] = FD_ISSET(tmp_socket, &errd) != 0;
 		
 		result_p->base[i] = MAKE_SEQ(tmp_sp);
 	}

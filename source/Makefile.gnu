@@ -510,7 +510,7 @@ clobber distclean : clean
 	$(MAKE) -C pcre CONFIG=$(BUILDDIR)/$(CONFIG) FPIC=-fPIC clean
 	
 
-.PHONY : clean distclean clobber all htmldoc manual lib818
+.PHONY : clean distclean clobber all htmldoc manual lib818 testaux
 
 ifeq "$(OBJDIR)" "libobj"
 
@@ -867,7 +867,7 @@ $(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : $(TRUNKDIR)/tests/ecp
 $(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : $(BUILDDIR)/$(EEXU) $(BUILDDIR)/$(EUBIND)
 $(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EECU)
 $(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : $(BUILDDIR)/$(LIBRARY_NAME)
-$(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : $(BUILDDIR)/return15$(EXE_EXT)
+$(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : $(TRUNKDIR)/tests/return15$(EXE_EXT)
 $(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html :  
 
 	-cd $(TRUNKDIR)/tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
@@ -1153,15 +1153,15 @@ endif
 $(BUILDDIR)/test818.o : test818.c
 	$(CC) -c $(LIB818_FPIC) -I $(TRUNKDIR)/include $(FE_FLAGS) -Wall -shared $(TRUNKDIR)/source/test818.c -o $(BUILDDIR)/test818.o
 
-$(BUILDDIR)/return15$(EXE_EXT) : return15.c
-	$(CC) -I $(TRUNKDIR)/include $(FE_FLAGS) -Wall -shared $(TRUNKDIR)/source/return15.c -o $(BUILDDIR)/return15$(EXE_EXT)
+$(TRUNKDIR)/tests/return15$(EXE_EXT) : return15.c
+	$(CC)  $(TRUNKDIR)/source/return15.c $(MSIZE) -o $(TRUNKDIR)/tests/return15$(EXE_EXT)
 	
 	
 lib818 :
 	touch test818.c
 	$(MAKE) -j$(BUILDJOBS) $(TRUNKDIR)/tests/lib818.dll
 
-testaux : $(BUILDDIR)/return15$(EXE_EXT)
+testaux : $(TRUNKDIR)/tests/return15$(EXE_EXT) $(TRUNKDIR)/tests/lib818.dll
 	
 $(TRUNKDIR)/tests/lib818.dll : $(BUILDDIR)/test818.o
 	$(CC)  $(MSIZE) $(LIB818_FPIC) -shared -o $(TRUNKDIR)/tests/lib818.dll $(CREATEDLLFLAGS) $(BUILDDIR)/test818.o

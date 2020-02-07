@@ -114,18 +114,18 @@ There are now enthusiastic users around the world.
 == Introduction
 :<<LEVELTOC level=2 depth=4>>
 
-=== Yet Another Programming Language?
-
-Euphoria is a very high-level programming language. It is unique among a
-crowd of conventional languages.
-
 === Great Features
 
 * Open source
 * Free for personal and commercial use
 * Produces royalty-free, stand-alone, programs
-* Multi-platform ~-- //Windows//, //OS X//, //Linux//, //FreeBSD//,
-  //OpenBSD//, //NetBSD//, ...
+* Multi-platform
+** Windows
+** OS X
+** Linux
+** FreeBSD
+** OpenBSD
+** NetBSD
 * Provides a choice of multi-platform GUI toolkits: IUP, GTK, wxWindows
 * Syntax colored profiling, debugging and tracing of code
 * Dynamic memory allocation and efficient garbage collection
@@ -159,7 +159,7 @@ data-structures.
 modify them to any size and complexity
 * It supports both //static// data typing and //dynamic// data typing.
 
-=== Beyond Elegance Sequences
+=== Beyond Elegance: Sequences
 
 * Euphoria programs are considerably faster than conventional interpreted
 languages ~-- Euphoria makes a better website server

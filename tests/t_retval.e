@@ -4,16 +4,17 @@ include std/io.e
 include std/utils.e
 
 constant full_cl = command_line()
-constant exe     = full_cl[1]
-puts(1, exe & 10)
-constant build_dir = pathname(exe)
-puts(1, build_dir & 10)
-constant proposed_return15 = build_dir & SLASH & "return15.exe"
-puts(1,proposed_return15 & 10)
-constant return15_in_same_dir_as_eui = file_exists(proposed_return15)
+constant test_file = full_cl[2]
+ifdef WINDOWS then
+    constant ext = ".exe"
+elsedef
+    constant ext = ""
+end ifdef
+constant naiive_dir = dirname(test_file)
+constant testfile_dir = iif( equal(naiive_dir, ""), ".", naiive_dir)
+constant return15_program = testfile_dir & SLASH & "return15" & ext
+test_true(return15_program & " was found", file_exists( return15_program ) )
+constant return15exe = return15_program
+test_equal("Program that returns 15", 15, system_exec( return15_program, 2 ))
 
-test_true("return15.exe was found", return15_in_same_dir_as_eui)
-constant return15exe = proposed_return15
-test_equal("Program that returns 15", 15, system_exec( sprintf("..\\source\\build\\return15.exe", {}), 2 ))
-		
 test_report()
