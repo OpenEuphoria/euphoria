@@ -9,7 +9,7 @@ namespace dll
 include std/error.e
 include std/machine.e
 include std/types.e
-
+public include std/win32/win32dllconst.ew
 --****
 -- === C Type Constants
 -- These C type constants are used when defining external C functions in a shared

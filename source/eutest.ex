@@ -1688,12 +1688,14 @@ procedure main()
 	if map:has( opts, "process-log") then
 		do_process_log( files, output_format )
 	else
-		-- This strange looking line, uses the do_process_log 
-		-- routine to find all of the files that need to be
-		-- processed (and assign that to retest_files).
-		-- It doesn't actually produce any output.
-		if file_exists("unittest.log") then
-			do_process_log( files, PREPARE_RETEST_output )
+		if file_exists( "unittest.log" ) then
+		    -- This strange looking line, uses the do_process_log 
+		    -- routine to find all of the files that need to be
+		    -- processed (and assign that to retest_files).
+		    -- It doesn't actually produce any output.
+		    do_process_log( files, PREPARE_RETEST_output )
+		else
+		    retest_files = {}
 		end if
 		if map:has( opts, "retest" ) then
 			files = retest_files
