@@ -45,7 +45,7 @@
 #endif
 #include <stdio.h>
 #include <time.h>
-#if defined(__GNUC__)
+#if !defined(__WIN32)
 #	include <sys/times.h>
 #	include <string.h>
 #else
