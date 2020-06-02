@@ -1,6 +1,9 @@
 /*****************************************************************************/
 /*      (c) Copyright - See License.txt       */
 /*****************************************************************************/
+/* These two macros must be defined early in order to prevent link errors on MinGW */
+#define _WSAFDIsSet (*WSAFDIsSetPtr)
+#define __WSAFDIsSet (*WSAFDIsSetPtr)
 
 #include <stdint.h>
 #if defined(_WIN32) && INTPTR_MAX == INT64_MAX
@@ -827,6 +830,7 @@ int eusock_getsock_option(int x)
 			}
 			return eax;
 		}
+	#else
 	#endif
 	
     void eusock_wsastart()

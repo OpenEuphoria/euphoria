@@ -10,7 +10,7 @@
 #define ix86 86 
 #define ix86_64 8664
 #include <stdint.h>
-
+#include <math.h>
 #include "global.h"
 
 		  /* Euphoria object format v1.2 and later */

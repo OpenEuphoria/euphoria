@@ -572,8 +572,7 @@ debug-library : $(BUILDDIR)/$(EECUDBGA)
 builddirs : | $(BUILD_DIRS)
 
 $(BUILD_DIRS) :
-	if ! -e "$@":
-		mkdir -p $@
+	mkdir -p $@
 
 ifeq "$(ROOTDIR)" ""
 ROOTDIR=$(TRUNKDIR)
@@ -702,7 +701,7 @@ endif
 
 $(BUILDDIR)/$(EECU) :  EU_TARGET=euc.ex
 $(BUILDDIR)/$(EECU) :  EU_MAIN=$(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_STD_INC)
-$(BUILDDIR)/$(EECU) :  $(wildcard $(BUILDDIR)/transobj/*.c) $(EU_MAIN) $(EU_TRANSLATOR_FILES) $(EUI_RES) $(EUIW_RES) $(wildcard be_*.c)
+$(BUILDDIR)/$(EECU) :  $(wildcard $(BUILDDIR)/transobj/*.c) $(EU_MAIN) $(EU_TRANSLATOR_FILES) $(EUC_RES) $(EUIW_RES) $(wildcard be_*.c)
 $(BUILDDIR)/$(EECU) :  $(BUILDDIR)/include/be_ver.h $(TRUNKDIR)/source/pcre/*.c
 ifeq "$(OBJDIR)" "transobj"
 $(BUILDDIR)/$(EECU) :  EU_OBJS="$(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) $(PREFIXED_PCRE_OBJECTS)"
@@ -1004,7 +1003,7 @@ else
 endif
 
 ifeq "$(ARCH)" "ARM"
-	EUC_CFLAGS=-cflags "-fomit-frame-pointer -c -w -fsigned-char -O2 -I$(TRUNKDIR) -ffast-math"
+	EUC_CFLAGS=-cflags "-fomit-frame-pointer -c -w -fsigned-char -O2 -I$(CYPTRUNKDIR) -ffast-math"
 	EUC_LFLAGS=-lflags "$(CYPBUILDDIR)/eu.a -ldl -lm -lpthread"
 else
 	EUC_CFLAGS=-cflags "$(FE_FLAGS)"

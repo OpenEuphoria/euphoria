@@ -37,11 +37,12 @@
 /******************/
 /* Included files */
 /******************/
-#define _SVID_SOURCE
 #include <stdint.h>
-#if defined(_WIN32) && INTPTR_MAX == INT64_MAX
+#if defined(_WIN64)
 // MSVCRT doesn't handle long double output correctly
 #define __USE_MINGW_ANSI_STDIO 1
+#elif defined(_WIN32)
+#define _SVID_SOURCE true
 #endif
 #include <stdio.h>
 #include <time.h>
@@ -962,8 +963,14 @@ void InitExecute()
 	// a bit of cleanup - tick rate, profile, active page etc.
 #endif
 
-// detect matherr support
-#if defined(DOMAIN) && defined(SING) && defined(OVERFLOW) && defined(UNDERFLOW) && defined(TLOSS) && defined(PLOSS)
+// MinGW doesn't support the way we detect math errors, so our unittests fail 
+// These are t_c_*overflow*.e and t_c_*underflow*.e files.  This only effects
+// when users try to do impossible things in math, or use literals that are too long
+// to be a number we can fit into our longest number type.
+// So, if you find you get a compile error here and you're using MinGW on 32-bit.  
+// Goto your _mingw.h file, look at __MINGW32_MAJOR_VERSION and update the constant 
+// below to the current value of the major version in the _mingw.h file.
+#if !defined(__MINGW32_VERSION) || (__MINGW32_MAJOR_VERSION > 5)
 	// enable our matherr function
 	_LIB_VERSION = _SVID_;
 #endif
