@@ -11,7 +11,7 @@
 #include "symtab.h"
 
 #ifndef MAX_SEQ_LEN
-#if INTPTR_MAX == INT32_MAX
+#if defined(__i386__)
 #	define MAX_SEQ_LEN ((((unsigned long)0xFFFFFFFF - sizeof(struct s1)) / sizeof(object)) - 1)
 #else
 #	define MAX_SEQ_LEN ((((unsigned long)0xFFFFFFFFFFFFFFFFLL - sizeof(struct s1)) / sizeof(object)) - 1)

@@ -228,11 +228,11 @@ int memcopy( void *dest, size_t avail, void *src, size_t len);
 object eu_sizeof( object data_type );
 int getKBchar();
 
-#if INTPTR_MAX == INT32_MAX
+#if defined(__i386__)
 #define CALLBACK_POINTER 0x12345678L
 #define general_ptr_magic 0xF001F001L
 
-#elif INTPTR_MAX == INT64_MAX
+#elif defined(__x86_64__)
 #define general_ptr_magic 0xabcdefabcdefabcdLL
 #ifdef ERUNTIME
 #define CALLBACK_POINTER ((uintptr_t)0x1234567812345678LL)

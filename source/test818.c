@@ -51,11 +51,11 @@ typedef enum {false,true} Bool;
 		return EUPHORIA_MAX_INT/2; \
 	}
 
-#if INT32_MAX == INTPTR_MAX
+#if defined(__i386__)
 MAKE_BORDER_FUNCTIONS(int,C_INT)
 #endif
 
-#if INT32_MAX == INTPTR_MAX || !defined(_WIN32)
+#if defined(__i386__) || !defined(_WIN32)
 MAKE_BORDER_FUNCTIONS(long,C_LONG)
 #endif
 MAKE_BORDER_FUNCTIONS(long long,C_LONGLONG)
@@ -81,7 +81,6 @@ MAKE_ID_FUNCTION(long, C_LONG)
 MAKE_ID_FUNCTION(unsigned long, C_ULONG)
 MAKE_ID_FUNCTION(long long, C_LONGLONG)
 MAKE_ID_FUNCTION(unsigned long long, C_ULONGLONG)
-
 MAKE_ID_FUNCTION(float, C_FLOAT)
 MAKE_ID_FUNCTION(double, C_DOUBLE)
 

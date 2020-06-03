@@ -16,7 +16,7 @@
 #define _LARGEFILE64_SOURCE
 #include <stdlib.h>
 #include <stdint.h>
-#if defined(_WIN32) && INTPTR_MAX == INT64_MAX
+#if defined(_WIN64)
 // MSVCRT doesn't handle long double output correctly
 #define __USE_MINGW_ANSI_STDIO 1
 #endif
@@ -2327,12 +2327,13 @@ object DefineC(object x)
 #if defined(__APPLE__) && defined(__MACH__)
 	#define CALLBACK_SIZE (300)
 #else
-	#if __GNUC__ == 4
-		#if INTPTR_MAX == INT32_MAX
-
+	#if __GNUC__ >= 4
+		#if defined(__i386__)
+		
+		// Tried on MINGW-32 GCC 8: 96 is minimal.
 		#define CALLBACK_SIZE (96)
 
-		#elif INTPTR_MAX == INT64_MAX
+		#elif defined(__x86_64__)
 
 		#define CALLBACK_SIZE (143)
 
@@ -2451,7 +2452,7 @@ object CallBack(object x)
 #endif
 	}
 
-#if INTPTR_MAX == INT64_MAX
+#if  defined(__x86_64__)
 	// For some reason the cdecl callback crashes on windows, but this always works.
 	// We're not really using stdcall or cdecl anyways
 	// It also seems to crash on 64-bit Linux/GNU in some cases.
@@ -2501,7 +2502,7 @@ object CallBack(object x)
 					RTFatal("routine has too many parameters for call-back");
 		}
 	}
-#if (INTPTR_MAX == INT32_MAX) && defined(__APPLE__) && defined(__MACH__)
+#if (defined(__i386__)) && defined(__APPLE__) && defined(__MACH__)
 	// always use the custom call back handler for OSX
 	// -- Use the normal cdecl on 64-bit, and the custom one on 32-bit.
 	// Clean this up if it works.
@@ -2556,7 +2557,7 @@ object CallBack(object x)
 	if (res != 0) {
 		RTFatal("Internal error: CallBack memcopy failed (%d).", res);
 	}
-#if defined(__APPLE__) && defined(__MACH__) || (INTPTR_MAX == INT64_MAX)
+#if defined(__APPLE__) && defined(__MACH__) ||  defined(__x86_64__)
 	// For platforms that also have 'general_ptr' to patch, 'not_patched' should have another
 	// bit set to be cleared when they patch this value.
 	not_patched = 010 | not_patched;
@@ -2584,7 +2585,7 @@ object CallBack(object x)
 			not_patched &= ~1;
 						
 		}
-#if defined(EOSX) || (INTPTR_MAX == INT64_MAX)
+#if defined(EOSX) || defined(__x86_64__)
 /* If OS/X ever gets ported to ARM ... */
 #ifdef EARM
 #error "misaligned comparison code" 

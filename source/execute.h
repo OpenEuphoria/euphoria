@@ -46,7 +46,7 @@
 #define MAXINT32     (intptr_t) 0x3FFFFFFFL
 
 
-#if INTPTR_MAX == INT32_MAX
+#if defined(__i386__)
 
 #define DBL_MASK     (uintptr_t)0xA0000000L
 #define SEQ_MASK     (uintptr_t)0x80000000L
@@ -289,7 +289,7 @@ struct char_cell {
 
 #define MIN_LONGLONG_DBL ((eudouble)(signed long long)   0x8000000000000000LL)
 
-#if INTPTR_MAX == INT32_MAX
+#if defined(__i386__)
 
 /* In 32-bit 1e64-1 is no smaller than 1e64. */
 #define MAX_LONGLONG_DBL ((eudouble)(unsigned long long) 0xFFFFFFFFFFFFF800LL)

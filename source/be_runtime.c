@@ -9,14 +9,17 @@
 /******************/
 /* Included files */
 /******************/
-#define _SVID_SOURCE             /* See feature_test_macros(7) */
-#define _LARGE_FILE_API
-#define _LARGEFILE64_SOURCE
 #include <stdint.h>
-#if defined(_WIN32) && INTPTR_MAX == INT64_MAX
+#if defined(_WIN64)
 // MSVCRT doesn't handle long double output correctly
 #define __USE_MINGW_ANSI_STDIO 1
+#elif defined(_WIN32)
+#define _SVID_SOURCE true
 #endif
+#define _LARGE_FILE_API
+#define _LARGEFILE64_SOURCE
+
+
 #include <stdio.h>
 
 #include <stdarg.h>
@@ -1832,7 +1835,7 @@ object Dnot_bits(d_ptr a)
 #endif
 }
 
-#if defined(__FreeBSD__) && INTPTR_MAX != INT32_MAX
+#if defined(__FreeBSD__) && !defined(__i386__)
 long double powl( long double a, long double b ){
 	return (long double) pow( (double) a, (double) b );
 }
@@ -4089,7 +4092,7 @@ static void rPrint(object a)
                         print_chars += strlen("NOVALUE");
                 }
 		else {
-#if INTPTR_MAX == INT32_MAX
+#if defined(__i386__)
 			snprintf(sbuff, NUM_SIZE, "%.10g", DBL_PTR(a)->dbl);
 #else
 			snprintf(sbuff, NUM_SIZE, "%.10Lg", DBL_PTR(a)->dbl);
@@ -4345,7 +4348,7 @@ object_ptr v_elem;
 			EFree(sval);
 	}
 	else if (c == 'd' || c == 'x' || c == 'o') {
-#if defined( _WIN32 ) && INTPTR_MAX == INT64_MAX
+#if defined( _WIN32 ) && defined(__x86_64__)
 		cstring[flen++] = 'l';
 #endif
 		cstring[flen++] = 'l';
@@ -4398,7 +4401,7 @@ object_ptr v_elem;
 		screen_output(f, sbuff);
 	}
 	else if (c == 'e' || c == 'f' || c == 'g') {
-#if INTPTR_MAX == INT64_MAX
+#if defined(__x86_64__)
 		cstring[flen++] = 'L';
 #endif
 		cstring[flen++] = c;
@@ -5103,7 +5106,7 @@ object system_exec_call(object command, object wait)
     
     exit_code = _spawnvp(P_WAIT, argvNDQ, (char const * const *)argv);
     
-	#if INTPTR_MAX == INT32_MAX
+	#if defined(__i386__)
 	// This causes a crash on Win64
     EFree(argvNDQ);			// free the 'process' name
 	#endif
@@ -5118,11 +5121,11 @@ object system_exec_call(object command, object wait)
 	}
 	if (w != 2)
 		RestoreConfig();
-	#if INTPTR_MAX == INT32_MAX
+	#if defined(__i386__)
 	if (exit_code >= MININT && exit_code <= MAXINT)
 	#endif
 		return (object)exit_code;
-	#if INTPTR_MAX == INT32_MAX
+	#if defined(__i386__)
 	else
 		return NewDouble((eudouble)exit_code);
 	#endif
@@ -5520,7 +5523,7 @@ uintptr_t __cdecl osx_cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t 
 }
 #endif
 
-#if INTPTR_MAX == INT32_MAX
+#if defined(__i386__)
 #define CALL_GENERAL_CALLBACK (*general_ptr)
 #else
 

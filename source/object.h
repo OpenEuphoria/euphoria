@@ -21,7 +21,7 @@ struct cleanup {
 
 struct s1 {                        /* a sequence header block */
 	object_ptr base;               /* pointer to (non-existent) 0th element */
-#if INTPTR_MAX == INT32_MAX
+#if defined(__i386__)
 	int length;                   /* number of elements */
 	int ref;                      /* reference count */
 	cleanup_ptr cleanup;           /* custom clean up when sequence is deallocated */
@@ -35,7 +35,7 @@ struct s1 {                        /* a sequence header block */
 	
 }; /* total 20 bytes */
 
-#if INTPTR_MAX == INT32_MAX
+#if defined(__i386__)
 typedef double eudouble;
 #else
 typedef long double eudouble;
@@ -43,7 +43,7 @@ typedef long double eudouble;
 
 struct d {                         /* a double precision number */
 	eudouble dbl;                    /* double precision value */
-#if INTPTR_MAX == INT32_MAX
+#if defined(__i386__)
 	int ref;                      /* reference count */
 #else
 	intptr_t ref;                      /* reference count */

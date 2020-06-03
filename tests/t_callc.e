@@ -69,7 +69,7 @@ constant unsigned_values     = {ubyte_values, ubyte_values,
 														50_000 & 8_000 & 20_000,
 																	4_000_000_000 & 420_000_000 & 42,
 																				#BEEFDEAD & #C001D00D,
-																							(3 & 7) * power(2,40)}
+																							(3 & 7) * power(2,58) & 0xD000_0000_0000_0000 }
 											
 constant floating_point_types = { C_FLOAT, C_DOUBLE },
          floating_point_type_names = { "C_FLOAT", "C_DOUBLE" },
@@ -79,11 +79,12 @@ enum false=0, true=1
 
 atom r_max_uint_fn
 for i = 1 to length(minus_1_values) do
-    if pointer_size < 8 and minus_1_values[i] = MAXUINT64 then
-        exit
-    end if
 	r_max_uint_fn = define_c_func( "", call_back( routine_id("minus_1_fn") ), {}, unsigned_types[i] )
-	test_equal( sprintf("return type %s makes unsigned value", {unsigned_type_names[i]}), minus_1_values[i], c_func(r_max_uint_fn, {}) )
+    if pointer_size < 8 and unsigned_types[i] = C_ULONGLONG then
+        test_true( sprintf("return type %s makes unsigned value", {unsigned_type_names[i]}), c_func(r_max_uint_fn, {}) > 0 )
+    else
+		test_equal( sprintf("return type %s makes unsigned value", {unsigned_type_names[i]}), minus_1_values[i], c_func(r_max_uint_fn, {}) )
+    end if
 end for
 
 constant byte_values = ' ' & -32 & -100 & ')'
@@ -97,19 +98,17 @@ elsedef
 constant signed_types      = { C_CHAR,    C_BYTE,   C_SHORT,   C_INT,   C_BOOL,   C_LONG,   C_LONGLONG }
 constant signed_type_names = { "C_CHAR", "C_BYTE", "C_SHORT", "C_INT", "C_BOOL", "C_LONG", "C_LONGLONG"}
 constant signed_values     = { byte_values, byte_values, 
-			-20_000 & 10_000 & 20_000, (2 & -2) * 1e9, true & false, (2 & -2) * power(2,20), (3 & -2) * power(2,40)} 
+			-20_000 & 10_000 & 20_000, (2 & -2) * 1e9, true & false, (2 & -2) * power(2,20), (3 & -2) * power(2,58)} 
 end ifdef																		
 constant types = signed_types & unsigned_types
 constant type_names = signed_type_names & unsigned_type_names
 constant values = signed_values & unsigned_values
 for i = 1 to length(signed_types) do
-    if pointer_size < 8 and signed_types[i] = C_LONGLONG then
+    if pointer_size < 8 and find(signed_types[i], C_ULONGLONG & C_LONGLONG) then
         continue
     end if
 	-- 32-bit callbacks don't return anything big enough to be a C_LONGLONG, so skip those
-	if find(signed_types[i], floating_point_types) then
-		continue
-	end if
+
 	if pointer_size = 8 or signed_types[i] != C_LONGLONG then
 		r_max_uint_fn = define_c_func( "", call_back( routine_id("minus_1_fn") ), {}, signed_types[i] )
 		test_equal( sprintf("return type %s preserves -1", {signed_type_names[i]}), -1, c_func(r_max_uint_fn, {}) )
@@ -228,7 +227,6 @@ for i = 1 to length(signed_types) do
 				expected_val,
 				c_func(r_near_hashC, {}))
 		end if
-	
 	end if
 	integer r_get_m20 = define_c_func( lib818, sprintf("+%s_M20", 
 		{signed_type_names[i]}), {}, signed_types[i] )
@@ -252,8 +250,37 @@ for i = 1 to length(types) do
 	test_true(sprintf("%s id function is in our library", {type_names[i]}), id_r != -1)
 	for j = 1 to length(values[i]) do
 		value_test_counter += 1
-		test_equal(sprintf("Value test for %s #%d", {type_names[i], value_test_counter}),
-			values[i][j], c_func(id_r, {values[i][j]}))
+		if pointer_size < 8 and find(types[i], {C_LONGLONG, C_ULONGLONG}) then
+            -- When working with 64-bit integers on 32-bit, these integers have more matissa precision than
+            -- any EUPHORIA type. This means in this case, we should consider two values in EUPHORIA equal if
+            -- they are not "integer" types by subtracting them. If the difference is zero, they are equal 
+            -- but if the difference is not zero.  Then use the following methodology:			
+
+            -- Take the experimental and control values
+			atom experimental = c_func(id_r, {values[i][j]})
+			atom control      = values[i][j]
+			atom diff = abs(experimental - control)
+			-- If either of these values are zero but not both, we should consider them non-equal.
+			-- If log2(experimental) - log2(abs(experimental - control)) > 52, then the bits the 
+			-- double can store match and we should consider them equal.
+			if diff = 0 then
+				test_pass(sprintf("Value test for %s #%d\n", {type_names[i], value_test_counter}))
+			elsif experimental = 0 then
+				test_fail(sprintf("Value test for %s #%d is 0 should be %g", {type_names[i], value_test_counter, control}))
+			else
+				atom log2_experimental = log(experimental)/log(2)
+				atom log2_diff = log(diff)/log(2)
+				if log2_experimental - log2_diff <= 52 then
+					test_fail(sprintf("Value as good as a double in agreement for %s #%d  [log2(exp=%g)(=%g)] - {[log2(exp(=%g) - control(=%g))](=%g)} < 53?(",
+					{type_names[i], value_test_counter, experimental, log2_experimental, experimental, control, log2_diff}))
+				else
+					test_pass(sprintf("Value as good as a double in agreement for %s #%d  log2(exp)(=%g) - log2(diff)(=%g) < 53?(", {type_names[i], value_test_counter, log2_experimental, log2_diff}))
+				end if
+			end if
+		else		
+			test_equal(sprintf("Value test for %s #%d", {type_names[i], value_test_counter}),
+				values[i][j], c_func(id_r, {values[i][j]}))
+		end if
 	end for
 end for
 

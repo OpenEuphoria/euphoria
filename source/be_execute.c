@@ -41,8 +41,8 @@
 #if defined(_WIN64)
 // MSVCRT doesn't handle long double output correctly
 #define __USE_MINGW_ANSI_STDIO 1
-#elif defined(_WIN32)
-#define _SVID_SOURCE true
+#else
+#define _SVID_SOURCE 1
 #endif
 #include <stdio.h>
 #include <time.h>
@@ -557,7 +557,7 @@ static object do_peek4(object a, int b )
 	return top;
 }
 
-#if INTPTR_MAX == INT32_MAX
+#if !defined(__x86_64__)
 #define POKE_LIMIT(x) "poke" #x " is limited to 32-bit numbers"
 #else
 #define POKE_LIMIT(x) "poke" #x " is limited to 64-bit numbers"
@@ -3107,7 +3107,7 @@ void do_exec(intptr_t *start_pc)
 					c = a;
 					b = top;
 
-#if INT64_MAX == INTPTR_MAX
+#ifdef __x86_64__
 					{
 						int128_t product = (int128_t)c * (int128_t)b;
 						if( product == (int128_t)( a = (intptr_t)product ) && IS_ATOM_INT( product ) ){
@@ -4621,7 +4621,7 @@ void do_exec(intptr_t *start_pc)
 				thread();
 				BREAK;
 
-#if INTPTR_MAX == INT64_MAX
+#if defined(__x86_64__)
 			case L_PEEK_POINTER:
 #endif
 			case L_PEEK8U:
@@ -4643,7 +4643,7 @@ void do_exec(intptr_t *start_pc)
 				BREAK;
 
 
-#if INTPTR_MAX == INT32_MAX
+#if defined(__i386__)
 			case L_PEEK_POINTER:
 #endif
 			case L_PEEK4U:
@@ -4776,7 +4776,7 @@ void do_exec(intptr_t *start_pc)
 				inc3pc();
 				thread();
 				BREAK;
-#if INT64_MAX == INTPTR_MAX
+#if defined(__x86_64__)
 			case L_POKE_POINTER:
 #endif
 			case L_POKE8:
@@ -4789,7 +4789,7 @@ void do_exec(intptr_t *start_pc)
 				thread();
 				BREAK;
 				
-#if INT32_MAX == INTPTR_MAX
+#if defined(__i386__)
 			case L_POKE_POINTER:
 #endif
 			case L_POKE4:

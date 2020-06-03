@@ -606,20 +606,14 @@ shrouder : $(BUILDDIR)/$(EUSHROUD)
 
 
 $(BUILDDIR)/intobj/main-.c : EU_TARGET=eui.ex
-$(BUILDDIR)/intobj/main-.c : $(BUILDDIR)/include/be_ver.h
-$(BUILDDIR)/intobj/main-.c : $(BUILDDIR)/include/be_ver.h
 
 euisource : $(BUILDDIR)/intobj/main-.c
 
-$(BUILDDIR)/transobj/main-.c : $(BUILDDIR)/transobj/main-.c
 $(BUILDDIR)/transobj/main-.c :  EU_TARGET=euc.ex
-$(BUILDDIR)/transobj/main-.c : $(BUILDDIR)/include/be_ver.h
 
 eucsource : $(BUILDDIR)/transobj/main-.c
 
-$(BUILDDIR)/backobj/main-.c : $(BUILDDIR)/backobj/main-.c
 $(BUILDDIR)/backobj/main-.c :  EU_TARGET=backend.ex
-$(BUILDDIR)/backobj/main-.c : $(BUILDDIR)/include/be_ver.h
 
 backendsource : $(BUILDDIR)/backobj/main-.c
 
@@ -1153,8 +1147,7 @@ endif
 $(BUILDDIR)/test818.o : test818.c
 	$(CC) -c $(LIB818_FPIC) -I $(TRUNKDIR)/include $(FE_FLAGS) -Wall -shared $(TRUNKDIR)/source/test818.c -o $(BUILDDIR)/test818.o
 
-lib818 :
-	touch test818.c
+lib818 : test818.c
 	$(MAKE) -j$(BUILDJOBS) $(TRUNKDIR)/tests/lib818.dll
 
 $(TRUNKDIR)/tests/lib818.dll : $(BUILDDIR)/test818.o

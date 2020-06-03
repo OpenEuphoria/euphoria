@@ -12,7 +12,7 @@
 #define _LARGE_FILE_API
 #define _LARGEFILE64_SOURCE
 #include <stdint.h>
-#if defined(_WIN32) && INTPTR_MAX == INT64_MAX
+#if defined(_WIN64)
 // MSVCRT doesn't handle long double output correctly
 #define __USE_MINGW_ANSI_STDIO 1
 #endif
@@ -565,7 +565,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 				add_char = TRUE;
 		}
 		else{ 
-#if INTPTR_MAX == INT64_MAX
+#if defined(__X86_64__)
 			snprintf(val_string,  DV_len, "%.10Lg", DBL_PTR(val)->dbl);
 #else
 			snprintf(val_string,  DV_len, "%.10g", DBL_PTR(val)->dbl);
@@ -1613,7 +1613,7 @@ void BadSubscript(object subs, int length)
 	if (IS_ATOM_INT(subs))
 		snprintf(subs_buff, BadSubscript_bufflen, "%d", (int)subs);
 	else
-#if INTPTR_MAX == INT64_MAX
+#if defined(__X86_64__)
 		snprintf(subs_buff, BadSubscript_bufflen, "%.10Lg", DBL_PTR(subs)->dbl);
 #else
 		snprintf(subs_buff, BadSubscript_bufflen, "%.10g", DBL_PTR(subs)->dbl);
@@ -1642,7 +1642,7 @@ void RangeReading(object subs, int len)
 	if (IS_ATOM_INT(subs))
 		snprintf(subs_buff, RangeReading_buflen, "%d", (int)subs);
 	else
-#if INTPTR_MAX == INT64_MAX
+#if defined(__X86_64__)
 		snprintf(subs_buff, RangeReading_buflen, "%.10Lg", DBL_PTR(subs)->dbl);
 #else
 		snprintf(subs_buff, RangeReading_buflen, "%.10g", DBL_PTR(subs)->dbl);

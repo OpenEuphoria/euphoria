@@ -40,7 +40,7 @@
  */
  
 #include <stdint.h>
-#if defined(_WIN32) && INTPTR_MAX == INT64_MAX
+#if defined(_WIN64)
 // MSVCRT doesn't handle long double output correctly
 #define __USE_MINGW_ANSI_STDIO 1
 #endif
@@ -167,7 +167,7 @@ typedef union {
 /* Local variables */
 /*******************/
 
-#if INTPTR_MAX == INT32_MAX && __ARM_PCS_VFP != 1
+#if defined(EX86) && __ARM_PCS_VFP != 1
 
 // reenable when these crashes stop
 #define generate_typedefs(function_name, return_type, convention, namebase, default_value) typedef return_type (convention *namebase ## 0)();\
@@ -1033,9 +1033,9 @@ union xmm_param {
 };
 #endif
 
-#if INTPTR_MAX == INT64_MAX
+#if defined(EX86_64)
 
-#	ifdef _WIN32
+#	ifdef _WIN64
 
 		/* The Windows x86-64 calling convention only uses a maximum of
 		 * four registers for passing parameters, regardless of the type.
@@ -1100,6 +1100,16 @@ union xmm_param {
 						arg = dbl_arg.ints[0];\
 						push();\
 						argsize += 4;
+						
+#		define PUSH_UINT64_ARG(x) \
+						(*((uint64_t*)(&dbl_arg.int64))) = (uint64_t) x;\
+						arg = dbl_arg.ints[1];\
+						push();\
+						arg = dbl_arg.ints[0];\
+						push();\
+						argsize += 4;
+						
+						
 						
 #	elif __ARM_PCS_VFP != 1
 #		define PUSH_INT_ARG arg_op[arg_i++] = arg;
@@ -1181,7 +1191,7 @@ object call_c(int func, object proc_ad, object arg_list)
 		intptr_t arg_op[20];
 		intptr_t arg_i = 0;
 #	endif
-#	if INTPTR_MAX == INT32_MAX && __ARM_PCS_VFP != 1
+#	if (defined(EARM) || defined(EX86)) && __ARM_PCS_VFP != 1
 		#if !defined(push)
 		intptr_t arg_len;
 		#endif
@@ -1199,11 +1209,8 @@ object call_c(int func, object proc_ad, object arg_list)
 	as_offset = (uintptr_t)&argsize;
 	// as_offset = last_offset - 4;
 #	endif
-
-
-
 	
-#if INTPTR_MAX == INT64_MAX || __ARM_PCS_VFP == 1
+#if defined(EX86_64) || __ARM_PCS_VFP == 1
 #ifdef _WIN32
 	int signature = 0;
 #else
@@ -1227,7 +1234,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	}
 	
 	long_proc_address = (intptr_t)(c_routine[proc_index].address);
-#	if INTPTR_MAX == INT32_MAX && __ARM_PCS_VFP != 1
+#	if (defined(EARM) || defined(EX86)) && __ARM_PCS_VFP != 1
 #		if defined(__WIN32) && !defined(__WATCOMC__)
 			cdecl_call = c_routine[proc_index].convention;
 #		endif
@@ -1246,7 +1253,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	
 	return_type = c_routine[proc_index].return_size; // will be INT
 
-	#if INTPTR_MAX == INT32_MAX && !defined(push) && __ARM_PCS_VFP != 1
+	#if (defined(EARM) || defined(EX86)) && !defined(push) && __ARM_PCS_VFP != 1
 		arg_len = arg_list_ptr->length;
 	#endif
 	
@@ -1303,11 +1310,11 @@ object call_c(int func, object proc_ad, object arg_list)
 			}
 
 			if (size == C_DOUBLE) {
-				#if INTPTR_MAX == INT32_MAX && __ARM_PCS_VFP != 1
+				#if (defined(EARM) || defined(EX86)) && __ARM_PCS_VFP != 1
 
 					PUSH_INT64_ARG(dbl_arg.int64)
 						
-				#elif INTPTR_MAX == INT64_MAX || __ARM_PCS_VFP == 1
+				#elif defined(EX86_64) || __ARM_PCS_VFP == 1
 				
 					if( FP_ARG_COUNTER < MAX_FP_PARAM_REGISTERS ) {
 						UPDATE_SIGNATURE
@@ -1327,10 +1334,10 @@ object call_c(int func, object proc_ad, object arg_list)
 			else {
 				/* C_FLOAT */
 				flt_arg.flt = (float)dbl_arg.dbl;
-				#if INTPTR_MAX == INT32_MAX && __ARM_PCS_VFP != 1
+				#if (defined(EARM) || defined(EX86)) && __ARM_PCS_VFP != 1
 					arg = (uintptr_t)flt_arg.int32;
 					PUSH_INT_ARG
-				#elif INTPTR_MAX == INT64_MAX || __ARM_PCS_VFP == 1
+				#elif defined(EX86_64) || __ARM_PCS_VFP == 1
 					if( FP_ARG_COUNTER < MAX_FP_PARAM_REGISTERS ){
 						UPDATE_SIGNATURE
 						dbl_op[FP_ARG_COUNTER++].f = flt_arg.flt;
@@ -1348,39 +1355,38 @@ object call_c(int func, object proc_ad, object arg_list)
 				arg = next_arg;
 				PUSH_INT_ARG
 			}
-			else if (IS_ATOM(next_arg) 
-				&& DBL_PTR(next_arg)->dbl >= MIN_BITWISE_DBL
-				&& DBL_PTR(next_arg)->dbl <= MAX_BITWISE_DBL ){
-				// allow signed -> unsigned cast, but makes sure we don't overflow
-				arg = (uint64_t)(uintptr_t)DBL_PTR(next_arg)->dbl; //correct
+			else if (IS_ATOM(next_arg) && (double_result=DBL_PTR(next_arg)->dbl) >= MIN_BITWISE_DBL && double_result <= MAX_DOUBLE_DBL) {
+				// atoms are rounded to integers
+				// Do we really need both casts? Maybe do a sign check.
+				// We can usually assume that pointers > 0 but is that a
+				// valid assumption? Do we need to check bounds? JAG
+				arg = (uint64_t)(uintptr_t)double_result; //correct
 				// if it's a -ve f.p. number, Watcom converts it to long and
 				// then to unsigned long. This is exactly what we want.
 				// Works with the others too. 
 				PUSH_INT_ARG
 			}else{
-				RTFatal("argument out of range.");
+				RTFatal("argument %.0g out of range for C_POINTER.", DBL_PTR(next_arg)->dbl);
 			}
 		}
-		else if( size == C_LONGLONG || size == C_ULONGLONG ){
+		else if (size == C_LONGLONG || size == C_ULONGLONG) {
 			if (IS_ATOM_INT(next_arg)) {
+				// next_arg >= MININT && next_arg <= MAXINT
 				PUSH_INT64_ARG(next_arg);
 			}
 			else if (IS_ATOM(next_arg)) {
 				// atoms are converted to and rounded to 64-bit values, 
-				// this is lossess on both 32 and 64 bit.
-				#ifdef EARM
-				PUSH_INT64_ARG((int64_t)DBL_PTR(next_arg)->dbl);
-				#else
-				// fix cast conversion for sign and include unsigned long long JAG
-				if( DBL_PTR(next_arg)->dbl > (eudouble)INT64_MAX
-					&& DBL_PTR(next_arg)->dbl <= (eudouble)UINT64_MAX ) {
-					PUSH_INT64_ARG((uint64_t)DBL_PTR(next_arg)->dbl);
-				}else if( DBL_PTR(next_arg)->dbl >= (eudouble)INT64_MIN ) {
-					PUSH_INT64_ARG((int64_t)DBL_PTR(next_arg)->dbl);
+				// this is lossess on both 32 and 64 bit.  Yet, sometime from
+				// here and the actual call, the lower significant bits get corrupted.
+				double_result = DBL_PTR(next_arg)->dbl;
+				if(double_result >= 0.0
+					&& double_result <= MAX_LONGLONG_DBL ) {
+					PUSH_UINT64_ARG((uint64_t)double_result);
+				}else if(double_result >= MIN_LONGLONG_DBL && double_result <= MAX_LONGLONG_DBL) {
+					PUSH_INT64_ARG((int64_t)double_result);
 				}else{
-					RTFatal("argument out of range.");
+					RTFatal("argument %.0g out of range for C_LONGLONG or C_ULONGLONG.", double_result);
 				}
-				#endif
 			}
 		}
 		else {
@@ -1409,23 +1415,23 @@ object call_c(int func, object proc_ad, object arg_list)
 				PUSH_INT_ARG
 			}
 			else if (IS_ATOM(next_arg)) {
+				// arg = (uintptr_t)DBL_PTR(next_arg)->dbl;
+				// fix cast conversion for sign and include unsigned long long JAG
+				// I may have broken this for ARM, but what's with the
+				// if statement? JAG
+				if ((double_result=DBL_PTR(next_arg)->dbl) > MAX_BITWISE_DBL || double_result < MIN_BITWISE_DBL) {
+					RTFatal("argument %g out of range C_DOUBLE.", double_result);
+				} else 
 				// atoms are rounded to integers
 				#ifdef EARM
 				if( size == C_INT )
 					arg = (intptr_t)DBL_PTR(next_arg)->dbl; //correct
 				else
 				#endif
-				// arg = (uintptr_t)DBL_PTR(next_arg)->dbl;
-				// fix cast conversion for sign and include unsigned long long JAG
-				// I may have broken this for ARM, but what's with the
-				// if statement? JAG
-				if( DBL_PTR(next_arg)->dbl > (eudouble)INT64_MAX
-					&& DBL_PTR(next_arg)->dbl <= (eudouble)UINT64_MAX ) {
-					arg = ((uint64_t)DBL_PTR(next_arg)->dbl);
-				}else if( DBL_PTR(next_arg)->dbl >= (eudouble)INT64_MIN ) {
-					arg = ((int64_t)DBL_PTR(next_arg)->dbl);
-				}else{
-					RTFatal("argument out of range.");
+				if (double_result >= 0.0) {
+					arg = ((uint64_t)double_result);
+				} else {
+					arg = ((int64_t)double_result);
 				}
 				
 				PUSH_INT_ARG
@@ -1437,7 +1443,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	}    
 
 	// Make the Call
-	#if INTPTR_MAX == INT32_MAX && __ARM_PCS_VFP != 1
+	#if (defined(EARM) || defined(EX86)) && __ARM_PCS_VFP != 1
 		#ifdef push
 			// Make the Call - The C compiler thinks it's a 0-argument call
 			// might be VOID C routine, but shouldn't crash
@@ -1486,40 +1492,27 @@ object call_c(int func, object proc_ad, object arg_list)
 		call_routine(double);
 		return NewDouble(double_result);
 	}
-	else if (return_type == C_LONGLONG ){
-		
-		#if INTPTR_MAX == INT32_MAX
+	else if (return_type == C_LONGLONG || return_type == C_ULONGLONG){
+		#if (defined(EARM) || defined(EX86))
 			long long int int64_t_result;
 		#else
 			#define int64_t_result int_result
 		#endif
 		#if __ARM_PCS_VFP == 1
 			int64_t_result = icall_x86_64( long_proc_address, (double*)dbl_op, arg_op, int_args SIGNATURE_PARAM );
-		#endif
-		call_routine(int64_t);
-		if( int64_t_result <= (long long int)MAXINT && int64_t_result >= (long long int)MININT ){
-			return (intptr_t) int64_t_result;
-		}
-		else{
-			return NewDouble( (eudouble) int64_t_result );
-		}
-	}
-	else if (return_type == C_ULONGLONG ){
-		
-		#if UINTPTR_MAX == UINT32_MAX
-			unsigned long long int uint64_t_result;
 		#else
-			#define uint64_t_result int_result
+			call_routine(int64_t);
 		#endif
-		#if __ARM_PCS_VFP == 1
-			uint64_t_result = icall_x86_64( long_proc_address, (double*)dbl_op, arg_op, int_args SIGNATURE_PARAM );
-		#endif
-		call_routine(uint64_t);
-		if( uint64_t_result <= (unsigned long long int)MAXINT ){
-			return (intptr_t) uint64_t_result;
-		}
-		else{
-			return NewDouble( (eudouble)(uint64_t) uint64_t_result );
+		if (
+			(return_type == C_ULONGLONG && (unsigned long long int)int64_t_result <= (unsigned long long int)MAXINT)
+											||
+		   (return_type == C_LONGLONG && int64_t_result <= (long long int)MAXINT && int64_t_result >= (long long int)MININT)
+		   ) {
+			return (intptr_t) int64_t_result;
+		} else if (return_type == C_ULONGLONG) {
+			return NewDouble( (eudouble) (unsigned long long int)int64_t_result );
+		} else {
+			return NewDouble( (eudouble) int64_t_result );
 		}
 	}
 	else if (return_type == C_FLOAT) {

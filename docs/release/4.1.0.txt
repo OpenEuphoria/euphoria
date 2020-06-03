@@ -1,5 +1,9 @@
 == Version 4.1.0 Date TBD
 
+=== Current Bugs
+
+* Unsigned long longs are corrupted when passed to C routines in 32-bit MinGW
+
 === Bug Fixes
 
 * [[ticket:665]] Fixed to load socket routines from its DLL only when needed.
