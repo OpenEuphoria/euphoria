@@ -208,6 +208,23 @@ end ifdef
 
 test_equal( "42555", 42555, 4.2555e4 )
 test_equal( "Plank", 6.62606957 * power(10,-34), 6.62606957e-34 )
+--
+--
+-- The following test fails.  The values look the same, but when you look at the bits produced, you'll find the most insignificant bits 
+-- between these two differ.  All of the 63 other bits match. 
+--     include std/scinot.e
+--     include std/convert.e
+--     ? bytes_to_bits(scientific_to_float("6.022141e23"))
+--     ? bytes_to_bits(atom_to_float64(6.022141 * power(10,23)))
+--     {0,0,1,0,1,1,1,1,0,0,1,1,1,1,0,1,0,0,0,1,0,1,0,1,1,1,1,1,1,0,1,1,1,0,1,0,0,0,0,1,1,0,0,0,0,1,1,1,1,1,1,1,1,0,1,1,0,0,1,0,0,0,1,0}
+--     {1,0,1,0,1,1,1,1,0,0,1,1,1,1,0,1,0,0,0,1,0,1,0,1,1,1,1,1,1,0,1,1,1,0,1,0,0,0,0,1,1,0,0,0,0,1,1,1,1,1,1,1,1,0,1,1,0,0,1,0,0,0,1,0}
+-- A number that is a terminating decimal in base-10, is often a repeating decimal in base-2.  After some reading, this doesn't really 
+-- appear to really be a bug but just a characteristic a representation of a non-terminating decimal fraction (or binary fraction).
+-- For example:  If rounding to thousandths, 0.333 is within 0.0005 of one third. Now when we multiply by 3 we get 0.999, rather than 1.  
+-- The expected error should be in this interval [-0.0015,0.0015].  Percentage wise,
+-- So, we see that for each number  the machine epsilon is 100*power(2,-54)% of each value.  Multiplying these intervals means
+-- we only should demand the outcome of being within 100*(power(2,-53)+power(2,-104))% within the real product.  So the highest acceptable
+-- difference should be 3*power(2,-54) proportionally between the two.
 test_equal( "Avagadro #1", 6.022141 * power(10,23), scientific_to_atom("6.022141e23") )
 test_equal( "Avagadro #2", 6.0221412e23, scientific_to_atom("0.60221412e24") )
 test_equal( "Avagadro #3", 6.0221412e23, scientific_to_atom("6022.1412e20") )
