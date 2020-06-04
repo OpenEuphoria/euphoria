@@ -74,10 +74,33 @@ ifdef EUI then
             sequence cwf = config[P_WARNINGS]
 
 	    sequence cmd = eui & ' ' & config[P_PARAM] & " -test -batch -wf " & warnings_issued & " t_warning_options.d" & SLASH & "make_warnings.ex > " & nul
-        delete_file(warnings_issued)
+	    atom counter = 0
+	    
+	    -- Files deleted by this process may still register as existing
+	    -- What's worse, is some times you may be able to read the contents
+	    -- of a file that has been deleted.
+	    
+	    -- So these loops give the OS the time it needs.  Under Windows 10, they time out,
+	    -- but we compare the output from dir before and after which contains timestamps
+	    -- and will eventually change after a write.
+	    integer actually_deleted = delete_file(warnings_issued)
+        while file_exists(warnings_issued) and counter < 10 do
+        	sleep(0.5)
+        	counter += 0.5
+        	actually_deleted = actually_deleted or delete_file(warnings_issued)
+        end while
+        object file_meta = 0
+        if not actually_deleted then
+        	file_meta = dir(warnings_issued)
+        end if
 	    system(cmd,2)
 	    sequence wf = {}
-		if file_exists(warnings_issued) > 0 then
+	    counter = 0
+	    while equal(dir(warnings_issued), file_meta) and counter < 10 do
+	    	counter += 0.5
+	    	sleep(0.5)
+	    end while
+		if file_exists(warnings_issued) > 0 and compare(dir(warnings_issued), file_meta) then
 			wf = warning_parse(warnings_issued)
         end if
         integer ti = find("translator", cwf)
