@@ -101,7 +101,12 @@
 #  include <i86.h>
 #endif
 
+#if __GNUC__ > 7
+#include <direct.h>
+#else
+// This gets complaints on GCC v8, MinGW.
 #include <dos.h>
+#endif
 #endif  // not EUNIX
 
 #include <time.h>
