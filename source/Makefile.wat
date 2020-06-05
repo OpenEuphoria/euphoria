@@ -112,13 +112,14 @@ BASEPATH=$(BUILDDIR)\pcre
 
 FULLBUILDDIR=$(BUILDDIR)\
 
+.EXTENSIONS: .ex
+
 EU_CORE_FILES = &
 	block.e &
 	common.e &
 	coverage.e &
 	emit.e &
 	error.e &
-	fenv.e &
 	fwdref.e &
 	global.e &
 	inline.e &
@@ -349,8 +350,10 @@ core : .SYMBOLIC
 
 code-page-db : $(BUILDDIR)\ecp.dat .SYMBOLIC
 
+testaux : $(TRUNKDIR)\tests\return15.exe ..\tests\lib818.dll
+
 $(BUILDDIR)\ecp.dat : $(TRUNKDIR)\bin\buildcpdb.ex $(TRUNKDIR)\source\codepage 
-	$(BUILDDIR)\eui -i $(TRUNKDIR)\include $(TRUNKDIR)\bin\buildcpdb.ex -p$(TRUNKDIR)\source\codepage -o$(BUILDDIR)
+	$(BUILDDIR)\eui.exe -i $(TRUNKDIR)\include $(TRUNKDIR)\bin\buildcpdb.ex -p$(TRUNKDIR)\source\codepage -o$(BUILDDIR)
 
 BUILD_DIRS= &
 	$(BUILDDIR)\intobj &
@@ -437,9 +440,9 @@ OSFLAG=EWINDOWS
 LIBTARGET=$(BUILDDIR)\$(LIBRARY_NAME).lib
 CC = wcc386
 .ERASE
-COMMON_FLAGS = $(DEBUGFLAG) -DARCH=ix86
+COMMON_FLAGS = $(DEBUGFLAG) -DARCH=ix86 -DEX86=1
 FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s  /I$(TRUNKDIR) $(EREL_TYPE)
-BE_FLAGS = /ol /zp4 /d$(OSFLAG) /5r /dEWATCOM  /dEOW $(SETALIGN4) $(NOASSERT) $(HEAPCHECKFLAG) $(%ERUNTIME) $(EXTRACHECKFLAG) $(EXTRASTATSFLAG)  $(MEMFLAG) $(EREL_TYPE)
+BE_FLAGS = /ol /zp4 /d$(OSFLAG) /5r  /dEOW $(SETALIGN4) $(NOASSERT) $(HEAPCHECKFLAG) $(%ERUNTIME) $(EXTRACHECKFLAG) $(EXTRASTATSFLAG)  $(MEMFLAG) $(EREL_TYPE)
 
 !ifndef OBJDIR
 $(LIBTARGET) : .always .recheck
@@ -525,9 +528,16 @@ testeu : .SYMBOLIC  $(TRUNKDIR)\tests\ecp.dat $(EU_INTERPRETER_FILES) $(EU_CORE_
 
 !endif #EUPHORIA
 
-test : .SYMBOLIC $(BUILDDIR)\eubind.exe  $(TRUNKDIR)\tests\ecp.dat $(FULLBUILDDIR)\eu.$(LIBEXT) $(BUILDDIR)\eub.exe $(BUILDDIR)\euc.exe 
+
+..\tests\return15.exe: return15.c
+	owcc return15.c
+	wlink SYS nt libfile return15.o name ..\tests\return15.exe
+	
+
+test : .SYMBOLIC ..\tests\lib818.dll ..\tests\return15.exe $(BUILDDIR)\eubind.exe  $(TRUNKDIR)\tests\ecp.dat $(FULLBUILDDIR)\eu.$(LIBEXT) $(BUILDDIR)\eub.exe $(BUILDDIR)\euc.exe 
 	cd ..\tests
-	set EUCOMPILEDIR=$(TRUNKDIR) 
+	set EUCOMPILEDIR=$(TRUNKDIR)
+	
 	-$(EUTEST) $(TEST_EXTRA) $(VERBOSE_TESTS) -i ..\include -cc wat -eui $(FULLBUILDDIR)\eui.exe -euc $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -bind $(FULLBUILDDIR)\eubind.exe -eub $(BUILDDIR)\eub.exe -log $(LIST) $(TESTFILE)
 	$(EUTEST) -process-log > $(BUILDDIR)/test-report.txt
 	$(EUTEST) -process-log -html > $(BUILDDIR)/test-report.html	
@@ -551,40 +561,42 @@ report: .SYMBOLIC
 	$(EUTEST) -process-log -html > ..\reports\report.html
 	cd ..\source
 
-!ifndef BASE
-tester: .SYMBOLIC 
-	wmake -h $(BUILDDIR)\eutest\eutest.exe  SRCDIR=source BASE=eutest $(VARS)
+tester: .SYMBOLIC $(BUILDDIR)\eutest.exe
 
 binder : .SYMBOLIC $(BUILDDIR)\eubind.exe
 
-$(BUILDDIR)\eubind.exe : $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib $(TRUNKDIR)\source\eubind.ex
-	wmake -h $(BUILDDIR)\eubind.exe SRCDIR=source BASE=eubind $(VARS)
-
 shrouder : .SYMBOLIC $(BUILDDIR)\eushroud.exe
-
-$(BUILDDIR)\eushroud.exe :  $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib $(TRUNKDIR)\source\eushroud.ex
-	wmake -h $(BUILDDIR)\eushroud.exe SRCDIR=source BASE=eushroud $(VARS)
 	
-!endif
-tools: .SYMBOLIC
-    @echo ------- TOOLS -----------
-	wmake -h $(BUILDDIR)\eutest.exe SRCDIR=source BASE=eutest $(VARS)
-	wmake -h $(BUILDDIR)\eucoverage.exe SRCDIR=bin BASE=eucoverage $(VARS)
-	wmake -h $(BUILDDIR)\euloc.exe SRCDIR=bin BASE=euloc $(VARS)
-	wmake -h $(BUILDDIR)\eudist.exe SRCDIR=source BASE=eudist $(VARS)
+tools: .SYMBOLIC $(BUILDDIR)\eutest.exe $(BUILDDIR)\gcov.exe $(BUILDDIR)\eudist\eubind.exe $(BUILDDIR)\eudist\eushroud.exe $(BUILDDIR)\eudist\eudist.exe
 
-!ifdef BASE
+.ex.exe : $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib
+	$(BUILDDIR)\euc.exe -con -wat -lib $(BUILDDIR)\eu.lib $[@ -o $^@
 
-$(BUILDDIR)\$(BASE)\$(BASE).mak : $(TRUNKDIR)\$(SRCDIR)\$(BASE).ex 
-	$(RM) $(BUILDDIR)\$(BASE)
-	$(BUILDDIR)\euc -wat -con -nobuild -keep -build-dir $(BUILDDIR)\$(BASE) -makefile -o $(BUILDDIR)\$(BASE).exe -i $(TRUNKDIR)\include $<
+$(BUILDDIR)\eutest.exe : $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib $(TRUNKDIR)\source\eutest.ex
+$(BUILDDIR)\eubind.exe : $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib $(TRUNKDIR)\source\eubind.ex
+$(BUILDDIR)\eushroud.exe : $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib $(TRUNKDIR)\source\eubind.ex
+$(BUILDDIR)\eudist.exe : $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib $(TRUNKDIR)\source\eudist.ex
+$(BUILDDIR)\gcov.exe : $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib $(TRUNKDIR)\source\gcov.ex
 
-$(BUILDDIR)\$(BASE).exe : $(BUILDDIR)\$(BASE)\$(BASE).mak
-	cd $(BUILDDIR)\$(BASE)
-	wmake /f $(BASE).mak
+# The .mak step has been disabled because the translator no longer produces valid Watcom Makefiles.
+# 
+# .ex.mak : $(BUILDDIR)\euc.exe
+# 	@echo TO DO: make mak file here.
+# 	$(BUILDDIR)\euc -wat -con -nobuild -keep -build-dir $(BUILDDIR)\$^& -makefile -o $(BUILDDIR)\eudist\$^&.exe -i $(TRUNKDIR)\include $]@
 
-!endif
-	
+# $(BUILDDIR)\eudist\eudist.mak : $(TRUNKDIR)\source\eudist.ex
+# 
+# .mak.exe : $[:
+# 	@echo to do: make exe file here.
+# 	cd $(BUILDDIR)
+# 	cd $^&
+# 	wmake /f $[.
+# 	copy $^&.exe ..
+# 	
+# $(BUILDDIR)\eudist.exe : $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib $(BUILDDIR)\eudist\eudist.mak
+
+dister: .SYMBOLIC $(BUILDDIR)\eudist.exe
+
 tools-additional: .SYMBOLIC
     @echo ------- ADDITIONAL TOOLS -----------
 	wmake -h $(BUILDDIR)\eudoc.exe $(VARS) BASE=eudoc

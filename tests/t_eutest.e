@@ -11,16 +11,12 @@ constant diff_style_output_data =
 
 -- doesn't make any sense to bother shrouding, binding or translating this...
 ifdef EUI then
-sequence eutest = ".." & SLASH &".." & SLASH & "source" & SLASH & "eutest.ex"
-sequence incdir = ".." & SLASH & ".." & SLASH & "include"
-sequence exe    = command_line()
-exe = exe[1]
+constant eutest = ".." & SLASH &".." & SLASH & "source" & SLASH & "eutest.ex"
+constant incdir = ".." & SLASH & ".." & SLASH & "include"
+constant cl    = command_line()
+constant exe = canonical_path(cl[1])
 
-if not file_exists(exe) then
-	exe = locate_file(exe, getenv("PATH"))
-end if
-
-sequence files = dir( "eutest" & SLASH & "t_*.e" )
+constant files = dir( "eutest" & SLASH & "t_*.e" )
 
 chdir( "eutest" )
 for i = 1 to length( files ) do

@@ -7,8 +7,8 @@ include std/sequence.e
 include std/sort.e
 include std/utils.e
 include std/text.e
+include std/types.e
 
-constant warnings_issued = "warnings_issued.txt"
 constant nul = iif(platform() = WINDOWS,"NUL","/dev/null")
 
 constant warn_regex = regex:new("Warning +{ *([a-z_]+) *}:")
@@ -63,69 +63,50 @@ constant
        {"none+strict", "-x all -strict", sort({"resolution", "short_circuit", "translator", "override", "builtin_chosen", "not_used", "no_value", "custom", "not_reached", "mixed_profile", "empty_case", "default_case"})}
        }
        
-       
-       
 ifdef EUI then
-        if find(match("eui", lower(eui)), length(eui)-{2,6}) = 0 then
-            test_fail("Interpreter could not be determined.")
-        end if
-        for j = 1 to length(configs) do
-            sequence config = configs[j]
-            sequence cwf = config[P_WARNINGS]
-
-	    sequence cmd = eui & ' ' & config[P_PARAM] & " -test -batch -wf " & warnings_issued & " t_warning_options.d" & SLASH & "make_warnings.ex > " & nul
-	    atom counter = 0
-	    
+	if eu:find(match("eui", lower(eui)), length(eui)-{2,6}) = 0 then
+		test_fail("Interpreter could not be determined.")
+	end if
+	for j = 1 to length(configs) do
+		sequence config = configs[j]
+		sequence cwf = config[P_WARNINGS]
+		-- Must use distinct name for each loop iteration:  For the file system doesn't syncrhonize.
+		/* constant */ ascii_string warnings_issued = sprintf("warnings_issued-%x.txt", {j})
+		sequence cmd = eui & ' ' & config[P_PARAM] & " -test -batch -wf " & warnings_issued & " t_warning_options.d" & SLASH & "make_warnings.ex > " & nul
 	    -- Files deleted by this process may still register as existing
-	    -- What's worse, is some times you may be able to read the contents
-	    -- of a file that has been deleted.
-	    
-	    -- So these loops give the OS the time it needs.  Under Windows 10, they time out,
-	    -- but we compare the output from dir before and after which contains timestamps
-	    -- and will eventually change after a write.
-	    integer actually_deleted = delete_file(warnings_issued)
-        while file_exists(warnings_issued) and counter < 10 do
-        	sleep(0.5)
-        	counter += 0.5
-        	actually_deleted = actually_deleted or delete_file(warnings_issued)
-        end while
-        object file_meta = 0
-        if not actually_deleted then
-        	file_meta = dir(warnings_issued)
-        end if
-	    system(cmd,2)
-	    sequence wf = {}
-	    counter = 0
-	    while equal(dir(warnings_issued), file_meta) and counter < 10 do
-	    	counter += 0.5
-	    	sleep(0.5)
-	    end while
+	    -- What's worse is some times you may be able to read the contents
+	    -- of a file that has been deleted.  It is more reliable to compare
+		-- dir outputs to determine whether a file is really gone or has been replaced.
+        object file_meta = dir(warnings_issued)
+		system(cmd,2)
+		sequence wf = {}
 		if file_exists(warnings_issued) > 0 and compare(dir(warnings_issued), file_meta) then
 			wf = warning_parse(warnings_issued)
-        end if
-        integer ti = find("translator", cwf)
-        if ti then
-            cwf = remove(cwf, ti)
-        end if
+		end if
+		integer ti = eu:find("translator", cwf)
+		if ti then
+			cwf = remove(cwf, ti)
+		end if
         
         ifdef LINUX then
             -- impossible on Linux because with profile_time is an error            
-            integer xpi = find("mixed_profile", cwf)
+            integer xpi = eu:find("mixed_profile", cwf)
             if xpi then
                 cwf = remove(cwf, xpi)
             end if
         end ifdef
 
         for c = 1 to length(cwf) do
-            test_true(config[P_NAME] & " warning enabled: " & cwf[c], find(cwf[c], wf) != 0)
+            test_true(config[P_NAME] & " warning enabled: " & cwf[c], eu:find(cwf[c], wf) != 0)
         end for
         for c = 1 to length(cwf) do
-            integer t = find(cwf[c], wf)
+            integer t = eu:find(cwf[c], wf)
             wf = remove(wf, t)
         end for
         for t = 1 to length(wf) do
             test_false(config[P_NAME] & " warning enabled: " & wf[t], 1)
         end for
+        delete_file(warnings_issued)
 	end for -- j
 
 	-- avoid confusion of eutest

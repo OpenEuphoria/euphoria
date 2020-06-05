@@ -5050,6 +5050,9 @@ void system_call(object command, object wait)
 		RestoreConfig();
 }
 
+#ifdef __WATCOMC__
+#define _spawnvp spawnvp
+#endif
 
 object system_exec_call(object command, object wait)
 /* Run a .exe or .com file, then restore the graphics mode.

@@ -2344,7 +2344,7 @@ object DefineC(object x)
 
 		#endif
 	#else
-		#define CALLBACK_SIZE (80)
+		#define CALLBACK_SIZE (100)
 	#endif
 #endif
 #endif

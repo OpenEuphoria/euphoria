@@ -371,10 +371,12 @@ public procedure test_equal(sequence name, object expected, object outcome)
 
 	if equal(expected, outcome ) then
 		-- for inf and -inf simple values
-		success = 1	
+		success = 1
 	elsif equal(0*expected, 0*outcome) then
 		-- for complicated sequences values
-		success = math:max( math:abs( expected - outcome ) ) < 1e-9
+		atom abs_diff = math:max( math:abs( expected - outcome ) )
+		atom porportional_small = 1e-12*math:max( math:abs( expected ) & math:abs( outcome ) )
+		success = abs_diff < porportional_small or abs_diff < 1e-9
 	else
 		success = 0
 	end if

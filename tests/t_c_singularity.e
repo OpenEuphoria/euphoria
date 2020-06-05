@@ -17,8 +17,7 @@ type truth_type(object x)
 end type
 truth_type truth
 
--- Returns zero on my machine.  Weird eh?
-constant libc = open_dll("libc.so")
+constant libc = open_dll({"libc.so", "crtdll.dll"})
 -- Used to return function offsets from the EUI binary
 constant this_binary = 0
 

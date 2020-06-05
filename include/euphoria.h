@@ -1,7 +1,12 @@
 #ifndef EUPHORIA_H_
 #define EUPHORIA_H_
 
-#ifdef EWINDOWS
+#if defined(__WATCOMC__)
+#define EWATCOM
+#endif
+
+
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
@@ -381,7 +386,7 @@ void UserCleanup(int);
 extern int tcb_size;
 extern int current_task;
 extern double clock_period;
-#ifdef EWINDOWS
+#ifdef _WIN32
 #include <windows.h>
 
 // Address to a fiber:
@@ -467,3 +472,6 @@ extern object eu_sizeof();
 
 
 #endif
+
+int getKBchar();
+
