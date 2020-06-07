@@ -485,10 +485,6 @@ function setup_build()
 				m_flag = sprintf( "-m%d", bits )
 			end if
 			
-			if TWINDOWS then
-				m_flag &= " -lws2_32"
-			end if
-			
 			-- compiling object flags
 			if debug_option then
 				c_flags &= " -g3"
