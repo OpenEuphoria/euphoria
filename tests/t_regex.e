@@ -329,5 +329,6 @@ constant message = "fixes? ticket 348, fixes ticket 999"
 constant re_ticket = re:new(`fixes(\?)? ticket ([0-9]+)`, re:CASELESS)
 test_equal("ticket 362 #5",{2,0} & ", " & {2,2},re:find_replace_callback(re_ticket, message,
 	routine_id("info")))
+test_equal("Replace * with empty string on a string '*'.", regex:find_replace(re:new("\\*"), "*", ""), "")
 
 test_report()
