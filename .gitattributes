@@ -1,0 +1,3 @@
+*.gnu linguist-language=Makefile
+*.mak linguist-language=Makefile
+*.wat linguist-language=Makefile
