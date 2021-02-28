@@ -1,3 +1,4 @@
+
 # GNU Makefile for Euphoria Unix systems
 #
 # NOTE: This is meant to be used with GNU make,
@@ -573,7 +574,7 @@ debug-library : $(BUILDDIR)/$(EECUDBGA)
 builddirs : | $(BUILD_DIRS)
 
 $(BUILD_DIRS) :
-	mkdir -p $@
+	@mkdir -p $@
 
 ifeq "$(ROOTDIR)" ""
 ROOTDIR=$(TRUNKDIR)

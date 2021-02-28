@@ -1478,9 +1478,9 @@ object call_c(int func, object proc_ad, object arg_list)
 		/* I think you can safely change this such that there are no more conditions.  *
 		 * You'll need to rename those 64bit functions. */
 		#define call_routine(type) \
-				if( is_double ) double_result = dcall_x86_64( long_proc_address, (double*)dbl_op, arg_op SIGNATURE_PARAM);\
-				if( is_float  ) float_result = fcall_x86_64( long_proc_address, (double*)dbl_op, arg_op SIGNATURE_PARAM);\
-				else            int_result = icall_x86_64( long_proc_address, (double*)dbl_op, arg_op, int_args SIGNATURE_PARAM )
+			if ( is_double )    double_result = dcall_x86_64( long_proc_address, (double*)dbl_op, arg_op SIGNATURE_PARAM);\
+			else if( is_float ) float_result = fcall_x86_64( long_proc_address, (double*)dbl_op, arg_op SIGNATURE_PARAM);\
+			else                int_result = icall_x86_64( long_proc_address, (double*)dbl_op, arg_op, int_args SIGNATURE_PARAM )
 	#endif
 	if (return_type == C_DOUBLE) {
 		call_routine(double);
