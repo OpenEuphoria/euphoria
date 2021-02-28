@@ -109,6 +109,7 @@ int main(int argc, char **argv)
 	char new_ver[BUF_SIZE], new_date[BUF_SIZE];
 	int old_rev = 0, new_rev = 0;
     int had_old_info = 0;
+    int system_return_value;
 
     if (argc < 4)
     {
@@ -141,7 +142,6 @@ int main(int argc, char **argv)
 			 "\"%s\" show --format=%s%%H%%n%%at%%n-1%%n%s > %s",
 			 hg_executable, clq, clq, cache_filename);
 
-    int system_return_value;
     if ((system_return_value = system(tmp)) != 0)
     {
         /*

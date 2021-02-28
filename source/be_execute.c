@@ -45,7 +45,7 @@
 #endif
 #include <stdio.h>
 #include <time.h>
-#ifdef EUNIX
+#if !defined(__WIN32)
 #	include <sys/times.h>
 #	include <string.h>
 #else
@@ -562,6 +562,62 @@ static object do_peek4(object a, int b )
 #define POKE_LIMIT(x) "poke" #x " is limited to 64-bit numbers"
 #endif
 
+#ifdef __WATCOMC__
+// 754 - double format as a struct with bitfields.
+typedef struct  {
+    unsigned int frac2:32;
+    unsigned int frac1:20;
+    unsigned int exp:11;
+    unsigned int sign:1;
+} dbl64_format;
+
+union ds {
+    double n;
+    dbl64_format s;
+};
+
+static double trunc(const double f) {
+    union ds d;
+    signed int ff;
+    d.n = f;
+    // A smaller ff number means a greater value of d.n.
+    ff = 1043 - d.s.exp;
+    #if DDEBUG
+    printf("f = %.15g: sign = %d, exp = %d, frac = %u %u. ff = %d:", d.n, d.s.sign, d.s.exp, d.s.frac1, d.s.frac2, ff);
+    #endif
+    if (d.s.sign == 0 && d.s.exp == 0 && d.s.frac1 == 0 && d.s.frac2 == 0) {
+    #if DDEBUG
+    	printf("==> trunc(f) = %0.3g\n", 0.0);
+    #endif
+    	return f;
+    }
+    #if DDEBUG
+    	printf("2**ff: %d", (1 << ff));
+    #endif
+    if (ff >= 0) {
+    	d.s.frac1 &= ~((1 << ff) - 1);
+    	d.s.frac2 = 0;
+    } else if (ff > -32) {
+    	ff += 32;
+    	d.s.frac2 &= ~((1 << ff) - 1);
+    } // else no bits in d.s.frac* are non-integer valued 
+    // so leave both d.s.frac* as they are
+    
+    if (d.s.exp < 1023 && d.s.frac1 == 0 && d.s.frac2 == 0) {
+    	// the implicitly bit when frac1==0 and d.s.exp<1023 is <1.  Set this to 
+    	// special zero case.
+    	d.s.exp = 0;
+    	d.s.sign = 0;
+    }
+    //d.s.frac1 &= (((ff + 1) << 1) - 1);
+    #if DDEBUG
+    	printf("sign = %d, exp = %d, frac = %u %u", d.s.sign, d.s.exp, d.s.frac1, d.s.frac2);
+    	printf("==> trunc(f) = %.14g\n", d.n);
+    #endif
+    return d.n;    
+}
+#endif
+
 static void do_poke2(object a, object top)
 // moved it here because it was causing bad code generation for WIN32
 {
@@ -965,15 +1021,16 @@ void InitExecute()
 // detect matherr support
 #if defined(DOMAIN) && defined(SING) && defined(OVERFLOW) && defined(UNDERFLOW) && defined(TLOSS) && defined(PLOSS)
 	// enable our matherr function
+#if !defined(EMINGW) && !defined(EWATCOM)
 	_LIB_VERSION = _SVID_;
 #endif
-    
+	
 #ifdef _WIN32
 		/* Prevent "Send Error Report to Microsoft dialog from coming up
-		   if this thing has an unhandled exception.  */
-		SetUnhandledExceptionFilter(Win_Machine_Handler);
+	   if this thing has an unhandled exception.  */
+	SetUnhandledExceptionFilter(Win_Machine_Handler);
 #endif
-
+#endif
 #ifndef ERUNTIME  // dll shouldn't take handler away from main program
 #ifndef EDEBUG
 	signal(SIGILL,  Machine_Handler);

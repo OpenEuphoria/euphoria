@@ -225,9 +225,9 @@ export procedure coverage_exclude( sequence patterns )
 			integer fx = 1
 			while fx <= length( covered_files ) do
 				if regex:has_match( ex, covered_files[fx] ) then
-					covered_files = remove( covered_files, fx )
-					routine_map   = remove( routine_map, fx )
-					line_map      = remove( line_map, fx )
+					covered_files = eu:remove( covered_files, fx )
+					routine_map   = eu:remove( routine_map, fx )
+					line_map      = eu:remove( line_map, fx )
 				else
 					fx += 1
 				end if

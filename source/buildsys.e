@@ -484,6 +484,11 @@ function setup_build()
 				-- current gcc for ARM does not support -m32
 				m_flag = sprintf( "-m%d", bits )
 			end if
+			
+			if TWINDOWS then
+				m_flag &= " -lws2_32"
+			end if
+			
 			-- compiling object flags
 			if debug_option then
 				c_flags &= " -g3"
@@ -656,12 +661,13 @@ procedure write_objlink_file()
 end procedure
 
 
+constant CONTCHAR = iif(compiler_type = COMPILER_WATCOM, '&', '\\')
 procedure write_makefile_srcobj_list(integer fh)
 	printf(fh, "%s_SOURCES =", { upper(file0) })
 	for i = 1 to length(generated_files) do
 		if generated_files[i][$] = 'c' then
 			if i > 1 then
-				printf(fh, " \\%s\t", { HOSTNL }  )
+				printf(fh, " %s%s\t", { CONTCHAR, HOSTNL }  )
 			end if
 			puts(fh, " " & generated_files[i])
 		end if
@@ -673,7 +679,7 @@ procedure write_makefile_srcobj_list(integer fh)
 	for i = 1 to length(generated_files) do
 		if match(".o", generated_files[i]) then
 			if file_count then
-				printf(fh, " \\%s\t", { HOSTNL }  )
+				printf(fh, " %s%s\t", { CONTCHAR, HOSTNL }  )
 			end if
 			file_count += 1
 			puts(fh, " " & generated_files[i])
@@ -684,7 +690,7 @@ procedure write_makefile_srcobj_list(integer fh)
 	printf(fh, "%s_GENERATED_FILES = ", { upper(file0) })
 	for i = 1 to length(generated_files) do
 		if i > 1 then
-			printf(fh, " \\%s\t", { HOSTNL }  )
+			printf(fh, " %s%s\t", { CONTCHAR, HOSTNL }  )
 		end if
 		puts(fh, " " & generated_files[i])
 	end for

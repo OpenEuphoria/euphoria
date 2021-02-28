@@ -61,7 +61,6 @@ elsedef
 end ifdef
 elsedef
 	constant
-		STDLIB = dll:open_dll({ "libc.so", "libc.dylib", "" }),
 		PIPE   = dll:define_c_func(STDLIB, "pipe",   {dll:C_POINTER}, dll:C_INT),
 		READ   = dll:define_c_func(STDLIB, "read",   {dll:C_INT, dll:C_POINTER, dll:C_POINTER}, dll:C_LONG),
 		WRITE  = dll:define_c_func(STDLIB, "write",  {dll:C_INT, dll:C_POINTER, dll:C_POINTER}, dll:C_LONG),
