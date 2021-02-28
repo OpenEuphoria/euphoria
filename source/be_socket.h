@@ -9,6 +9,7 @@
     	#include <winsock2.h>
         #include <ws2tcpip.h>
     #endif // AF_INET
+    #undef FD_ISSET
 	typedef int socklen_t;
 #else // ifdef EWINDOWS else
     #include <sys/types.h>

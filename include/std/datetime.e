@@ -22,8 +22,8 @@ elsifdef WINDOWS then
 	constant gmtime_ = dll:define_c_func(dll:open_dll("msvcrt.dll"), "+gmtime", {dll:C_POINTER}, dll:C_POINTER)
 	constant time_ = dll:define_c_proc(dll:open_dll("kernel32.dll"), "GetSystemTimeAsFileTime", {dll:C_POINTER})
 elsifdef UNIX then
-	constant gmtime_ = dll:define_c_func(dll:open_dll("libc.so"), "gmtime", {dll:C_POINTER}, dll:C_POINTER)
-	constant time_ = dll:define_c_func(dll:open_dll("libc.so"), "time", {dll:C_POINTER}, dll:C_INT)
+	constant gmtime_ = dll:define_c_func(STDLIB, "gmtime", {dll:C_POINTER}, dll:C_POINTER)
+	constant time_ = dll:define_c_func(STDLIB, "time", {dll:C_POINTER}, dll:C_INT)
 end ifdef
 
 enum TM_SEC, TM_MIN, TM_HOUR, TM_MDAY, TM_MON, TM_YEAR --, TM_WDAY, TM_YDAY, TM_ISDST

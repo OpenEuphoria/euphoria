@@ -7,7 +7,14 @@
 #ifndef H_GLOBAL
 #define H_GLOBAL
 
+
+#if defined(__WATCOMC__)
+#define EWATCOM
+#endif
 #ifdef _WIN32
+#if !defined(EWINDOWS)
+#define EWINDOWS
+#endif
 #include <windows.h>
 #endif
 #ifdef EWATCOM

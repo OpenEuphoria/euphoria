@@ -120,7 +120,7 @@ ifeq "$(EMINGW)" "1"
 	EPTHREAD=
 	EOSTYPE=-DEWINDOWS
 	EBSDFLAG=-DEMINGW
-	LDLFLAG=
+	LDLFLAG=-static 
 	SEDFLAG=-ri
 	EOSFLAGS=$(NO_CYGWIN) -mwindows
 	EOSFLAGSCONSOLE=$(NO_CYGWIN)
@@ -310,10 +310,11 @@ else ifeq "$(ARCH)" "ix86_64"
 endif
 
 
+WARNINGFLGS = 
 ifeq "$(MANAGED_MEM)" "1"
-    FE_FLAGS =  $(ARCH_FLAG) $(COVERAGEFLAG) $(MSIZE) $(EPTHREAD) -c -fsigned-char $(EOSTYPE) $(EOSMING) -ffast-math $(FP_FLAGS)                $(EOSFLAGS) $(DEBUG_FLAGS) -I$(CYPTRUNKDIR)/source -I$(CYPTRUNKDIR) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE) $(MEM_FLAGS)
+    FE_FLAGS =  $(ARCH_FLAG) $(COVERAGEFLAG) $(MSIZE) $(EPTHREAD) -Wno-unused-variable -Wno-unused-but-set-variable -c -fsigned-char $(EOSTYPE) $(EOSMING) -ffast-math $(FP_FLAGS)                $(EOSFLAGS) $(DEBUG_FLAGS) -I$(CYPTRUNKDIR)/source -I$(CYPTRUNKDIR) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE) $(MEM_FLAGS)
 else
-    FE_FLAGS =  $(ARCH_FLAG) $(COVERAGEFLAG) $(MSIZE) $(EPTHREAD) -c -fsigned-char $(EOSTYPE) $(EOSMING) -ffast-math $(FP_FLAGS) $(EOSFLAGS) $(DEBUG_FLAGS) -I$(CYPTRUNKDIR)/source -I$(CYPTRUNKDIR) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE)
+    FE_FLAGS =  $(ARCH_FLAG) $(COVERAGEFLAG) $(MSIZE) $(EPTHREAD) -Wno-unused-variable -Wno-unused-but-set-variable -c -fsigned-char $(EOSTYPE) $(EOSMING) -ffast-math $(FP_FLAGS) $(EOSFLAGS) $(DEBUG_FLAGS) -I$(CYPTRUNKDIR)/source -I$(CYPTRUNKDIR) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE)
 endif
 BE_FLAGS =  $(ARCH_FLAG) $(COVERAGEFLAG) $(MSIZE) $(EPTHREAD) -c -Wall $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(FP_FLAGS) $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE) $(FPIC) -I$(TRUNKDIR)/source
 
@@ -509,7 +510,7 @@ clobber distclean : clean
 	$(MAKE) -C pcre CONFIG=$(BUILDDIR)/$(CONFIG) FPIC=-fPIC clean
 	
 
-.PHONY : clean distclean clobber all htmldoc manual lib818
+.PHONY : clean distclean clobber all htmldoc manual lib818 testaux
 
 ifeq "$(OBJDIR)" "libobj"
 
@@ -572,8 +573,7 @@ debug-library : $(BUILDDIR)/$(EECUDBGA)
 builddirs : | $(BUILD_DIRS)
 
 $(BUILD_DIRS) :
-	if ! -e "$@":
-		mkdir -p $@
+	mkdir -p $@
 
 ifeq "$(ROOTDIR)" ""
 ROOTDIR=$(TRUNKDIR)
@@ -612,14 +612,12 @@ $(BUILDDIR)/intobj/main-.c : $(BUILDDIR)/include/be_ver.h
 
 euisource : $(BUILDDIR)/intobj/main-.c
 
-$(BUILDDIR)/transobj/main-.c : $(BUILDDIR)/transobj/main-.c
-$(BUILDDIR)/transobj/main-.c :  EU_TARGET=euc.ex
+$(BUILDDIR)/transobj/main-.c : EU_TARGET=euc.ex
 $(BUILDDIR)/transobj/main-.c : $(BUILDDIR)/include/be_ver.h
 
 eucsource : $(BUILDDIR)/transobj/main-.c
 
-$(BUILDDIR)/backobj/main-.c : $(BUILDDIR)/backobj/main-.c
-$(BUILDDIR)/backobj/main-.c :  EU_TARGET=backend.ex
+$(BUILDDIR)/backobj/main-.c : EU_TARGET=backend.ex
 $(BUILDDIR)/backobj/main-.c : $(BUILDDIR)/include/be_ver.h
 
 backendsource : $(BUILDDIR)/backobj/main-.c
@@ -703,7 +701,7 @@ endif
 $(BUILDDIR)/$(EECU) :  EU_TARGET=euc.ex
 $(BUILDDIR)/$(EECU) :  EU_MAIN=$(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_STD_INC)
 $(BUILDDIR)/$(EECU) :  $(wildcard $(BUILDDIR)/transobj/*.c) $(EU_MAIN) $(EU_TRANSLATOR_FILES) $(EUI_RES) $(EUIW_RES) $(wildcard be_*.c)
-$(BUILDDIR)/$(EECU) :  $(BUILDDIR)/include/be_ver.h $(TRUNKDIR)/source/pcre/*.c
+$(BUILDDIR)/$(EECU) :  $(BUILDDIR)/include/be_ver.h $(TRUNKDIR)/source/pcre/*.c $(EUC_RES)
 ifeq "$(OBJDIR)" "transobj"
 $(BUILDDIR)/$(EECU) :  EU_OBJS="$(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) $(PREFIXED_PCRE_OBJECTS)"
 $(BUILDDIR)/$(EECU) :  $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) $(PREFIXED_PCRE_OBJECTS)
@@ -869,6 +867,7 @@ $(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : $(TRUNKDIR)/tests/ecp
 $(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : $(BUILDDIR)/$(EEXU) $(BUILDDIR)/$(EUBIND)
 $(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EECU)
 $(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : $(BUILDDIR)/$(LIBRARY_NAME)
+$(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : $(TRUNKDIR)/tests/return15$(EXE_EXT)
 $(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html :  
 
 	-cd $(TRUNKDIR)/tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
@@ -998,7 +997,7 @@ EUCOVERAGE=eucoverage
 EUDIST=eudist
 
 ifeq "$(EMINGW)" "1"
-	MINGW_FLAGS=-gcc
+	MINGW_FLAGS=-gcc -con
 else
 	MINGW_FLAGS=
 endif
@@ -1154,10 +1153,16 @@ endif
 $(BUILDDIR)/test818.o : test818.c
 	$(CC) -c $(LIB818_FPIC) -I $(TRUNKDIR)/include $(FE_FLAGS) -Wall -shared $(TRUNKDIR)/source/test818.c -o $(BUILDDIR)/test818.o
 
+$(TRUNKDIR)/tests/return15$(EXE_EXT) : return15.c
+	$(CC)  $(TRUNKDIR)/source/return15.c $(MSIZE) -o $(TRUNKDIR)/tests/return15$(EXE_EXT)
+	
+	
 lib818 :
 	touch test818.c
 	$(MAKE) -j$(BUILDJOBS) $(TRUNKDIR)/tests/lib818.dll
 
+testaux : $(TRUNKDIR)/tests/return15$(EXE_EXT) $(TRUNKDIR)/tests/lib818.dll
+	
 $(TRUNKDIR)/tests/lib818.dll : $(BUILDDIR)/test818.o
 	$(CC)  $(MSIZE) $(LIB818_FPIC) -shared -o $(TRUNKDIR)/tests/lib818.dll $(CREATEDLLFLAGS) $(BUILDDIR)/test818.o
 

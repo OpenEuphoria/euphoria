@@ -192,11 +192,11 @@ ifdef BITS32 then
 	test_equal( "0b1.11111111e1022 #3", power(2,968)*(power(2,55)-2), scientific_to_atom("89884656743115795e291") )
 	test_equal( "0b1.11111111e1022 #4", power(2,968)*(power(2,55)-2), scientific_to_atom("8.9884656743115795e307") )
 	
-	test_equal( "1E308 #1",             power(10,308), scientific_to_atom("1e308") )
-	test_equal( "1E308 #2",             power(10,308), scientific_to_atom("0.001e311") )
-	test_equal( "1E308 #3",             power(10,308), scientific_to_atom("0.1e309") )
-	test_equal( "1E308 #4",             power(10,308), scientific_to_atom("10e307") )
-	test_equal( "1E308 #5",             power(10,308), scientific_to_atom("1000e305") )
+	test_equal( "1E308 #1", power(10,308), scientific_to_atom("1e308") )
+	test_equal( "1E308 #2", power(10,308), scientific_to_atom("0.001e311") )
+	test_equal( "1E308 #3", power(10,308), scientific_to_atom("0.1e309") )
+	test_equal( "1E308 #4", power(10,308), scientific_to_atom("10e307") )
+	test_equal( "1E308 #5", power(10,308), scientific_to_atom("1000e305") )
 	
 	test_equal( "inf  #1", 1e308*10, scientific_to_atom("1e309") )
 	test_equal( "inf  #2", 1e308*10, scientific_to_atom("0.001e312") )

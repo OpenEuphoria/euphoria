@@ -127,7 +127,8 @@ end function
 function split_diff_length(sequence asplit_diff)
     integer len = 0
     for i = 1 to length(asplit_diff) do
-        len += length(asplit_diff[i])
+        ascii_string p = asplit_diff[i][1]
+        len += length(p)
     end for
     return len
 end function
@@ -701,7 +702,16 @@ procedure process_coverage()
 	end if
 end procedure
 
-procedure do_test( sequence files )
+type string_of_strings(sequence x)
+    for i = 1 to length(x) do
+        if not types:string(x[i]) then
+            return 0
+        end if
+    end for
+    return 1
+end type
+
+procedure do_test( string_of_strings files )
 	atom score
 	integer first_counter = length(files)+1
 	integer log_fd = 0
@@ -1149,8 +1159,9 @@ procedure html_out(sequence data)
                                         html_decorate_diff(this_diff)
                                 })
                             end if
+                            
                         end if
-
+                        
                         if not use_diff_format then 
                             printf(html_fn, html_table_failed_row, {
                                 data[2],
@@ -1465,7 +1476,7 @@ end function
 
 procedure main()
 
-	object files = {}
+	string_of_strings files = {}
 	map opts = cmd_parse( cmdopts )
 	sequence keys = map:keys( opts )
 	sequence output_format = ASCII_output
@@ -1634,12 +1645,12 @@ procedure main()
 				if length( val ) then
 					files = build_file_list( val )
 				else
-					files = dir("t_*.e" )
-					if atom(files) then
-						files = {}
+					object dent_list = dir("t_*.e" )
+					if atom(dent_list) then
+						dent_list = {}
 					end if
-					for f = 1 to length( files ) do
-						files[f] = files[f][D_NAME]
+					for f = 1 to length( dent_list ) do
+						files = append(files, dent_list[f][D_NAME])
 					end for
 					files = sort( files )
 					-- put the counter tests last to do
@@ -1675,14 +1686,18 @@ procedure main()
 	end if
 	
 	if map:has( opts, "process-log") then
-		platform_init()
 		do_process_log( files, output_format )
-		if map:has( opts, "retest" ) then
-			do_test( retest_files )
-		end if
 	else
+		if file_exists( "unittest.log" ) then
+		    -- This strange looking line, uses the do_process_log 
+		    -- routine to find all of the files that need to be
+		    -- processed (and assign that to retest_files).
+		    -- It doesn't actually produce any output.
+		    do_process_log( files, PREPARE_RETEST_output )
+		else
+		    retest_files = {}
+		end if
 		if map:has( opts, "retest" ) then
-			do_process_log( files, PREPARE_RETEST_output )
 			files = retest_files
 		end if
 		platform_init()
@@ -1693,7 +1708,7 @@ end procedure
 enum DOCUMENT_OPEN, -- a procedure that takes no parameters and opens the html-file if not stdout
 DOCUMENT_CLOSE, --  a procrocedure that takes no parameters and [closes the html-file if not stdout]
 DOCUMENT_PROCESS, -- a procedure takes a single parameter see html_out and ascii_out 
-DOCUMENT_NL, -- a function no parameters that outputs a new-line 
+DOCUMENT_NL, -- a function no parameters that outputs a new-line
 DOCUMENT_LINK, --  a function no parameters that outputs a link
 DOCUMENT_ENDING, -- a printf format string for the document's ending or 0.
 DOCUMENT_P -- a routine that outputs something to indicate a new paragraph is starting

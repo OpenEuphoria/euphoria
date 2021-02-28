@@ -139,7 +139,7 @@ export procedure show_banner()
 	if equal(EuConsole, "1") then
 		misc_info[4] = GetMsgText(EUCONSOLE,0)
 	else
-		misc_info = remove(misc_info, 4)
+		misc_info = eu:remove(misc_info, 4)
 	end if
 
 	screen_output(STDERR, sprintf("%s v%s %s\n   %s %s, %s\n   Revision Date: %s\n   Id: %s\n", {
@@ -243,11 +243,11 @@ export function merge_parameters(sequence a, sequence b, sequence opts, integer 
 		if length(this_opt) and not find(MULTIPLE, this_opt[OPTIONS]) then
 			if bi then
 				if find(HAS_PARAMETER, this_opt[OPTIONS]) then
-					-- remove the option and it's parameter as well
-					a = remove(a, i, i + 1)
+					-- eu:remove the option and it's parameter as well
+					a = eu:remove(a, i, i + 1)
 				else
-					-- remove only the option
-					a = remove(a, i)
+					-- eu:remove only the option
+					a = eu:remove(a, i)
 				end if
 				
 				-- no need to increment the parameter index as we have removed options 
@@ -411,12 +411,12 @@ export function expand_config_options(sequence args)
 	sequence next_idx
 	sequence files = {}
 	sequence cmd_1_2 = args[1..2]
-	args = remove( args, 1, 2 )
+	args = eu:remove( args, 1, 2 )
 	
 	while idx with entry do
 		if equal(upper(args[idx]), "-C") then
 			files = append( files, args[idx+1] )
-			args = remove( args, idx, idx + 1 )
+			args = eu:remove( args, idx, idx + 1 )
 		else
 			-- jump over the option and parameter, if any
 			idx = next_idx[2]
@@ -496,7 +496,7 @@ export procedure handle_common_options(m:map opts)
 				
 			case "x" then
 				for i = 1 to length(val) do
-					sequence this_warn = val[i]
+					cstring this_warn = val[i]
 					integer auto_add_warn = 0
 					if this_warn[1] = '+' then
 						auto_add_warn = 1
@@ -564,7 +564,7 @@ export procedure finalize_command_line(m:map opts)
 		prev_OpWarning = OpWarning
 	end if
 	
-	-- Initialize the option_switches and remove them
+	-- Initialize the option_switches and eu:remove them
 	-- from the command line
 	sequence extras = m:get(opts, cmdline:EXTRAS)
 	if length(extras) > 0 then

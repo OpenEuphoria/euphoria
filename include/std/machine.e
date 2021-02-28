@@ -166,7 +166,7 @@ include std/dll.e
 export constant
 	--**
 	-- @nodoc@
-	STDLIB   = dll:open_dll({ "libc.so", "libc.dylib", "" }),
+	STDLIB   = dll:open_dll({ "libc.so.7", "libc.so", "libc.dylib", "" }),
 	--**
 	-- @nodoc@
 	MMAP     = dll:define_c_func( STDLIB, "mmap", 
