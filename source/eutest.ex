@@ -30,6 +30,9 @@ include std/map.e
 include std/cmdline.e
 include std/eds.e
 include std/regex.e
+include lcssp.e
+include std/pretty.e
+include std/types.e
 
 ifdef UNIX then
 	constant dexe = ""
@@ -59,6 +62,7 @@ constant cmdopts = {
 	{ HEADER,                "Logging" },
 	{ "log",              0, "Enable logging", { } },
 	{ "process-log",      0, "Process log instead of running tests", { } },
+	{ "css-file",         0, "Set the CSS file URL",  { HAS_PARAMETER, "css_filename" } },
 	{ "html",             0, "Enable HTML output mode", { } },
 	{ "html-file",        0, "Output file for html log output", { HAS_PARAMETER, "filename" } },
 	{ HEADER,                "Test Coverage" },
@@ -81,6 +85,80 @@ constant cmdopts = {
 	$
 }
 
+enum DIFF_NORMAL, DIFF_ADDED, DIFF_MISSING
+
+function split_diff(sequence control, sequence outcome)
+    if length(control) = 0 and length(outcome) = 0 then
+        return ""
+    end if    
+    
+    sequence data = LCSubstr_fast(control, outcome)
+    
+    if equal(data, {}) then
+        -- handle terminating condition
+        return {{control, DIFF_MISSING}, {outcome, DIFF_ADDED}}
+    end if
+    
+    integer len = data[1]
+    integer endc = data[2]
+    integer endo = data[3]
+    
+    integer c1, c0
+    
+    -- -- make the long string begin on a word boundary
+    -- if endc-len < length(control) then
+    --     c1 = control[endc-len+1]
+    -- else
+    --     c1 = 0
+    -- end if
+    -- while len > 0 and not t_space(c1) and not t_space(c0) and not t_punct(c1) and not t_punct(c0) with entry do
+    --     len = len - 1
+    --     c1 = c0
+    -- entry
+    --     c0 = control[endc - len]
+    -- end while
+    
+    
+    return split_diff(control[1..endc-len], outcome[1..endo-len]) &
+          {{control[endc-len+1..endc], DIFF_NORMAL}} &
+          split_diff(control[endc+1..$], outcome[endo+1..$])
+end function
+
+function split_diff_length(sequence asplit_diff)
+    integer len = 0
+    for i = 1 to length(asplit_diff) do
+        ascii_string p = asplit_diff[i][1]
+        len += length(p)
+    end for
+    return len
+end function
+
+function html_decorate_diff(sequence asplit_diff)
+    /* constant */ sequence missingstyle = "<span class=missing>"
+    /* constant */ sequence missingstyleend = "</span class=missing>"
+    /* constant */ sequence addedstyle = "<span class=added>"
+    /* constant */ sequence addedstyleend = "</span class=added>"
+    /* constant */ sequence normalstyle = "<span class=normal>"
+    /* constant */ sequence normalstyleend = "</span class=normal>"
+
+    sequence result = ""
+    for i = 1 to length(asplit_diff) do
+        sequence astring_score_pair = asplit_diff[i]
+        sequence str = astring_score_pair[1]
+        integer  score = astring_score_pair[2]
+        switch score do
+            case DIFF_NORMAL then
+                result &= normalstyle & str & normalstyleend
+            case DIFF_ADDED then
+                result &= addedstyle & str & addedstyleend
+            case DIFF_MISSING then
+                result &= missingstyle & str & missingstyleend
+        end switch
+    end for
+    
+    return result
+end function
+
 constant USER_BREAK_EXIT_CODES = {255,-1073741510}
 integer verbose_switch = 0
 object void
@@ -90,6 +168,7 @@ sequence eub_path = ""
 sequence exclude_patterns = {}
 integer no_check = 0
 object html_filename = 0 
+object css_filename = 0
 
 -- moved from do_test:
 integer logging_activated = 0
@@ -153,7 +232,7 @@ function invoke(sequence cmd, sequence filename, integer err)
 	delete_file("ex.err")
 
 	status = system_exec(cmd, 2)
-	if find(status, USER_BREAK_EXIT_CODES) > 0 then
+	if eu:find(status, USER_BREAK_EXIT_CODES) > 0 then
 		-- user break
 		abort(status)
 	end if
@@ -236,7 +315,7 @@ function prepare_error_file(object file_name)
 		file_data = file_data[1..4]
 	end if
 	for i = 1 to length(file_data) do
-		pos = find('=', file_data[i])
+		pos = eu:find('=', file_data[i])
 		if pos then
 			if length(file_data[i]) >= 6 then
 				if equal(file_data[i][1..4], "    ") then
@@ -245,7 +324,7 @@ function prepare_error_file(object file_name)
 				end if
 			end if
 		end if
-		if find(file_data[i], {"Global & Local Variables","Public & Export & Global & Local Variables", "--- Defined Words ---"}) then
+		if eu:find(file_data[i], {"Global & Local Variables","Public & Export & Global & Local Variables", "--- Defined Words ---"}) then
 			file_data = file_data[1 .. i-1]
 			exit
 		end if
@@ -317,7 +396,7 @@ function find_error_file( sequence filename )
 	sequence control_error_file
 	sequence base_filename
 	
-	base_filename = filename[1 .. find('.', filename & '.') - 1] & ".d" & SLASH
+	base_filename = filename[1 .. eu:find('.', filename & '.') - 1] & ".d" & SLASH
 	
 	-- try tests/t_test.d/interpreter/UNIX/control.err
 	control_error_file =  base_filename & "interpreter" & SLASH & interpreter_os_name & SLASH & "control.err"
@@ -504,8 +583,8 @@ function test_file( sequence filename, sequence fail_list )
 		fail_list = interpret_fail( cmd, filename, fail_list )
 		
 		ifdef REC then
-			if compare(old_fail_list, fail_list) then
-				sequence directory = filename[1..find('.',filename&'.')] & "d" & SLASH & interpreter_os_name
+			if eu:compare(old_fail_list, fail_list) then
+				sequence directory = filename[1..eu:find('.',filename&'.')] & "d" & SLASH & interpreter_os_name
 				
 				create_directory(directory)
 				
@@ -582,7 +661,7 @@ procedure ensure_coverage()
 		and db_table_size( table_name ) = 0 then
 			ix += 1
 		else
-			tables = remove( tables, ix )
+			tables = eu:remove( tables, ix )
 		end if
 	end while
 	db_close()
@@ -623,7 +702,16 @@ procedure process_coverage()
 	end if
 end procedure
 
-procedure do_test( sequence files )
+type string_of_strings(sequence x)
+    for i = 1 to length(x) do
+        if not types:string(x[i]) then
+            return 0
+        end if
+    end for
+    return 1
+end type
+
+procedure do_test( string_of_strings files )
 	atom score
 	integer first_counter = length(files)+1
 	integer log_fd = 0
@@ -735,9 +823,9 @@ procedure ascii_out(sequence data)
 			printf(1, "%s\n", { data[2] })
 			puts(1, repeat('=', 76) & "\n")
 
-			if find(data[2], error_list[1]) then
+			if eu:find(data[2], error_list[1]) then
 				printf(1,"%s\n",
-				{ error_list[2][find(data[2],error_list[1])] })
+				{ error_list[2][eu:find(data[2],error_list[1])] })
 			end if
 
 		case "failed" then
@@ -871,12 +959,12 @@ constant no_error_color = "#aaffaa"
 constant error_color =  "#ffaaaa"
 sequence html_table_head = `
 <table width=100%%>
-<tr bgcolor=#dddddd>
+<tr class='header'>
 <th colspan=3 align=left><a name='%s'>%s</a></th>
 <td><a href='#summary'>all file summary</a></th>
 </tr>`
 
-constant html_table_headers = `<tr bgcolor=#dddddd><th>test name</th>
+constant html_table_headers = `<tr class='header'><th>test name</th>
 <th>test time</th>
 <th>expected</th>
 <th>outcome</th>
@@ -884,9 +972,9 @@ constant html_table_headers = `<tr bgcolor=#dddddd><th>test name</th>
 
 constant html_error_table_begin = `
 </DOCUMENT_P><table width='100%%'>
-<tr bgcolor="` & error_color & `">
+<tr class=error>
 <th width='78%%' align='left'><a name='%s'>%s</a></th>
-<td bgcolor="` & no_error_color & `" align='left'><a href='#summary'>all file summary</a></td></tr>
+<td class=no_error align='left'><a href='#summary'>all file summary</a></td></tr>
 </table>
 <table width='100%%'>`
 
@@ -899,27 +987,28 @@ constant differing_ex_err_pattern = regex:new(sprintf(differing_ex_err_format,{"
 constant html_unexpected_exerr_table_begin = 
 html_error_table_begin &
 `
-<tr><th width="50%%" colspan='1' bgcolor="#dddddd">expected ex.err</th><th colspan='1' bgcolor="` & error_color & `">outcome ex.err</th></tr>`
-constant html_unexpected_exerr_row_format = "<tr><td bgcolor=\"#dddddd\" colspan='1' ><pre>%s</pre></td><td bgcolor=\"" & error_color & "\" bcolspan='1' ><pre>%s</pre></td></tr>"
+<tr><th width="50%%" colspan='1'  class='header'>expected ex.err</th><th colspan='1' class=error>outcome ex.err</th></tr>`
+sequence html_unexpected_exerr_row_format = "<tr><td  class='header' colspan='1' ><pre>%s</pre></td><td class=error bcolspan='1' ><pre>%s</pre></td></tr>"
+constant html_unexpected_exerr_diff_row_format = "<tr><td  colspan='2' ><pre>%s</pre></td></tr>"
 
-constant html_unexpected_exerr_table_end = `
+sequence html_unexpected_exerr_table_end = `
 </table>
 `
 
-constant html_error_table_end = html_unexpected_exerr_table_end
-constant html_table_error_row = `
-<tr bgcolor="%s">
+sequence html_error_table_end = html_unexpected_exerr_table_end
+sequence html_table_error_row = `
+<tr class=%s>
 <th align="left" width="50%%">%s</td>
 <td colspan="3">%s</td>
 </tr>`
 
 sequence html_table_error_content_begin = `
-<tr bgcolor="#ffaaaa">
+<tr class=error>
   <th colspan="4" align="left" width="50%">
     Error file contents follows below
   </th>
 </tr>
-<tr bgcolor="#ffaaaa">
+<tr class=error>
   <td colspan="4" align="left" width="100%">
     <pre>
 `
@@ -931,11 +1020,19 @@ sequence html_table_error_content_end = `
 `
 
 sequence html_table_failed_row = `
-<tr bgcolor="#ffaaaa">
+<tr class=error>
   <th align=left width=50%%>%s</th>
   <td>%f</td>
   <td>%s</td>
   <td>%s</td>
+</tr>
+`
+
+sequence html_table_failed_row2 = `
+<tr>
+  <th align=left width=50%%>%s</th>
+  <td>%f</td>
+  <td colspan=2>%s</td>
 </tr>
 `
 
@@ -984,35 +1081,42 @@ sequence html_table_final_summary = `
 <P>
 <h3>Testing Completed %04d-%02d-%02d %02d:%02d</h3>
 </P>
-</body>
-</html>`
+`
 
 procedure html_out(sequence data)
 	switch data[1] do
 		case "file" then
 
-			integer err = find(data[2], error_list[1])
+			integer err = eu:find(data[2], error_list[1])
 			if err then
-				sequence color
+				sequence style
 				if error_list[3][err] = E_NOERROR then
-					color = no_error_color
+					style = "no_error"
 				else
-					color = error_color
+					style = "error"
 				end if
 				
 				object ex_err = regex:matches(differing_ex_err_pattern, error_list[2][err])
 				if sequence(ex_err) then
 					printf(html_fn, html_unexpected_exerr_table_begin, {data[2], data[2]} )
-					printf(html_fn, html_unexpected_exerr_row_format, ex_err[2..3])
+                        		sequence control = ex_err[2]
+                        		sequence outcome = ex_err[3]
+                        		sequence this_diff = split_diff(control,outcome)
+		        		boolean use_diff_format = length(control) + length(outcome) > 1.62 * split_diff_length(this_diff)
+		            		if use_diff_format then
+						printf(html_fn, html_unexpected_exerr_diff_row_format, { html_decorate_diff(this_diff) })
+					else
+						printf(html_fn, html_unexpected_exerr_row_format, ex_err[2..3])
+					end if
 					printf(html_fn, html_unexpected_exerr_table_end, {} )			
-				elsif find(error_list[2][err], {No_valid_control_file_was_supplied, Unexpected_empty_control_file, No_valid_exerr_has_been_generated, Unexpected_empty_exerr}) then
+				elsif eu:find(error_list[2][err], {No_valid_control_file_was_supplied, Unexpected_empty_control_file, No_valid_exerr_has_been_generated, Unexpected_empty_exerr}) then
 					printf(html_fn, html_error_table_begin, {data[2], data[2]} )
-					printf(html_fn, html_table_error_row, {color, "", error_list[2][err]} )
+					printf(html_fn, html_table_error_row, {style, "", error_list[2][err]} )
 					printf(html_fn, html_error_table_end, {} )
 					unsummarized_files = append(unsummarized_files, data[2])
 				else
 					printf(html_fn, html_table_head, { data[2], data[2] })
-					printf(html_fn, html_table_error_row, { color, "", error_list[2][err] })
+					printf(html_fn, html_table_error_row, { style, "", error_list[2][err] })
 					puts(html_fn, html_table_headers )
 					
 					if sequence(error_list[4][err]) then
@@ -1035,12 +1139,37 @@ procedure html_out(sequence data)
 			end if
 
 		case "failed" then
-			printf(html_fn, html_table_failed_row, {
-				data[2],
-				sprint(data[5]),
-				sprint(data[3]),
-				sprint(data[4])
-			})
+		        boolean use_diff_format = FALSE
+		        sequence pretty_print_option = {0}
+                        if t_ascii(data[3]) and t_ascii(data[4]) then
+                              pretty_print_option = {3}
+                        end if
+                        sequence control = pretty_sprint(data[3], pretty_print_option)
+                        sequence outcome = pretty_sprint(data[4], pretty_print_option)
+                        sequence this_diff = split_diff(control,outcome)
+
+                        if sequence(data[3]) and sequence(data[4]) then
+		            
+		            use_diff_format = length(control) + length(outcome) > 1.62 * split_diff_length(this_diff)
+		            
+		            if use_diff_format then
+                                printf(html_fn, html_table_failed_row2, {
+                                        data[2],
+                                        sprint(data[5]),
+                                        html_decorate_diff(this_diff)
+                                })
+                            end if
+                            
+                        end if
+                        
+                        if not use_diff_format then 
+                            printf(html_fn, html_table_failed_row, {
+                                data[2],
+                                sprint(data[5]),
+                                pretty_sprint(data[3], pretty_print_option),
+                                pretty_sprint(data[4], pretty_print_option)
+                            })
+                        end if
 
 		case "passed" then
 			sequence anum
@@ -1072,11 +1201,44 @@ procedure html_open()
 	if sequence(html_filename) then
 		html_fn = open(html_filename, "w")
 	end if
-	puts(html_fn, "<html><body>\n")
+	puts(html_fn, "<DOCTYPE html>\n<html><head>\n")
+	puts(html_fn, "<meta charset=\"utf-8\">\n")
+	integer css_fn
+	if equal(css_filename, 0) then
+	    -- no css URL specified and no good way to find out where Euphoria is installed
+	    -- inline a style
+	    puts(html_fn, "<style>\n")
+	    -- write style right into the HTML file
+	    css_fn = html_fn
+	else
+	    printf(html_fn, "<link href=%s rel=\"stylesheet\">", {quote(css_filename)})
+	    if file_exists(css_filename) then
+	        -- do not overwrite an existing file (it may have been modified
+	        css_fn = -1
+	    else
+	        css_fn = open(css_filename, "w")
+	    end if
+	end if
+	
+	if css_fn > -1 then
+            puts(css_fn, "span.missing {background-color: #dddddd; text-decoration:line-through;}\n")
+            puts(css_fn, "span.added {background-color: #ffaaaa;}\n")
+            puts(css_fn, ".header {background-color: #dddddd;} \n")
+            puts(css_fn, ".error  {background-color: #ffaaaa }    \n")
+            puts(css_fn, ".no_error {{background-color: #aaffaa } \n")
+        end if
+        
+        if equal(css_filename, 0) then
+            puts(html_fn, "</style>\n")
+        end if
+        if css_fn != -1 and css_fn != html_fn then
+            close(css_fn)
+        end if
+	puts(html_fn, "</head><body>\n")
 end procedure
 
 procedure html_close()
-	puts(html_fn, "</html></body>\n")
+	puts(html_fn, "</body></html>\n")
 	if html_fn != 1 then
 		close(html_fn)
 	end if
@@ -1097,7 +1259,7 @@ end function
 
 
 procedure summarize_error(sequence output_class, sequence message, error_class e)
-	if find(e, error_list[3]) then
+	if eu:find(e, error_list[3]) then
 		printf(html_fn,message & call_func(output_class[DOCUMENT_NL],{}) & "These were:\n", {sum(error_list[3] = e)})
 
 		for i = 1 to length(error_list[1]) do
@@ -1175,12 +1337,12 @@ procedure do_process_log( sequence cmds, sequence output_class)
 					total_time += data[3]
 				
 				case "file" then
-					integer ofi = find(data[2], other_files)
+					integer ofi = eu:find(data[2], other_files)
 					if ofi != 0 then
 						other_files = other_files[1..ofi-1] & other_files[ofi+1..$]
 					end if
 
-					while length(unsummarized_files)>=1 and compare(data[2],unsummarized_files[1])!=0 do
+					while length(unsummarized_files)>=1 and eu:compare(data[2],unsummarized_files[1])!=0 do
 						call_proc(out_r, {{"summary",0,0,0,0}})
 					end while
 			end switch
@@ -1194,7 +1356,7 @@ procedure do_process_log( sequence cmds, sequence output_class)
 	end while
 	
 	for i = 1 to length(other_files) do
-		if find(other_files[i], error_list[1]) then
+		if eu:find(other_files[i], error_list[1]) then
 			call_proc(out_r, {{"file",other_files[i]}})
 			call_proc(out_r, {{"summary",0,0,0,0}})
 		end if
@@ -1208,9 +1370,9 @@ procedure do_process_log( sequence cmds, sequence output_class)
 	summarize_error(output_class, "Bound test files failed unexpectedly.......: %d", E_BOUND)   
 	summarize_error(output_class, "Test files run successfully................: %d", E_NOERROR)  
 	
-	if find(1, error_list[3] = E_EUTEST) then
+	if eu:find(1, error_list[3] = E_EUTEST) then
 		printf(html_fn, "There was an internal error to the testing system involving %s%s",
-			{ error_list[1][find(E_EUTEST, error_list[3])], call_func(output_class[DOCUMENT_NL],{}) })
+			{ error_list[1][eu:find(E_EUTEST, error_list[3])], call_func(output_class[DOCUMENT_NL],{}) })
 	end if
 
 	object version_used = get_interpreter_version()
@@ -1314,7 +1476,7 @@ end function
 
 procedure main()
 
-	object files = {}
+	string_of_strings files = {}
 	map opts = cmd_parse( cmdopts )
 	sequence keys = map:keys( opts )
 	sequence output_format = ASCII_output
@@ -1323,8 +1485,8 @@ procedure main()
 	-- need to check this because it affects the behavior of the option below. 
 	if map:has(opts, "verbose") then
 		verbose_switch = 1
-	end if				
-
+	end if			
+	
 	-- Because the "eubin" option sets several parameters at once, there is utility in allowing this option to be processed before the other options.   For in this case, after setting several parameters with this option we can change one or two with less typing than setting all of them with other options.  Because the order of keys is not related to the order they appear on the command line, we must always process this option first before the loop.
 	if map:has(opts, "eubin") then
 		sequence val = canonical_path(map:get(opts, "eubin"),1=1)
@@ -1476,16 +1638,19 @@ procedure main()
 			case "html-file" then
 				html_filename = val
 				
+			case "css-file" then
+				css_filename = val
+				
 			case cmdline:EXTRAS then
 				if length( val ) then
 					files = build_file_list( val )
 				else
-					files = dir("t_*.e" )
-					if atom(files) then
-						files = {}
+					object dent_list = dir("t_*.e" )
+					if atom(dent_list) then
+						dent_list = {}
 					end if
-					for f = 1 to length( files ) do
-						files[f] = files[f][D_NAME]
+					for f = 1 to length( dent_list ) do
+						files = append(files, dent_list[f][D_NAME])
 					end for
 					files = sort( files )
 					-- put the counter tests last to do
@@ -1508,7 +1673,7 @@ procedure main()
 							exit
 						end if
 					end for
-					files = remove(files,first_counter,last_counter) 
+					files = eu:remove(files,first_counter,last_counter) 
 						& files[first_counter..last_counter]
 				end if
 			case "n", "nocheck" then
@@ -1521,14 +1686,18 @@ procedure main()
 	end if
 	
 	if map:has( opts, "process-log") then
-		platform_init()
 		do_process_log( files, output_format )
-		if map:has( opts, "retest" ) then
-			do_test( retest_files )
-		end if
 	else
+		if file_exists( "unittest.log" ) then
+		    -- This strange looking line, uses the do_process_log 
+		    -- routine to find all of the files that need to be
+		    -- processed (and assign that to retest_files).
+		    -- It doesn't actually produce any output.
+		    do_process_log( files, PREPARE_RETEST_output )
+		else
+		    retest_files = {}
+		end if
 		if map:has( opts, "retest" ) then
-			do_process_log( files, PREPARE_RETEST_output )
 			files = retest_files
 		end if
 		platform_init()
@@ -1539,7 +1708,7 @@ end procedure
 enum DOCUMENT_OPEN, -- a procedure that takes no parameters and opens the html-file if not stdout
 DOCUMENT_CLOSE, --  a procrocedure that takes no parameters and [closes the html-file if not stdout]
 DOCUMENT_PROCESS, -- a procedure takes a single parameter see html_out and ascii_out 
-DOCUMENT_NL, -- a function no parameters that outputs a new-line 
+DOCUMENT_NL, -- a function no parameters that outputs a new-line
 DOCUMENT_LINK, --  a function no parameters that outputs a link
 DOCUMENT_ENDING, -- a printf format string for the document's ending or 0.
 DOCUMENT_P -- a routine that outputs something to indicate a new paragraph is starting

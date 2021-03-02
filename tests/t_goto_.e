@@ -2,7 +2,6 @@ include std/unittest.e
 include std/error.e
 
 warning_file(-1)
-with trace
 integer n,m,c
 n = 0
 

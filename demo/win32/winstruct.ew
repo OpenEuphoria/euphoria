@@ -2,6 +2,7 @@
 -- common definitions used by the demos
 
 include std/dll.e
+include std/win32/w32dllconst.ew
 include std/error.e
 include std/machine.e
 include std/math.e

@@ -21,6 +21,9 @@ include std/io.e
 include std/sort.e
 include std/map.e as map
 include std/search.e
+include std/convert.e
+include std/search.e
+include std/sequence.e
 
 include buildsys.e
 include c_decl.e
@@ -208,7 +211,7 @@ end procedure
 procedure opDEREF_TEMP()
 	integer ix = find( Code[pc+1], saved_temps )
 	if ix then
-		saved_temps = remove( saved_temps, ix )
+		saved_temps = eu:remove( saved_temps, ix )
 	end if	
 	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 2
@@ -1057,7 +1060,7 @@ procedure seg_peek8(integer target_sym, integer source, boolean dbl, integer op)
 		sign = ""
 	end if
 	if dbl then
-		c_stmt( sprintf( "peek8_longlong = *(%sint64_t *)(uintptr_t)(DBL_PTR(@)->dbl);\n", {sign} ), 
+		c_stmt( sprintf( "peek8_longlong = *(%sint64_t *)(uintptr_t)(DBL_PTR(@)->dbl);\n", {sign} ),
 			source)
 
 	else
@@ -1093,30 +1096,27 @@ end procedure
 
 procedure seg_poke1(integer source, boolean dbl)
 -- poke a single byte value into poke_addr
-	-- WATCOM etc.
 	if dbl then
-		if TARM then
+	    m_stmtln("#if defined(EARM) || (defined(__LCC__) && defined(_WIN32))")
 			c_stmt("_2 = trunc( DBL_PTR(@)->dbl );\n", source)
 			c_stmt0("*poke_addr = (uint8_t)_2;\n" )
-		else
-			c_stmt("*poke_addr = (uint8_t)DBL_PTR(@)->dbl;\n", source)
-		end if
-		
+		m_stmtln("#else")
+		    c_stmt("*poke_addr = (uint8_t)( DBL_PTR(@)->dbl );\n", source)
+		m_stmtln("#endif")
 	else
 		c_stmt("*poke_addr = (uint8_t)@;\n", source)
 	end if
-
 end procedure
 
 procedure seg_poke2(integer source, boolean dbl)
 -- poke a word value into poke2_addr
 	if dbl then
-		if TARM then
+	    m_stmtln("#if defined(EARM) || (defined(__LCC__) && defined(_WIN32))")
 			c_stmt("_2 = trunc( DBL_PTR(@)->dbl );\n", source)
 			c_stmt0("*poke2_addr = (uint16_t)_2;\n" )
-		else
+		m_stmtln("#else")
 			c_stmt("*poke2_addr = (uint16_t)DBL_PTR(@)->dbl;\n", source)
-		end if
+		m_stmtln("#endif")
 	else
 		c_stmt("*poke2_addr = (uint16_t)@;\n", source)
 	end if
@@ -1125,10 +1125,10 @@ end procedure
 procedure seg_poke4(integer source, boolean dbl)
 -- poke a 4-byte value into poke4_addr
 	if dbl then
-		if TARM then
-			c_stmt("if( DBL_PTR(@)->dbl <= MAXINT_DBL ) *poke4_addr = (int32_t)DBL_PTR(@)->dbl; else\n", 
+	    m_stmtln("#if defined(EARM) || (defined(__LCC__) && defined(_WIN32))")
+			c_stmt("if( DBL_PTR(@)->dbl <= MAXINT_DBL ) *poke4_addr = (int32_t)DBL_PTR(@)->dbl; else\n",
 				{source, source})
-		end if
+		m_stmtln("#endif")
 		c_stmt("*poke4_addr = (uint32_t)DBL_PTR(@)->dbl;\n", source)
 	else
 		c_stmt("*poke4_addr = (uint32_t)@;\n", source)
@@ -1155,7 +1155,6 @@ procedure seg_pokeptr(integer source, boolean dbl)
 	else
 		c_stmt("*pokeptr_addr = (uintptr_t)@;\n", source)
 	end if
-
 end procedure
 
 function machine_func_type(integer x)
@@ -1307,10 +1306,22 @@ procedure main_temps()
 	Initializing = FALSE
 end procedure
 
-export sequence LL_suffix = ""
-if TARGET_SIZEOF_POINTER = 8 then
-	LL_suffix = "LL"
-end if
+export procedure c_print_int(atom v)
+    if v > #7fff_ffff or v < -#8000_0000 then
+        c_printf("%dLL", {v})
+    else
+        c_printf("%d", {v})
+    end if
+end procedure
+
+export procedure c_print_int_scln(atom v)
+    if v > #7fff_ffff or v < -#8000_0000 then
+        c_printf("%dLL;\n", {v})
+    else
+        c_printf("%d;\n", {v})
+    end if
+end procedure
+
 function FoldInteger(integer op, integer target, integer left, integer right)
 -- try to fold an integer operation: + - * power floor_div
 -- we know that left and right are of type integer.
@@ -1343,7 +1354,7 @@ function FoldInteger(integer op, integer target, integer left, integer right)
 
 		if result[MIN] = result[MAX] and result[MIN] != NOVALUE then
 			c_stmt("@ = ", target)
-			c_printf("%d%s;\n", {result[MIN], LL_suffix})
+			c_print_int_scln(result[MIN])
 		end if
 
 	elsif op = MINUS or op = MINUS_I then
@@ -1366,7 +1377,7 @@ function FoldInteger(integer op, integer target, integer left, integer right)
 
 		if result[MIN] = result[MAX] and result[MIN] != NOVALUE then
 			c_stmt("@ = ", target)
-			c_printf("%d%s;\n", {result[MIN], LL_suffix})
+			c_print_int_scln(result[MIN])
 		end if
 
 	elsif op = rw:MULTIPLY then
@@ -1417,7 +1428,7 @@ function FoldInteger(integer op, integer target, integer left, integer right)
 			if result[MIN] = result[MAX] and result[MIN] != NOVALUE then
 				intres = result[MIN]
 				c_stmt("@ = ", target)
-				c_printf("%d%s;\n", {intres, LL_suffix})
+                c_print_int_scln(intres)
 			end if
 		end if
 
@@ -1432,7 +1443,7 @@ function FoldInteger(integer op, integer target, integer left, integer right)
 				result[MIN] = p1
 				result[MAX] = result[MIN]
 				c_stmt("@ = ", target)
-				c_printf("%d%s;\n", {result[MIN], LL_suffix})
+				c_print_int_scln(result[MIN])
 			end if
 
 		else
@@ -1464,7 +1475,7 @@ function FoldInteger(integer op, integer target, integer left, integer right)
 
 			if intres >= MININT and intres <= MAXINT then
 				c_stmt("@ = ", target)
-				c_printf("%d%s;\n", {intres, LL_suffix})
+				c_print_int_scln(intres)
 				result[MIN] = intres
 				result[MAX] = result[MIN]
 			end if
@@ -1629,95 +1640,185 @@ function int64_mult_testb2( sequence range_b )
 	return test_b2
 end function
 
+function log2ceil(object i)
+    if sequence(i) then
+        for j = 1 to length(i) do
+            i[j] = log2ceil(i[j])
+        end for
+        return i
+    end if
+    if not integer(i) then
+        return -floor(-log(i)/log(2))
+    end if
+    sequence bits = int_to_bits(i)
+    integer first_bit = rfind(1, bits)
+    if first_bit = 0 then
+        return MININT
+    end if
+    integer next_bit  = find(1, bits[1..first_bit-1])
+    return first_bit - 1 + (next_bit != 0)
+end function
+
+type integer62(atom a)
+    return a > -0x3fff_ffff_ffff_ffff and a <= 0x3fff_ffff_ffff_ffff and floor(a) = a
+end type
+
+type realshort(integer i)
+    return abs(i) < 20_000
+end type
 
 function IntegerMultiply(integer a, integer b)
 -- create the optimal code for multiplying two integers,
 -- based on their min and max values.
--- a must be from -INT16 to +INT16
--- b must be from -INT15 to +INT15
+-- code returned must always have a new line at the end
 	sequence multiply_code
 	sequence dblcode
-	object test_a, test_b1, test_b2
 	sequence range_a, range_b
 
 	if TypeIs(a, TYPE_INTEGER) then
 		range_a = ObjMinMax(a)
 	else
-		range_a = {MININT, MAXINT}
+		range_a = {-max_int32-1, max_int32}
 	end if
 
 	if TypeIs(b, TYPE_INTEGER) then
 		range_b = ObjMinMax(b)
 	else
-		range_b = {MININT, MAXINT}
+		range_b = {-max_int32-1, max_int32}
 	end if
 
 	dblcode = "@1 = NewDouble(@2 * (eudouble)@3);\n"
-
-	-- test_a
-	if TARGET_SIZEOF_POINTER = 4 then
-		test_a = int32_mult_testa( range_a )
+	
+	-- calculate maximum log2 of the absolute value of every possible number except for 0
+	realshort max_la = log2ceil(max(max(abs(range_a[1]), abs(range_a[2])), 1))
+	realshort max_lb = log2ceil(max(max(abs(range_b[1]), abs(range_b[2])), 1))
+	
+	-- For the minimum, if the range includes 0, then the minimum is 0
+	realshort min_la
+	realshort min_lb
+	if range_a[1] * range_a[2] > 0 then
+	    min_la = log2ceil((max(min(abs(range_a[1]), abs(range_a[2])), 1)))
+	else
+	    min_la = 0
+	end if
+	
+	if (range_b[1] > 0) = (range_b[2] > 0) then
+	    min_lb = log2ceil((max(min(abs(range_b[1]), abs(range_b[2])), 1)))
+	else
+	    min_lb = 0
+	end if
 		
+	sequence range_lap32 = {min_la+min_lb, max_la+max_lb}
+	
+	-- Now suppose 64-bit ranges and calculate that:
+	if TypeIs(a, TYPE_INTEGER) then
+		range_a = ObjMinMax(a)
 	else
-		test_a = int64_mult_testa( range_a )
+		range_a = {-max_int64-1, max_int64}
 	end if
-	
-	if atom( test_a ) and TARGET_SIZEOF_POINTER = 4 then
-		return dblcode
-	end if
-	
-	-- test_b1
-	if TARGET_SIZEOF_POINTER = 4 then
-		test_b1 = int32_mult_testb1( range_b )
+
+	if TypeIs(b, TYPE_INTEGER) then
+		range_b = ObjMinMax(b)
 	else
-		test_b1 = int64_mult_testb1( range_b )
-	end if
-	if atom( test_b1 ) then
-		return dblcode
+		range_b = {-max_int64-1, max_int64}
 	end if
 	
-	
-	-- test_b2
-	if TARGET_SIZEOF_POINTER = 4 then
-		test_b2 = int32_mult_testb2( range_b )
+	max_la = log2ceil(max(max(abs(range_a[1]), abs(range_a[2])), 1))
+	max_lb = log2ceil(max(max(abs(range_b[1]), abs(range_b[2])), 1))
+
+	if range_a[1] * range_a[2] > 0 then
+	    min_la = log2ceil((max(min(abs(range_a[1]), abs(range_a[2])), 1)))
 	else
-		test_b2 = int64_mult_testb2( range_b )
-	end if
-	if atom( test_b2 ) then
-		return dblcode
+	    min_la = 0
 	end if
 	
-	-- put it all together
-	multiply_code = "if ("
-
-	multiply_code &= test_a
-
-	if length(test_a) and length(test_b1) then
-		multiply_code &= " && "
-	end if
-
-	multiply_code &= test_b1
-
-	if (length(test_a) or length(test_b1)) and length(test_b2) then
-		multiply_code &= " && "
-	end if
-
-	multiply_code &= test_b2
-
-	if length(test_a) or length(test_b1) or length(test_b2) then
-		multiply_code &= "){\n" &
-						 "@1 = @2 * @3;\n}\n" &
-						 "else{\n"
-		if TARGET_SIZEOF_POINTER = 4 then
-			multiply_code &= "@1 = NewDouble(@2 * (eudouble)@3);\n}\n"
-		else
-			multiply_code  = "{\nint128_t p128 = (int128_t)@2 * (int128_t)@3;\n"
-			multiply_code &= "if( p128 != (int128_t)(@1 = (intptr_t)p128) || !IS_ATOM_INT( p128 ) ){\n"
-			multiply_code &= "@1 = NewDouble( (eudouble)p128 );\n"
-			multiply_code &= "}\n}\n"
-		end if
+	if (range_b[1] > 0) = (range_b[2] > 0) then
+	    min_lb = log2ceil((max(min(abs(range_b[1]), abs(range_b[2])), 1)))
 	else
-		multiply_code = "@1 = @2 * @3;\n"  -- no tests, must be integer
+	    min_lb = 0
+	end if
+		
+	sequence range_lap64 = {min_la*min_lb, max_la*max_lb}	
+	
+	
+	sequence intcode = 	 "@1 = @2 * @3;\n"
+    sequence generalcode32 = 	
+    "if (@3 == (short)@3) {\n" &
+    	"/* @3 is 16-bit */\n" &
+    	"if ((@2 <= INT15 && @2 >= -INT15) ||\n" &
+    		"(@3 == (char)@3 && @2 <= INT23 && @2 >= -INT23) ||\n" &
+    		"(@2 == (short)@2 && @3 <= INT15 && @3 >= -INT15)) {\n" &
+    		"@1 = @3 * @2;\n" &
+    	"}\n" &
+    	"else {\n" &
+    		"@1 = (object)NewDouble(@3 * (eudouble)@2);\n" &
+    	"}\n" &
+    "}\n" &
+    "else if (@2 == (char)@2 && @3 <= INT23 && @3 >= -INT23) {\n" &
+    	"/* @2 is 8-bit, @3 is 23-bit */\n" &
+    	"@1 = @3 * @2;\n" &
+    "}\n" &
+    "else {\n" &
+    	"@1 = (object)NewDouble(@3 * (eudouble)@2);\n" &
+    "}\n"
+	
+	sequence generalcode64 =
+			 "{\nint128_t p128 = (int128_t)@2 * (int128_t)@3;\n" &
+			 "if( p128 != (int128_t)(@1 = (intptr_t)p128) || !IS_ATOM_INT( p128 ) ){\n" &
+			 "@1 = NewDouble( (eudouble)p128 );\n" &
+			 "}\n}\n"
+	
+	if range_lap32[2] < 30 and range_lap64[2] < 62 then
+	    -- product must be integer
+	    multiply_code = intcode
+	elsif range_lap32[1] > 30 and range_lap64[1] > 62 then
+	    -- product cannot fit into a integer, use a double wihtout checking
+	    multiply_code = dblcode
+	else
+	    -- product might not fit into an integer
+	    multiply_code = "#if INTPTR_MAX == INT32_MAX\n"
+	
+	    if max_lb >= 15 then
+	        multiply_code &= "if (@3 == (short)@3) {\n"
+        end if
+        if max_lb >= 7 then
+    	    multiply_code &=    "/* @3 is 16-bit */\n" &
+                                "if ((@2 <= INT15 && @2 >= -INT15) ||\n" &
+                                    "(@3 == (char)@3 && @2 <= INT23 && @2 >= -INT23) ||\n" &
+                                    "(@2 == (short)@2 && @3 <= INT15 && @3 >= -INT15)) {\n"
+        else
+    	    multiply_code &=  "/* @3 is 8-bit */\n" &
+                                "if (@2 <= INT23 && @2 >= -INT23) {\n"
+        end if
+
+        multiply_code &=            "@1 = @3 * @2;\n" &
+                                "}\n" &
+                                "else {\n" &
+                                    "@1 = (object)NewDouble(@3 * (eudouble)@2);\n" &
+                                "}\n"
+	    if max_lb >= 15 then
+	        multiply_code &= "}\n"
+	        if min_la < 7 then
+                if max_lb >= 23 then
+                    multiply_code &=
+                              "else if (@2 == (char)@2 && @3 <= INT23 && @3 >= -INT23) {\n"
+                else
+                    multiply_code &=
+                              "else if (@2 == (char)@2) {\n"
+                end if
+
+                multiply_code &=  "/* @2 is 8-bit, @3 is 23-bit */\n" &
+                                  "@1 = @3 * @2;\n" &
+                              "}\n"
+             end if -- min_lb < 7
+                multiply_code &= "else {\n" &
+                                  "@1 = (object)NewDouble(@3 * (eudouble)@2);\n" &
+                              "}\n"
+	
+        end if
+	    multiply_code &= "#else\n"
+	    multiply_code &= generalcode64
+	    multiply_code &= "#endif\n"
 	end if
 	
 	return multiply_code
@@ -2945,6 +3046,8 @@ procedure opINTEGER_CHECK()
 		LeftSym = TRUE
 		c_stmt("_1 = (object)(DBL_PTR(@)->dbl);\n", sym)
 		LeftSym = TRUE
+		c_stmt( "if (UNIQUE(DBL_PTR(@)) && (DBL_PTR(@)->cleanup != 0))\n" &
+				"RTFatal(\"Cannot assign value with a destructor to an integer\");", {sym, sym})
 		c_stmt("DeRefDS(@);\n", sym)
 		c_stmt("@ = _1;\n", sym)
 		c_stmt0("}\n")
@@ -3075,7 +3178,7 @@ end procedure
 
 procedure opLENGTH()
 -- LENGTH / PLENGTH
-	integer 
+	integer
 		source_sym = Code[pc+1],
 		target_sym = Code[pc+2]
 	
@@ -3684,7 +3787,7 @@ end procedure
 
 procedure opIS_AN_OBJECT()
 	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
-	-- check 
+	-- check
 	c_stmt("if( NOVALUE == @ ){\n", {Code[pc+1]}, Code[pc+1])
 		c_stmt("@ = 0;\n", Code[pc+2])
 	c_stmt0("}\n")
@@ -3981,12 +4084,15 @@ procedure opMULTIPLY()
 	gencode = "@ = binary_op(MULTIPLY, @, @);\n"
 	intcode2= "@1 = @2 * @3;\n"
 	-- quick range test - could expand later maybe
-	intcode = IntegerMultiply(Code[pc+1], Code[pc+2])
+		
 	if TypeIs(Code[pc+1], TYPE_DOUBLE) or
 	   TypeIs(Code[pc+2], TYPE_DOUBLE) then
 		atom_type = TYPE_DOUBLE
 	end if
+	
+	
 	dblfn="*"
+	intcode = IntegerMultiply(Code[pc+1], Code[pc+2])
 	
 	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
@@ -4627,7 +4733,7 @@ procedure opCALL_PROC()
 					c_stmt0( sprintf( "Ref( *(( (intptr_t*)_2) + %d) );\n", k ) )
 				end for
 
-				if TWINDOWS and dll_option then
+			    m_stmtln("#if _WIN32")
 					c_stmt("if (_00[@].convention) {\n", Code[pc+1])
 					if Code[pc] = CALL_FUNC then
 						c_stmt0("_1 = (*(intptr_t (__stdcall *)())_0)(\n")
@@ -4644,14 +4750,14 @@ procedure opCALL_PROC()
 					end if
 					arg_list(i)
 					c_stmt0("}\n")
-				else
+				m_stmtln("#else // _WIN32")
 					if Code[pc] = CALL_FUNC then
 						c_stmt0("_1 = (*(intptr_t (*)())_0)(\n")
 					else
 						c_stmt0("(*(intptr_t (*)())_0)(\n")
 					end if
 					arg_list(i)
-				end if
+				m_stmtln("#endif // _WIN32")
 
 			end if
 			if len = NOVALUE then
@@ -5787,7 +5893,7 @@ end procedure
 procedure opPOKE()
 -- generate code for poke/2/4/8
 -- should optimize constant address
-	integer 
+	integer
 		op  = Code[pc],
 		ptr = Code[pc+1],
 		val = Code[pc+2]
@@ -5816,32 +5922,32 @@ procedure opPOKE()
 	end if
 
 	if TypeIsNotIn( ptr, TYPES_IS) then
-		sequence dbl_ptr = "(DBL_PTR(@)->dbl)"
-		if TARM then
-			if not TypeIsIn( ptr, TYPES_AO ) then
-				c_stmt0("{\n" )
-			end if
-			c_stmt("eudouble temp_dbl = DBL_PTR(@)->dbl;\n", ptr )
-			dbl_ptr = "temp_dbl"
-		end if
+        if not TypeIsIn( ptr, TYPES_AO) then
+            c_stmt0("{\n" )
+        end if
+        c_stmt("eudouble temp_dbl = DBL_PTR(@)->dbl;\n", ptr )
 		switch op do
 			case POKE_POINTER then
-				c_stmt(sprintf("pokeptr_addr = (uintptr_t *)(uintptr_t)%s;\n", {dbl_ptr}), ptr)
+				c_stmt0("pokeptr_addr = (uintptr_t *)")
 			case POKE8 then
-				c_stmt(sprintf("poke8_addr = (uint64_t *)(uintptr_t)%s;\n", {dbl_ptr}), ptr)
+				c_stmt0("poke8_addr = (uint64_t *)")
 			case POKE4 then
-				c_stmt(sprintf("poke4_addr = (uint32_t *)(uintptr_t)%s;\n", {dbl_ptr}), ptr)
+				c_stmt0("poke4_addr = (uint32_t *)")
 			case POKE2 then
-				c_stmt(sprintf("poke2_addr = (uint16_t *)(uintptr_t)%s;\n", {dbl_ptr}),ptr)
+				c_stmt0("poke2_addr = (uint16_t *)")
 			case else
-				c_stmt(sprintf("poke_addr = (uint8_t *)(uintptr_t)%s;\n", {dbl_ptr}), ptr)
+				c_stmt0("poke_addr = (uint8_t *)")
 		end switch
+		c_stmt0("(uintptr_t)temp_dbl;\n")
+        if not TypeIsIn( ptr, TYPES_AO) then
+		    c_stmt0("}\n" )
+        end if		
 	end if
 	
-	if TypeIsIn( ptr, TYPES_AO) or (TARM and TypeIsNotIn( ptr, TYPES_IS)) then
-		c_stmt0("}\n" )	
+	if TypeIsIn( ptr, TYPES_AO) then
+		c_stmt0("}\n" )
 	end if
-	
+
 	if TypeIsIn( val, TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@)) {\n", val)
 	end if
@@ -5913,13 +6019,15 @@ procedure opPOKE()
 				c_stmt0("*poke_addr++ = (uint8_t)_2;\n")
 		end switch
 		c_stmt0("}\nelse if (_2 == NOVALUE) {\n")
-		c_stmt0("break;\n}\n")
+		c_stmt0("break;\n")
+		c_stmt0("}\n")
 		c_stmt0("else {\n")
-		sequence _2 = "DBL_PTR(_2)->dbl"
-		if TARM then
-			_2 = "_2"
-			c_stmt0( "_2 = trunc( DBL_PTR(_2)->dbl );\n" )
-		end if
+        m_stmtln("#if defined(EARM)")
+        m_stmtln("#define THIS_DOUBLE trunc( DBL_PTR(_2)->dbl")
+        m_stmtln("#else")
+        m_stmtln("#define THIS_DOUBLE DBL_PTR(_2)->dbl")
+        m_stmtln("#endif")
+		sequence _2 = "THIS_DOUBLE"
 		switch op do
 			case POKE_POINTER then
 				c_stmt0( sprintf( "*pokeptr_addr++ = (uintptr_t)%s;\n", {_2}) )
@@ -5937,6 +6045,7 @@ procedure opPOKE()
 					c_stmt0( sprintf( "*poke_addr++ = (uint8_t)%s;\n", {_2}) )
 				
 		end switch
+		m_stmtln("#undef THIS_DOUBLE")
 		c_stmt0("}\n")
 		c_stmt0("}\n") -- while(1)
 
@@ -6059,20 +6168,20 @@ procedure opGETC()
 
 	c_stmt0("}\n")
 	c_stmt0("if (last_r_file_ptr == xstdin) {\n")
-	if TWINDOWS then
+    m_stmtln("#if _WIN32")
 		c_stmt0("show_console();\n")
-	end if
+    m_stmtln("#endif")
 	c_stmt0("if (in_from_keyb) {\n")
-	if TUNIX then
+	m_stmtln("#if defined(__unix__)")
 		if EGPM then
 			c_stmt("@ = mgetch(1);\n", Code[pc+2])  -- echo the character
 		else
 			-- c_stmt("@ = getch(1);\n", Code[pc+2])   -- echo the character
 			c_stmt("@ = getc((FILE*)xstdin);\n", Code[pc+2])   -- echo the character
 		end if
-	else
+	m_stmtln("#else")
 		c_stmt("@ = getKBchar();\n", Code[pc+2])
-	end if
+	m_stmtln("#endif")
 	c_stmt0("}\n")
 	c_stmt0("else{\n")
 
@@ -6105,9 +6214,9 @@ end procedure
 
 procedure opGET_KEY()
 -- read an immediate key (if any) from the keyboard or return -1
-	if TWINDOWS then
-		c_stmt0("show_console();\n")
-	end if
+    m_stmtln("#if _WIN32")
+		c_stmt0("show_console()")
+    m_stmtln("#endif")
 	CSaveStr("_0", Code[pc+1], 0, 0, 0)
 	c_stmt("@ = get_key(0);\n", Code[pc+1])
 	CDeRefStr("_0")
@@ -7081,7 +7190,7 @@ export procedure init_opcodes()
 			case "CALL_FUNC" then
 				operation[i] = routine_id("opCALL_PROC")
 
-			case "PEEK4U", "PEEK4S", "PEEKS", "PEEK2U", "PEEK2S", "PEEK_STRING", 
+			case "PEEK4U", "PEEK4S", "PEEKS", "PEEK2U", "PEEK2S", "PEEK_STRING",
 				"PEEK8S", "PEEK8U", "PEEK_POINTER" then
 				
 				operation[i] = routine_id("opPEEK")
@@ -7295,12 +7404,12 @@ void _0cleanup_vars();
 
 
 `)
-	if TWINDOWS then
+	m_stmtln("#if defined(_WIN32)")
 		c_stmt0("\nvoid EuUninit(){\n")
-	else
+	m_stmtln("#else")
 		c_stmt0("#define EFree free\n" )
 		c_stmt0("\nvoid __attribute__ ((destructor)) eu_uninit(){\n")
-	end if
+	m_stmtln("#endif")
 
 	integer literal_sym = literal_init
 	c_stmt0( "int i;\n" )
@@ -7328,8 +7437,7 @@ end procedure
 --**
 -- Creates the initialize / uninitialize code for a translated dynamic library
 procedure init_dll()
-	
-	if TWINDOWS then
+	m_stmtln("#if defined(_WIN32)")
 		-- Lcc and WATCOM seem to need this instead
 		-- (Lcc had __declspec(dllexport))
 		c_stmt0("int __stdcall LibMain(int hDLL, int Reason, void *Reserved)\n")
@@ -7342,7 +7450,7 @@ procedure init_dll()
 		c_stmt0("}\n")
 		c_stmt0("return 1;\n")
 		c_stmt0("}\n")
-	end if
+	m_stmtln("#endif")
 	uninit_eu()
 end procedure
 
@@ -7414,18 +7522,18 @@ procedure BackEnd(atom ignore)
 
 	version()
 
-	if TWINDOWS then
+    m_stmtln("#if defined(_WIN32)")
 		-- this has to be included before stdint.h (in euphoria.h) at least on Watcom
 		c_puts("#include <windows.h>\n")
-	end if
+	m_stmtln("#endif")
 	c_puts("#include <time.h>\n")
 	c_puts("#include \"include/euphoria.h\"\n")
 	c_puts("#include \"main-.h\"\n")
 	c_puts("#include \"struct.h\"\n\n")
 
-	if TUNIX then
-		c_puts("#include <unistd.h>\n")
-	end if
+	m_stmtln("#ifndef _WIN32")
+		m_stmtln("#include <unistd.h>")
+    m_stmtln("#endif")
 	c_puts("\n\n")
 	c_puts("int Argc;\n")
 	c_hputs("extern int Argc;\n")
@@ -7433,7 +7541,7 @@ procedure BackEnd(atom ignore)
 	c_puts("char **Argv;\n")
 	c_hputs("extern char **Argv;\n")
 
-	if TWINDOWS then
+	m_stmtln("#ifdef _WIN32")
 		c_puts("HANDLE default_heap;\n")
 		if sequence(wat_path) then
 			c_puts("/* this is in the header */\n")
@@ -7441,7 +7549,7 @@ procedure BackEnd(atom ignore)
 		else
 			c_puts("//\'test me!\' is this in the header?: unsigned __stdcall GetProcessHeap(void);\n")
 		end if
-	end if
+    m_stmtln("#endif")
 
 	c_puts("uintptr_t *peekptr_addr;\n")
 	c_hputs("extern uintptr_t *peekptr_addr;\n")
@@ -7484,9 +7592,9 @@ procedure BackEnd(atom ignore)
 	
 	c_puts("void init_literal();\n")
 
-	if TWINDOWS and not dll_option then
+	m_stmtln("#ifdef _WIN32")
 			c_puts("extern long __stdcall Win_Machine_Handler(LPEXCEPTION_POINTERS p);\n")
-	end if
+    m_stmtln("#endif")
 
 	if total_stack_size = -1 then
 		-- user didn't set the option
@@ -7502,8 +7610,8 @@ procedure BackEnd(atom ignore)
 	if EXTRA_CHECK then
 		c_hputs("extern long bytes_allocated;\n")
 	end if
-	
-	if TWINDOWS then
+
+	m_stmtln("#ifdef _WIN32")
 		if dll_option then
 			if sequence(wat_path) then
 				c_stmt0("\nint __stdcall _CRT_INIT (int, int, void *);\n")
@@ -7514,13 +7622,13 @@ procedure BackEnd(atom ignore)
 			c_stmt0("\nint __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine, int iCmdShow)\n")
 		end if
 
-	else -- TUNIX
+	m_stmtln("#else // _WIN32") -- _WIN32
 		if dll_option then
 			c_stmt0("\nint __attribute__ ((constructor)) eu_init()\n")
 		else
 			c_stmt0("\nint main(int argc, char *argv[])\n")
 		end if
-	end if
+    m_stmtln("#endif")
 	c_stmt0("{\n")
 
 	c_stmt0("s1_ptr _0switch_ptr;\n")
@@ -7528,7 +7636,7 @@ procedure BackEnd(atom ignore)
 
 	main_temps()
 
-	if TWINDOWS then
+	m_stmtln("#ifdef _WIN32")
 		if dll_option then
 			c_stmt0("\nArgc = 0;\n")
 			c_stmt0("default_heap = GetProcessHeap();\n")
@@ -7549,15 +7657,14 @@ procedure BackEnd(atom ignore)
 			c_stmt0("}\n")
 			
 		end if
-	else --TUNIX
+	m_stmtln("#else")
 		if dll_option then
 			c_stmt0("\nArgc = 0;\n")
 		else
 			c_stmt0("Argc = argc;\n")
 			c_stmt0("Argv = argv;\n")
 		end if
-
-	end if
+    m_stmtln("#endif")
 
 	if not dll_option then
 		c_stmt0("stack_base = (char *)&_0;\n")
@@ -7586,19 +7693,19 @@ procedure BackEnd(atom ignore)
 
 	-- fail safe mechanism in case
 	-- Complete Edition library gets out by mistake
-	if TWINDOWS then
+	m_stmtln("#ifdef _WIN32")
 		if atom(wat_path) then
 			c_stmt0("eu_startup(_00, _01, _02, (object)CLOCKS_PER_SEC, (object)CLOCKS_PER_SEC);\n")
 		else
 			c_stmt0("eu_startup(_00, _01, _02, (object)CLOCKS_PER_SEC, (object)CLK_TCK);\n")
 		end if
-	else
+	m_stmtln("#else")
 		c_puts("#ifdef CLK_TCK\n")
 		c_stmt0("eu_startup(_00, _01, _02, (object)CLOCKS_PER_SEC, (object)CLK_TCK);\n")
 		c_puts("#else\n")
 		c_stmt0("eu_startup(_00, _01, _02, (object)CLOCKS_PER_SEC, (object)sysconf(_SC_CLK_TCK));\n")
 		c_puts("#endif\n")
-	end if
+    m_stmtln("#endif")
 	
 	c_stmt0( sprintf( "trace_lines = %d;\n", trace_lines ) )
 
@@ -7775,10 +7882,9 @@ procedure BackEnd(atom ignore)
 	end for
 	c_stmt0("}\n")
 
-
-	if TWINDOWS then
+	c_hputs("#ifdef _WIN32\n")
 		c_hputs("extern void *winInstance;\n\n")
-	end if
+	c_hputs("#endif\n")
 
 	close(c_code)
 	close(c_h)

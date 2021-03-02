@@ -192,7 +192,7 @@ test_equal( "process lines #3", tmp, alt_tmp)
 
 
 -- OpenBSD allows seeking on STDIN, STDOUT and STDERR
-ifdef not OPENBSD and not NETBSD and not FREEBSD then
+ifdef not OPENBSD and not NETBSD and not FREEBSD and not WINDOWS then
 	test_equal( "Seek STDIN",  1, seek(0, 0))
 	test_equal( "Seek STDOUT", 1, seek(1, 0))
 	test_equal( "Seek STDERR", 1, seek(2, 0))

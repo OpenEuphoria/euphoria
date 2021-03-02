@@ -11,7 +11,7 @@
 #define EUPHORIA_MAX_INT MAXINT
 #include <string.h>
 
-#ifdef __WIN32
+#ifdef _WIN32
 #define EXPORT __declspec(dllexport)
 #else
 #define EXPORT
@@ -21,6 +21,7 @@
 #define C000_LONG_VALUE (0xC * (1L << (8*sizeof(long)-8)))
 #define C000_SHORT_VALUE (0xC * (1 << (8*sizeof(short)-8)))
 #define C000_LONGLONG_VALUE (0xC * (1LL << (8*sizeof(long long)-8)))
+#define C000_ULONGLONG_VALUE (0xC * (1ULL << (8*sizeof(unsigned long long)-8)))
 #define C000_FLOAT_VALUE (float)(0xC * (1 << (8*sizeof(float)-8)))
 #define C000_DOUBLE_VALUE (double)(0xC * (1 << (8*sizeof(double)-8)))
 typedef signed char Byte;
@@ -54,10 +55,11 @@ typedef enum {false,true} Bool;
 MAKE_BORDER_FUNCTIONS(int,C_INT)
 #endif
 
-#if INT32_MAX == INTPTR_MAX || !defined(EWINDOWS)
+#if INT32_MAX == INTPTR_MAX || !defined(_WIN32)
 MAKE_BORDER_FUNCTIONS(long,C_LONG)
 #endif
 MAKE_BORDER_FUNCTIONS(long long,C_LONGLONG)
+MAKE_BORDER_FUNCTIONS(unsigned long long,C_ULONGLONG)
 MAKE_BORDER_FUNCTIONS(float, C_FLOAT)
 MAKE_BORDER_FUNCTIONS(double, C_DOUBLE)
 
@@ -78,6 +80,7 @@ MAKE_ID_FUNCTION(void*, C_POINTER)
 MAKE_ID_FUNCTION(long, C_LONG)
 MAKE_ID_FUNCTION(unsigned long, C_ULONG)
 MAKE_ID_FUNCTION(long long, C_LONGLONG)
+MAKE_ID_FUNCTION(unsigned long long, C_ULONGLONG)
 
 MAKE_ID_FUNCTION(float, C_FLOAT)
 MAKE_ID_FUNCTION(double, C_DOUBLE)
@@ -92,18 +95,21 @@ MAKE_GET_VAL_FN(short,     C_SHORT,    _BFF_FD, C000_SHORT_VALUE - 20)
 MAKE_GET_VAL_FN(int,       C_INT,      _BFF_FD, C000_INT_VALUE - 20)
 MAKE_GET_VAL_FN(long,      C_LONG,     _BFF_FD, C000_LONG_VALUE - 20)
 MAKE_GET_VAL_FN(long long, C_LONGLONG, _BFF_FD, C000_LONGLONG_VALUE - 20)
+MAKE_GET_VAL_FN(unsigned long long, C_ULONGLONG, _BFF_FD, C000_LONGLONG_VALUE - 20)
 
 MAKE_GET_VAL_FN(char,      C_CHAR,     _M20, -20)
 MAKE_GET_VAL_FN(short,     C_SHORT,    _M20, -20)
 MAKE_GET_VAL_FN(int,       C_INT,      _M20, -20)
 MAKE_GET_VAL_FN(long,      C_LONG,     _M20, -20)
 MAKE_GET_VAL_FN(long long, C_LONGLONG, _M20, -20)
+MAKE_GET_VAL_FN(unsigned long long, C_ULONGLONG, _M20, -20)
 
 MAKE_GET_VAL_FN(char,      C_CHAR,     _M100, -100)
 MAKE_GET_VAL_FN(short,     C_SHORT,    _M100, -10000)
 MAKE_GET_VAL_FN(int,       C_INT,      _M100, -1000000000)
 MAKE_GET_VAL_FN(long,      C_LONG,     _M100, ((sizeof(long) == sizeof(long long)) ? -1000000000000000000LL : -1000000000L) )
 MAKE_GET_VAL_FN(long long, C_LONGLONG, _M100, -1000000000000000000LL)
+MAKE_GET_VAL_FN(unsigned long long, C_ULONGLONG, _M100, -1000000000000000000LL)
 
 
 EXPORT double sum_C_FLOAT_C_DOUBLE(float f1, double d1) {

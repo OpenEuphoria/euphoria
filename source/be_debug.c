@@ -1,13 +1,13 @@
 
 #include <stdint.h>
-#if defined(EWINDOWS) && INTPTR_MAX == INT64_MAX
+#if defined(_WIN32) && INTPTR_MAX == INT64_MAX
 // MSVCRT doesn't handle long double output correctly
 #define __USE_MINGW_ANSI_STDIO 1
 #endif
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 
 #else
 
@@ -212,7 +212,7 @@ void set_debugger( char *debugger_name ){
 }
 
 int load_debugger(){
-#ifdef EWINDOWS
+#ifdef _WIN32
 	HANDLE lib;
 	FARPROC sym;
 #else
@@ -221,7 +221,7 @@ int load_debugger(){
 #endif
 
 	external_debugger = 0;
-#ifdef EWINDOWS
+#ifdef _WIN32
 	lib = LoadLibrary( external_debugger_name );
 #else
 	lib = dlopen( external_debugger_name, RTLD_LAZY );
@@ -231,7 +231,7 @@ int load_debugger(){
 		return 0;
 	}
 	
-#ifdef EWINDOWS
+#ifdef _WIN32
 	sym = GetProcAddress( lib, "initialize_debugger" );
 #else
 	sym = dlsym( lib, "initialize_debugger" );
@@ -312,7 +312,7 @@ object eu_call_stack( int debugger ){
 		if (*new_pc == (intptr_t)opcode(CALL_BACK_RETURN)) {
 			// we're in a callback routine
 			
-#ifdef EWINDOWS         
+#ifdef _WIN32         
 			copy_string(TempBuff, "\n^^^ call-back from Windows\n", TEMP_SIZE);
 #else           
 			copy_string(TempBuff, "\n^^^ call-back from external source\n", TEMP_SIZE);

@@ -16,7 +16,7 @@
 #define _LARGEFILE64_SOURCE
 #include <stdlib.h>
 #include <stdint.h>
-#if defined(EWINDOWS) && INTPTR_MAX == INT64_MAX
+#if defined(_WIN32) && INTPTR_MAX == INT64_MAX
 // MSVCRT doesn't handle long double output correctly
 #define __USE_MINGW_ANSI_STDIO 1
 #endif
@@ -45,7 +45,7 @@
 #include "be_syncolor.h"
 #include "be_debug.h"
 
-#ifdef ELINUX
+#ifdef __linux__
 #include <malloc.h>
 #endif
 
@@ -101,13 +101,13 @@
 #  include <i86.h>
 #endif
 
-#include <dos.h>
+#include <direct.h>
 #endif  // not EUNIX
 
 #include <time.h>
 #include <string.h>
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
@@ -130,7 +130,7 @@ unsigned char * new_page();
 /**********************/
 /* Exported variables */
 /**********************/
-#ifdef EWINDOWS
+#ifdef _WIN32
 HINSTANCE winInstance;
 #endif
 
@@ -339,7 +339,7 @@ void InitGraphics()
 
 void EndGraphics()
 {
-#ifdef EWINDOWS
+#ifdef _WIN32
 	SetConsoleMode(console_output, orig_console_mode); // back to normal
 #endif
 #ifdef EUNIX
@@ -362,7 +362,7 @@ void NewConfig(int raise_console)
 /* note new video configuration - this doesn't work
    after a system call that changes modes - could be out of sync */
 {
-#ifdef EWINDOWS
+#ifdef _WIN32
 	CONSOLE_SCREEN_BUFFER_INFO info;
 	if (raise_console) {
 		// properly initializes the console when running in eui mode
@@ -464,7 +464,7 @@ static object Graphics_Mode(object x)
 /* x is the graphics mode */
 {
 	UNUSED(x);
-#if defined(EWINDOWS)
+#if defined(_WIN32)
 	NewConfig(TRUE);
 #endif
 	return ATOM_0;
@@ -475,7 +475,7 @@ static object Video_config()
 {
 	object_ptr obj_ptr;
 	s1_ptr result;
-#if defined(EWINDOWS)
+#if defined(_WIN32)
 	NewConfig(TRUE); // Windows size might have changed since last call.
 #endif
 	result = NewS1((int)10);
@@ -499,7 +499,7 @@ static object Cursor(object x)
 /* set style of cursor */
 {
 	
-#ifdef EWINDOWS
+#ifdef _WIN32
 	short style;
 	CONSOLE_CURSOR_INFO c;
 	style = get_int(x);
@@ -523,7 +523,7 @@ static object TextRows(object x)
 /* text_rows built-in */
 {
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 	COORD newsize;
 	int new_rows;
 
@@ -544,7 +544,7 @@ object Wrap(object x)
 /* set line wrap mode */
 {
 	wrap_around = get_int(x);
-#if defined(EWINDOWS)
+#if defined(_WIN32)
 	show_console();
 #endif
 	return ATOM_1;
@@ -586,7 +586,7 @@ void do_scroll(int top, int bottom, int amount)
 // amount is positive => text moves up
 {
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 	SMALL_RECT src, clip;
 	COORD dest;
 	CHAR_INFO fill_char;
@@ -765,13 +765,13 @@ object SetTColor(object x)
 	int bold;
 #endif
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 	WORD attribute;
 	CONSOLE_SCREEN_BUFFER_INFO con_info;
 #endif
 
 	c = get_int(x);
-#if defined(EWINDOWS)
+#if defined(_WIN32)
 	show_console();
 	GetConsoleScreenBufferInfo(console_output, &con_info);
 	attribute = (c & 0x0f) | (con_info.wAttributes & 0xf0);
@@ -805,13 +805,13 @@ object SetBColor(object x)
 	char buff[SBC_buflen];
 #endif
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 	WORD attribute;
 	CONSOLE_SCREEN_BUFFER_INFO con_info;
 #endif
 
 	c = get_int(x);
-#if defined(EWINDOWS)
+#if defined(_WIN32)
 	show_console();
 	GetConsoleScreenBufferInfo(console_output, &con_info);
 	attribute = ((c & 0x0f) << 4) | (con_info.wAttributes & 0x0f);
@@ -840,26 +840,9 @@ static object user_allocate(object x)
 {
 	int nbytes;
 	char *addr;
-#ifdef EBSD
-	uintptr_t first, last, gp1;
-#endif
 
 	nbytes = get_int(x);
-#ifdef EBSD
 	addr = EMalloc(nbytes);
-	// make it executable
-	gp1 = pagesize-1;
-	first = (uintptr_t)addr & (~gp1); // start of page
-	last = (uintptr_t)addr+nbytes-1; // last address
-	last = last | gp1; // end of page
-	mprotect((void *)first, last - first + 1,
-			 PROT_READ+PROT_WRITE+PROT_EXEC);
-#elif defined(ELINUX)
-	addr = (char*) memalign( pagesize, nbytes );
-	mprotect( addr, nbytes, PROT_EXEC | PROT_READ | PROT_WRITE );
-#else
-	addr = EMalloc(nbytes);
-#endif
 
 	return MAKE_UINT(addr);
 }
@@ -947,7 +930,7 @@ static object Seek(object x)
 // 2 implementations of dir()
 
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 	// 1 of 2: Windows
 static object Dir(object x)
 /* x is the name of a directory or file */
@@ -1196,7 +1179,7 @@ static object Dir(object x)
 
 	DIR *dirp;
 	int r = -1;
-#ifdef ELINUX
+#ifdef __linux__
 	struct stat64 stbuf;
 #else
 	struct stat stbuf;
@@ -1220,7 +1203,7 @@ static object Dir(object x)
 	dirp = opendir(path); // on Linux, path *must* be a directory
 
 	if (dirp == NULL) {
-#ifdef ELINUX
+#ifdef __linux__
 		r = stat64(path, &stbuf);  // should be a file
 #else
 		r = stat(path, &stbuf);  // should be a file
@@ -1253,7 +1236,7 @@ static object Dir(object x)
 		if (dirp != NULL) {
 			snprintf(full_name, full_name_size, "%s/%s", path, direntp->d_name);
 			full_name[full_name_size] = 0; // ensure NULL
-#ifdef ELINUX
+#ifdef __linux__
 			r = stat64(full_name, &stbuf);
 #else
 			r = stat(full_name, &stbuf);
@@ -1333,13 +1316,13 @@ static object PutScreenChar(object x)
 	int save_line, save_col;
 	unsigned int fg, bg;
 #endif
-#ifdef EWINDOWS
+#ifdef _WIN32
 	COORD coords;
 	int temp;
 	char cc[4];
 #endif
 
-#if defined(EWINDOWS)
+#if defined(_WIN32)
 	show_console();
 #endif
 
@@ -1384,7 +1367,7 @@ static object PutScreenChar(object x)
 	iflush(stdout);
 #endif
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 	while (len > 0) {
 		cc[0] = get_pos_int("put_screen_char()", *p);
 		attr  = get_pos_int("put_screen_char()", *(p+1));
@@ -1409,7 +1392,7 @@ static object GetScreenChar(object x)
 	s1_ptr result, x1;
 	unsigned line, column;
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 
 	int temp, att;
 	char ch[4];
@@ -1422,7 +1405,7 @@ static object GetScreenChar(object x)
 	result = NewS1(2);
 	obj_ptr = result->base;
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 	show_console();
 
 	coords.X = column-1;
@@ -1524,7 +1507,7 @@ static object GetPosition()
 
 	result = NewS1(2);
 	obj_ptr = result->base;
-#ifdef EWINDOWS
+#ifdef _WIN32
 	show_console();
 #endif
 
@@ -1629,7 +1612,7 @@ static object unlock_file(object x)
 {
 	IFILE f;
 	intptr_t fd;
-#ifdef EWINDOWS
+#ifdef _WIN32
 	uint64_t first, last, bytes;
 	object s;
 #endif
@@ -1839,7 +1822,7 @@ double current_time()
 
 
 #ifndef ERUNTIME
-#ifdef EWINDOWS
+#ifdef _WIN32
 DWORD WINAPI WinTimer(LPVOID lpParameter)
 {
 	LARGE_INTEGER freq,lcount,ncount;
@@ -2106,7 +2089,7 @@ object OpenDll(object x)
 			"  The name started with \"%s\".", dll_string);
 		RTFatal(message);
 	}
-#ifdef EWINDOWS
+#ifdef _WIN32
 	lib = (HINSTANCE)LoadLibrary(dll_string);
 #else
 	// Linux
@@ -2163,7 +2146,7 @@ object DefineCVar(object x)
 		RTFatal("variable name is too long");
 	variable_string = TempBuff;
 	MakeCString(variable_string, variable_name, TEMP_SIZE);
-#ifdef EWINDOWS
+#ifdef _WIN32
 	//Ray Smith says this works.
 	variable_address = (char *)(intptr_t (*)())GetProcAddress((void *)lib, variable_string);
 	if (variable_address == NULL)
@@ -2212,7 +2195,7 @@ object DefineC(object x)
 	}
 
 	routine_name = *(((s1_ptr)x)->base+2);
-#ifdef EWINDOWS
+#ifdef _WIN32
 	/* On Windows we normally expect routines to restore the stack when they return. */
 	convention = C_STDCALL;
 #else
@@ -2265,7 +2248,7 @@ object DefineC(object x)
 			routine_string++;
 			convention = C_CDECL;
 		}
-#ifdef EWINDOWS
+#ifdef _WIN32
 		proc_address = (intptr_t (*)())GetProcAddress((void *)lib, routine_string);
 		if (proc_address == NULL)
 			return ATOM_M1;
@@ -2307,7 +2290,7 @@ object DefineC(object x)
 
 		if (t >= E_INTEGER && t <= E_OBJECT)
 			eu_dll_exists = TRUE;
-		else if (t < C_CHAR || t > C_DOUBLE)
+		else if (t < C_CHAR || t > C_ULONGLONG)
 			RTFatal("Invalid argument type");
 
 		arg++;
@@ -2326,7 +2309,7 @@ object DefineC(object x)
 
 	if (t >= E_INTEGER && t <= E_OBJECT)
 		eu_dll_exists = TRUE;
-	else if (t != 0 && (t < C_CHAR || t > C_DOUBLE))
+	else if (t != 0 && (t < C_CHAR || t > C_ULONGLONG))
 		RTFatal("Invalid return type");
 
 	c_routine[c_routine_next].address = proc_address;
@@ -2341,7 +2324,7 @@ object DefineC(object x)
         #define CALLBACK_SIZE (129)
 #else
 
-#ifdef EOSX
+#if defined(__APPLE__) && defined(__MACH__)
 	#define CALLBACK_SIZE (300)
 #else
 	#if __GNUC__ == 4
@@ -2351,18 +2334,18 @@ object DefineC(object x)
 
 		#elif INTPTR_MAX == INT64_MAX
 
-		#define CALLBACK_SIZE 143
+		#define CALLBACK_SIZE (143)
 
 		#endif
 	#else
-		#define CALLBACK_SIZE (80)
+		#define CALLBACK_SIZE (100)
 	#endif
 #endif
 #endif
 
 #define EXECUTABLE_ALIGNMENT (4)
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 typedef void * (__stdcall *VirtualAlloc_t)(void *, unsigned int size, unsigned int flags, unsigned int protection);
 #endif
 
@@ -2372,11 +2355,11 @@ typedef void * (__stdcall *VirtualAlloc_t)(void *, unsigned int size, unsigned i
 				p_v and p_radix must be < power(2,31)
 */
 
-#ifdef roundup  /* EOPENBSD defines it at least, others might */
+#ifdef roundup  /* __OpenBSD__ defines it at least, others might */
 #undef roundup
 #endif /* roundup */
 
-inline signed int roundup(unsigned int p_v, unsigned int p_radix) {
+static signed int roundup(unsigned int p_v, unsigned int p_radix) {
 	signed int radix = (signed int)p_radix;
 	signed int v = (signed int)p_v;
 
@@ -2385,8 +2368,9 @@ inline signed int roundup(unsigned int p_v, unsigned int p_radix) {
 
 typedef unsigned char * page_ptr;
 
+/* return read, write, exeutable memory */
 unsigned char * new_page() {
-#ifdef EWINDOWS
+#ifdef _WIN32
 	return VirtualAlloc( NULL, CALLBACK_SIZE, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE );
 #elif EUNIX
 	return mmap(NULL, pagesize, PROT_EXEC|PROT_WRITE|PROT_READ, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
@@ -2394,7 +2378,7 @@ unsigned char * new_page() {
 }
 
 void set_page_to_read_execute_only(page_ptr page_addr) {
-#ifdef EWINDOWS
+#ifdef _WIN32
 	static unsigned long oldprot;
 	static unsigned long * oldprotptr = &oldprot;
 	VirtualProtect(page_addr, pagesize, PAGE_EXECUTE_READ, oldprotptr);
@@ -2404,7 +2388,7 @@ void set_page_to_read_execute_only(page_ptr page_addr) {
 }
 
 void set_page_to_read_write_execute(page_ptr page_addr) {
-#ifdef EWINDOWS
+#ifdef _WIN32
 	static unsigned long oldprot;
 	static unsigned long * oldprotptr = &oldprot;
 	VirtualProtect(page_addr, pagesize, PAGE_EXECUTE_READWRITE, oldprotptr);
@@ -2462,14 +2446,15 @@ object CallBack(object x)
 	}
 	else {
 		routine_id = get_int(x);
-#if defined(EWINDOWS)
+#if defined(_WIN32)
 		convention = C_STDCALL;
 #endif
 	}
 
-#if defined( EWINDOWS ) && INTPTR_MAX == INT64_MAX
+#if INTPTR_MAX == INT64_MAX
 	// For some reason the cdecl callback crashes on windows, but this always works.
 	// We're not really using stdcall or cdecl anyways
+	// It also seems to crash on 64-bit Linux/GNU in some cases.
 	convention = C_STDCALL;
 #endif
 	/* Check routine_id value and get the number of arguments */
@@ -2516,7 +2501,7 @@ object CallBack(object x)
 					RTFatal("routine has too many parameters for call-back");
 		}
 	}
-#if (INTPTR_MAX == INT32_MAX) && defined EOSX
+#if (INTPTR_MAX == INT32_MAX) && defined(__APPLE__) && defined(__MACH__)
 	// always use the custom call back handler for OSX
 	// -- Use the normal cdecl on 64-bit, and the custom one on 32-bit.
 	// Clean this up if it works.
@@ -2549,13 +2534,13 @@ object CallBack(object x)
 	}
 	
 	copy_addr = page_addr + page_offset;
-#	ifdef EWINDOWS		   
+#	ifdef _WIN32		   
 	/* Assume we are running under some Windows that
 	   supports VirtualAlloc() always returning 0. 
 	   This has happened before in testing.  */
 	if (copy_addr == NULL)
 		copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);	
-#	endif /* def EWINDOWS */
+#	endif /* def _WIN32 */
 
 
 	/* Check if the memory allocation worked. */	
@@ -2571,7 +2556,7 @@ object CallBack(object x)
 	if (res != 0) {
 		RTFatal("Internal error: CallBack memcopy failed (%d).", res);
 	}
-#if defined(EOSX) || (INTPTR_MAX == INT64_MAX)
+#if defined(__APPLE__) && defined(__MACH__) || (INTPTR_MAX == INT64_MAX)
 	// For platforms that also have 'general_ptr' to patch, 'not_patched' should have another
 	// bit set to be cleared when they patch this value.
 	not_patched = 010 | not_patched;
@@ -2614,7 +2599,7 @@ object CallBack(object x)
 	set_page_to_read_execute_only(page_addr);
 	
 	if (not_patched) {
-		RTFatal("Internal error: CallBack routine id patch failed: missing magic.");
+		RTFatal("Internal error: CallBack routine id patch failed: missing magic (%d).", not_patched);
 	}
 	
 	addr = (uintptr_t)copy_addr;
@@ -2830,7 +2815,7 @@ object eu_uname()
 #endif
 }
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 long __stdcall Win_Machine_Handler(LPEXCEPTION_POINTERS p) {
 	return EXCEPTION_EXECUTE_HANDLER;
 }
@@ -2839,7 +2824,7 @@ long __stdcall Win_Machine_Handler(LPEXCEPTION_POINTERS p) {
 void Machine_Handler(int sig_no)
 /* illegal instruction, segmentation violation */
 {
-#ifdef WINDOWS
+#ifdef _WIN32
 	is_batch = console_application();
 #endif
 #ifdef ERUNTIME
@@ -2992,7 +2977,7 @@ object machine(object opcode, object x)
 				break;
 				
 			case M_WAIT_KEY:
-#if defined(EWINDOWS)
+#if defined(_WIN32)
 				show_console();
 #endif
 				if (current_screen != MAIN_SCREEN)
@@ -3119,31 +3104,31 @@ object machine(object opcode, object x)
 
 			case M_PLATFORM:
 				/* obsolete, but keep it */
-#ifdef ENETBSD
+#ifdef __NetBSD__
 				return 7;
 #else
-#ifdef EOPENBSD
+#ifdef __OpenBSD__
 				return 6;
 #else
-#ifdef EOSX
+#ifdef __APPLE__
 				return 4;
 #else
-#ifdef EBSD // FreeBSD by this point
+#ifdef __FreeBSD__
 				return 8;
 #else
-#ifdef ELINUX
+#ifdef __linux__
 				return 3;  // (UNIX, called Linux for backwards compatibility)
 #else
-#ifdef EWINDOWS
+#ifdef _WIN32
 				return 2;  // WIN32
 #else
 				return 1; // Unknown platform
-#endif // EWINDOWS
-#endif // ELINUX
-#endif // EBSD
-#endif // EOSX
-#endif // EOPENBSD
-#endif // ENETBSD
+#endif // _WIN32
+#endif // __linux__
+#endif // __FreeBSD__
+#endif // __APPLE__
+#endif // __OpenBSD__
+#endif // __NetBSD__
 
 				break;
 
@@ -3153,7 +3138,7 @@ object machine(object opcode, object x)
 #ifdef EUNIX
 				inst = (uintptr_t)getpid();
 #endif
-#ifdef EWINDOWS
+#ifdef _WIN32
 				inst = (uintptr_t)winInstance;
 #endif
 
@@ -3275,12 +3260,12 @@ object machine(object opcode, object x)
 				}
 #else
 #ifdef EUNIX
-#ifdef ELINUX
+#ifdef __linux__
 				temp = unsetenv(src);
 #else
 				unsetenv(src);
 				temp = 0;
-#endif /* ELINUX */
+#endif /* __linux__ */
 #endif /* EUNIX */
 #endif /* EMINGW */
 #endif /* __WATCOMC__ */

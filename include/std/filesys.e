@@ -40,7 +40,7 @@ elsifdef OSX then
 	constant lib = dll:open_dll("libc.dylib")
 
 elsifdef UNIX then
-	constant lib = dll:open_dll("libc.so")
+	constant lib = STDLIB
 	
 end ifdef
 
@@ -2183,12 +2183,18 @@ public function copy_file(sequence src, sequence dest, integer overwrite = 0)
 		
 	elsedef
 		integer success = 0
-		if file_exists(src) then
-			if overwrite or not file_exists( dest ) then
-				integer
-					in  = open( src, "rb" ),
-					out = open( dest, "wb" )
-				if in != -1 and out != -1 then
+		object src_list = dir(src)
+		if sequence(src_list) and length(src_list) = 1 and not find('d',src_list[1][D_ATTRIBUTES]) then
+			object dest_list = dir(dest)
+			if (overwrite and sequence(dest_list) and length(dest_list) = 1 and not find('d',dest_list[1][D_ATTRIBUTES])) 
+				or not file_exists( dest ) then
+				atom
+					in  = open( src, "rb", 1 )
+				if in != -1 then
+					integer out = open( dest, "wb" )
+					if out = -1 then
+						return 0
+					end if
 					integer byte
 					while byte != -1 with entry do
 						puts( out, byte )
@@ -2196,7 +2202,6 @@ public function copy_file(sequence src, sequence dest, integer overwrite = 0)
 						byte = getc( in )
 					end while
 					success = 1
-					close( in )
 					close( out )
 				end if
 			end if

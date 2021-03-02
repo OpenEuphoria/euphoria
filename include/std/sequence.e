@@ -2446,72 +2446,67 @@ public function breakup(sequence source, object size, integer style = BK_LEN)
 end function
 
 --**
--- removes all nesting from a sequence.
+-- Removes all nesting from a sequence, while retaining all its atoms.
 --
 -- Parameters:
---		# ##s## : the sequence to flatten out.
---      # ##delim## : An optional delimiter to place after each flattened sub-sequence (except
---                 the last one).
+--		# ##Source## : The sequence to flatten out.
+--      # ##Delim## : An object. This is an optional delimiter to place after each flattened sub-sequence
+--                   (except if the sub-sequence is the last element).
 --
 -- Returns:
---		A **sequence**, of atoms, all the atoms in ##s## enumerated.
+--		A **sequence** that contains only atoms. It has all the atoms in ##Source##.
 --
 -- Comments:
--- * If you consider a sequence as a tree, then the enumeration is performed
--- by left-right reading of the tree. The elements are simply read left to
--- right, without any care for braces.
--- * Empty sub-sequences are stripped out entirely.
+-- * One way to visualize how this function works, is to think of the input
+--   sequence written out as a literal with all the nested pairs of braces, then
+--   simply remove all the braces inside the outer most pair.
+-- * If you supply a delimiter, it is only added after sub-sequences. It is never used
+--   to delimit individual atoms.
+-- * The delimiter is flattened before using it in the resulting sequence.
 --
 -- Example 1:
 -- <eucode>
--- s = flatten({{18, 19}, 45, {18.4, 29.3}})
--- -- s is {18, 19, 45, 18.4, 29.3}
--- </eucode>
---
--- Example 2:
--- <eucode>
--- s = flatten({18,{ 19, {45}}, {18.4, {}, 29.3}})
--- -- s is {18, 19, 45, 18.4, 29.3}
+-- s = flatten({{18, 19}, 45,  {18.4,     29.3}}) --> {18, 19, 45, 18.4, 29.3}
+-- s = flatten({18, {19, {45}},{18.4, {}, 29.3}}) --> {18, 19, 45, 18.4, 29.3}
 -- </eucode>
 --
 -- Example 3:
 -- <eucode>
 -- Using the delimiter argument.
--- s = flatten({"abc", "def", "ghi"}, ", ")
--- -- s is "abc, def, ghi"
+-- s = flatten({"abc", "def", "ghi"}, ", ") --> "abc, def, ghi"
+-- s = flatten({"abc", "", "ghi", 'a', {"jkl", "mno", "pqr"}, "stu", "vwx", "yz"}, ',')
+-- --> "abc,,ghi,ajkl,mno,pqr,stu,vwx,yz"
+-- s = flatten({"file","name"},{"/", "_/"}) --> "file/_/name"
 -- </eucode>
 
 
-public function flatten(sequence s, object delim = "")
-	sequence ret
-	object x
-	integer len
-	integer pos
-
-	ret = s
-	pos = 1
-	len = length(ret)
-	while pos <= len do
-		x = ret[pos]
-		if sequence(x) then
-			if length(delim) = 0 then
-				ret = ret[1..pos-1] & flatten(x) & ret[pos+1 .. $]
-			else
-				sequence temp = ret[1..pos-1] & flatten(x)
-				if pos != length(ret) then
-					ret = temp &  delim & ret[pos+1 .. $]
-				else
-					ret = temp & ret[pos+1 .. $]
-				end if
-			end if
-			len = length(ret)
+public function flatten(sequence pSource, object pDelim={})
+	sequence lResult
+	object lTemp
+	
+	lResult = {}
+	-- Ensure that the delimiter is also flat.
+	if sequence(pDelim) and length(pDelim) > 0 then
+		pDelim = flatten(pDelim)
+	end if
+	
+	for i = 1 to length(pSource) do
+		-- Using temporary object for performance
+		lTemp = pSource[i]
+		if atom(lTemp) then
+			lResult &= lTemp  -- Atoms are simply appended
 		else
-			pos += 1
+			lResult &= flatten(lTemp, pDelim) -- Append flattened sub-seq.
+			-- Only add delimiter if this was not the last element.
+			if i != length(pSource) then
+				lResult &= pDelim
+			end if
 		end if
-	end while
-
-	return ret
+	end for
+	return lResult
+	
 end function
+
 
 --**
 -- returns a sequence of three sub-sequences. The sub-sequences contain

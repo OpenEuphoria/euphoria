@@ -57,4 +57,10 @@ test_equal( "poke4/peek4u negagive, doubles",{77, 0xffff_ffff, 5, 0xffff_ffff}, 
 poke8( ptr, {77, -1, 5.1, -1.1})
 test_equal( "poke8/peek8u negagive, doubles",{77, 0xffff_ffff_ffff_ffff, 5, 0xffff_ffff_ffff_ffff}, peek8u( ptr & 4 ) )
 
+poke8( ptr, {0xffff_ffff, 0xffff_ffff_ffff_f800, 0x7fff_ffff_ffff_fe00, 0x3fff_ffff_ffff_ff00})
+test_equal( "poke8/peek8u long long doubles",{0xffff_ffff, 0xffff_ffff_ffff_f800, 0x7fff_ffff_ffff_fe00, 0x3fff_ffff_ffff_ff00}, peek8u( ptr & 4 ) )
+
+poke8( ptr, #7FFF_FFFF_FFFF_FC00)
+test_equal( "poke8/peek8s long long double", #7FFF_FFFF_FFFF_FC00, peek8s( ptr ) )
+
 test_report()

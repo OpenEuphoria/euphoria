@@ -908,12 +908,12 @@ end procedure
 --
 -- Example 1:
 -- <eucode>
--- any_key() -- "Press Any Key to continue..."
+-- maybe_any_key() -- "Press Any Key to continue..."
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
--- any_key("Press Any Key to quit")
+-- maybe_any_key("Press Any Key to quit")
 -- </eucode>
 --
 -- See Also:
@@ -927,30 +927,24 @@ end procedure
 
 --**
 -- Description:
---   prompts the user to enter a number and returns only validated input.
+--   Displays a prompts then waits for the user to enter a number, which is returned.
 --
 -- Parameters:
---   # ##st## : is a string of text that will be displayed on the screen.
---   # ##s## : is a sequence of two values {lower, upper} which determine the range of values
---  		   that the user may enter. s can be empty, {}, if there are no restrictions.
+--   # ##prompt## : is a string of text that will be displayed on the screen before accepting 
+--                  the user's response.
+--   # ##range## : is either an empty sequence (the default), or a sequence of exactly two atoms {lower, upper} that determine the range of values
+--  		   that the user is allowed enter. If ##range## is empty, {}, there are no restrictions.
 --
 -- Returns:
---   An **atom**, 
--- in the assigned range which the user typed in.
+--   An **atom**. The number that the user entered.
+--   A **sequence**. The user cancelled the prompt by pressing Control+Z.
 --
 -- Errors:
---   If [[:puts]] cannot display ##st## on standard output, or if the first or second element
---   of ##s## is a sequence, a runtime error will be raised.
---
---   If user tries cancelling the prompt by hitting Control+Z, the program will abort as well,
---   issuing a type check error.
+--   If [[:puts]] cannot display ##prompt## on standard output, or if either element
+--   of ##range## is a sequence, a runtime error will be raised.
 --
 -- Comments:
---   As long as the user enters a number that is less than lower or greater
---   than upper, the user will be prompted again.
---
---   If this routine is too simple for your needs, feel free to copy it and make your
---   own more specialized version.
+--   If the user enters a number that is outside the ##range##, the user will be prompted again.
 --
 -- Example 1:
 --   <eucode>
@@ -966,7 +960,7 @@ end procedure
 -- 	[[:puts]], [[:prompt_string]]
 --
 
-public function prompt_number(sequence prompt, sequence range)
+public function prompt_number(sequence prompt, sequence range={})
 	object answer
 
 	while 1 do
@@ -974,6 +968,10 @@ public function prompt_number(sequence prompt, sequence range)
 		 answer = gets(0) -- make sure whole line is read
 		 puts(1, '\n')
 
+		 if not sequence(answer) then
+		 	return {answer}
+		 end if
+		 
 		 answer = stdget:value(answer)
 		 if answer[1] != stdget:GET_SUCCESS or sequence(answer[2]) then
 			  puts(1, "A number is expected - try again\n")
@@ -995,7 +993,7 @@ end function
 -- prompts the user to enter a string of text.
 --
 -- Parameters:
---		# ##st## : is a string that will be displayed on the screen.
+--		# ##prompt## : is a string that will be displayed on the screen.
 --
 -- Returns:
 -- 		A **sequence**, 

@@ -437,7 +437,7 @@ elsifdef OSX then
 
 elsifdef BSD then
 	constant
-		lib = dll:open_dll("libc.so"),
+		lib = STDLIB,
 		f_strfmon = dll:define_c_func(lib, "strfmon", {P, I, P, dll:C_DOUBLE}, I),
 		f_strfnum = -1,
 		f_setlocale = dll:define_c_func(lib, "setlocale", {I, P}, P),

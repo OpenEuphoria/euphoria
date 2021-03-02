@@ -166,7 +166,7 @@ include std/dll.e
 export constant
 	--**
 	-- @nodoc@
-	STDLIB   = dll:open_dll({ "libc.so", "libc.dylib", "" }),
+	STDLIB   = dll:open_dll({ "libc.so.7", "libc.so", "libc.dylib", "" }),
 	--**
 	-- @nodoc@
 	MMAP     = dll:define_c_func( STDLIB, "mmap", 
@@ -457,6 +457,10 @@ end ifdef
 -- Quad words are 64-bit integers.  In C, they are typically declared as long long int,
 -- or long int (on 64-bit architectures other than Windows).  They
 -- are big enough to hold pointers to other values in memory on 64-bit architectures.
+--
+-- Be careful:
+-- Recall that atoms in EUPHORIA (32 bit) have 15 digits of accuracy.
+-- Integral Values whose absolute value exceeds 2^^53^^ might not be representable exactly.
 --
 -- Use [[:allocate_data]] to allocate data and return its address.
 -- Use [[:poke8]] to write to the data at an address.
@@ -987,6 +991,9 @@ end function
 --
 -- Comments: 
 --
+-- On 32-bit machines, the information provided by peek8 will be an approximation due to the
+-- way numbers are stored.  If you want to peek in a lossless way use [[:peek4u]] or [[:peek4s]]
+--
 -- Since addresses are 32-bit numbers on 32-bit architectures, they can be larger than the largest
 -- value of type integer (31-bits). Variables that hold an address should
 -- therefore be declared as atoms.
@@ -1042,6 +1049,9 @@ end function
 -- When supplying a ##{address, count}## sequence, the count must not be negative.
 --
 -- Comments:
+--
+-- On 32-bit machines, the information provided by peek8s will be an approximation due to the
+-- limitations on atoms.  If you want to peek in a lossless way use [[:peek4u]] or [[:peek4s]]
 --
 -- Since addresses are 32-bit numbers on 32-bit architectures, they can be larger than the largest
 -- value of type integer (31-bits). Variables that hold an address should
@@ -1213,6 +1223,9 @@ end function
 -- When supplying a ##{address, count}## sequence, the count must not be negative.
 --
 -- Comments:
+--
+-- On 32-bit machines, the information provided by peek8u will be an approximation due to the
+-- limitations on atoms.  If you want to peek in a lossless way use [[:peek4u]] or [[:peek4s]]
 --
 -- Since addresses are 32-bit numbers on 32-bit architectures, they can be larger than the largest
 -- value of type integer (31-bits). Variables that hold an address should
@@ -1580,6 +1593,9 @@ end function
 --
 -- Comments:
 --
+-- On 32-bit machines, the number you supply to poke8 will already be an approximate value
+-- before it can reach the memory.  If you want to poke exact values way use [[:poke4u]] or [[:poke4s]]
+--
 -- There is no point in having ##poke8s## or ##poke8u##. For example, both
 -- +power(2,63) and -power(2,63) are stored as ###F000000000000000##. It is up to whoever
 -- reads the value to figure it out.
@@ -1590,7 +1606,7 @@ end function
 -- The 8-byte values to be stored can be negative or positive. You can read
 -- them back with either ##peek8s## or ##peek8u##. However, the results
 -- are unpredictable if you want to store values with a fractional part or a
--- magnitude greater than power(2,64), even though Euphoria represents them
+-- magnitude greater than 2^^64^^, even though Euphoria represents them
 -- all as atoms.
 --
 -- Example 1:
@@ -1607,7 +1623,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:Using Data Double Words]], [[:peek4s]], [[:peek4u]], [[:poke]], [[:poke2]], [[:allocate]], [[:free]], [[:call]]
+--     [[:Using Data Quad Words]], [[:peek4s]], [[:peek4u]], [[:poke]], [[:poke2]], [[:allocate]], [[:free]], [[:call]]
 --
 
 --****

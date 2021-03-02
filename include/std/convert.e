@@ -50,16 +50,24 @@ atom mem  = machine_func(M_ALLOC,8)
 --
 -- Example 1:
 -- <eucode>
--- s = int_to_bytes(999)
--- -- s is {231, 3, 0, 0}
+-- include std/convert.e
+-- sequence s = int_to_bytes(999)
+-- ?s
 -- </eucode>
+--
+-- Result:
+-- {231, 3, 0, 0}
 --
 -- Example 2:
 --
 -- <eucode>
--- s = int_to_bytes(-999)
--- -- s is {-231, -4, -1, -1}
+-- include std/convert.e
+-- sequence s = int_to_bytes(-999)
+-- ?s
 -- </eucode>
+--
+-- Result:
+-- {-231, -4, -1, -1}
 --
 -- See Also:
 --		[[:bytes_to_int]], [[:int_to_bits]], [[:atom_to_float64]], [[:poke4]]
@@ -152,7 +160,8 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- s = int_to_bits(177, 8)
+-- include std/convert.e
+-- sequence s = int_to_bits(177, 8)
 -- -- s is {1,0,0,0,1,1,0,1} -- "reverse" order
 -- </eucode>
 --
@@ -251,8 +260,16 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- fn = open("numbers.dat", "wb")
--- puts(fn, atom_to_float64(157.82)) -- write 8 bytes to a file
+-- include std/convert.e
+-- sequence bytes = atom_to_float64( 3.14159265359 )
+-- ? bytes
+-- atom pi = float64_to_atom( bytes )
+-- ? pi
+--
+-- Result:
+--
+-- {234,46,68,84,251,33,9,64}
+-- 3.141592654
 -- </eucode>
 --
 -- See Also:
@@ -301,8 +318,16 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- fn = open("numbers.dat", "wb")
--- puts(fn, atom_to_float32(157.82)) -- write 4 bytes to a file
+-- include std/convert.e
+-- sequence bytes = atom_to_float32( 3.14159265359 )
+-- ? bytes
+-- atom pi = float32_to_atom( bytes )
+-- ? pi
+--
+-- Result:
+--
+-- {219,15,73,64}
+-- 3.141592741
 -- </eucode>
 --
 -- See Also:
@@ -325,15 +350,9 @@ end function
 -- Comments:
 -- Any 64-bit IEEE floating-point number can be converted to an atom.
 --
--- Example 1:
--- <eucode>
--- f = repeat(0, 8)
--- fn = open("numbers.dat", "rb")  -- read binary
--- for i = 1 to 8 do
---     f[i] = getc(fn)
--- end for
--- a = float64_to_atom(f)
--- </eucode>
+-- Example:
+--
+-- See [[:atom_to_float64]] for example.
 --
 -- See Also:
 --		[[:float32_to_atom]], [[:bytes_to_int]], [[:atom_to_float64]]
@@ -356,16 +375,9 @@ end function
 -- Comments:
 -- Any 32-bit IEEE floating-point number can be converted to an atom.
 --
--- Example 1:
--- <eucode>
--- f = repeat(0, 4)
--- fn = open("numbers.dat", "rb") -- read binary
--- f[1] = getc(fn)
--- f[2] = getc(fn)
--- f[3] = getc(fn)
--- f[4] = getc(fn)
--- a = float32_to_atom(f)
--- </eucode>
+-- Example:
+--
+-- See [[:atom_to_float32]] for example
 --
 -- See Also:
 --		[[:float64_to_atom]], [[:bytes_to_int]], [[:atom_to_float32]]
@@ -392,10 +404,21 @@ end function
 --
 -- Example 1:
 -- <eucode>
---  atom h = hex_text("-#3_4FA.00E_1BD")
---  -- h is now -13562.003444492816925
---  atom h = hex_text("DEADBEEF")
---  -- h is now 3735928559
+-- include std/convert.e
+-- include std/console.e
+-- atom h1 = hex_text("-#3_4FA.00E_1BD")
+-- ?h1
+-- display("h1 is:[]",h1)
+-- atom h2 = hex_text("DEAD_BEEF")
+-- ?h2
+-- display("h2 is:[]",h2)
+-- 
+-- Results:
+--
+-- -13562.00344
+-- H1 is:-13562.0034444928
+-- 3735928559
+-- H2 is:3735928559
 -- </eucode>
 --
 -- See Also:
@@ -498,6 +521,21 @@ integer decimal_mark = '.'
 -- as the decimal point symbol. The pre-changed value is returned.
 -- * Any other value does not change the current setting. Instead it just returns the current value.
 -- * The initial value of the decimal marker is a period.
+--
+-- Example:
+-- <eucode>
+-- include std/convert.e  
+-- atom n1 = to_number("12,345.95")  
+-- ? n1  
+-- set_decimal_mark(',')  
+-- atom n2 = to_number("12.345,95")  
+-- ? n2 
+--
+-- Result:
+--
+-- 12345.95
+-- 12345.95
+-- </eucode>
 
 public function set_decimal_mark(integer new_mark)
 	integer old_mark
@@ -570,6 +608,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
+-- include std/convert.e
 -- object val
 -- val = to_number("12.34")      ---> 12.34 -- No errors and no error return needed.
 -- val = to_number("12.34", 1)   ---> {12.34, 0} -- No errors.
@@ -793,6 +832,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
+-- include std/convert.e
 -- ? to_integer(12)            --> 12
 -- ? to_integer(12.4)          --> 12
 -- ? to_integer("12")          --> 12
@@ -852,6 +892,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
+-- include std/convert.e
 -- include std/console.e
 -- display(to_string(12))           --> 12
 -- display(to_string("abc"))        --> abc

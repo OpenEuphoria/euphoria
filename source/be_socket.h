@@ -1,7 +1,7 @@
 #ifndef BE_SOCKET_H_
 #define BE_SOCKET_H_
 
-#ifdef EWINDOWS
+#ifdef _WIN32
     #include <windows.h>
 
     #ifndef AF_INET
@@ -9,6 +9,7 @@
     	#include <winsock2.h>
         #include <ws2tcpip.h>
     #endif // AF_INET
+    #undef FD_ISSET
 	typedef int socklen_t;
 #else // ifdef EWINDOWS else
     #include <sys/types.h>
@@ -22,7 +23,7 @@
 
 		#ifdef EBSD
     		#include <netinet/in.h>
-		#endif // EFREEBSD
+		#endif // EBSD
 
 		#define SOCKET int
 		#define SOCKET_ERROR -1
@@ -30,7 +31,7 @@
 		#define SOCKADDR struct sockaddr_in
 		#define closesocket close
 	#endif // UNIX
-#endif // ifdef EWINDOWS else
+#endif // ifdef _WIN32 else
 
 object eusock_info(object x);
 object eusock_getservbyname(object x);

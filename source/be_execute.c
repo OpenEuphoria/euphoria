@@ -37,14 +37,15 @@
 /******************/
 /* Included files */
 /******************/
+#define _SVID_SOURCE
 #include <stdint.h>
-#if defined(EWINDOWS) && INTPTR_MAX == INT64_MAX
+#if defined(_WIN32) && INTPTR_MAX == INT64_MAX
 // MSVCRT doesn't handle long double output correctly
 #define __USE_MINGW_ANSI_STDIO 1
 #endif
 #include <stdio.h>
 #include <time.h>
-#ifdef EUNIX
+#if !defined(__WIN32)
 #	include <sys/times.h>
 #	include <string.h>
 #else
@@ -54,7 +55,7 @@
 #	include <conio.h>
 #endif
 #include <math.h>
-#ifdef EWINDOWS
+#ifdef _WIN32
 #	include <windows.h>
 #endif
 #include <signal.h>
@@ -294,14 +295,14 @@ static void trace_command(object x)
 		else if (i == 1) {
 			TraceOn = trace_enabled;
 			color_trace = TRUE;
-#ifdef EWINDOWS
+#ifdef _WIN32
 			show_console();
 #endif
 		}
 		else if (i == 2) {
 			TraceOn = trace_enabled;
 			color_trace = FALSE;
-#ifdef EWINDOWS
+#ifdef _WIN32
 			show_console();
 #endif
 		}
@@ -497,7 +498,7 @@ static object do_peek4(object a, int b )
 		peek4_addr = (uint32_t *)a;
 	}
 	else if (IS_ATOM(a)) {
-#ifdef __arm__
+#ifdef EARM
 		double d = DBL_PTR(a)->dbl;
 		peek4_addr = (uint32_t*)(uintptr_t)d;
 #else
@@ -562,6 +563,62 @@ static object do_peek4(object a, int b )
 #define POKE_LIMIT(x) "poke" #x " is limited to 64-bit numbers"
 #endif
 
+#ifdef __WATCOMC__
+// 754 - double format as a struct with bitfields.
+typedef struct  {
+    unsigned int frac2:32;
+    unsigned int frac1:20;
+    unsigned int exp:11;
+    unsigned int sign:1;
+} dbl64_format;
+
+union ds {
+    double n;
+    dbl64_format s;
+};
+
+static double trunc(const double f) {
+    union ds d;
+    signed int ff;
+    d.n = f;
+    // A smaller ff number means a greater value of d.n.
+    ff = 1043 - d.s.exp;
+    #if DDEBUG
+    printf("f = %.15g: sign = %d, exp = %d, frac = %u %u. ff = %d:", d.n, d.s.sign, d.s.exp, d.s.frac1, d.s.frac2, ff);
+    #endif
+    if (d.s.sign == 0 && d.s.exp == 0 && d.s.frac1 == 0 && d.s.frac2 == 0) {
+    #if DDEBUG
+    	printf("==> trunc(f) = %0.3g\n", 0.0);
+    #endif
+    	return f;
+    }
+    #if DDEBUG
+    	printf("2**ff: %d", (1 << ff));
+    #endif
+    if (ff >= 0) {
+    	d.s.frac1 &= ~((1 << ff) - 1);
+    	d.s.frac2 = 0;
+    } else if (ff > -32) {
+    	ff += 32;
+    	d.s.frac2 &= ~((1 << ff) - 1);
+    } // else no bits in d.s.frac* are non-integer valued 
+    // so leave both d.s.frac* as they are
+    
+    if (d.s.exp < 1023 && d.s.frac1 == 0 && d.s.frac2 == 0) {
+    	// the implicitly bit when frac1==0 and d.s.exp<1023 is <1.  Set this to 
+    	// special zero case.
+    	d.s.exp = 0;
+    	d.s.sign = 0;
+    }
+    //d.s.frac1 &= (((ff + 1) << 1) - 1);
+    #if DDEBUG
+    	printf("sign = %d, exp = %d, frac = %u %u", d.s.sign, d.s.exp, d.s.frac1, d.s.frac2);
+    	printf("==> trunc(f) = %.14g\n", d.n);
+    #endif
+    return d.n;    
+}
+#endif
+
 static void do_poke2(object a, object top)
 // moved it here because it was causing bad code generation for WIN32
 {
@@ -588,7 +645,7 @@ static void do_poke2(object a, object top)
 		temp_dbl = DBL_PTR(top)->dbl;
 		if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 			RTFatal(POKE_LIMIT(2));
-#ifdef __arm__
+#ifdef EARM
 			a = trunc( temp_dbl );
 			*poke2_addr = (uint16_t) a;
 #else
@@ -613,7 +670,7 @@ static void do_poke2(object a, object top)
 		
 				if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 					RTFatal( POKE_LIMIT(2) );
-#ifdef __arm__
+#ifdef EARM
 				a = trunc( DBL_PTR(top)->dbl );
 				*poke2_addr = (uint16_t) a;
 #else
@@ -634,10 +691,9 @@ static void do_poke8(object a, object top)
 	eudouble temp_dbl;
 	s1_ptr s1;
 	object_ptr obj_ptr;
-#ifdef __arm__
-	uint64_t tmp64;
-#endif
-
+	int64_t tmp64;
+	uint64_t utmp64;
+	
 	/* determine the address to be poked */
 	if (IS_ATOM_INT(a)) {
 		poke8_addr = (uint64_t *)INT_VAL(a);
@@ -653,15 +709,19 @@ static void do_poke8(object a, object top)
 		*poke8_addr = (uint64_t) top;
 	}
 	else if (IS_ATOM(top)) {
-		temp_dbl = DBL_PTR(top)->dbl;
-		if (temp_dbl < MIN_LONGLONG_DBL || temp_dbl > MAX_LONGLONG_DBL)
-			RTFatal("poke8 is limited to 64-bit numbers");
-#ifdef __arm__
-		tmp64 = trunc( temp_dbl );
-		*poke8_addr = tmp64;
-#else
-		*poke8_addr = (uint64_t) temp_dbl;
-#endif
+#define poke_atom \
+		temp_dbl = DBL_PTR(top)->dbl;\
+		if (temp_dbl < MIN_LONGLONG_DBL || temp_dbl > MAX_LONGLONG_DBL) \
+			RTFatal("poke8 is limited to 64-bit numbers");\
+		temp_dbl = trunc( temp_dbl );\
+		if (temp_dbl <= 0.0) { \
+				tmp64 = temp_dbl;\
+				*(int64_t*)poke8_addr = tmp64;\
+		} else {\
+				utmp64 = temp_dbl;\
+				*poke8_addr = utmp64;\
+		}
+		poke_atom
 	}
 	else {
 		/* second arg is sequence */
@@ -676,15 +736,7 @@ static void do_poke8(object a, object top)
 			else if (IS_ATOM(top)) {
 				if (top == NOVALUE)
 					break;
-				temp_dbl = DBL_PTR(top)->dbl;
-				if (temp_dbl < MIN_LONGLONG_DBL || temp_dbl > MAX_LONGLONG_DBL)
-					RTFatal("poke8 is limited to 64-bit numbers");
-#ifdef __arm__
-				tmp64 = trunc( temp_dbl );
-				*poke8_addr = (uint64_t) tmp64;
-#else
-				*poke8_addr = (uint64_t) temp_dbl;
-#endif
+				poke_atom
 				++poke8_addr;
 			}
 			else {
@@ -692,6 +744,7 @@ static void do_poke8(object a, object top)
 			}
 		}
 	}
+#undef poke_atom
 }
 
 static void do_poke4(object a, object top)
@@ -701,7 +754,7 @@ static void do_poke4(object a, object top)
 	eudouble temp_dbl;
 	s1_ptr s1;
 	object_ptr obj_ptr;
-#ifdef __arm__
+#ifdef EARM
 	int32_t tmp_int;
 #endif
 
@@ -710,7 +763,7 @@ static void do_poke4(object a, object top)
 		poke4_addr = (uint32_t *)INT_VAL(a);
 	}
 	else if (IS_ATOM(a)) {
-#ifdef __arm__
+#ifdef EARM
 		temp_dbl = DBL_PTR(a)->dbl;
 		poke4_addr = (uint32_t *)(uintptr_t)temp_dbl;
 #else
@@ -728,7 +781,7 @@ static void do_poke4(object a, object top)
 		temp_dbl = DBL_PTR(top)->dbl;
 		if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 			RTFatal(POKE_LIMIT(4));
-#ifdef __arm__
+#ifdef EARM
 		if( temp_dbl < 0.0 ){
 			tmp_int = (int32_t) temp_dbl;
 		}
@@ -756,7 +809,7 @@ static void do_poke4(object a, object top)
 				temp_dbl = DBL_PTR(top)->dbl;
 				if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 					RTFatal(POKE_LIMIT(4));
-#ifdef __arm__
+#ifdef EARM
 				if( temp_dbl < 0.0 ){
 					tmp_int = (int32_t) temp_dbl;
 				}
@@ -798,7 +851,7 @@ static void do_poke4(object a, object top)
 #define FP_EMULATION_NEEDED // FOR WATCOM/DOS to run on old 486/386 without f.p.
 
 #if !defined(EMINGW)
-#if defined(EWINDOWS) || (defined(__WATCOMC__) && !defined(FP_EMULATION_NEEDED))
+#if defined(_WIN32) || (defined(__WATCOMC__) && !defined(FP_EMULATION_NEEDED))
 #ifdef EMSVC
 long msvc_spare = 0;
 #define thread() do { __asm { JMP [pc] } } while(0)
@@ -966,12 +1019,19 @@ void InitExecute()
 	// a bit of cleanup - tick rate, profile, active page etc.
 #endif
 
-#ifdef EWINDOWS
-		/* Prevent "Send Error Report to Microsoft dialog from coming up
-		   if this thing has an unhandled exception.  */
-		SetUnhandledExceptionFilter(Win_Machine_Handler);
+// detect matherr support
+#if defined(DOMAIN) && defined(SING) && defined(OVERFLOW) && defined(UNDERFLOW) && defined(TLOSS) && defined(PLOSS)
+	// enable our matherr function
+#if !defined(EMINGW) && !defined(EWATCOM)
+	_LIB_VERSION = _SVID_;
 #endif
-
+	
+#ifdef _WIN32
+		/* Prevent "Send Error Report to Microsoft dialog from coming up
+	   if this thing has an unhandled exception.  */
+	SetUnhandledExceptionFilter(Win_Machine_Handler);
+#endif
+#endif
 #ifndef ERUNTIME  // dll shouldn't take handler away from main program
 #ifndef EDEBUG
 	signal(SIGILL,  Machine_Handler);
@@ -1728,7 +1788,7 @@ struct sline *slist;
 
 /* Front-end variables passed via miscellaneous fe.misc */
 char **file_name;
-#ifdef EWINDOWS
+#ifdef _WIN32
 extern DWORD WINAPI WinTimer(LPVOID lpParameter);
 #endif
 int max_stack_per_call;
@@ -1749,7 +1809,7 @@ void fe_set_pointers()
 	AnyStatementProfile= fe.misc[2];
 	sample_size        = fe.misc[3];
 
-#if defined(EWINDOWS)
+#if defined(_WIN32)
 	if (sample_size > 0) {
 		profile_sample = (intptr_t *)EMalloc(sample_size * sizeof(intptr_t));
 		//lock_region(profile_sample, sample_size * sizeof(int));
@@ -2802,6 +2862,10 @@ void do_exec(intptr_t *start_pc)
 					tpc = pc;
 					a = DoubleToInt(top);
 					if (IS_ATOM_INT(a)) {
+						if (UNIQUE(DBL_PTR(top)) && (DBL_PTR(top)->cleanup != 0)) {
+							tpc = pc - 1; //RTFatalType(pc-1);
+							RTFatal("Cannot assign value with a destructor to an integer");
+						}
 						DeRefDS(top);
 						*(object_ptr)pc[-1] = a;
 						BREAK;
@@ -4766,7 +4830,7 @@ void do_exec(intptr_t *start_pc)
 					poke_addr = (char *)INT_VAL(a);
 				}
 				else if (IS_ATOM(a)) {
-#ifdef __arm__
+#ifdef EARM
 					double d = DBL_PTR(a)->dbl;
 					poke_addr = (char*) (uintptr_t) d;
 #else
@@ -4972,7 +5036,7 @@ void do_exec(intptr_t *start_pc)
 				}
 				else if (IS_ATOM(b)) {
 					/* no check for overflow here.. hmm*/
-#ifdef __arm__
+#ifdef EARM
 					b = trunc( DBL_PTR(b)->dbl );
 					*poke_addr = (uint8_t) b;
 #else
@@ -4991,7 +5055,7 @@ void do_exec(intptr_t *start_pc)
 						else if (IS_ATOM(b)) {
 							if (b == NOVALUE)
 								break;
-#ifdef __arm__
+#ifdef EARM
 							b = trunc( DBL_PTR(b)->dbl );
 							*poke_addr = (uint8_t) b;
 #else
@@ -5038,7 +5102,7 @@ void do_exec(intptr_t *start_pc)
 					sub_addr = (void(*)())INT_VAL(a);
 				}
 				else if (IS_ATOM(a)) {
-#ifdef __arm__
+#ifdef EARM
 					tuint = (uintptr_t)(DBL_PTR(a)->dbl);
 					sub_addr = (void(*)())tuint;
 #else
@@ -5115,7 +5179,7 @@ void do_exec(intptr_t *start_pc)
 						last_r_file_no = NOVALUE;
 				}
 				if (last_r_file_ptr == stdin) {
-#ifdef EWINDOWS
+#ifdef _WIN32
 					// In WIN32 this is needed before
 					// in_from_keyb is set correctly
 					show_console();
@@ -5160,19 +5224,19 @@ void do_exec(intptr_t *start_pc)
 #ifdef EUNIX
 				top = 3;  // (UNIX, called Linux for backwards compatibility)
 #endif
-#ifdef EBSD
+#ifdef __FreeBSD__
 				top = 8; // FreeBSD
 #endif
-#ifdef EOSX
+#ifdef __APPLE__
 				top = 4;  // OSX
 #endif
-#ifdef EOPENBSD
+#ifdef __OpenBSD__
 				top = 6; // OpenBSD
 #endif
-#ifdef ENETBSD
+#ifdef __NetBSD__
 				top = 7; // NetBSD
 #endif
-#ifdef EWINDOWS
+#ifdef _WIN32
 				top = 2;  // WIN32
 #endif
 
@@ -5185,7 +5249,7 @@ void do_exec(intptr_t *start_pc)
 							 or return -1 */
 			deprintf("case L_GET_KEY:");
 				tpc = pc;
-#if defined(EWINDOWS)
+#if defined(_WIN32)
 				show_console();
 #endif
 				if (current_screen != MAIN_SCREEN) {

@@ -1,0 +1,7 @@
+*.c   linguist-language=C
+*.e   linguist-language=Euphoria
+*.ex  linguist-language=Euphoria
+*.gnu linguist-language=Makefile
+*.h   linguist-language=C
+*.mak linguist-language=Makefile
+*.wat linguist-language=Makefile

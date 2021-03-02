@@ -1,0 +1,7 @@
+t_c_badpoke8.e:5
+poke8 is limited to 64-bit numbers 
+
+
+Public & Export & Global & Local Variables
+
+

@@ -1190,7 +1190,7 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 							if ref[FR_QUALIFIED] != -1 then
 								if ref[FR_QUALIFIED] > 0 then
 									-- some qualified filename
-									errloc = sprintf("\t\'%s\' (%s:%d) was not declared in \'%s\'.\n", 
+									errloc = sprintf("\t\'%s\' (%s:%d) was not declared in \'%s\' or is not visible.\n", 
 										{ref[FR_NAME], abbreviate_path(known_files[ref[FR_FILE]]), ref[FR_LINE],
 											find_replace('\\',abbreviate_path(known_files[ref[FR_QUALIFIED]]),'/')})
 								else

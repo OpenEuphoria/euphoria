@@ -48,7 +48,7 @@ int get_version_info(char *cache_filename,
     fgets(buf, BUF_SIZE, ver_fh);
 
     /* trim the newline */
-    if (strlen(buf) < node_size)
+    if (strlen(buf) > 0)
         buf[strlen(buf)-1] = 0;
     strncpy(node, buf, node_size);
 
@@ -104,15 +104,16 @@ int main(int argc, char **argv)
 {
     FILE *ver_fh;
     char tmp[MAX_PATH];
-    char *hg_executable, *cache_filename, *output_filename;
+    char *hg_executable, *cache_filename, *output_filename, *clq;
     char old_ver[BUF_SIZE], old_date[BUF_SIZE];
 	char new_ver[BUF_SIZE], new_date[BUF_SIZE];
 	int old_rev = 0, new_rev = 0;
     int had_old_info = 0;
+    int system_return_value;
 
     if (argc < 4)
     {
-        fprintf(stderr, "Usage: %s hg-executable cache-file output-filename\n",
+        fprintf(stderr, "Usage: %s git-executable cache-file output-filename\n",
                 argv[0]);
         exit(1);
     }
@@ -130,40 +131,39 @@ int main(int argc, char **argv)
 
     had_old_info = get_version_info(cache_filename, old_ver, BUF_SIZE, old_date, BUF_SIZE, &old_rev);
 
+    clq =
 #if defined(__WATCOMC__) || defined(__MINGW32__)
-    snprintf(tmp, MAX_PATH,
-			 "\"%s\" parents --template {node}\\n{date}\\n{rev} > %s",
-			 hg_executable, cache_filename);
+    ""
 #else
-    snprintf(tmp, MAX_PATH,
-			 "\"%s\" parents --template '{node}\\n{date}\\n{rev}' > %s",
-			 hg_executable, cache_filename);
+    "\'"
 #endif
+    ;
+    snprintf(tmp, MAX_PATH,
+			 "\"%s\" show --format=%s%%H%%n%%at%%n-1%%n%s > %s",
+			 hg_executable, clq, clq, cache_filename);
 
-    if (system(tmp) != 0)
+    if ((system_return_value = system(tmp)) != 0)
     {
         /*
          * If we do not have a be_ver.h, write a junk one. Otherwise,
          * leave the existing one alone... i.e. from a source-tarball?
-		 */
-	  if (has_be_ver(output_filename) == 0) {
-		fprintf(stderr, "Mercurial seems to not be installed, writing unknown be_ver.h\n");
-		put_version(output_filename, "unknown", "unknown", 0);
-	  }
-
-	  exit(0);
+         */
+        if (has_be_ver(output_filename) == 0) {
+	    if (system_return_value == -1) {
+		fprintf(stderr, "Git does not seem to be installed.");
+	    } else {
+		fprintf(stderr, "Git command failed.");
+	    }
+	    fprintf(stderr, "  Writing unknown be_ver.h\n");
+	    put_version(output_filename, "unknown", "unknown", 0);
+	    exit(0);
+        }
     }
 
     if (get_version_info(cache_filename, new_ver, BUF_SIZE, new_date, BUF_SIZE, &new_rev) == 0)
     {
-	  fprintf(stderr, "Could not open cache file %s\n  result of hg parents\n",
+	  fprintf(stderr, "Could not open cache file %s\n",
 			  cache_filename);
-
-	  if (has_be_ver(output_filename) == 0) {
-		fprintf(stderr, "Mercurial seems to not be installed, writing unknown be_ver.h\n");
-		put_version(output_filename, "unknown", "unknown", 0);
-	  }
-
 	  exit(0);
     }
 

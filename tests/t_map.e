@@ -50,8 +50,7 @@ test_equal("map m1 size#2", 1006, map:size(m1))
 test_equal("map m1 get 5#2",               "5", map:get(m1,  5, 999) )
 test_equal("map m1 get 1000",           "1000", map:get(m1, 1000, 999) )
 
--- add 2000 floats
-o2 = map:threshold(o1)
+-- add 1000 floats
 for i = 1 to 1000 do
 	map:put(m1, -i*1.333333, i)
 end for
@@ -605,11 +604,15 @@ test_equal("map:get(gimlet, --)", "comment", map:get(gimlet, "--"))
 
 map init_routines = map:new()
 
+
 sequence names = {}
 procedure register( sequence name, integer foo=0 )
 	map:put( init_routines, name, foo )
 	names = append( names, name )
 end procedure
+
+
+
 
 procedure validate_map( sequence name, integer has )
 	sequence keys = map:keys( init_routines, 1 )
@@ -629,11 +632,13 @@ procedure validate_map( sequence name, integer has )
 	test_equal( sprintf( "validate_map %s %d", {name, has}), "", text )
 end procedure
 
+
+
 procedure remove_name( sequence name )
 	validate_map( name, 1 )
 	map:remove( init_routines, name )
 	integer nx = find( name, names )
-	names = remove( names, nx )
+	names = eu:remove( names, nx )
 	validate_map( name, 0 )
 end procedure
 

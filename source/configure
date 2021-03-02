@@ -1,8 +1,8 @@
 #!/bin/sh
 
 CONFIG_FILE=config.gnu
-PLAT="default platform"
-ARCH="default arch"
+PLAT="default_platform"
+ARCH="default_arch"
 
 UNAME_SYSTEM=`(uname -s) 2>/dev/null`  || UNAME_SYSTEM=unknown
 UNAME_MACHINE=`(uname -m) 2>/dev/null` || UNAME_MACHINE=unknown
@@ -34,7 +34,8 @@ if echo "$UNAME_SYSTEM" | grep CYGWIN > /dev/null; then
 
 elif echo "$UNAME_SYSTEM" | grep MINGW > /dev/null; then
 	UNAME_SYSTEM=WINDOWS
-	PWDARG=-W
+	USEMINGPATH="true"
+	PWDARG=
 	EXE=.exe
 else
 	PWDARG=
@@ -55,28 +56,30 @@ if [ -z "SOURCEDIR" ] ; then
 fi
 TRUNKDIR="`(cd \"$SOURCEDIR\" && cd .. && pwd $PWDARG)`"
 
+MIN_VER=`egrep "define +MIN_VER" version.h | awk ' { print $3; }'`
+
+
 # gcc doesn't seem to like -m32 on 32-bit machines when there are 
 # no 64-bit machines 
 # with an instruction super set of the 32-bit machine.  This means,
 # -m32 is fine for ix86 32bit machines but bad for ARM and Motorola based
 # machines.
 
-
 MFLAG=-m32
 
 if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
-	ARCH=ix86
+	HOST_ARCH=ix86
 	MFLAG=-m32
 	
 elif echo "$UNAME_MACHINE" | egrep "x86_64|amd64" > /dev/null; then
-	ARCH=ix86_64
+	HOST_ARCH=ix86_64
 	MFLAG=-m64
 	
 elif echo "$UNAME_MACHINE" | grep -i ARM > /dev/null; then
-	ARCH=ARM
+	HOST_ARCH=ARM
 	MFLAG=
-	
 fi
+ARCH=$HOST_ARCH
 
 if test $UNAME_SYSTEM = "Linux"; then
 	EHOST=ELINUX
@@ -117,6 +120,7 @@ else
 	TARGET=EBSD
 fi
 
+BUILDJOBS="1"
 
 # default use source
 if [ "$SOURCEDIR" = `pwd $PWDARG` ] ; then
@@ -137,10 +141,10 @@ fi
 
 SCP="scp -C"
 SSH="ssh -C"
-HG="hg"
 INSTALL_PREFIX="/usr/local"
 EREL_TYPE="development"
 ROOTDIR="$TRUNKDIR"
+HG="git"
 
 CONFIGURE_PARAMS="$@"
 
@@ -219,6 +223,15 @@ while [ "$1" != "" ]; do
 		if [ -x "${EUBIN}/eui" ]; then
 			EC="${EUBIN}/eui ${SOURCEDIR}/euc.ex"
 		fi
+		;;
+
+	--jobs*)
+		VAL=`echo $1 | cut -d = -f 2`
+		if [ "$VAL" = "$1" ]; then
+			shift ; VAL=$1
+		fi
+
+		BUILDJOBS=$VAL
 		;;
 
 	--build*)
@@ -327,6 +340,10 @@ while [ "$1" != "" ]; do
 		if [ "$VAL" = "$1" ]; then
 			shift ; VAL=$1
 		fi
+		if [ $MIN_VER = 0 ]; then
+			echo "Option --arch not available for 4.0 installs."
+			exit
+		fi
 		ARCH=$VAL
 		case $ARCH in
 			x86[_\-\.]64)
@@ -394,6 +411,7 @@ while [ "$1" != "" ]; do
 		echo "   --without-euphoria  Don't use a precompiled version of Euphoria to build."
 		echo "   --eubin value       Set the path of the precompiled"
 		echo "                       binaries used to intrepret and translate the sources."
+		echo "   --jobs value        Set number of build jobs to run in make. Default is 1."
 		echo "   --build value       Set the build directory. The default is"
 		echo "                       'build' off of the source directory."
 		echo "   --debug             Turn debugging on."
@@ -416,8 +434,10 @@ while [ "$1" != "" ]; do
 		echo "                       operations such as manual upload."
 		echo "   --scp-client value  SCP program to use for scp uploads (default scp -C)."
 		echo "   --ssh-client value  SSH program to use for ssh commands (default ssh -C)."
-		echo "   --hg value          Mercurial binary command (default 'which hg')."
-		echo "   --arch value        Set architecture to ARM, x86, or x86-64."
+		echo "   --hg value          Git binary command (default 'which git')."
+		if [ $MIN_VER -gt 0 ]; then
+			echo "   --arch value        Set architecture to ARM, x86, or x86-64."
+		fi
 		# Is --wine still needed?
 		echo "   --wine value        Path to wine (useful for cross compilation to windows)."
 		echo "   --no-cygwin         Use the -mno-cygwin flag with MinGW."
@@ -545,10 +565,14 @@ mkdir -p $BUILDDIR
 [ -n "$TRUNKDIR" ] && echo TRUNKDIR=$TRUNKDIR >> "$PREFIX"${CONFIG_FILE}
 [ -n "$SOURCEDIR" ] && echo SOURCEDIR=$SOURCEDIR >> "$PREFIX"${CONFIG_FILE}
 [ -n "$BUILDDIR" ] && echo BUILDDIR=$BUILDDIR >> "$PREFIX"${CONFIG_FILE}
+[ -n "$BUILDJOBS" ] && echo BUILDJOBS=$BUILDJOBS >> "$PREFIX"${CONFIG_FILE}
 
 if [ "$USECYPPATH" = "true" ]; then
 	 CYPTRUNKDIR=`cygpath -a -m $TRUNKDIR`
 	 CYPBUILDDIR=`cygpath -a -m $BUILDDIR`
+elif [ "$USEMINGPATH" = "true" ]; then
+	 CYPTRUNKDIR=`(cd $TRUNKDIR;pwd -W)`
+	 CYPBUILDDIR=`(cd $BUILDDIR;pwd -W)`
 else
 	# MinGW and others
 	 CYPTRUNKDIR=$TRUNKDIR
@@ -576,18 +600,20 @@ echo -eudir $CYPTRUNKDIR >> $BUILDDIR/eu.cfg
 echo -i $CYPTRUNKDIR/include >> $BUILDDIR/eu.cfg
 
 echo "[translate]" >> $BUILDDIR/eu.cfg
-if [ "x$PLAT" != "xdefault platform" ]; then
+if [ "x$PLAT" != "xdefault_platform" ]; then
 	echo "-plat" $PLAT  >> $BUILDDIR/eu.cfg
 	echo PLAT=$PLAT >> "$PREFIX"${CONFIG_FILE}
 fi
-if [ "x$ARCH" != "xdefault arch" ]; then
+if [ "x$ARCH" != "x$HOST_ARCH" ]; then
 	echo "-arch" $ARCH >> $BUILDDIR/eu.cfg
 fi
 	
 echo "-$XLTTARGETCC " >> $BUILDDIR/eu.cfg
 echo "-con " >> $BUILDDIR/eu.cfg
 echo "-com" $CYPTRUNKDIR >> $BUILDDIR/eu.cfg
-echo "-lib-pic" $CYPBUILDDIR/euso.a >> $BUILDDIR/eu.cfg
+if [ $MIN_VER -gt 0 ]; then
+	echo "-lib-pic" $CYPBUILDDIR/euso.a >> $BUILDDIR/eu.cfg
+fi
 if [ "x$CC_PREFIX" != "x" ]; then
 	echo "-cc-prefix" $CC_PREFIX  >> $BUILDDIR/eu.cfg
 fi

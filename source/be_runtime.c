@@ -9,10 +9,11 @@
 /******************/
 /* Included files */
 /******************/
+#define _SVID_SOURCE             /* See feature_test_macros(7) */
 #define _LARGE_FILE_API
 #define _LARGEFILE64_SOURCE
 #include <stdint.h>
-#if defined(EWINDOWS) && INTPTR_MAX == INT64_MAX
+#if defined(_WIN32) && INTPTR_MAX == INT64_MAX
 // MSVCRT doesn't handle long double output correctly
 #define __USE_MINGW_ANSI_STDIO 1
 #endif
@@ -41,13 +42,13 @@
 #  if !defined(EMINGW)
 #    include <graph.h>
 #  endif
-#  include <dos.h>
+#  include <direct.h>
 #  include <process.h>
 #  include <conio.h>
 #endif
 
 #include <string.h>
-#ifdef EWINDOWS
+#ifdef _WIN32
 	/* Ensure we set this to 0x400 whether or not it is set. */
 	#include <windows.h>
 	#ifndef _WIN32_IE
@@ -89,13 +90,13 @@
 #define CONTROL_Z 26
 #define CR 13
 #define LF 10
-#ifdef WINDOWS
+#ifdef _WIN32
 #define BS 8
 #else
 #define BS 127
 #endif
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 static int winkbhit();
 #endif
 /**********************/
@@ -460,7 +461,7 @@ void MainScreen()
 
 #endif
 
-#if !defined(EBSD62)
+#if defined(DOMAIN) && defined(SING) && defined(OVERFLOW) && defined(UNDERFLOW) && defined(TLOSS) && defined(PLOSS)
 #undef matherr // avoid OpenWATCOM problem
 #if (defined(__WATCOMC__) || defined(EUNIX)) && !defined(EOW)
 int matherr(struct exception *err)   // 10.6 wants this
@@ -498,7 +499,7 @@ int matherr(struct _exception *err)  // OW wants this
 	RTFatal("math function %s error", msg);
 	return 0;
 }
-#endif
+#endif // defined(matherr)
 
 int crash_call_back = FALSE;
 
@@ -1341,7 +1342,7 @@ void udt_clean_rt( object o, int rid ){
 	else{
 		RefDS( o );
 	}
-#ifdef EWINDOWS
+#ifdef _WIN32
 	if( rt00[rid].convention ){
 		// stdcall
 		(*(int (__stdcall *)())rt00[rid].addr)( o );
@@ -1831,7 +1832,7 @@ object Dnot_bits(d_ptr a)
 #endif
 }
 
-#if defined(EFREEBSD) && INTPTR_MAX != INT32_MAX
+#if defined(__FreeBSD__) && INTPTR_MAX != INT32_MAX
 long double powl( long double a, long double b ){
 	return (long double) pow( (double) a, (double) b );
 }
@@ -2200,7 +2201,7 @@ void setran()
 {
 	time_t time_of_day;
 	struct tm *local;
-#if !defined( EWINDOWS )
+#if !defined( _WIN32 )
 	object garbage;
 #endif
 	static int32_t src = prim1 ^ prim2;
@@ -2209,7 +2210,7 @@ void setran()
 	local = localtime(&time_of_day);
 	seed2 = local->tm_yday * 86400 + local->tm_hour * 3600 +
 			local->tm_min * 60 +     local->tm_sec;
-#ifdef EWINDOWS
+#ifdef _WIN32
 	seed1 = GetTickCount() + src;  // milliseconds since Windows started
 #else
 	seed1 = (int32_t)(0xffffffff & (uintptr_t)&garbage) + random() + src;
@@ -3763,7 +3764,7 @@ object EOpen(object filename, object mode_obj, object cleanup)
 	if (i < MAX_USER_FILE) {
 		if (strcmp_ins("con", cname) == 0) {
 			// opening console
-#ifdef EWINDOWS
+#ifdef _WIN32
 			show_console();
 #endif
 			con_was_opened = TRUE;
@@ -4344,7 +4345,7 @@ object_ptr v_elem;
 			EFree(sval);
 	}
 	else if (c == 'd' || c == 'x' || c == 'o') {
-#if defined( EWINDOWS ) && INTPTR_MAX == INT64_MAX
+#if defined( _WIN32 ) && INTPTR_MAX == INT64_MAX
 		cstring[flen++] = 'l';
 #endif
 		cstring[flen++] = 'l';
@@ -4574,7 +4575,7 @@ int nodelaych(int wait)
 }
 #endif
 
-#if defined(EWINDOWS) && defined(EMINGW)
+#if defined(_WIN32) && defined(EMINGW)
 int winkbhit();
 #endif
 
@@ -4584,7 +4585,7 @@ int get_key(int wait)
 {
 	int a;
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 		if (wait || winkbhit()) {
 			a = getKBcode();
 
@@ -4813,7 +4814,7 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 	}
 }
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 	typedef void WINAPI (*VfP_t)(void *);
 	typedef void WINAPI (*Vf_t)(void);	
 #endif
@@ -4821,7 +4822,7 @@ void eu_startup(struct routine_list *rl, struct ns_list *nl, unsigned char **ip,
 				int cps, int clk)
 /* Initialize run-time data structures for the compiled user program. */
 {
-	#ifdef EWINDOWS
+	#ifdef _WIN32
 		HMODULE Comctl32;
 		VfP_t initCommonControlsPtr;
 		Vf_t initCommonControls95Ptr;
@@ -4842,7 +4843,7 @@ void eu_startup(struct routine_list *rl, struct ns_list *nl, unsigned char **ip,
 	copy_string(TempErrName, "ex.err", TempErrName_len);
 	TempWarningName = NULL;
 	display_warnings = 1;
-#ifdef EWINDOWS
+#ifdef _WIN32
 	{
 		/* Make sure the common controls stuff is initialized.
 		 * Since we use a manifest, we have to make sure that
@@ -4885,7 +4886,7 @@ void Position(object line, object col)
 		col_val = (int)(DBL_PTR(col)->dbl);     /* need better check here too */
 	}
 	if (line_val < 1 ||
-#ifdef EWINDOWS
+#ifdef _WIN32
 	line_val > line_max ||
 #endif
 		 col_val < 1 ||  col_val > col_max) {
@@ -4896,7 +4897,7 @@ void Position(object line, object col)
 	SetPosition(line_val, col_val);
 }
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 
 char *get_module_name(){
 	int ns, bs;
@@ -4932,7 +4933,7 @@ char **make_arg_cv(char *cmdline, int *argc, int skip_leading_dquote)
 	int i, w, j;
 	char **argv;
 	InitEMalloc();
-#ifdef EWINDOWS
+#ifdef _WIN32
 	if( cmdline == NULL ){
 		// Windows already did the work for us
 		*argc = __argc;
@@ -4941,7 +4942,7 @@ char **make_arg_cv(char *cmdline, int *argc, int skip_leading_dquote)
 	}
 #endif
 	argv = (char **)EMalloc((strlen(cmdline)/2+3) * sizeof(char *));
-#ifdef EWINDOWS
+#ifdef _WIN32
 	if (*argc == 1) {
 		argv[0] = get_module_name();
 		w = 1;
@@ -5046,6 +5047,9 @@ void system_call(object command, object wait)
 		RestoreConfig();
 }
 
+#ifdef __WATCOMC__
+#define _spawnvp spawnvp
+#endif
 
 object system_exec_call(object command, object wait)
 /* Run a .exe or .com file, then restore the graphics mode.
@@ -5273,13 +5277,19 @@ object make_atom32(unsigned c32)
 		return NewDouble((eudouble)c32);
 }
 
+object make_satom(intptr_t c)
+{
+	if (c <= MAXINT && c > MININT) {
+		return c;
+	} else {
+		return NewDouble((eudouble)c);
+	}
+}
+
 object make_atom(uintptr_t c)
 /* make a Euphoria atom from an unsigned C value */
 {
-	if (c <= (uintptr_t)MAXINT)
-		return c;
-	else
-		return NewDouble((eudouble)c);
+	return make_satom((intptr_t)c);
 }
 
 uintptr_t general_call_back(
@@ -5418,7 +5428,7 @@ uintptr_t general_call_back(
 
 	if (num_args >= 1) {
 	  DeRef(call_back_arg1->obj);
-	  call_back_arg1->obj = make_atom((uintptr_t)arg1);
+	  call_back_arg1->obj = make_satom(arg1);
 	  code[2] = (object *)call_back_arg1;
 	  if (num_args >= 2) {
 		DeRef(call_back_arg2->obj);
@@ -5781,11 +5791,11 @@ void Cleanup(int status)
 
 	// Note: ExitProcess() - frees all the dlls but won't flush the regular files
 	for (i = 0; i < open_dll_count; i++) {
-#ifdef EWINDOWS
+#ifdef _WIN32
 		FreeLibrary(open_dll_list[i]);
 #else
 		dlclose( open_dll_list[i] );
-#endif // EWINDOWS
+#endif // _WIN32
 	}
 #if 0
 	{
@@ -5869,7 +5879,7 @@ int getKBchar()
 }
 #endif
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 static char one_line[300];
 static char *next_char_ptr = NULL;
 
@@ -5934,7 +5944,7 @@ void key_gets(char *input_string, int buffsize)
 	numpad_enter = VK_to_EuKBCode[VK_RETURN];
 	left_arrow   = VK_to_EuKBCode[VK_LEFT];
 	
-#ifdef EWINDOWS
+#ifdef _WIN32
 	show_console();
 #endif	
 	GetTextPositionP(&cursor);
@@ -5960,7 +5970,7 @@ void key_gets(char *input_string, int buffsize)
 		if (c == CR || c == LF || c == numpad_enter)
 			break;
 
-#ifndef WINDOWS
+#ifndef _WIN32
 		if( c == 27 ){
 			char d, e;
 			// escape code!
@@ -6467,6 +6477,8 @@ object eu_sizeof( object data_type ){
 			return sizeof( long );
 		case C_LONGLONG:
 			return sizeof( long long );
+		case C_ULONGLONG:
+			return sizeof( unsigned long long );
 		default:
 			return 0;
 	}

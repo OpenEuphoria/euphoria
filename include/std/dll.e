@@ -21,6 +21,8 @@ include std/types.e
 -- See Also:
 --   [[:define_c_proc]], [[:define_c_func]], [[:define_c_var]]
 
+with define NO_CHANDLE
+
 public constant
 	--** char  8-bits
 	C_CHAR    = #01000001,
@@ -52,6 +54,8 @@ public constant
 	C_POINTER = #03000001,
 	--** longlong 64-bits
 	C_LONGLONG  = #03000002,
+	--** unsigned longlong 64-bits
+	C_ULONGLONG  = #03000010,
 	$
 ifdef BITS32 then
 public constant
@@ -62,18 +66,8 @@ public constant
 	C_LONG_PTR = C_LONGLONG
 end ifdef
 public constant
-	--** handle sizeof pointer
-	C_HANDLE  = C_LONG_PTR,
-	--** hwnd sizeof pointer
-	C_HWND    = C_LONG_PTR,
 	--** dword 32-bits
 	C_DWORD   = C_UINT,
-	--** wparam sizeof pointer
-	C_WPARAM  = C_POINTER,
-	--** lparam sizeof pointer
-	C_LPARAM  = C_POINTER,
-	--** hresult 32-bits
-	C_HRESULT = C_LONG,
 	--** float 32-bits
 	C_FLOAT   = #03000004,
 	--** double 64-bits

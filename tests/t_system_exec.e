@@ -27,6 +27,9 @@ abort(1)
 	sequence cmds = command_line()
     
     sequence interpreter = cmds[1]
+    if not file_exists(interpreter) then
+		interpreter = locate_file(cmds[1], getenv("PATH"))
+	end if
     sequence interpreter_copy = join_path({test_dir, filename(interpreter)})
     interpreter_copy = interpreter_copy[2..$]
     

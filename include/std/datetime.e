@@ -22,8 +22,8 @@ elsifdef WINDOWS then
 	constant gmtime_ = dll:define_c_func(dll:open_dll("msvcrt.dll"), "+gmtime", {dll:C_POINTER}, dll:C_POINTER)
 	constant time_ = dll:define_c_proc(dll:open_dll("kernel32.dll"), "GetSystemTimeAsFileTime", {dll:C_POINTER})
 elsifdef UNIX then
-	constant gmtime_ = dll:define_c_func(dll:open_dll("libc.so"), "gmtime", {dll:C_POINTER}, dll:C_POINTER)
-	constant time_ = dll:define_c_func(dll:open_dll("libc.so"), "time", {dll:C_POINTER}, dll:C_INT)
+	constant gmtime_ = dll:define_c_func(STDLIB, "gmtime", {dll:C_POINTER}, dll:C_POINTER)
+	constant time_ = dll:define_c_func(STDLIB, "time", {dll:C_POINTER}, dll:C_INT)
 end ifdef
 
 enum TM_SEC, TM_MIN, TM_HOUR, TM_MDAY, TM_MON, TM_YEAR --, TM_WDAY, TM_YDAY, TM_ISDST
@@ -365,10 +365,47 @@ public enum
 -- A datetime type consists of a sequence of length six in the form
 -- ##{year, month, day_of_month, hour, minute, second}##. Checks are made to guarantee
 -- those values are in range. 
--- 
+--
+-- datetime can be used to declare a variable as a datetime type, or used to check if a variable is a datetime type.
+-- (See examples below.)
+--
 -- Note:
 -- All elements must be integers except for
 -- seconds which could either integer or atom values.
+--
+-- Example 1:
+-- <eucode>
+-- include std/datetime.e  
+-- datetime x = now() -- x is a datetime variable, and now() returns a datetime 
+-- ? x  
+-- ? datetime(x) -- is it a datetime variable?  
+--
+-- Result:
+-- {2019,9,8,3,23,23}  
+-- 1 
+-- </eucode>
+--
+-- Example 2:
+-- <eucode>
+-- include std/datetime.e  
+-- object y = {2019,1,10} -- y is not a datetime variable, just a sequence containing a date {year,month,day}
+-- ? y
+-- ? datetime(y) -- is it a datetime variable?  
+--
+-- Result:
+-- {2019,1,10}  
+-- 0
+-- </eucode>
+--
+-- Example 3:
+-- <eucode>
+-- include std/datetime.e  
+-- datetime z = {2019,1,10} -- z is declared as a datetime type; it is validated on assignment
+-- -- Since what we assigned was not a valid datetime variable, we get an error.
+--
+-- Result:
+-- type_check failure, z is {2019,1,1}
+-- </eucode>
 
 public type datetime(object o)
 	if atom(o) then return 0 end if
@@ -481,7 +518,8 @@ end type
 -- Example 1:
 --
 -- <eucode>
--- now = date()
+-- include std/datetime.e
+-- sequence now = date()
 -- -- now has: {95,3,24,23,47,38,6,83}
 -- -- i.e. Friday March 24, 1995 at 11:47:38pm, day 83 of the year
 -- </eucode>
@@ -497,13 +535,24 @@ end type
 --   # ##src## : a sequence which ##date## might have returned
 --
 -- Returns:
---   A **sequence**, more precisely a **datetime** corresponding to the same moment 
+--   A **sequence**, more precisely a [[:datetime]], corresponding to the same moment 
 --   in time.
 --
 -- Example 1:
 -- <eucode>
--- d = from_date(date())
--- -- d is the current date and time
+-- include std/datetime.e
+--
+-- sequence a_date
+-- datetime today
+--
+-- a_date = date()
+-- today = from_date(a_date)
+--
+-- ?a_date
+-- -- {119,9,20,21,0,57,6,263}
+--
+-- ?today
+-- -- {2019,9,20,21,0,57}
 -- </eucode>
 --
 -- See Also:
@@ -517,13 +566,18 @@ end function
 -- creates a new datetime value initialized with the current date and time.
 --
 -- Returns:
---   A **sequence**, more precisely a **datetime** corresponding to the current 
+--   A **sequence**, more precisely a [[:datetime]], corresponding to the current 
 --   moment in time.
 --
--- Example 1:
+-- Example:
 -- <eucode>
--- dt = now()
--- -- dt is the current date and time
+-- include std/datetime.e
+-- datetime dt = now()
+-- ?dt
+--
+-- Result:
+--
+-- {2019,09,19,8,47,13}
 -- </eucode>
 --
 -- See Also:
@@ -542,9 +596,19 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- dt = now_gmt()
--- -- If local time was July 16th, 2008 at 10:34pm CST
--- -- dt would be July 17th, 2008 at 03:34pm GMT
+-- include std/datetime.e
+-- datetime lt = now() -- local time
+-- datetime gmt = now_gmt()
+-- ?lt
+-- ?gmt
+--
+-- Result (varies depending on time and date!):
+--
+-- This result is from Central Standard Timezone.
+--
+-- {2019,9,23,11,3,42}
+-- {2019,9,23,16,3,42}
+--
 -- </eucode>
 --
 -- See Also:

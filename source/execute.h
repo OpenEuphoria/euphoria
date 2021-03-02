@@ -287,11 +287,12 @@ struct char_cell {
 #define MAX_DOUBLE_DBL ((eudouble)(unsigned long)0xFFFFFFFF)
 #define MIN_DOUBLE_DBL ((eudouble)(signed long)  0x80000000)
 
-#define MAX_LONGLONG_DBL ((eudouble)(unsigned long long) 0xFFFFFFFFFFFFFFFFLL)
 #define MIN_LONGLONG_DBL ((eudouble)(signed long long)   0x8000000000000000LL)
 
 #if INTPTR_MAX == INT32_MAX
 
+/* In 32-bit 1e64-1 is no smaller than 1e64. */
+#define MAX_LONGLONG_DBL ((eudouble)(unsigned long long) 0xFFFFFFFFFFFFF800LL)
 #define MAX_BITWISE_DBL MAX_DOUBLE_DBL
 #define MIN_BITWISE_DBL MIN_DOUBLE_DBL
 
@@ -299,6 +300,7 @@ struct char_cell {
 #define EUPOW   pow
 #else
 
+#define MAX_LONGLONG_DBL ((eudouble)(unsigned long long) 0xFFFFFFFFFFFFFFFFLL)
 #define MAX_BITWISE_DBL MAX_LONGLONG_DBL
 #define MIN_BITWISE_DBL MIN_LONGLONG_DBL
 
@@ -308,23 +310,24 @@ struct char_cell {
 #endif
 
 /* .dll argument & return value types */
-#define C_TYPE     0x0F000000
-#define C_DOUBLE   0x03000008
-#define C_FLOAT    0x03000004
-#define C_CHAR     0x01000001
-#define C_UCHAR    0x02000001
-#define C_SHORT    0x01000002
-#define C_USHORT   0x02000002
-#define E_INTEGER  0x06000004
-#define E_ATOM     0x07000004
-#define E_SEQUENCE 0x08000004
-#define E_OBJECT   0x09000004
-#define C_INT      0x01000004
-#define C_UINT     0x02000004
-#define C_LONG     0x01000008
-#define C_ULONG    0x02000008
-#define C_POINTER  0x03000001
-#define C_LONGLONG 0x03000002
+#define C_TYPE      0x0F000000
+#define C_DOUBLE    0x03000008
+#define C_FLOAT     0x03000004
+#define C_CHAR      0x01000001
+#define C_UCHAR     0x02000001
+#define C_SHORT     0x01000002
+#define C_USHORT    0x02000002
+#define E_INTEGER   0x06000004
+#define E_ATOM      0x07000004
+#define E_SEQUENCE  0x08000004
+#define E_OBJECT    0x09000004
+#define C_INT       0x01000004
+#define C_UINT      0x02000004
+#define C_LONG      0x01000008
+#define C_ULONG     0x02000008
+#define C_POINTER   0x03000001
+#define C_LONGLONG  0x03000002
+#define C_ULONGLONG 0x03000010
 	
 #define C_STDCALL 0
 #define C_CDECL 1

@@ -10,13 +10,13 @@
 /* Included files */
 /******************/
 #include <stdint.h>
-#if defined(EWINDOWS) && INTPTR_MAX == INT64_MAX
+#if defined(_WIN32) && INTPTR_MAX == INT64_MAX
 // MSVCRT doesn't handle long double output correctly
 #define __USE_MINGW_ANSI_STDIO 1
 #endif
 #include <stdio.h>
 #include <time.h>
-#ifdef EWINDOWS
+#ifdef _WIN32
 #  include <windows.h>
 #  include <limits.h>
 #endif

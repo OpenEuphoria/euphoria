@@ -3,7 +3,7 @@
 /*****************************************************************************/
 
 #include <stdint.h>
-#if defined(EWINDOWS) && INTPTR_MAX == INT64_MAX
+#if defined(_WIN32) && INTPTR_MAX == INT64_MAX
 // MSVCRT doesn't handle long double output correctly
 #define __USE_MINGW_ANSI_STDIO 1
 #endif
@@ -20,6 +20,7 @@
 #include "be_alloc.h"
 #include "be_machine.h"
 #include "be_runtime.h"
+
 #include "be_socket.h"
 
 /* return value as a C int irregardless whether it is a double pointed to by this as an encoded pointer, or if it in itself is an
@@ -32,7 +33,7 @@
 /* Return 0 iff this ATOM, x, has a fraction part */
 #define DOESNT_HAVE_FRACTION_PART(x) (((((unsigned long)x) | 0xE0000000) == 0xA0000000) ? (DBL_PTR(x)->dbl == (double)(int)DBL_PTR(x)->dbl) : 1)
 
-inline int NOT_USHORT_VALUE(object x) {
+static int NOT_USHORT_VALUE(object x) {
 	if IS_ATOM_INT(x) {
 		return !((0 <= x) && (x <= 0xFFFF));
 	} else if IS_ATOM(x) {
@@ -51,7 +52,7 @@ inline int NOT_USHORT_VALUE(object x) {
 #define SOCK_SOCKET   1
 #define SOCK_SOCKADDR 2
 
-inline int IS_SOCKET(object sock_obj) {
+static int IS_SOCKET(object sock_obj) {
 	struct s1 * socket_s;
 	object_ptr base;
 	object xsock_socket, xsock_address;
@@ -260,7 +261,7 @@ int eusock_getfamily(int x)
 	case EAF_INET6:
 #ifdef AF_INET6
 		return AF_INET6;
-#elif defined(EWINDOWS)
+#elif defined(_WIN32)
 		// hack as Watcom doesn't have AF_INET6 defined
 		return 23;
 #else
@@ -269,7 +270,7 @@ int eusock_getfamily(int x)
 	case EAF_BTH:
 #ifdef AF_BTH
 		return AF_BTH;
-#elif defined(EWINDOWS)
+#elif defined(_WIN32)
 		// hack as Watcom doesn't have AF_BTH defined
 		return 32;
 #else
@@ -643,7 +644,7 @@ int eusock_getsock_option(int x)
     }
 }
 
-#ifdef EWINDOWS
+#ifdef _WIN32
 
  	#ifndef WSAAPI
 		#define WSAAPI PASCAL
@@ -768,15 +769,25 @@ int eusock_getsock_option(int x)
 	);
 	sendto_fntype sendtoPtr;
 	WSACleanup_fntype  WSAGetLastErrorPtr;
-	#ifndef __WATCOMC__
-		typedef int WSAAPI (*WSAFDIsSet_fntype)(
-			SOCKET fd,
-			fd_set *set
-		);
-		WSAFDIsSet_fntype WSAFDIsSetPtr;
-		#undef FD_ISSET
-		#define FD_ISSET( p1, p2 )  (*WSAFDIsSetPtr)( (SOCKET)(p1), (fd_set *)(p2) )
-	#endif
+	typedef int WSAAPI (*WSAFDIsSet_fntype)(
+		SOCKET fd,
+		fd_set *set
+	);
+	WSAFDIsSet_fntype WSAFDIsSetPtr = NULL;
+
+	// Four hours of searching could find where the code is trying to use
+	// the function with this name in WinSock.  A binary search left me with
+	// a track of code within eusock_select which didn't contain the call.
+	// However, if you remove this following definition you will get a link 
+	// error in Windows.
+	int WSAAPI __WSAFDIsSet(SOCKET fd, fd_set *set) {
+		if (WSAFDIsSetPtr == NULL) {
+			RTFatal("Error: FD_ISSET called before SOCKET initialization.");
+		}
+		return (*WSAFDIsSetPtr)(fd,set);
+	}
+	
+	#define FD_ISSET (*WSAFDIsSetPtr)
 
 	typedef u_short WSAAPI (*htons_fntype)(
 		__in  u_short hostshort
@@ -812,23 +823,9 @@ int eusock_getsock_option(int x)
 	  __in   int len,
 	  __in   int flags
 	);
-	recv_fntype recvPtr;	
+	recv_fntype recvPtr;
 
-	#if defined(__WATCOMC__)
-		/* must be inlined in the header file,
-		  for this always tries to get linked in.*/
-		int __WSAFDIsSet(
-				SOCKET fd,
-				fd_set *set) {
-			int ecx = set->fd_count;
-			int eax = 0;
-			while (ecx--) {
-				eax += (fd == set->fd_array[ecx]);
-			}
-			return eax;
-		}
-	#endif
-	
+
     void eusock_wsastart()
     {
     	WORD wVersionRequested;
@@ -859,12 +856,10 @@ int eusock_getsock_option(int x)
 			RTFatal("Could not load routine WSAGetLastError.");
 		}
 		
-#if !defined(__WATCOMC__)	
 		WSAFDIsSetPtr = (WSAFDIsSet_fntype)GetProcAddress(eusock_wsastarted, "__WSAFDIsSet");
 		if (WSAFDIsSetPtr == NULL) {
 			RTFatal("Could not load routine WSAFDIsSet.");
 		}
-#endif
 		
 		socketPtr = (socket_fntype)GetProcAddress(eusock_wsastarted, "socket");
 		if (socketPtr == NULL) {
@@ -991,9 +986,6 @@ int eusock_getsock_option(int x)
 #define inet_addr (*inet_addrPtr)
 #define send (*sendPtr)
 #define recv (*recvPtr)
-#if !defined(__WATCOMC__)
-#define WSAFDIsSet (*WSAFDIsSetPtr)
-#endif
 
 
     void eusock_wsacleanup()
@@ -1079,7 +1071,7 @@ int eusock_getsock_option(int x)
 
     #define eusock_ensure_init() if (eusock_wsastarted == NULL) eusock_wsastart();
 
-#else // ifdef EWINDOWS else
+#else // ifdef _WIN32 else
     #include <errno.h>
     int eusock_geterror()
     {
@@ -1172,7 +1164,7 @@ int eusock_getsock_option(int x)
     }
 
     #define eusock_ensure_init()
-#endif // ifdef EWINDOWS else
+#endif // ifdef _WIN32 else
 
 /* ============================================================================
  *

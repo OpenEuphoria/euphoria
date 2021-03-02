@@ -1,3 +1,5 @@
+-- A similar counter test file is t_c_ns_builtin.e
+-- A similar counter test file is t_c_scope_local_include.e
 namespace fail
 include std/unittest.e
 

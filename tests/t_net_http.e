@@ -5,6 +5,9 @@ include std/math.e
 include std/os.e
 
 ifdef not NOINET_TESTS then
+	-- this gives the server user:pass of devel:devel
+	constant authorize_header = {"Authorization", "Basic ZGV2ZWw6ZGV2ZWw="} 
+
 	object content
 
 	content = http_get("http://www.iana.org/")
@@ -14,10 +17,10 @@ ifdef not NOINET_TESTS then
 	content = http_get("http://www.iana.org")
 	assert("content readable http_get no path", length(content) > 1)
 	test_not_equal("content non-empty with http_get no path", length(content[2]), 0)
-
+	
 	content = http_get("http://www.iana.org/domains/example/")
 	if atom(content) then
-		test_fail("content readable from http_get with a path")
+		test_fail(sprintf("content readable from http_get with a path %d", {content}))
 	else
 		assert("content readable from http_get with a path", length(content) = 2)
 		test_true("content correct form from http_get with a path", match("<title>", "" & content[2]))
@@ -36,7 +39,8 @@ ifdef not NOINET_TESTS then
 	sequence data = {
 		{ "data", num }
 	}
-    content = http_post("http://test.openeuphoria.org/post_test.ex", data)
+    content = http_post("http://test.openeuphoria.org/post_test.ex", data, 
+    	{authorize_header})
 	if atom(content) or length(content) < 2 then
 		test_fail("http_post post #1")
 	else
@@ -44,9 +48,10 @@ ifdef not NOINET_TESTS then
 	end if
 
 	sequence headers = {
-		{ "Cache-Control", "no-cache" }
+		{ "Cache-Control", "no-cache" },
+		authorize_header
 	}
-    content = http_get("http://test.openeuphoria.org/post_test.txt", headers)
+    content = http_get("http://test.openeuphoria.org/post_test.txt", headers )
 	if atom(content) or length(content) < 2 then
 		test_true("http_get with headers #2", sequence(content))
 		test_fail("http_get with headers #3")
@@ -63,9 +68,14 @@ ifdef not NOINET_TESTS then
 		-- Test already encoded string
 		num = sprintf("%d", { rand_range(1000,10000) })
 		data = sprintf("data=%s", { num })
-		content = http_post("http://test.openeuphoria.org/post_test.ex", data)
-		assert("http_get with headers #5", length(content) = 2)
-		test_equal("http_get with headers #6", "success", content[2])
+		content = http_post("http://test.openeuphoria.org/post_test.ex", data, {authorize_header})
+		if atom(content) and length(content) = 2 then
+			test_pass("http_get with headers #5")
+			test_equal("http_get with headers #6", "success", content[2])
+		else
+			test_fail("http_get with headers #5")
+			test_fail("http_get with headers #6")
+		end if
 
 		content = http_get("http://test.openeuphoria.org/post_test.txt", headers)
 		assert("http_get with headers #7", length(content) = 2)
@@ -82,7 +92,7 @@ ifdef not NOINET_TESTS then
 	-- post file script gets size and file parameters, calls decode_base64, and sends
 	-- back SIZE\nDECODED_FILE_CONTENTS. The test script is written in Perl to test against
 	-- modules we did not code, i.e. CGI and Base64 in this case.
-	content = http_post("http://test.openeuphoria.org/post_file.cgi", { MULTIPART_FORM_DATA, data })
+	content = http_post("http://test.openeuphoria.org/post_file.cgi", { MULTIPART_FORM_DATA, data }, {authorize_header})
 	if atom(content) or length(content) < 2 then
 		test_fail("multipart form file upload")
 	else

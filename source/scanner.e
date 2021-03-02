@@ -1217,8 +1217,20 @@ function my_sscanf(sequence yytext)
 		elsifdef BITS64 then
 			mantissa = scientific_to_atom( yytext, EXTENDED )
 		elsedef
-			InternalErr( 351, "Scanning scientific notation in my_sscanf" )
+			InternalErr( ERROR_IN_PARSING_SCIENTIFIC_NOTATION, "Scanning scientific notation in my_sscanf" )
 		end ifdef
+		for yi = 1 to length(yytext) do
+			integer ychar = yytext[yi]
+			if ychar = 'e' or ychar = 'E' then
+				-- don't look at the digits after E
+				exit
+			end if
+			if ychar > '0' and ychar <= '9' and mantissa = 0 then
+				-- non zero digit but we got a zero value from the function.
+				fenv:raise(FE_UNDERFLOW)
+				exit
+			end if
+		end for
 		goto "floating_point_check"
 	end if
 	mantissa = 0.0
@@ -1229,8 +1241,7 @@ function my_sscanf(sequence yytext)
 	yytext &= 0 -- end marker
 	c = yytext[1]
 	i = 2
-	
-	
+		
 	while c >= '0' and c <= '9' do
 		ndigits += 1
 		mantissa = mantissa * 10.0 + (c - '0')
@@ -1238,31 +1249,59 @@ function my_sscanf(sequence yytext)
 		i += 1
 	end while
 	
-	if fenv:test(FE_OVERFLOW) then
-		real_overflow = 1
-	end if
-	
-	if c = '.' then
+	-- indicates whether the value the user entered was not zero
+	integer not_zero = 0
+	if c = '.' and not fenv:test(FE_OVERFLOW) then
 		-- get fraction
 		c = yytext[i]
 		i += 1
+		-- backup value of dec
+		atom back_dec
+		-- the denomonator of the fraction part
 		dec = 1.0
-		atom frac = 0
+		-- its backup and the numerator of the fraction part
+		atom num_back, num = 0
 		while c >= '0' and c <= '9' do
 			ndigits += 1
-			frac = frac * 10 + (c - '0')
+			if c != '0' then
+				not_zero = 1
+			end if
+			num_back = num
+			num = num_back * 10 + (c - '0')
+			-- if num = PINF, so also will be dec in this iteration			
+			back_dec = dec
 			dec *= 10.0
 			c = yytext[i]
 			i += 1
+			if dec = PINF then
+				-- clear FE_OVERFLOW, for it only means there
+				-- are more digits after the decimal than we
+				-- can use to calculate a fraction.
+				fenv:clear(fenv:FE_OVERFLOW)
+				num = num_back
+				dec = back_dec
+				exit
+			end if
 		end while
-		mantissa += frac / dec
+		-- keep looking for non-zero digits.
+		while c >= '0' and c <= '9' do
+			if c != '0' then
+				not_zero = 1
+				exit
+			end if
+			c = yytext[i]
+			i += 1
+		end while
+		atom frac
+		frac = num / dec
+		mantissa += frac  
+		if frac = 0 and not_zero then
+			-- the literal represents a non-zero number that 
+			-- is too small to be representable as an atom.
+			fenv:raise(fenv:FE_UNDERFLOW)
+		end if
 	end if
 	
-	if fenv:test(fenv:FE_OVERFLOW) and not real_overflow then
-		fenv:clear(fenv:FE_OVERFLOW)
-		fenv:raise(fenv:FE_UNDERFLOW)
-	end if
-
 	if ndigits = 0 then
 		CompileErr(NUMBER_NOT_FORMED_CORRECTLY)  -- no digits
 	end if

@@ -43,7 +43,7 @@ integer initialized_coverage = 0
 export procedure check_coverage()
 
 	for i = length( file_coverage ) + 1 to length( known_files ) do
-		file_coverage &= find( canonical_path( known_files[i],,1 ), covered_files )
+		file_coverage &= eu:find( canonical_path( known_files[i],,1 ), covered_files )
 	end for
 end procedure
 
@@ -56,7 +56,7 @@ export procedure init_coverage()
 	end if
 	initialized_coverage = 1
 	for i = 1 to length( file_coverage ) do
-		file_coverage[i] = find( canonical_path( known_files[i],,1 ), covered_files )
+		file_coverage[i] = eu:find( canonical_path( known_files[i],,1 ), covered_files )
 	end for
 	
 	if equal( coverage_db_name, "" ) then
@@ -136,7 +136,7 @@ procedure read_coverage_db()
 	
 	for i = 1 to length( tables ) do
 		sequence name = tables[i][2..$]
-		integer fx = find( name, covered_files )
+		integer fx = eu:find( name, covered_files )
 		if not fx then
 			continue
 		end if
@@ -188,7 +188,7 @@ export procedure add_coverage( sequence cover_this )
 		sequence files = dir( path  )
 		
 		for i = 1 to length( files ) do
-			if find( 'd', files[i][D_ATTRIBUTES] ) then
+			if eu:find( 'd', files[i][D_ATTRIBUTES] ) then
 				if not eu:find(files[i][D_NAME], {".", ".."}) then
 					add_coverage( cover_this & SLASH & files[i][D_NAME] )
 				end if
@@ -196,13 +196,13 @@ export procedure add_coverage( sequence cover_this )
 			elsif regex:has_match( eu_file, files[i][D_NAME] ) then
 				-- this is canonical
 				sequence subpath = path & SLASH & files[i][D_NAME]
-				if not find( subpath, covered_files ) and not excluded( subpath ) then
+				if not eu:find( subpath, covered_files ) and not excluded( subpath ) then
 					new_covered_path( subpath )
 				end if
 			end if
 		end for
 	elsif regex:has_match( eu_file, path ) and
-			not find( path, covered_files ) and
+			not eu:find( path, covered_files ) and
 			not excluded( path ) then
 		new_covered_path( path )
 	end if
@@ -225,9 +225,9 @@ export procedure coverage_exclude( sequence patterns )
 			integer fx = 1
 			while fx <= length( covered_files ) do
 				if regex:has_match( ex, covered_files[fx] ) then
-					covered_files = remove( covered_files, fx )
-					routine_map   = remove( routine_map, fx )
-					line_map      = remove( line_map, fx )
+					covered_files = eu:remove( covered_files, fx )
+					routine_map   = eu:remove( routine_map, fx )
+					line_map      = eu:remove( line_map, fx )
 				else
 					fx += 1
 				end if

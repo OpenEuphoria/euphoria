@@ -1483,6 +1483,9 @@ end function
 --****
 -- === Bitwise Operations
 --
+-- Arguments passed to bitwise operations are interpreted as sequences of bits and these sequences are operated on and the result is returned, which is another sequence of bits, is returned as a number.  The numbers passed when using ix86 and ARM archetecture must use no more than 32-bits and have no fraction part.  Numbers that use no more than 32-bits are numbers between -2_147_483_648 to 4_294_967_295.  Numbers that have a fraction part or are outside this range will not yield the results that a calculator that uses more bits would get.
+-- 
+--
 
 --****
 -- Signature:
@@ -1507,7 +1510,7 @@ end function
 -- 
 -- If you intend to manipulate full 32-bit values, you should declare your variables as atom, rather than integer. Euphoria's integer type is limited to 31-bits. 
 -- 
--- Results are treated as signed numbers. They will be negative when the highest-order bit is 1. 
+-- Results are treated as unsigned numbers. They will never be negative.
 --
 -- To understand the binary representation of a number you should display it in hexadecimal notation. 
 -- Use the %x format of [[:printf]]. Using [[:int_to_bits]] is an even more direct approach.
@@ -1527,10 +1530,7 @@ end function
 -- Example 3:
 -- <eucode>
 --  a = and_bits(#FFFFFFFF, #FFFFFFFF)
--- -- a is -1
--- -- Note that #FFFFFFFF is a positive number,
--- -- but the result of a bitwise operation is interpreted
--- -- as a signed 32-bit number, so it's negative.
+--  -- a is #FFFFFFFF
 -- </eucode>
 --
 -- See Also:
@@ -1558,7 +1558,7 @@ end function
 -- 
 -- If you intend to manipulate full 32-bit values, you should declare your variables as atom, rather than integer. Euphoria's integer type is limited to 31-bits. 
 -- 
--- Results are treated as signed numbers. They will be negative when the highest-order bit is 1. 
+-- Results are treated as unsigned numbers. They will never be negative.
 -- 
 -- Example 1:  
 -- <eucode>
@@ -1590,7 +1590,7 @@ end function
 -- 
 -- If you intend to manipulate full 32-bit values, you should declare your variables as atom, rather than integer. Euphoria's integer type is limited to 31-bits. 
 -- 
--- Results are treated as signed numbers. They will be negative when the highest-order bit is 1.
+-- Results are treated as unsigned numbers. They will never be negative.
 --
 -- Example 1:  
 -- <eucode>
@@ -1628,14 +1628,14 @@ end function
 -- 
 -- If you intend to manipulate full 32-bit values, you should declare your variables as atom, rather than integer. Euphoria's integer type is limited to 31-bits. 
 -- 
--- Results are treated as signed numbers. They will be negative when the highest-order bit is 1. 
+-- Results are treated as unsigned numbers. They will never be negative. 
 -- 
--- A simple equality holds for an atom ##a##: ##a + not_bits(a) = -1##.
+-- A simple equality holds for an atom ##a##: ##a + not_bits(a) + 1 = power(2,32)##.
 --
 -- Example 1:
 -- <eucode>
 --  a = not_bits(#000000F7)
--- -- a is -248 (i.e. FFFFFF08 interpreted as a negative number)
+-- -- a is #FFFFFF08 (interpreted as a positive number)
 -- </eucode>
 --
 -- See Also: 
@@ -1662,20 +1662,26 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- ? shift_bits((7, -3) --> 56
--- ? shift_bits((0, -9) --> 0
--- ? shift_bits((4, -7) --> 512
--- ? shift_bits((8, -4) --> 128
--- ? shift_bits((0xFE427AAC, -7) --> 0x213D5600
--- ? shift_bits((-7, -3) --> -56  which is 0xFFFFFFC8 
--- ? shift_bits((131, 0) --> 131
--- ? shift_bits((184.464, 0) --> 184
--- ? shift_bits((999_999_999_999_999, 0) --> -1530494977 which is 0xA4C67FFF
--- ? shift_bits((184, 3) -- 23
--- ? shift_bits((48, 2) --> 12
--- ? shift_bits((121, 3) --> 15
--- ? shift_bits((0xFE427AAC, 7) -->  0x01FC84F5
--- ? shift_bits((-7, 3) --> 0x1FFFFFFF
+-- ? shift_bits(7, -3) --> shift_bits(0b111, -3) -> 0b111000 (which is 56) 
+-- ? shift_bits(0, -9) --> shift_bits(0b0, -9) -> 0b0000000000 -> 0
+-- ? shift_bits(4, -7) --> shift_bits(0b100, -7) -> 0b1000000000 (which is 512) 
+-- ? shift_bits(8, -4) --> shift_bits(0b1000, -4) -> 0b1000_0000 (which is 128)
+-- ? shift_bits(0xFE427AAC, -7) --> shift_bits(0b11111110010000100111101010101100, -7)
+--                              -->            0b00100001001111010101011000000000 
+--                              --             (which is 557_667_840)
+-- ? shift_bits(-7, -3) --> 
+--  -->  shift_bits(0b11111111111111111111111111111001, -3)
+--             -->  0b11111111111111111111111111001000 ( which is 4_294_967_240)
+-- ? shift_bits(131, 0) --> 131
+-- ? shift_bits(184.464, 0) --> 184
+-- ? shift_bits(999_999_999_999_999, 0) --> 0xA4C67FFF
+-- ? shift_bits(184, 3) -- 23
+-- ? shift_bits(48, 2) --> 12
+-- ? shift_bits(121, 3) --> 15
+-- ? shift_bits(0xFE427AAC, 7) -->  0x01FC84F5
+-- ? shift_bits(-7, 3) --> 0x1FFFFFFF (which is 536_870_911)
+-- -->  shift_bits(0b11111111111111111111111111111001, 3)
+--            -->  0b00011111111111111111111111111111 ( which is 536_870_911)
 -- ? shift_bits({48, 121}, 2) --> {12, 30}
 -- </eucode>
 --
@@ -1739,13 +1745,13 @@ end function
 -- ? rotate_bits(4, -7) --> 512
 -- ? rotate_bits(8, -4) --> 128
 -- ? rotate_bits(0xFE427AAC, -7) --> 0x213D567F
--- ? rotate_bits(-7, -3) --> -49  which is 0xFFFFFFCF 
+-- ? rotate_bits(-7, -3) --> 4_294_967_247  which is 0xFFFFFFCF 
 -- ? rotate_bits(131, 0) --> 131
 -- ? rotate_bits(184.464, 0) --> 184
--- ? rotate_bits(999_999_999_999_999, 0) --> -1530494977 which is 0xA4C67FFF
+-- ? rotate_bits(999_999_999_999_999, 0) --> 2_764_472_319 which is 0xA4C67FFF
 -- ? rotate_bits(184, 3) -- 23
 -- ? rotate_bits(48, 2) --> 12
--- ? rotate_bits(121, 3) --> 536870927
+-- ? rotate_bits(121, 3) --> 536_870_927
 -- ? rotate_bits(0xFE427AAC, 7) -->  0x59FC84F5
 -- ? rotate_bits(-7, 3) --> 0x3FFFFFFF
 -- ? rotate_bits({48, 121}, 2) --> {12, 1073741854}
@@ -1789,7 +1795,7 @@ end function
 --
 
 --**
--- returns the greater common divisor of to atoms.
+-- Returns the greater common divisor of two atoms
 --
 -- Parameters:
 --		# ##p## : one of the atoms to consider
