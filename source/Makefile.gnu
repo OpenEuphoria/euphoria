@@ -522,7 +522,7 @@ else
 
 $(BUILDDIR)/$(EECUA) : $(wildcard $(TRUNKDIR)/source/*.{c,h}) $(wildcard $(TRUNKDIR)/source/pcre/*.{c,h}) | $(BUILD_DIRS)
 	echo "No match for objdir=$(OBJDIR) calling Make"
-	$(MAKE) -j$(BUILDJOBS) $(BUILDDIR)/$(EECUA) OBJDIR=libobj ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG= EPROFILE=$(EPROFILE)
+	$(MAKE) $(BUILDDIR)/$(EECUA) OBJDIR=libobj ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG= EPROFILE=$(EPROFILE)
 endif
 
 ifeq "$(OBJDIR)" "libobjdbg"
@@ -534,7 +534,7 @@ else
 
 $(BUILDDIR)/$(EECUDBGA) : $(wildcard $(TRUNKDIR)/source/*.[ch]) $(wildcard $(TRUNKDIR)/source/pcre/*.[ch]) | $(BUILD_DIRS)
 	echo "No match calling Make (debug)"
-	$(MAKE) -j$(BUILDJOBS) $(BUILDDIR)/$(EECUDBGA) OBJDIR=libobjdbg ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE)
+	$(MAKE) $(BUILDDIR)/$(EECUDBGA) OBJDIR=libobjdbg ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE)
 
 endif
 
@@ -544,7 +544,7 @@ $(BUILDDIR)/$(EECUSOA) : $(EU_LIB_OBJECTS)
 else
 $(BUILDDIR)/$(EECUSOA) : $(BUILDDIR)/$(EECUA) $(wildcard $(TRUNKDIR)/source/*.[ch]) $(wildcard $(TRUNKDIR)/source/pcre/*.[ch]) | $(BUILD_DIRS)
 ifneq "$(EMINGW)" "1"
-	$(MAKE) -j$(BUILDJOBS) $(BUILDDIR)/$(EECUSOA) OBJDIR=libobj-fPIC ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG= EPROFILE=$(EPROFILE) FPIC=-fPIC
+	$(MAKE) $(BUILDDIR)/$(EECUSOA) OBJDIR=libobj-fPIC ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG= EPROFILE=$(EPROFILE) FPIC=-fPIC
 else
 	ln -f $(BUILDDIR)/$(EECUA) $(BUILDDIR)/$(EECUSOA)
 endif
@@ -557,7 +557,7 @@ $(BUILDDIR)/$(EECUSODBGA) : $(EU_LIB_OBJECTS)
 else
 $(BUILDDIR)/$(EECUSODBGA) : $(BUILDDIR)/$(EECUDBGA) $(wildcard $(TRUNKDIR)/source/*.[ch]) $(wildcard $(TRUNKDIR)/source/pcre/*.[ch]) | $(BUILD_DIRS)
 ifneq "$(EMINGW)" "1"
-	$(MAKE) -j$(BUILDJOBS) $(BUILDDIR)/$(EECUSODBGA) OBJDIR=libobjdbg-fPIC ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE) FPIC=-fPIC
+	$(MAKE) $(BUILDDIR)/$(EECUSODBGA) OBJDIR=libobjdbg-fPIC ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE) FPIC=-fPIC
 else
 	ln -f $(BUILDDIR)/$(EECUDBGA) $(BUILDDIR)/$(EECUSODBGA)
 endif
@@ -624,9 +624,9 @@ $(BUILDDIR)/backobj/main-.c : $(BUILDDIR)/include/be_ver.h
 backendsource : $(BUILDDIR)/backobj/main-.c
 
 source : builddirs
-	$(MAKE) -j$(BUILDJOBS) $(BUILDDIR)/intobj/main-.c OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
-	$(MAKE) -j$(BUILDJOBS) $(BUILDDIR)/transobj/main-.c OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
-	$(MAKE) -j$(BUILDJOBS) $(BUILDDIR)/backobj/main-.c OBJDIR=backobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+	$(MAKE) $(BUILDDIR)/intobj/main-.c OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+	$(MAKE) $(BUILDDIR)/transobj/main-.c OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+	$(MAKE) $(BUILDDIR)/backobj/main-.c OBJDIR=backobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 
 HASH := $(shell git show --format='%H' | head -1)
 SHORT_HASH := $(shell git show --format='%h' | head -1)
@@ -688,9 +688,9 @@ endif
 else
 $(BUILDDIR)/$(EEXU) : | $(BUILDDIR)/intobj $(BUILDDIR)/intobj/back
 ifeq "$(EUPHORIA)" "1"
-	$(MAKE) -j$(BUILDJOBS) euisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+	$(MAKE) euisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 endif	
-	$(MAKE) -j$(BUILDJOBS) $(BUILDDIR)/$(EEXU) OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+	$(MAKE) $(BUILDDIR)/$(EEXU) OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 endif
 
 $(BUILDDIR)/$(OBJDIR)/back/be_machine.o : $(BUILDDIR)/include/be_ver.h
@@ -712,9 +712,9 @@ $(BUILDDIR)/$(EECU) :  $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) $(PREFIXED
 else
 $(BUILDDIR)/$(EECU) : | $(BUILDDIR)/transobj $(BUILDDIR)/transobj/back
 ifeq "$(EUPHORIA)" "1"
-	$(MAKE) -j$(BUILDJOBS) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+	$(MAKE) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 endif	
-	$(MAKE) -j$(BUILDJOBS) $(BUILDDIR)/$(EECU) OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+	$(MAKE) $(BUILDDIR)/$(EECU) OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 endif
 
 backend :  $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW)
@@ -741,11 +741,11 @@ endif
 else
 $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) : | $(BUILDDIR)/backobj $(BUILDDIR)/backobj/back
 ifeq "$(EUPHORIA)" "1"
-	$(MAKE) -j$(BUILDJOBS) backendsource EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG)  EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+	$(MAKE) backendsource EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG)  EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 endif	
-	$(MAKE) -j$(BUILDJOBS) $(BUILDDIR)/$(EBACKENDC) EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+	$(MAKE) $(BUILDDIR)/$(EBACKENDC) EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 ifeq "$(EMINGW)" "1"
-	$(MAKE) -j$(BUILDJOBS) $(BUILDDIR)/$(EBACKENDW) EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+	$(MAKE) $(BUILDDIR)/$(EBACKENDW) EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 endif
 endif
 
@@ -1161,7 +1161,7 @@ $(TRUNKDIR)/tests/return15$(EXE_EXT) : return15.c
 	
 lib818 :
 	touch test818.c
-	$(MAKE) -j$(BUILDJOBS) $(TRUNKDIR)/tests/lib818.dll
+	$(MAKE) $(TRUNKDIR)/tests/lib818.dll
 
 testaux : $(TRUNKDIR)/tests/return15$(EXE_EXT) $(TRUNKDIR)/tests/lib818.dll
 	
@@ -1179,13 +1179,13 @@ $(BUILDDIR)/$(OBJDIR)/%.c : $(BUILDDIR)/$(OBJDIR) $(EU_MAIN)
 		$(CYPTRUNKDIR)/source/$(EU_TARGET) )
 else
 $(BUILDDIR)/intobj/main-.c : $(EU_MAIN)
-	$(MAKE) -j$(BUILDJOBS) $(BUILDDIR)/intobj/main-.c OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)        
+	$(MAKE) $(BUILDDIR)/intobj/main-.c OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)        
 
 $(BUILDDIR)/transobj/main-.c : $(EU_MAIN)
-	$(MAKE) -j$(BUILDJOBS) $(BUILDDIR)/transobj/main-.c OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)  
+	$(MAKE) $(BUILDDIR)/transobj/main-.c OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)  
 	
 $(BUILDDIR)/backobj/main-.c : $(EU_MAIN)
-	$(MAKE) -j$(BUILDJOBS) $(BUILDDIR)/backobj/main-.c OBJDIR=backobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)  
+	$(MAKE) $(BUILDDIR)/backobj/main-.c OBJDIR=backobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)  
 	
 endif
 endif
@@ -1202,7 +1202,7 @@ $(BUILDDIR)/$(OBJDIR)/back/be_inline.o : $(TRUNKDIR)/source/be_inline.c $(CONFIG
 endif
 ifdef PCRE_OBJECTS	
 $(PREFIXED_PCRE_OBJECTS) : $(patsubst %.o,$(TRUNKDIR)/source/pcre/%.c,$(PCRE_OBJECTS)) $(TRUNKDIR)/source/pcre/config.h.unix $(TRUNKDIR)/source/pcre/pcre.h.unix
-	$(MAKE) -j$(BUILDJOBS) -C $(TRUNKDIR)/source/pcre all CC="$(PCRE_CC)" PCRE_CC="$(PCRE_CC)" EOSTYPE="$(EOSTYPE)" EOSFLAGS="$(EOSPCREFLAGS)" FPIC=$(FPIC)
+	$(MAKE) -C $(TRUNKDIR)/source/pcre all CC="$(PCRE_CC)" PCRE_CC="$(PCRE_CC)" EOSTYPE="$(EOSTYPE)" EOSFLAGS="$(EOSPCREFLAGS)" FPIC=$(FPIC)
 endif
 
 .IGNORE : test
