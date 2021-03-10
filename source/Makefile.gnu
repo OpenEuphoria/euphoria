@@ -296,7 +296,7 @@ ifeq "$(TRANSLATE)" "euc"
 else
 #   We MUST pass these arguments to $(EXE), for $(EXE) is not and shouldn't be governed by eu.cfg in BUILDDIR.
 #   Euphoria programs under Windows use paths of the form "c:\euphoria\program" even when compiling under MING or Cygwin!  This means they must take CYP* macros CYPINCDIR and CYPTRUNKDIR as arguments.   
-	TRANSLATE=$(HOST_EXE) $(CYPINCDIR) $(EC_DEBUG) $(EFLAG) $(CYPTRUNKDIR)/source/euc.ex $(EUC_DEBUG_FLAG)
+	TRANSLATE=$(WINE) $(HOST_EXE) $(CYPINCDIR) $(EC_DEBUG) $(EFLAG) $(CYPTRUNKDIR)/source/euc.ex $(EUC_DEBUG_FLAG)
 endif
 
 ifeq "$(ARCH)" "ARM"
@@ -760,7 +760,7 @@ $(MKVER): mkver.c $(BUILDDIR)/include/
 	$(CC) -o $@ $<
 
 $(BUILDDIR)/ver.cache : $(MKVER) $(EU_BACKEND_RUNNER_FILES) $(EU_TRANSLATOR_FILES) $(EU_INTERPRETER_FILES) $(EU_CORE_FILES) $(EU_STD_INC) $(wildcard *.c)
-	$(MKVER) "$(HG)" "$(BUILDDIR)/ver.cache" "$(BUILDDIR)/include/be_ver.h" $(EREL_TYPE)$(RELEASE)
+	$(WINE) $(MKVER) "$(HG)" "$(BUILDDIR)/ver.cache" "$(BUILDDIR)/include/be_ver.h" $(EREL_TYPE)$(RELEASE)
 
 $(BUILDDIR)/include/be_ver.h:  $(BUILDDIR)/ver.cache $(BUILD_DIRS)
 
@@ -1048,7 +1048,8 @@ $(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c $(BUILDDIR)/$(EECU) $(BUI
 
 $(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/eushroud.ex \
 $(EU_BACKEND_RUNNER_FILES) $(EU_CORE_FILES)
-	$(BUILDDIR)/$(EECU) -build-dir "$(CYPBUILDDIR)/shroud-build" \
+	$(TRANSLATE) -build-dir "$(CYPBUILDDIR)/shroud-build" \
+		-c "$(CYPBUILDDIR)/eu.cfg" \
 		-o "$(CYPBUILDDIR)/$(EUSHROUD)" \
 		-lib "$(CYPBUILDDIR)/eu.a" \
 		-makefile -eudir $(CYPTRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) \
