@@ -13,9 +13,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix: 
-        arch: ['x86','x86-64']
+        arch: ['ARM','x86','x86-64']
         plat: ['LINUX']
         include:
+        - arch: 'ARM'
+          plat: 'LINUX'
+          cc-prefix: 'arm-linux-gnueabihf'
         - arch: 'x86'
           plat: 'LINUX'
           cc-prefix: 'i686-linux-gnu'
@@ -24,20 +27,30 @@ jobs:
         working-directory: ./source
     steps:
       - name: Checkout Repository
+        id: checkout-repository
         uses: actions/checkout@v2
       - name: Install Compilers
+        id: install-compilers
         if: matrix.cc-prefix
-        run: sudo apt-get -y install binutils-${{matrix.cc-prefix}} gcc-${{matrix.cc-prefix}}
+        run: |
+          sudo apt-get -y install binutils-${{matrix.cc-prefix}} gcc-${{matrix.cc-prefix}}
+          echo "::set-output name=cc-prefix::--cc-prefix='${{matrix.cc-prefix}}-'"
       - name: Install Euphoria
+        id: install-euphoria
         run: |
           wget -q https://github.com/OpenEuphoria/euphoria/releases/download/4.1.0/euphoria-4.1.0-Linux-x64-57179171dbed.tar.gz -O- | sudo tar -C /usr/local -xz euphoria-4.1.0-Linux-x64/{bin,include}
           cd /usr/local/bin; sudo find /usr/local/euphoria-4.1.0-Linux-x64/bin -type f -executable -exec ln -s {} \;
       - name: Run Configure
-        run: ./configure --arch='${{matrix.arch}}' --plat='${{matrix.plat}}' --cc-prefix='${{matrix.cc-prefix}}'
+        id: run-configure
+        run: ./configure --arch='${{matrix.arch}}' --plat='${{matrix.plat}}' ${{steps.install-compilers.outputs.cc-prefix}}
       - name: Build Euphoria
-        run: make all
+        id: build-euphoria
+        run: |
+          make all
+          echo "::set-output name=euphoria-version::$(./build/echoversion)"
       - name: Upload Artifacts
+        id: upload-artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: euphoria-4.1.0-${{matrix.plat}}-${{matrix.arch}}-${{github.run_id}}
+          name: euphoria-${{steps.build-euphoria.output.euphoria-version}}-${{matrix.plat}}-${{matrix.arch}}-${{github.run_id}}
           path: ./source/build/
