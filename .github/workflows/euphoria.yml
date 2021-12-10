@@ -25,3 +25,8 @@ jobs:
         run: ./configure
       - name: make
         run: make interpreter
+      - name: upload-artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: artifact-${{github.run_id}}
+          path: ./source/build/
