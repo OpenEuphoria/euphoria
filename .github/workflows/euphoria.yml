@@ -13,15 +13,21 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix: 
-        arch: ['ARM','x86','x86-64']
-        plat: ['LINUX']
         include:
-        - arch: 'ARM'
+        - arch: 'x86-64'
           plat: 'LINUX'
-          cc-prefix: 'arm-linux-gnueabihf'
         - arch: 'x86'
           plat: 'LINUX'
-          cc-prefix: 'i686-linux-gnu'
+          cc-prefix: 'i686-linux-gnu-'
+          cc-package: 'i686-linux-gnu'
+        - arch: 'x86'
+          plat: 'WINDOWS'
+          cc-prefix: 'i686-w64-mingw32-'
+          cc-package: 'mingw-w64-i686'
+        - arch: 'x86-64'
+          plat: 'WINDOWS'
+          cc-prefix: 'x86_64-w64-mingw32-'
+          cc-package: 'mingw-w64-x86-64'
     defaults:
       run:
         working-directory: ./source
@@ -31,10 +37,10 @@ jobs:
         uses: actions/checkout@v2
       - name: Install Compilers
         id: install-compilers
-        if: matrix.cc-prefix
+        if: matrix.cc-package
+          echo "::set-output name=cc-prefix::--cc-prefix='${{matrix.cc-prefix}}'"
         run: |
-          sudo apt-get -y install binutils-${{matrix.cc-prefix}} gcc-${{matrix.cc-prefix}}
-          echo "::set-output name=cc-prefix::--cc-prefix='${{matrix.cc-prefix}}-'"
+          sudo apt-get -y install {binutils,gcc}-${{matrix.cc-package}}
       - name: Install Euphoria
         id: install-euphoria
         run: |
