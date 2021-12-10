@@ -75,12 +75,8 @@ PCRE_CC=$(CC)
 include $(CONFIG)
 include $(TRUNKDIR)/source/pcre/objects.mak
 
-ifeq "$(EHOST)" "$(ETARGET)"
-  HOSTCC=$(CC)
-else
 # so far this is all we support
   HOSTCC=gcc
-endif
 
 ifeq "$(RELEASE)" "1"
   RELEASE_FLAG = -D EU_FULL_RELEASE
