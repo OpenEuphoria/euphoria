@@ -11,6 +11,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./source
     steps:
       - name: checkout
         uses: actions/checkout@v2
@@ -19,8 +22,6 @@ jobs:
           wget -q https://github.com/OpenEuphoria/euphoria/releases/download/4.1.0/euphoria-4.1.0-Linux-x64-57179171dbed.tar.gz -O- | sudo tar -C /usr/local -xz euphoria-4.1.0-Linux-x64/{bin,include}
           cd /usr/local/bin; sudo find /usr/local/euphoria-4.1.0-Linux-x64/bin -type f -executable -exec ln -s {} \;
       - name: configure
-        working-directory: $GITHUB_WORKSPACE/source
         run: ./configure
       - name: make
-        working-directory: $GITHUB_WORKSPACE/source
         run: make interpreter
