@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        plat: ['LINUX']
+        plat: ['LINUX','WINDOWS']
         arch: ['x86','x86-64']
     defaults:
       run:
@@ -51,7 +51,7 @@ jobs:
       - name: Build Euphoria
         id: build-euphoria
         run: |
-          make -j2 all
+          make all
           echo "euphoria-version=$(./build/echoversion)" >> $GITHUB_ENV
       - name: Upload Artifacts
         id: upload-artifacts
