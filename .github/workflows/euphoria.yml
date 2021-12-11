@@ -12,22 +12,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
-      matrix: 
-        include:
-        - arch: 'x86-64'
-          plat: 'LINUX'
-        - arch: 'x86'
-          plat: 'LINUX'
-          cc-prefix: 'i686-linux-gnu-'
-          cc-package: 'i686-linux-gnu'
-        - arch: 'x86'
-          plat: 'WINDOWS'
-          cc-prefix: 'i686-w64-mingw32-'
-          cc-package: 'mingw-w64-i686'
-        - arch: 'x86-64'
-          plat: 'WINDOWS'
-          cc-prefix: 'x86_64-w64-mingw32-'
-          cc-package: 'mingw-w64-x86-64'
+      matrix:
+        arch: ['LINUX','WINDOWS']
+        plat: ['x86','x86-64']
     defaults:
       run:
         working-directory: ./source
@@ -35,12 +22,24 @@ jobs:
       - name: Checkout Repository
         id: checkout-repository
         uses: actions/checkout@v2
-      - name: Install Compilers
-        id: install-compilers
-        if: matrix.cc-package
-          echo "::set-output name=cc-prefix::--cc-prefix='${{matrix.cc-prefix}}'"
+      - name: Install Compilers (Linux x86)
+        id: install-compilers-linux-x86
+        if: matrix.arch == 'LINUX' && matrix.plat == 'x86'
         run: |
-          sudo apt-get -y install {binutils,gcc}-${{matrix.cc-package}}
+          sudo apt-get -qy install {binutils,gcc}-i686-linux-gnu
+          echo "cc-prefix=i686-linux-gnu-" >> $GITHUB_ENV
+      - name: Install Compilers (Windows x86)
+        id: install-compilers-windows-x86
+        if: matrix.arch == 'WINDOWS' && matrix.plat == 'x86'
+        run: |
+          sudo apt-get -qy install {binutils,gcc}-mingw-w64-i686
+          echo "cc-prefix=i686-w64-mingw32-" >> $GITHUB_ENV
+      - name: Install Compilers (Windows x64)
+        id: install-compilers-windows-x64
+        if: matrix.arch == 'WINDOWS' && matrix.plat == 'x86-64'
+        run: |
+          sudo apt-get -qy install {binutils,gcc}-mingw-w64-x86-64
+          echo "cc-prefix=x86_64-w64-mingw32-" >> $GITHUB_ENV
       - name: Install Euphoria
         id: install-euphoria
         run: |
@@ -48,15 +47,15 @@ jobs:
           cd /usr/local/bin; sudo find /usr/local/euphoria-4.1.0-Linux-x64/bin -type f -executable -exec ln -s {} \;
       - name: Run Configure
         id: run-configure
-        run: ./configure --arch='${{matrix.arch}}' --plat='${{matrix.plat}}' ${{steps.install-compilers.outputs.cc-prefix}}
+        run: ./configure --arch='${{matrix.arch}}' --plat='${{matrix.plat}}' --cc-prefix='${{env.cc-prefix}}'
       - name: Build Euphoria
         id: build-euphoria
         run: |
-          make all
-          echo "::set-output name=euphoria-version::$(./build/echoversion)"
+          make -j2 all
+          echo "euphoria-version=$(./build/echoversion)" >> $GITHUB_ENV
       - name: Upload Artifacts
         id: upload-artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: euphoria-${{steps.build-euphoria.output.euphoria-version}}-${{matrix.plat}}-${{matrix.arch}}-${{github.run_id}}
+          name: euphoria-${{env.euphoria-version}}-${{matrix.plat}}-${{matrix.arch}}-${{github.run_id}}
           path: ./source/build/
