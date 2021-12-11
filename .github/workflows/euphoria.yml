@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        plat: ['LINUX','WINDOWS']
+        plat: ['LINUX']
         arch: ['x86','x86-64']
     defaults:
       run:
@@ -24,19 +24,19 @@ jobs:
         uses: actions/checkout@v2
       - name: Install Compilers (Linux x86)
         id: install-compilers-linux-x86
-        if: matrix.arch == 'LINUX' && matrix.plat == 'x86'
+        if: matrix.plat == 'LINUX' && matrix.arch == 'x86'
         run: |
           sudo apt-get -qy install {binutils,gcc}-i686-linux-gnu
           echo "cc-prefix=i686-linux-gnu-" >> $GITHUB_ENV
       - name: Install Compilers (Windows x86)
         id: install-compilers-windows-x86
-        if: matrix.arch == 'WINDOWS' && matrix.plat == 'x86'
+        if: matrix.plat == 'WINDOWS' && matrix.arch == 'x86'
         run: |
           sudo apt-get -qy install {binutils,gcc}-mingw-w64-i686
           echo "cc-prefix=i686-w64-mingw32-" >> $GITHUB_ENV
       - name: Install Compilers (Windows x64)
         id: install-compilers-windows-x64
-        if: matrix.arch == 'WINDOWS' && matrix.plat == 'x86-64'
+        if: matrix.plat == 'WINDOWS' && matrix.arch == 'x86-64'
         run: |
           sudo apt-get -qy install {binutils,gcc}-mingw-w64-x86-64
           echo "cc-prefix=x86_64-w64-mingw32-" >> $GITHUB_ENV
