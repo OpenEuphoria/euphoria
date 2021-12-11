@@ -9,12 +9,13 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-euphoria:
+    name: Build Euphoria
     runs-on: ubuntu-latest
     strategy:
       matrix:
         plat: ['LINUX','WINDOWS']
-        arch: ['x86','x86-64']
+        arch: ['x86','x86_64']
     defaults:
       run:
         working-directory: ./source
@@ -22,6 +23,10 @@ jobs:
       - name: Checkout Repository
         id: checkout-repository
         uses: actions/checkout@v2
+      - name: Install Dependencies
+        id: install-dependencies
+        run: |
+          sudo apt-get -qy install texlive-latex-extra
       - name: Install Compilers (Linux x86)
         id: install-compilers-linux-x86
         if: matrix.plat == 'LINUX' && matrix.arch == 'x86'
@@ -36,7 +41,7 @@ jobs:
           echo "cc-prefix=i686-w64-mingw32-" >> $GITHUB_ENV
       - name: Install Compilers (Windows x64)
         id: install-compilers-windows-x64
-        if: matrix.plat == 'WINDOWS' && matrix.arch == 'x86-64'
+        if: matrix.plat == 'WINDOWS' && matrix.arch == 'x86_64'
         run: |
           sudo apt-get -qy install {binutils,gcc}-mingw-w64-x86-64
           echo "cc-prefix=x86_64-w64-mingw32-" >> $GITHUB_ENV
@@ -51,11 +56,16 @@ jobs:
       - name: Build Euphoria
         id: build-euphoria
         run: |
-          make all
+          make all htmldoc pdfdoc
           echo "euphoria-version=$(./build/echoversion)" >> $GITHUB_ENV
+      - name: Get Short Hash
+        id: get-short-hash
+        uses: benjlevesque/short-sha@v1.2
       - name: Upload Artifacts
         id: upload-artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: euphoria-${{env.euphoria-version}}-${{matrix.plat}}-${{matrix.arch}}-${{github.run_id}}
-          path: ./source/build/
+          name: euphoria-${{env.euphoria-version}}-${{matrix.plat}}-${{matrix.arch}}-${{env.SHA}}
+          path: |
+            ./source/build/
+            !./source/build/**/*.o
