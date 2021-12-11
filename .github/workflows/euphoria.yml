@@ -23,10 +23,6 @@ jobs:
       - name: Checkout Repository
         id: checkout-repository
         uses: actions/checkout@v2
-    # - name: Install Dependencies
-    #   id: install-dependencies
-    #   run: |
-    #     sudo apt-get -qy install texlive-latex-extra
       - name: Install Compilers (Linux x86)
         id: install-compilers-linux-x86
         if: matrix.plat == 'LINUX' && matrix.arch == 'x86'
@@ -58,7 +54,6 @@ jobs:
         run: |
           make all
           make htmldoc
-        # make pdfdoc
           echo "euphoria-version=$(./build/echoversion)" >> $GITHUB_ENV
       - name: Get Short Hash
         id: get-short-hash
