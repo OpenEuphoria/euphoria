@@ -13,8 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        arch: ['LINUX','WINDOWS']
-        plat: ['x86','x86-64']
+        plat: ['LINUX','WINDOWS']
+        arch: ['x86','x86-64']
     defaults:
       run:
         working-directory: ./source
