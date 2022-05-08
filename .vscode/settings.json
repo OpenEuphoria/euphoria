@@ -1,0 +1,18 @@
+{
+    "files.associations": {
+        "*.gnu": "makefile",
+        "*.mak": "makefile",
+        "*.wat": "makefile"
+    },
+    "files.exclude": {
+        "**/.git": true,
+        "**/.hgeol": true,
+        "**/.hgignore": true,
+        "**/build": true,
+        "**/config.gnu": true,
+        "**/ecp.dat": true,
+        "**/ex.err": true,
+        "**/Makefile": true,
+        "**/version.txt": true
+    }
+}

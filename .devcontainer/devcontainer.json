@@ -1,0 +1,10 @@
+{
+    "name": "Euphoria",
+    "build": {
+        "dockerfile": "Dockerfile.euphoria"
+    },
+    "extensions": [
+		"ms-vscode.cpptools",
+		"openeuphoria.vscode-euphoria"
+	]
+}

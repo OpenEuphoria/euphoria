@@ -1,0 +1,68 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Configure",
+            "type": "shell",
+            "group": "build",
+            "command": "./configure",
+            "options": {
+                "cwd": "${workspaceFolder}/source"
+            }
+        },
+        {
+            "label": "Build (all)",
+            "type": "shell",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "command": "make",
+            "args": [
+                "all"
+            ],
+            "dependsOn": [
+                "Configure"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/source"
+            }
+        },
+        {
+            "label": "Build (docs)",
+            "type": "shell",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "command": "make",
+            "args": [
+                "htmldoc"
+            ],
+            "dependsOn": [
+                "Configure"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/source"
+            }
+        },
+        {
+            "label": "Test",
+            "type": "shell",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "command": "make",
+            "args": [
+                "test"
+            ],
+            "dependsOn": [
+                "Build (all)"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/source"
+            }
+        }
+    ]
+}
