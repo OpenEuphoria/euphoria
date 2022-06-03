@@ -586,7 +586,7 @@ object find_replace_pcre(object x )
 		str = EMalloc(out_len + 2);
 		copy_string(str, out, out_len + 1);
 		
-		start_from = ovector[rc] + rep_s->length;
+		start_from = ovector[rc] + rep_s->length - 1;
 		limit -= 1;
 	}
 	
