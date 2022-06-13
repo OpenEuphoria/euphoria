@@ -707,7 +707,7 @@ constant StdErrMsgs = {
     { TOO_MANY_WARNING_ERRORS                      , "too many warning errors" },
     { TO_BUILD_YOUR_PROJECT_CHANGE_DIRECTORY_TO_1_AND_TYPE_23MAK, "To build your project, change directory to [1] and type [2][3].mak" },
     { TO_BUILD_YOUR_PROJECT_INCLUDE_1MAK_INTO_A_LARGER_MAKEFILE_PROJECT, "To build your project, include [1].mak into a larger Makefile project" },
-    { TO_BUILD_YOUR_PROJECT_TYPE_12MAK             , "To build your project, type [1][2].mak" },
+    { TO_BUILD_YOUR_PROJECT_TYPE_12MAK             , "To build your project, type [1]" },
     { TO_RUN_YOUR_PROJECT_TYPE_1                   , "\nTo run your project, type [1]" },
     { TRACE_LINES_CMD                              , "Specify the number of lines to use in ctrace.out" },
     { TRANSLATING_CODE_PASS                        , "Translating code, pass: " },

@@ -573,7 +573,7 @@ endif
 code-page-db : $(BUILDDIR)/ecp.dat $(TRUNKDIR)/tests/ecp.dat
 
 $(BUILDDIR)/ecp.dat : $(TRUNKDIR)/source/codepage/*.ecp msgtext.e $(BUILDDIR)/$(EEXU) | $(BUILDDIR)
-	$(HOST_EXE) -i $(CYPTRUNKDIR)/include $(CYPTRUNKDIR)/bin/buildcpdb.ex -p$(CYPTRUNKDIR)/source/codepage -o$(CYPBUILDDIR)
+	$(BUILDDIR)/$(EEXU) -i $(CYPTRUNKDIR)/include $(CYPTRUNKDIR)/bin/buildcpdb.ex -p$(CYPTRUNKDIR)/source/codepage -o$(CYPBUILDDIR)
 
 $(TRUNKDIR)/tests/ecp.dat : $(BUILDDIR)/ecp.dat
 	cp -fl $(BUILDDIR)/ecp.dat $(TRUNKDIR)/tests/ecp.dat || cp -f $(BUILDDIR)/ecp.dat $(TRUNKDIR)/tests/ecp.dat
@@ -1001,7 +1001,8 @@ $(BUILDDIR)/eudist-build/main-.c : $(TRUNKDIR)/source/eudist.ex
 		-silent -makefile -eudir $(CYPTRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) $(MINGW_FLAGS) $(TRUNKDIR)/source/eudist.ex
 
 $(BUILDDIR)/$(EUDIST) : $(TRUNKDIR)/source/eudist.ex $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA) $(BUILDDIR)/eudist-build/main-.c | $(BUILDDIR)
-	$(MAKE) -C "$(BUILDDIR)/eudist-build" -f eudist.mak
+	(cd "$(BUILDDIR)/eudist-build" ;sh ./configure )
+	$(MAKE) -C "$(BUILDDIR)/eudist-build"
 
 
 $(BUILDDIR)/eudis-build/main-.c : $(TRUNKDIR)/source/dis.ex  $(TRUNKDIR)/source/dis.e $(TRUNKDIR)/source/dox.e
@@ -1011,7 +1012,8 @@ $(BUILDDIR)/eudis-build/main-.c : $(EU_INTERPRETER_FILES)
 		-silent -makefile -eudir $(CYPTRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) $(MINGW_FLAGS) $(CYPTRUNKDIR)/source/dis.ex
 
 $(BUILDDIR)/$(EUDIS) : $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA) $(BUILDDIR)/eudis-build/main-.c  $(BUILDDIR)/$(EECUA)
-	$(MAKE) -C "$(BUILDDIR)/eudis-build" -f dis.mak
+	(cd "$(BUILDDIR)/eudis-build" ;sh ./configure )
+	$(MAKE) -C "$(BUILDDIR)/eudis-build"
 
 
 $(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/eubind.ex $(EU_INTERPRETER_FILES) $(EU_BACKEND_RUNNER_FILES) $(EU_CORE_FILES)
@@ -1019,7 +1021,8 @@ $(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/eubind.ex $(EU_INTERPRETER_F
 		-silent -makefile -eudir $(CYPTRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) $(MINGW_FLAGS) $(CYPTRUNKDIR)/source/eubind.ex
 
 $(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA)
-	$(MAKE) -C "$(CYPBUILDDIR)/bind-build" -f eubind.mak
+	(cd "$(BUILDDIR)/bind-build" ;sh ./configure )
+	$(MAKE) -C "$(CYPBUILDDIR)/bind-build"
 
 
 $(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/eushroud.ex $(EU_BACKEND_RUNNER_FILES) $(EU_CORE_FILES)
@@ -1027,7 +1030,8 @@ $(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/eushroud.ex $(EU_BACKEND_R
 		-silent -makefile -eudir $(CYPTRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) $(MINGW_FLAGS) $(CYPTRUNKDIR)/source/eushroud.ex
 
 $(BUILDDIR)/$(EUSHROUD) : $(BUILDDIR)/shroud-build/main-.c $(BUILDDIR)/$(EECUA)
-	$(MAKE) -C "$(CYPBUILDDIR)/shroud-build" -f eushroud.mak
+	(cd "$(BUILDDIR)/shroud-build" ;sh ./configure )
+	$(MAKE) -C "$(CYPBUILDDIR)/shroud-build"
 
 
 $(BUILDDIR)/eutest-build/main-.c : $(TRUNKDIR)/source/eutest.ex
@@ -1035,7 +1039,8 @@ $(BUILDDIR)/eutest-build/main-.c : $(TRUNKDIR)/source/eutest.ex
 		-silent -makefile -eudir $(CYPTRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) $(MINGW_FLAGS) $(CYPTRUNKDIR)/source/eutest.ex
 
 $(BUILDDIR)/$(EUTEST) : $(BUILDDIR)/eutest-build/main-.c  $(BUILDDIR)/$(EECUA)
-	$(MAKE) -C "$(BUILDDIR)/eutest-build" -f eutest.mak
+	(cd "$(BUILDDIR)/eutest-build" ;sh ./configure )
+	$(MAKE) -C "$(BUILDDIR)/eutest-build"
 
 
 $(BUILDDIR)/eucoverage-build/main-.c : $(TRUNKDIR)/bin/eucoverage.ex
@@ -1043,7 +1048,8 @@ $(BUILDDIR)/eucoverage-build/main-.c : $(TRUNKDIR)/bin/eucoverage.ex
 		-silent -makefile -eudir $(CYPTRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) $(MINGW_FLAGS) $(CYPTRUNKDIR)/bin/eucoverage.ex
 
 $(BUILDDIR)/$(EUCOVERAGE) : $(BUILDDIR)/eucoverage-build/main-.c $(BUILDDIR)/$(EECUA)
-	$(MAKE) -C "$(CYPBUILDDIR)/eucoverage-build" -f eucoverage.mak
+	(cd "$(BUILDDIR)/eucoverage-build" ;sh ./configure )
+	$(MAKE) -C "$(CYPBUILDDIR)/eucoverage-build"
 
 
 EU_TOOLS= \

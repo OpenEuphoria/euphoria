@@ -473,6 +473,7 @@ function setup_build()
 		bits = 64
 	end if
 	
+	
 	switch compiler_type do
 		case COMPILER_GCC then
 			c_exe = compiler_prefix & "gcc"
@@ -480,6 +481,7 @@ function setup_build()
 			obj_ext = "o"
 
 			sequence m_flag = ""
+			sequence ctl_flags = ""
 			if not TARM then
 				-- current gcc for ARM does not support -m32
 				m_flag = sprintf( "-m%d", bits )
@@ -499,9 +501,10 @@ function setup_build()
 			if dll_option and not TWINDOWS then
 				c_flags &= " -fPIC"
 			end if
-
-			c_flags &= sprintf(" -c -w -fsigned-char -O2 %s -I%s -ffast-math",
-					{ m_flag, adjust_for_build_file(get_eucompiledir()) })
+			
+			
+              c_flags &= sprintf(" -c -w -fsigned-char -O2 %s -I%s -ffast-math",
+                      { iif(build_system_type!=BUILD_DIRECT, "", m_flag) , adjust_for_build_file(get_eucompiledir()) })
 			
 			if TWINDOWS and mno_cygwin then
 				-- we must use this compile flag here to ensure that we load the MINGW include
@@ -509,33 +512,38 @@ function setup_build()
 				c_flags &= " -mno-cygwin"
 			end if
 
+			if dll_option then
+				l_flags &= " -shared "
+			end if
+			
 			if build_system_type != BUILD_DIRECT then
-				l_flags = sprintf( " $(RUNTIME_LIBRARY) %s", { m_flag })
+				l_flags = sprintf( " $(RUNTIME_LIBRARY)", {})
 			else
 				l_flags = sprintf( " %s %s",
 								   { adjust_for_command_line_passing( user_library ), m_flag })
 			end if
 
-			if dll_option then
-				l_flags &= " -shared "
-			end if
-
-			if TLINUX then
-				l_flags &= " -ldl -lm -lpthread"
-			elsif TBSD then
-				l_flags &= " -lm -lpthread"
-			elsif TOSX then
-				l_flags &= " -lresolv"
-			elsif TWINDOWS then
-				if mno_cygwin then
-					-- we must use this option to avoid linking to the cygwin dll.
-					l_flags &= " -mno-cygwin"
-				end if				
-				if not con_option then
-					-- we must use this flag to prevent a new console from appearing
-					-- when running this program from explorer (the GUI)
-					l_flags &= " -mwindows"
-				end if
+			if build_system_type = BUILD_DIRECT then
+			  -- in the case of full makefiles these will be
+			  -- setup after translation via a -- configure script.
+              if TLINUX then
+                  l_flags &= " -ldl -lm -lpthread"
+              elsif TBSD then
+                  l_flags &= " -lm -lpthread"
+              elsif TOSX then
+                  l_flags &= " -lresolv"
+              elsif TWINDOWS then
+                  if mno_cygwin then
+                      -- we must use this option to avoid linking to the cygwin dll.
+                      l_flags &= " -mno-cygwin"
+                  end if				
+                  if not con_option then
+                      -- we must use this flag to prevent a new console from appearing
+                      -- when running this program from explorer (the GUI)
+                      l_flags &= " -mwindows"
+                  end if
+              end if
+			
 			end if
 			
 			-- input/output
@@ -724,77 +732,204 @@ procedure write_makefile_full()
 	sequence settings = setup_build()
 
 	ensure_exename(settings[SETUP_EXE_EXT])
-
-	integer fh = open(output_dir & file0 & ".mak", "wb")
-
-	printf(fh, "CC     = %s" & HOSTNL, { settings[SETUP_CEXE] })
-	printf(fh, "CFLAGS = %s" & HOSTNL, { settings[SETUP_CFLAGS] })
-	printf(fh, "LINKER = %s" & HOSTNL, { settings[SETUP_LEXE] })
 	
-	if compiler_type = COMPILER_GCC then
-		printf(fh, "LFLAGS = %s" & HOSTNL, { settings[SETUP_LFLAGS] })
-	else
-		write_objlink_file()
-	end if
+	integer cf = open(output_dir & "configure", "wb")
+	puts(cf, """#!/bin/sh
 
-	write_makefile_srcobj_list(fh)
-	puts(fh, HOSTNL)
+CONFIG_FILE=config.gnu
+PLAT="default_platform"
+ARCH="default_arch"
+
+UNAME_SYSTEM=`(uname -s) 2>/dev/null`  || UNAME_SYSTEM=unknown
+UNAME_MACHINE=`(uname -m) 2>/dev/null` || UNAME_MACHINE=unknown
+UNAME_REL=`(uname -r) 2>/dev/null` || UNAME_REL=unknown
+
+# If under Cygwin or Mingw, we have 2 sets of paths: the normal TRUNKDIR/BUILDDIR/INCDIR defined by
+# the Cygwin path (/cygdrive/c/dir/file) or under Mingw the Mingw path (/c/dir/file); as well as the
+# CYP- versions (c:/dir/file). The normal variables are used by make itself, which can't handle the
+# mixed-mode path and can only deal with pure Cygwin or Mingw ones. (These are also used by the
+# various utilities ike cp, gcc, etc, even though they can handle either format). The CYP- versions
+# are used whenever we call eui, euc, or an euphoria program, as these can only handle mixed-mode
+# paths.
+
+USECYPPATH="false"
+
+# argument sent to the pwd command.  Most platforms no arguments.
+PWDARG=
+if echo "$UNAME_SYSTEM" | grep CYGWIN > /dev/null; then
+    # for now, we build with -mno-cygwin under cygwin, so this is treated
+    # identically to MinGW
+    # A true exu.exe should probably set UNAME_SYSTEM="CYGWIN"
+    UNAME_SYSTEM=WINDOWS
+    # However, since we use absolute paths and Cygwin's make can't deal with
+    # mixed-mode paths (C:/dir/file) the way MSYS's make can, we turn
+    # CYPPATH on
+    USECYPPATH="true"
+    PWDARG=
+    EXE=.exe
+
+elif echo "$UNAME_SYSTEM" | grep MINGW > /dev/null; then
+    UNAME_SYSTEM=WINDOWS
+    USEMINGPATH="true"
+    PWDARG=
+    EXE=.exe
+else
+    PWDARG=
+fi
+
+# gcc doesn't seem to like -m32 on 32-bit machines when there are 
+# no 64-bit machines 
+# with an instruction super set of the 32-bit machine.  This means,
+# -m32 is fine for ix86 32bit machines but bad for ARM and Motorola based
+# machines.
+
+MSIZE="-m32"
+
+if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
+    HOST_ARCH=ix86
+    MSIZE=-m32
+    
+elif echo "$UNAME_MACHINE" | egrep "x86_64|amd64" > /dev/null; then
+    HOST_ARCH=ix86_64
+    MSIZE=-m64
+    
+elif echo "$UNAME_MACHINE" | grep -i ARM > /dev/null; then
+    HOST_ARCH=ARM
+    MSIZE=
+fi
+ARCH=$HOST_ARCH
+
+if test $UNAME_SYSTEM = "Linux"; then
+    EHOST=ELINUX
+    TARGET=ELINUX
+    LFLAGS="-ldl -lm -lpthread"
+elif test $UNAME_SYSTEM = "WINDOWS"; then
+    EHOST=EWINDOWS
+    TARGET=EWINDOWS""" & HOSTNL &
+    "    LFLAGS=\" -lws2_32 " & 
+    iif(con_option,""," -mwindows") & "\"" & HOSTNL &
+"""    
+    if [ "$USECYPPATH" = "true" ]; then
+       LFLAGS="$LFLAGS  -mno-cygwin"
+    fi
+elif test $UNAME_SYSTEM = "OpenBSD"; then
+    EHOST=OPENBSD
+    TARGET=EOPENBSD
+    EBSD=1
+    LFLAGS=" -lm -lpthread"
+elif test $UNAME_SYSTEM = "NetBSD"; then
+    EHOST=NETBSD
+    TARGET=EBSD
+    EBSD=1
+    LFLAGS=" -lm -lpthread"
+elif test $UNAME_SYSTEM = "FreeBSD"; then
+    EHOST=FREEBSD
+    TARGET=EFREEBSD
+    EBSD=1
+    LFLAGS=" -lm -lpthread"
+# OS X > 10.4 (Darwin version 8 and up) supports 64-bit applications.
+elif test $UNAME_SYSTEM = "Darwin"; then
+    EHOST=EOSX
+    TARGET=EOSX
+    EBSD=1
+    VAL=`echo "$UNAME_REL" | cut -d \. -f 1`
+    if test $VAL -gt 8; then
+        ARCH=ix86_64
+        MSIZE=-m64
+        
+    # PPC will have to be supported manually; Euphoria doesn't currently support PPC.
+    else 
+        ARCH=x86
+        MSIZE=-m32
+        
+    fi
+    LFLAGS = " -lresolv"
+else
+    EHOST=EBSD
+    TARGET=EBSD
+    LFLAGS=" -lm -lpthread"
+fi
+[ -n "$MSIZE" ] && echo "MSIZE=$MSIZE" >> ${CONFIG_FILE}
+[ -n "$LFLAGS" ] && echo "CTLFLAGS=$LFLAGS" >> ${CONFIG_FILE}
+echo >> ${CONFIG_FILE}
+	""")
+	close(cf)
+
+	integer GNUMakefile = open(output_dir & "GNUMakefile", "wb")
+	integer WatcomMakefile = open(output_dir & "Makefile", "wb")
+	printf(GNUMakefile, "CC     = %s" & HOSTNL, { settings[SETUP_CEXE] })
 	
-	if compiler_type = COMPILER_WATCOM then
-		printf(fh, "\"%s\" : $(%s_OBJECTS) %s" & HOSTNL, { 
-			exe_name[D_ALTNAME], upper(file0), user_library
-		})
-		printf(fh, "\t$(LINKER) @%s.lnk" & HOSTNL, { file0 })
-		if length(rc_file[D_ALTNAME]) and length(settings[SETUP_RC_COMPILER]) then
-			writef(fh, "\t" & settings[SETUP_RC_COMPILER], { rc_file[D_ALTNAME], res_file[D_ALTNAME], exe_name[D_ALTNAME] })
-		end if
-		puts(fh, HOSTNL)
-		printf(fh, "%s-clean : .SYMBOLIC" & HOSTNL, { file0 })
-		if length(res_file[D_ALTNAME]) then
-			printf(fh, "\tdel \"%s\"" & HOSTNL, { res_file[D_ALTNAME] })
-		end if
-		for i = 1 to length(generated_files) do
-			if match(".o", generated_files[i]) then
-				printf(fh, "\tdel \"%s\"" & HOSTNL, { generated_files[i] })
-			end if
-		end for
-		puts(fh, HOSTNL)
-		printf(fh, "%s-clean-all : .SYMBOLIC" & HOSTNL, { file0 })
-		printf(fh, "\tdel \"%s\"" & HOSTNL, { exe_name[D_ALTNAME] })
-		if length(res_file[D_ALTNAME]) then
-			printf(fh, "\tdel \"%s\"" & HOSTNL, { res_file[D_ALTNAME] })
-		end if
-		for i = 1 to length(generated_files) do
-			printf(fh, "\tdel \"%s\"" & HOSTNL, { generated_files[i] })
-		end for
-		puts(fh, HOSTNL)
-		puts(fh, ".c.obj : .autodepend" & HOSTNL)
-		puts(fh, "\t$(CC) $(CFLAGS) $<" & HOSTNL)
-		puts(fh, HOSTNL)
+	printf(GNUMakefile, "CFLAGS = %s ${MSIZE}" & HOSTNL, { settings[SETUP_CFLAGS] })
+	printf(GNUMakefile, "LINKER = %s" & HOSTNL, { settings[SETUP_LEXE] })
+	printf(GNUMakefile, "LFLAGS = %s ${CTLFLAGS} ${MSIZE}" & HOSTNL, { settings[SETUP_LFLAGS] })
+	
 
-	else
-		printf(fh, "RUNTIME_LIBRARY=%s\n", { settings[SETUP_RUNTIME_LIBRARY] } )
-		printf(fh, "%s: $(%s_OBJECTS) $(RUNTIME_LIBRARY) %s " & HOSTNL, { adjust_for_build_file(exe_name[D_ALTNAME]), upper(file0), rc_file[D_ALTNAME] })
-		if length(rc_file[D_ALTNAME]) then
-			writef(fh, "\t" & settings[SETUP_RC_COMPILER] & HOSTNL, { rc_file[D_ALTNAME], res_file[D_ALTNAME] })
-		end if
-		printf(fh, "\t$(LINKER) -o %s $(%s_OBJECTS) %s $(LFLAGS)" & HOSTNL, {
-			exe_name[D_ALTNAME], upper(file0), iif(length(res_file[D_ALTNAME]), res_file[D_ALTNAME], "") })
-		puts(fh, HOSTNL)
-		printf(fh, ".PHONY: %s-clean %s-clean-all" & HOSTNL, { file0, file0 })
-		puts(fh, HOSTNL)
-		printf(fh, "%s-clean:" & HOSTNL, { file0 })
-		printf(fh, "\trm -rf $(%s_OBJECTS) %s" & HOSTNL, { upper(file0), res_file[D_ALTNAME] })
-		puts(fh, HOSTNL)
-		printf(fh, "%s-clean-all: %s-clean" & HOSTNL, { file0, file0 })
-		printf(fh, "\trm -rf $(%s_SOURCES) %s %s" & HOSTNL, { upper(file0), res_file[D_ALTNAME], exe_name[D_ALTNAME] })
-		puts(fh, HOSTNL)
-		puts(fh, "%.o: %.c" & HOSTNL)
-		puts(fh, "\t$(CC) $(CFLAGS) $*.c -o $*.o" & HOSTNL)
-		puts(fh, HOSTNL)
-	end if
+	printf(WatcomMakefile, "CC     = %s" & HOSTNL, { settings[SETUP_CEXE] })
+	
+	printf(WatcomMakefile, "CFLAGS = %s" & HOSTNL, { settings[SETUP_CFLAGS] })
+	printf(WatcomMakefile, "LINKER = %s" & HOSTNL, { settings[SETUP_LEXE] })
+		
+	write_objlink_file()	
 
-	close(fh)
+	write_makefile_srcobj_list(GNUMakefile)	
+	write_makefile_srcobj_list(WatcomMakefile)
+	puts(GNUMakefile, HOSTNL)
+	puts(WatcomMakefile, HOSTNL)
+	
+    printf(WatcomMakefile, "\"%s\" : $(%s_OBJECTS) %s" & HOSTNL, { 
+        exe_name[D_ALTNAME], upper(file0), user_library
+    })
+    printf(WatcomMakefile, "\t$(LINKER) @%s.lnk" & HOSTNL, { file0 })
+    if length(rc_file[D_ALTNAME]) and length(settings[SETUP_RC_COMPILER]) then
+        writef(WatcomMakefile, "\t" & settings[SETUP_RC_COMPILER], { rc_file[D_ALTNAME], res_file[D_ALTNAME], exe_name[D_ALTNAME] })
+    end if
+    puts(WatcomMakefile, HOSTNL)
+    printf(WatcomMakefile, "%s-clean : .SYMBOLIC" & HOSTNL, { file0 })
+    if length(res_file[D_ALTNAME]) then
+        printf(WatcomMakefile, "\tdel \"%s\"" & HOSTNL, { res_file[D_ALTNAME] })
+    end if
+    for i = 1 to length(generated_files) do
+        if match(".o", generated_files[i]) then
+            printf(WatcomMakefile, "\tdel \"%s\"" & HOSTNL, { generated_files[i] })
+        end if
+    end for
+    puts(WatcomMakefile, HOSTNL)
+    printf(WatcomMakefile, "%s-clean-all : .SYMBOLIC" & HOSTNL, { file0 })
+    printf(WatcomMakefile, "\tdel \"%s\"" & HOSTNL, { exe_name[D_ALTNAME] })
+    if length(res_file[D_ALTNAME]) then
+        printf(WatcomMakefile, "\tdel \"%s\"" & HOSTNL, { res_file[D_ALTNAME] })
+    end if
+    for i = 1 to length(generated_files) do
+        printf(WatcomMakefile, "\tdel \"%s\"" & HOSTNL, { generated_files[i] })
+    end for
+    puts(WatcomMakefile, HOSTNL)
+    puts(WatcomMakefile, ".c.obj : .autodepend" & HOSTNL)
+    puts(WatcomMakefile, "\t$(CC) $(CFLAGS) $<" & HOSTNL)
+    puts(WatcomMakefile, HOSTNL)
+
+    puts(GNUMakefile,   "include config.gnu\n")
+    printf(GNUMakefile, "RUNTIME_LIBRARY=%s\n", { settings[SETUP_RUNTIME_LIBRARY] } )
+    printf(GNUMakefile, "%s: $(%s_OBJECTS) $(RUNTIME_LIBRARY) %s " & HOSTNL, { adjust_for_build_file(exe_name[D_ALTNAME]), upper(file0), rc_file[D_ALTNAME] })
+    if length(rc_file[D_ALTNAME]) then
+        writef(GNUMakefile, "\t" & settings[SETUP_RC_COMPILER] & HOSTNL, { rc_file[D_ALTNAME], res_file[D_ALTNAME] })
+    end if
+    printf(GNUMakefile, "\t$(LINKER) -o %s $(%s_OBJECTS) %s $(LFLAGS)" & HOSTNL, {
+        exe_name[D_ALTNAME], upper(file0), iif(length(res_file[D_ALTNAME]), res_file[D_ALTNAME], "") })
+    puts(GNUMakefile, HOSTNL)
+    printf(GNUMakefile, ".PHONY: %s-clean %s-clean-all" & HOSTNL, { file0, file0 })
+    puts(GNUMakefile, HOSTNL)
+    printf(GNUMakefile, "%s-clean:" & HOSTNL, { file0 })
+    printf(GNUMakefile, "\trm -rf $(%s_OBJECTS) %s" & HOSTNL, { upper(file0), res_file[D_ALTNAME] })
+    puts(GNUMakefile, HOSTNL)
+    printf(GNUMakefile, "%s-clean-all: %s-clean" & HOSTNL, { file0, file0 })
+    printf(GNUMakefile, "\trm -rf $(%s_SOURCES) %s %s" & HOSTNL, { upper(file0), res_file[D_ALTNAME], exe_name[D_ALTNAME] })
+    puts(GNUMakefile, HOSTNL)
+    puts(GNUMakefile, "%.o: %.c" & HOSTNL)
+    puts(GNUMakefile, "\t$(CC) $(CFLAGS) $*.c -o $*.o" & HOSTNL)
+    puts(GNUMakefile, HOSTNL)
+
+	close(GNUMakefile)
+	close(WatcomMakefile)
 end procedure
 
 --**
@@ -991,10 +1126,10 @@ export procedure write_buildfile()
 			
 			if not silent then
 				sequence make_command
-				if compiler_type = COMPILER_WATCOM then
-					make_command = "wmake /f "
+				if compiler_type = COMPILER_WATCOM then				    
+					make_command = "\'wmake\'"
 				else
-					make_command = "make -f "
+					make_command = "\'sh configure; make\'"
 				end if
 
 				ShowMsg(1, MSG_1C_FILES_WERE_CREATED, { cfile_count + 2 })
@@ -1002,7 +1137,7 @@ export procedure write_buildfile()
 				if sequence(output_dir) and length(output_dir) > 0 then
 					ShowMsg(1, TO_BUILD_YOUR_PROJECT_CHANGE_DIRECTORY_TO_1_AND_TYPE_23MAK, { output_dir, make_command, file0 })
 				else
-					ShowMsg(1, TO_BUILD_YOUR_PROJECT_TYPE_12MAK, { make_command, file0 })
+					ShowMsg(1, TO_BUILD_YOUR_PROJECT_TYPE_12MAK, { make_command })
 				end if
 			end if
 
