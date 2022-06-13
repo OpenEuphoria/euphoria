@@ -292,14 +292,17 @@ else
 endif
 
 ifeq "$(ARCH)" "ARM"
+    TARCH_FLAG=ARM
 	ARCH_FLAG=-DEARM
 	MSIZE=-mcpu=generic-armv6
 else ifeq "$(ARCH)" "ix86"
+    TARCH_FLAG=X86
 	ARCH_FLAG=-DEX86
 	# Mostly for OSX, but prevents bad conversions double<-->long
 	# See ticket #874
 	FP_FLAGS=-mno-sse
 else ifeq "$(ARCH)" "ix86_64"
+    TARCH_FLAG=X86_64
 	ARCH_FLAG=-DEX86_64
 endif
 
@@ -997,7 +1000,7 @@ endif
 
 
 $(BUILDDIR)/eudist-build/main-.c : $(TRUNKDIR)/source/eudist.ex
-	$(TRANSLATE) -build-dir "$(CYPBUILDDIR)/eudist-build" -c "$(BUILDDIR)/eu.cfg" -o "$(CYPBUILDDIR)/$(EUDIST)" -lib "$(CYPBUILDDIR)/eu.a" \
+	$(TRANSLATE) -arch $(TARCH_FLAG) -build-dir "$(CYPBUILDDIR)/eudist-build" -c "$(BUILDDIR)/eu.cfg" -o "$(CYPBUILDDIR)/$(EUDIST)" -lib "$(CYPBUILDDIR)/eu.a" \
 		-silent -makefile -eudir $(CYPTRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) $(MINGW_FLAGS) $(TRUNKDIR)/source/eudist.ex
 
 $(BUILDDIR)/$(EUDIST) : $(TRUNKDIR)/source/eudist.ex $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA) $(BUILDDIR)/eudist-build/main-.c | $(BUILDDIR)
@@ -1007,7 +1010,7 @@ $(BUILDDIR)/$(EUDIST) : $(TRUNKDIR)/source/eudist.ex $(BUILDDIR)/$(EECU) $(BUILD
 $(BUILDDIR)/eudis-build/main-.c : $(TRUNKDIR)/source/dis.ex  $(TRUNKDIR)/source/dis.e $(TRUNKDIR)/source/dox.e
 $(BUILDDIR)/eudis-build/main-.c : $(EU_CORE_FILES)
 $(BUILDDIR)/eudis-build/main-.c : $(EU_INTERPRETER_FILES)
-	$(TRANSLATE) -build-dir "$(CYPBUILDDIR)/eudis-build" -c "$(CYPBUILDDIR)/eu.cfg" -o "$(CYPBUILDDIR)/$(EUDIS)" -lib "$(CYPBUILDDIR)/eu.a" \
+	$(TRANSLATE) -arch $(TARCH_FLAG) -build-dir "$(CYPBUILDDIR)/eudis-build" -c "$(CYPBUILDDIR)/eu.cfg" -o "$(CYPBUILDDIR)/$(EUDIS)" -lib "$(CYPBUILDDIR)/eu.a" \
 		-silent -makefile -eudir $(CYPTRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) $(MINGW_FLAGS) $(CYPTRUNKDIR)/source/dis.ex
 
 $(BUILDDIR)/$(EUDIS) : $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA) $(BUILDDIR)/eudis-build/main-.c  $(BUILDDIR)/$(EECUA)
@@ -1015,7 +1018,7 @@ $(BUILDDIR)/$(EUDIS) : $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA) $(BUILDDIR)/eudi
 
 
 $(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/eubind.ex $(EU_INTERPRETER_FILES) $(EU_BACKEND_RUNNER_FILES) $(EU_CORE_FILES)
-	$(TRANSLATE) -build-dir "$(CYPBUILDDIR)/bind-build" -c "$(CYPBUILDDIR)/eu.cfg" -o "$(CYPBUILDDIR)/$(EUBIND)" -lib "$(CYPBUILDDIR)/eu.a" \
+	$(TRANSLATE) -arch $(TARCH_FLAG) -build-dir "$(CYPBUILDDIR)/bind-build" -c "$(CYPBUILDDIR)/eu.cfg" -o "$(CYPBUILDDIR)/$(EUBIND)" -lib "$(CYPBUILDDIR)/eu.a" \
 		-silent -makefile -eudir $(CYPTRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) $(MINGW_FLAGS) $(CYPTRUNKDIR)/source/eubind.ex
 
 $(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA)
@@ -1023,7 +1026,7 @@ $(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c $(BUILDDIR)/$(EECU) $(BUI
 
 
 $(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/eushroud.ex $(EU_BACKEND_RUNNER_FILES) $(EU_CORE_FILES)
-	$(TRANSLATE) -build-dir "$(CYPBUILDDIR)/shroud-build" -c "$(CYPBUILDDIR)/eu.cfg" -o "$(CYPBUILDDIR)/$(EUSHROUD)" -lib "$(CYPBUILDDIR)/eu.a" \
+	$(TRANSLATE) -arch $(TARCH_FLAG) -build-dir "$(CYPBUILDDIR)/shroud-build" -c "$(CYPBUILDDIR)/eu.cfg" -o "$(CYPBUILDDIR)/$(EUSHROUD)" -lib "$(CYPBUILDDIR)/eu.a" \
 		-silent -makefile -eudir $(CYPTRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) $(MINGW_FLAGS) $(CYPTRUNKDIR)/source/eushroud.ex
 
 $(BUILDDIR)/$(EUSHROUD) : $(BUILDDIR)/shroud-build/main-.c $(BUILDDIR)/$(EECUA)
@@ -1031,7 +1034,7 @@ $(BUILDDIR)/$(EUSHROUD) : $(BUILDDIR)/shroud-build/main-.c $(BUILDDIR)/$(EECUA)
 
 
 $(BUILDDIR)/eutest-build/main-.c : $(TRUNKDIR)/source/eutest.ex
-	$(TRANSLATE) -build-dir "$(CYPBUILDDIR)/eutest-build" -c "$(CYPBUILDDIR)/eu.cfg" -o "$(CYPBUILDDIR)/$(EUTEST)" -lib "$(CYPBUILDDIR)/eu.a" \
+	$(TRANSLATE) -arch $(TARCH_FLAG) -build-dir "$(CYPBUILDDIR)/eutest-build" -c "$(CYPBUILDDIR)/eu.cfg" -o "$(CYPBUILDDIR)/$(EUTEST)" -lib "$(CYPBUILDDIR)/eu.a" \
 		-silent -makefile -eudir $(CYPTRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) $(MINGW_FLAGS) $(CYPTRUNKDIR)/source/eutest.ex
 
 $(BUILDDIR)/$(EUTEST) : $(BUILDDIR)/eutest-build/main-.c  $(BUILDDIR)/$(EECUA)
@@ -1039,7 +1042,7 @@ $(BUILDDIR)/$(EUTEST) : $(BUILDDIR)/eutest-build/main-.c  $(BUILDDIR)/$(EECUA)
 
 
 $(BUILDDIR)/eucoverage-build/main-.c : $(TRUNKDIR)/bin/eucoverage.ex
-	$(TRANSLATE) -build-dir "$(CYPBUILDDIR)/eucoverage-build" -c "$(CYPBUILDDIR)/eu.cfg" -o "$(CYPBUILDDIR)/$(EUCOVERAGE)" -lib "$(CYPBUILDDIR)/eu.a" \
+	$(TRANSLATE) -arch $(TARCH_FLAG) -build-dir "$(CYPBUILDDIR)/eucoverage-build" -c "$(CYPBUILDDIR)/eu.cfg" -o "$(CYPBUILDDIR)/$(EUCOVERAGE)" -lib "$(CYPBUILDDIR)/eu.a" \
 		-silent -makefile -eudir $(CYPTRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) $(MINGW_FLAGS) $(CYPTRUNKDIR)/bin/eucoverage.ex
 
 $(BUILDDIR)/$(EUCOVERAGE) : $(BUILDDIR)/eucoverage-build/main-.c $(BUILDDIR)/$(EECUA)
