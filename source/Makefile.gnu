@@ -575,8 +575,8 @@ endif
 
 code-page-db : $(BUILDDIR)/ecp.dat $(TRUNKDIR)/tests/ecp.dat
 
-$(BUILDDIR)/ecp.dat : $(TRUNKDIR)/source/codepage/*.ecp msgtext.e | $(BUILDDIR)
-	$(BUILDDIR)/$(EEXU) -i $(CYPTRUNKDIR)/include $(CYPTRUNKDIR)/bin/buildcpdb.ex -p$(CYPTRUNKDIR)/source/codepage -o$(CYPBUILDDIR) || $(HOST_EXE) -i $(CYPTRUNKDIR)/include $(CYPTRUNKDIR)/bin/buildcpdb.ex -p$(CYPTRUNKDIR)/source/codepage -o$(CYPBUILDDIR)
+$(BUILDDIR)/ecp.dat : $(BUILDDIR)/$(EEXU) $(TRUNKDIR)/source/codepage/*.ecp msgtext.e | $(BUILDDIR)
+	$(BUILDDIR)/$(EEXU) -i $(CYPTRUNKDIR)/include $(CYPTRUNKDIR)/bin/buildcpdb.ex -p$(CYPTRUNKDIR)/source/codepage -o$(CYPBUILDDIR)
 
 $(TRUNKDIR)/tests/ecp.dat : $(BUILDDIR)/ecp.dat
 	cp -fl $(BUILDDIR)/ecp.dat $(TRUNKDIR)/tests/ecp.dat || cp -f $(BUILDDIR)/ecp.dat $(TRUNKDIR)/tests/ecp.dat
@@ -1142,8 +1142,8 @@ ifeq "$(EUPHORIA)" "1"
 
 ifneq "$(OBJDIR)" ""
 $(BUILDDIR)/$(OBJDIR)/%.c : $(EU_MAIN) | $(BUILDDIR)/$(OBJDIR)
-	@echo $(TRANSLATE) -silent -nobuild $(CYPINCDIR) -$(XLTTARGETCC) $(RELEASE_FLAG) $(TARGETPLAT) -c "$(BUILDDIR)/eu.cfg" $(CYPTRUNKDIR)/source/$(EU_TARGET)
-	@(cd $(BUILDDIR)/$(OBJDIR); rm -f *.[co]; $(TRANSLATE) -silent -nobuild $(CYPINCDIR) -$(XLTTARGETCC) $(RELEASE_FLAG) $(TARGETPLAT) -c "$(BUILDDIR)/eu.cfg" $(CYPTRUNKDIR)/source/$(EU_TARGET))
+	@echo $(TRANSLATE) -arch $(TARCH_FLAG) -silent -nobuild $(CYPINCDIR) -$(XLTTARGETCC) $(RELEASE_FLAG) $(TARGETPLAT) -c "$(BUILDDIR)/eu.cfg" $(CYPTRUNKDIR)/source/$(EU_TARGET)
+	@(cd $(BUILDDIR)/$(OBJDIR); rm -f *.[co]; $(TRANSLATE) -arch $(TARCH_FLAG) -silent -nobuild $(CYPINCDIR) -$(XLTTARGETCC) $(RELEASE_FLAG) $(TARGETPLAT) -c "$(BUILDDIR)/eu.cfg" $(CYPTRUNKDIR)/source/$(EU_TARGET))
 else
 $(BUILDDIR)/intobj/main-.c : $(EU_MAIN)
 	$(MAKE) $(BUILDDIR)/intobj/main-.c OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
