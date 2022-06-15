@@ -86,22 +86,36 @@ elsedef
 		SLASH_CHARS = "\\/:"
 	public sequence HOSTNL = "\r\n" -- may change if cross-translating
 end ifdef
-
-ifdef ARM then
-	IARM = 1
-elsifdef X86 then
-	IX86 = 1
-elsifdef X86_64 then
-	IX86_64 = 1
+ifdef EU4_0 then
+  ifdef ARM then
+      IARM = 1
+  elsifdef X86 then
+      IX86 = 1
+  elsifdef X86_64 then
+      IX86_64 = 1
+  elsedef
+      -- building with earlier versions needs this:
+      if sizeof( dll:C_POINTER ) = 4 then
+          -- could technically be ARM here, but we'll default to the most common case:
+          IX86 = 1
+      else
+          IX86_64 = 1
+      end if
+  end ifdef
 elsedef
-	-- building with earlier versions needs this:
-	if sizeof( dll:C_POINTER ) = 4 then
-		-- could technically be ARM here, but we'll default to the most common case:
-		IX86 = 1
-	else
-		IX86_64 = 1
-	end if
-end ifdef
+    constant M_MACHINE_INFO = 106
+	sequence machine_param = machine_func(M_MACHINE_INFO, {})
+	switch machine_param[1] do
+	    case "X86" then
+	        IX86 = 1
+	    case "X86_64" then
+	        IX86_64 = 1
+	    case "ARM" then
+	        IARM = 1
+	end switch
+	set_target_arch(machine_param[1])
+	
+end ifdef	
 
 TX86    = IX86
 TX86_64 = IX86_64
