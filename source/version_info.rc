@@ -1,6 +1,6 @@
 1 VERSIONINFO
-FILEVERSION 4,1,0,10
-PRODUCTVERSION 4,1,0,10
+FILEVERSION 4,2,0,10
+PRODUCTVERSION 4,2,0,10
 FILEFLAGSMASK 0x3fL
 FILEFLAGS 0x0L
 FILEOS 0x4L
@@ -14,14 +14,14 @@ BEGIN
           VALUE "Comments",         "http://openeuphoria.org\0"
           VALUE "CompanyName",      "OpenEuphoria Group\0"
           VALUE "FileDescription",  VER_FILE_DESCRIPTION
-          VALUE "FileVersion",      "4.1.0\0"
+          VALUE "FileVersion",      "4.2.0\0"
           VALUE "InternalName",     VER_ORIGINAL_FILENAME
-          VALUE "LegalCopyright",   "Copyright (c) 2011 by OpenEuphoria Group\0"
+          VALUE "LegalCopyright",   "Copyright (c) 2022 by OpenEuphoria Group\0"
           VALUE "LegalTrademarks1", "\0"
           VALUE "LegalTrademarks2", "\0"
           VALUE "OriginalFilename", VER_ORIGINAL_FILENAME
           VALUE "ProductName",      VER_PRODUCT_NAME
-          VALUE "ProductVersion",   "4.1.0\0"
+          VALUE "ProductVersion",   "4.2.0\0"
         END
     END
   BLOCK "VarFileInfo"

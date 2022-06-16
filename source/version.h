@@ -14,7 +14,7 @@
 */
 
 #define MAJ_VER 4 
-#define MIN_VER 1
+#define MIN_VER 2
 #define PAT_VER 0 
 
 #ifndef EREL_TYPE

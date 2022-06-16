@@ -255,6 +255,7 @@ end ifdef
 :%%output=relnotes
 := Release Notes
 :<<LEVELTOC level=1 depth=2>>
+../docs/release/4.1.1.txt
 ../docs/release/4.1.0.txt
 ../docs/release/4.0.6.txt
 ../docs/release/4.0.5.txt

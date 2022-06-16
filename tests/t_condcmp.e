@@ -4,12 +4,14 @@ include std/os.e
 -- The following files all must be
 -- changed when changing the patch version,
 -- minor version or major version:
--- 1. /source/version_info.rc
--- 2. /packaging/win32/euphoria.iss
--- 3. /packaging/win32/euphoria-ow.iss
--- 4. /tests/t_condcmp.e
--- 5. /source/version.h
--- 6. /docs/refman_2.txt (Euphoria Version Definitions)
+-- * 1. /source/version_info.rc
+-- * 2. /packaging/win32/euphoria.iss
+-- * 3. /packaging/win32/euphoria-ow.iss
+-- * 4. /tests/t_condcmp.e
+-- * 5. /source/version.h
+-- * 6. /docs/refman_2.txt (Euphoria Version Definitions)
+-- * 7. /docs/release/ (Release notes)
+-- * 8. /docs/manual.af (add release notes)
 
 
 ifdef hello then
@@ -52,16 +54,16 @@ ifdef WINDOWS then
 	test_equal("WINDOWS test", 2, platform())
 end ifdef
 
-ifdef EU4_1_0 then
-    test_pass("EU4_1_0")
+ifdef EU4_2_0 then
+    test_pass("EU4_2_0")
 elsedef
-    test_fail("EU4_1_0")
+    test_fail("EU4_2_0")
 end ifdef
 
-ifdef EU4_1 then
-	test_pass("EU4_1")
+ifdef EU4_2 then
+	test_pass("EU4_2")
 elsedef
-	test_fail("EU4_1")
+	test_fail("EU4_2")
 end ifdef
 
 ifdef EU4 then
