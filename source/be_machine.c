@@ -3393,6 +3393,21 @@ object machine(object opcode, object x)
             case M_KEY_CODES:
                 return key_codes(x);
 	
+            case M_MACHINE_INFO:
+                {
+                    s1_ptr s = NewS1(2);
+                #if (__ia64__) || (_IA64) || (__IA64__) || (__amd64__)
+                    s->base[1] = NewString("X86_64");
+                #elif __i386__
+                    s->base[1] = NewString("X86");
+                #elif __arm__
+                    s->base[1] = NewString("ARM");
+                #else
+                    s->base[1] = NewString("?");
+                #endif
+                    s->base[2] = 0;
+                    return MAKE_SEQ(s);
+                }
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:
 				/* could be out-of-range int, or double, or sequence */
@@ -3408,7 +3423,7 @@ object machine(object opcode, object x)
 				else {
 					RTFatal("the first argument of machine_proc/func must be an integer");
 				}
-				/* try again at top of while loop */
+				/* try again at top of while loop */				
 		}
 	}
 }

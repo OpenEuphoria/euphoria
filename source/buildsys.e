@@ -855,7 +855,7 @@ echo >> ${CONFIG_FILE}
 	""")
 	close(cf)
 
-	integer GNUMakefile = open(output_dir & "GNUMakefile", "wb")
+	integer GNUMakefile = open(output_dir & "GNUmakefile", "wb")
 	integer WatcomMakefile = open(output_dir & "Makefile", "wb")
 	printf(GNUMakefile, "CC     = %s" & HOSTNL, { settings[SETUP_CEXE] })
 	
