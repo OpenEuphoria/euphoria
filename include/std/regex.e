@@ -538,7 +538,19 @@ public constant
 	--** This error isn't in the source code.
 	ERROR_NULLWSLIMIT    = (-22),
 	--** Both BSR_UNICODE and BSR_ANY options were specified.  These options are contradictory.
-	ERROR_BADNEWLINE     = (-23)
+	ERROR_BADNEWLINE     = (-23),
+	ERROR_BADOFFSET = (-24),
+	ERROR_SHORTUTF8 = (-25),
+	ERROR_SHORTUTF16 = (-25),  -- Same for 8/16
+	ERROR_RECURSELOOP = (-26),
+	ERROR_JIT_STACKLIMIT = (-27),
+	ERROR_BADMODE = (-28),
+	ERROR_BADENDIANNESS = (-29),
+	ERROR_DFA_BADRESTART = (-30),
+	ERROR_JIT_BADOPTION = (-31),
+	ERROR_BADLENGTH = (-32),
+	ERROR_UNSET = (-33),
+	$
 
 public constant error_names = {
 	{ERROR_NOMATCH,        "ERROR_NOMATCH"             },
@@ -564,7 +576,16 @@ public constant error_names = {
 	{ERROR_DFA_RECURSE,    "ERROR_DFA_RECURSE"         },
 	{ERROR_RECURSIONLIMIT, "ERROR_RECURSIONLIMIT"      },
 	{ERROR_NULLWSLIMIT,    "ERROR_NULLWSLIMIT"         },
-	{ERROR_BADNEWLINE,     "ERROR_BADNEWLINE"          }
+	{ERROR_BADNEWLINE,     "ERROR_BADNEWLINE"          },
+    {ERROR_SHORTUTF8,      "ERROR_SHORTUTF"},
+    {ERROR_RECURSELOOP,    "ERROR_RECURSELOOP"},
+    {ERROR_JIT_STACKLIMIT, "ERROR_JIT_STACKLIMIT"},
+    {ERROR_BADMODE,        "ERROR_BADMODE"},
+    {ERROR_BADENDIANNESS,  "ERROR_BADENDIANNESS"},
+    {ERROR_DFA_BADRESTART, "ERROR_DFA_BADRESTART"},
+    {ERROR_JIT_BADOPTION, "ERROR_JIT_BADOPTION"},
+    {ERROR_BADLENGTH,     "ERROR_BADLENGTH"},
+    {ERROR_UNSET,         "ERROR_UNSET"}
 }
 
 constant all_options = math:or_all({
@@ -655,7 +676,7 @@ end function
 -- [[:error_message]]
 
 public function error_to_string(integer i)
-	if i >= 0 or i < -23 then
+	if i > ERROR_NOMATCH or i < ERROR_UNSET then
 		return sprintf("%d",{i})
 	else
 		return search:vlookup(i, error_names, 1, 2, "Unknown Error")

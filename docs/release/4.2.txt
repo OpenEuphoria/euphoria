@@ -1,0 +1,4 @@
+== Version 4.1.1 Date TBD
+
+=== Bug Fixes
+* correctly identify which arch defines to define even after cross translating from one to another or translating from 4.0... ticket 1017. 
