@@ -110,7 +110,7 @@ add_options( trans_opt_def )
 
 export procedure transoptions()
 	sequence tranopts = sort( get_options() )
-ifdef EU4_1	then
+ifdef EU4_2	then
 	sequence machine_param = machine_func(106, {})
 	set_target_arch(machine_param[1])
 end ifdef	

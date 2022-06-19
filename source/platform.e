@@ -87,7 +87,7 @@ elsedef
 	public sequence HOSTNL = "\r\n" -- may change if cross-translating
 end ifdef
 constant M_MACHINE_INFO = 106
-if compare({version_major(), version_minor(), version_patch()}, {4,2,0}) <= 0 then
+if compare({version_major(), version_minor(), version_patch()}, {4,2,0}) < 0 then
 
   ifdef ARM then
       IARM = 1
