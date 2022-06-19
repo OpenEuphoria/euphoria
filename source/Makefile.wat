@@ -536,6 +536,7 @@ testeu : .SYMBOLIC  $(TRUNKDIR)\tests\ecp.dat $(EU_INTERPRETER_FILES) $(EU_CORE_
 
 test : .SYMBOLIC ..\tests\lib818.dll ..\tests\return15.exe $(BUILDDIR)\eubind.exe  $(TRUNKDIR)\tests\ecp.dat $(FULLBUILDDIR)\eu.$(LIBEXT) $(BUILDDIR)\eub.exe $(BUILDDIR)\euc.exe 
 	cd ..\tests
+	-del ctc.log
 	set EUCOMPILEDIR=$(TRUNKDIR)
 	
 	-$(EUTEST) $(TEST_EXTRA) $(VERBOSE_TESTS) -i ..\include -cc wat -eui $(FULLBUILDDIR)\eui.exe -euc $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -bind $(FULLBUILDDIR)\eubind.exe -eub $(BUILDDIR)\eub.exe -log $(LIST) $(TESTFILE)

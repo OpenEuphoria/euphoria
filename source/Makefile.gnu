@@ -858,7 +858,7 @@ $(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : $(BUILDDIR)/$(LIBRARY
 $(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html : $(TRUNKDIR)/tests/return15$(EXE_EXT)
 $(BUILDDIR)/test-report.txt $(BUILDDIR)/test-report.html :
 
-	-cd $(TRUNKDIR)/tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
+	-cd $(TRUNKDIR)/tests && rm ctc.log; EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
 		$(EXE) -i $(CYPTRUNKDIR)/include $(TRUNKDIR)/source/eutest.ex $(CYPINCDIR) -cc gcc $(VERBOSE_TESTS) \
 		-exe "$(CYPBUILDDIR)/$(EEXU)" \
 		-ec "$(CYPBUILDDIR)/$(EECU)" \
