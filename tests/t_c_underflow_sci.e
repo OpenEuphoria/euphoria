@@ -1,14 +1,12 @@
 include std/unittest.e
 
--- the smallest double is about 4.9e-324
--- this should be read without an error
-atom c = 4.940_656_458_412_465_4e-324 
--- the following line should error out with an error.  It is exactly half of the smallest number.
--- It is small enough to get rounded to 0 by the Euphoria scanner.
-atom a = 2.470_328_229_206_232_7e-324
--- the following number is even smaller.
-atom b = 2e-30000 
+-- A very small unparsible positive value.  Too small for this notation.
+-- Should throw an error here, warning the user the number is so small it is interpreted as zero.
+atom epsilon = 3e-4932
 
+-- test below for numbers really close to zero works better than test_not_equal()
+test_false("Number is not zero", epsilon + epsilon = epsilon)
+? 1/epsilon
 test_pass("Tiny standard decimal notation number")
 test_report()
 test_pass("Tiny floating point notation atom")
