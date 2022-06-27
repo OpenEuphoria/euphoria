@@ -1,5 +1,6 @@
-t_c_overflow_sci4.e:6
+t_c_overflow_sci4.e:4
 <0608>:: The number specified here is too big.
-atom        a = -1e309
-                     ^
+atom        a = -1.18973e+4933
+                             ^
+
 

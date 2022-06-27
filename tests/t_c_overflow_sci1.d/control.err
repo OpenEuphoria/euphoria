@@ -1,5 +1,18 @@
-t_c_overflow_sci1.e:11
+t_c_overflow_sci1.e:4
 <0608>:: The number specified here is too big.
-atom        a = 1.79769313486231582e308
-                                      ^
+atom        a = 1.18974e+4932
+                            ^
 
+
+--- Defined Words ---
+EU4
+EU4_2
+EU4_2_0
+CONSOLE
+UNIX
+LINUX
+X86_64
+BITS64
+LONG64
+EUI
+-------------------

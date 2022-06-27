@@ -1211,7 +1211,8 @@ function my_sscanf(sequence yytext)
 	end if
 
 	fenv:clear(FE_ALL_EXCEPT)
-	if find( 'e', yytext ) or find( 'E', yytext ) then
+	atom e_location = find( 'e', lower(yytext) )
+	if e_location then
 		ifdef BITS32 then
 			mantissa = scientific_to_atom( yytext, DOUBLE )
 		elsifdef BITS64 then
@@ -1219,18 +1220,20 @@ function my_sscanf(sequence yytext)
 		elsedef
 			InternalErr( ERROR_IN_PARSING_SCIENTIFIC_NOTATION, "Scanning scientific notation in my_sscanf" )
 		end ifdef
-		for yi = 1 to length(yytext) do
-			integer ychar = yytext[yi]
-			if ychar = 'e' or ychar = 'E' then
-				-- don't look at the digits after E
-				exit
-			end if
-			if ychar > '0' and ychar <= '9' and mantissa = 0 then
+		sequence exp_part = value(yytext[e_location+1..$])
+		sequence man_part = value(yytext[1..e_location-1])
+		if mantissa = PINF or mantissa = -PINF then
+		    if exp_part[2] < -4000 then
+		        fenv:raise(FE_UNDERFLOW)
+		    else
+		        fenv:raise(FE_OVERFLOW)
+		    end if
+		elsif mantissa = 0 then
+    		if man_part[1] = GET_SUCCESS  and man_part[2] != 0 and exp_part[2] < -4000 then
 				-- non zero digit but we got a zero value from the function.
 				fenv:raise(FE_UNDERFLOW)
-				exit
-			end if
-		end for
+			end if		
+		end if
 		goto "floating_point_check"
 	end if
 	mantissa = 0.0
@@ -1306,49 +1309,6 @@ function my_sscanf(sequence yytext)
 		CompileErr(NUMBER_NOT_FORMED_CORRECTLY)  -- no digits
 	end if
 
-	--The following code is already handled by the call to
-	--scientific_to_atom() above. It can probably be removed.
-	/* if c = 'e' or c = 'E' then
-		-- get exponent sign
-		e_sign = +1
-		e_mag = 0
-		c = yytext[i]
-		i += 1
-		if c = '-' then
-			e_sign = -1
-		elsif c != '+' then
-			i -= 1
-		end if
-		-- get exponent magnitude
-		c = yytext[i]
-		i += 1
-		if c >= '0' and c <= '9' then
-			e_mag = c - '0'
-			c = yytext[i]
-			i += 1
-			while c >= '0' and c <= '9' do
-				e_mag = e_mag * 10 + c - '0'
-				c = yytext[i]
-				i += 1
-				if e_mag > 1000 then -- avoid int overflow. can only have
-					exit             -- 200-digit mantissa to reduce mag
-				end if
-			end while
-		else
-			return {} -- no exponent
-		end if
-		e_mag = e_sign * e_mag
-		if e_mag > 308 then
-			mantissa = mantissa * power(10.0, 308.0)
-			e_mag = e_mag - 308
-			while e_mag > 0 do
-				mantissa = mantissa * 10.0 -- Could crash? No we'll get INF.
-				e_mag -= 1
-			end while
-		else
-			mantissa = mantissa * power(10.0, e_mag)
-		end if
-	end if */
 	label "floating_point_check"
 	-- we may have overflowed calculating the fraction part...
 	-- so, it is better we check whether it is underflowed  

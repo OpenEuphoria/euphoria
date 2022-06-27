@@ -160,7 +160,7 @@ test_equal("find() #5", {{9,10}}, regex:find(re, "the dog is happy", 8))
 
 re = regex:new(`[A-Z][a-z]+\s`, { regex:CASELESS })
 test_equal("find() #6", {{1,4}}, regex:find(re, "and John ran"))
-test_equal("find() #7", regex:ERROR_NOMATCH, regex:find(re, "15 dogs ran", regex:ANCHORED))
+test_equal("find() #7", regex:ERROR_BADOFFSET, regex:find(re, "15 dogs ran", regex:ANCHORED))
 
 re = regex:new(`[A-Z][a-z]+\s`, { regex:CASELESS, regex:ANCHORED })
 test_equal("find() #8", {{1,4}}, regex:find(re, "and John ran"))

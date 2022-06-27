@@ -1266,7 +1266,12 @@ object call_c(int func, object proc_ad, object arg_list)
 			MakeCString(NameBuff, MAKE_SEQ(c_routine[proc_index].name), c_routine[proc_index].name->length );
 		else
 			NameBuff[0] = '\0';
-		snprintf(TempBuff, TEMP_SIZE, "C routine %s() needs %d argument%s, not %d",
+		snprintf(TempBuff, TEMP_SIZE, 
+#if INTPTR_MAX == INT64_MAX
+    "C routine %s() needs %ld argument%s, not %ld",
+#else
+    "C routine %s() needs %d argument%s, not %d",
+#endif
 						  NameBuff,
 						  arg_size_ptr->length,
 						  (arg_size_ptr->length == 1) ? "" : "s",

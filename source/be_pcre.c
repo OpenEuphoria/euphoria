@@ -328,12 +328,13 @@ int replace_pcre(const char *rep, const char *Src, int len, int *ovector, int cn
 				 char **Dest, int *Dlen)
 {
     int dlen = 0;
-    char *dest = 0;
+    char *dest = (char *) EMalloc(1);
     char Ch;
     int n, st;
     int flag = 0;
 	
-    *Dest = 0;
+    *Dest = dest;
+    *dest = '\0';
     *Dlen = 0;
 	add(&dlen, &dest, Src, ovector[0], &flag);
     while (*rep) {
@@ -586,7 +587,7 @@ object find_replace_pcre(object x )
 		str = EMalloc(out_len + 2);
 		copy_string(str, out, out_len + 1);
 		
-		start_from = ovector[rc] + rep_s->length - 1;
+		start_from = ovector[0] + rep_s->length;
 		limit -= 1;
 	}
 	

@@ -2063,7 +2063,7 @@ function binary_op(integer pc, integer ResAlwaysInt, sequence target_val,
 	   TypeIs(rhs2, TYPE_INTEGER) then
 		-- uncertain about neither
 
-		if find(Code[pc], {PLUS, PLUS_I, MINUS, MINUS_I,
+		if 0 and find(Code[pc], {PLUS, PLUS_I, MINUS, MINUS_I,
 						   rw:MULTIPLY, FLOOR_DIV, POWER}) then
 
 			np = pc + 4 + 2 * (Code[pc+4] = INTEGER_CHECK)

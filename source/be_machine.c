@@ -1186,13 +1186,14 @@ static object Dir(object x)
 #endif
 	struct tm *date_time;
 // TODO MinGW uses the Windows API version of Dir(), not the stat() version
+// Two more for the slash character and null character.
 #if defined(EMINGW)
-#define full_name_size (MAX_FILE_NAME + 257)
+#define full_name_size (MAX_FILE_NAME + 256 + 2)
 #else
-#define full_name_size (MAX_FILE_NAME + NAME_MAX + 1)
+#define full_name_size (MAX_FILE_NAME + NAME_MAX + 2)
 #endif
 
-	char full_name[full_name_size + 1];
+	char full_name[full_name_size+1];
 	/* x will be sequence if called via dir() */
 
 	if (SEQ_PTR(x)->length > MAX_FILE_NAME)

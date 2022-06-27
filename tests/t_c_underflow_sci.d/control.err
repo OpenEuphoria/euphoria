@@ -1,4 +1,6 @@
-t_c_underflow_sci.e:8
+t_c_underflow_sci.e:5
 <0607>:: The number specified here is too small.
-atom a = 2.470_328_229_206_232_7e-324
-                                    ^
+atom epsilon = 3e-4932
+                     ^
+
+

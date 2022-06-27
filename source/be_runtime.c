@@ -1758,7 +1758,11 @@ object Dremainder(d_ptr a, d_ptr b)
 {
 	if (b->dbl == 0.0)
 		RTFatal("can't get remainder of a number divided by 0");
-	return (object)NewDouble(fmod(a->dbl, b->dbl)); /* for now */
+#if INTPTR_MAX == INT64_MAX
+    return (object)NewDouble(fmodl(a->dbl, b->dbl));
+#else
+	return (object)NewDouble(fmod(a->dbl, b->dbl));
+#endif
 }
 
 object and_bits(uintptr_t a, uintptr_t b)
