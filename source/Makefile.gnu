@@ -1408,7 +1408,7 @@ $(BUILDDIR)/libobj/back/be_debug.o: $(TRUNKDIR)/source/execute.h $(TRUNKDIR)/sou
 $(BUILDDIR)/libobj/back/be_debug.o: $(TRUNKDIR)/source/redef.h $(TRUNKDIR)/source/reswords.h $(TRUNKDIR)/source/be_alloc.h $(TRUNKDIR)/source/be_debug.h
 $(BUILDDIR)/libobj/back/be_debug.o: $(TRUNKDIR)/source/be_execute.h $(TRUNKDIR)/source/be_machine.h $(TRUNKDIR)/source/be_rterror.h
 $(BUILDDIR)/libobj/back/be_debug.o: $(TRUNKDIR)/source/be_runtime.h $(TRUNKDIR)/source/be_symtab.h
-$(BUILDDIR)/libobj/back/be_decompress.o: $(TRUNKDIR)/source/alldefs.h $(TRUNKDIR)/source/global.h $(TRUNKDIR)/source/object.h $(TRUNKDIR)/source/symtab.h
+$(BUILDDIR)/libobj/back/be_decompress.o: $(BUILDDIR)/libobj/back/ $(TRUNKDIR)/source/alldefs.h $(TRUNKDIR)/source/global.h $(TRUNKDIR)/source/object.h $(TRUNKDIR)/source/symtab.h
 $(BUILDDIR)/libobj/back/be_decompress.o: $(TRUNKDIR)/source/execute.h $(TRUNKDIR)/source/reswords.h $(TRUNKDIR)/source/be_alloc.h
 $(BUILDDIR)/libobj/back/be_decompress.o: $(TRUNKDIR)/source/be_runtime.h
 $(BUILDDIR)/libobj/back/be_execute.o: $(TRUNKDIR)/source/alldefs.h $(TRUNKDIR)/source/global.h $(TRUNKDIR)/source/object.h $(TRUNKDIR)/source/symtab.h
