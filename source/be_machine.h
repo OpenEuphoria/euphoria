@@ -56,7 +56,7 @@ extern int line_max; /* current number of text lines on screen */
 extern int col_max;  /* current number of text columns on screen */
 
 #ifdef EUNIX
-int consize_ioctl;	/* 1 if line_max or col_max came from ioctl */
+extern int consize_ioctl;	/* 1 if line_max or col_max came from ioctl */
 #endif
 
 int use_prompt( void );

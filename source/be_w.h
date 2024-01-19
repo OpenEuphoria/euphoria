@@ -15,10 +15,10 @@ void screen_copy(struct char_cell a[MAX_LINES][MAX_COLS],
 void update_screen_string(char *s);
 
 // we need to record everything written to the screen
-struct char_cell screen_image[MAX_LINES][MAX_COLS];
+extern struct char_cell screen_image[MAX_LINES][MAX_COLS];
 // plus have two alternate screens for interactive trace
-struct char_cell alt_image_main[MAX_LINES][MAX_COLS];
-struct char_cell alt_image_debug[MAX_LINES][MAX_COLS];
+extern struct char_cell alt_image_main[MAX_LINES][MAX_COLS];
+extern struct char_cell alt_image_debug[MAX_LINES][MAX_COLS];
 #endif
 /*
   Description: opens a console Window if it doesn't exist and return true if the application started with one.

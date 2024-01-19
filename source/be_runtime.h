@@ -93,8 +93,8 @@ __attribute__ ((noreturn))
 
 
 #ifdef EUNIX
-char key_buff[KEYBUFF_SIZE];
-int key_write;;       // place where next key will be stored
+extern char key_buff[KEYBUFF_SIZE];
+extern int key_write;       // place where next key will be stored
 #endif
 
 void system_call(object command, object wait);
