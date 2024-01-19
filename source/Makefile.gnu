@@ -63,6 +63,7 @@
 MAKEFLAGS += --no-print-directory
 
 CONFIG_FILE = config.gnu
+AR=$(CC_PREFIX)$(AR_SUFFIX)
 CC=$(CC_PREFIX)$(CC_SUFFIX)
 RC=$(CC_PREFIX)$(RC_SUFFIX)
 ifndef CONFIG
@@ -105,7 +106,11 @@ ifeq "$(EBSD)" "1"
     EBSDFLAG=-DEBSD -DEBSD62 -DENETBSD
   endif
 else
-  LDLFLAG=-ldl -lresolv -lnsl
+  ifeq "$(ARCH)" "ix86_64"
+    LDLFLAG=-ldl -lresolv -lnsl
+  else
+    LDLFLAG=-ldl -lresolv
+  endif
   PREREGEX=$(FROMBSDREGEX)
   SEDFLAG=-ri
 endif
@@ -294,7 +299,8 @@ endif
 ifeq "$(ARCH)" "ARM"
     TARCH_FLAG=ARM
 	ARCH_FLAG=-DEARM
-	MSIZE=-mcpu=generic-armv6
+#	MSIZE=-march=armv6 -mfpu=vfp -mfloat-abi=hard
+	MSIZE=-marm
 else ifeq "$(ARCH)" "ix86"
     TARCH_FLAG=X86
 	ARCH_FLAG=-DEX86
@@ -517,7 +523,7 @@ ifeq "$(OBJDIR)" "libobj"
 $(BUILDDIR)/$(EECUA) : $(EU_LIB_OBJECTS) | $(BUILDDIR)
 	$(AR) -rc $(BUILDDIR)/$(EECUA) $(EU_LIB_OBJECTS)
 else
-$(BUILDDIR)/$(EECUA) : $(wildcard $(TRUNKDIR)/source/*.{c,h}) $(wildcard $(TRUNKDIR)/source/pcre/*.{c,h}) | $(BUILDDIR)
+$(BUILDDIR)/$(EECUA) : $(wildcard $(TRUNKDIR)/source/*.[ch]) $(wildcard $(TRUNKDIR)/source/pcre/*.[ch]) | $(BUILDDIR)
 	$(MAKE) $(BUILDDIR)/$(EECUA) OBJDIR=libobj ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG= EPROFILE=$(EPROFILE)
 endif
 
@@ -979,10 +985,10 @@ endif
                    $(TRUNKDIR)/source/*.h \
 	           $(DESTDIR)$(PREFIX)/share/euphoria/source
 
-EUDIS=eudis
-EUTEST=eutest
-EUCOVERAGE=eucoverage
-EUDIST=eudist
+EUDIS=eudis$(EXE_EXT)
+EUTEST=eutest$(EXE_EXT)
+EUCOVERAGE=eucoverage$(EXE_EXT)
+EUDIST=eudist$(EXE_EXT)
 
 ifeq "$(EMINGW)" "1"
 	MINGW_FLAGS=-gcc -con
@@ -1158,13 +1164,13 @@ endif
 endif
 
 ifneq "$(OBJDIR)" ""
-$(BUILDDIR)/$(OBJDIR)/back/%.o : $(TRUNKDIR)/source/%.c $(CONFIG_FILE)
+$(BUILDDIR)/$(OBJDIR)/back/%.o : $(TRUNKDIR)/source/%.c $(CONFIG_FILE) | $(BUILDDIR)/$(OBJDIR)/back/
 	$(CC) $(BE_FLAGS) $(EBSDFLAG) -I $(BUILDDIR)/$(OBJDIR)/back -I $(BUILDDIR)/include $(TRUNKDIR)/source/$*.c -o$(BUILDDIR)/$(OBJDIR)/back/$*.o
 
-$(BUILDDIR)/$(OBJDIR)/back/be_callc.o : $(TRUNKDIR)/source/$(BE_CALLC).c $(CONFIG_FILE)
+$(BUILDDIR)/$(OBJDIR)/back/be_callc.o : $(TRUNKDIR)/source/$(BE_CALLC).c $(CONFIG_FILE) | $(BUILDDIR)/$(OBJDIR)/back/
 	$(CC) -c -Wall $(EOSTYPE) $(ARCH_FLAG) $(FPIC) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -DARCH=$(ARCH) -fsigned-char -O2 -fno-omit-frame-pointer -ffast-math -fno-defer-pop $(CALLC_DEBUG) $(TRUNKDIR)/source/$(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.o
 
-$(BUILDDIR)/$(OBJDIR)/back/be_inline.o : $(TRUNKDIR)/source/be_inline.c $(CONFIG_FILE)
+$(BUILDDIR)/$(OBJDIR)/back/be_inline.o : $(TRUNKDIR)/source/be_inline.c $(CONFIG_FILE) | $(BUILDDIR)/$(OBJDIR)/back/
 	$(CC) -finline-functions $(BE_FLAGS) $(EBSDFLAG) $(RUNTIME_FLAGS) $(TRUNKDIR)/source/be_inline.c -o$(BUILDDIR)/$(OBJDIR)/back/be_inline.o
 endif
 ifdef PCRE_OBJECTS

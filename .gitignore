@@ -2,6 +2,7 @@ build-*
 ecp.dat
 ex.err
 config.gnu
+config-*.gnu
 Makefile
 version.txt
 *.swp
@@ -10,5 +11,6 @@ build
 **/#*#
 .*.marks
 source/build
+source/build-*
 tests/return15
 tests/warnings_issued*.txt

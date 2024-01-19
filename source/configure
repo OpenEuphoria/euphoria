@@ -135,6 +135,7 @@ fi
 
  XLTTARGETCC=gcc
  CC=gcc
+ AR=ar
  EDEBUG=
 
 SCP="scp -C"
@@ -359,6 +360,15 @@ while [ "$1" != "" ]; do
 				exit
 		esac
 		;;
+	
+	--ar*)
+		VAL=`echo $1 | cut -d = -f 2`
+		if [ "$VAL" = "$1" ]; then
+			shift ; VAL=$1
+		fi
+
+		 AR=$VAL
+		;;
 		
 	--wine*)
 		VAL=`echo $1 | cut -d = -f 2`
@@ -526,6 +536,7 @@ echo "TRANSLATE=$EC" >> "$PREFIX"${CONFIG_FILE}
 [ -n "$TARGET" ] && echo "ETARGET=$TARGET" >> "$PREFIX"${CONFIG_FILE}
 [ -n "$ARCH" ] && echo "ARCH=$ARCH" >> "$PREFIX"${CONFIG_FILE}
 [ -n "$MFLAG" ] && echo "MSIZE=$MFLAG" >> "$PREFIX"${CONFIG_FILE}
+[ -n "$AR" ] && echo "AR_SUFFIX=$AR" >> "$PREFIX"${CONFIG_FILE}
 [ -n "$CC" ] && echo "CC_SUFFIX=$CC" >> "$PREFIX"${CONFIG_FILE}
 [ -n "$CC_PREFIX" ] && echo "CC_PREFIX=$CC_PREFIX" >> "$PREFIX"${CONFIG_FILE}
 [ -n "$RC" ] && echo "RC_SUFFIX=$RC" >> "$PREFIX"${CONFIG_FILE}
