@@ -120,7 +120,6 @@ ifdef HTML
 ../demo/search.ex
 ../demo/tree.ex
 ../demo/where.ex
-../demo/dsearch.ex
 ../demo/bench/sieve8k.ex
 ../demo/win32/taskwire.exw
 ../demo/win32/window.exw
@@ -284,7 +283,7 @@ ifdef HTML
 ../docs/release/euc.txt
 ../docs/release/euc-b2.txt
 ../docs/release/euc-b1.txt
-../docs/release/euc-a3.txt
+../docs/release/euc-a4.txt
 ../docs/release/euc-a3.txt
 ../docs/release/euc-a2.txt
 ../docs/release/euc-a1.txt
