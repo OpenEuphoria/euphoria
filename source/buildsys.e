@@ -903,6 +903,22 @@ echo >> ${CONFIG_FILE}
         printf(WatcomMakefile, "\tdel \"%s\"" & HOSTNL, { generated_files[i] })
     end for
     puts(WatcomMakefile, HOSTNL)
+    puts(WatcomMakefile, "distclean : .SYMBOLIC" & HOSTNL)
+    if length(res_file[D_ALTNAME]) then
+        printf(WatcomMakefile, "\tdel \"%s\"" & HOSTNL, { res_file[D_ALTNAME] })
+    end if
+    for i = 1 to length(generated_files) do
+        printf(WatcomMakefile, "\tdel \"%s\"" & HOSTNL, { generated_files[i] })
+    end for
+    printf(WatcomMakefile, "\tdel \"%s.mak\"" & HOSTNL, { file0 })
+    printf(WatcomMakefile, "\tdel \"%s\"" & HOSTNL, { "Makefile" })
+    printf(WatcomMakefile, "\tdel \"%s\"" & HOSTNL, { "GNUmakefile" })
+    printf(WatcomMakefile, "\tdel \"%s\"" & HOSTNL, { "configure" })
+    printf(WatcomMakefile, "\tdel \"%s\"" & HOSTNL, { "config.gnu" })
+    printf(WatcomMakefile, "\tdel \"%s\"" & HOSTNL, { file0 })
+    puts(WatcomMakefile, HOSTNL)
+    
+    
     puts(WatcomMakefile, ".c.obj : .autodepend" & HOSTNL)
     puts(WatcomMakefile, "\t$(CC) $(CFLAGS) $<" & HOSTNL)
     puts(WatcomMakefile, HOSTNL)
@@ -924,8 +940,11 @@ echo >> ${CONFIG_FILE}
     printf(GNUMakefile, "%s-clean-all: %s-clean" & HOSTNL, { file0, file0 })
     printf(GNUMakefile, "\trm -rf $(%s_SOURCES) %s %s" & HOSTNL, { upper(file0), res_file[D_ALTNAME], exe_name[D_ALTNAME] })
     puts(GNUMakefile, HOSTNL)
+    puts(GNUMakefile, "distclean:" & HOSTNL)
+    printf(GNUMakefile, "\trm -fr $(HELLO_GENERATED_FILES) $(HELLO_SOURCES) %s.mak Makefile GNUmakefile configure config.gnu %s%s%s",
+               { file0, file0, HOSTNL, HOSTNL })
     puts(GNUMakefile, "%.o: %.c" & HOSTNL)
-    puts(GNUMakefile, "\t$(CC) $(CFLAGS) $*.c -o $*.o" & HOSTNL)
+    puts(GNUMakefile, "\t$(CC) $(CFLAGS) $*.c -c -o $*.o" & HOSTNL)
     puts(GNUMakefile, HOSTNL)
 
 	close(GNUMakefile)
