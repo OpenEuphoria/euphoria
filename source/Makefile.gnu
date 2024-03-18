@@ -474,10 +474,11 @@ BUILD_DIRS = \
 
 clean :
 	-for f in $(BUILD_DIRS) ; do \
-		rm -r $${f} ; \
+		rm $${f}/*.o ; \
 	done ;
+	-rm $(BUILDDIR)/eusodbg.a
 	-rm -r $(BUILDDIR)/pcre
-	-rm -r $(BUILDDIR)/pcre_fpic
+	-rm -r $(BUILDDIR)/pcre-fPIC
 	-rm $(BUILDDIR)/*pdf
 	-rm $(BUILDDIR)/*txt
 	-rm -r $(BUILDDIR)/*-build
@@ -501,7 +502,13 @@ clean :
 	-rm $(TRUNKDIR)/tests/lib818.dll
 	-rm $(BUILDDIR)/*.res
 
-clobber distclean : clean
+distclean : clean
+	-for f in $(BUILD_DIRS) ; do \
+		rm -r $${f} ; \
+	done ;	
+	rm $(BUILDDIR)/ecp.dat
+	
+clobber : distclean
 	-rm -f $(CONFIG)
 	-rm -f Makefile
 	-rm -fr $(BUILDDIR)
@@ -746,10 +753,10 @@ update-version-cache : $(BUILDDIR)/ver.cache
 $(MKVER): mkver.c $(BUILDDIR)/include/
 	$(HOSTCC) -o $@ $<
 
-$(BUILDDIR)/ver.cache : $(MKVER) $(EU_BACKEND_RUNNER_FILES) $(EU_TRANSLATOR_FILES) $(EU_INTERPRETER_FILES) $(EU_CORE_FILES) $(EU_STD_INC) $(wildcard *.c)
+$(BUILDDIR)/ver.cache $(BUILDDIR)/include/be_ver.h: $(BUILDDIR)/include $(MKVER) $(EU_BACKEND_RUNNER_FILES) $(EU_TRANSLATOR_FILES) $(EU_INTERPRETER_FILES) $(EU_CORE_FILES) $(EU_STD_INC) $(wildcard *.c)
 	$(MKVER) "$(HG)" "$(BUILDDIR)/ver.cache" "$(BUILDDIR)/include/be_ver.h" $(EREL_TYPE)$(RELEASE)
 
-$(BUILDDIR)/include/be_ver.h:  $(BUILDDIR)/ver.cache $(BUILD_DIRS)
+
 
 ###############################################################################
 #
