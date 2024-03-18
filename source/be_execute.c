@@ -616,6 +616,10 @@ static double trunc(const double f) {
     #endif
     return d.n;    
 }
+#elif defined(__x86_64__) || defined(_M_X64)
+#define trunc truncl
+#else
+// use the standard not 64 bit double trunc by doing nothing...
 #endif
 
 static void do_poke2(object a, object top)

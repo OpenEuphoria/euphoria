@@ -31,10 +31,15 @@ poke8( p, power( 2, 40 ) )
 test_equal( "poke8/peek8u 2^40", power( 2, 40 ), peek8u( p ) )
 test_equal( "poke8/peek8s 2^40", power( 2, 40 ), peek8s( p ) )
 
+poke8( p, 0xffffffff + power(2,32)* 0xffffffff)
+test_equal( "poke8/peek8u 0xffff....ffff", 0xffffffff + power(2,32)* 0xffffffff, peek8u( p ) )
+if compare( 0xffffffff + power(2,32)* 0xffffffff, peek8u( p ) ) then
+    test_equal( "poke8/peek 0xffff....ffff", repeat(0xff, 8), peek( {p, 8} ) )
+end if
 poke8( p, -1 )
 test_equal( "poke8/peek4u -1", 0xffffffff, peek4u( p ) )
 test_equal( "poke8/peek4u+4 -1", 0xffffffff, peek4u( p + 4 ) )
-test_equal( "poke8/peek8u -1", 0xffffffff + power(2,32)* 0xffffffff, peek8u( p ) )
+test_equal( "poke8/peek8u -1", 0xffffffff_ffffffff, peek8u( p ) )
 test_equal( "poke8/peek8s -1", -1, peek8s( p ) )
 
 poke8( p, {1, 2, 3})

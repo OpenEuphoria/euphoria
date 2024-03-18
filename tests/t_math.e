@@ -2,6 +2,12 @@ include std/machine.e
 include std/math.e
 include std/unittest.e
 include std/convert.e
+
+test_not_equal( "ffff...ffff != -1", 0xffffffffffffffff, -1)
+test_not_equal( "ffff...ffff + 1 != 0", power(2,64), 0)
+test_equal( "ffff...ffff=ffff...ffff = 0xffffffff000000000000 + 0xffffffff", 0xffffffffffffffff, 0xffffffff + power(2,32)* 0xffffffff )
+
+
 test_equal("gcd #1", 17, gcd(1999*3*17,1993*17*7))
 test_equal("gcd #2", 1,  gcd(-4, -1)  )
 test_equal("gcd #3", 38, gcd(76.3, -114))
