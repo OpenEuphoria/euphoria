@@ -228,7 +228,7 @@ endif
 CYPINCDIR=-i $(CYPTRUNKDIR)/include
 
 BE_CALLC = be_callc
-MSIZE=-m32
+
 
 ifndef ECHO
 ECHO=/bin/echo
@@ -486,17 +486,14 @@ shrouder : $(BUILDDIR)/$(EUSHROUD)
 euisource : $(BUILDDIR)/intobj/main-.c
 euisource :  EU_TARGET = int.ex
 euisource : $(BUILDDIR)/intobj/back/coverage.h
-euisource : $(BUILDDIR)/include/be_ver.h
 
 eucsource : $(BUILDDIR)/transobj/main-.c
 eucsource :  EU_TARGET = ec.ex
 eucsource : $(BUILDDIR)/transobj/back/coverage.h
-eucsource : $(BUILDDIR)/include/be_ver.h
 
 backendsource : $(BUILDDIR)/backobj/main-.c
 backendsource :  EU_TARGET=backend.ex
 backendsource : $(BUILDDIR)/backobj/back/coverage.h
-backendsource : $(BUILDDIR)/include/be_ver.h
 
 source : | $(BUILD_DIRS)
 	$(MAKE) euisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
@@ -601,13 +598,13 @@ endif
 $(BUILDDIR)/$(EECU) :  EU_TARGET = euc.ex
 $(BUILDDIR)/$(EECU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_STD_INC)
 $(BUILDDIR)/$(EECU) :  $(wildcard $(BUILDDIR)/transobj/*.c) $(EU_MAIN) $(EU_TRANSLATOR_FILES) $(EUI_RES) $(EUIW_RES) $(wildcard be_*.c)
-$(BUILDDIR)/$(EECU) :  $(BUILDDIR)/include/be_ver.h $(TRUNKDIR)/source/pcre/*.c
+$(BUILDDIR)/$(EECU) :  $(TRUNKDIR)/source/pcre/*.c
 ifeq "$(OBJDIR)" "transobj"
 $(BUILDDIR)/$(EECU) :  EU_OBJS="$(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) $(PREFIXED_PCRE_OBJECTS)"
 $(BUILDDIR)/$(EECU) :  $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) $(PREFIXED_PCRE_OBJECTS)
 	@$(ECHO) making $(EEXU)
 	@echo $(OS)
-	$(CC) $(EOSFLAGSCONSOLE) $(EUC_RES) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EECU)
+	$(CC) $(EOSFLAGSCONSOLE) $(EUC_RES) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(MSIZE) -o $(BUILDDIR)/$(EECU)
 else
 $(BUILDDIR)/$(EECU) : | $(BUILDDIR)/transobj $(BUILDDIR)/transobj/back
 ifeq "$(EUPHORIA)" "1"
@@ -626,15 +623,15 @@ endif
 $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) :  EU_TARGET = backend.ex
 $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) :  EU_MAIN = $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES)  $(EU_TRANSLATOR_FILES) $(EU_STD_INC)
 $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) :  $(wildcard $(BUILDDIR)/backobj/*.c) $(EU_MAIN)
-$(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) :  $(BUILDDIR)/include/be_ver.h $(TRUNKDIR)/source/pcre/*.c
+$(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) :  $(TRUNKDIR)/source/pcre/*.c
 ifeq "$(OBJDIR)" "backobj"
 $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) :  EU_OBJS="$(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) $(PREFIXED_PCRE_OBJECTS)"
 $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) :  $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) $(PREFIXED_PCRE_OBJECTS)
 $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) :  $(EUB_RES) $(EUBW_RES)
 	@$(ECHO) making $(EBACKENDC)
-	$(CC) $(EOSFLAGS) $(EUB_RES) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(DEBUG_FLAGS) $(MSIZE) $(PROFILE_FLAGS) -o $(BUILDDIR)/$(EBACKENDC)
+	$(CC) $(EOSFLAGS) $(EUB_RES) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(DEBUG_FLAGS) $(MSIZE) $(PROFILE_FLAGS) $(MSIZE) -o $(BUILDDIR)/$(EBACKENDC)
 ifeq "$(EMINGW)" "1"
-	$(CC) $(EOSFLAGS) $(EUBW_RES) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(DEBUG_FLAGS) $(MSIZE) $(PROFILE_FLAGS) -o $(BUILDDIR)/$(EBACKENDW)
+	$(CC) $(EOSFLAGS) $(EUBW_RES) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(DEBUG_FLAGS) $(MSIZE) $(PROFILE_FLAGS) $(MSIZE) -o $(BUILDDIR)/$(EBACKENDW)
 endif
 else
 $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) : | $(BUILDDIR)/backobj $(BUILDDIR)/backobj/back
@@ -656,11 +653,14 @@ update-version-cache : $(BUILDDIR)/ver.cache
 
 $(MKVER): mkver.c
 	$(CC) -o $@ $<
+	
+$(BUILDDIR)/include:
+	mkdir $@
 
-$(BUILDDIR)/ver.cache : $(MKVER) $(EU_BACKEND_RUNNER_FILES) $(EU_TRANSLATOR_FILES) $(EU_INTERPRETER_FILES) $(EU_CORE_FILES) $(EU_STD_INC) $(wildcard *.c)
+
+$(BUILDDIR)/include/be_ver.h $(BUILDDIR)/ver.cache : $(MKVER) $(BUILDDIR)/include $(EU_BACKEND_RUNNER_FILES) $(EU_TRANSLATOR_FILES) $(EU_INTERPRETER_FILES) $(EU_CORE_FILES) $(EU_STD_INC) $(wildcard *.c)  
 	$(MKVER) "$(HG)" "$(BUILDDIR)/ver.cache" "$(BUILDDIR)/include/be_ver.h" $(EREL_TYPE)$(RELEASE)
 
-$(BUILDDIR)/include/be_ver.h:  $(BUILDDIR)/ver.cache $(BUILD_DIRS)
 
 ###############################################################################
 #
@@ -882,7 +882,7 @@ $(BUILDDIR)/eudist-build/main-.c : eudist.ex
 		-makefile -eudir $(TRUNKDIR) \
 		$(TRUNKDIR)/source/eudist.ex
 
-$(BUILDDIR)/$(EUDIST) : $(TRUNKDIR)/source/eudist.ex $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(LIBRARY_NAME) $(BUILDDIR)/eudist-build/main-.c
+$(BUILDDIR)/$(EUDIST) : $(TRUNKDIR)/source/eudist.ex $(BUILDDIR)/$(EECU)  $(BUILDDIR)/$(LIBRARY_NAME)  $(BUILDDIR)/eudist-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/eudist-build" -f eudist.mak
 
 $(BUILDDIR)/eudis-build/main-.c : $(TRUNKDIR)/source/dis.ex  $(TRUNKDIR)/source/dis.e $(TRUNKDIR)/source/dox.e
@@ -914,7 +914,7 @@ $(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/shroud.ex $(EU_BACKEND_RUN
 $(BUILDDIR)/$(EUSHROUD) : $(BUILDDIR)/shroud-build/main-.c $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(LIBRARY_NAME) 
 		$(MAKE) -C "$(BUILDDIR)/shroud-build" -f shroud.mak
 
-$(BUILDDIR)/eutest-build/main-.c : $(TRUNKDIR)/source/eutest.ex
+$(BUILDDIR)/eutest-build/main-.c : $(TRUNKDIR)/source/eutest.ex 
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eutest-build" \
 		-o "$(BUILDDIR)/$(EUTEST)" \
 		-makefile -eudir $(TRUNKDIR) \
@@ -983,9 +983,9 @@ uninstall-docs :
 .PHONY : uninstall uninstall-docs
 
 ifeq "$(EUPHORIA)" "1"
-$(BUILDDIR)/intobj/main-.c : $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) $(EU_TRANSLATOR_FILES) $(EU_STD_INC)
-$(BUILDDIR)/transobj/main-.c : $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_STD_INC)
-$(BUILDDIR)/backobj/main-.c : $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES) $(EU_TRANSLATOR_FILES) $(EU_STD_INC)
+$(BUILDDIR)/intobj/main-.c : $(BUILDDIR)/include/be_ver.h $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) $(EU_TRANSLATOR_FILES) $(EU_STD_INC)
+$(BUILDDIR)/transobj/main-.c : $(BUILDDIR)/include/be_ver.h $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_STD_INC)
+$(BUILDDIR)/backobj/main-.c : $(BUILDDIR)/include/be_ver.h $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES) $(EU_TRANSLATOR_FILES) $(EU_STD_INC)
 endif
 
 %obj :

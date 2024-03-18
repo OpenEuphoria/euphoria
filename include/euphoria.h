@@ -266,6 +266,7 @@ object system_exec_call(object command, object wait);
 s1_ptr Copy_elements(int start,s1_ptr source, int replace );
 object Insert(object a,object b,int pos);
 object calc_hash(object a, object b);
+object Dor_bits(d_ptr a, d_ptr b);
 object Dxor_bits(d_ptr a, d_ptr b);
 object not_bits(long a);
 object Date();
@@ -274,6 +275,7 @@ cleanup_ptr DeleteRoutine( int e_index );
 void DeRef1(int a);
 void Replace(replace_ptr rb);
 void UserCleanup(int);
+void setran();
 
 #define TASK_HANDLE int
 

@@ -54,31 +54,33 @@ if [ -z "SOURCEDIR" ] ; then
   exit 1  # fail
 fi
 TRUNKDIR="`(cd \"$SOURCEDIR\" && cd .. && pwd $PWDARG)`"
-
+# Will change this value should --eubin be set below
+HOST_MIN_VER=`eui | head -1 | awk -F. '{ print $2 }'`
 MIN_VER=`egrep "define +MIN_VER" version.h | awk ' { print $3; }'`
 
 
 # gcc doesn't seem to like -m32 on 32-bit machines when there are 
-# no 64-bit machines 
+# not 64-bit machines 
 # with an instruction super set of the 32-bit machine.  This means,
 # -m32 is fine for ix86 32bit machines but bad for ARM and Motorola based
 # machines.
 
+# Because this is 4.0, 32bit x86 only
 MFLAG=-m32
-
 if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
 	HOST_ARCH=ix86
 	MFLAG=-m32
 	
 elif echo "$UNAME_MACHINE" | egrep "x86_64|amd64" > /dev/null; then
 	HOST_ARCH=ix86_64
-	MFLAG=-m64
+	MFLAG=-m32
 	
 elif echo "$UNAME_MACHINE" | grep -i ARM > /dev/null; then
 	HOST_ARCH=ARM
 	MFLAG=
 fi
-ARCH=$HOST_ARCH
+ARCH=ix86
+
 
 if test $UNAME_SYSTEM = "Linux"; then
 	EHOST=ELINUX
@@ -220,6 +222,7 @@ while [ "$1" != "" ]; do
 		EUBIN=$VAL
 		if [ -x "${EUBIN}/eui" ]; then
 			EC="${EUBIN}/eui ${SOURCEDIR}/euc.ex"
+			HOST_MIN_VER=`${EUBIN}/eui | head -1 | awk -F. '{ print $2 }'`			
 		fi
 		;;
 
@@ -588,10 +591,11 @@ if [ "x$PLAT" != "xdefault_platform" ]; then
 	echo "-plat" $PLAT  >> $BUILDDIR/eu.cfg
 	echo PLAT=$PLAT >> "$PREFIX"${CONFIG_FILE}
 fi
-if [ "x$ARCH" != "x$HOST_ARCH" ]; then
-	echo "-arch" $ARCH >> $BUILDDIR/eu.cfg
-fi
-	
+if [ "$HOST_MIN_VER" -ne "0" ]; then
+  if [ "x$ARCH" != "x$HOST_ARCH" ]; then
+      echo "-arch" $ARCH >> $BUILDDIR/eu.cfg
+  fi
+fi	
 echo "-$XLTTARGETCC " >> $BUILDDIR/eu.cfg
 echo "-con " >> $BUILDDIR/eu.cfg
 echo "-com" $CYPTRUNKDIR >> $BUILDDIR/eu.cfg
