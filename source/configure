@@ -146,10 +146,15 @@ ROOTDIR="$TRUNKDIR"
 HG="git"
 
 CONFIGURE_PARAMS="$@"
+OPT=-O3
 
 # parameters
 while [ "$1" != "" ]; do
     case $1 in
+    --build-quickly)
+        OPT=-O0      
+      ;;
+      
 	--plat*|--target)
 		VAL=`echo $1 | cut -d = -f 2`
 		if [ "$VAL" = "$1" ]; then
@@ -235,6 +240,7 @@ while [ "$1" != "" ]; do
 
 	--debug )
 		 EDEBUG=1
+		 OPT=-ggdb
 		;;
 
 	--prefix*)
@@ -392,6 +398,7 @@ while [ "$1" != "" ]; do
 		echo "                       Set the OS that we will translate to."
 		echo "                       Values can be: WINDOWS, OSX, LINUX,"
 		echo "                       FREEBSD, OPENBSD or NETBSD."
+		echo "   --build-quickly     The targets will be built with no C optimization."
 		echo "   --watcom            The translator will create C code"
 		echo "                       for the Watcom compiler."
 		echo "   --cc-prefix         Prefix to use with the compiler and"
@@ -628,5 +635,9 @@ echo "-eub" $CYPBUILDDIR/eub >> $BUILDDIR/eu.cfg
 if [ -f "$TRUNKDIR/source/eu.cfg" ] ; then
 	rm "$TRUNKDIR/source/eu.cfg"
 fi
+
+
+[ -n "$OPT" ] && echo OPT=$OPT >> "$PREFIX"${CONFIG_FILE}
+
 
 echo >> ${CONFIG_FILE}

@@ -139,7 +139,7 @@ ifeq "$(EMINGW)" "1"
 			LIBRARY_NAME=eudbg.a
 		endif
 	else
-		EOSMING=-ffast-math -O2 -Os
+		EOSMING=-ffast-math -Os
 		ifdef FPIC
 			LIBRARY_NAME=euso.a
 		else
@@ -183,7 +183,7 @@ else
 			LIBRARY_NAME=eudbg.a
 		endif
 	else
-		EOSMING=-ffast-math -O2 -Os
+		EOSMING=-ffast-math $(OPT) -Os
 		ifdef FPIC
 			LIBRARY_NAME=euso.a
 		else
@@ -232,6 +232,7 @@ ifdef COVERAGE
     COVERAGEFLAG=-fprofile-arcs -ftest-coverage
     DEBUG_FLAGS=-g3 -O0 -Wall
     COVERAGELIB=-lgcov
+    OPT=
 endif
 
 ifndef TESTFILE
@@ -314,11 +315,11 @@ endif
 
 WARNINGFLGS =
 ifeq "$(MANAGED_MEM)" "1"
-    FE_FLAGS =  $(ARCH_FLAG) $(COVERAGEFLAG) $(MSIZE) $(EPTHREAD) -Wno-unused-variable -Wno-unused-but-set-variable -c -fsigned-char $(EOSTYPE) $(EOSMING) -ffast-math $(FP_FLAGS)                $(EOSFLAGS) $(DEBUG_FLAGS) -I$(CYPTRUNKDIR)/source -I$(CYPTRUNKDIR) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE) $(MEM_FLAGS)
+    FE_FLAGS =  $(ARCH_FLAG) $(COVERAGEFLAG) $(MSIZE) $(EPTHREAD) -Wno-unused-variable -Wno-unused-but-set-variable -c -fsigned-char $(EOSTYPE) $(EOSMING) -ffast-math $(FP_FLAGS)                $(EOSFLAGS) $(DEBUG_FLAGS) -I$(CYPTRUNKDIR)/source -I$(CYPTRUNKDIR) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE) $(MEM_FLAGS) $(OPT)
 else
-    FE_FLAGS =  $(ARCH_FLAG) $(COVERAGEFLAG) $(MSIZE) $(EPTHREAD) -Wno-unused-variable -Wno-unused-but-set-variable -c -fsigned-char $(EOSTYPE) $(EOSMING) -ffast-math $(FP_FLAGS) $(EOSFLAGS) $(DEBUG_FLAGS) -I$(CYPTRUNKDIR)/source -I$(CYPTRUNKDIR) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE)
+    FE_FLAGS =  $(ARCH_FLAG) $(COVERAGEFLAG) $(MSIZE) $(EPTHREAD) -Wno-unused-variable -Wno-unused-but-set-variable -c -fsigned-char $(EOSTYPE) $(EOSMING) -ffast-math $(FP_FLAGS) $(EOSFLAGS) $(DEBUG_FLAGS) -I$(CYPTRUNKDIR)/source -I$(CYPTRUNKDIR) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE) $(OPT)
 endif
-BE_FLAGS =  $(ARCH_FLAG) $(COVERAGEFLAG) $(MSIZE) $(EPTHREAD) -c -Wall $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(FP_FLAGS) $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE) $(FPIC) -I$(TRUNKDIR)/source
+BE_FLAGS =  $(ARCH_FLAG) $(COVERAGEFLAG) $(MSIZE) $(OPT) $(EPTHREAD) -c -Wall $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(FP_FLAGS) $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE) $(FPIC) -I$(TRUNKDIR)/source
 
 # Disable Position Independent Executable (PIE)
 ifneq (,$(shell $(CC) -v 2>&1 | grep default-pie))
@@ -997,7 +998,7 @@ else
 endif
 
 ifeq "$(ARCH)" "ARM"
-	EUC_CFLAGS=-cflags "-fomit-frame-pointer -c -w -fsigned-char -O2 -I$(TRUNKDIR) -ffast-math"
+	EUC_CFLAGS=-cflags "-fomit-frame-pointer -c -w -fsigned-char -I$(TRUNKDIR) -ffast-math"
 	EUC_LFLAGS=-lflags "$(CYPBUILDDIR)/eu.a -ldl -lm -lpthread"
 else
 	EUC_CFLAGS=-cflags "$(FE_FLAGS)"
@@ -1168,7 +1169,7 @@ $(BUILDDIR)/$(OBJDIR)/back/%.o : $(TRUNKDIR)/source/%.c $(CONFIG_FILE) | $(BUILD
 	$(CC) $(BE_FLAGS) $(EBSDFLAG) -I $(BUILDDIR)/$(OBJDIR)/back -I $(BUILDDIR)/include $(TRUNKDIR)/source/$*.c -o$(BUILDDIR)/$(OBJDIR)/back/$*.o
 
 $(BUILDDIR)/$(OBJDIR)/back/be_callc.o : $(TRUNKDIR)/source/$(BE_CALLC).c $(CONFIG_FILE) | $(BUILDDIR)/$(OBJDIR)/back/
-	$(CC) -c -Wall $(EOSTYPE) $(ARCH_FLAG) $(FPIC) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -DARCH=$(ARCH) -fsigned-char -O2 -fno-omit-frame-pointer -ffast-math -fno-defer-pop $(CALLC_DEBUG) $(TRUNKDIR)/source/$(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.o
+	$(CC) -c -Wall $(EOSTYPE) $(ARCH_FLAG) $(FPIC) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -DARCH=$(ARCH) -fsigned-char $(OPT) -fno-omit-frame-pointer -ffast-math -fno-defer-pop $(CALLC_DEBUG) $(TRUNKDIR)/source/$(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.o
 
 $(BUILDDIR)/$(OBJDIR)/back/be_inline.o : $(TRUNKDIR)/source/be_inline.c $(CONFIG_FILE) | $(BUILDDIR)/$(OBJDIR)/back/
 	$(CC) -finline-functions $(BE_FLAGS) $(EBSDFLAG) $(RUNTIME_FLAGS) $(TRUNKDIR)/source/be_inline.c -o$(BUILDDIR)/$(OBJDIR)/back/be_inline.o
