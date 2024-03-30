@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 void RTFatalType(intptr_t *pc)
-#ifdef EUNIX
+#ifdef __unix
 __attribute__ ((noreturn))
 #endif
 ;
@@ -38,7 +38,7 @@ void BadSubscript(object subs, int length);
 void NoValue(symtab_ptr s);
 
 void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap)
-#if defined(EUNIX) || defined(EMINGW)
+#if defined(__unix) || defined(EMINGW)
  __attribute__ ((noreturn))
 #else
 #pragma aux CleanUpError_va aborts;

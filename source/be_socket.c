@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef EUNIX
+#ifdef __unix
 #ifndef timeval
 #include <sys/time.h>
 #endif

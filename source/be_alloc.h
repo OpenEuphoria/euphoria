@@ -140,7 +140,7 @@ typedef struct block_list * block_list_ptr;
 #endif
 
 // Size of the usable space in an allocated block
-#ifdef EUNIX
+#ifdef __unix
 	#ifdef EBSD
 		#define block_size(p) 1    // length is not stored with the block
 	#else
@@ -155,7 +155,7 @@ typedef struct block_list * block_list_ptr;
 	#endif
 #endif
 
-#ifdef EUNIX
+#ifdef __unix
 #include <stdlib.h>
 #endif
 #if defined( ESIMPLE_MALLOC )
@@ -209,7 +209,7 @@ extern long copy_string(char *dest, char *src, size_t bufflen);
 extern long append_string(char *dest, char *src, size_t bufflen);
 
 extern void SpaceMessage()
-#if defined(EUNIX) || defined(EMINGW)
+#if defined(__unix) || defined(EMINGW)
 __attribute__ ((noreturn))
 #else
 #pragma aux SpaceMessage aborts;

@@ -1,7 +1,7 @@
 #if defined(_WIN32) || defined(EDOS)
 #	include "pcre.h.windows"
 #else
-#    if defined(EUNIX)
+#    if defined(__unix)
 #    	include "pcre.h.unix"
 #    else
 #       error **

@@ -162,7 +162,7 @@ struct time_info {
 	long tot_ticks;
 };
 
-#if defined(EUNIX) || defined(EMINGW)
+#if defined(__unix) || defined(EMINGW)
 #  define KEYBUFF_SIZE 50
 #  define __far
 #  define FAR
@@ -214,7 +214,7 @@ struct videoconfigEx {
 	int screencols;
 };
 
-#ifdef EUNIX
+#ifdef __unix
 #define PATH_SEPARATOR ':'
 #define SLASH '/'
 #else
@@ -222,7 +222,7 @@ struct videoconfigEx {
 #define SLASH '\\'
 #endif
 
-#if defined(EUNIX)
+#if defined(__unix)
 #define WORD unsigned short
 #define __stdcall
 #define __cdecl

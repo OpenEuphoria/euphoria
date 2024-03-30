@@ -1,7 +1,7 @@
 #if defined(_WIN32) || defined(EDOS)
 #	include "config.h.windows"
 #else
-#    if defined(EUNIX)
+#    if defined(__unix)
 #    	include "config.h.unix"
 #    else
 #       error **

@@ -26,7 +26,7 @@
 #include <ctype.h>
 #include <inttypes.h>
 
-#ifdef EUNIX
+#ifdef __unix
 #  include <unistd.h>
 #  include <termios.h>
 #  include <time.h>
@@ -463,7 +463,7 @@ void MainScreen()
 
 #if defined(DOMAIN) && defined(SING) && defined(OVERFLOW) && defined(UNDERFLOW) && defined(TLOSS) && defined(PLOSS)
 #undef matherr // avoid OpenWATCOM problem
-#if (defined(__WATCOMC__) || defined(EUNIX)) && !defined(EOW)
+#if (defined(__WATCOMC__) || defined(__unix)) && !defined(EOW)
 int matherr(struct exception *err)   // 10.6 wants this
 #else
 int matherr(struct _exception *err)  // OW wants this
@@ -554,7 +554,7 @@ void call_crash_routines()
 	}
 }
 
-#if defined(EUNIX) || defined(EMINGW)
+#if defined(__unix) || defined(EMINGW)
 static void SimpleRTFatal(char *msg, va_list ap) __attribute__ ((noreturn));
 #endif
 
@@ -4081,7 +4081,7 @@ static void rPrint(object a)
 			screen_output(print_file, sbuff);
 			print_chars += strlen(sbuff);
 			if (show_ascii && a >= ' ' &&
-#ifdef EUNIX
+#ifdef __unix
 				a <= 126)  // DEL is a problem with ANSI code display
 #else
 				a <= 127)
@@ -4560,7 +4560,7 @@ object EPrintf(object file_no, object format_obj, object values)
 		return ATOM_0;
 }
 
-#ifdef EUNIX
+#ifdef __unix
 int nodelaych(int wait)
 // returns a character, or -1 if no character is there and wait is FALSE
 {
@@ -4598,10 +4598,10 @@ int get_key(int wait)
 		return -1;
 #endif
 
-#ifdef EUNIX
+#ifdef __unix
 		a = nodelaych(wait); // no delay, no echo
 		return a;
-#endif // EUNIX
+#endif // __unix
 }
 
 
@@ -4612,7 +4612,7 @@ int trace_lines = 500;
 static void one_trace_line(char *line)
 /* write a line to the ctrace.out file */
 {
-#ifdef EUNIX
+#ifdef __unix
 	iprintf(trace_file, "%-78.78s\n", line);
 #else
 	iprintf(trace_file, "%-77.77s\r\n", line);
@@ -5059,7 +5059,7 @@ object system_exec_call(object command, object wait)
 /* Run a .exe or .com file, then restore the graphics mode.
    Will wait for user to hit key if desired. */
 {
-#ifndef EUNIX
+#ifndef __unix
 	char **argv;
     char *argvNDQ; // Without double-quote
 #endif
@@ -5092,7 +5092,7 @@ object system_exec_call(object command, object wait)
 
 	exit_code = 0;
 
-#ifdef EUNIX
+#ifdef __unix
 	// this runs the shell - not really supposed to, but it gets exit code
 	// Assigning directly to WEXITSTATUS causes a compiler failure on BSD and OSX.
 	// Fix by adding a separate assignment.
@@ -5673,7 +5673,7 @@ object Command_Line()
 		for (i = 0; i < Argc; i++) {
 			*(++obj_ptr) = NewString(*argv++);
 		}
-#ifdef EUNIX
+#ifdef __unix
 		{
 			char * buff;
 			ssize_t len;
@@ -5698,7 +5698,7 @@ void Cleanup(int status)
 /* clean things up before leaving 0 - ok, non 0 - error */
 {
 	int fh;
-#ifdef EUNIX
+#ifdef __unix
 	char *xterm;
 #endif
 
@@ -5763,7 +5763,7 @@ void Cleanup(int status)
 #endif // BACKEND
 #endif // ERUNTIME
 
-#ifdef EUNIX
+#ifdef __unix
 	if (use_prompt() && have_console &&
 		(config.numtextrows < 24 || config.numtextrows > 25 || config.numtextcols != 80 ||
 			((xterm = getenv("TERM")) != NULL &&
@@ -5773,7 +5773,7 @@ void Cleanup(int status)
 		getKBchar();
 	}
 
-#else // EUNIX
+#else // __unix
 
 	if (use_prompt() && TempWarningName == NULL && display_warnings &&
 		(warning_count || (status && !user_abort)))
@@ -5784,7 +5784,7 @@ void Cleanup(int status)
 		screen_output(stderr, "\n\nPress Enter...\n");
 		getKBchar();
 	}
-#endif // EUNIX
+#endif // __unix
 	EndGraphics();
 
 #ifndef ERUNTIME
@@ -5875,7 +5875,7 @@ void UserCleanup(int status)
 	Cleanup(status);
 }
 
-#ifdef EUNIX
+#ifdef __unix
 int getKBchar()
 {
 	echo_wait();

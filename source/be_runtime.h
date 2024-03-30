@@ -55,7 +55,7 @@ extern int trace_lines;
 void debug_msg(char *msg);
 
 void UserCleanup(int status)
-#if defined(EUNIX) || defined(EMINGW)
+#if defined(__unix) || defined(EMINGW)
 __attribute__ ((noreturn))
 #else
 #pragma aux UserCleanup aborts;
@@ -63,28 +63,28 @@ __attribute__ ((noreturn))
 ;
 
 void RTFatal(char *, ...)
-#if defined(EUNIX) || defined(EMINGW)
+#if defined(__unix) || defined(EMINGW)
 __attribute__ ((noreturn))
 #else
 #pragma aux RTFatal aborts;
 #endif
 ;
 void RTInternal(char *msg, ...)
-#if defined(EUNIX) || defined(EMINGW)
+#if defined(__unix) || defined(EMINGW)
 __attribute__ ((noreturn))
 #else
 #pragma aux RTInternal aborts;
 #endif
 ;
 void RTFatal_va(char *msg, va_list ap)
-#if defined(EUNIX) || defined(EMINGW)
+#if defined(__unix) || defined(EMINGW)
 __attribute__ ((noreturn))
 #else
 #pragma aux RTFatal_va aborts;
 #endif
 ;
 void Cleanup()
-#if defined(EUNIX) || defined(EMINGW)
+#if defined(__unix) || defined(EMINGW)
 __attribute__ ((noreturn))
 #else
 #pragma aux Cleanup aborts;
@@ -92,7 +92,7 @@ __attribute__ ((noreturn))
 ;
 
 
-#ifdef EUNIX
+#ifdef __unix
 extern char key_buff[KEYBUFF_SIZE];
 extern int key_write;       // place where next key will be stored
 #endif

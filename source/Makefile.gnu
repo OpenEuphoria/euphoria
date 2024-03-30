@@ -168,7 +168,6 @@ ifeq "$(EMINGW)" "1"
 else
 	EXE_EXT=
 	EPTHREAD=-pthread
-	EOSTYPE=-DEUNIX
 	EOSFLAGS=
 	EOSFLAGSCONSOLE=
 	EOSPCREFLAGS=
@@ -237,10 +236,6 @@ endif
 
 ifndef TESTFILE
     COVERAGE_ERASE=-coverage-erase
-endif
-
-ifeq  "$(ELINUX)" "1"
-    EBSDFLAG=-DELINUX
 endif
 
 # backwards compatibility
@@ -481,7 +476,7 @@ BUILD_DIRS = \
 
 clean :
 	-for f in $(BUILD_DIRS) ; do \
-		rm -r $${f} ; \
+		rm $${f}/*/*.o $${f}/*.o ; \
 	done ;
 	-rm -r $(BUILDDIR)/pcre
 	-rm -r $(BUILDDIR)/pcre_fpic

@@ -198,7 +198,7 @@ double Wait(double t)
 	req.tv_nsec = itsme;
 	nanosleep(&req, NULL);
 	
-#endif // EUNIX
+#endif // __unix
 	return current_time();
 }
 

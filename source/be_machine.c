@@ -49,7 +49,7 @@
 #include <malloc.h>
 #endif
 
-#ifdef EUNIX
+#ifdef __unix
 
 #include <strings.h>
 #define stricmp strcasecmp
@@ -91,7 +91,7 @@
 #define LOCK_UN  8 /* unlock */
 #endif
 
-#else // EUNIX
+#else // __unix
 
 #include <io.h>
 #include <direct.h>
@@ -102,7 +102,7 @@
 #endif
 
 #include <direct.h>
-#endif  // not EUNIX
+#endif  // not __unix
 
 #include <time.h>
 #include <string.h>
@@ -150,7 +150,7 @@ volatile int sample_next = 0;
 
 int line_max; /* current number of text lines on screen */
 int col_max;  /* current number of text columns on screen */
-#ifdef EUNIX
+#ifdef __unix
 int consize_ioctl = 0;	/* 1 if line_max or col_max came from ioctl */
 #endif
 
@@ -297,7 +297,7 @@ object get_int(object x)
 /* Note: side effects could happen from double eval of x */
 #define Get_Int(x) (IS_ATOM_INT(x) ? INT_VAL(x) : get_int(x))
 
-#ifdef EUNIX
+#ifdef __unix
 struct termios savetty; // initial tty state for STDIN
 struct termios newtty;  // current tty state for STDIN
 
@@ -323,7 +323,7 @@ void noecho(int wait)
 void InitGraphics()
 /* initialize for graphics */
 {
-#ifdef EUNIX
+#ifdef __unix
 	// save initial tty state
 	tcgetattr(STDIN_FILENO, &savetty);
 
@@ -342,7 +342,7 @@ void EndGraphics()
 #ifdef _WIN32
 	SetConsoleMode(console_output, orig_console_mode); // back to normal
 #endif
-#ifdef EUNIX
+#ifdef __unix
 	tcsetattr(STDIN_FILENO, TCSANOW, &savetty);
 #endif
 }
@@ -392,7 +392,7 @@ void NewConfig(int raise_console)
 	config.numvideopages = 1;
 #endif
 
-#ifdef EUNIX
+#ifdef __unix
 	char *env_lines;
 	char *env_cols;
 	int x;
@@ -511,7 +511,7 @@ static object Cursor(object x)
 	SetConsoleCursorInfo(console_output, &c);
 	return ATOM_1;
 #endif
-#ifdef EUNIX
+#ifdef __unix
 	// leaveok(stdscr, style != 0x02000); doesn't work very well
 	x = 1;
 	return x;
@@ -550,7 +550,7 @@ object Wrap(object x)
 	return ATOM_1;
 }
 
-#ifdef EUNIX
+#ifdef __unix
 static char *bl20 = "                    ";
 
 void blank_lines(int line, int n)
@@ -616,7 +616,7 @@ void do_scroll(int top, int bottom, int amount)
 	}
 #endif
 
-#ifdef EUNIX
+#ifdef __unix
 	short c1;
 	short r1;
 	int t;
@@ -759,7 +759,7 @@ object SetTColor(object x)
 /* SET TEXT COLOR */
 {
 	short c;
-#if defined(EUNIX)
+#if defined(__unix)
 #define STC_buflen (20)
 	char buff[STC_buflen];
 	int bold;
@@ -778,7 +778,7 @@ object SetTColor(object x)
 	SetConsoleTextAttribute(console_output, attribute);
 #endif
 
-#ifdef EUNIX
+#ifdef __unix
 	current_fg_color = c & 15;
 	if (current_fg_color > 7) {
 		bold = 1; // BOLD ON (BRIGHT)
@@ -800,7 +800,7 @@ object SetBColor(object x)
 /* SET BACKGROUND COLOR */
 {
 	int c;
-#if defined(EUNIX)
+#if defined(__unix)
 #define SBC_buflen (20)
 	char buff[SBC_buflen];
 #endif
@@ -818,7 +818,7 @@ object SetBColor(object x)
 	SetConsoleTextAttribute(console_output, attribute);
 #endif
 
-#ifdef EUNIX
+#ifdef __unix
 	current_bg_color = c & 15;
 	if (current_bg_color > 7) {
 		c = 100 + (current_bg_color & 7);
@@ -1167,7 +1167,7 @@ typedef struct _SYSTEMTIME {
 }
 #endif
 
-#if defined(EUNIX)
+#if defined(__unix)
 	// 2 of 2: Unix style with stat()
 static object Dir(object x)
 /* x is the name of a directory or file */
@@ -1311,7 +1311,7 @@ static object PutScreenChar(object x)
 	unsigned line, column;
 	s1_ptr args;
 	object_ptr p;
-#ifdef EUNIX
+#ifdef __unix
 	unsigned c;
 	char s1[2];
 	int save_line, save_col;
@@ -1337,7 +1337,7 @@ static object PutScreenChar(object x)
 		RTFatal("third argument to put_screen_char() must be a sequence of even length");
 	p = args->base+1;
 
-#ifdef EUNIX
+#ifdef __unix
 	save_line = screen_line;
 	save_col = screen_col;
 	fg = current_fg_color;
@@ -1424,7 +1424,7 @@ static object GetScreenChar(object x)
 
 #endif
 
-#ifdef EUNIX
+#ifdef __unix
 	if (line >= 1 && line <= (unsigned)line_max &&
 		column >= 1 && column <= (unsigned)col_max) {
 		obj_ptr[1] = screen_image[line-1][column-1].ascii;
@@ -1540,7 +1540,7 @@ static object lock_file(object x)
 	intptr_t fd;
 	int r;
 	int t;
-#ifndef EUNIX
+#ifndef __unix
 	uint64_t first, last, bytes;
 	object s;
 	OVERLAPPED overlapped;
@@ -1554,12 +1554,12 @@ static object lock_file(object x)
 	f = which_file(fn, EF_READ | EF_WRITE);
 	fd = ifileno(f);
 
-#ifndef EUNIX
+#ifndef __unix
 	fd = _get_osfhandle( fd ); // need a HANDLE on Windows
 #endif
 	// get 2nd element of x - lock type
 	t = get_int(*(((s1_ptr)x)->base+2));
-#ifdef EUNIX
+#ifdef __unix
 	if (t == 1)
 		r = flock(fd, LOCK_SH | LOCK_NB);
 	else
@@ -1596,7 +1596,7 @@ static object lock_file(object x)
 
 #endif
 	
-#ifdef EUNIX
+#ifdef __unix
 	if (r == 0){
 #else
 	if (r != 0){
@@ -1624,9 +1624,9 @@ static object unlock_file(object x)
 	fn = *(((s1_ptr)x)->base+1);
 	f = which_file(fn, EF_READ | EF_WRITE);
 	fd = ifileno(f);
-#ifdef EUNIX
+#ifdef __unix
 	flock(fd, LOCK_UN);
-#else // EUNIX
+#else // __unix
 	fd = _get_osfhandle( fd );
 	// get 2nd element of x - range - assume it's a sequence
 	s = *(((s1_ptr)x)->base+2);
@@ -1650,7 +1650,7 @@ static object unlock_file(object x)
 				(DWORD)( (first & 0xffffffff00000000) << 32 ),
 				(DWORD)bytes & 0xffffffff,
 				(DWORD) ((bytes & 0xffffffff00000000) << 32));
-#endif // EUNIX
+#endif // __unix
 	return ATOM_1; // ignored
 }
 
@@ -1802,13 +1802,13 @@ static object e_sleep(object x)
 double current_time()
 /* return value for time() function */
 {
-#ifdef EUNIX
+#ifdef __unix
 	struct tms buf;
 #endif
 	if (clock_frequency == 0.0) {
 		/* no handler */
 		return (double)
-#ifdef EUNIX
+#ifdef __unix
 		times(&buf) / clk_tck
 #else
 		clock() / (double)clocks_per_sec
@@ -2373,7 +2373,7 @@ typedef unsigned char * page_ptr;
 unsigned char * new_page() {
 #ifdef _WIN32
 	return VirtualAlloc( NULL, CALLBACK_SIZE, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE );
-#elif EUNIX
+#elif __unix
 	return mmap(NULL, pagesize, PROT_EXEC|PROT_WRITE|PROT_READ, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
 #endif
 }
@@ -2383,7 +2383,7 @@ void set_page_to_read_execute_only(page_ptr page_addr) {
 	static unsigned long oldprot;
 	static unsigned long * oldprotptr = &oldprot;
 	VirtualProtect(page_addr, pagesize, PAGE_EXECUTE_READ, oldprotptr);
-#elif EUNIX
+#elif __unix
 	mprotect(page_addr, pagesize, PROT_EXEC|PROT_READ);
 #endif
 }
@@ -2393,7 +2393,7 @@ void set_page_to_read_write_execute(page_ptr page_addr) {
 	static unsigned long oldprot;
 	static unsigned long * oldprotptr = &oldprot;
 	VirtualProtect(page_addr, pagesize, PAGE_EXECUTE_READWRITE, oldprotptr);
-#elif EUNIX
+#elif __unix
 	mprotect(page_addr, pagesize, PROT_EXEC | PROT_READ | PROT_WRITE );
 #endif
 }
@@ -2788,7 +2788,7 @@ object eu_info()
 
 object eu_uname()
 {
-#ifdef EUNIX
+#ifdef __unix
 	int ret;
 	struct utsname buf;
 	s1_ptr s1;
@@ -2881,7 +2881,7 @@ object start_backend(object x)
 	// we need to output an error message.
 	in_backend = 1;
 
-#if defined(EUNIX) || defined(EMINGW)
+#if defined(__unix) || defined(EMINGW)
 	do_exec(NULL);  // init jumptable
 #endif
 
@@ -3137,7 +3137,7 @@ object machine(object opcode, object x)
 			case M_INSTANCE:
 			{
 				uintptr_t inst = 0;
-#ifdef EUNIX
+#ifdef __unix
 				inst = (uintptr_t)getpid();
 #endif
 #ifdef _WIN32
@@ -3155,7 +3155,7 @@ object machine(object opcode, object x)
 				if (current_screen != MAIN_SCREEN)
 					MainScreen();
 				if (have_console) {
-#ifndef EUNIX
+#ifndef __unix
 					FreeConsole();
 #endif
 					have_console = FALSE;
@@ -3261,14 +3261,14 @@ object machine(object opcode, object x)
 					EFree(dest);
 				}
 #else
-#ifdef EUNIX
+#ifdef __unix
 #ifdef __linux__
 				temp = unsetenv(src);
 #else
 				unsetenv(src);
 				temp = 0;
 #endif /* __linux__ */
-#endif /* EUNIX */
+#endif /* __unix */
 #endif /* EMINGW */
 #endif /* __WATCOMC__ */
 
