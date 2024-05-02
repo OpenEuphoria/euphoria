@@ -610,7 +610,7 @@ void EFree(char *p)
 }
 
 #else
-#if !defined(_WIN32) && !defined(EUNIX)
+#if !defined(_WIN32) && !defined(__unix)
 // Version of allocation routines for systems that might not return allocations
 // that are 4-byte aligned.
 char *EMalloc(unsigned long nbytes)
@@ -673,7 +673,7 @@ char *ERealloc(char *orig, uintptr_t newsize)
 
 #endif
 
-#ifndef EUNIX
+#ifndef __unix
 #ifndef _WIN32
 #ifdef EXTRA_CHECK
 #include <malloc.h>
@@ -716,7 +716,7 @@ int heap_dump(char *ptr)
 }
 #endif // EXTRA_CHECK
 #endif // _WIN32
-#endif // EUNIX
+#endif // __unix
 
 #ifndef ESIMPLE_MALLOC
 char *ERealloc(char *orig, uintptr_t newsize)

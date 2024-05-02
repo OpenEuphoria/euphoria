@@ -112,7 +112,7 @@ union pc_t {
 		: ((fp)->_cnt--,*(fp)->_ptr++))
 #endif
 
-#if defined(__WATCOMC__) || defined(EUNIX)
+#if defined(__WATCOMC__) || defined(__unix)
 	// a bit faster:
 #	define mygetc(fp) \
 		((fp)->_cnt<=0 \
@@ -920,7 +920,7 @@ void threadpc3(void);
 #endif
 #endif // !defined(EMINGW)
 
-#if defined(EUNIX) || defined(EMINGW)
+#if defined(__unix) || defined(EMINGW)
 // these GNU-based compilers support dynamic labels,
 // so threading is much easier
 #define thread() goto *((void *)*pc)
@@ -1053,7 +1053,7 @@ void InitExecute()
 }
 
 #ifndef INT_CODES
-#if defined(EUNIX) || defined(EMINGW)
+#if defined(__unix) || defined(EMINGW)
 intptr_t **jumptab; // initialized in do_exec()
 #else
 #ifdef __WATCOMC__
@@ -1899,7 +1899,7 @@ void Execute(intptr_t *start_index)
 }
 
 #ifndef INT_CODES
-#if defined(EUNIX) || defined(EMINGW)
+#if defined(__unix) || defined(EMINGW)
 // don't use switch/case - use special jump to label feature
 #define case
 #endif
@@ -1945,7 +1945,7 @@ void do_exec(intptr_t *start_pc)
 	object *block;
 	uintptr_t tuint;
 
-#if defined(EUNIX) || defined(EMINGW)
+#if defined(__unix) || defined(EMINGW)
 #ifndef INT_CODES
 	static void *localjumptab[MAX_OPCODE] = {
   &&L_LESS, &&L_GREATEREQ, &&L_EQUALS, &&L_NOTEQ, &&L_LESSEQ, &&L_GREATER,
@@ -2044,7 +2044,7 @@ void do_exec(intptr_t *start_pc)
 #endif
 #endif
 	if (start_pc == NULL) {
-#if defined(EUNIX) || defined(EMINGW)
+#if defined(__unix) || defined(EMINGW)
 #ifndef INT_CODES
 		jumptab = (intptr_t **)localjumptab;
 #endif
@@ -5040,7 +5040,7 @@ void do_exec(intptr_t *start_pc)
 						b = getKBchar();
 					}
 					else {
-#ifdef EUNIX
+#ifdef __unix
 						b = getc(last_r_file_ptr);
 #else
 						b = mygetc(last_r_file_ptr);
@@ -5048,7 +5048,7 @@ void do_exec(intptr_t *start_pc)
 					}
 				}
 				else
-#ifdef EUNIX
+#ifdef __unix
 					b = getc(last_r_file_ptr);
 #else
 					b = mygetc(last_r_file_ptr); /* don't use <a> ! */
@@ -5073,7 +5073,7 @@ void do_exec(intptr_t *start_pc)
 			deprintf("case L_PLATFORM:");
 				DeRef(*(object_ptr)pc[1]);
 				top = 1;  // Unknown platform
-#ifdef EUNIX
+#ifdef __unix
 				top = 3;  // (UNIX, called Linux for backwards compatibility)
 #endif
 #ifdef __FreeBSD__
@@ -5109,7 +5109,7 @@ void do_exec(intptr_t *start_pc)
 				}
 				top = MAKE_INT(get_key(FALSE));
 				if (top == ATOM_M1 && TraceOn) {
-#ifdef EUNIX
+#ifdef __unix
 					struct tms buf;
 					c0 = times(&buf) + 8 * clk_tck; // wait 8 real seconds
 					while (times(&buf)

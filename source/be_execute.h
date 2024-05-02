@@ -33,7 +33,7 @@ extern int il_file;       /* we are processing a separate .il file */
 extern intptr_t *tpc;
 
 #ifndef INT_CODES
-#if defined(EUNIX) || defined(EMINGW) || defined(EWATCOM)
+#if defined(__unix) || defined(EMINGW) || defined(EWATCOM)
 extern intptr_t **jumptab; // initialized in do_exec() 
 #else
 #ifdef EWATCOM

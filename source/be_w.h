@@ -8,7 +8,7 @@ void screen_show(void);
 void InitInOut(void);
 int has_console(void);
 
-#ifdef EUNIX
+#ifdef __unix
 void screen_copy(struct char_cell a[MAX_LINES][MAX_COLS],
                  struct char_cell b[MAX_LINES][MAX_COLS]);
 
@@ -73,7 +73,7 @@ void flush_screen(void);
 int getKBcode();
 extern int VK_to_EuKBCode[256];
 
-#ifdef EUNIX
+#ifdef __unix
 #define  VK_LBUTTON  (0x01) /*  Left mouse button */
 #define  VK_RBUTTON  (0x02) /*  Right mouse button */
 #define  VK_CANCEL  (0x03) /*  Control-break processing */

@@ -18,7 +18,7 @@
 #include <stdarg.h>
 #include <time.h>
 
-#ifdef EUNIX
+#ifdef __unix
 #  include <sys/stat.h>
 #  include <unistd.h>
 #else
@@ -299,7 +299,7 @@ static char *expanded_end;
 static int must_flush = TRUE; /* flush output to screen or not */
 static int collect_next;   /* place to store next collect output */
 static int collect_free;   /* number of chars of empty space remaining */
-#ifdef EUNIX
+#ifdef __unix
 // we need to record everything written to the screen
 struct char_cell screen_image[MAX_LINES][MAX_COLS];
 // plus have two alternate screens for interactive trace
@@ -394,7 +394,7 @@ void GetTextPositionP(struct eu_rccoord *p)
 }
 
 
-#ifdef EUNIX
+#ifdef __unix
 void screen_copy(struct char_cell a[MAX_LINES][MAX_COLS],
                  struct char_cell b[MAX_LINES][MAX_COLS])
 // copy a screen to another area
@@ -425,7 +425,7 @@ void screen_show()
 }
 #endif
 
-#if defined (EUNIX)
+#if defined (__unix)
 void Set_Image(struct char_cell image[MAX_LINES][MAX_COLS], char vch, char fg, char bg)
 {
   int i, j;
@@ -456,7 +456,7 @@ void InitInOut()
     buff_start.X = 0;
     buff_start.Y = 0;
 #endif
-#if defined(EUNIX)
+#if defined(__unix)
     position.col = 1;
     position.row = 1;
     in_from_keyb  = isatty(0);
@@ -798,7 +798,7 @@ void flush_screen()
 }
 
 
-#ifdef EUNIX
+#ifdef __unix
 void update_screen_string(char *s)
 // record that a string of characters was written to the screen
 {
@@ -863,11 +863,11 @@ static void expand_tabs(char *raw_string)
                                expanded_ptr - expanded_string);
                 end_of_line('\n');
 #endif // _WIN32
-#ifdef EUNIX
+#ifdef __unix
                 iputs(expanded_string, stdout);
                 iflush(stdout);
                 update_screen_string(expanded_string);
-#endif // EUNIX
+#endif // __unix
 
                 screen_col = 1;
                 expanded_ptr = expanded_string; // make it empty
@@ -903,7 +903,7 @@ static void expand_tabs(char *raw_string)
             end_of_line(c);
 #endif
 
-#ifdef EUNIX
+#ifdef __unix
             // curses advances to next line if given \r or \n beyond 80
             *expanded_ptr = '\0';
             iputs(expanded_string, stdout);
@@ -941,7 +941,7 @@ static void expand_tabs(char *raw_string)
 #ifdef _WIN32
         MyWriteConsole(expanded_string, expanded_ptr - expanded_string);
 #endif
-#ifdef EUNIX
+#ifdef __unix
         iputs(expanded_string, stdout);
         iflush(stdout);
         update_screen_string(expanded_string);
@@ -992,7 +992,7 @@ void screen_output(IFILE f, char *out_string)
     }
 
     else {
-#ifdef EUNIX
+#ifdef __unix
         if ((f == stdout && out_to_screen) ||
             (f == stderr && err_to_screen && (!low_on_space || have_console))) {
             if (current_screen != MAIN_SCREEN)
@@ -1077,7 +1077,7 @@ void ClearScreen()
     SetPosition(1,1);
 #endif
 
-#ifdef EUNIX
+#ifdef __unix
     // ANSI code
     SetTColor(current_fg_color);
     SetBColor(current_bg_color);
@@ -1093,12 +1093,12 @@ void ClearScreen()
 
 void SetPosition(int line, int col)
 {
-#ifdef EUNIX
+#ifdef __unix
 #define SP_buflen (20)
     char buff[SP_buflen];
 #endif
 
-#ifdef EUNIX
+#ifdef __unix
     snprintf(buff, SP_buflen, "\E[%d;%dH", line, col);
     iputs(buff, stdout);
     iflush(stdout);

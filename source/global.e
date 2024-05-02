@@ -256,16 +256,12 @@ export enum
 export constant
 	max_int32 = #3FFFFFFF
 
-ifdef not EU4_0 then
-	atom ptr = machine_func( 16, 8 )
-	poke( ptr, { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x3f } )
-	export constant
-			max_int64 = peek8s( ptr )
-	machine_proc( 17, ptr )
-elsedef    
-	export constant
-		max_int64 = 0x3fffffffffffffff
-end ifdef
+-- When building on 64-bit but with a 32-bit interpreter numbers are misread
+-- with rounding errors by the interpreter trying to interpret a 64-bit instance
+-- of the translator.  So, depending on that round off error, we will use a much 
+-- smaller maximum integer, so the code will always work.  Note BITS64 and friends
+-- do not help you here.
+export constant max_int64 = (0x4000_0000_0000_0000 = 0x3fff_ffff_ffff_ffff) * power(2,51) + (0x4000_0000_0000_0000 != 0x3fff_ffff_ffff_ffff) * power(2,62) - 1
 
 ifdef BITS64 then
 	export constant

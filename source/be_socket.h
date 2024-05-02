@@ -18,7 +18,7 @@
 	#include <netinet/in.h>
 	#include <arpa/inet.h>
 
-	#ifdef EUNIX
+	#ifdef __unix
         #include <unistd.h>
 
 		#ifdef EBSD

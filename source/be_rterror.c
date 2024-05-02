@@ -20,7 +20,7 @@
 #include <stdarg.h>
 #include <setjmp.h>
 
-#ifndef EUNIX
+#ifndef __unix
 #  if !defined(EMINGW)
 #    include <graph.h>
 #    include <bios.h>
@@ -28,7 +28,7 @@
 #  include <conio.h>
 #endif
 
-#ifdef EUNIX
+#ifdef __unix
 #include <sys/ioctl.h>
 #include <unistd.h>
 #endif
@@ -64,7 +64,7 @@
 #define MAX_VARS_PER_LINE 6
 #define MAX_TRACEBACK 100 /* maximum number of levels of traceback to show */
 
-#ifdef EUNIX
+#ifdef __unix
 #define FLIP_TO_MAIN 265  /* F1 */
 #define FLIP_TO_DEBUG 266 /* F2 */
 #define DOWN_ARROW 258
@@ -100,7 +100,7 @@ char *type_error_msg = "\ntype_check failure, ";   /* changeable message */
 /*******************/
 
 #ifndef BACKEND
-#ifdef EUNIX
+#ifdef __unix
 static int MainCol;   /* Main foreground color */
 static int MainBkCol; /* Main background color */
 #endif
@@ -199,7 +199,7 @@ static void set_bk_color(int c)
 		col = 7;
 	else if (col == _BLACK)
 		col = 0; 
-#ifdef EUNIX
+#ifdef __unix
 	else if (col == _BLUE)
 		col = 4;
 	else if (col == _YELLOW)
@@ -284,7 +284,7 @@ static void DisplayLine(long n, int highlight)
 	if (slist[n].options & (OP_PROFILE_STATEMENT | OP_PROFILE_TIME))
 		line += 4;
 	if (line[0] == END_OF_FILE_CHAR) {
-#ifdef EUNIX
+#ifdef __unix
 		append_string(TempBuff, "\376\n", TEMP_SIZE - strlen(TempBuff) - 1);
 #else
 		append_string(TempBuff, "\021\n", TEMP_SIZE - strlen(TempBuff) - 1);
@@ -347,7 +347,7 @@ static void Refresh(long line_num, int vars_too)
 		EClearLines(2 + vp.num_trace_lines, vp.lines, vp.columns, bottom_attrib); 
 #endif
 
-#if defined(EUNIX)
+#if defined(__unix)
 	if (vars_too && !(TEXT_MODE)) {
 		ClearScreen();
 	}
@@ -449,7 +449,7 @@ void MainScreen()
 #ifdef _WIN32
 		RestoreNormal();
 #endif
-#ifdef EUNIX
+#ifdef __unix
 		screen_copy(screen_image, alt_image_debug); // save debug screen
 		screen_copy(alt_image_main, screen_image); // restore main screen
 		screen_show();
@@ -461,7 +461,7 @@ void MainScreen()
 	screen_col = main_screen_col;
 	screen_line = main_screen_line;
 
-#ifdef EUNIX
+#ifdef __unix
 	SetTColor(MainCol);
 	SetBColor(MainBkCol);
 #endif
@@ -653,7 +653,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 #ifdef _WIN32         
 			SaveTrace();
 #else
-#ifdef EUNIX
+#ifdef __unix
 			screen_copy(screen_image, alt_image_debug);
 			blank_lines(0, vp.lines - 1);
 #else
@@ -674,7 +674,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 #ifdef _WIN32         
 			RestoreTrace();
 #else
-#ifdef EUNIX
+#ifdef __unix
 			screen_copy(alt_image_debug, screen_image);
 			screen_show();
 #else           
@@ -768,7 +768,7 @@ void ShowDebug()
 	RestoreTrace();
 #endif
 
-#ifdef EUNIX
+#ifdef __unix
 	MainCol = current_fg_color;
 	MainBkCol = current_bg_color;
 	screen_copy(screen_image, alt_image_main);
@@ -782,7 +782,7 @@ void ShowDebug()
 		for (i = 0; i < vp.display_size; i++) 
 			ClearSlot(i);
 		init_class();
-#ifndef EUNIX
+#ifndef __unix
 		conin = iopen("CON", "r");
 		if (conin == NULL)
 #endif
@@ -829,7 +829,7 @@ static void DebugCommand()
 		} else if (c == '2') {
 			c = FLIP_TO_DEBUG;
 		}
-#ifdef EUNIX
+#ifdef __unix
 		// must handle ANSI codes
 		if (c == 27) {
 			c = get_key(TRUE);
@@ -1569,7 +1569,7 @@ void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap)
 	Cleanup(1);
 }
 
-#ifdef EUNIX
+#ifdef __unix
 void CleanUpError(char *msg, symtab_ptr s_ptr, ...) __attribute__ ((noreturn));
 #endif
 
@@ -1687,7 +1687,7 @@ void INT_Handler(int sig_no)
 void GetViewPort(struct EuViewPort *vp)
 {
 	int l_var_lines;
-#ifdef EUNIX
+#ifdef __unix
 	struct winsize ws;
 #endif
 
@@ -1701,7 +1701,7 @@ void GetViewPort(struct EuViewPort *vp)
 
 #endif
 
-#ifdef EUNIX
+#ifdef __unix
 	if (consize_ioctl != 0 && !ioctl(STDIN_FILENO, TIOCGWINSZ, &ws)) {
 		line_max = ws.ws_row;
 		col_max = ws.ws_col;

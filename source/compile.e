@@ -6167,7 +6167,7 @@ end procedure
 procedure opGET_KEY()
 -- read an immediate key (if any) from the keyboard or return -1
     m_stmtln("#if _WIN32")
-		c_stmt0("show_console()")
+		c_stmt0("show_console();\n")
     m_stmtln("#endif")
 	CSaveStr("_0", Code[pc+1], 0, 0, 0)
 	c_stmt("@ = get_key(0);\n", Code[pc+1])
@@ -7700,6 +7700,9 @@ procedure BackEnd(atom ignore)
 
 	-- writing to init-.c
 
+	--c_stmt0("typedef unsigned int uintptr;\n")
+	c_stmt0("typedef signed int intptr ;\n")
+	
 	DeclareFileVars()
 	DeclareRoutineList()
 	DeclareNameSpaceList()
@@ -7735,7 +7738,7 @@ procedure BackEnd(atom ignore)
 		if atom(SymTab[tp][S_OBJ]) then -- can't be NOVALUE
 			-- double
 			c_stmt0("_")
-			c_printf("%d = NewDouble((eudouble)", SymTab[tp][S_TEMP_NAME])
+			c_printf("%d = NewDouble(", SymTab[tp][S_TEMP_NAME])
 			c_printf8(SymTab[tp][S_OBJ])
 			c_puts(");\n")
 		else
