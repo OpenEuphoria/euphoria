@@ -608,7 +608,6 @@ shrouder : $(BUILDDIR)/$(EUSHROUD)
 
 $(BUILDDIR)/intobj/main-.c : EU_TARGET=eui.ex
 $(BUILDDIR)/intobj/main-.c : $(BUILDDIR)/include/be_ver.h
-$(BUILDDIR)/intobj/main-.c : $(BUILDDIR)/include/be_ver.h
 
 euisource : $(BUILDDIR)/intobj/main-.c
 
@@ -670,7 +669,7 @@ endif
 $(BUILDDIR)/$(EEXU) :  EU_TARGET=eui.ex
 $(BUILDDIR)/$(EEXU) :  EU_MAIN=$(EU_CORE_FILES) $(EU_INTERPRETER_FILES) $(EU_STD_INC)
 $(BUILDDIR)/$(EEXU) :  $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) $(EU_STD_INC)
-$(BUILDDIR)/$(EEXU) :  $(wildcard $(BUILDDIR)/intobj/*.c) $(EU_TRANSLATOR_FILES) $(EUI_RES) $(EUIW_RES) $(wildcard be_*.c)
+$(BUILDDIR)/$(EEXU) :  $(wildcard $(BUILDDIR)/intobj/*.c) $(EU_TRANSLATOR_FILES) $(EUI_RES) $(EUIW_RES) $(wildcard $(TRUNKDIR)/source/be_*.c)
 $(BUILDDIR)/$(EEXU) :  $(BUILDDIR)/include/be_ver.h $(TRUNKDIR)/source/pcre/*.c
 ifeq "$(OBJDIR)" "intobj"
 $(BUILDDIR)/$(EEXU) :  EU_OBJS="$(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(PREFIXED_PCRE_OBJECTS)"
@@ -697,7 +696,7 @@ endif
 
 $(BUILDDIR)/$(EECU) :  EU_TARGET=euc.ex
 $(BUILDDIR)/$(EECU) :  EU_MAIN=$(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_STD_INC)
-$(BUILDDIR)/$(EECU) :  $(wildcard $(BUILDDIR)/transobj/*.c) $(EU_MAIN) $(EU_TRANSLATOR_FILES) $(EUI_RES) $(EUIW_RES) $(wildcard be_*.c)
+$(BUILDDIR)/$(EECU) :  $(wildcard $(BUILDDIR)/transobj/*.c) $(EU_MAIN) $(EU_TRANSLATOR_FILES) $(EUI_RES) $(EUIW_RES) $(wildcard $(TRUNKDIR)/source/be_*.c)
 $(BUILDDIR)/$(EECU) :  $(BUILDDIR)/include/be_ver.h $(TRUNKDIR)/source/pcre/*.c $(EUC_RES)
 ifeq "$(OBJDIR)" "transobj"
 $(BUILDDIR)/$(EECU) :  EU_OBJS="$(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) $(PREFIXED_PCRE_OBJECTS)"
@@ -727,7 +726,7 @@ ifeq "$(OBJDIR)" "backobj"
 $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) :  EU_OBJS="$(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) $(PREFIXED_PCRE_OBJECTS)"
 $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) :  $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) $(PREFIXED_PCRE_OBJECTS)
 $(BUILDDIR)/$(EBACKENDC) $(BUILDDIR)/$(EBACKENDW) :  $(EUB_RES) $(EUBW_RES)
-	$(CC) $(EOSFLAGS) $(EUB_RES) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(DEBUG_FLAGS) $(MSIZE) $(PROFILE_FLAGS) -o $(BUILDDIR)/$(EBACKENDC)
+	$(CC) $(EOSFLAGSCONSOLE) $(EUB_RES) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(DEBUG_FLAGS) $(MSIZE) $(PROFILE_FLAGS) -o $(BUILDDIR)/$(EBACKENDC)
 ifeq "$(EMINGW)" "1"
 	$(CC) $(EOSFLAGS) $(EUBW_RES) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(DEBUG_FLAGS) $(MSIZE) $(PROFILE_FLAGS) -o $(BUILDDIR)/$(EBACKENDW)
 endif
@@ -749,13 +748,11 @@ endif
 .PHONY: update-version-cache
 update-version-cache : $(BUILDDIR)/ver.cache
 
-$(MKVER): mkver.c $(BUILDDIR)/include/
+$(MKVER): mkver.c | $(BUILDDIR)/include/
 	$(HOSTCC) -o $@ $<
 
-$(BUILDDIR)/ver.cache : $(MKVER) $(EU_BACKEND_RUNNER_FILES) $(EU_TRANSLATOR_FILES) $(EU_INTERPRETER_FILES) $(EU_CORE_FILES) $(EU_STD_INC) $(wildcard *.c)
+$(BUILDDIR)/include/be_ver.h $(BUILDDIR)/ver.cache : $(EU_BACKEND_RUNNER_FILES) $(EU_TRANSLATOR_FILES) $(EU_INTERPRETER_FILES) $(EU_CORE_FILES) $(EU_STD_INC) $(wildcard $(TRUNKDIR)/source/be_*.c) $(wildcard $(TRUNKDIR)/.git/index) | $(MKVER) $(BUILD_DIRS)
 	$(MKVER) "$(HG)" "$(BUILDDIR)/ver.cache" "$(BUILDDIR)/include/be_ver.h" $(EREL_TYPE)$(RELEASE)
-
-$(BUILDDIR)/include/be_ver.h:  $(BUILDDIR)/ver.cache $(BUILD_DIRS)
 
 ###############################################################################
 #
@@ -1010,7 +1007,7 @@ $(BUILDDIR)/eudist-build/main-.c : $(TRUNKDIR)/source/eudist.ex
 		-silent -makefile -eudir $(CYPTRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) $(MINGW_FLAGS) $(TRUNKDIR)/source/eudist.ex
 
 $(BUILDDIR)/$(EUDIST) : $(TRUNKDIR)/source/eudist.ex $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA) $(BUILDDIR)/eudist-build/main-.c | $(BUILDDIR)
-	$(MAKE) -C "$(BUILDDIR)/eudist-build" -f eudist.mak
+	$(MAKE) -C "$(BUILDDIR)/eudist-build" -f eudist.mak CC="$(CC)"
 
 
 $(BUILDDIR)/eudis-build/main-.c : $(TRUNKDIR)/source/dis.ex  $(TRUNKDIR)/source/dis.e $(TRUNKDIR)/source/dox.e
@@ -1019,40 +1016,39 @@ $(BUILDDIR)/eudis-build/main-.c : $(EU_INTERPRETER_FILES)
 	$(TRANSLATE) -arch $(TARCH_FLAG) -build-dir "$(CYPBUILDDIR)/eudis-build" -c "$(CYPBUILDDIR)/eu.cfg" -o "$(CYPBUILDDIR)/$(EUDIS)" -lib "$(CYPBUILDDIR)/eu.a" \
 		-silent -makefile -eudir $(CYPTRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) $(MINGW_FLAGS) $(CYPTRUNKDIR)/source/dis.ex
 
-$(BUILDDIR)/$(EUDIS) : $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA) $(BUILDDIR)/eudis-build/main-.c  $(BUILDDIR)/$(EECUA)
-	$(MAKE) -C "$(BUILDDIR)/eudis-build" -f dis.mak
-
+$(BUILDDIR)/$(EUDIS) : $(BUILDDIR)/eudis-build/main-.c | $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA)
+	$(MAKE) -C "$(BUILDDIR)/eudis-build" -f dis.mak CC="$(CC)"
 
 $(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/eubind.ex $(EU_INTERPRETER_FILES) $(EU_BACKEND_RUNNER_FILES) $(EU_CORE_FILES)
 	$(TRANSLATE) -arch $(TARCH_FLAG) -build-dir "$(CYPBUILDDIR)/bind-build" -c "$(CYPBUILDDIR)/eu.cfg" -o "$(CYPBUILDDIR)/$(EUBIND)" -lib "$(CYPBUILDDIR)/eu.a" \
 		-silent -makefile -eudir $(CYPTRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) $(MINGW_FLAGS) $(CYPTRUNKDIR)/source/eubind.ex
 
-$(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA)
-	$(MAKE) -C "$(CYPBUILDDIR)/bind-build" -f eubind.mak
+$(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c | $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA)
+	$(MAKE) -C "$(CYPBUILDDIR)/bind-build" -f eubind.mak CC="$(CC)"
 
 
 $(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/eushroud.ex $(EU_BACKEND_RUNNER_FILES) $(EU_CORE_FILES)
 	$(TRANSLATE) -arch $(TARCH_FLAG) -build-dir "$(CYPBUILDDIR)/shroud-build" -c "$(CYPBUILDDIR)/eu.cfg" -o "$(CYPBUILDDIR)/$(EUSHROUD)" -lib "$(CYPBUILDDIR)/eu.a" \
 		-silent -makefile -eudir $(CYPTRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) $(MINGW_FLAGS) $(CYPTRUNKDIR)/source/eushroud.ex
 
-$(BUILDDIR)/$(EUSHROUD) : $(BUILDDIR)/shroud-build/main-.c $(BUILDDIR)/$(EECUA)
-	$(MAKE) -C "$(CYPBUILDDIR)/shroud-build" -f eushroud.mak
+$(BUILDDIR)/$(EUSHROUD) : $(BUILDDIR)/shroud-build/main-.c | $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA)
+	$(MAKE) -C "$(CYPBUILDDIR)/shroud-build" -f eushroud.mak CC="$(CC)"
 
 
 $(BUILDDIR)/eutest-build/main-.c : $(TRUNKDIR)/source/eutest.ex
 	$(TRANSLATE) -arch $(TARCH_FLAG) -build-dir "$(CYPBUILDDIR)/eutest-build" -c "$(CYPBUILDDIR)/eu.cfg" -o "$(CYPBUILDDIR)/$(EUTEST)" -lib "$(CYPBUILDDIR)/eu.a" \
 		-silent -makefile -eudir $(CYPTRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) $(MINGW_FLAGS) $(CYPTRUNKDIR)/source/eutest.ex
 
-$(BUILDDIR)/$(EUTEST) : $(BUILDDIR)/eutest-build/main-.c  $(BUILDDIR)/$(EECUA)
-	$(MAKE) -C "$(BUILDDIR)/eutest-build" -f eutest.mak
+$(BUILDDIR)/$(EUTEST) : $(BUILDDIR)/eutest-build/main-.c | $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA)
+	$(MAKE) -C "$(BUILDDIR)/eutest-build" -f eutest.mak CC="$(CC)"
 
 
 $(BUILDDIR)/eucoverage-build/main-.c : $(TRUNKDIR)/bin/eucoverage.ex
 	$(TRANSLATE) -arch $(TARCH_FLAG) -build-dir "$(CYPBUILDDIR)/eucoverage-build" -c "$(CYPBUILDDIR)/eu.cfg" -o "$(CYPBUILDDIR)/$(EUCOVERAGE)" -lib "$(CYPBUILDDIR)/eu.a" \
 		-silent -makefile -eudir $(CYPTRUNKDIR) $(EUC_CFLAGS) $(EUC_LFLAGS) $(MINGW_FLAGS) $(CYPTRUNKDIR)/bin/eucoverage.ex
 
-$(BUILDDIR)/$(EUCOVERAGE) : $(BUILDDIR)/eucoverage-build/main-.c $(BUILDDIR)/$(EECUA)
-	$(MAKE) -C "$(CYPBUILDDIR)/eucoverage-build" -f eucoverage.mak
+$(BUILDDIR)/$(EUCOVERAGE) : $(BUILDDIR)/eucoverage-build/main-.c | $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA)
+	$(MAKE) -C "$(CYPBUILDDIR)/eucoverage-build" -f eucoverage.mak CC="$(CC)"
 
 
 EU_TOOLS= \
