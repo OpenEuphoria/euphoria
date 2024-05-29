@@ -170,7 +170,7 @@ procedure PopGoto()
 	label_block = goto_stack[$][7]
 	goto_init   = goto_stack[$][8]
 	
-	goto_stack = remove( goto_stack, length( goto_stack ) )
+	goto_stack = eu:remove( goto_stack, length( goto_stack ) )
 	
 end procedure
 
@@ -683,7 +683,7 @@ function next_token()
 
 	if length(backed_up_tok) > 0 then
 		t = backed_up_tok[$]
-		backed_up_tok = remove( backed_up_tok, length( backed_up_tok ) )
+		backed_up_tok = eu:remove( backed_up_tok, length( backed_up_tok ) )
 		if putback_fwd_line_number then
 			
 			ForwardLine     = putback_ForwardLine
@@ -1171,7 +1171,7 @@ procedure Object_call( token tok )
 					putback(tok2)
 					tok_match(RIGHT_SQUARE)
 					subs_depth -= 1
-					current_sequence = remove( current_sequence, length( current_sequence ) )
+					current_sequence = eu:remove( current_sequence, length( current_sequence ) )
 					emit_op(RHS_SUBS)
 					-- current_sequence will be updated
 				end if
@@ -1179,7 +1179,7 @@ procedure Object_call( token tok )
 				lhs_subs_level = save_lhs_subs_level
 				tok2 = next_token()
 			end while
-			current_sequence = remove( current_sequence, length( current_sequence ) )
+			current_sequence = eu:remove( current_sequence, length( current_sequence ) )
 			putback(tok2)
 			--short_circuit += 1
 
@@ -1302,14 +1302,14 @@ procedure Factor()
 					putback(tok)
 					tok_match(RIGHT_SQUARE)
 					subs_depth -= 1
-					current_sequence = remove( current_sequence, length( current_sequence ) )
+					current_sequence = eu:remove( current_sequence, length( current_sequence ) )
 					emit_op(RHS_SUBS) -- current_sequence will be updated
 				end if
 				factors = save_factors
 				lhs_subs_level = save_lhs_subs_level
 				tok = next_token()
 			end while
-			current_sequence = remove( current_sequence, length( current_sequence ) )
+			current_sequence = eu:remove( current_sequence, length( current_sequence ) )
 			putback(tok)
 			short_circuit += 1
 
@@ -1645,7 +1645,7 @@ procedure Assignment(token left_var)
 		subs_depth += 1
 		if lhs_ptr then
 			-- multiple lhs subscripts, evaluate first n-1 of them with this
-			current_sequence = remove( current_sequence, length( current_sequence ) )
+			current_sequence = eu:remove( current_sequence, length( current_sequence ) )
 			if subs = 1 then
 				-- first subscript of 2 or more
 				subs1_patch = length(Code)+1
@@ -1791,7 +1791,7 @@ procedure Assignment(token left_var)
 		end if
 	end if
 
-	current_sequence = remove( current_sequence, length( current_sequence ) )
+	current_sequence = eu:remove( current_sequence, length( current_sequence ) )
 
 	if not TRANSLATE then
 		if OpTrace then
@@ -1870,7 +1870,7 @@ procedure Multi_assign()
 			integer len = length( Code )
 			if Code[len] = temp_sym then
 				-- RHS_SUBS may try to NOVALUE_TEMP our temp_sym...we don't want that
-				Code = remove( Code, len - 1, len )
+				Code = eu:remove( Code, len - 1, len )
 			end if
 			emit_op( ASSIGN )
 			
@@ -2917,7 +2917,7 @@ procedure While_statement()
 		backpatch(bp2, length(Code)+1)
 	end if
 	exit_loop(exit_base)
-	entry_stack = remove( entry_stack, length( entry_stack ) )
+	entry_stack = eu:remove( entry_stack, length( entry_stack ) )
 	push_temps( temps )
 end procedure
 

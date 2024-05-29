@@ -985,7 +985,7 @@ export procedure inline_deferred_calls()
 						if is_func then
 							-- push the return target
 							Push( op[$] )
-							op = remove( op, length(op) )
+							op = eu:remove( op, length(op) )
 						end if
 						
 						-- push the parameters
