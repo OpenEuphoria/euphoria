@@ -46,7 +46,7 @@ jobs:
       - name: Install Compilers (Linux ARM)
         id: install-compilers-linux-arm
         if: matrix.platform == 'linux-arm'
-        run: sudo apt-get -qy install {binutils,gcc}-arm-linux-gnu
+        run: sudo apt-get -qy install {binutils,gcc}-arm-linux-gnueabihf
 
       - name: Install Compilers (Linux x86)
         id: install-compilers-linux-x86
