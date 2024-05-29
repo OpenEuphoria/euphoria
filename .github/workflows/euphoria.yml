@@ -3,66 +3,107 @@ name: Euphoria
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
+    tags:
+      - 4.2*
   pull_request:
-    branches: [ master ]
+    branches:
+      - master
   workflow_dispatch:
 
 jobs:
   build-euphoria:
     name: Build Euphoria
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
-        plat: ['LINUX','WINDOWS']
-        arch: ['x86','x86_64']
+        platform: [linux-arm, linux-x86, linux-x64, windows-x86, windows-x64]
     defaults:
       run:
         working-directory: ./source
     steps:
-      - name: Checkout Repository
-        id: checkout-repository
-        uses: actions/checkout@v2
+      - name: Checkout euphoria
+        id: checkout-euphoria-repo
+        uses: actions/checkout@v4
+
+      - name: Checkout creole
+        id: checkout-creole-repo
+        uses: actions/checkout@v4
+        with:
+          repository: OpenEuphoria/creole
+          path: source/creole
+          ref: master
+
+      - name: Checkout eudoc
+        id: checkout-eudoc-repo
+        uses: actions/checkout@v4
+        with:
+          repository: OpenEuphoria/eudoc
+          path: source/eudoc
+          ref: master
+
+      - name: Install Compilers (Linux ARM)
+        id: install-compilers-linux-arm
+        if: matrix.platform == 'linux-arm'
+        run: sudo apt-get -qy install {binutils,gcc}-arm-linux-gnu
+
       - name: Install Compilers (Linux x86)
         id: install-compilers-linux-x86
-        if: matrix.plat == 'LINUX' && matrix.arch == 'x86'
-        run: |
-          sudo apt-get -qy install {binutils,gcc}-i686-linux-gnu
-          echo "cc-prefix=i686-linux-gnu-" >> $GITHUB_ENV
+        if: matrix.platform == 'linux-x86'
+        run: sudo apt-get -qy install {binutils,gcc}-i686-linux-gnu
+
       - name: Install Compilers (Windows x86)
         id: install-compilers-windows-x86
-        if: matrix.plat == 'WINDOWS' && matrix.arch == 'x86'
-        run: |
-          sudo apt-get -qy install {binutils,gcc}-mingw-w64-i686
-          echo "cc-prefix=i686-w64-mingw32-" >> $GITHUB_ENV
+        if: matrix.platform == 'windows-x86'
+        run: sudo apt-get -qy install {binutils,gcc}-mingw-w64-i686
+
       - name: Install Compilers (Windows x64)
         id: install-compilers-windows-x64
-        if: matrix.plat == 'WINDOWS' && matrix.arch == 'x86_64'
-        run: |
-          sudo apt-get -qy install {binutils,gcc}-mingw-w64-x86-64
-          echo "cc-prefix=x86_64-w64-mingw32-" >> $GITHUB_ENV
+        if: matrix.plat == 'windows-x64'
+        run: sudo apt-get -qy install {binutils,gcc}-mingw-w64-x86-64
+
+      - name: Install Ccache
+        id: install-ccache
+        run: sudo apt-get -qy install ccache
+
       - name: Install Euphoria
         id: install-euphoria
         run: |
           wget -q https://github.com/OpenEuphoria/euphoria/releases/download/4.1.0/euphoria-4.1.0-Linux-x64-57179171dbed.tar.gz -O- | sudo tar -C /usr/local -xz euphoria-4.1.0-Linux-x64/{bin,include}
           cd /usr/local/bin; sudo find /usr/local/euphoria-4.1.0-Linux-x64/bin -type f -executable -exec ln -s {} \;
-      - name: Run Configure
-        id: run-configure
-        run: ./configure --arch='${{matrix.arch}}' --plat='${{matrix.plat}}' --cc-prefix='${{env.cc-prefix}}'
+
+      - name: Save/Load Cache
+        id: save-load-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache/
+          key: ccache=${{matrix.platform}}
+
       - name: Build Euphoria
         id: build-euphoria
         run: |
-          make all
-          make htmldoc
+          make -f build.mak -j$(nproc) PLATFORM=${{matrix.platform}} USE_CCACHE=1 WITH_CREOLE=1 WITH_EUDOC=1
           echo "euphoria-version=$(./build/echoversion)" >> $GITHUB_ENV
+
       - name: Get Short Hash
         id: get-short-hash
-        uses: benjlevesque/short-sha@v1.2
+        uses: benjlevesque/short-sha@v2.2
+
       - name: Upload Artifacts
         id: upload-artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: euphoria-${{env.euphoria-version}}-${{matrix.plat}}-${{matrix.arch}}-${{env.SHA}}
+          name: euphoria-${{env.euphoria-version}}-${{matrix.platform}}-${{env.SHA}}
           path: |
-            ./source/build/
+            ./source/build-${{matrix.platform}}/
+            ./source/config-${{matrix.platform}}}.gnu
             !./source/build/**/*.o
+
+      - name: Publish Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          body_path: ../docs/release/${{env.euphoria-version}}.txt
+          prerelease: true
+          files: euphoria-${{env.euphoria-version}}-${{matrix.platform}}-${{env.SHA}}.*
