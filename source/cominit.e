@@ -122,28 +122,10 @@ export procedure show_banner()
 		memory_type = GetMsgText(USING_SYSTEM_MEMORY,0)
 	end ifdef
 
-	sequence misc_info = {
-		info:arch_bits(),
-		info:platform_name(), 
-		memory_type, 
-		"", 
-		info:version_date(),
-		info:version_node(TRUE) -- full node
-	}
+	screen_output(STDERR, sprintf("%s v%s %s\n", {prod_name,info:version_string_short(),info:version_type()}))
+	screen_output(STDERR, sprintf("   %s %s, %s\n", {info:arch_bits(),info:platform_name(),memory_type}))
+	screen_output(STDERR, sprintf("   Revision Date: %s, Id: %s\n", {info:version_date(),info:version_node(FALSE,7)}))
 
---	if info:is_developmental then
---		misc_info[$] = sprintf("%d:%s", { info:version_revision(), info:version_node() })
---	end if
-
-	object EuConsole = getenv("EUCONS")
-	if equal(EuConsole, "1") then
-		misc_info[4] = GetMsgText(EUCONSOLE,0)
-	else
-		misc_info = eu:remove(misc_info, 4)
-	end if
-
-	screen_output(STDERR, sprintf("%s v%s %s\n   %s %s, %s\n   Revision Date: %s\n   Id: %s\n", {
-		prod_name, info:version_string_short(), info:version_type() } & misc_info ) )
 end procedure
 
 -- Taken from std/cmdline.e :-(
