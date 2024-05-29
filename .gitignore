@@ -5,12 +5,17 @@ config.gnu
 config-*.gnu
 Makefile
 version.txt
+*.bak*
 *.swp
+*.tar.gz
+*.zip
 build
 *~
 **/#*#
 .*.marks
 source/build
 source/build-*
+source/creole
+source/eudoc
 tests/return15
 tests/warnings_issued*.txt
