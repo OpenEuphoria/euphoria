@@ -129,20 +129,21 @@ end function
 --
 -- Parameters:
 --   * ##full## - If TRUE, the full node id is returned. If FALSE
---     only the first 12 characters of the node id is returned.
+--     only the first ##n## characters of the node id is returned.
 --     Typically the short node id is considered unique.
+--   * ##n## - Maximum number of characters to return.
 --
 -- Returns:
 --   A text **sequence**, containing the source code management systems
 --   node id that globally identifies the executing Euphoria.
 --
 
-public function version_node(integer full = 0)
-	if full or length(version_info[NODE]) < 12 then
+public function version_node(integer full = 0, integer n = 12)
+	if full or length(version_info[NODE]) < n then
 		return version_info[NODE]
 	end if
 
-	return version_info[NODE][1..12]
+	return version_info[NODE][1..n]
 end function
 
 --**
