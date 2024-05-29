@@ -60,7 +60,7 @@ jobs:
 
       - name: Install Compilers (Windows x64)
         id: install-compilers-windows-x64
-        if: matrix.plat == 'windows-x64'
+        if: matrix.platform == 'windows-x64'
         run: sudo apt-get -qy install {binutils,gcc}-mingw-w64-x86-64
 
       - name: Install Ccache
