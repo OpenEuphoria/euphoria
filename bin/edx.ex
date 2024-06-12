@@ -104,7 +104,7 @@ ifdef UNIX then
 	ESCAPE = 27
 	CR = 10
 	NUM_PAD_ENTER = 10
-	BS = 127 -- 263
+	BS = 8 -- 127 -- 263 -- BACKSPACE
 	HOME = 262 
 	END = 360 
 	CONTROL_HOME = CONTROL_T -- (top)
@@ -210,14 +210,14 @@ constant INITIAL_LINES = 43,  -- when editor starts up
 		 FINAL_LINES = 43     -- when editor is finished
 
 -- colors
-constant TOP_LINE_TEXT_COLOR = BLACK,
-		 TOP_LINE_BACK_COLOR = BROWN, 
-		 TOP_LINE_DIM_COLOR = BLUE,
-		 BACKGROUND_COLOR = WHITE
+constant TOP_LINE_TEXT_COLOR = WHITE,
+		 TOP_LINE_BACK_COLOR = BLUE, 
+		 TOP_LINE_DIM_COLOR = YELLOW,
+		 BACKGROUND_COLOR = BLACK
 
 -- colors needed by syncolor.e:
 -- Adjust to suit your monitor and your taste.
-global constant NORMAL_COLOR = BLACK,   -- GRAY might look better
+global constant NORMAL_COLOR = WHITE,   -- GRAY might look better
 				COMMENT_COLOR = RED,
 				KEYWORD_COLOR = BLUE,
 				BUILTIN_COLOR = MAGENTA,
