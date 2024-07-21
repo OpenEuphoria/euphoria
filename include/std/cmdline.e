@@ -114,7 +114,8 @@ public enum
 	NO_AT_EXPANSION,
 
 	--**
-	-- Supply a message to display and pause just prior to ##abort## being called.
+	-- When running in a GUI environment, supply a message to display and 
+    -- pause just prior to ##abort## being called.
 	PAUSE_MSG,
 
 	--**
@@ -165,17 +166,22 @@ enum
 	CALLBACK    = 5,
 	MAPNAME     = 6
 
-sequence pause_msg = ""
+sequence pause_msg = "" -- User defined message that is displayed if an abortable error found.
 
+--------------------------------
 procedure local_abort(integer lvl)
-	if length(pause_msg) != 0 then
-		console:maybe_any_key(pause_msg, 1)
+--------------------------------
+	if length(pause_msg) != 0 then  -- check for a user-defined message 
+	   console:maybe_any_key(pause_msg, 1)  -- If there is one, display and wait for keystroke.
 	end if
 
-	abort(lvl)
+	abort(lvl)  -- Stop execution of program.
 end procedure
 
+
+--------------------------------
 procedure check_for_bad_combos( sequence opts, integer opt1, integer opt2, sequence error_message )
+--------------------------------
 	-- Checks for illegal combinations of options, and crashes if found
 	if find( opt1, opts[OPTIONS]) then
 		if find( opt2, opts[OPTIONS]) then
@@ -184,7 +190,9 @@ procedure check_for_bad_combos( sequence opts, integer opt1, integer opt2, seque
 	end if
 end procedure
 
+--------------------------------
 function has_duplicate( sequence opts, sequence opt, integer name_type, integer start_from )
+--------------------------------
 	if sequence( opt[name_type] ) then
 		sequence opt_name = opt[name_type]
 		for i = start_from + 1 to length( opts ) do
@@ -196,7 +204,9 @@ function has_duplicate( sequence opts, sequence opt, integer name_type, integer 
 	return 0
 end function
 
+--------------------------------
 procedure check_for_duplicates( sequence opts )
+--------------------------------
 	-- Check for duplicate option records.
 	for i = 1 to length(opts) do
 		sequence opt
@@ -215,7 +225,9 @@ procedure check_for_duplicates( sequence opts )
 
 end procedure
 
+--------------------------------
 function update_opts( sequence opts )
+--------------------------------
 	-- Cleans up the options, making sure they're appropriate size,
 	-- adds default values where appropriate, and checks for 
 	-- some illegal combinations.
@@ -307,7 +319,9 @@ function update_opts( sequence opts )
 	return opts
 end function
 
+--------------------------------
 function standardize_help_options( sequence opts, integer auto_help_switches )
+--------------------------------
 	
 	-- Insert the default 'help' options if one is not already being used.
 	integer has_h = 0, has_help = 0, has_question = 0
@@ -351,8 +365,11 @@ function standardize_help_options( sequence opts, integer auto_help_switches )
 	end if
 	return opts
 end function
+
 -- Local routine to validate and reformat option records if they are not in the standard format.
+--------------------------------
 function standardize_opts(sequence opts, integer auto_help_switches)
+--------------------------------
 	
 	opts = update_opts( opts )
 	
@@ -378,7 +395,9 @@ function standardize_opts(sequence opts, integer auto_help_switches)
 	return opts
 end function
 
+--------------------------------
 function print_help( sequence opts, sequence cmds )
+--------------------------------
 	-- Calculate the size of the padding required to keep option text aligned.
 	-- Prints help for each option and the extras.
 	integer pad_size = 0
@@ -465,7 +484,9 @@ function print_help( sequence opts, sequence cmds )
 	return pad_size
 end function
 
+--------------------------------
 procedure print_extras_help( sequence opts, integer extras_mandatory, integer extras_opt )
+--------------------------------
 	-- Print help about the extras
 	if extras_mandatory != 0 then
 		if length(opts[extras_opt][DESCRIPTION]) > 0 then
@@ -484,7 +505,9 @@ procedure print_extras_help( sequence opts, integer extras_mandatory, integer ex
 	end if
 end procedure
 
+--------------------------------
 procedure local_help(sequence opts, object add_help_rid = -1, sequence cmds = command_line(), 
+--------------------------------
 		integer std = 0, object parse_options = {})
 	
 	sequence cmd
@@ -528,7 +551,9 @@ procedure local_help(sequence opts, object add_help_rid = -1, sequence cmds = co
 	
 end procedure
 
+--------------------------------
 procedure call_user_help( object add_help_rid )
+--------------------------------
 	if atom(add_help_rid) then
 		if add_help_rid >= 0 then
 			puts(1, "\n")
@@ -554,7 +579,9 @@ procedure call_user_help( object add_help_rid )
 	end if
 end procedure
 
+--------------------------------
 procedure print_option_help( sequence opt, integer pad_size )
+--------------------------------
 	if atom(opt[SHORTNAME]) and atom(opt[LONGNAME]) then
 		-- Ignore 'extras' record
 		return
@@ -783,11 +810,15 @@ end procedure
 -- }}}
 --
 
+--------------------------------
 public procedure show_help(sequence opts, object add_help_rid=-1, sequence cmds = command_line(), object parse_options = {})
+--------------------------------
     local_help(opts, add_help_rid, cmds, 0, parse_options)
 end procedure
 
+--------------------------------
 function find_opt(sequence opts, sequence opt_style, object cmd_text)
+--------------------------------
 	sequence opt_name
 	object opt_param
 	integer param_found = 0
@@ -877,7 +908,9 @@ function find_opt(sequence opts, sequence opt_style, object cmd_text)
 	return {0, "Unrecognised"}
 end function
 
+--------------------------------
 function get_help_options( sequence opts )
+--------------------------------
 	sequence help_opts = {}
 	
 	for i = 1 to length(opts) do
@@ -901,8 +934,10 @@ function get_help_options( sequence opts )
 	return help_opts
 end function
 
+--------------------------------
 function parse_at_cmds( sequence cmd, sequence cmds, sequence opts, integer arg_idx, object add_help_rid,
 						object parse_options, integer help_on_error, integer auto_help )
+--------------------------------
 	-- Called to parse out a command option that's an @file
 	-- returns the new list of commands after expansion
 	
@@ -963,8 +998,10 @@ function parse_at_cmds( sequence cmd, sequence cmds, sequence opts, integer arg_
 end function
 
 
+--------------------------------
 procedure check_mandatory( sequence opts, map parsed_opts, object add_help_rid, sequence cmds, object parse_options,
 	integer help_on_error, integer auto_help )
+--------------------------------
 	-- Check options to make sure all the manadory options are covered
 	for i = 1 to length(opts) do
 		if find(MANDATORY, opts[i][OPTIONS]) then
@@ -993,8 +1030,10 @@ procedure check_mandatory( sequence opts, map parsed_opts, object add_help_rid, 
 	end for
 end procedure
 
+--------------------------------
 procedure parse_abort( sequence format_msg, sequence msg_data,
 		sequence opts, object add_help_rid, sequence cmds, object parse_options, integer help_on_error, integer auto_help )
+--------------------------------
 -- something is wrong with the option
 	printf(1, format_msg, msg_data)
 	if help_on_error then
@@ -1005,9 +1044,11 @@ procedure parse_abort( sequence format_msg, sequence msg_data,
 	local_abort(1)
 end procedure
 
+--------------------------------
 function parse_commands( sequence cmds, sequence opts, map parsed_opts, sequence help_opts, 
 		object add_help_rid, object parse_options, integer use_at, integer validation, 
 		integer has_extra, sequence call_count, integer help_on_error, integer auto_help )
+--------------------------------
 	-- Parses the actual command line vs the options
 	-- Returns a two element sequence:
 	--  1: the list of command line options (may be altered due to @file expansion)
@@ -1096,7 +1137,7 @@ function parse_commands( sequence cmds, sequence opts, map parsed_opts, sequence
 			ifdef UNITTEST then
 				return 0
 			end ifdef
-			local_abort(0)
+			local_abort(0)  -- Do not execute program if HELP was requested.
 		end if
 
 		find_result = find_opt(opts, type_, cmd[from_..$])
@@ -1125,9 +1166,11 @@ function parse_commands( sequence cmds, sequence opts, map parsed_opts, sequence
 	return { cmds, call_count }
 end function
 
+--------------------------------
 function handle_opt( sequence find_result, integer arg_idx, sequence opts, map parsed_opts,
 		sequence cmds, object add_help_rid, object parse_options, sequence call_count,
 		integer validation, integer help_on_error, integer auto_help )
+--------------------------------
 	-- Called to deal with an option found on the command line
 	-- Returns 2 element sequence:
 	--  1: the new arg_idx
@@ -1251,6 +1294,11 @@ end function
 --   routine_id of a procedure that accepts no parameters, or a sequence containing
 --   lines of text (one line per element).  The procedure is expected
 --   to write text to the stdout device.
+-- # ##PAUSE_MSG## ~-- The next Parse Option must be some text that will be displayed
+--   if an error is detected during the parsing of options. The user must press a
+--   key to continue after the text is displayed. //NOTE//: This only applies when
+--   the application is running in a GUI environment. Has no effect when running
+--   as a command-line program.
 -- # ##NO_HELP_ON_ERROR## ~-- Do not show a list of options on a command line error.
 -- # ##NO_HELP## ~-- Do not automatically add the switches '-h', '-?', and '--help'
 --   to display the help text (if any).
@@ -1449,7 +1497,9 @@ end function
 -- See Also:
 --   [[:show_help]], [[:command_line]]
 
+--------------------------------
 public function cmd_parse(sequence opts, object parse_options = {}, sequence cmds = command_line())
+--------------------------------
 	sequence cmd
 	sequence help_opts
 	sequence call_count
@@ -1491,9 +1541,9 @@ public function cmd_parse(sequence opts, object parse_options = {}, sequence cmd
 			case PAUSE_MSG then
 				if po < length(parse_options) then
 					po += 1
-					pause_msg = parse_options[po]
+					pause_msg = parse_options[po]  -- Grab the user defined abort message text.
 				else
-					error:crash("PAUSE_MSG was given to cmd_parse with no actual message text")
+					error:crash("PAUSE_MSG is missing any message text")
 				end if
 				
 			case else
@@ -1575,7 +1625,9 @@ end function
 --   [[:parse_commandline]], [[:system]], [[:system_exec]], [[:command_line]], 
 --   [[:canonical_path]],  [[:TO_SHORT]] 
 
+--------------------------------
 public function build_commandline(sequence cmds)
+--------------------------------
 	return stdseq:flatten( text:quote( cmds,,'\\'," " ), " ")
 end function
 
@@ -1599,6 +1651,8 @@ end function
 --   [[:build_commandline]]
 --
 
+--------------------------------
 public function parse_commandline(sequence cmdline)
+--------------------------------
 	return keyvalues(cmdline, " ", ":=", "\"'`", " \t\r\n", 0)
 end function
