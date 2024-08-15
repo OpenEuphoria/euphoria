@@ -50,10 +50,11 @@ WITH_EUBIN ?= 0
 USE_CCACHE ?= $(HAVE_CCACHE)
 VERBOSE ?= 0
 
-MAKEFILE_NAME := $(abspath $(lastword $(MAKEFILE_LIST)))
-TRUNKDIR := $(abspath $(dir $(MAKEFILE_NAME))..)
+MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
+MAKEFILE_NAME := $(notdir $(MAKEFILE_PATH))
+TRUNKDIR := $(abspath $(dir $(MAKEFILE_PATH))..)
 
-PLATFORMS := linux-arm linux-x86 linux-x64 windows-x86 windows-x64
+PLATFORMS := linux-arm linux-arm64 linux-x86 linux-x64 windows-x86 windows-x64
 RELEASE ?= release
 
 ifeq ($(findstring $(PLATFORM),$(PLATFORMS)),)
@@ -66,10 +67,16 @@ MIN_VER := $(word 3,$(shell grep MIN_VER version.h))
 PAT_VER := $(word 3,$(shell grep PAT_VER version.h))
 VERSION := $(MAJ_VER).$(MIN_VER).$(PAT_VER)
 
+CC_SUFFIX := gcc
+
 ifeq ($(PLATFORM),linux-arm)
   ARCH := ARM
   PLAT := LINUX
   CC_PREFIX := arm-linux-gnueabihf-
+else ifeq ($(PLATFORM),linux-arm64)
+  ARCH := ARM64
+  PLAT := LINUX
+  CC_PREFIX := aarch64-linux-gnu-
 else ifeq ($(PLATFORM),linux-x86)
   ARCH := x86
   PLAT := LINUX
@@ -98,19 +105,18 @@ else
   ZIP_EXT := .tar.gz
 endif
 
+ifeq ($(USE_CCACHE),1)
+  CCACHE := ccache
+endif
+
+CC = $(CCACHE) $(CC_PREFIX)$(CC_SUFFIX)
+HOSTCC = $(CCACHE) gcc
+
 BUILDDIR = $(TRUNKDIR)/source/build-$(PLATFORM)
 EUBINDIR = $(TRUNKDIR)/source/build-eubin
 EUCFG_FILE = $(BUILDDIR)/eu.cfg
 CONFIG_FILE = config-$(PLATFORM).gnu
-CONFIG_PARAMS = --arch=$(ARCH) --plat=$(PLAT) --build=$(BUILDDIR) --release=$(RELEASE)
-
-ifeq ($(USE_CCACHE),1)
-  CONFIG_PARAMS += --cc-prefix='ccache $(CC_PREFIX)'
-  HOSTCC = 'ccache gcc'
-else
-  CONFIG_PARAMS += --cc-prefix=$(CC_PREFIX)
-  HOSTCC = gcc
-endif
+CONFIG_PARAMS = --arch=$(ARCH) --plat=$(PLAT) --build=$(BUILDDIR) --release=$(RELEASE) --cc-prefix='$(CCACHE) $(CC_PREFIX)'
 
 COMPILED_FILES = \
   $(BUILDDIR)/eub$(EXE_EXT) \
@@ -205,8 +211,8 @@ ifeq ($(WITH_EUBIN),1)
   EUBIN_EUI = $(EUBINDIR)/eui
 else
   CONFIG_PARAMS += --use-source-translator
-  EUBIN_EUC = euc
-  EUBIN_EUI = eui
+  EUBIN_EUC = eui -i $(TRUNKDIR)/include $(TRUNKDIR)/source/euc.ex
+  EUBIN_EUI = eui -i $(TRUNKDIR)/include $(TRUNKDIR)/source/eui.ex
   EUC = $(EUBIN_EUC)
 endif
 
@@ -228,10 +234,11 @@ ifneq ($(VERBOSE),1)
 endif
 
 ifeq ($(VERBOSE),1)
-$(foreach v,$(filter-out .% $(VARIABLES) VARIABLES,$(sort $(.VARIABLES))),$(info $(v)=$($(v))))
+CMDLINE_VARIABLES := CC PLATFORM USE_CCACHE VERBOSE WITH_CREOLE WITH_EUBIN WITH_EUDOC
+$(foreach v,$(sort $(CMDLINE_VARIABLES) $(filter-out .% %_FILES %_TARGETS $(VARIABLES) VARIABLES,$(.VARIABLES))),$(info $(v)=$($(v))))
 endif
 
-all : $(PACKAGE_FILE)
+all: $(PACKAGE_FILE)
 
 $(PACKAGE_FILE) : $(PACKAGE_TARGETS)
 ifeq ($(ZIP_EXT),.tar.gz)
@@ -255,28 +262,28 @@ debug-static-library: $(BUILDDIR)/eudbg$(LIB_EXT)
 $(LIBRARY_FILES) : | $(CONFIG_FILE) $(EUCFG_FILE) $(BUILDDIR)/mkver$(EXE_EXT)
 	$(ECHO)$(MAKE) CONFIG_FILE=$(CONFIG_FILE) $@
 
-backend : $(BUILDDIR)/eub$(EXE_EXT)
-interpreter : $(BUILDDIR)/eui$(EXE_EXT)
-translator : $(BUILDDIR)/euc$(EXE_EXT)
+backend: $(BUILDDIR)/eub$(EXE_EXT)
+interpreter: $(BUILDDIR)/eui$(EXE_EXT)
+translator: $(BUILDDIR)/euc$(EXE_EXT)
 
 $(BUILDDIR)/mkver$(EXE_EXT) : | $(CONFIG_FILE) $(EUCFG_FILE)
-	$(ECHO)$(MAKE) CONFIG_FILE=$(CONFIG_FILE) HOSTCC=$(HOSTCC) $@
+	$(ECHO)$(MAKE) CONFIG_FILE=$(CONFIG_FILE) HOSTCC="$(HOSTCC)" $@
 
 $(COMPILED_FILES) : | $(LIBRARY_FILES) $(CONFIG_FILE) $(EUCFG_FILE) $(BUILDDIR)/mkver$(EXE_EXT)
-	$(ECHO)$(MAKE) CONFIG_FILE=$(CONFIG_FILE) TRANSLATE=$(TRANSLATE) $@
+	$(ECHO)$(MAKE) CONFIG_FILE=$(CONFIG_FILE) TRANSLATE="$(TRANSLATE)" $@
 
-tools : eubind eucoverage eudis eudist eushroud eutest
-eubind : $(BUILDDIR)/eubind$(EXE_EXT)
-eucoverage : $(BUILDDIR)/eucoverage$(EXE_EXT)
-eudis : $(BUILDDIR)/eudis$(EXE_EXT)
-eudist : $(BUILDDIR)/eudist$(EXE_EXT)
-eushroud : $(BUILDDIR)/eushroud$(EXE_EXT)
-eutest : $(BUILDDIR)/eutest$(EXE_EXT)
+tools: eubind eucoverage eudis eudist eushroud eutest
+eubind: $(BUILDDIR)/eubind$(EXE_EXT)
+eucoverage: $(BUILDDIR)/eucoverage$(EXE_EXT)
+eudis: $(BUILDDIR)/eudis$(EXE_EXT)
+eudist: $(BUILDDIR)/eudist$(EXE_EXT)
+eushroud: $(BUILDDIR)/eushroud$(EXE_EXT)
+eutest: $(BUILDDIR)/eutest$(EXE_EXT)
 
 $(TRANSLATED_FILES) : | $(LIBRARY_FILES) $(CONFIG_FILE) $(EUCFG_FILE)
-	$(ECHO)$(MAKE) CONFIG_FILE=$(CONFIG_FILE) TRANSLATE=$(TRANSLATE) $@
+	$(ECHO)$(MAKE) CONFIG_FILE=$(CONFIG_FILE) TRANSLATE="$(TRANSLATE)" $@
 
-htmldoc : $(HTMLDOC_FILES)
+htmldoc: $(HTMLDOC_FILES)
 
 $(filter-out $(BUILDDIR)/html/index.html,$(HTMLDOC_FILES)) : $(BUILDDIR)/html/index.html
 
@@ -302,7 +309,7 @@ $(OTHER_TARGETS) : $(PACKAGE_PATH)/% : $(TRUNKDIR)/%
 	@mkdir -p $(dir $@)
 	$(ECHO)cp -p $< $@
 
-$(CONFIG_FILE) :
+$(CONFIG_FILE) $(EUCFG_FILE) :
 	@mkdir -p $(BUILDDIR)
 	$(ECHO)./configure $(CONFIG_PARAMS)
 	$(ECHO)mv config.gnu $(CONFIG_FILE)
@@ -311,7 +318,7 @@ $(EUCFG_FILE) : | $(CONFIG_FILE)
 
 .NOTPARALLEL: $(CONFIG_FILE) $(EUCFG_FILE)
 
-clean :
+clean:
 	$(ECHO)rm -rf $(BUILDDIR) $(CONFIG_FILE) $(PACKAGE_PATH) $(PACKAGE_FILE)
 
 dist-clean : clean
@@ -333,15 +340,13 @@ $(BUILDDIR)/html/index.html : | $(EUBIN_EUI)
 
 $(COMPILED_FILES) $(TRANSLATED_FILES) : | $(EUBIN_EUC)
 
-# $(EUBIN_LIB)
-eubin: $(EUBIN_EUC) $(EUBIN_EUI)
+eubin: $(EUBIN_LIB) $(EUBIN_EUC) $(EUBIN_EUI)
 
-#$(EUBIN_LIB) : | $(EUBIN_CONFIG) $(EUBIN_EUCFG)
-#	$(ECHO)$(MAKE) CONFIG_FILE=$(EUBIN_CONFIG) HOSTCC=$(HOSTCC) $@
+$(EUBIN_EUC) $(EUBIN_EUI): $(EUBIN_LIB)
 
-# $(EUBIN_LIB)
-$(EUBIN_EUC) $(EUBIN_EUI): | $(EUBIN_CONFIG) $(EUBIN_EUCFG)
-	$(ECHO)$(MAKE) CONFIG_FILE=$(EUBIN_CONFIG) HOSTCC=$(HOSTCC) $@
+$(EUBIN_LIB) $(EUBIN_EUC) $(EUBIN_EUI): | $(EUBIN_CONFIG) $(EUBIN_EUCFG)
+	@mkdir -p $(EUBINDIR)
+	$(ECHO)$(MAKE) CONFIG_FILE=$(EUBIN_CONFIG) HOSTCC="$(HOSTCC)" $@
 
 $(EUBIN_CONFIG) : ; @mkdir -p $(EUBINDIR)
 	$(ECHO)./configure $(EUBIN_PARAMS)
@@ -359,6 +364,8 @@ endif
 
 ifeq ($(WITH_EUDOC),1)
 
+$(BUILDDIR)/html/index.html : | $(TRUNKDIR)/source/eudoc/eudoc.ex
+
 eudoc: $(PACKAGE_PATH)/bin/eudoc$(EXE_EXT)
 
 $(PACKAGE_PATH)/bin/eudoc$(EXE_EXT) : $(BUILDDIR)/eudoc$(EXE_EXT)
@@ -366,10 +373,10 @@ $(PACKAGE_PATH)/bin/eudoc$(EXE_EXT) : $(BUILDDIR)/eudoc$(EXE_EXT)
 	$(ECHO)cp -p $< $@
 
 $(BUILDDIR)/eudoc$(EXE_EXT) : $(BUILDDIR)/eudoc-build/eudoc.mak
-	$(ECHO)$(MAKE) -C $(dir $<) -f $(notdir $<)
+	$(ECHO)$(MAKE) -C $(dir $<) -f $(notdir $<) CC="$(CC)" LINKER="$(CC)"
 
 $(BUILDDIR)/eudoc-build/eudoc.mak : $(TRUNKDIR)/source/eudoc/eudoc.ex | $(CONFIG_FILE) $(EUCFG_FILE) $(BUILDDIR)/eu$(LIB_EXT)
-	$(ECHO)$(EUC) $(EUCFLAGS) -build-dir $(dir $@) -o $(BUILDDIR)/eudoc$(EXE_EXT) $<
+	$(ECHO)$(TRANSLATE) $(EUCFLAGS) -build-dir $(dir $@) -o $(BUILDDIR)/eudoc$(EXE_EXT) $<
 
 $(TRUNKDIR)/source/eudoc/eudoc.ex :
 	$(ECHO)git clone --depth=1 https://github.com/OpenEuphoria/eudoc $(TRUNKDIR)/source/eudoc
@@ -380,6 +387,8 @@ endif
 
 ifeq ($(WITH_CREOLE),1)
 
+$(BUILDDIR)/html/index.html : | $(TRUNKDIR)/source/creole/creole.ex
+
 creole: $(PACKAGE_PATH)/bin/creole$(EXE_EXT)
 
 $(PACKAGE_PATH)/bin/creole$(EXE_EXT) : $(BUILDDIR)/creole$(EXE_EXT)
@@ -387,10 +396,10 @@ $(PACKAGE_PATH)/bin/creole$(EXE_EXT) : $(BUILDDIR)/creole$(EXE_EXT)
 	$(ECHO)cp -p $< $@
 
 $(BUILDDIR)/creole$(EXE_EXT) : $(BUILDDIR)/creole-build/creole.mak
-	$(ECHO)$(MAKE) -C $(dir $<) -f $(notdir $<)
+	$(ECHO)$(MAKE) -C $(dir $<) -f $(notdir $<) CC="$(CC)" LINKER="$(CC)"
 
 $(BUILDDIR)/creole-build/creole.mak : $(TRUNKDIR)/source/creole/creole.ex | $(CONFIG_FILE) $(EUCFG_FILE) $(BUILDDIR)/eu$(LIB_EXT)
-	$(ECHO)$(EUC) $(EUCFLAGS) -build-dir $(dir $@) -o $(BUILDDIR)/creole$(EXE_EXT) $<
+	$(ECHO)$(TRANSLATE) $(EUCFLAGS) -build-dir $(dir $@) -o $(BUILDDIR)/creole$(EXE_EXT) $<
 
 $(TRUNKDIR)/source/creole/creole.ex :
 	$(ECHO)git clone --depth=1 https://github.com/OpenEuphoria/creole $(TRUNKDIR)/source/creole

@@ -78,6 +78,11 @@ elif echo "$UNAME_MACHINE" | egrep "x86_64|amd64" > /dev/null; then
 elif echo "$UNAME_MACHINE" | grep -i ARM > /dev/null; then
 	HOST_ARCH=ARM
 	MFLAG=
+
+elif echo "$UNAME_MACHINE" | grep -i aarch64 > /dev/null; then
+	HOST_ARCH=ARM64
+	MFLAG=
+
 fi
 ARCH=$HOST_ARCH
 
@@ -352,6 +357,11 @@ while [ "$1" != "" ]; do
 				MFLAG=-m32
 				
 			;;
+			ARM64)
+				ARCH=ARM64
+				MFLAG=
+				
+			;;
 			ARM)
 				ARCH=ARM
 				MFLAG=
@@ -363,6 +373,7 @@ while [ "$1" != "" ]; do
 				echo "   x86"
 				echo "   x86_64"
 				echo "   ARM"
+				echo "   ARM64"
 				exit
 		esac
 		;;
@@ -441,7 +452,7 @@ while [ "$1" != "" ]; do
 		echo "   --ssh-client value  SSH program to use for ssh commands (default ssh -C)."
 		echo "   --hg value          Git binary command (default 'which git')."
 		if [ $MIN_VER -gt 0 ]; then
-			echo "   --arch value        Set architecture to ARM, x86, or x86-64."
+			echo "   --arch value        Set architecture to ARM, ARM64, x86, or x86-64."
 		fi
 		# Is --wine still needed?
 		echo "   --wine value        Path to wine (useful for cross compilation to windows)."

@@ -56,7 +56,7 @@
 #include "be_alloc.h"
 
 
-#if !defined(EARM) && !defined(EX86) && !defined(EX86_64)
+#if !defined(EARM) && !defined(EARM64) && !defined(EX86) && !defined(EX86_64)
 #	error "Missing required architecture macros."
 #endif
 

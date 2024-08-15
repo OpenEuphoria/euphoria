@@ -37,6 +37,7 @@ public integer
 	IX86     = 0, TX86     = 0,
 	IX86_64  = 0, TX86_64  = 0,
 	IARM     = 0, TARM     = 0,
+	IARM64   = 0, TARM64   = 0,
 	$
 
 -- operating system:
@@ -91,6 +92,8 @@ if compare({version_major(), version_minor(), version_patch()}, {4,2,0}) < 0 the
 
   ifdef ARM then
       IARM = 1
+  elsifdef ARM64 then
+      IARM64 = 1
   elsifdef X86 then
       IX86 = 1
   elsifdef X86_64 then
@@ -113,6 +116,8 @@ else
 	        IX86_64 = 1
 	    case "ARM" then
 	        IARM = 1
+	    case "ARM64" then
+	        IARM64 = 1
 	end switch
 	set_target_arch(machine_param[1])	
 end if	
@@ -120,7 +125,7 @@ end if
 TX86    = IX86
 TX86_64 = IX86_64
 TARM    = IARM
-
+TARM64  = IARM64
 
 integer ihost_platform = platform()
 public function host_platform()
@@ -161,6 +166,8 @@ public procedure set_target_arch( sequence arch )
 	TX86_64 = 0
 	IARM    = 0
 	TARM    = 0
+	IARM64  = 0
+	TARM64  = 0
 	switch upper( arch ) do
 		case "X86", "IX86" then
 			IX86    = 1
@@ -177,8 +184,13 @@ public procedure set_target_arch( sequence arch )
 			TARM = 1
 			TARGET_SIZEOF_POINTER = 4
 		
+		case "ARM64" then
+			IARM64 = 1
+			TARM64 = 1
+			TARGET_SIZEOF_POINTER = 8
+		
 		case else
-			ShowMsg( 2, UNKNOWN_ARCHITECTURE_1__SUPPORTED_ARCHITECTURES_ARE_2, { arch, "X86, X86_64, ARM" } )
+			ShowMsg( 2, UNKNOWN_ARCHITECTURE_1__SUPPORTED_ARCHITECTURES_ARE_2, { arch, "X86, X86_64, ARM, ARM64" } )
 			abort( 1 )
 	end switch
 	set_target_integer_size( TARGET_SIZEOF_POINTER )	
@@ -266,6 +278,8 @@ public function GetPlatformDefines(integer for_translator = 0)
 		end if
 	elsif (IARM and not for_translator) or (TARM and for_translator) then
 		local_defines &= {"ARM", "BITS32", "LONG32"}
+	elsif (IARM64 and not for_translator) or (TARM64 and for_translator) then
+		local_defines &= {"ARM64", "BITS64", "LONG64"}
 	end if
 	
 	-- So the translator knows what to strip from defines if translating

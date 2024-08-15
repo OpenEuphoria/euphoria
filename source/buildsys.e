@@ -468,10 +468,10 @@ function setup_build()
 		abort(1)
 	end if
 	
-	integer bits = 32
-	if TX86_64 then
-		bits = 64
-	end if
+--	integer bits = 32
+--	if TX86_64 then
+--		bits = 64
+--	end if
 	
 	switch compiler_type do
 		case COMPILER_GCC then
@@ -480,9 +480,13 @@ function setup_build()
 			obj_ext = "o"
 
 			sequence m_flag = ""
-			if not TARM then
-				-- current gcc for ARM does not support -m32
-				m_flag = sprintf( "-m%d", bits )
+			if TX86_64 then
+				m_flag = "-m64"
+			elsif TX86 then
+				m_flag = "-m32"
+		--	if not TARM then
+		--		-- current gcc for ARM does not support -m32
+		--		m_flag = sprintf( "-m%d", bits )
 			end if
 			
 			if TWINDOWS then
