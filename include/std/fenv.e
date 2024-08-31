@@ -28,7 +28,7 @@ public constant FE_INEXACT = 'e',
 	 FE_INVALID   = 'i',
 	 FE_ALL_EXCEPT = "eiouz"
 
-ifdef ARM then
+ifdef ARM or ARM64 then
         type enum c_fe by *2
                 C_FE_INVALID = 1,
                 C_FE_DIVBYZERO = 2,

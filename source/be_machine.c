@@ -3399,6 +3399,8 @@ object machine(object opcode, object x)
                     s1_ptr s = NewS1(2);
                 #if (__ia64__) || (_IA64) || (__IA64__) || (__amd64__)
                     s->base[1] = NewString("X86_64");
+                #elif __aarch64__
+                    s->base[1] = NewString("ARM64");
                 #elif __i386__
                     s->base[1] = NewString("X86");
                 #elif __arm__
