@@ -49,6 +49,7 @@ WITH_CREOLE ?= 1
 WITH_EUBIN ?= 0
 USE_CCACHE ?= $(HAVE_CCACHE)
 VERBOSE ?= 0
+DEBUG ?= 0
 
 MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MAKEFILE_NAME := $(notdir $(MAKEFILE_PATH))
@@ -197,6 +198,10 @@ ifeq ($(PLATFORM),$(filter windows-%,$(PLATFORM)))
   PACKAGE_TARGETS += $(RESOURCE_TARGETS)
 endif
 
+ifeq ($(DEBUG),1)
+  CONFIG_PARAMS += --debug --release development
+endif
+
 ifeq ($(WITH_EUBIN),1)
   CONFIG_PARAMS += --eubin=$(EUBINDIR) --use-binary-translator
   EUC = eui -eudir $(TRUNKDIR) -i $(TRUNKDIR)/include $(TRUNKDIR)/source/euc.ex
@@ -209,6 +214,7 @@ ifeq ($(WITH_EUBIN),1)
   EUBIN_LIB = $(EUBINDIR)/eu.a
   EUBIN_EUC = $(EUBINDIR)/euc
   EUBIN_EUI = $(EUBINDIR)/eui
+  EUBIN_SRC = $(wildcard *.e) $(wildcard *.c)
 else
   CONFIG_PARAMS += --use-source-translator
   EUBIN_EUC = eui -i $(TRUNKDIR)/include $(TRUNKDIR)/source/euc.ex
@@ -344,7 +350,7 @@ eubin: $(EUBIN_LIB) $(EUBIN_EUC) $(EUBIN_EUI)
 
 $(EUBIN_EUC) $(EUBIN_EUI): $(EUBIN_LIB)
 
-$(EUBIN_LIB) $(EUBIN_EUC) $(EUBIN_EUI): | $(EUBIN_CONFIG) $(EUBIN_EUCFG)
+$(EUBIN_LIB) $(EUBIN_EUC) $(EUBIN_EUI): $(EUBIN_SRC) | $(EUBIN_CONFIG) $(EUBIN_EUCFG)
 	@mkdir -p $(EUBINDIR)
 	$(ECHO)$(MAKE) CONFIG_FILE=$(EUBIN_CONFIG) HOSTCC="$(HOSTCC)" $@
 
