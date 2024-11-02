@@ -6,6 +6,7 @@
 #ifndef BE_ALLOC_H_
 #define BE_ALLOC_H_ 1
 
+#include <features.h>  
 #include <limits.h>
 #include "execute.h"
 #include "symtab.h"
@@ -173,6 +174,7 @@ extern char *ERealloc(char *orig, uintptr_t newsize);
   GLIB versions between 2.28 (when the old code worked) and version 2.39
   is where the things get broken.
   */
+  
 #if defined(__DJGPP__) ? (__DJGPP__ <= 2 && __DJGPP_MINOR__ < 4) : \
  !__GLIBC_PREREQ(2, 39)
 size_t strlcpy(char *dest, char *src, size_t maxlen);
