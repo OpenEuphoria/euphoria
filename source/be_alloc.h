@@ -166,11 +166,11 @@ typedef struct block_list * block_list_ptr;
 #endif
 extern char *EMalloc(uintptr_t size);
 extern char *ERealloc(char *orig, uintptr_t newsize);
-#if (defined(__GLIBC__) && __GLIBC__ <= 2 && __GLIBC_MINOR__ <= 31) \
-	|| (defined(__DJGPP__) && __DJGPP__ <= 2 && __DJGPP_MINOR__ < 4)
-size_t strlcpy(char *dest, char *src, size_t maxlen);
-size_t strlcat(char *dest, char *src, size_t maxlen);
-#endif
+
+// for:
+//size_t strlcpy(char *dest, char *src, size_t maxlen);
+//size_t strlcat(char *dest, char *src, size_t maxlen);
+#include <bsd/string.h>
 
 #ifdef EBSD
 char *malloc_options;
