@@ -181,7 +181,7 @@ OTHER_FILES = \
   $(TRUNKDIR)/bin/eucoverage.ex \
   $(TRUNKDIR)/bin/euloc.ex \
   $(TRUNKDIR)/bin/make31.exw \
-  $(TRUNKDIR)/License.txt
+  $(TRUNKDIR)/LICENSE
 ifeq ($(PLATFORM),$(filter windows-%,$(PLATFORM)))
   OTHER_FILES += $(TRUNKDIR)/makecfg.bat
 else
