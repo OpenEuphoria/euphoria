@@ -441,7 +441,7 @@ EU_DOC_SOURCE = \
 	$(EU_STD_INC) \
 	$(DOCDIR)/manual.af \
 	$(wildcard $(TRUNKDIR)/include/*.*) \
-	$(TRUNKDIR)/License.txt \
+	$(TRUNKDIR)/ \
 	$(wildcard $(TRUNKDIR)/demo/*.*) \
 	$(wildcard $(TRUNKDIR)/demo/*/*.*) \
 	$(wildcard $(DOCDIR)/*.txt) \
