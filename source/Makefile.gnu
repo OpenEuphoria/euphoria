@@ -106,11 +106,7 @@ ifeq "$(EBSD)" "1"
     EBSDFLAG=-DEBSD -DEBSD62 -DENETBSD
   endif
 else
-  ifeq "$(ARCH)" "ix86_64"
-    LDLFLAG=-ldl -lresolv -lnsl
-  else
-    LDLFLAG=-ldl -lresolv
-  endif
+  LDLFLAG=-ldl -lresolv
   PREREGEX=$(FROMBSDREGEX)
   SEDFLAG=-ri
 endif
