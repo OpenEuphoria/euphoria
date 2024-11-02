@@ -166,8 +166,15 @@ typedef struct block_list * block_list_ptr;
 #endif
 extern char *EMalloc(uintptr_t size);
 extern char *ERealloc(char *orig, uintptr_t newsize);
-#if defined(__GNU_LIBRARY__) || defined(__GLIBC__) \
-	|| (defined(__DJGPP__) && __DJGPP__ <= 2 && __DJGPP_MINOR__ < 4)
+/* Changes in the call signature of strlcpy which happened between
+  Mint version 20.2 and Mint 22, causes an explicit declaration of 
+  strlcpy and strlcat with the obsolete signature to kill the build.
+  
+  GLIB versions between 2.28 (when the old code worked) and version 2.39
+  is where the things get broken.
+  */
+#if defined(__DJGPP__) ? (__DJGPP__ <= 2 && __DJGPP_MINOR__ < 4) : \
+ !__GLIBC_PREREQ(2, 39)
 size_t strlcpy(char *dest, char *src, size_t maxlen);
 size_t strlcat(char *dest, char *src, size_t maxlen);
 #endif
