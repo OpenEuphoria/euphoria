@@ -180,8 +180,8 @@ extern char *ERealloc(char *orig, uintptr_t newsize);
 #if !defined(__GLIBC_PREREQ)
 # define __GLIBC_PREREQ(x,y) false
 #endif
-#if defined(__DJGPP__) ? (__DJGPP__ <= 2 && __DJGPP_MINOR__ < 4) : \
- (!__GLIBC_PREREQ(2, 39))
+#if defined(__DJGPP__) ? __DJGPP__ <= 2 && __DJGPP_MINOR__ < 4 : \
+ (!__GLIBC_PREREQ(2, 39) || defined(EARM))
 size_t strlcpy(char *dest, char *src, size_t maxlen);
 size_t strlcat(char *dest, char *src, size_t maxlen);
 #endif
