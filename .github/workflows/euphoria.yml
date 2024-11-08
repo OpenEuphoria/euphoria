@@ -13,8 +13,8 @@ on:
   workflow_dispatch:
 
 env:
-  CCACHE_BASEDIR: ${{env.GITHUB_WORKSPACE}}
-  CCACHE_DIR: ${{env.GITHUB_WORKSPACE}}/.ccache
+  CCACHE_BASEDIR: ${{github.workspace}}
+  CCACHE_DIR: ${{github.workspace}}/.ccache
   CCACHE_COMPRESS: true
   CCACHE_COMPRESSLEVEL: 5
   CCACHE_MAXSIZE: 100M
