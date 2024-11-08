@@ -93,7 +93,7 @@ jobs:
       - name: Build Euphoria
         id: build-euphoria
         run: |
-          make -f build.mak -j$(nproc) PLATFORM=${{matrix.platform}} USE_CCACHE=1 WITH_CREOLE=1 WITH_EUDOC=1
+          make -f build.mak -j$(nproc) PLATFORM=${{matrix.platform}} USE_CCACHE=1 WITH_CREOLE=1 WITH_EUDOC=1 WITH_EUBIN=1
           echo "euphoria-version=$(./build/echoversion)" >> $GITHUB_ENV
 
       - name: Get Short Hash
