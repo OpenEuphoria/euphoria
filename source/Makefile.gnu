@@ -765,8 +765,10 @@ $(TRUNKDIR)/source/eudoc/eudoc.ex :
 $(TRUNKDIR)/source/creole/creole.ex :
 	git clone git://github.com/openeuphoria/creole $(TRUNKDIR)/source/creole
 
-$(BUILDDIR)/euphoria.txt : $(EU_DOC_SOURCE)
+$(BUILDDIR)/euphoria.txt : $(EU_DOC_SOURCE) $(TRUNKDIR)/License.txt
 	cd $(TRUNKDIR)/docs && $(EUDOC) -d HTML --strip=2 --verbose -a manual.af -o $(CYPBUILDDIR)/euphoria.txt
+
+$(TRUNKDIR)/License.txt : $(TRUNKDIR)/LICENSE ; cp -p $< $@
 
 $(BUILDDIR)/docs/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/*.txt $(TRUNKDIR)/include/std/*.e
 	-mkdir -p $(BUILDDIR)/docs/images
