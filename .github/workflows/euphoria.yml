@@ -12,6 +12,13 @@ on:
       - master
   workflow_dispatch:
 
+env:
+  CCACHE_BASEDIR: ${{env.GITHUB_WORKSPACE}}
+  CCACHE_DIR: ${{env.CCACHE_BASEDIR}}/.ccache
+  CCACHE_COMPRESS: true
+  CCACHE_COMPRESSLEVEL: 5
+  CCACHE_MAXSIZE: 100M
+
 jobs:
   build-euphoria:
     name: Build Euphoria
@@ -46,36 +53,32 @@ jobs:
       - name: Install Compilers (Linux ARM)
         id: install-compilers-linux-arm
         if: matrix.platform == 'linux-arm'
-        run: sudo apt-get -qy install {binutils,gcc}-arm-linux-gnueabihf
+        run: sudo apt-get -qy install ccache {binutils,gcc}-arm-linux-gnueabihf
 
       - name: Install Compilers (Linux ARM64)
         id: install-compilers-linux-arm64
         if: matrix.platform == 'linux-arm64'
-        run: sudo apt-get -qy install {binutils,gcc}-aarch64-linux-gnu
+        run: sudo apt-get -qy install ccache {binutils,gcc}-aarch64-linux-gnu
 
       - name: Install Compilers (Linux x86)
         id: install-compilers-linux-x86
         if: matrix.platform == 'linux-x86'
-        run: sudo apt-get -qy install {binutils,gcc}-i686-linux-gnu
+        run: sudo apt-get -qy install ccache {binutils,gcc}-i686-linux-gnu
 
       - name: Install Compilers (Linux x64)
         id: install-compilers-linux-x64
         if: matrix.platform == 'linux-x64'
-        run: sudo apt-get -qy install {binutils,gcc}-x86-64-linux-gnu
+        run: sudo apt-get -qy install ccache {binutils,gcc}-x86-64-linux-gnu
 
       - name: Install Compilers (Windows x86)
         id: install-compilers-windows-x86
         if: matrix.platform == 'windows-x86'
-        run: sudo apt-get -qy install {binutils,gcc}-mingw-w64-i686
+        run: sudo apt-get -qy install ccache {binutils,gcc}-mingw-w64-i686
 
       - name: Install Compilers (Windows x64)
         id: install-compilers-windows-x64
         if: matrix.platform == 'windows-x64'
-        run: sudo apt-get -qy install {binutils,gcc}-mingw-w64-x86-64
-
-      - name: Install Ccache
-        id: install-ccache
-        run: sudo apt-get -qy install ccache
+        run: sudo apt-get -qy install ccache {binutils,gcc}-mingw-w64-x86-64
 
       - name: Install Euphoria
         id: install-euphoria
@@ -87,18 +90,18 @@ jobs:
         id: save-load-cache
         uses: actions/cache@v4
         with:
-          path: ~/.cache/ccache/
-          key: ccache=${{matrix.platform}}
+          path: ${{env.CCACHE_DIR}}
+          key: ${{matrix.platform}}
 
       - name: Build Euphoria
         id: build-euphoria
         run: |
           make -f build.mak -j$(nproc) PLATFORM=${{matrix.platform}} USE_CCACHE=1 WITH_CREOLE=1 WITH_EUDOC=1 WITH_EUBIN=1
-          echo "euphoria-version=$(./build/echoversion)" >> $GITHUB_ENV
+          echo "euphoria-version=$(./build-eubin/echoversion)" >> $GITHUB_ENV
 
       - name: Get Short Hash
         id: get-short-hash
-        uses: benjlevesque/short-sha@v2.2
+        uses: benjlevesque/short-sha@v3.0
 
       - name: Upload Artifacts
         id: upload-artifacts
@@ -106,12 +109,12 @@ jobs:
         with:
           name: euphoria-${{env.euphoria-version}}-${{matrix.platform}}-${{env.SHA}}
           path: |
-            ./source/build-${{matrix.platform}}/
-            ./source/config-${{matrix.platform}}}.gnu
-            !./source/build/**/*.o
+            build-${{matrix.platform}}/
+            config-${{matrix.platform}}.gnu
+            !build-${{matrix.platform}}/**/*.o
 
       - name: Publish Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           body_path: ../docs/release/${{env.euphoria-version}}.txt
