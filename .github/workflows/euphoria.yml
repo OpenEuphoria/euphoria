@@ -109,9 +109,10 @@ jobs:
         with:
           name: euphoria-${{env.euphoria-version}}-${{matrix.platform}}-${{env.SHA}}
           path: |
-            build-${{matrix.platform}}/
-            config-${{matrix.platform}}.gnu
-            !build-${{matrix.platform}}/**/*.o
+            ./source/build-${{matrix.platform}}/
+            ./source/config-${{matrix.platform}}.gnu
+            ./source/euphoria-${{env.euphoria-version}}-${{matrix.platform}}-${{env.SHA}}.*
+            !./source/build-${{matrix.platform}}/**/*.o
 
       - name: Publish Release
         uses: softprops/action-gh-release@v2
