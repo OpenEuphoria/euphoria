@@ -1,9 +1,6 @@
 include std/io.e 
 include std/error.e 
 include std/unittest.e 
-with trace
-trace(1)
-
 
 type enum boolean T,F=0 end type 
 type file_number(integer x)
