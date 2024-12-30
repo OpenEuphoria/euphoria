@@ -2988,12 +2988,12 @@ procedure opINTEGER_CHECK()
 		LeftSym = TRUE
 		c_stmt("_1 = (object)(DBL_PTR(@)->dbl);\n", sym)
 		LeftSym = TRUE
-		c_stmt( "if (UNIQUE(DBL_PTR(@)) && (DBL_PTR(@)->cleanup != 0))\n" &
-				"RTFatal(\"Cannot assign value with a destructor to an integer\");", {sym, sym})
-		c_stmt("DeRefDS(@);\n", sym)
-		c_stmt("@ = _1;\n", sym)
+		-- The BB_var_type may still be a Dptr structure after an integer check.
+		c_stmt( "if (!UNIQUE(DBL_PTR(@)) || (DBL_PTR(@)->cleanup == 0)) {\n", {sym, sym})
+		c_stmt(	"DeRefDS(@);\n", {sym})
+		c_stmt( "@ = _1;\n", {sym})
 		c_stmt0("}\n")
-		SetBBType(sym, TYPE_INTEGER, novalue, TYPE_OBJECT, 0 )
+		c_stmt0("}\n")		
 	end if
 	pc += 2
 end procedure

@@ -3366,7 +3366,7 @@ export function CompileType(symtab_index type_ptr)
 		return TYPE_OBJECT
 
 	elsif type_ptr = integer_type then
-		return TYPE_INTEGER
+		return TYPE_ATOM
 
 	elsif type_ptr = atom_type then
 		return TYPE_ATOM
@@ -3381,7 +3381,7 @@ export function CompileType(symtab_index type_ptr)
 		-- user defined - look at type of the parameter of the type
 		t = SymTab[SymTab[type_ptr][S_NEXT]][S_VTYPE]
 		if t = integer_type then
-			return TYPE_INTEGER
+			return TYPE_ATOM
 		elsif t = atom_type then
 			return TYPE_ATOM
 		elsif t = sequence_type then

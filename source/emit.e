@@ -220,23 +220,11 @@ function IsInteger(symtab_index sym)
 
 	if sym < 1 then
 		-- probably a forward reference
-		return 0
+		return FALSE
 	end if
 
 	mode = SymTab[sym][S_MODE]
-	if mode = M_NORMAL then
-		t = SymTab[sym][S_VTYPE]
-		if t = integer_type then
-			return TRUE
-		end if
-		if t > 0 then
-			pt = SymTab[t][S_NEXT]
-			if pt and SymTab[pt][S_VTYPE] = integer_type then
-				return TRUE   -- usertype(integer x)
-			end if
-		end if
-
-	elsif mode = M_CONSTANT then
+	if mode = M_CONSTANT then
 		if integer(SymTab[sym][S_OBJ]) then  -- bug fixed: can't allow PLUS1_I op
 			return TRUE
 		end if

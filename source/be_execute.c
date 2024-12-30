@@ -1934,7 +1934,7 @@ void do_exec(intptr_t *start_pc)
 	int end_pos;
 	int going_up;
 	object_ptr result_ptr;
-	object result_val;
+	object result_val=0;
 	int cf;
 	int seqlen;
 	opcode_type *patch;
@@ -2772,12 +2772,6 @@ void do_exec(intptr_t *start_pc)
 					tpc = pc;
 					a = DoubleToInt(top);
 					if (IS_ATOM_INT(a)) {
-						if (UNIQUE(DBL_PTR(top)) && (DBL_PTR(top)->cleanup != 0)) {
-							tpc = pc - 1; //RTFatalType(pc-1);
-							RTFatal("Cannot assign value with a destructor to an integer");
-						}
-						DeRefDS(top);
-						*(object_ptr)pc[-1] = a;
 						BREAK;
 					}
 				}

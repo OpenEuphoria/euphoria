@@ -375,6 +375,8 @@ object Dor_bits(d_ptr a, d_ptr b);
 object Dxor_bits(d_ptr a, d_ptr b);
 object not_bits(object a);
 object Dxor(object a, object b);
+object Dor(object a, object b);
+object Xor(object a, object b);
 object Date();
 cleanup_ptr ChainDeleteRoutine( cleanup_ptr old, cleanup_ptr prev );
 cleanup_ptr DeleteRoutine( object e_index );

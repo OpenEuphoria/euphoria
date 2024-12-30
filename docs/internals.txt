@@ -34,17 +34,14 @@ Euphoria.
 
 ==== The Euphoria representation of a Euphoria Object =====
 
-Every Euphoria object is stored as-is.  A special unlikely floating point value 
+Every Euphoria object in the Euphoria backend is stored as-is.  A special unlikely floating point value 
 is used for ##NOVALUE##.  ##NOVALUE## signifies that a variable has not been 
 assigned a value or the end of a sequence.
 
 ==== The C Representation of a Euphoria Object =====
 
 Every Euphoria object is either stored as is, or as an encoded pointer.  A 
-Euphoria ##integer## is stored in a 32-bit signed integer.  If the number is too
-big for a Euphoria ##integer##, it is assigned to a 64-bit double float in a 
-structure and an encoded pointer to that structure is stored in the said 32-bit 
-memory space.  Sequences are stored in a similar way.
+Euphoria ##integer## is often stored in a 32-bit or 64-bit signed integer.  If the number is too big for a Euphoria ##integer##, has a fraction part, or has a destructor associated with it; it is assigned to a 64-bit double float in a structure and an encoded pointer to that structure is stored in the said 64 bit or 32-bit memory space.  Sequences are stored in a similar way: An encoded pointer is stored, and this pointer points to a sequence structure.
 
 {{{
 
@@ -63,15 +60,13 @@ memory space.  Sequences are stored in a similar way.
                      |<--------     integer    --------->|
    |<--------------------- object ---------------------->|		     
 
+   
 }}}
 
+The 64-bit system is not documented here.  Refer to euphoria.h for detail on the 64-bit version of the scheme outlined above.
 
-Euphoria integers are stored in object variables as-is.  An object variable is a
-four byte signed integer.  Legal integer values for Euphoria integers are 
-between -1,073,741,824 ( -2^^30^^ ) and +1,073,741,823 ( 2^^30^^-1 ).
-Unsigned hexadecimal numbers from C000_0000 to FFFF_FFFF are the negative 
-integers and numbers from 0000_0000 to 3FFF_FFFF are the positive integers.  The
-hexadecimal values not used as integers are thus 4000_0000 to BFFF_FFFF.  Other 
+Euphoria integers are stored in object variables as-is.  An object variable is a four byte signed integer and is even its own value or an encoded pointer.  Legal integer values for Euphoria integers are between -1,073,741,824 ( -2^^30^^ ) and +1,073,741,823 ( 2^^30^^-1 ).
+Unsigned hexadecimal numbers from C000_0000 to FFFF_FFFF are the negative integers and numbers from 0000_0000 to 3FFF_FFFF are the positive integers.  The hexadecimal values not used as integers are thus 4000_0000 to BFFF_FFFF.  Other 
 values are for encoded pointers.  Pointers are always 8 byte aligned.  So a 
 pointer is stored in 29-bits instead of 32 and can fit in a hexadecimal range 
 0x2000_0000 long. The pointers are encoded in such a way that their encoded values 
@@ -84,11 +79,13 @@ variable and it also signifies the end of a sequence.  In C, values of this type
 are stored in the 'object' type.  The range 4000_0000 to 7FFF_FFFF is unused.
 
 A double structure 'struct d' could indeed contain a value that is legally in 
-the range of a Euphoria integer.  So the encoded pointer to this structure is 
+the range of a Euphoria integer and has no fraction part.  So the encoded pointer to this structure is 
 recognized by the interpreter as an 'integer' but in this internals document 
 when we say Euphoria integer we mean it actually is a C integer in the legal 
 Euphoria integer range.
 
+Objects declared as integer may use encoded pointers to double structures in its representation even after type checking
+due to changes made for ticket 937.
 
 === The C Representations of a Euphoria Sequence and a Euphoria Atom =====
 
@@ -182,13 +179,13 @@ in struct s1.  To this end, the 64bit implementation of 4.1 has these members in
 
 The macros are imperfect.  For example, ##IS_SEQUENCE(NOVALUE)## returns 
 ##TRUE## and ##IS_ATOM_DBL## will return ##TRUE## for integer values as well 
-as encoded pointers to
-'struct d's.   This is why there is an order that these tests are made: We test 
-##IS_ATOM_INT## and if that fails we can use ##IS_ATOM_DBL## and then that will 
-only be true if we pass an encoded pointer to a double.  We must be sure that 
-something is not ##NOVALUE## before we use ##IS_SEQUENCE## on it.
+as encoded pointers to 'struct d's.   This is why there is an order that these tests are made: 
+First, we must either by logic or testing ensure that a value cannot be NOVALUE, and 
+then we can rely on ##IS_ATOM_INT## to determine that a value is not a pointer to a double structure,
+or a sequence structure.  Then we may use IS_ATOM_DBL to test that it is a pointer to a double structure.
+We must be sure that something is not ##NOVALUE## before we use ##IS_SEQUENCE## on it.
 
-// Often we know foo is not NOVALUE before getting into this://
+// Often we know something (foo) is not NOVALUE before getting into this://
 
 {{{
 // object foo
@@ -206,6 +203,8 @@ A sequence is held in a 'struct s1' type and a double is contained in a
 
 
 === Type Value Functions and Macros
+
+
 
 @[:internals:IS_ATOM_INT|]
 ==== IS_ATOM_INT
