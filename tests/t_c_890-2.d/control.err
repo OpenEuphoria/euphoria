@@ -1,0 +1,6 @@
+/home/leprechaun/Source/euphoria/tests/t_c_890-2.e:6 in type boolean() 
+Expected a routine_id of a procedure which takes only one argument, not bad_cleanup_routine which takes 0. 
+    i1 = <no value>
+
+
+Public & Export & Global & Local Variables

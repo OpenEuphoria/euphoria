@@ -1,0 +1,6 @@
+tests/t_c_890-1.e:6 in type boolean() 
+Expected a routine_id of a procedure.  Not that of a function (bad_cleanup_routine). 
+    i1 = <no value>
+
+
+Public & Export & Global & Local Variables

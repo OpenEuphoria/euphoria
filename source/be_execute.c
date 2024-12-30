@@ -4186,9 +4186,21 @@ void do_exec(intptr_t *start_pc)
 
 				// get the routine symtab_ptr:
 				b = get_pos_int("call_proc/call_func", *(object_ptr)pc[2]);
-				if (b >= e_routine_next) {
+				
+				// do not count on returned value being positive.
+				if (b < 0 || b >= e_routine_next) {
 					RTFatal("invalid routine id");
 				}
+				
+                		sub = e_routine[b];
+                		if (sub->token != PROC) {
+                		    RTFatal("Expected a routine_id of a procedure.  Not that of a function (%s).", sub->name);
+                		}
+                		
+                		if (sub->u.subp.num_args != 1) {
+                		    RTFatal("Expected a routine_id of a procedure which takes only one argument, not %s which takes %d.", sub->name, sub->u.subp.num_args);
+                		}
+                
 				obj_ptr = (object_ptr) DeleteRoutine( b );
 
 				// Only ref if source and target are different, and the source

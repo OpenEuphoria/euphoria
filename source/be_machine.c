@@ -231,7 +231,9 @@ object ATOM_TO_ATOM_INT( object X ) {
 }
 
 uintptr_t get_pos_int(char *where, object x)
-/* return a positive integer value if possible */
+/* return a positive integer value if possible.  The value 
+ * returned between -2^30 to 2^64-1. It will fail if x is
+ * a sequence. */
 {
 	if (IS_ATOM_INT(x))
 		return INT_VAL(x);
