@@ -1574,9 +1574,9 @@ void analyze_switch()
 	int negative;
 	int offset;
 	object sym;
-	s1_ptr values = SEQ_PTR( *(object_ptr)tpc[2] );
-	s1_ptr jump   = SEQ_PTR( *(object_ptr)tpc[3] );
-	s1_ptr new_values = NewS1( values->length );
+	s1_ptr values = SEQ_PTR( *(object_ptr)tpc[2] ); // will get deallocated
+	s1_ptr jump   = SEQ_PTR( *(object_ptr)tpc[3] ); // will get deallocated
+	s1_ptr new_values = NewS1( values->length ); // may get deallocated
 	s1_ptr lookup;
 	int i;
 	object top;
@@ -1585,6 +1585,13 @@ void analyze_switch()
 	object unique_values_obj;
 	object empty_sequence;
 	object check_map;
+#ifndef NDEBUG	
+	char debug_buffer[500];
+	size_t debug_space;
+	size_t debug_used;
+	char*debug_string=debug_buffer;
+	size_t initial_top_ref;
+#endif	
 
 	unique_jumps = call_map_new();
 	unique_values = NewS1( values->length );
@@ -1601,23 +1608,30 @@ void analyze_switch()
 			sym = -sym;
 		}
 		top = fe.st[sym].obj;
-
+		
 		if( top == NOVALUE ){
+		        all_ints = 0;
 			NoValue( &fe.st[sym] );
 		}
 
 		// int check
-		if (IS_ATOM_INT(top) || IS_ATOM_DBL(top)) {
-			if (!IS_ATOM_INT(top) ) {
+		if (IS_ATOM_INT(top) || IS_ATOM_DBL(top)) {		        
+			if (!IS_ATOM_INT(top)) {
 				a = DoubleToInt(top);
 				if (IS_ATOM_INT(a)) {
-					DeRefDS(top);
-					top = a;
+					// the value's reference count should not be decremented here.
+					// as it was not incremented when it became part of the interpreter's 
+					// internal structure fe.st[sym].
+					fe.st[sym].obj = top = a;			  	
+				} else {
+				        all_ints = 0;
 				}
 			}
-
-			if( top > max ) max = top;
-			if( top < min ) min = top;
+			
+			if (all_ints) {
+				if (top>max) max = top;
+				if (top<min) min = top;
+			}
 		}
 		else{
 			all_ints = 0;
@@ -1628,21 +1642,24 @@ void analyze_switch()
 			if( IS_ATOM_INT( top ) ){
 				if (top == MININT) {
 					top = (object)NewDouble((eudouble)-MININT);
+					all_ints = 0;
 				}
 				else
 					top = -top;
 			}
 			else {
-				top = unary_op( UMINUS, top );
+				top = unary_op( UMINUS, top );				
+				all_ints = 0;
 			}
-
-			new_values->base[i] = top;
 		}
-		else{
-
-			new_values->base[i] = fe.st[sym].obj;
+		if (!IS_ATOM_INT( top )) {
+		  initial_top_ref = DBL_PTR( top )->ref;
+		  debug_used = snprintf(debug_string, debug_space, "initial ref count of top is %ld\n", DBL_PTR(top)->ref);
+		  debug_string += debug_used;
+		  debug_space -= debug_used;				    		  
 		}
-		Ref( new_values->base[i] );
+		Ref( top );
+		new_values->base[i] = top;
 		
 		// Use a std;map just like in the front end to check for duplicate case values:
 		check_map = call_map_get( unique_jumps, jump->base[i], empty_sequence );
@@ -1693,17 +1710,64 @@ void analyze_switch()
 		}
 		else{
 			// new value...
+#ifndef NDEBUG			
+			if (!IS_ATOM_INT(top)) {
+			    // should be at least 3 and often exactly 3.  It is!
+			    debug_used = snprintf(debug_string, debug_space, "prior to map:put ref count of top is %ld\n", DBL_PTR(top)->ref);
+			    debug_string += debug_used;
+			    debug_space -= debug_used;				    
+			}
+#endif			
 			call_map_put( unique_jumps, jump->base[i], new_values->base[i], 6 /* map:APPEND */ );
+#ifndef NDEBUG
+			if (!IS_ATOM_INT(top)) {
+			    // should be at least 3 and often exactly 3.  It is!
+			    debug_used = snprintf(debug_string, debug_space, "prior to append ref count of top is %ld\n", DBL_PTR(top)->ref);
+			    debug_string += debug_used;
+			    debug_space -= debug_used;				    
+			}
+#endif			
+			Ref(top);
 			Append( &unique_values_obj, unique_values_obj, new_values->base[i] );
+#ifndef NDEBUG
+			if (!IS_ATOM_INT(top)) {
+			    // should be at least 3 and often exactly 3.  It is!
+			    debug_used = snprintf(debug_string, debug_space, "after append + Ref, ref count of top is %ld\n", DBL_PTR(top)->ref);
+			    debug_string += debug_used;
+			    debug_space -= debug_used;
+			}			
+#endif			
 			unique_values = SEQ_PTR( unique_values_obj );
 		}
+			
 		DeRefDS( check_map );
+		
+#ifndef NDEBUG
+		if (!IS_ATOM_INT(top)) {
+		    // should be at least 3 and often exactly 3.  It is!
+		    debug_used = snprintf(debug_string, debug_space, "ref count of top is %ld\n", IS_ATOM_INT(top) ? 1 : DBL_PTR(top)->ref);
+		    debug_string += debug_used;
+		    debug_space -= debug_used;		    
+		}	
+#endif		
 	}
 	DeRefDS( unique_jumps );
 	DeRefDS( empty_sequence );
 	DeRefDS( unique_values_obj );
 
 	DeRefDS( MAKE_SEQ( values ) );
+#ifndef NDEBUG
+	if (!IS_ATOM_INT(top)) {
+	    debug_used = snprintf(debug_string, debug_space, "After dereference of containers, ref count of top is %ld\n", DBL_PTR(top)->ref);
+	    debug_string += debug_used;
+	    debug_space -= debug_used;
+	    if (DBL_PTR(top)->ref < 2 || DBL_PTR(top)->ref - initial_top_ref != 1) {	      
+	      // should be at least 1 and often exactly 1.  It must be one more than the initial value.
+	      // Not 2?
+	      printf("Memory Leak Report:\n%s", debug_buffer);
+	    }
+	}
+#endif	
 	if( all_ints &&  max - min < 1024){
 		*tpc = (intptr_t)opcode( SWITCH_SPI );
 
@@ -1719,6 +1783,7 @@ void analyze_switch()
 		tpc[2] = (intptr_t)offset;
 		DeRefDS( *(object_ptr)tpc[3] );
 		*(object_ptr)tpc[3] = (object)MAKE_SEQ( lookup );
+		DeRefDS( MAKE_SEQ( new_values ) );
 	}
 	else{
 		*(object_ptr)tpc[2] = (object)MAKE_SEQ( new_values );
@@ -1729,6 +1794,7 @@ void analyze_switch()
 			*tpc = (intptr_t)opcode( SWITCH );
 		}
 	}
+	
 }
 
 struct sline *slist;

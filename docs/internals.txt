@@ -376,7 +376,7 @@ IS_SEQUENCE(o) is TRUE and //o// is not NOVALUE.
 </eucode>
 
 ===== Returns
-a unsigned long value by truncating what x's value is to an integer
+a long value by accessing the double structure and converting to a long or returning itself.  In the third case, if it is a sequence, the program crashes here. 
 
 ===== Comment
 Any object may be passed.  A sequence results in a runtime failure.
