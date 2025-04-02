@@ -12,6 +12,7 @@ namespace base64
 
 include std/sequence.e
 include std/search.e
+include std/types.e
 
 constant aleph = {
 	'A','B','C','D','E','F','G','H','I','J','K','L','M',
@@ -19,6 +20,26 @@ constant aleph = {
 	'a','b','c','d','e','f','g','h','i','j','k','l','m',
 	'n','o','p','q','r','s','t','u','v','w','x','y','z',
 	'0','1','2','3','4','5','6','7','8','9','+','/'
+}
+
+--# aleph to decode table, -1 means invalid character
+constant ccha = {
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63,
+	52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1,
+	-1,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14,
+	15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1,
+	-1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+	41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
 }
 
 --#
@@ -155,15 +176,15 @@ end function
 --
 -- Returns:
 -- A **sequence**, base256 decode of passed sequence.
--- the length of data to decode must be a multiple of ##4## .
+-- the length of data to decode must be a multiple of ##4## if ##in##
+-- is valid, -1 otherwise
 --
 -- Comments:
 -- The calling program is expected to strip newlines and so on before calling.
 --
 public function decode(sequence in) 
-	integer len, oidx, case3, tmp
+	integer len, oidx, case3, tmp, index
 	sequence result
-	sequence ccha
 
 	-- TODO: Surely this is not the most efficient way of doing this
 	in = search:match_replace("\r\n", in, "")
@@ -172,23 +193,21 @@ public function decode(sequence in)
 	if remainder(len, 4) != 0 then
 		return -1
 	end if
-	
+
 	oidx = (len / 4) * 3
 	case3 = 3
-	
-	while in[len] = '=' do	--# should only happen 0 1 or 2 times
+
+	tmp = len
+	while len > 0 and in[len] = '=' do	--# should only happen 0 1 or 2 times
 		oidx -= 1
 		case3 = nc3[case3]
 		len -= 1
 	end while
 
-	--#
-	--# invert aleph to a decode table
-	--#
-	ccha = repeat(0, 256)
-	for i = 1 to 64 do
-		ccha[aleph[i]] = i - 1
-	end for	
+	if tmp - len > 2	--# too many pad characters
+	then
+		return -1
+	end if
 
 	result = repeat('?', oidx)
 	for i = oidx to 1 by -1 do
@@ -201,8 +220,20 @@ public function decode(sequence in)
 		--# dmul = {4,16,64}
 		--# ddiv = {16,4,1}
 		--#
-		tmp = remainder(ccha[in[len - 1]], drem[case3]) * dmul[case3]
-		tmp += floor(ccha[in[len]] / ddiv[case3])
+		index = ccha[in[len - 1]]
+		if index < 0	--# invalid character
+		then
+			return -1
+		end if
+
+		tmp = remainder(index, drem[case3]) * dmul[case3]
+		index = ccha[in[len]]
+		if index < 0	--# invalid character
+		then
+			return -1
+		end if
+
+		tmp += floor(index / ddiv[case3])
 		result[i] = tmp
 		len -= ldrop[case3]
 		case3 = nc3[case3]
