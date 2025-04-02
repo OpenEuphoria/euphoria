@@ -1,4 +1,5 @@
 include std/unittest.e
+include std/math.e
 
 include std/base64.e
 
@@ -21,6 +22,7 @@ result = decode(result)
 test_equal("3 char decode", result, "XYZ")
 
 constant encode_table = {
+    "AA==", --# 0
     "AQ==", --# 1
     "AgI=", --# 2
     "AwMD", --# 3
@@ -80,10 +82,10 @@ constant encode_table = {
     "OTk5OTk5OTk5OTk5OTk5OTk5OTk5OTk5OTk5OTk5OTk5OTk5OTk5OTk5OTk5OTk5OTk5OTk5OTk5"  --# 57
 }
 
-for i = 1 to 57 do
-    this = repeat(i,i)
+for i = 0 to 57 do
+    this = repeat(i, max({1, i}))
     result = encode(this)
-    test_equal(sprintf("%d byte encode", { i }), result, encode_table[i])
+    test_equal(sprintf("%d byte encode", { i }), result, encode_table[i + 1])
     result = decode(result)
     test_equal(sprintf("%d byte conversion", { i }), result, this)
 end for
@@ -117,6 +119,9 @@ bad_result = decode("a===")
 test_equal("Too many pad characters", bad_result, -1)
 
 bad_result = decode("YX!q")
+test_equal("Invalid base64 character", bad_result, -1)
+
+bad_result = decode("YX\0q")
 test_equal("Invalid base64 character", bad_result, -1)
 
 test_report()
