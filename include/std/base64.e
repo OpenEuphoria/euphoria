@@ -12,7 +12,6 @@ namespace base64
 
 include std/sequence.e
 include std/search.e
-include std/types.e
 
 constant aleph = {
 	'A','B','C','D','E','F','G','H','I','J','K','L','M',
