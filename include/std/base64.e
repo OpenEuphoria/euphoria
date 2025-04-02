@@ -170,9 +170,9 @@ end function
 --	 # ##in## ~-- must be a simple sequence of length ##4## to ##76## .
 --
 -- Returns:
--- A **sequence**, base256 decode of passed sequence.
--- the length of data to decode must be a multiple of ##4## if ##in##
--- is valid, -1 otherwise
+-- A **sequence**, base256 decode of passed sequence if the length of
+-- the data to decode is a multiple of ##4## and a valid Base64 code.
+-- Otherwise, -1 is returned.
 --
 -- Comments:
 -- The calling program is expected to strip newlines and so on before calling.
