@@ -21,9 +21,25 @@ constant aleph = {
 	'0','1','2','3','4','5','6','7','8','9','+','/'
 }
 
---#
---# - see also ccha in which inverted decode table is built.
---#
+--# Base64 decode table (-1 is invalid character)
+constant ccha = {
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63, 52,
+    53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1, -1,
+     0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15,
+    16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1, -1,
+    26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
+    42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+}
 --# Pad character is '=' (61)
 --#
 --# encoded output of encode is mo more that 76 characters each.
@@ -163,7 +179,7 @@ end function
 --
 public function decode(sequence in) 
 	integer len, oidx, case3, tmp, index
-	sequence result, ccha
+	sequence result
 
 	-- TODO: Surely this is not the most efficient way of doing this
 	in = search:match_replace("\r\n", in, "")
@@ -187,14 +203,6 @@ public function decode(sequence in)
 	then
 		return -1
 	end if
-
-	--#
-	--# invert aleph to a decode table
-	--#
-	ccha = repeat(-1, 256)
-	for i = 1 to 64 do
-		ccha[aleph[i]] = i - 1
-	end for	
 
 	result = repeat('?', oidx)
 	for i = oidx to 1 by -1 do
