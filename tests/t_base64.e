@@ -122,7 +122,7 @@ bad_result = decode("YX!q")
 test_equal("Invalid base64 character", bad_result, -1)
 
 bad_result = decode("YX\0q")
-test_equal("Invalid base64 character", bad_result, -1)
+test_equal("Null base64 character", bad_result, -1)
 
 test_report()
 
